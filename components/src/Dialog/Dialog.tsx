@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, MouseEvent } from 'react';
+import React, { ReactElement, MouseEvent } from 'react';
 import {
   Button,
   ButtonProps,
@@ -79,7 +79,7 @@ const SecondaryButton = ({ children, ...props }: DialogButtonProps): ReactElemen
  * https://github.com/mui-org/material-ui/issues/13253
  * This component adds style to get expected behavior & should be used whenever we have a Form inside a Dialog
  */
-const Form = styled('form')({
+const Form: React.ComponentType<React.FormHTMLAttributes<HTMLFormElement>> = styled('form')({
   overflowY: 'auto',
   display: 'flex',
   flexDirection: 'column',
@@ -93,9 +93,14 @@ const dialogCloseIconButtonStyle = (theme: Theme): Record<string, unknown> => {
   return { position: 'absolute', top: theme.spacing(0.5), right: theme.spacing(0.5) };
 };
 
-export const Dialog = ({ children, ...props }: DialogProps): ReactElement => (
-  <MuiDialog {...props}>{children}</MuiDialog>
-);
+export const Dialog: React.FC<DialogProps> & {
+  Header: typeof Header;
+  Form: typeof Form;
+  Content: typeof Content;
+  PrimaryButton: typeof PrimaryButton;
+  SecondaryButton: typeof SecondaryButton;
+  Actions: typeof DialogActions;
+} = ({ children, ...props }: DialogProps): ReactElement => <MuiDialog {...props}>{children}</MuiDialog>;
 
 Dialog.Header = Header;
 Dialog.Form = Form;
