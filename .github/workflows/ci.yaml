@@ -1,0 +1,106 @@
+name: ci
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  merge_group:
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    name: 'build'
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v5
+      - uses: perses/github-actions@v0.11.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_npm: true
+          enable_go: true
+      - name: install dependencies
+        run: npm ci
+      - name: build library
+        if: github.event_name == 'release'
+        run: go run ./scripts/build-libraries/build-libraries.go --tag=${{ github.event.release.tag_name }}
+      - name: build all libraries
+        if: github.event_name != 'release'
+        run: go run ./scripts/build-libraries/build-libraries.go
+      - name: store plugin archives
+        uses: actions/upload-artifact@v4
+        with:
+          name: archives
+          path: |
+            **/*.tar.gz
+            **/dist
+            !node_modules
+
+  lint-npm:
+    name: 'lint-npm'
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v5
+      - uses: perses/github-actions@v0.11.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_npm: true
+      - run: npm ci
+      - run: npm run lint
+
+  test-npm:
+    name: 'test-npm'
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v5
+      - uses: perses/github-actions@v0.11.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_npm: true
+      - run: npm ci
+      - run: npm run test
+
+  type-check:
+    name: 'type-check'
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v5
+      - uses: perses/github-actions@v0.11.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_npm: true
+      - run: npm ci
+      - run: npm run type-check
+
+  release:
+    name: 'release'
+    needs: 'build'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: ${{ github.event.release.tag_name }}
+    env:
+      GITHUB_TOKEN: ${{ github.TOKEN }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@v5
+      - uses: perses/github-actions@v0.11.0
+      - uses: ./.github/perses-ci/actions/setup_environment
+        with:
+          enable_npm: true
+          enable_go: true
+          nvmrc_path: './.nvmrc'
+      - name: Download archive
+        uses: actions/download-artifact@v5
+        with:
+          name: archives
+      - run: go run ./scripts/upload-archive/upload-archive.go -tag=${{ github.event.release.tag_name }}
+      - name: Publish npm package
+        run: go run ./scripts/npm-publish/npm-publish.go -tag=${{ github.event.release.tag_name }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,0 +1,15 @@
+version: 2
+updates:
+- package-ecosystem: "npm"
+  directory: "/ui"
+  open-pull-requests-limit: 3
+  schedule:
+    interval: "monthly"
+  # Raise all npm pull requests with custom labels
+  labels:
+    - "dependencies"
+    - "ui"
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: "weekly"
