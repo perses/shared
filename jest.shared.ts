@@ -1,4 +1,4 @@
-// Copyright 2023 The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { Config } from '@jest/types';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import type { Config } from '@jest/types';
 
 const swcrcPath = resolve(__dirname, './.cjs.swcrc');
 const swcrc = JSON.parse(readFileSync(swcrcPath, 'utf-8'));
@@ -28,10 +28,15 @@ const config: Config.InitialOptions = {
     // Use polyfill for jsdom environment
     '^use-resize-observer$': 'use-resize-observer/polyfilled',
 
+    // Tell Jest where other Perses packages live since it doesn't know about project references
+    '^@perses-dev/(?!core)(.*)$': '<rootDir>/../$1/src',
+
     // Configure Jest to handle stylesheets
     '\\.(css|less)$': '<rootDir>/../stylesMock.js',
   },
-  transformIgnorePatterns: ['node_modules/(?!(lodash-es|yaml))'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(lodash-es|yaml|@uiw/codemirror-extensions-basic-setup|@uiw/react-codemirror))',
+  ],
   transform: {
     // This does not do type-checking and assumes that's happening elsewhere for TS test files (e.g. as part of the
     // build process)
