@@ -96,6 +96,6 @@ jobs:
           name: archives
       - run: go run ./scripts/upload-archive/upload-archive.go -tag=${{ github.event.release.tag_name }}
       - name: Publish npm package
-        run: go run ./scripts/npm-publish/npm-publish.go -tag=${{ github.event.release.tag_name }}
+        run: go run ./scripts/npm-publish/npm-publish.go --dry-run -tag=${{ github.event.release.tag_name }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

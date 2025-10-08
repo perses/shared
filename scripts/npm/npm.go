@@ -25,8 +25,8 @@ type Package struct {
 	Workspaces []string `json:"workspaces"`
 }
 
-func GetPackage(pluginPath string) (Package, error) {
-	data, err := os.ReadFile(filepath.Join(pluginPath, "package.json"))
+func GetPackage(dirPath string) (Package, error) {
+	data, err := os.ReadFile(filepath.Join(dirPath, "package.json"))
 	if err != nil {
 		return Package{}, err
 	}

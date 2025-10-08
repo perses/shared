@@ -20,18 +20,24 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var tagNamePattern = regexp.MustCompile(`(?m)(.+)/v(\d+\.\d+\.\d+(?:-[\w\d.]+)?)`)
+var versionPattern = regexp.MustCompile(`^v(\d+\.\d+\.\d+(?:-[\w\d.]+)?)$`)
 
 func Flag() *string {
-	return flag.String("tag", "", "Name of the tag")
+	return flag.String("tag", "", "Release tag (format: v1.2.3)")
 }
 
-func Parse(tag *string) (string, string) {
-	tagSplit := tagNamePattern.FindStringSubmatch(*tag)
-	if len(tagSplit) != 3 {
-		logrus.Fatalf("Invalid tag name: %s", *tag)
+// Parse parses a tag in the format "v1.2.3" and returns the version without the 'v' prefix
+func Parse(tag *string) string {
+	if tag == nil || *tag == "" {
+		logrus.Fatal("Tag parameter is required (format: v1.2.3)")
 	}
-	pluginFolderName := tagSplit[1]
-	version := tagSplit[2]
-	return pluginFolderName, version
+
+	tagValue := *tag
+	matches := versionPattern.FindStringSubmatch(tagValue)
+	if len(matches) != 2 {
+		logrus.Fatalf("Invalid tag format: %s. Expected format: v1.2.3", tagValue)
+	}
+
+	// Return version without 'v' prefix
+	return matches[1]
 }

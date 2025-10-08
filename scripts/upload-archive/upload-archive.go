@@ -26,19 +26,18 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func main() {
-	t := tag.Flag()
-	flag.Parse()
-	pluginFolderName, version := tag.Parse(t)
-
-	pck, err := npm.GetPackage(pluginFolderName)
+func uploadArchive(workspacePath string, version string, releaseTag string) error {
+	pck, err := npm.GetPackage(workspacePath)
 	if err != nil {
-		logrus.WithError(err).Fatalf("unable to read package file for library %s", pluginFolderName)
+		return fmt.Errorf("unable to read package file for workspace %s: %w", workspacePath, err)
 	}
 
+	// Use package name for archive
+	packageName := pck.Name
+	expectedArchiveName := fmt.Sprintf("%s-%s.tar.gz", packageName, version)
+
 	// Check that the archive release does not already exist
-	expectedArchiveName := fmt.Sprintf("%s-%s.tar.gz", pluginFolderName, version)
-	cmd := exec.Command("gh", "release", "view", *t, "--json", "assets")
+	cmd := exec.Command("gh", "release", "view", releaseTag, "--json", "assets")
 	output, execErr := cmd.CombinedOutput()
 	if execErr == nil {
 		var releaseInfo struct {
@@ -47,22 +46,56 @@ func main() {
 			} `json:"assets"`
 		}
 		if jsonErr := json.Unmarshal(output, &releaseInfo); jsonErr != nil {
-			logrus.WithError(jsonErr).Warnf("failed to parse gh release view output for tag %s, proceeding with upload attempt", *t)
+			logrus.WithError(jsonErr).Warnf("failed to parse gh release view output for tag %s, proceeding with upload attempt", releaseTag)
 		} else {
 			for _, asset := range releaseInfo.Assets {
 				if asset.Name == expectedArchiveName {
-					logrus.Warnf("archive %s already exists in release %s, skipping upload", expectedArchiveName, *t)
-					return
+					logrus.Warnf("archive %s already exists in release %s, skipping upload", expectedArchiveName, releaseTag)
+					return nil
 				}
 			}
-			logrus.Infof("release %s found, but archive %s is missing. Proceeding with upload.", *t, expectedArchiveName)
+			logrus.Infof("release %s found, but archive %s is missing. Proceeding with upload.", releaseTag, expectedArchiveName)
 		}
 	} else {
-		logrus.Infof("release %s not found or gh command failed, proceeding with upload attempt. Error: %v", *t, execErr)
+		logrus.Infof("release %s not found or gh command failed, proceeding with upload attempt. Error: %v", releaseTag, execErr)
 	}
 
 	// Upload the archive to GitHub
-	if execErr := command.Run("gh", "release", "upload", *t, filepath.Join(pluginFolderName, fmt.Sprintf("%s-%s.tar.gz", pck, version))); execErr != nil {
-		logrus.WithError(execErr).Fatalf("unable to upload archive %s", pck)
+	archivePath := filepath.Join(workspacePath, expectedArchiveName)
+	if execErr := command.Run("gh", "release", "upload", releaseTag, archivePath); execErr != nil {
+		return fmt.Errorf("unable to upload archive %s: %w", expectedArchiveName, execErr)
 	}
+
+	logrus.Infof("✓ Successfully uploaded %s to release %s", expectedArchiveName, releaseTag)
+	return nil
+}
+
+func main() {
+	t := tag.Flag()
+	flag.Parse()
+
+	version := tag.Parse(t)
+	releaseTag := *t
+
+	// Get workspaces from root package.json
+	workspaces, err := npm.GetWorkspaces()
+	if err != nil {
+		logrus.WithError(err).Fatal("unable to read workspaces from package.json")
+	}
+
+	if len(workspaces) == 0 {
+		logrus.Fatal("no workspaces found in package.json")
+	}
+
+	logrus.Infof("Found %d workspace(s) to upload archives for", len(workspaces))
+
+	// Upload archives for all workspaces
+	for _, workspace := range workspaces {
+		logrus.Infof("Uploading archive for workspace: %s", workspace)
+		if err := uploadArchive(workspace, version, releaseTag); err != nil {
+			logrus.WithError(err).Fatalf("failed to upload archive for workspace %s", workspace)
+		}
+	}
+
+	logrus.Info("✓ All archives uploaded successfully!")
 }

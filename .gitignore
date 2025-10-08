@@ -32,6 +32,4 @@ typedoc
 coverage
 
 # ignore file copied during the release process of the UI
-LICENSE
 CHANGELOG.md
-/embed.go
