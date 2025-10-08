@@ -27,14 +27,9 @@ import (
 )
 
 func uploadArchive(workspacePath string, version string, releaseTag string) error {
-	pck, err := npm.GetPackage(workspacePath)
-	if err != nil {
-		return fmt.Errorf("unable to read package file for workspace %s: %w", workspacePath, err)
-	}
-
-	// Use package name for archive
-	packageName := pck.Name
-	expectedArchiveName := fmt.Sprintf("%s-%s.tar.gz", packageName, version)
+	// Use format: perses-<workspace>-v<version>
+	expectedArchiveName := fmt.Sprintf("perses-%s-v%s.tar.gz", workspacePath, version)
+	archivePath := filepath.Join(workspacePath, expectedArchiveName)
 
 	// Check that the archive release does not already exist
 	cmd := exec.Command("gh", "release", "view", releaseTag, "--json", "assets")
@@ -61,7 +56,6 @@ func uploadArchive(workspacePath string, version string, releaseTag string) erro
 	}
 
 	// Upload the archive to GitHub
-	archivePath := filepath.Join(workspacePath, expectedArchiveName)
 	if execErr := command.Run("gh", "release", "upload", releaseTag, archivePath); execErr != nil {
 		return fmt.Errorf("unable to upload archive %s: %w", expectedArchiveName, execErr)
 	}

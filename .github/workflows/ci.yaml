@@ -20,11 +20,12 @@ jobs:
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
+          enable_go: true
       - name: install dependencies
         run: npm ci
-      - name: build libraries
-        run: npm run build
-      - name: store plugin archives
+      - name: build libraries and create archives
+        run: go run ./scripts/build-and-archive/build-and-archive.go
+      - name: store libraries archives
         uses: actions/upload-artifact@v4
         with:
           name: archives

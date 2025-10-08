@@ -14,30 +14,65 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"os/exec"
 
+	"github.com/perses/shared/scripts/changelog"
 	"github.com/perses/shared/scripts/command"
 	"github.com/perses/shared/scripts/npm"
 	"github.com/sirupsen/logrus"
 )
 
 func release() {
+	// Get version from root package.json
 	version, err := npm.GetPackage(".")
 	if err != nil {
-		logrus.WithError(err).Fatalf("unable to get the version of the libraries")
+		logrus.WithError(err).Fatalf("unable to get the version from package.json")
 	}
-	releaseName := fmt.Sprintf("v%s", version)
+	releaseName := fmt.Sprintf("v%s", version.Version)
+
 	// ensure the tag does not already exist
 	if execErr := command.Run("git", "rev-parse", "--verify", releaseName); execErr == nil {
 		logrus.Infof("release %s already exists", releaseName)
 		return
 	}
+
+	logrus.Infof("Creating release %s", releaseName)
+
 	// create the GitHub release
 	if execErr := command.Run("gh", "release", "create", releaseName, "-t", releaseName, "-n", generateChangelog()); execErr != nil {
 		logrus.WithError(execErr).Fatalf("unable to create the release %s", releaseName)
 	}
+
+	logrus.Infof("✓ Successfully created release %s", releaseName)
+}
+
+func getPreviousTag() string {
+	data, err := exec.Command("git", "describe", "--tags", "--abbrev=0", "--match", "v*").Output()
+	if err != nil {
+		if exitError, ok := err.(*exec.ExitError); ok {
+			if exitError.ExitCode() == 128 {
+				return ""
+			}
+		}
+
+		logrus.Fatal(err)
+	}
+	return string(bytes.ReplaceAll(data, []byte("\n"), []byte("")))
+}
+
+func generateChangelog() string {
+	previousTag := getPreviousTag()
+	if previousTag == "" {
+		logrus.Infof("no previous tag found for libraries, skipping changelog generation")
+		return "First release"
+	}
+	logrus.Infof("previous tag for libraries is %s", previousTag)
+	entries := changelog.GetGitLogs(previousTag)
+
+	return changelog.New(entries).GenerateChangelog()
 }
 
 // This script generates Github release(s).
@@ -48,7 +83,7 @@ func release() {
 //
 // Usage:
 //
-// This will release all libraries:
+// This will create a single release for all libraries in the monorepo:
 //
 //	go run ./scripts/release
 //
@@ -59,12 +94,19 @@ func main() {
 	if err := exec.Command("git", "fetch", "--tags").Run(); err != nil {
 		logrus.WithError(err).Fatal("unable to fetch the tags")
 	}
+
+	// Verify all workspaces exist and have the same version
 	workspaces, err := npm.GetWorkspaces()
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to get the list of the workspaces")
 	}
-	for _, workspace := range workspaces {
-		logrus.Infof("releasing %s", workspace)
-		release()
+
+	if len(workspaces) == 0 {
+		logrus.Fatal("no workspaces found in package.json")
 	}
+
+	logrus.Infof("Found %d workspace(s) in monorepo", len(workspaces))
+
+	// Create a single release for the monorepo (all packages share the same version)
+	release()
 }
