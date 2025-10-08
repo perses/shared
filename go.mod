@@ -2,10 +2,7 @@ module github.com/perses/shared
 
 go 1.25.0
 
-require (
-	github.com/perses/common v0.28.0
-	github.com/sirupsen/logrus v1.9.3
-)
+require github.com/sirupsen/logrus v1.9.3
 
 require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect

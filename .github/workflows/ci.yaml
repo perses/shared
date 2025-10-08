@@ -20,15 +20,10 @@ jobs:
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
-          enable_go: true
       - name: install dependencies
         run: npm ci
-      - name: build library
-        if: github.event_name == 'release'
-        run: go run ./scripts/build-libraries/build-libraries.go --tag=${{ github.event.release.tag_name }}
-      - name: build all libraries
-        if: github.event_name != 'release'
-        run: go run ./scripts/build-libraries/build-libraries.go
+      - name: build libraries
+        run: npm run build
       - name: store plugin archives
         uses: actions/upload-artifact@v4
         with:
