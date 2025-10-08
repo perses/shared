@@ -17,7 +17,8 @@
   "workspaces": [
     "components",
     "dashboards",
-    "plugin-system"
+    "plugin-system",
+    "explore"
   ],
   "devDependencies": {
     "@swc/cli": "^0.7.8",
