@@ -92,7 +92,7 @@ jobs:
           enable_go: true
           nvmrc_path: './.nvmrc'
       - name: Download archive
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: archives
       - run: go run ./scripts/upload-archive/upload-archive.go -tag=${{ github.event.release.tag_name }}
