@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Box, Popover, CircularProgress, styled, PopoverPosition, Theme } from '@mui/material';
+import { Stack, Box, Popover, CircularProgress, styled, PopoverPosition } from '@mui/material';
 import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import { QueryData } from '@perses-dev/plugin-system';
@@ -110,14 +110,24 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
       return <CircularProgress aria-label="loading" size="1.125rem" />;
     } else if (queryErrors.length > 0) {
       const errorTexts = queryErrors
-        .map((q) => q.error)
-        .map((e: any) => e?.message ?? e?.toString() ?? 'Unknown error') // eslint-disable-line @typescript-eslint/no-explicit-any
+        .map((q) => {
+          const error = q.error;
+          if (error instanceof Error) {
+            return error.message || 'Unknown error';
+          }
+          return String(error) || 'Unknown error';
+        })
         .join('\n');
 
       return (
         <InfoTooltip description={errorTexts}>
           <HeaderIconButton aria-label="panel errors" size="small">
-            <AlertIcon fontSize="inherit" />
+            <AlertIcon
+              fontSize="inherit"
+              sx={{
+                color: (theme) => theme.palette.error.main,
+              }}
+            />
           </HeaderIconButton>
         </InfoTooltip>
       );
@@ -228,7 +238,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     <>
       {/* small panel width: move all icons except move/grab to overflow menu */}
       <ConditionalBox
-        sx={(theme: Theme) => ({
+        sx={(theme) => ({
           [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).between(0, HEADER_SMALL_WIDTH)]: { display: 'flex' },
         })}
       >
@@ -245,7 +255,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 
       {/* medium panel width: move edit icons to overflow menu */}
       <ConditionalBox
-        sx={(theme: Theme) => ({
+        sx={(theme) => ({
           [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).between(HEADER_SMALL_WIDTH, HEADER_MEDIUM_WIDTH)]: {
             display: 'flex',
           },
@@ -267,7 +277,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 
       {/* large panel width: show all icons in panel header */}
       <ConditionalBox
-        sx={(theme: Theme) => ({
+        sx={(theme) => ({
           // flip the logic here; if the browser (or jsdom) does not support container queries, always show all icons
           display: 'flex',
           [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).down(HEADER_MEDIUM_WIDTH)]: { display: 'none' },
