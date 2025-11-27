@@ -11,10 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { IconButtonProps } from '@mui/material';
-import { IconButton, styled } from '@mui/material';
+import { IconButton, IconButtonProps, styled } from '@mui/material';
+import { StyledComponent } from '@emotion/styled';
+import { Theme } from '@mui/material/styles';
 
-export const HeaderIconButton: React.ComponentType<IconButtonProps> = styled(IconButton)(({ theme }) => ({
-  borderRadius: theme.shape.borderRadius,
-  padding: '4px',
-}));
+export const HeaderIconButton: StyledComponent<IconButtonProps & { theme?: Theme }> = styled(IconButton)(
+  ({ theme }) => ({
+    borderRadius: theme.shape.borderRadius,
+    padding: '4px',
+  })
+);

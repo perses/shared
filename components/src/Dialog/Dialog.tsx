@@ -11,22 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement, MouseEvent } from 'react';
 import {
   Button,
   ButtonProps,
-  Dialog as MuiDialog,
   DialogActions,
   DialogContent,
-  DialogContentProps as MuiDialogContentProps,
   DialogProps,
   DialogTitle,
   DialogTitleProps,
   IconButton,
+  Dialog as MuiDialog,
+  DialogContentProps as MuiDialogContentProps,
   styled,
   Theme,
 } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
+import React, { MouseEvent, ReactElement } from 'react';
 import { combineSx } from '../utils';
 
 export interface DialogHeaderProps extends DialogTitleProps {
@@ -100,7 +100,7 @@ export const Dialog: React.FC<DialogProps> & {
   PrimaryButton: typeof PrimaryButton;
   SecondaryButton: typeof SecondaryButton;
   Actions: typeof DialogActions;
-} = ({ children, ...props }: DialogProps): ReactElement => <MuiDialog {...props}>{children}</MuiDialog>;
+} = ({ children, ...props }) => <MuiDialog {...props}>{children}</MuiDialog>;
 
 Dialog.Header = Header;
 Dialog.Form = Form;

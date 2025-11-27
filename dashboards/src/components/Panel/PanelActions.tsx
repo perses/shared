@@ -24,8 +24,9 @@ import DragIcon from 'mdi-material-ui/DragVertical';
 import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
 import MenuIcon from 'mdi-material-ui/Menu';
 import AlertIcon from 'mdi-material-ui/Alert';
+import AlertCircleIcon from 'mdi-material-ui/AlertCircle';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
-import { Link } from '@perses-dev/core';
+import { Link, Notice } from '@perses-dev/core';
 import {
   ARIA_LABEL_TEXT,
   HEADER_ACTIONS_CONTAINER_NAME,
@@ -36,6 +37,12 @@ import {
 import { HeaderIconButton } from './HeaderIconButton';
 import { PanelLinks } from './PanelLinks';
 import { PanelOptions } from './Panel';
+
+const noticeTypeToIcon: Record<Notice['type'], ReactNode> = {
+  error: <AlertCircleIcon color="error" />,
+  warning: <AlertIcon fontSize="inherit" color="warning" />,
+  info: <InformationOutlineIcon fontSize="inherit" color="info" />,
+};
 
 export interface PanelActionsProps {
   title: string;
@@ -110,13 +117,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
       return <CircularProgress aria-label="loading" size="1.125rem" />;
     } else if (queryErrors.length > 0) {
       const errorTexts = queryErrors
-        .map((q) => {
-          const error = q.error;
-          if (error instanceof Error) {
-            return error.message || 'Unknown error';
-          }
-          return String(error) || 'Unknown error';
-        })
+        .map((q) => q.error)
+        .map((e) => e.message)
         .join('\n');
 
       return (
@@ -128,6 +130,24 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
                 color: (theme) => theme.palette.error.main,
               }}
             />
+          </HeaderIconButton>
+        </InfoTooltip>
+      );
+    }
+  }, [queryResults]);
+
+  const noticesIndicator = useMemo(() => {
+    const notices = queryResults.flatMap((q) => {
+      return q.data?.metadata?.notices ?? [];
+    });
+
+    if (notices.length > 0) {
+      const lastNotice = notices[notices.length - 1]!;
+
+      return (
+        <InfoTooltip description={lastNotice.message}>
+          <HeaderIconButton aria-label="panel notices" size="small">
+            {noticeTypeToIcon[lastNotice.type]}
           </HeaderIconButton>
         </InfoTooltip>
       );
@@ -245,7 +265,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider}
         <OnHover>
           <OverflowMenu title={title}>
-            {descriptionAction} {linksAction} {queryStateIndicator} {extraActions} {viewQueryAction}
+            {descriptionAction} {linksAction} {queryStateIndicator} {noticesIndicator} {extraActions} {viewQueryAction}
             {readActions} {pluginActions}
             {editActions}
           </OverflowMenu>
@@ -265,6 +285,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           {descriptionAction} {linksAction}
         </OnHover>
         {divider} {queryStateIndicator}
+        {noticesIndicator}
         <OnHover>
           {extraActions}
           {readActions}
@@ -287,6 +308,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           {descriptionAction} {linksAction}
         </OnHover>
         {divider} {queryStateIndicator}
+        {noticesIndicator}
         <OnHover>
           {extraActions}
           {viewQueryAction}
