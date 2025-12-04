@@ -26,7 +26,7 @@ jobs:
       - name: build libraries and create archives
         run: go run ./scripts/build-and-archive/build-and-archive.go
       - name: store libraries archives
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: archives
           path: |
