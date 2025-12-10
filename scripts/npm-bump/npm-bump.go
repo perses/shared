@@ -37,11 +37,7 @@ func main() {
 		logrus.Fatalf("Invalid semantic version format: %s. Expected format: X.Y.Z or X.Y.Z-prerelease", version)
 	}
 
-	workspaces, err := npm.GetWorkspaces(".")
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to get workspaces from root package.json")
-	}
-
+	workspaces := npm.MustGetWorkspaces(".")
 	if len(workspaces) == 0 {
 		logrus.Info("No workspaces found")
 		return

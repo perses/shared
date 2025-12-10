@@ -26,12 +26,8 @@ import (
 )
 
 func release() {
-	// Get version from root package.json
-	version, err := npm.GetPackage(".")
-	if err != nil {
-		logrus.WithError(err).Fatalf("unable to get the version from package.json")
-	}
-	releaseName := fmt.Sprintf("v%s", version.Version)
+	// Get version from root package.json and format it.
+	releaseName := fmt.Sprintf("v%s", npm.MustGetVersion("."))
 
 	// ensure the tag does not already exist
 	if execErr := command.Run("git", "rev-parse", "--verify", releaseName); execErr == nil {
@@ -96,11 +92,7 @@ func main() {
 	}
 
 	// Verify all workspaces exist and have the same version
-	workspaces, err := npm.GetWorkspaces(".")
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to get the list of the workspaces")
-	}
-
+	workspaces := npm.MustGetWorkspaces(".")
 	if len(workspaces) == 0 {
 		logrus.Fatal("no workspaces found in package.json")
 	}
