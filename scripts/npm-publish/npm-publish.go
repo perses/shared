@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/perses/shared/scripts/npm"
+	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/perses/shared/scripts/tag"
 	"github.com/sirupsen/logrus"
 )
@@ -102,7 +102,7 @@ func main() {
 	logrus.Infof("Expected version from tag: %s", expectedVersion)
 
 	// Get workspaces from root package.json
-	workspaces, err := npm.GetWorkspaces()
+	workspaces, err := npm.GetWorkspaces(".")
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to read workspaces from package.json")
 	}

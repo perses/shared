@@ -17,8 +17,8 @@ import (
 	"flag"
 	"regexp"
 
-	"github.com/perses/shared/scripts/command"
-	"github.com/perses/shared/scripts/npm"
+	"github.com/perses/perses/scripts/pkg/command"
+	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
 )
 
@@ -37,7 +37,7 @@ func main() {
 		logrus.Fatalf("Invalid semantic version format: %s. Expected format: X.Y.Z or X.Y.Z-prerelease", version)
 	}
 
-	workspaces, err := npm.GetWorkspaces()
+	workspaces, err := npm.GetWorkspaces(".")
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to get workspaces from root package.json")
 	}

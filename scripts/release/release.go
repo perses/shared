@@ -19,9 +19,9 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/perses/perses/scripts/changelog"
-	"github.com/perses/shared/scripts/command"
-	"github.com/perses/shared/scripts/npm"
+	"github.com/perses/perses/scripts/pkg/changelog"
+	"github.com/perses/perses/scripts/pkg/command"
+	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
 )
 
@@ -96,7 +96,7 @@ func main() {
 	}
 
 	// Verify all workspaces exist and have the same version
-	workspaces, err := npm.GetWorkspaces()
+	workspaces, err := npm.GetWorkspaces(".")
 	if err != nil {
 		logrus.WithError(err).Fatal("unable to get the list of the workspaces")
 	}
