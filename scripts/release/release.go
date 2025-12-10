@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/perses/shared/scripts/changelog"
+	"github.com/perses/perses/scripts/changelog"
 	"github.com/perses/shared/scripts/command"
 	"github.com/perses/shared/scripts/npm"
 	"github.com/sirupsen/logrus"
