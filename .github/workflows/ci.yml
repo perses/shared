@@ -21,16 +21,16 @@ jobs:
         with:
           enable_npm: true
           enable_go: true
+          nvmrc_path: './.nvmrc'
       - name: install dependencies
         run: npm ci
-      - name: build libraries and create archives
-        run: go run ./scripts/build-and-archive/build-and-archive.go
+      - name: build libraries
+        run: "npm run build"
       - name: store libraries archives
         uses: actions/upload-artifact@v5
         with:
           name: archives
           path: |
-            **/*.tar.gz
             **/dist
             !node_modules
 
@@ -95,7 +95,6 @@ jobs:
         uses: actions/download-artifact@v6
         with:
           name: archives
-      - run: go run ./scripts/upload-archive/upload-archive.go -tag=${{ github.event.release.tag_name }}
       - name: Publish npm package
         run: go run ./scripts/npm-publish/npm-publish.go --dry-run -tag=${{ github.event.release.tag_name }}
         env:

@@ -36,3 +36,5 @@ coverage
 
 # ignore file copied during the release process of the UI
 CHANGELOG.md
+
+.idea/
