@@ -85,6 +85,34 @@ npm run reinstall
 npm run clear-turbo-cache
 ```
 
+### Linking with the Perses UI
+
+To link these shared libraries with your local Perses UI development environment, use the provided script:
+
+```bash
+./scripts/link-with-perses/link-with-perses.sh
+```
+
+The script will back up your current dependencies, build and link the shared libraries for local development. It will search  for the Perses UI app as a sibling directory by default. See the script helper for more details:
+
+```bash
+./scripts/link-with-perses/link-with-perses.sh --help
+```
+
+> [!WARNING]
+> As the shared dependencies are file references, you cannot build the Perses UI for production while linked to local shared libraries. Make sure to unlink the shared libraries before building for production.
+
+#### Regular workflow
+
+1. Clone the perses repo [https://github.com/perses/perses](https://github.com/perses/perses)
+2. From the perses `ui` folder install the ui dependencies with `npm install`.
+3. From the perses root folder, start the Perses API in dev mode with `./scripts/api_backend_dev.sh`.
+4. Clone this shared repo and install dependencies with `npm install`.
+5. From the shared root folder, run `./scripts/link-with-perses/link-with-perses.sh`. If your perses repo is in a different location than a sibling directory, use the `--path` option to specify its location.
+6. From the perses `ui` folder, run `npm run start:shared` to start the Perses UI in dev mode using the linked shared libraries with hot module reloading.
+7. Make changes to the shared libraries and see them reflected in your local Perses UI.
+8. When done, run `./scripts/link-with-perses/link-with-perses.sh unlink` to restore the original dependencies in the Perses UI.
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our development process and how to submit pull requests.
