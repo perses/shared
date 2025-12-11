@@ -52,6 +52,9 @@ WORKSPACE_PACKAGES=(
 BACKUP_FILE=".perses-shared-link-bk.json"
 BACKUP_LOCK_FILE=".perses-shared-link-lock-bk.json"
 
+# Debug flag (set via --debug flag)
+DEBUG=false
+
 # =============================================================================
 # Helper Functions
 # =============================================================================
@@ -67,6 +70,7 @@ print_help() {
     echo "Options:"
     echo "  -p, --path <path>   Path to the perses repository root (default: ../perses)"
     echo "                      The app is expected at <path>/$APP_RELATIVE_PATH"
+    echo "  -d, --debug         Show detailed error output when commands fail"
     echo "  -h, --help          Show this help message"
     echo ""
     echo "Examples:"
@@ -143,6 +147,22 @@ is_built() {
     return 1
 }
 
+# Convert Git Bash path to Windows path for npm on Windows
+convert_path_for_npm() {
+    local path="$1"
+    
+    # Check if we're on Windows (Git Bash/MSYS/MinGW)
+    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
+        # Convert /c/Users/... to C:/Users/...
+        if [[ "$path" =~ ^/([a-z])/ ]]; then
+            local drive_letter="${BASH_REMATCH[1]}"
+            path="${drive_letter^^}:${path:2}"
+        fi
+    fi
+    
+    echo "$path"
+}
+
 # Build workspaces that are not built
 build_if_needed() {
     local needs_build=false
@@ -191,11 +211,11 @@ show_status() {
         local package_folder=$(get_package_folder "$workspace")
         
         if package_exists_in_external "$package_name" "$external_package_json"; then
-            ((total_count++))
+            ((total_count++)) || true
             local current_version=$(get_current_version "$package_name" "$external_package_json")
             
             if is_linked "$current_version"; then
-                ((linked_count++))
+                ((linked_count++)) || true
                 if is_built "$package_folder"; then
                     printf "  ${GREEN}●${NC} %s ${GREEN}linked${NC}\n" "$package_name"
                 else
@@ -256,41 +276,92 @@ do_link() {
     
     # Link each workspace package
     local already_linked=0
-    
+
     echo "Linking packages to $app_path..."
     
+    # Temporarily disable exit on error to handle npm install failures gracefully.
+    # npm install may fail (non-zero exit code) but still succeed in linking the package.
+    # This allows us to check the actual result and continue trying other packages.
+    set +e
     for workspace in "${WORKSPACE_PACKAGES[@]}"; do
         local package_name=$(get_package_name "$workspace")
         local package_folder=$(get_package_folder "$workspace")
         local package_path="$SHARED_ROOT/$package_folder"
         
+        # Convert path for Windows npm if needed
+        local npm_package_path=$(convert_path_for_npm "$package_path")
+        
         if package_exists_in_external "$package_name" "$external_package_json"; then
             local current_version=$(get_current_version "$package_name" "$external_package_json")
             
             if is_linked "$current_version"; then
-                ((already_linked++))
+                ((already_linked++)) || true
+                if [[ "$DEBUG" == true ]]; then
+                    echo "  $package_name already linked (current: $current_version)"
+                fi
                 continue
             fi
-            
+
             echo -n "  Linking $package_name... "
             
-            if (cd "$ui_path" && npm install "file:$package_path" --save -w app --silent 2>/dev/null); then
+            # Capture both stdout and stderr for debugging
+            local npm_output
+            npm_output=$(cd "$ui_path" && npm install "file:$npm_package_path" --save -w app 2>&1)
+            local npm_exit_code=$?
+            
+            # Check if package was actually linked (npm on Windows may return error but still succeed)
+            local new_version=$(get_current_version "$package_name" "$external_package_json")
+            
+            if is_linked "$new_version"; then
+                printf "${GREEN}done${NC}\n"
+            elif [[ $npm_exit_code -eq 0 ]]; then
                 printf "${GREEN}done${NC}\n"
             else
                 printf "${RED}failed${NC}\n"
+                if [[ "$DEBUG" == true ]]; then
+                    log_error "npm install failed with exit code $npm_exit_code"
+                    echo "  Package path: $package_path"
+                    echo "  NPM package path: $npm_package_path"
+                    echo "  UI path: $ui_path"
+                    echo "  Command: npm install \"file:$npm_package_path\" --save -w app"
+                    echo "  Output:"
+                    echo "$npm_output" | sed 's/^/    /'
+                    echo ""
+                fi
             fi
         fi
     done
+    set -e  # Re-enable exit on error
     
     if [[ $already_linked -gt 0 ]]; then
         echo "  ($already_linked package(s) already linked)"
     fi
     
+    # Check if any packages failed and suggest debug mode
+    local failed_count=0
+    for workspace in "${WORKSPACE_PACKAGES[@]}"; do
+        local package_name=$(get_package_name "$workspace")
+        if package_exists_in_external "$package_name" "$external_package_json"; then
+            local current_version=$(get_current_version "$package_name" "$external_package_json")
+            if ! is_linked "$current_version"; then
+                ((failed_count++)) || true
+            fi
+        fi
+    done
+    
+    if [[ $failed_count -gt 0 && "$DEBUG" != true ]]; then
+        echo ""
+        log_warning "Some packages failed to link. Run with --debug flag for detailed error information:"
+        echo "  $0 link --debug"
+    fi
+
     # Show status
     show_status "$perses_root"
-    
-    # Show next steps
-    printf "\nNow you can start the app dev server, in shared mode, from Perses:\n\ncd %s\nnpm run start:shared\n" "$app_path"
+
+    # Show next steps on success
+    if [[ $failed_count -eq 0 ]]; then
+        printf "\nNow you can start the app dev server, in shared mode, from Perses:\n\ncd %s\nnpm run start:shared\n" "$app_path"
+    fi
 }
 
 # =============================================================================
@@ -416,6 +487,10 @@ main() {
         case "$1" in
             link|unlink|status)
                 command="$1"
+                shift
+                ;;
+            -d|--debug)
+                DEBUG=true
                 shift
                 ;;
             -p|--path)

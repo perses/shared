@@ -107,7 +107,7 @@ The script will back up your current dependencies, build and link the shared lib
 1. Clone the perses repo [https://github.com/perses/perses](https://github.com/perses/perses)
 2. From the perses `ui` folder install the ui dependencies with `npm install`.
 3. From the perses root folder, start the Perses API in dev mode with `./scripts/api_backend_dev.sh`.
-4. Clone this shared repo and install dependencies with `npm install`.
+4. Clone this shared repo and install dependencies with `npm install`. ⚠️ Do not rename the cloned repo, otherwise it breaks the paths resolution on the perses repo side.
 5. From the shared root folder, run `./scripts/link-with-perses/link-with-perses.sh`. If your perses repo is in a different location than a sibling directory, use the `--path` option to specify its location.
 6. From the perses `ui` folder, run `npm run start:shared` to start the Perses UI in dev mode using the linked shared libraries with hot module reloading.
 7. Make changes to the shared libraries and see them reflected in your local Perses UI.
