@@ -102,11 +102,7 @@ func main() {
 	logrus.Infof("Expected version from tag: %s", expectedVersion)
 
 	// Get workspaces from root package.json
-	workspaces, err := npm.GetWorkspaces(".")
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to read workspaces from package.json")
-	}
-
+	workspaces := npm.MustGetWorkspaces(".")
 	if len(workspaces) == 0 {
 		logrus.Fatal("no workspaces found in package.json")
 	}
