@@ -25,7 +25,7 @@ jobs:
       - name: install dependencies
         run: npm ci
       - name: build libraries
-        run: "npm run build"
+        run: 'npm run build'
       - name: store libraries archives
         uses: actions/upload-artifact@v5
         with:
@@ -96,6 +96,6 @@ jobs:
         with:
           name: archives
       - name: Publish npm package
-        run: go run ./scripts/npm-publish/npm-publish.go --dry-run -tag=${{ github.event.release.tag_name }}
+        run: go run ./scripts/npm-publish/npm-publish.go -tag=${{ github.event.release.tag_name }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
