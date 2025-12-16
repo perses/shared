@@ -92,7 +92,7 @@ jobs:
           enable_go: true
           nvmrc_path: './.nvmrc'
       - name: Download archive
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: archives
       - name: Publish npm package
