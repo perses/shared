@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { StyledComponent } from '@emotion/styled';
 import {
   Button,
   ButtonProps,
@@ -26,7 +27,7 @@ import {
   Theme,
 } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
-import React, { MouseEvent, ReactElement } from 'react';
+import { MouseEvent, ReactElement } from 'react';
 import { combineSx } from '../utils';
 
 export interface DialogHeaderProps extends DialogTitleProps {
@@ -79,7 +80,7 @@ const SecondaryButton = ({ children, ...props }: DialogButtonProps): ReactElemen
  * https://github.com/mui-org/material-ui/issues/13253
  * This component adds style to get expected behavior & should be used whenever we have a Form inside a Dialog
  */
-const Form: React.ComponentType<React.FormHTMLAttributes<HTMLFormElement>> = styled('form')({
+const Form: StyledComponent<React.ComponentProps<'form'>> = styled('form')({
   overflowY: 'auto',
   display: 'flex',
   flexDirection: 'column',
