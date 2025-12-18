@@ -17,7 +17,7 @@ import { formatValue, TimeSeriesValueTuple, FormatOptions, TimeSeries } from '@p
 import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping, DatapointInfo } from '../model';
 import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp } from '../utils';
 import { CursorCoordinates, CursorData, EMPTY_TOOLTIP_DATA } from './tooltip-model';
-import {pow} from 'mathjs';
+
 // increase multipliers to show more series in tooltip
 export const INCREASE_NEARBY_SERIES_MULTIPLIER = 5.5; // adjusts how many series show in tooltip (higher == more series shown)
 export const DYNAMIC_NEARBY_SERIES_MULTIPLIER = 30; // used for adjustment after series number divisor
@@ -48,7 +48,6 @@ export function checkforNearbyTimeSeries(
   yBuffer: number,
   chart: EChartsInstance,
   format?: FormatOptions,
-  logBase?: number,
 ): NearbySeriesArray {
   const currentNearbySeriesData: NearbySeriesArray = [];
   const cursorX: number | null = pointInGrid[0] ?? null;
@@ -183,7 +182,7 @@ export function legacyCheckforNearbySeries(
   pointInGrid: number[],
   yBuffer: number,
   chart?: EChartsInstance,
-  format?: FormatOptions
+  format?: FormatOptions,
 ): NearbySeriesArray {
   const currentNearbySeriesData: NearbySeriesArray = [];
   const cursorX: number | null = pointInGrid[0] ?? null;
@@ -347,8 +346,8 @@ export function getNearbySeriesData({
       const extent = yAxisScale._extent;
       // Calculate actual data range from log extent
       // extent is in log space (e.g., [0, 2] for 10^0 to 10^2)
-      const actualMin = Math.pow(logBase, extent[0]);
-      const actualMax = Math.pow(logBase, extent[1]);
+      const actualMin = logBase ** extent[0];
+      const actualMax = logBase ** extent[1];
       // Use a fraction of the actual range as the interval
       yInterval = (actualMax - actualMin) / 100;
     }
