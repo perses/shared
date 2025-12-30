@@ -32,8 +32,10 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
   panelDefinition: PanelDefinition
 ) => {
   const { display, plugin: pluginDefinition, queries: initialQueries, links: initialLinks } = panelDefinition.spec;
-  const [name, setName] = useState(display.name);
-  const [description, setDescription] = useState(display.description);
+  // Provide default display object if undefined
+  const displayData = display ?? { name: undefined, description: undefined };
+  const [name, setName] = useState(displayData.name);
+  const [description, setDescription] = useState(displayData.description);
   const [links, setLinks] = useState(initialLinks);
   const [plugin, setPlugin] = useState(pluginDefinition);
 
@@ -61,8 +63,9 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
   const setPanelDefinition = useCallback(
     (panelDefinition: PanelDefinition) => {
       const { display, plugin, queries, links } = panelDefinition.spec;
-      setName(display.name);
-      setDescription(display.description);
+      const displayData = display ?? { name: undefined, description: undefined };
+      setName(displayData.name);
+      setDescription(displayData.description);
       setLinks(links);
       setPlugin(plugin);
       setQueries(queries);
@@ -75,7 +78,7 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
       panelDefinition: {
         kind: 'Panel',
         spec: {
-          display: { name, description },
+          display: name !== undefined || description !== undefined ? { name, description } : undefined,
           plugin,
           queries: currentQueries,
           links,
