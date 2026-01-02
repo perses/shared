@@ -24,7 +24,7 @@ type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
 
 export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   id: string;
-  title: string;
+  title?: string;
   description?: string;
   links?: Link[];
   extra?: ReactNode;
