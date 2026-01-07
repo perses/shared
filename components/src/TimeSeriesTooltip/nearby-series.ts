@@ -96,7 +96,6 @@ export function checkforNearbyTimeSeries(
 
         const xValue = nearbyTimeSeries[0];
         const yValue = nearbyTimeSeries[1];
-
         // TODO: ensure null values not displayed in tooltip
         if (yValue !== undefined && yValue !== null) {
           if (closestTimestamp === xValue) {
@@ -336,7 +335,20 @@ export function getNearbySeriesData({
   const pointInGrid = getPointInGrid(mousePos.plotCanvas.x, mousePos.plotCanvas.y, chart);
   if (pointInGrid !== null) {
     const chartModel = chart['_model'];
-    const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
+    const yAxisScale = chartModel.getComponent('yAxis').axis.scale;
+    const isLogScale = yAxisScale.type === 'log';
+    let yInterval = yAxisScale._interval;
+    // For logarithmic scales, convert the log interval to actual data range
+    if (isLogScale && yAxisScale.base) {
+      const logBase = yAxisScale.base;
+      const extent = yAxisScale._extent;
+      // Calculate actual data range from log extent
+      // extent is in log space (e.g., [0, 2] for 10^0 to 10^2)
+      const actualMin = logBase ** extent[0];
+      const actualMax = logBase ** extent[1];
+      // Use a fraction of the actual range as the interval
+      yInterval = (actualMax - actualMin) / 100;
+    }
     const totalSeries = data.length;
     const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
     return checkforNearbyTimeSeries(data, seriesMapping, pointInGrid, yBuffer, chart, format);
@@ -439,7 +451,6 @@ export function getYBuffer({
   if (showAllSeries) {
     return yInterval * 10; // roughly correlates with grid so entire canvas is searched
   }
-
   // never let nearby series range be less than roughly the size of a single tick
   const yBufferMin = yInterval * 0.3;
 
@@ -448,7 +459,6 @@ export function getYBuffer({
     const adjustedBuffer = (yInterval * DYNAMIC_NEARBY_SERIES_MULTIPLIER) / totalSeries;
     return Math.max(yBufferMin, adjustedBuffer);
   }
-
   // increase multiplier to expand nearby series range
   return Math.max(yBufferMin, yInterval * INCREASE_NEARBY_SERIES_MULTIPLIER);
 }
