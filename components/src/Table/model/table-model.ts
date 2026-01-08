@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { Theme } from '@mui/material';
+import { Link } from '@perses-dev/core';
 import {
   AccessorKeyColumnDef,
   CellContext,
@@ -262,8 +263,14 @@ declare module '@tanstack/table-core' {
     align?: TableColumnConfig<TData>['align'];
     headerDescription?: TableColumnConfig<TData>['headerDescription'];
     cellDescription?: TableColumnConfig<TData>['cellDescription'];
+    dataLink?: TableColumnConfig<TData>['dataLink'];
   }
 }
+
+// Column link settings
+// The URL could be set to a static link or could be constructed dynamically
+// The URL may include reference to the variables or neighboring cells in the row
+export type DataLink = Omit<Link, 'name'>;
 
 // Only exposing a very simplified version of the very extensive column definitions
 // possible with tanstack table to make it easier for us to control rendering
@@ -324,11 +331,7 @@ export interface TableColumnConfig<TableData>
    * Dynamic link setting. If available the the cell content should turn into
    * a link with the value of the cell as the dynamic section
    */
-  dataLink?: {
-    url: string;
-    title?: string;
-    openNewTab: boolean;
-  };
+  dataLink?: DataLink;
 }
 
 /**
@@ -338,7 +341,7 @@ export function persesColumnsToTanstackColumns<TableData>(
   columns: Array<TableColumnConfig<TableData>>
 ): Array<ColumnDef<TableData>> {
   const tableCols: Array<ColumnDef<TableData>> = columns.map(
-    ({ width, align, headerDescription, cellDescription, enableSorting, ...otherProps }) => {
+    ({ width, align, headerDescription, cellDescription, enableSorting, dataLink, ...otherProps }) => {
       // Tanstack Table does not support an "auto" value to naturally size to fit
       // the space in a table. We translate our custom "auto" setting to 0 size
       // for these columns, so it is easy to fall back to auto when rendering.
@@ -370,6 +373,7 @@ export function persesColumnsToTanstackColumns<TableData>(
           align,
           headerDescription,
           cellDescription,
+          dataLink,
         },
       };
 

@@ -72,6 +72,7 @@ export function VirtualizedTable<TableData>({
     startIndex: 0,
     endIndex: 0,
   });
+
   const setVisibleRange: TableVirtuosoProps<TableData, unknown>['rangeChanged'] = (newVisibleRange) => {
     visibleRange.current = newVisibleRange;
   };
@@ -218,7 +219,6 @@ export function VirtualizedTable<TableData>({
             <>
               {row.getVisibleCells().map((cell, i, cells) => {
                 const position: TableCellPosition = {
-                  // Add 1 to the row index because the header is row 0
                   row: index + 1,
                   column: i,
                 };
@@ -228,6 +228,14 @@ export function VirtualizedTable<TableData>({
 
                 const cellRenderFn = cell.column.columnDef.cell;
                 const cellContent = typeof cellRenderFn === 'function' ? cellRenderFn(cellContext) : null;
+
+                /* 
+                   IMPORTANT:
+                   If Variables exist in the link, they should have been translated by the plugin already. (Being developed at the moment)
+                   Components have no access to any context (Which is intentional and correct)
+                   We may want to add parameters to a link from neighboring cells in the future as well.
+                   If this is the case, the value of the neighboring cells should be read from here and be replaced. (Bing discussed at the moment, not decided yet)
+                */
 
                 const cellDescriptionDef = cell.column.columnDef.meta?.cellDescription;
                 let description: string | undefined = undefined;
@@ -258,6 +266,7 @@ export function VirtualizedTable<TableData>({
                     description={description}
                     color={cellConfig?.textColor ?? undefined}
                     backgroundColor={cellConfig?.backgroundColor ?? undefined}
+                    dataLink={cell.column.columnDef.meta?.dataLink}
                   >
                     {cellConfig?.text || cellContent}
                   </TableCell>
