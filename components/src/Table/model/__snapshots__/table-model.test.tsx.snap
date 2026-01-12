@@ -64,6 +64,7 @@ exports[`persesColumnToTanstackColumn transforms perses columns to tanstack colu
     "meta": {
       "align": "right",
       "cellDescription": undefined,
+      "dataLink": undefined,
       "headerDescription": undefined,
     },
     "minSize": 0,
@@ -77,6 +78,7 @@ exports[`persesColumnToTanstackColumn transforms perses columns to tanstack colu
     "meta": {
       "align": undefined,
       "cellDescription": [Function],
+      "dataLink": undefined,
       "headerDescription": "The total number of values.",
     },
     "size": 120,

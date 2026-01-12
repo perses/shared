@@ -11,9 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TableCell as MuiTableCell, styled, TableCellProps as MuiTableCellProps, Box, useTheme } from '@mui/material';
+import {
+  TableCell as MuiTableCell,
+  styled,
+  TableCellProps as MuiTableCellProps,
+  Box,
+  useTheme,
+  Link,
+} from '@mui/material';
 import { ReactElement, useEffect, useRef } from 'react';
-import { TableCellAlignment, TableDensity, getTableCellLayout } from './model/table-model';
+import { DataLink, TableCellAlignment, TableDensity, getTableCellLayout } from './model/table-model';
 
 const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
   padding: 0,
@@ -65,6 +72,7 @@ export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex' | 'al
   onFocusTrigger?: (e: React.MouseEvent<HTMLTableCellElement> | React.KeyboardEvent<HTMLTableCellElement>) => void;
   color?: string;
   backgroundColor?: string;
+  dataLink?: DataLink;
 }
 
 export function TableCell({
@@ -81,10 +89,10 @@ export function TableCell({
   align,
   color,
   backgroundColor,
+  dataLink,
   ...otherProps
 }: TableCellProps): ReactElement {
   const theme = useTheme();
-
   const elRef = useRef<HTMLTableCellElement>();
 
   const isHeader = variant === 'head';
@@ -172,7 +180,17 @@ export function TableCell({
         aria-label={description}
         textAlign={align}
       >
-        {children}
+        {dataLink ? (
+          <Link
+            href={dataLink.url}
+            target={dataLink.targetBlank ? '_blank' : '_self'}
+            rel={dataLink.targetBlank ? 'noopener noreferrer' : undefined}
+          >
+            {children}
+          </Link>
+        ) : (
+          children
+        )}
       </Box>
     </StyledMuiTableCell>
   );
