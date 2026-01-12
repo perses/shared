@@ -105,6 +105,7 @@ export function replaceVariable(
 ): string {
   const variableSyntax = '$' + varName;
   const alternativeVariableSyntax = '${' + varName + (varFormat ? ':' + varFormat : '') + '}';
+  const builtInVariableSyntax = varName.includes('__') ? varName : undefined;
 
   let replaceString = '';
   if (Array.isArray(variableValue)) {
@@ -114,8 +115,11 @@ export function replaceVariable(
     replaceString = interpolate([variableValue], varName, varFormat || InterpolationFormat.RAW);
   }
 
-  text = text.replaceAll(variableSyntax, replaceString);
-  return text.replaceAll(alternativeVariableSyntax, replaceString);
+  if (builtInVariableSyntax) {
+    return text.replaceAll(builtInVariableSyntax, replaceString);
+  }
+
+  return text.replaceAll(variableSyntax, replaceString).replaceAll(alternativeVariableSyntax, replaceString);
 }
 
 // This regular expression is designed to identify variable references in a string.
@@ -124,7 +128,7 @@ export function replaceVariable(
 // 2. ${variableName} - This is a more complex format and the regular expression captures the variable name (\w+ matches one or more word characters) in the curly braces.
 // 3. ${variableName:format} - This is a more complex format that allows specifying a format interpolation.
 
-const VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^}]+))?(?::([^}]+))?}/gm;
+const VARIABLE_REGEX = /\$(\w+)|\${(\w+)(?:\.([^:^}]+))?(?::([^}]+))?}|__(\w+)/gm;
 
 /**
  * Returns a list of variables
@@ -141,6 +145,9 @@ export function parseVariables(text: string): string[] {
       } else if (match[2]) {
         // \${(\w+)}\
         matches.add(match[2]);
+      } else if (match[5]) {
+        // __(\w+)
+        matches.add(match[0]);
       }
     }
   }
@@ -167,6 +174,9 @@ export function parseVariablesAndFormat(text: string): Map<string, Interpolation
       } else if (match[2]) {
         // \${(\w+)}\
         matches.set(match[2], stringToFormat(format));
+      } else if (match[5]) {
+        // __(\w+)
+        matches.set(match[0], stringToFormat(format));
       }
     }
   }

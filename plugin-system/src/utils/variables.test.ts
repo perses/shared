@@ -19,6 +19,14 @@ describe('parseVariables()', () => {
       text: 'hello $var1 world $var2',
       variables: ['var1', 'var2'],
     },
+    {
+      text: 'hello ${var1} world ${var2}',
+      variables: ['var1', 'var2'],
+    },
+    {
+      text: 'from: __from to: __to',
+      variables: ['__from', '__to'],
+    },
   ];
 
   tests.forEach(({ text, variables }) => {
