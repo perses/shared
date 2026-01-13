@@ -23,3 +23,13 @@ cue-eval:
 cue-test:
 	@echo ">> Run the unit tests for CUE schemas"
 	$(GO) run ./scripts/test-cue/test-cue.go
+
+.PHONY: checklicense
+checklicense:
+	@echo ">> checking license"
+	$(GO) run ./scripts/check-license --check
+
+.PHONY: fixlicense
+fixlicense:
+	@echo ">> adding license header where it's missing"
+	$(GO) run ./scripts/check-license --fix
