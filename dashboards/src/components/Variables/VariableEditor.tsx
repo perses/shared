@@ -37,6 +37,7 @@ import AddIcon from 'mdi-material-ui/Plus';
 import { Action, BuiltinVariableDefinition, VariableDefinition, ExternalVariableDefinition } from '@perses-dev/core';
 import { useImmer } from 'use-immer';
 import PencilIcon from 'mdi-material-ui/Pencil';
+import CloneIcon from 'mdi-material-ui/ContentCopy';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
@@ -275,6 +276,22 @@ export function VariableEditor(props: {
                             </IconButton>
                             <IconButton onClick={() => editVariable(idx)}>
                               <PencilIcon />
+                            </IconButton>
+                            <IconButton
+                              onClick={() => {
+                                setVariableDefinitions((draft) => {
+                                  if (v.kind === 'TextVariable') {
+                                    draft.push({
+                                      ...v,
+                                      spec: { ...v.spec, value: v.spec.value, name: `${v.spec.name}_copy` },
+                                    });
+                                  } else {
+                                    draft.push({ ...v, spec: { ...v.spec, name: `${v.spec.name}_copy` } });
+                                  }
+                                });
+                              }}
+                            >
+                              <CloneIcon />
                             </IconButton>
                             <IconButton onClick={() => removeVariable(idx)}>
                               <TrashIcon />
