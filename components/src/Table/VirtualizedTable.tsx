@@ -64,7 +64,6 @@ export function VirtualizedTable<TableData>({
   rowCount,
 }: VirtualizedTableProps<TableData>): ReactElement {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
-
   // Use a ref for these values because they are only needed for keyboard
   // focus interactions and setting them on state will lead to a significant
   // amount of unnecessary re-renders.
@@ -250,6 +249,19 @@ export function VirtualizedTable<TableData>({
                   description = cellContent;
                 }
 
+                /* this has been specifically added for the data link, 
+                   therefore, non string and numeric values should be excluded
+                */
+                const adjacentCellsValuesMap = Object.entries(row.original as Record<string, unknown>)
+                  ?.filter(([_, value]) => ['string', 'number'].includes(typeof value))
+                  .reduce(
+                    (acc, [key, value]) => ({
+                      ...acc,
+                      [key]: String(value),
+                    }),
+                    {}
+                  );
+
                 return (
                   <TableCell
                     key={cell.id}
@@ -267,6 +279,7 @@ export function VirtualizedTable<TableData>({
                     color={cellConfig?.textColor ?? undefined}
                     backgroundColor={cellConfig?.backgroundColor ?? undefined}
                     dataLink={cell.column.columnDef.meta?.dataLink}
+                    adjacentCellsValuesMap={adjacentCellsValuesMap}
                   >
                     {cellConfig?.text || cellContent}
                   </TableCell>
