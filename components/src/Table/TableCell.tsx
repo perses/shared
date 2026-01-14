@@ -19,7 +19,7 @@ import {
   useTheme,
   Link,
 } from '@mui/material';
-import { ReactElement, useEffect, useRef } from 'react';
+import { ReactElement, useEffect, useMemo, useRef } from 'react';
 import { DataLink, TableCellAlignment, TableDensity, getTableCellLayout } from './model/table-model';
 
 const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
@@ -73,6 +73,7 @@ export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex' | 'al
   color?: string;
   backgroundColor?: string;
   dataLink?: DataLink;
+  adjacentCellsValuesMap?: Record<string, string>;
 }
 
 export function TableCell({
@@ -90,6 +91,7 @@ export function TableCell({
   color,
   backgroundColor,
   dataLink,
+  adjacentCellsValuesMap,
   ...otherProps
 }: TableCellProps): ReactElement {
   const theme = useTheme();
@@ -123,6 +125,20 @@ export function TableCell({
     // tabindex and focuses to the right cell.
     onFocusTrigger?.(e);
   };
+
+  const modifiedDataLink = useMemo((): DataLink | undefined => {
+    if (!dataLink) return undefined;
+
+    let url = dataLink.url;
+    const regex = /\$\{__data\.fields\["(.+)?"\]\}/;
+    if (adjacentCellsValuesMap && regex.test(dataLink.url)) {
+      Object.entries(adjacentCellsValuesMap).forEach(([key, value]) => {
+        const placeholder = `\${__data.fields["${key}"]}`;
+        url = url.replaceAll(placeholder, encodeURIComponent(value));
+      });
+    }
+    return { ...dataLink, url };
+  }, [dataLink, adjacentCellsValuesMap]);
 
   return (
     <StyledMuiTableCell
@@ -180,11 +196,11 @@ export function TableCell({
         aria-label={description}
         textAlign={align}
       >
-        {dataLink ? (
+        {modifiedDataLink ? (
           <Link
-            href={dataLink.url}
-            target={dataLink.targetBlank ? '_blank' : '_self'}
-            rel={dataLink.targetBlank ? 'noopener noreferrer' : undefined}
+            href={modifiedDataLink.url}
+            target={modifiedDataLink.targetBlank ? '_blank' : '_self'}
+            rel={modifiedDataLink.targetBlank ? 'noopener noreferrer' : undefined}
           >
             {children}
           </Link>
