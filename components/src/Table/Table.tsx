@@ -62,6 +62,8 @@ export function Table<TableData>({
   pagination,
   onPaginationChange,
   rowSelectionVariant = 'standard',
+  rowErrors,
+  onRowErrorDismiss,
   ...otherProps
 }: TableProps<TableData>): ReactElement {
   const theme = useTheme();
@@ -199,6 +201,8 @@ export function Table<TableData>({
       pagination={pagination}
       onPaginationChange={onPaginationChange}
       rowCount={table.getRowCount()}
+      rowErrors={rowErrors}
+      onRowErrorDismiss={onRowErrorDismiss}
     />
   );
 }

@@ -25,6 +25,8 @@ import {
 } from '@tanstack/react-table';
 import { CSSProperties } from 'react';
 
+import { SelectionActionError } from '../../SelectionActions/selection-action-model';
+
 export const DEFAULT_COLUMN_WIDTH = 150;
 export const DEFAULT_COLUMN_HEIGHT = 40;
 
@@ -168,6 +170,17 @@ export interface TableProps<TableData> {
    * is enabled. If not set, a default color is used.
    */
   getCheckboxColor?: (rowData: TableData) => string;
+
+  /**
+   * Map of row IDs to error information for rows where action execution failed.
+   * Used to display inline error indicators on failed rows.
+   */
+  rowErrors?: Record<string, SelectionActionError>;
+
+  /**
+   * Callback fired when a user dismisses an error indicator on a row.
+   */
+  onRowErrorDismiss?: (rowId: string) => void;
 }
 
 function calculateTableCellHeight(lineHeight: CSSProperties['lineHeight'], paddingY: string): number {
