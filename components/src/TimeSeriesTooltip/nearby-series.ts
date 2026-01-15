@@ -19,8 +19,8 @@ import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp }
 import { CursorCoordinates, CursorData, EMPTY_TOOLTIP_DATA } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
-export const INCREASE_NEARBY_SERIES_MULTIPLIER = 5.5; // adjusts how many series show in tooltip (higher == more series shown)
-export const DYNAMIC_NEARBY_SERIES_MULTIPLIER = 30; // used for adjustment after series number divisor
+export const INCREASE_NEARBY_SERIES_MULTIPLIER = 2.5; // adjusts how many series show in tooltip (higher == more series shown)
+export const DYNAMIC_NEARBY_SERIES_MULTIPLIER = 15; // used for adjustment after series number divisor
 export const SHOW_FEWER_SERIES_LIMIT = 5;
 
 export interface NearbySeriesInfo {
@@ -47,7 +47,9 @@ export function checkforNearbyTimeSeries(
   pointInGrid: number[],
   yBuffer: number,
   chart: EChartsInstance,
-  format?: FormatOptions
+  format?: FormatOptions,
+  seriesFormatMap?: Map<string, FormatOptions>,
+  cursorPixelY?: number
 ): NearbySeriesArray {
   const currentNearbySeriesData: NearbySeriesArray = [];
   const cursorX: number | null = pointInGrid[0] ?? null;
@@ -76,6 +78,18 @@ export function checkforNearbyTimeSeries(
     return EMPTY_TOOLTIP_DATA;
   }
 
+  // For multi-axis support: convert yBuffer to pixel space for consistent comparison
+  // This allows us to compare series on different Y axes fairly
+  let yBufferPixels: number | null = null;
+  if (cursorPixelY !== undefined) {
+    // Convert a point at cursorY and cursorY + yBuffer to pixels to get the buffer in pixel space
+    const cursorPoint = chart.convertToPixel('grid', [0, cursorY]);
+    const bufferPoint = chart.convertToPixel('grid', [0, cursorY + yBuffer]);
+    if (cursorPoint && bufferPoint && cursorPoint[1] !== undefined && bufferPoint[1] !== undefined) {
+      yBufferPixels = Math.abs(bufferPoint[1] - cursorPoint[1]);
+    }
+  }
+
   // find the timestamp with data that is closest to cursorX
   for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
     const currentSeries = seriesMapping[seriesIdx];
@@ -88,7 +102,12 @@ export function checkforNearbyTimeSeries(
     if (currentDatasetValues === undefined || !Array.isArray(currentDatasetValues)) break;
     const lineSeries = currentSeries as LineSeriesOption;
     const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';
+    const seriesId = lineSeries.id ? lineSeries.id.toString() : '';
     const markerColor = lineSeries.color ?? '#000';
+
+    // Get the format for this series (from seriesFormatMap or fallback to default format)
+    const seriesFormat = seriesFormatMap?.get(seriesId) ?? format;
+
     if (Array.isArray(data)) {
       for (let datumIdx = 0; datumIdx < currentDatasetValues.length; datumIdx++) {
         const nearbyTimeSeries = currentDatasetValues[datumIdx];
@@ -99,15 +118,53 @@ export function checkforNearbyTimeSeries(
         // TODO: ensure null values not displayed in tooltip
         if (yValue !== undefined && yValue !== null) {
           if (closestTimestamp === xValue) {
-            if (cursorY <= yValue + yBuffer && cursorY >= yValue - yBuffer) {
+            // Check if this series is nearby the cursor
+            let isNearby = false;
+
+            // For multi-axis: compare in pixel space
+            if (cursorPixelY !== undefined && yBufferPixels !== null) {
+              const dataPointPixel = chart.convertToPixel({ seriesIndex: seriesIdx }, [datumIdx, yValue]);
+              if (dataPointPixel && dataPointPixel[1] !== undefined) {
+                const pixelDistance = Math.abs(cursorPixelY - dataPointPixel[1]);
+                isNearby = pixelDistance <= yBufferPixels;
+              } else {
+                // Fallback to data-space comparison for primary axis
+                isNearby = cursorY <= yValue + yBuffer && cursorY >= yValue - yBuffer;
+              }
+            } else {
+              // Fallback to original data-space comparison
+              isNearby = cursorY <= yValue + yBuffer && cursorY >= yValue - yBuffer;
+            }
+
+            if (isNearby) {
               // show fewer bold series in tooltip when many total series
               const minPercentRange = totalSeries > SHOW_FEWER_SERIES_LIMIT ? 2 : 5;
               const percentRangeToCheck = Math.max(minPercentRange, 100 / totalSeries);
-              const isClosestToCursor = isWithinPercentageRange({
-                valueToCheck: cursorY,
-                baseValue: yValue,
-                percentage: percentRangeToCheck,
-              });
+
+              // For isClosestToCursor, also use pixel space for multi-axis
+              let isClosestToCursor = false;
+              if (cursorPixelY !== undefined) {
+                const dataPointPixel = chart.convertToPixel({ seriesIndex: seriesIdx }, [datumIdx, yValue]);
+                if (dataPointPixel && dataPointPixel[1] !== undefined) {
+                  const pixelDistance = Math.abs(cursorPixelY - dataPointPixel[1]);
+                  // Use percentage of buffer for "closest" determination
+                  const tightBufferPixels = (yBufferPixels ?? 50) * (percentRangeToCheck / 100);
+                  isClosestToCursor = pixelDistance <= Math.max(tightBufferPixels, 5);
+                } else {
+                  isClosestToCursor = isWithinPercentageRange({
+                    valueToCheck: cursorY,
+                    baseValue: yValue,
+                    percentage: percentRangeToCheck,
+                  });
+                }
+              } else {
+                isClosestToCursor = isWithinPercentageRange({
+                  valueToCheck: cursorY,
+                  baseValue: yValue,
+                  percentage: percentRangeToCheck,
+                });
+              }
+
               if (isClosestToCursor) {
                 // shows as bold in tooltip, customize 'emphasis' options in getTimeSeries util
                 emphasizedSeriesIndexes.push(seriesIdx);
@@ -140,7 +197,7 @@ export function checkforNearbyTimeSeries(
                   seriesIndex: seriesIdx,
                 });
               }
-              const formattedY = formatValue(yValue, format);
+              const formattedY = formatValue(yValue, seriesFormat);
               currentNearbySeriesData.push({
                 seriesIdx: seriesIdx,
                 datumIdx: datumIdx,
@@ -294,6 +351,7 @@ export function getNearbySeriesData({
   seriesMapping,
   chart,
   format,
+  seriesFormatMap,
   showAllSeries = false,
 }: {
   mousePos: CursorData['coords'];
@@ -302,6 +360,7 @@ export function getNearbySeriesData({
   seriesMapping: TimeChartSeriesMapping;
   chart?: EChartsInstance;
   format?: FormatOptions;
+  seriesFormatMap?: Map<string, FormatOptions>;
   showAllSeries?: boolean;
 }): NearbySeriesArray {
   if (chart === undefined || mousePos === null) return EMPTY_TOOLTIP_DATA;
@@ -332,7 +391,8 @@ export function getNearbySeriesData({
   // mousemove position undefined when not hovering over chart canvas
   if (mousePos.plotCanvas.x === undefined || mousePos.plotCanvas.y === undefined) return EMPTY_TOOLTIP_DATA;
 
-  const pointInGrid = getPointInGrid(mousePos.plotCanvas.x, mousePos.plotCanvas.y, chart);
+  const cursorPixelY = mousePos.plotCanvas.y;
+  const pointInGrid = getPointInGrid(mousePos.plotCanvas.x, cursorPixelY, chart);
   if (pointInGrid !== null) {
     const chartModel = chart['_model'];
     const yAxisScale = chartModel.getComponent('yAxis').axis.scale;
@@ -351,7 +411,16 @@ export function getNearbySeriesData({
     }
     const totalSeries = data.length;
     const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
-    return checkforNearbyTimeSeries(data, seriesMapping, pointInGrid, yBuffer, chart, format);
+    return checkforNearbyTimeSeries(
+      data,
+      seriesMapping,
+      pointInGrid,
+      yBuffer,
+      chart,
+      format,
+      seriesFormatMap,
+      cursorPixelY
+    );
   }
 
   // no nearby series found

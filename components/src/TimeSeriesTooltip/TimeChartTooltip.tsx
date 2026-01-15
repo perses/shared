@@ -36,6 +36,10 @@ export interface TimeChartTooltipProps {
   containerId?: string;
   onUnpinClick?: () => void;
   format?: FormatOptions;
+  /**
+   * Map of series ID to format options for per-series formatting (used with multiple Y axes)
+   */
+  seriesFormatMap?: Map<string, FormatOptions>;
   wrapLabels?: boolean;
 }
 
@@ -47,6 +51,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   enablePinning = true,
   wrapLabels,
   format,
+  seriesFormatMap,
   onUnpinClick,
   pinnedPos,
 }: TimeChartTooltipProps) {
@@ -79,6 +84,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
     pinnedPos,
     chart,
     format,
+    seriesFormatMap,
     showAllSeries,
   });
   if (nearbySeries.length === 0) {
