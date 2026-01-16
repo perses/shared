@@ -106,7 +106,7 @@ export function createDeletePanelSlice(): StateCreator<
       set((state) => {
         state.deletePanelDialog = {
           panelGroupItemId: panelGroupItemId,
-          panelName: panel.spec.display.name,
+          panelName: panel.spec.display?.name ?? panelKey,
           panelGroupName: panelGroup.title ?? '',
         };
       });

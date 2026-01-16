@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@perses-dev/components": "0.53.0-rc.1",
-    "@perses-dev/core": "0.53.0-beta.4",
+    "@perses-dev/core": "0.53.0-rc.0",
     "@perses-dev/plugin-system": "0.53.0-rc.1",
     "@types/react-grid-layout": "^1.3.2",
     "date-fns": "^4.1.0",

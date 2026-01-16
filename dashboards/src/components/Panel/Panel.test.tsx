@@ -205,6 +205,11 @@ describe('Panel', () => {
   it('does not show description when panel does not have one', () => {
     // Render a panel without a description set
     const withoutDescription = createTestPanel();
+
+    if (withoutDescription.spec.display === undefined) {
+      throw new Error('Test setup error: display should be defined');
+    }
+
     withoutDescription.spec.display.description = undefined;
     renderPanel(withoutDescription);
 
@@ -217,6 +222,11 @@ describe('Panel', () => {
   it('does not show description when description only contains whitespace', () => {
     // Render a panel with an all whitespace description
     const withoutDescription = createTestPanel();
+
+    if (withoutDescription.spec.display?.description === undefined) {
+      throw new Error('Test setup error: description should be defined');
+    }
+
     withoutDescription.spec.display.description = '   ';
     renderPanel(withoutDescription);
 

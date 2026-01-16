@@ -32,8 +32,8 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
   panelDefinition: PanelDefinition
 ) => {
   const { display, plugin: pluginDefinition, queries: initialQueries, links: initialLinks } = panelDefinition.spec;
-  const [name, setName] = useState(display.name);
-  const [description, setDescription] = useState(display.description);
+  const [name, setName] = useState(display?.name);
+  const [description, setDescription] = useState(display?.description);
   const [links, setLinks] = useState(initialLinks);
   const [plugin, setPlugin] = useState(pluginDefinition);
 
@@ -61,8 +61,8 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
   const setPanelDefinition = useCallback(
     (panelDefinition: PanelDefinition) => {
       const { display, plugin, queries, links } = panelDefinition.spec;
-      setName(display.name);
-      setDescription(display.description);
+      setName(display?.name);
+      setDescription(display?.description);
       setLinks(links);
       setPlugin(plugin);
       setQueries(queries);
