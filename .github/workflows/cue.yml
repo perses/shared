@@ -3,12 +3,11 @@ on:
   push:
     branches:
       - main
-      - release/*
-      - snapshot/*
-    tags:
-      - v*
   pull_request:
   merge_group:
+  release:
+    types:
+      - published
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
