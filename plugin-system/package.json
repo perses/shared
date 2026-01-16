@@ -30,7 +30,7 @@
   "dependencies": {
     "@module-federation/enhanced": "^0.21.4",
     "@perses-dev/components": "0.53.0-rc.1",
-    "@perses-dev/core": "0.53.0-beta.4",
+    "@perses-dev/core": "0.53.0-rc.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "immer": "^10.1.1",

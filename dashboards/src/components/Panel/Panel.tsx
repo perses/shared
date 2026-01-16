@@ -225,8 +225,8 @@ export const Panel = memo(function Panel(props: PanelProps) {
         <PanelHeader
           extra={panelOptions?.extra?.({ panelDefinition: definition, panelGroupItemId })}
           id={headerId}
-          title={definition.spec.display.name}
-          description={definition.spec.display.description}
+          title={definition.spec.display?.name ?? ''}
+          description={definition.spec.display?.description}
           queryResults={queryResults}
           readHandlers={readHandlers}
           editHandlers={editHandlers}
