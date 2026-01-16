@@ -4,7 +4,7 @@
 # link-with-perses.sh
 # =============================================================================
 # This script manages file-based npm dependencies between this project (shared)
-# and an external project (e.g., perses). It allows developers to link local
+# and external projects (perses or plugins). It allows developers to link local
 # workspace packages as file dependencies for local development.
 #
 # Usage:
@@ -15,10 +15,15 @@
 #   unlink    - Restore original npm package versions in the external project
 #   status    - Show current link status of workspace packages
 #
-# Options:
-#   -p, --path <path>   Path to the perses repository root (default: ../perses)
-#                       The app is expected at <path>/ui/app
+# Target Options (mutually exclusive):
+#   --perses [path]     Link to perses/ui/app (default: ../perses)
+#   --plugins [path]    Link to plugins root (default: ../plugins)
+#
+# Other Options:
 #   -h, --help          Show this help message
+#   -d, --debug         Show detailed error output when commands fail
+#
+# If no target is specified, defaults to --perses for backward compatibility.
 # =============================================================================
 
 set -e
@@ -34,11 +39,23 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Get the root of the shared project (two levels up from scripts/link-with-perses/)
 SHARED_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-# Default perses repository root (sibling directory)
-DEFAULT_PERSES_ROOT="$(cd "$SHARED_ROOT/.." && pwd)/perses"
+# Parent directory for sibling projects
+PARENT_DIR="$(cd "$SHARED_ROOT/.." && pwd)"
 
-# Relative path from perses root to the app
-APP_RELATIVE_PATH="ui/app"
+# Default paths for each target
+DEFAULT_PERSES_ROOT="$PARENT_DIR/perses"
+DEFAULT_PLUGINS_ROOT="$PARENT_DIR/plugins"
+
+# Target mode: "perses" (default) or "plugins"
+TARGET_MODE="perses"
+
+# Target-specific configuration (set by configure_target_mode)
+PACKAGE_JSON_RELATIVE_PATH=""
+LOCK_RELATIVE_PATH=""
+WORKSPACE_FLAG=""
+DEP_SECTION=""
+BACKUP_FILE=""
+BACKUP_LOCK_FILE=""
 
 # Workspace packages defined in this project
 WORKSPACE_PACKAGES=(
@@ -48,12 +65,34 @@ WORKSPACE_PACKAGES=(
     "@perses-dev/explore:explore"
 )
 
-# Backup file for storing original versions
-BACKUP_FILE=".perses-shared-link-bk.json"
-BACKUP_LOCK_FILE=".perses-shared-link-lock-bk.json"
-
 # Debug flag (set via --debug flag)
 DEBUG=false
+
+# =============================================================================
+# Target Configuration
+# =============================================================================
+
+# Configure paths and settings based on target mode
+configure_target_mode() {
+    case "$TARGET_MODE" in
+        perses)
+            PACKAGE_JSON_RELATIVE_PATH="ui/app"
+            LOCK_RELATIVE_PATH="ui"
+            WORKSPACE_FLAG="-w app"
+            DEP_SECTION="dependencies"
+            BACKUP_FILE=".perses-shared-link-bk.json"
+            BACKUP_LOCK_FILE=".perses-shared-link-lock-bk.json"
+            ;;
+        plugins)
+            PACKAGE_JSON_RELATIVE_PATH="."
+            LOCK_RELATIVE_PATH="."
+            WORKSPACE_FLAG=""
+            DEP_SECTION="devDependencies"
+            BACKUP_FILE=".plugins-shared-link-bk.json"
+            BACKUP_LOCK_FILE=".plugins-shared-link-lock-bk.json"
+            ;;
+    esac
+}
 
 # =============================================================================
 # Helper Functions
@@ -63,21 +102,29 @@ print_help() {
     echo "Usage: $0 <command> [options]"
     echo ""
     echo "Commands:"
-    echo "  link      Install workspace packages as file references in the perses app"
-    echo "  unlink    Restore original npm package versions in the perses app"
+    echo "  link      Install workspace packages as file references in the target project"
+    echo "  unlink    Restore original npm package versions in the target project"
     echo "  status    Show current link status of workspace packages"
     echo ""
-    echo "Options:"
-    echo "  -p, --path <path>   Path to the perses repository root (default: ../perses)"
-    echo "                      The app is expected at <path>/$APP_RELATIVE_PATH"
+    echo "Target Options (mutually exclusive):"
+    echo "  -p, --perses [path] Link to perses/ui/app (default: ../perses)"
+    echo "  --plugins [path]    Link to plugins root (default: ../plugins)"
+    echo ""
+    echo "Other Options:"
     echo "  -d, --debug         Show detailed error output when commands fail"
     echo "  -h, --help          Show this help message"
     echo ""
+    echo "If no target is specified, defaults to --perses for backward compatibility."
+    echo ""
     echo "Examples:"
-    echo "  $0 link                          # Link with default perses at ../perses"
-    echo "  $0 link -p ~/projects/perses     # Link with custom perses location"
-    echo "  $0 unlink                        # Unlink and restore original versions"
-    echo "  $0 status                        # Check current link status"
+    echo "  $0 link                              # Link with perses at ../perses (default)"
+    echo "  $0 link --perses                     # Same as above, explicit"
+    echo "  $0 link --perses ~/projects/perses   # Link with custom perses location"
+    echo "  $0 link --plugins                    # Link with plugins at ../plugins"
+    echo "  $0 link --plugins ~/projects/plugins # Link with custom plugins location"
+    echo "  $0 unlink                            # Unlink perses (default)"
+    echo "  $0 unlink --plugins                  # Unlink plugins"
+    echo "  $0 status --plugins                  # Check plugins link status"
 }
 
 log_warning() {
@@ -120,11 +167,17 @@ package_exists_in_external() {
 }
 
 # Get current version of a package in external project
+# Prioritizes the target's dependency section based on DEP_SECTION
 get_current_version() {
     local package_name="$1"
     local external_package_json="$2"
     
-    local version=$(jq -r ".dependencies[\"$package_name\"] // .devDependencies[\"$package_name\"] // empty" "$external_package_json")
+    local version
+    if [[ "$DEP_SECTION" == "devDependencies" ]]; then
+        version=$(jq -r ".devDependencies[\"$package_name\"] // .dependencies[\"$package_name\"] // empty" "$external_package_json")
+    else
+        version=$(jq -r ".dependencies[\"$package_name\"] // .devDependencies[\"$package_name\"] // empty" "$external_package_json")
+    fi
     echo "$version"
 }
 
@@ -191,9 +244,12 @@ build_if_needed() {
 # =============================================================================
 
 show_status() {
-    local perses_root="$1"
-    local app_path="$perses_root/$APP_RELATIVE_PATH"
-    local external_package_json="$app_path/package.json"
+    local target_root="$1"
+    local package_json_path="$target_root"
+    if [[ "$PACKAGE_JSON_RELATIVE_PATH" != "." ]]; then
+        package_json_path="$target_root/$PACKAGE_JSON_RELATIVE_PATH"
+    fi
+    local external_package_json="$package_json_path/package.json"
     
     if [[ ! -f "$external_package_json" ]]; then
         log_error "package.json not found at: $external_package_json"
@@ -204,7 +260,7 @@ show_status() {
     local total_count=0
     
     echo ""
-    echo "Status ($app_path):"
+    echo "Status ($package_json_path) [target: $TARGET_MODE]:"
     
     for workspace in "${WORKSPACE_PACKAGES[@]}"; do
         local package_name=$(get_package_name "$workspace")
@@ -238,13 +294,13 @@ show_status() {
 # =============================================================================
 
 do_link() {
-    local perses_root="$1"
-    local app_path="$perses_root/$APP_RELATIVE_PATH"
-    local ui_path="$perses_root/ui"
-    local external_package_json="$app_path/package.json"
-    local external_package_lock="$ui_path/package-lock.json"
-    local backup_path="$app_path/$BACKUP_FILE"
-    local backup_lock_path="$ui_path/$BACKUP_LOCK_FILE"
+    local target_root="$1"
+    local package_json_path="$target_root/$PACKAGE_JSON_RELATIVE_PATH"
+    local lock_path="$target_root/$LOCK_RELATIVE_PATH"
+    local external_package_json="$package_json_path/package.json"
+    local external_package_lock="$lock_path/package-lock.json"
+    local backup_path="$package_json_path/$BACKUP_FILE"
+    local backup_lock_path="$lock_path/$BACKUP_LOCK_FILE"
     
     if [[ ! -f "$external_package_json" ]]; then
         log_error "package.json not found at: $external_package_json"
@@ -277,7 +333,7 @@ do_link() {
     # Link each workspace package
     local already_linked=0
 
-    echo "Linking packages to $app_path..."
+    echo "Linking packages to $package_json_path [$TARGET_MODE]..."
     
     # Temporarily disable exit on error to handle npm install failures gracefully.
     # npm install may fail (non-zero exit code) but still succeed in linking the package.
@@ -306,7 +362,15 @@ do_link() {
             
             # Capture both stdout and stderr for debugging
             local npm_output
-            npm_output=$(cd "$ui_path" && npm install "file:$npm_package_path" --save -w app 2>&1)
+            # Build npm install command based on target mode
+            local npm_cmd="npm install \"file:$npm_package_path\" --save"
+            if [[ -n "$WORKSPACE_FLAG" ]]; then
+                npm_cmd="$npm_cmd $WORKSPACE_FLAG"
+            fi
+            if [[ "$DEP_SECTION" == "devDependencies" ]]; then
+                npm_cmd="$npm_cmd --save-dev"
+            fi
+            npm_output=$(cd "$lock_path" && eval "$npm_cmd" 2>&1)
             local npm_exit_code=$?
             
             # Check if package was actually linked (npm on Windows may return error but still succeed)
@@ -322,8 +386,8 @@ do_link() {
                     log_error "npm install failed with exit code $npm_exit_code"
                     echo "  Package path: $package_path"
                     echo "  NPM package path: $npm_package_path"
-                    echo "  UI path: $ui_path"
-                    echo "  Command: npm install \"file:$npm_package_path\" --save -w app"
+                    echo "  Lock path: $lock_path"
+                    echo "  Command: $npm_cmd"
                     echo "  Output:"
                     echo "$npm_output" | sed 's/^/    /'
                     echo ""
@@ -352,15 +416,19 @@ do_link() {
     if [[ $failed_count -gt 0 && "$DEBUG" != true ]]; then
         echo ""
         log_warning "Some packages failed to link. Run with --debug flag for detailed error information:"
-        echo "  $0 link --debug"
+        echo "  $0 link --$TARGET_MODE --debug"
     fi
 
     # Show status
-    show_status "$perses_root"
+    show_status "$target_root"
 
     # Show next steps on success
     if [[ $failed_count -eq 0 ]]; then
-        printf "\nNow you can start the app dev server, in shared mode, from Perses:\n\ncd %s\nnpm run start:shared\n" "$app_path"
+        if [[ "$TARGET_MODE" == "perses" ]]; then
+            printf "\nNow you can start the app dev server, in shared mode, from Perses:\n\ncd %s\nnpm run start:shared\n" "$package_json_path"
+        else
+            printf "\nPackages linked successfully to plugins.\n"
+        fi
     fi
 }
 
@@ -369,13 +437,13 @@ do_link() {
 # =============================================================================
 
 do_unlink() {
-    local perses_root="$1"
-    local app_path="$perses_root/$APP_RELATIVE_PATH"
-    local ui_path="$perses_root/ui"
-    local external_package_json="$app_path/package.json"
-    local external_package_lock="$ui_path/package-lock.json"
-    local backup_path="$app_path/$BACKUP_FILE"
-    local backup_lock_path="$ui_path/$BACKUP_LOCK_FILE"
+    local target_root="$1"
+    local package_json_path="$target_root/$PACKAGE_JSON_RELATIVE_PATH"
+    local lock_path="$target_root/$LOCK_RELATIVE_PATH"
+    local external_package_json="$package_json_path/package.json"
+    local external_package_lock="$lock_path/package-lock.json"
+    local backup_path="$package_json_path/$BACKUP_FILE"
+    local backup_lock_path="$lock_path/$BACKUP_LOCK_FILE"
     
     if [[ ! -f "$external_package_json" ]]; then
         log_error "package.json not found at: $external_package_json"
@@ -384,7 +452,7 @@ do_unlink() {
     
     if [[ ! -f "$backup_path" ]]; then
         log_error "No backup file found. Cannot restore original versions."
-        echo "  Manually restore: cd $app_path && npm install @perses-dev/components@<version> ..."
+        echo "  Manually restore: cd $package_json_path && npm install @perses-dev/components@<version> ..."
         exit 1
     fi
     
@@ -392,8 +460,8 @@ do_unlink() {
     local backup_count=$(jq 'keys | length' "$backup_path" 2>/dev/null)
     if [[ -z "$backup_count" || "$backup_count" -eq 0 ]]; then
         log_error "Backup file is empty. Cannot restore original versions."
-        echo "  Manually restore: cd $app_path && npm install @perses-dev/components@<version> ..."
-        echo "  Or: rm $backup_path && cd $app_path && npm install"
+        echo "  Manually restore: cd $package_json_path && npm install @perses-dev/components@<version> ..."
+        echo "  Or: rm $backup_path && cd $package_json_path && npm install"
         exit 1
     fi
     
@@ -422,8 +490,9 @@ do_unlink() {
             echo -n "  Restoring $package_name@$original_version... "
             
             # Update package.json directly using jq instead of npm install
+            # Use the correct dependency section based on target mode
             local tmp=$(mktemp)
-            if jq ".dependencies[\"$package_name\"] = \"$original_version\"" "$external_package_json" > "$tmp" 2>/dev/null; then
+            if jq ".$DEP_SECTION[\"$package_name\"] = \"$original_version\"" "$external_package_json" > "$tmp" 2>/dev/null; then
                 mv "$tmp" "$external_package_json"
                 printf "${GREEN}done${NC}\n"
                 unlinked_any=true
@@ -450,14 +519,14 @@ do_unlink() {
         
         if [[ "$all_unlinked" == true ]]; then
             rm -f "$backup_path"
-            # Restore package-lock.json if backup exists and run npm install from ui root
+            # Restore package-lock.json if backup exists and run npm install from lock root
             if [[ -f "$backup_lock_path" ]]; then
                 echo "  Restoring package-lock.json..."
                 cp "$backup_lock_path" "$external_package_lock"
                 rm -f "$backup_lock_path"
             fi
             echo "  Running npm install from workspace root..."
-            (cd "$ui_path" && npm install --silent 2>/dev/null)
+            (cd "$lock_path" && npm install --silent 2>/dev/null)
         fi
     fi
     
@@ -465,11 +534,11 @@ do_unlink() {
     if [[ ${#missing_backups[@]} -gt 0 ]]; then
         echo ""
         log_warning "Missing backup for: ${missing_backups[*]}"
-        echo "  Manually restore: cd $app_path && npm install <package>@<version>"
+        echo "  Manually restore: cd $package_json_path && npm install <package>@<version>"
     fi
     
     # Show status
-    show_status "$perses_root"
+    show_status "$target_root"
 }
 
 # =============================================================================
@@ -480,7 +549,8 @@ main() {
     check_jq
     
     local command=""
-    local perses_root="$DEFAULT_PERSES_ROOT"
+    local target_root=""
+    local target_specified=false
     
     # Parse arguments
     while [[ $# -gt 0 ]]; do
@@ -493,13 +563,36 @@ main() {
                 DEBUG=true
                 shift
                 ;;
-            -p|--path)
-                if [[ -n "$2" && ! "$2" =~ ^- ]]; then
-                    perses_root="$2"
+            -p|--perses)
+                if [[ "$target_specified" == true ]]; then
+                    log_error "Cannot specify both --perses and --plugins"
+                    exit 1
+                fi
+                TARGET_MODE="perses"
+                target_specified=true
+                # Check if next argument is a path (not a flag or command)
+                if [[ -n "$2" && ! "$2" =~ ^- && ! "$2" =~ ^(link|unlink|status)$ ]]; then
+                    target_root="$2"
                     shift 2
                 else
-                    log_error "Option -p requires a path argument"
+                    target_root="$DEFAULT_PERSES_ROOT"
+                    shift
+                fi
+                ;;
+            --plugins)
+                if [[ "$target_specified" == true ]]; then
+                    log_error "Cannot specify both --perses and --plugins"
                     exit 1
+                fi
+                TARGET_MODE="plugins"
+                target_specified=true
+                # Check if next argument is a path (not a flag or command)
+                if [[ -n "$2" && ! "$2" =~ ^- && ! "$2" =~ ^(link|unlink|status)$ ]]; then
+                    target_root="$2"
+                    shift 2
+                else
+                    target_root="$DEFAULT_PLUGINS_ROOT"
+                    shift
                 fi
                 ;;
             -h|--help)
@@ -514,38 +607,47 @@ main() {
         esac
     done
     
+    # Default to perses if no target specified
+    if [[ "$target_specified" == false ]]; then
+        TARGET_MODE="perses"
+        target_root="$DEFAULT_PERSES_ROOT"
+    fi
+    
+    # Configure paths and settings based on target mode
+    configure_target_mode
+    
     # Resolve to absolute path
-    if [[ ! "$perses_root" = /* ]]; then
-        perses_root="$(cd "$SHARED_ROOT" && cd "$perses_root" 2>/dev/null && pwd)" || {
-            log_error "Cannot resolve path: $perses_root"
+    if [[ ! "$target_root" = /* ]]; then
+        target_root="$(cd "$SHARED_ROOT" && cd "$target_root" 2>/dev/null && pwd)" || {
+            log_error "Cannot resolve path: $target_root"
             exit 1
         }
     fi
     
-    # Check if perses root exists
-    if [[ ! -d "$perses_root" ]]; then
-        log_error "Perses repository not found at: $perses_root"
+    # Check if target root exists
+    if [[ ! -d "$target_root" ]]; then
+        log_error "Target repository not found at: $target_root"
         exit 1
     fi
     
-    # Check if app directory exists
-    local app_path="$perses_root/$APP_RELATIVE_PATH"
-    if [[ ! -d "$app_path" ]]; then
-        log_error "Perses app directory not found at: $app_path"
-        log_error "Make sure the perses repository has the expected structure."
+    # Check if package.json directory exists
+    local package_json_path="$target_root/$PACKAGE_JSON_RELATIVE_PATH"
+    if [[ ! -d "$package_json_path" ]]; then
+        log_error "Target directory not found at: $package_json_path"
+        log_error "Make sure the repository has the expected structure."
         exit 1
     fi
     
     # Execute command (default to 'link' if no command specified)
     case "$command" in
         link|"")
-            do_link "$perses_root"
+            do_link "$target_root"
             ;;
         unlink)
-            do_unlink "$perses_root"
+            do_unlink "$target_root"
             ;;
         status)
-            show_status "$perses_root"
+            show_status "$target_root"
             ;;
         *)
             log_error "Unknown command: $command"

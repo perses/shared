@@ -48,3 +48,5 @@ export * from './theme';
 export * from './TransformsEditor';
 export * from './RefreshIntervalPicker';
 export * from './ValueMappingEditor';
+export * from './SelectionActions';
+export * from './ActionConfirmationDialog';

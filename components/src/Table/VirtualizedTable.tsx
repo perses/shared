@@ -11,20 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Box, TableRow as MuiTableRow, TablePagination } from '@mui/material';
 import { Column, HeaderGroup, Row, flexRender } from '@tanstack/react-table';
-import { Box, TablePagination, TableRow as MuiTableRow } from '@mui/material';
-import { TableVirtuoso, TableComponents, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
-import { useRef, useMemo, ReactElement } from 'react';
-import { TableRow } from './TableRow';
-import { TableBody } from './TableBody';
+import { ReactElement, useMemo, useRef } from 'react';
+import { TableComponents, TableVirtuoso, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
+import { SelectionActionError, SelectionErrorIndicator } from '../SelectionActions';
+import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
 import { InnerTable } from './InnerTable';
+import { TableCellConfigs, TableProps, TableRowEventOpts } from './model/table-model';
+import { TableBody } from './TableBody';
+import { TableCell, TableCellProps } from './TableCell';
+import { TableFoot } from './TableFoot';
 import { TableHead } from './TableHead';
 import { TableHeaderCell } from './TableHeaderCell';
-import { TableCell, TableCellProps } from './TableCell';
+import { TableRow } from './TableRow';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
-import { TableCellConfigs, TableProps, TableRowEventOpts } from './model/table-model';
-import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
-import { TableFoot } from './TableFoot';
 
 type TableCellPosition = {
   row: number;
@@ -41,6 +42,14 @@ export type VirtualizedTableProps<TableData> = Required<
     headers: Array<HeaderGroup<TableData>>;
     cellConfigs?: TableCellConfigs;
     rowCount: number;
+    /**
+     * Map of row IDs to error information for rows where action execution failed.
+     */
+    rowErrors?: Record<string, SelectionActionError>;
+    /**
+     * Callback fired when a user dismisses an error indicator on a row.
+     */
+    onRowErrorDismiss?: (rowId: string) => void;
   };
 
 // Separating out the virtualized table because we may want a paginated table
@@ -62,6 +71,8 @@ export function VirtualizedTable<TableData>({
   pagination,
   onPaginationChange,
   rowCount,
+  rowErrors,
+  onRowErrorDismiss,
 }: VirtualizedTableProps<TableData>): ReactElement {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
   // Use a ref for these values because they are only needed for keyboard
@@ -214,6 +225,9 @@ export function VirtualizedTable<TableData>({
             return null;
           }
 
+          // Check if this row has an error
+          const rowError = rowErrors?.[row.id];
+
           return (
             <>
               {row.getVisibleCells().map((cell, i, cells) => {
@@ -262,6 +276,9 @@ export function VirtualizedTable<TableData>({
                     {}
                   );
 
+                // Show error indicator in the first non-checkbox cell
+                const showErrorIndicator = rowError && i === 0;
+
                 return (
                   <TableCell
                     key={cell.id}
@@ -282,6 +299,9 @@ export function VirtualizedTable<TableData>({
                     adjacentCellsValuesMap={adjacentCellsValuesMap}
                   >
                     {cellConfig?.text || cellContent}
+                    {showErrorIndicator && onRowErrorDismiss && (
+                      <SelectionErrorIndicator error={rowError} onDismiss={onRowErrorDismiss} />
+                    )}
                   </TableCell>
                 );
               })}
