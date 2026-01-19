@@ -4,7 +4,7 @@ go 1.25.5
 
 require (
 	github.com/perses/perses v0.53.0-rc.0.0.20260113112038-1e65a7475ba9
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 )
 
 require (
