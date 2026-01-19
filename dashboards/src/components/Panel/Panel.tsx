@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Card, CardContent, CardProps } from '@mui/material';
-import { ErrorAlert, ErrorBoundary, combineSx, useId } from '@perses-dev/components';
+import { ErrorAlert, ErrorBoundary, SelectionProvider, combineSx, useId } from '@perses-dev/components';
 import { PanelDefinition, PanelGroupItemId } from '@perses-dev/core';
 import { useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
 import { ReactNode, memo, useMemo, useState, useEffect } from 'react';
@@ -225,13 +225,15 @@ export const Panel = memo(function Panel(props: PanelProps) {
         ref={setContentElement}
       >
         <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[definition.spec, queryResults]}>
-          <PanelContent
-            definition={definition}
-            panelPluginKind={definition.spec.plugin.kind}
-            spec={definition.spec.plugin.spec}
-            contentDimensions={contentDimensions}
-            queryResults={queryResults}
-          />
+          <SelectionProvider>
+            <PanelContent
+              definition={definition}
+              panelPluginKind={definition.spec.plugin.kind}
+              spec={definition.spec.plugin.spec}
+              contentDimensions={contentDimensions}
+              queryResults={queryResults}
+            />
+          </SelectionProvider>
         </ErrorBoundary>
       </CardContent>
     </Card>

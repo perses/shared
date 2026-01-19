@@ -24,6 +24,7 @@ export * from './PluginEditor';
 export * from './PluginKindSelect';
 export * from './PluginRegistry';
 export * from './PluginSpecEditor';
+export * from './SelectionOptionsEditor';
 export * from './TimeRangeControls';
 export * from './Variables';
 export * from './MetricLabelInput';
