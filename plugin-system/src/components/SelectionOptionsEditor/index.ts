@@ -11,7 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './ChartsProvider';
-export * from './SelectionProvider';
-export * from './SnackbarProvider';
-export * from './TimeZoneProvider';
+export * from './SelectionOptionsEditor';
