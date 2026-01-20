@@ -38,7 +38,7 @@ function estimateLabelWidth(format: FormatOptions | undefined, maxValue: number)
 }
 
 /*
- * Populate yAxis or xAxis properties, returns an Array since multiple axes will be supported in the future
+ * Populate yAxis or xAxis properties, returns an Array since multiple axes are supported
  */
 export function getFormattedAxis(axis?: YAXisComponentOption | XAXisComponentOption, unit?: FormatOptions): unknown[] {
   const AXIS_DEFAULT = {
