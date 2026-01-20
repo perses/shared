@@ -112,6 +112,7 @@ export function getFormattedMultipleYAxes(
       splitLine: {
         show: false, // Hide grid lines for right-side axes to reduce visual noise
       },
+      show: baseAxis?.show,
     };
     axes.push(rightAxisConfig);
   });
