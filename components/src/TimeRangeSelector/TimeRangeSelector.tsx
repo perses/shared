@@ -87,11 +87,13 @@ export function TimeRangeSelector({
   const tzOptions = useMemo(() => timeZoneOptions ?? getTimeZoneOptions(), [timeZoneOptions]);
   const [tzAnchorEl, setTzAnchorEl] = useState<HTMLElement | null>(null);
   const tzOpen = Boolean(tzAnchorEl);
-  const tzLabel = useMemo(() => tzOptions.find((o) => o.value === timeZone)?.display ?? timeZone, [tzOptions, timeZone]);
+  const tzLabel = useMemo(
+    () => tzOptions.find((o) => o.value === timeZone)?.display ?? timeZone,
+    [tzOptions, timeZone]
+  );
 
   return (
     <>
-      {/* Timezone selector popover opened from globe icon */}
       <Popover
         anchorEl={tzAnchorEl}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
@@ -123,13 +125,10 @@ export function TimeRangeSelector({
               setTzAnchorEl(null);
             }}
             disableClearable
-            renderInput={(params) => (
-              <TextField {...params} placeholder="Search timezones" size="small" autoFocus />
-            )}
+            renderInput={(params) => <TextField {...params} placeholder="Search timezones" size="small" />}
           />
         </Box>
       </Popover>
-
       <Popover
         anchorEl={anchorEl.current}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
@@ -148,8 +147,6 @@ export function TimeRangeSelector({
           timeZone={timeZone}
         />
       </Popover>
-
-      {/* Header and options */}
       <Box ref={anchorEl}>
         <Select
           open={open}
@@ -191,7 +188,6 @@ export function TimeRangeSelector({
               </Box>
             </Box>
           </MenuItem>
-
           {timeOptions.map((item, idx) => (
             <MenuItem
               key={idx}
@@ -203,9 +199,11 @@ export function TimeRangeSelector({
               {item.display}
             </MenuItem>
           ))}
-
           {showCustomTimeRange && (
-            <MenuItem value={formatTimeRange(lastOption.value, timeZone)} onClick={() => setShowCustomDateSelector(true)}>
+            <MenuItem
+              value={formatTimeRange(lastOption.value, timeZone)}
+              onClick={() => setShowCustomDateSelector(true)}
+            >
               {lastOption.display}
             </MenuItem>
           )}
