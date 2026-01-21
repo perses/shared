@@ -12,14 +12,15 @@
 // limitations under the License.
 
 import {
-  TableCell as MuiTableCell,
-  styled,
-  TableCellProps as MuiTableCellProps,
   Box,
-  useTheme,
   Link,
+  TableCell as MuiTableCell,
+  TableCellProps as MuiTableCellProps,
+  styled,
+  useTheme,
 } from '@mui/material';
 import { ReactElement, useEffect, useMemo, useRef } from 'react';
+import { hasDataFieldPatterns, replaceDataFields } from '../utils/data-field-interpolation';
 import { DataLink, TableCellAlignment, TableDensity, getTableCellLayout } from './model/table-model';
 
 const StyledMuiTableCell = styled(MuiTableCell)(({ theme }) => ({
@@ -129,15 +130,11 @@ export function TableCell({
   const modifiedDataLink = useMemo((): DataLink | undefined => {
     if (!dataLink) return undefined;
 
-    let url = dataLink.url;
-    const regex = /\$\{__data\.fields\["(.+)?"\]\}/;
-    if (adjacentCellsValuesMap && regex.test(dataLink.url)) {
-      Object.entries(adjacentCellsValuesMap).forEach(([key, value]) => {
-        const placeholder = `\${__data.fields["${key}"]}`;
-        url = url.replaceAll(placeholder, encodeURIComponent(value));
-      });
+    if (adjacentCellsValuesMap && hasDataFieldPatterns(dataLink.url)) {
+      const { text } = replaceDataFields(dataLink.url, adjacentCellsValuesMap, { urlEncode: true });
+      return { ...dataLink, url: text };
     }
-    return { ...dataLink, url };
+    return dataLink;
   }, [dataLink, adjacentCellsValuesMap]);
 
   return (
