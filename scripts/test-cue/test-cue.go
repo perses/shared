@@ -90,7 +90,6 @@ func validateCueFiles() error {
 
 	for _, subDir := range dirsInScope {
 		logrus.Debugf("Processing directory: %s", subDir)
-
 		files, err := findCueFiles(schemasDir, subDir)
 		if err != nil {
 			return fmt.Errorf("failed to find CUE files in %s/%s: %w", schemasDir, subDir, err)
@@ -99,13 +98,13 @@ func validateCueFiles() error {
 		for _, file := range files {
 			schemaFile := filepath.Join(schemasDir, file)
 			testFile := filepath.Join(testDir, file)
-
 			if !fileExists(testFile) {
 				logrus.Debugf("Skipping %s: test file %s not found", schemaFile, testFile)
 				skippedCount++
 				continue
 			}
 
+			logrus.Infof("Validating %s with test file %s", schemaFile, testFile)
 			if err := runCueVet(schemaFile, testFile); err != nil {
 				logrus.Errorf("Validation failed for %s: %v", schemaFile, err)
 				errCount++
