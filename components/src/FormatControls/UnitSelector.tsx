@@ -35,7 +35,7 @@ const KIND_OPTIONS: readonly AutocompleteUnitOption[] = Object.entries(UNIT_CONF
   })
   .filter((config) => !config.disableSelectorOption);
 
-export function UnitSelector({ value, onChange, disabled = false }: UnitSelectorProps): ReactElement {
+export function UnitSelector({ value, onChange, disabled = false, ...otherProps }: UnitSelectorProps): ReactElement {
   const unitConfig = UNIT_CONFIG[value?.unit || 'decimal'];
 
   const handleChange = (_: unknown, newValue: AutocompleteUnitOption | null): void => {
@@ -53,6 +53,7 @@ export function UnitSelector({ value, onChange, disabled = false }: UnitSelector
       groupBy={(option) => option.group ?? 'Decimal'}
       onChange={handleChange}
       disabled={disabled}
+      {...otherProps}
     />
   );
 }
