@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useMemo, useCallback, useEffect, useState } from 'react';
-import { QueryParamConfig, useQueryParams } from 'use-query-params';
+import { QueryParamConfig, useQueryParams, StringParam } from 'use-query-params';
 import { getUnixTime, isDate } from 'date-fns';
 import {
   TimeRangeValue,
@@ -90,6 +90,10 @@ export const timeRangeQueryConfig = {
 
 export const refreshIntervalQueryConfig = {
   refresh: TimeRangeParam,
+};
+
+export const timeZoneQueryConfig = {
+  tz: StringParam,
 };
 
 /**
@@ -199,4 +203,26 @@ export function useSetRefreshIntervalParams(
     refreshInterval: initialRefreshInterval,
     setRefreshInterval: setRefreshInterval,
   };
+}
+
+/**
+ * Returns timezone getter and setter, taking the URL query params.
+ * Defaults to 'local' when not set.
+ */
+export function useTimeZoneParams(
+  initialTimeZone?: string
+): { timeZone: string; setTimeZone: (tz: string) => void } {
+  const [query, setQuery] = useQueryParams(timeZoneQueryConfig, { updateType: 'replaceIn' });
+  const { tz } = query;
+
+  const timeZone = (tz as string | undefined) ?? initialTimeZone ?? 'local';
+
+  const setTimeZone = useCallback(
+    (newTz: string) => {
+      setQuery({ tz: newTz });
+    },
+    [setQuery]
+  );
+
+  return { timeZone, setTimeZone };
 }

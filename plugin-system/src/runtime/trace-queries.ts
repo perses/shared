@@ -17,6 +17,7 @@ import { TraceQueryContext, TraceQueryPlugin } from '../model';
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
+import { useTimeZoneParams } from './TimeRangeProvider/query-params';
 import { useAllVariableValues } from './variables';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
 export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TraceQuery', PluginSpec>;
@@ -72,14 +73,14 @@ function getQueryOptions({
   queryKey: QueryKey;
   queryEnabled: boolean;
 } {
-  const { variableState, absoluteTimeRange } = context;
+  const { variableState, absoluteTimeRange, timeZone } = context;
 
   const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
   const variableDependencies = dependencies?.variables;
 
   const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
   const variablesValueKey = getVariableValuesKey(filteredVariabledState);
-  const queryKey = ['query', TRACE_QUERY_KEY, definition, absoluteTimeRange, variablesValueKey] as const;
+  const queryKey = ['query', TRACE_QUERY_KEY, definition, absoluteTimeRange, variablesValueKey, timeZone] as const;
 
   let waitToLoad = false;
   if (variableDependencies) {
@@ -95,6 +96,7 @@ function getQueryOptions({
 
 function useTraceQueryContext(): TraceQueryContext {
   const { absoluteTimeRange } = useTimeRange();
+  const { timeZone } = useTimeZoneParams('local');
   const variableState = useAllVariableValues();
   const datasourceStore = useDatasourceStore();
 
@@ -102,5 +104,6 @@ function useTraceQueryContext(): TraceQueryContext {
     variableState,
     datasourceStore,
     absoluteTimeRange,
+    timeZone,
   };
 }

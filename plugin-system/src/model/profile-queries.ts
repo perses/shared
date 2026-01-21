@@ -29,6 +29,7 @@ export interface ProfileQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
 export interface ProfileQueryContext {
   datasourceStore: DatasourceStore;
   absoluteTimeRange?: AbsoluteTimeRange;
+  timeZone?: string;
 }
 
 export type ProfileDataQuery = Query<ProfileData, unknown, ProfileData, QueryKey>;

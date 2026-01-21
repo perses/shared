@@ -11,11 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, MenuItem, Popover, Select } from '@mui/material';
+import { Box, MenuItem, Popover, Select, IconButton, TextField, List, ListItemButton, ListItemText } from '@mui/material';
 import Calendar from 'mdi-material-ui/Calendar';
+import EarthIcon from 'mdi-material-ui/Earth';
 import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { useTimeZone } from '../context';
+import { InfoTooltip } from '../InfoTooltip';
+import { TimeZoneOption, getTimeZoneOptions } from '../model/timeZoneOption';
 import { TimeOption } from '../model';
 import { DateTimeRangePicker } from './DateTimeRangePicker';
 import { buildCustomTimeOption, formatTimeRange } from './utils';
@@ -43,6 +46,10 @@ interface TimeRangeSelectorProps {
    * Defaults to true.
    */
   showCustomTimeRange?: boolean;
+  /** Optional explicit timezone and change handler to enable changing tz from the selector */
+  timeZone?: string;
+  timeZoneOptions?: TimeZoneOption[];
+  onTimeZoneChange?: (timeZone: TimeZoneOption) => void;
 }
 
 /**
@@ -57,10 +64,17 @@ export function TimeRangeSelector({
   onChange,
   height,
   showCustomTimeRange = true,
+  timeZone: timeZoneProp,
+  timeZoneOptions,
+  onTimeZoneChange,
 }: TimeRangeSelectorProps): ReactElement {
-  const { timeZone } = useTimeZone();
+  const { timeZone: ctxTimeZone } = useTimeZone();
+  const timeZone = timeZoneProp ?? ctxTimeZone;
 
   const anchorEl = useRef(); // Used to position the absolute time range picker
+  const [tzAnchorEl, setTzAnchorEl] = useState<null | HTMLElement>(null);
+  const [tzSearch, setTzSearch] = useState<string>('');
+  const tzOpen = Boolean(tzAnchorEl);
 
   // Control the open state of the absolute time range picker
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
@@ -86,6 +100,17 @@ export function TimeRangeSelector({
   // This is a trick to get around the limitation of select with menu item that doesn't support objects as value...
   const [open, setOpen] = useState(false);
 
+  const tzOptions = useMemo(() => timeZoneOptions ?? getTimeZoneOptions(), [timeZoneOptions]);
+  const filteredTzOptions = useMemo(() => {
+    const q = tzSearch.trim().toLowerCase();
+    if (q.length === 0) return tzOptions;
+    return tzOptions.filter((opt) => opt.display.toLowerCase().includes(q) || opt.value.toLowerCase().includes(q));
+  }, [tzOptions, tzSearch]);
+  const currentTzDisplay = useMemo(
+    () => tzOptions.find((opt) => opt.value === timeZone)?.display ?? timeZone,
+    [tzOptions, timeZone]
+  );
+
   return (
     <>
       <Popover
@@ -108,7 +133,38 @@ export function TimeRangeSelector({
             setOpen(false);
           }}
           onCancel={() => setShowCustomDateSelector(false)}
+          timeZone={timeZone}
         />
+      </Popover>
+      <Popover
+        open={tzOpen}
+        anchorEl={tzAnchorEl}
+        onClose={() => setTzAnchorEl(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Box sx={{ p: 1.5, width: 300 }}>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="Search timezone"
+            value={tzSearch}
+            onChange={(e) => setTzSearch(e.target.value)}
+          />
+          <List dense sx={{ maxHeight: 300, overflowY: 'auto' }}>
+            {filteredTzOptions.map((opt) => (
+              <ListItemButton
+                key={opt.value}
+                selected={opt.value === timeZone}
+                onClick={() => {
+                  onTimeZoneChange?.(opt);
+                  setTzAnchorEl(null);
+                }}
+              >
+                <ListItemText primary={opt.display} secondary={opt.value} />
+              </ListItemButton>
+            ))}
+          </List>
+        </Box>
       </Popover>
       <Box ref={anchorEl}>
         <Select
@@ -132,6 +188,23 @@ export function TimeRangeSelector({
             '.MuiSelect-select': height ? { lineHeight: height, paddingY: 0 } : {},
           }}
         >
+          <MenuItem
+            disableRipple
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            sx={{ cursor: 'default', '&:hover': { backgroundColor: 'transparent' }, py: 0.5, px: 1 }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+              <Box sx={{ typography: 'subtitle1' }}>Time Range</Box>
+              <InfoTooltip description={`Current timezone: ${currentTzDisplay}`}>
+                <IconButton aria-label="Search timezone" size="small" onClick={(e) => setTzAnchorEl(e.currentTarget)}>
+                  <EarthIcon />
+                </IconButton>
+              </InfoTooltip>
+            </Box>
+          </MenuItem>
           {timeOptions.map((item, idx) => (
             <MenuItem
               key={idx}
