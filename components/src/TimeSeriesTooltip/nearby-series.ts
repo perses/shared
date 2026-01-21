@@ -49,6 +49,7 @@ export function checkforNearbyTimeSeries(
   chart: EChartsInstance,
   format?: FormatOptions,
   seriesFormatMap?: Map<string, FormatOptions>,
+  // in the case of multi-axis, we need the cursor Y position in pixel space
   cursorPixelY?: number
 ): NearbySeriesArray {
   const currentNearbySeriesData: NearbySeriesArray = [];
