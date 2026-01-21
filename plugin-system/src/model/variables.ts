@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec, AbsoluteTimeRange } from '@perses-dev/core';
-import { VariableStateMap, DatasourceStore } from '../runtime';
+import type { VariableOption } from '@perses-dev/components';
+import { AbsoluteTimeRange, UnknownSpec } from '@perses-dev/core';
+import { DatasourceStore, VariableStateMap } from '../runtime';
 import { Plugin } from './plugin-base';
 
-export type VariableOption = { label: string; value: string };
+// Re-export VariableOption from @perses-dev/components for backwards compatibility
+export type { VariableOption } from '@perses-dev/components';
 
 export interface GetVariableOptionsContext {
   variables: VariableStateMap;
