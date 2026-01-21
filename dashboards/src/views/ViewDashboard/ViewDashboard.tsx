@@ -27,6 +27,7 @@ import {
   DatasourceStoreProvider,
   VariableProviderProps,
   VariableProviderWithQueryParams,
+  AnnotationProvider,
 } from '../../context';
 import { DashboardProviderWithQueryParams } from '../../context/DashboardProvider/DashboardProviderWithQueryParams';
 import { DashboardApp, DashboardAppProps } from './DashboardApp';
@@ -49,6 +50,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     emptyDashboardProps,
     isReadonly,
     isVariableEnabled,
+    isAnnotationEnabled,
     isDatasourceEnabled,
     isEditing,
     isCreating,
@@ -119,35 +121,38 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
             externalVariableDefinitions={externalVariableDefinitions}
             builtinVariableDefinitions={builtinVariables}
           >
-            <Box
-              sx={combineSx(
-                {
-                  display: 'flex',
-                  width: '100%',
-                  height: '100%',
-                  position: 'relative',
-                  overflow: 'hidden',
-                },
-                sx
-              )}
-              {...others}
-            >
-              <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <DashboardApp
-                  dashboardResource={dashboardResource}
-                  emptyDashboardProps={emptyDashboardProps}
-                  isReadonly={isReadonly}
-                  isVariableEnabled={isVariableEnabled}
-                  isDatasourceEnabled={isDatasourceEnabled}
-                  isCreating={isCreating}
-                  isInitialVariableSticky={isInitialVariableSticky}
-                  isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
-                  dashboardTitleComponent={dashboardTitleComponent}
-                  onSave={onSave}
-                  onDiscard={onDiscard}
-                />
-              </ErrorBoundary>
-            </Box>
+            <AnnotationProvider initialAnnotations={spec.annotations ?? []}>
+              <Box
+                sx={combineSx(
+                  {
+                    display: 'flex',
+                    width: '100%',
+                    height: '100%',
+                    position: 'relative',
+                    overflow: 'hidden',
+                  },
+                  sx
+                )}
+                {...others}
+              >
+                <ErrorBoundary FallbackComponent={ErrorAlert}>
+                  <DashboardApp
+                    dashboardResource={dashboardResource}
+                    emptyDashboardProps={emptyDashboardProps}
+                    isReadonly={isReadonly}
+                    isVariableEnabled={isVariableEnabled}
+                    isAnnotationEnabled={isAnnotationEnabled}
+                    isDatasourceEnabled={isDatasourceEnabled}
+                    isCreating={isCreating}
+                    isInitialVariableSticky={isInitialVariableSticky}
+                    isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
+                    dashboardTitleComponent={dashboardTitleComponent}
+                    onSave={onSave}
+                    onDiscard={onDiscard}
+                  />
+                </ErrorBoundary>
+              </Box>
+            </AnnotationProvider>
           </VariableProviderWithQueryParams>
         </TimeRangeProviderWithQueryParams>
       </DashboardProviderWithQueryParams>

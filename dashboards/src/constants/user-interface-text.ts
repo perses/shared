@@ -19,6 +19,7 @@ export const TOOLTIP_TEXT = {
   editJson: 'Edit JSON',
   editLinks: 'Edit links',
   editVariables: 'Edit variables',
+  editAnnotations: 'Edit annotations',
   viewJson: 'View JSON',
   // Group buttons
   addPanelToGroup: 'Add panel to group',

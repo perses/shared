@@ -21,6 +21,7 @@ import { ProfileQueryPlugin } from './profile-queries';
 import { VariablePlugin } from './variables';
 import { ExplorePlugin } from './explore';
 import { LogQueryPlugin } from './log-queries';
+import { AnnotationPlugin } from './annotations';
 
 export interface PluginModuleSpec {
   plugins: PluginMetadata[];
@@ -76,6 +77,7 @@ export type PluginType = {
  */
 export interface SupportedPlugins {
   Variable: VariablePlugin;
+  Annotation: AnnotationPlugin;
   Panel: PanelPlugin;
   TimeSeriesQuery: TimeSeriesQueryPlugin;
   TraceQuery: TraceQueryPlugin;

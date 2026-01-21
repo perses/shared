@@ -25,6 +25,7 @@ import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
 import { SaveDashboardButton } from '../SaveDashboardButton';
 import { DashboardStickyToolbar } from '../DashboardStickyToolbar';
+import { EditAnnotationsButton } from '../Annotations/EditAnnotationsButton';
 import { EditDashboardLinksButton } from '../DashboardLinks';
 import { LinksDisplay } from '../LinksDisplay';
 
@@ -34,6 +35,7 @@ export interface DashboardToolbarProps {
   initialVariableIsSticky?: boolean;
   isReadonly: boolean;
   isVariableEnabled: boolean;
+  isAnnotationEnabled: boolean;
   isDatasourceEnabled: boolean;
   isLinksEnabled?: boolean;
   onEditButtonClick: () => void;
@@ -48,6 +50,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
     initialVariableIsSticky,
     isReadonly,
     isVariableEnabled,
+    isAnnotationEnabled,
     isDatasourceEnabled,
     isLinksEnabled = true,
     onEditButtonClick,
@@ -93,6 +96,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
                 </Alert>
               )}
               <Stack direction="row" spacing={0.5} ml={1} whiteSpace="nowrap">
+                {isAnnotationEnabled && <EditAnnotationsButton />}
                 {isVariableEnabled && <EditVariablesButton />}
                 {isDatasourceEnabled && <EditDatasourcesButton />}
                 {isLinksEnabled && <EditDashboardLinksButton />}

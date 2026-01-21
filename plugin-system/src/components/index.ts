@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from './Annotations';
 export * from './CalculationSelector';
 export * from './DatasourceEditorForm';
 export * from './DatasourceSelect';

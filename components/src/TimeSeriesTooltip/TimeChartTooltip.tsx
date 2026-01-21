@@ -75,7 +75,11 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   // if tooltip is attached to a container, set max height to the height of the container so tooltip does not get cut off
   const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
 
-  transform.current = assembleTransform(mousePos, pinnedPos, height ?? 0, width ?? 0, containerElement);
+  if (!width || !height || !containerElement) {
+    return null;
+  }
+
+  transform.current = assembleTransform(mousePos, pinnedPos, height, width, containerElement);
 
   // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = getNearbySeriesData({
@@ -92,7 +96,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
     return null;
   }
 
-  const totalSeries = data.length;
+  const totalSeries = data.length; // !*.js,!*.d.ts,!*.js.map
 
   return (
     <Portal container={containerElement}>
