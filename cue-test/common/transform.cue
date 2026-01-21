@@ -15,6 +15,44 @@ package common
 
 myJoinByColumnValueTransform: #joinByColumnValueTransform & { spec: columns: ["job", "instance"] }
 
+
+jsonExtractColumnFieldsTransform: #extractColumnFieldsTransform & {
+	kind: "ExtractColumnFields"
+	spec: {
+		column: "raw_data"
+		format: "JSON"
+		matcher: "$.user.id"
+	}
+}
+
+regexExtractColumnFieldsTransform: #extractColumnFieldsTransform & {
+	kind: "ExtractColumnFields"
+	spec: {
+		column: "message"
+		format: "Regex"
+		matcher: "ERROR: (.*)"
+	}
+}
+
+
+genericExtractColumnFieldsTransform: #transform & {
+	kind: "ExtractColumnFields"
+	spec: {
+		column: "message"
+		format: "Regex"
+		matcher: "ERROR: (.*)"
+	}
+}
+
+splitDelimiterExtractColumnFieldsTransform: #extractColumnFieldsTransform & {
+	kind: "ExtractColumnFields"
+	spec: {
+		column: "message"
+		format: "SplitByDelimiter"
+		matcher: "="
+	}
+}
+
 myMergeColumnsTransform: #mergeColumnsTransform & {
 	spec: {
 		columns: ["job", "instance"]
