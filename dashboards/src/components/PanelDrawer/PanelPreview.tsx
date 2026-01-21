@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useContext, useRef } from 'react';
+import { ReactElement, useContext, useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { PanelEditorValues } from '@perses-dev/core';
 import { Panel } from '../Panel';
@@ -22,14 +22,12 @@ const PANEL_PREVIEW_DEFAULT_WIDTH = 840;
 
 export function PanelPreview({ panelDefinition }: Pick<PanelEditorValues, 'panelDefinition'>): ReactElement | null {
   const boxRef = useRef<HTMLDivElement>(null);
-  let width = PANEL_PREVIEW_DEFAULT_WIDTH;
-
   const panelEditorContext = useContext(PanelEditorContext);
 
-  if (boxRef.current !== null) {
-    width = boxRef.current.getBoundingClientRect().width;
+  useEffect(() => {
+    const width = boxRef.current?.getBoundingClientRect().width ?? PANEL_PREVIEW_DEFAULT_WIDTH;
     panelEditorContext?.preview?.setPreviewPanelWidth?.(width);
-  }
+  }, [panelEditorContext]);
 
   if (panelDefinition.spec.plugin.kind === '') {
     return null;
