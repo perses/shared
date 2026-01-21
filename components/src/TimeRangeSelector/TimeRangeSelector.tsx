@@ -11,7 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, MenuItem, Popover, Select, IconButton, TextField, List, ListItemButton, ListItemText } from '@mui/material';
+import {
+  Box,
+  MenuItem,
+  Popover,
+  Select,
+  IconButton,
+  TextField,
+  List,
+  ListItemButton,
+  ListItemText,
+} from '@mui/material';
 import Calendar from 'mdi-material-ui/Calendar';
 import EarthIcon from 'mdi-material-ui/Earth';
 import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';

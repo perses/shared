@@ -43,13 +43,13 @@ export const TooltipHeader = memo(function TooltipHeader({
   onShowAllClick,
   onUnpinClick,
 }: TooltipHeaderProps) {
+  const { formatWithUserTimeZone } = useTimeZone();
   const seriesTimeMs = nearbySeries[0]?.date ?? null;
   if (seriesTimeMs === null) {
     return null;
   }
 
   const formatTimeSeriesHeader = (timeMs: number): ReactElement => {
-    const { formatWithUserTimeZone } = useTimeZone();
     const date = new Date(timeMs);
     const formattedDate = formatWithUserTimeZone(date, 'MMM dd, yyyy - ');
     const formattedTime = formatWithUserTimeZone(date, 'HH:mm:ss');

@@ -209,9 +209,7 @@ export function useSetRefreshIntervalParams(
  * Returns timezone getter and setter, taking the URL query params.
  * Defaults to 'local' when not set.
  */
-export function useTimeZoneParams(
-  initialTimeZone?: string
-): { timeZone: string; setTimeZone: (tz: string) => void } {
+export function useTimeZoneParams(initialTimeZone?: string): { timeZone: string; setTimeZone: (tz: string) => void } {
   const [query, setQuery] = useQueryParams(timeZoneQueryConfig, { updateType: 'replaceIn' });
   const { tz } = query;
 

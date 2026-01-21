@@ -18,6 +18,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { ReactElement } from 'react';
 import { SnackbarProvider } from '@perses-dev/components';
 import { TimeRangeProviderBasic, TimeRangeProviderWithQueryParams } from '@perses-dev/plugin-system';
+import { MemoryRouter } from 'react-router-dom';
+import { QueryParamProvider } from 'use-query-params';
+import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { TimeRangeControls } from './TimeRangeControls';
 
 /**
@@ -28,9 +31,13 @@ export function renderWithContext(ui: React.ReactElement, options?: Omit<RenderO
   const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
 
   const BaseRender = (): ReactElement => (
-    <QueryClientProvider client={queryClient}>
-      <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>{ui}</SnackbarProvider>
-    </QueryClientProvider>
+    <MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <QueryParamProvider adapter={ReactRouter6Adapter}>
+          <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>{ui}</SnackbarProvider>
+        </QueryParamProvider>
+      </QueryClientProvider>
+    </MemoryRouter>
   );
 
   return render(<BaseRender />, options);
