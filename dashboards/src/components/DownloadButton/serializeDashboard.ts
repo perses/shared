@@ -19,10 +19,13 @@ type SerializedDashboard = {
   content: string;
 };
 
-function serializeYaml(dashboard: DashboardResource | EphemeralDashboardResource, shape?: 'cr'): SerializedDashboard {
+function serializeYaml(
+  dashboard: DashboardResource | EphemeralDashboardResource,
+  shape?: 'cr-v1alpha1' | 'cr-v1alpha2'
+): SerializedDashboard {
   let content: string;
 
-  if (shape === 'cr') {
+  if (shape === 'cr-v1alpha1') {
     const name = dashboard.metadata.name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
     content = stringify(
       {
@@ -41,6 +44,27 @@ function serializeYaml(dashboard: DashboardResource | EphemeralDashboardResource
       },
       { schema: 'yaml-1.1' }
     );
+  } else if (shape === 'cr-v1alpha2') {
+    const name = dashboard.metadata.name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    content = stringify(
+      {
+        apiVersion: 'perses.dev/v1alpha2',
+        kind: 'PersesDashboard',
+        metadata: {
+          labels: {
+            'app.kubernetes.io/name': 'perses-dashboard',
+            'app.kubernetes.io/instance': name,
+            'app.kubernetes.io/part-of': 'perses-operator',
+          },
+          name,
+          namespace: dashboard.metadata.project,
+        },
+        spec: {
+          config: dashboard.spec,
+        },
+      },
+      { schema: 'yaml-1.1' }
+    );
   } else {
     content = stringify(dashboard, { schema: 'yaml-1.1' });
   }
@@ -51,7 +75,7 @@ function serializeYaml(dashboard: DashboardResource | EphemeralDashboardResource
 export function serializeDashboard(
   dashboard: DashboardResource | EphemeralDashboardResource,
   format: 'json' | 'yaml',
-  shape?: 'cr'
+  shape?: 'cr-v1alpha1' | 'cr-v1alpha2'
 ): SerializedDashboard {
   switch (format) {
     case 'json':
