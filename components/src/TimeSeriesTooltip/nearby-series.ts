@@ -428,66 +428,6 @@ export function getNearbySeriesData({
   return EMPTY_TOOLTIP_DATA;
 }
 
-/**
- * [DEPRECATED] Uses mouse position to determine whether user is hovering over a chart canvas
- * If yes, convert from pixel values to logical cartesian coordinates and return all nearby series
- */
-export function legacyGetNearbySeriesData({
-  mousePos,
-  pinnedPos,
-  chartData,
-  chart,
-  format,
-  showAllSeries = false,
-}: {
-  mousePos: CursorData['coords'];
-  pinnedPos: CursorCoordinates | null;
-  chartData: EChartsDataFormat;
-  chart?: EChartsInstance;
-  format?: FormatOptions;
-  showAllSeries?: boolean;
-}): NearbySeriesArray {
-  if (chart === undefined || mousePos === null) return [];
-
-  // prevents multiple tooltips showing from adjacent charts unless tooltip is pinned
-  let cursorTargetMatchesChart = false;
-  if (mousePos.target !== null) {
-    const currentParent = (<HTMLElement>mousePos.target).parentElement;
-    if (currentParent !== null) {
-      const currentGrandparent = currentParent.parentElement;
-      if (currentGrandparent !== null) {
-        const chartDom = chart.getDom();
-        if (chartDom === currentGrandparent) {
-          cursorTargetMatchesChart = true;
-        }
-      }
-    }
-  }
-
-  // allows moving cursor inside tooltip without it fading away
-  if (pinnedPos !== null) {
-    mousePos = pinnedPos;
-    cursorTargetMatchesChart = true;
-  }
-
-  if (cursorTargetMatchesChart === false) return [];
-
-  if (chart['_model'] === undefined) return [];
-  const chartModel = chart['_model'];
-  const yInterval = chartModel.getComponent('yAxis').axis.scale._interval;
-  const totalSeries = chartData.timeSeries.length;
-  const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
-  const pointInPixel = [mousePos.plotCanvas.x ?? 0, mousePos.plotCanvas.y ?? 0];
-  if (chart.containPixel('grid', pointInPixel)) {
-    const pointInGrid = chart.convertFromPixel('grid', pointInPixel);
-    if (pointInGrid[0] !== undefined && pointInGrid[1] !== undefined) {
-      return legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, chart, format);
-    }
-  }
-
-  return [];
-}
-
 /*
  * Check if two numbers are within a specified percentage range
  */
