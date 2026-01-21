@@ -19,8 +19,8 @@ import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp }
 import { CursorCoordinates, CursorData, EMPTY_TOOLTIP_DATA } from './tooltip-model';
 
 // increase multipliers to show more series in tooltip
-export const INCREASE_NEARBY_SERIES_MULTIPLIER = 2.5; // adjusts how many series show in tooltip (higher == more series shown)
-export const DYNAMIC_NEARBY_SERIES_MULTIPLIER = 15; // used for adjustment after series number divisor
+export const INCREASE_NEARBY_SERIES_MULTIPLIER = 5.5; // adjusts how many series show in tooltip (higher == more series shown)
+export const DYNAMIC_NEARBY_SERIES_MULTIPLIER = 30; // used for adjustment after series number divisor
 export const SHOW_FEWER_SERIES_LIMIT = 5;
 
 export interface NearbySeriesInfo {
@@ -412,6 +412,10 @@ export function getNearbySeriesData({
     }
     const totalSeries = data.length;
     const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
+
+    // Detect if chart has multiple Y-axes by checking if any series uses yAxisIndex > 0
+    const hasMultipleYAxes = seriesMapping.some((series) => series.yAxisIndex !== undefined && series.yAxisIndex > 0);
+
     return checkforNearbyTimeSeries(
       data,
       seriesMapping,
@@ -420,7 +424,7 @@ export function getNearbySeriesData({
       chart,
       format,
       seriesFormatMap,
-      cursorPixelY
+      hasMultipleYAxes ? cursorPixelY : undefined
     );
   }
 
