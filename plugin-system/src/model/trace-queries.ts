@@ -41,7 +41,6 @@ export interface TraceQueryContext {
   datasourceStore: DatasourceStore;
   absoluteTimeRange?: AbsoluteTimeRange;
   variableState: VariableStateMap;
-  timeZone?: string;
 }
 
 export type TraceDataQuery = Query<TraceData, unknown, TraceData, QueryKey>;

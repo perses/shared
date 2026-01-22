@@ -16,7 +16,6 @@ import { useQueries, UseQueryResult } from '@tanstack/react-query';
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
-import { useTimeZoneParams } from './TimeRangeProvider/query-params';
 export type ProfileQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'ProfileQuery', PluginSpec>;
 export const PROFILE_QUERY_KEY = 'ProfileQuery';
 
@@ -28,19 +27,17 @@ export function useProfileQueries(definitions: ProfileQueryDefinition[]): Array<
   const { getPlugin } = usePluginRegistry();
   const datasourceStore = useDatasourceStore();
   const { absoluteTimeRange } = useTimeRange();
-  const { timeZone } = useTimeZoneParams('local');
 
   const context = {
     datasourceStore,
     absoluteTimeRange,
-    timeZone,
   };
 
   // useQueries() handles data fetching from query plugins (e.g. traceQL queries, promQL queries)
   // https://tanstack.com/query/v4/docs/react/reference/useQuery
   return useQueries({
     queries: definitions.map((definition) => {
-      const queryKey = ['query', PROFILE_QUERY_KEY, definition, absoluteTimeRange, timeZone] as const; // `queryKey` watches and reruns `queryFn` if keys in the array change
+      const queryKey = ['query', PROFILE_QUERY_KEY, definition, absoluteTimeRange] as const; // `queryKey` watches and reruns `queryFn` if keys in the array change
       const profileQueryKind = definition?.spec?.plugin?.kind;
       return {
         queryKey: queryKey,

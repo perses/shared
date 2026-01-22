@@ -17,7 +17,6 @@ import { LogQueryResult } from '../model/log-queries';
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
-import { useTimeZoneParams } from './TimeRangeProvider/query-params';
 import { useVariableValues } from './variables';
 
 export type LogQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'LogQuery', PluginSpec>;
@@ -28,19 +27,17 @@ export function useLogQueries(definitions: LogQueryDefinition[]): Array<UseQuery
   const datasourceStore = useDatasourceStore();
   const { absoluteTimeRange } = useTimeRange();
   const variableValues = useVariableValues();
-  const { timeZone } = useTimeZoneParams('local');
 
   const context = {
     timeRange: absoluteTimeRange,
     variableState: variableValues,
     datasourceStore,
     refreshKey: '',
-    timeZone,
   };
 
   return useQueries({
     queries: definitions.map((definition) => {
-      const queryKey = ['query', LOG_QUERY_KEY, definition, absoluteTimeRange, variableValues, timeZone] as const;
+      const queryKey = ['query', LOG_QUERY_KEY, definition, absoluteTimeRange, variableValues] as const;
       const logQueryKind = definition?.spec?.plugin?.kind;
       return {
         queryKey: queryKey,

@@ -27,7 +27,6 @@ export interface LogQueryContext {
   variableState: VariableStateMap;
   datasourceStore: DatasourceStore;
   refreshKey: string;
-  timeZone?: string;
 }
 
 type LogQueryPluginDependencies = {

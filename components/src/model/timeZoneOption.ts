@@ -17,35 +17,13 @@ export interface TimeZoneOption {
 }
 
 /**
- * List of common timezone options
- */
-const TIMEZONE_OPTIONS: TimeZoneOption[] = [
-  { value: 'local', display: 'Local' },
-  { value: 'UTC', display: 'UTC' },
-  { value: 'America/New_York', display: 'America/New_York' },
-  { value: 'America/Chicago', display: 'America/Chicago' },
-  { value: 'America/Denver', display: 'America/Denver' },
-  { value: 'America/Los_Angeles', display: 'America/Los_Angeles' },
-  { value: 'America/Anchorage', display: 'America/Anchorage' },
-  { value: 'Pacific/Honolulu', display: 'Pacific/Honolulu' },
-  { value: 'Europe/London', display: 'Europe/London' },
-  { value: 'Europe/Paris', display: 'Europe/Paris' },
-  { value: 'Europe/Berlin', display: 'Europe/Berlin' },
-  { value: 'Europe/Moscow', display: 'Europe/Moscow' },
-  { value: 'Asia/Dubai', display: 'Asia/Dubai' },
-  { value: 'Asia/Kolkata', display: 'Asia/Kolkata' },
-  { value: 'Asia/Bangkok', display: 'Asia/Bangkok' },
-  { value: 'Asia/Shanghai', display: 'Asia/Shanghai' },
-  { value: 'Asia/Hong_Kong', display: 'Asia/Hong_Kong' },
-  { value: 'Asia/Singapore', display: 'Asia/Singapore' },
-  { value: 'Asia/Tokyo', display: 'Asia/Tokyo' },
-  { value: 'Australia/Sydney', display: 'Australia/Sydney' },
-];
-
-/**
  * Get all available timezone options
  * @returns Array of timezone options
  */
 export function getTimeZoneOptions(): TimeZoneOption[] {
-  return TIMEZONE_OPTIONS;
+  const native = ((Intl as unknown as { supportedValuesOf?: (k: string) => string[] }).supportedValuesOf?.(
+    'timeZone'
+  ) ?? []);
+  const values = ['local', 'UTC', ...native].filter((v, i, arr) => arr.indexOf(v) === i);
+  return values.map((value) => ({ value, display: value === 'local' ? 'Local' : value.replace(/_/g, ' ') }));
 }

@@ -24,7 +24,6 @@ import {
 } from '@tanstack/react-query';
 import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode, TimeSeriesQueryPlugin } from '../model';
 import { useTimeRange } from './TimeRangeProvider';
-import { useTimeZoneParams } from './TimeRangeProvider/query-params';
 import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
@@ -49,7 +48,7 @@ function getQueryOptions({
   queryKey: QueryKey;
   queryEnabled: boolean;
 } {
-  const { timeRange, suggestedStepMs, mode, variableState, timeZone } = context;
+  const { timeRange, suggestedStepMs, mode, variableState } = context;
 
   const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
   const variableDependencies = dependencies?.variables;
@@ -66,7 +65,6 @@ function getQueryOptions({
     variablesValueKey,
     suggestedStepMs,
     mode,
-    timeZone,
   ] as const;
 
   // Determine queryEnabled
@@ -155,7 +153,6 @@ export function useTimeSeriesQueries(
  */
 function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
   const { absoluteTimeRange } = useTimeRange();
-  const { timeZone } = useTimeZoneParams('local');
   const variableState = useAllVariableValues();
   const datasourceStore = useDatasourceStore();
 
@@ -163,7 +160,6 @@ function useTimeSeriesQueryContext(): TimeSeriesQueryContext {
     timeRange: absoluteTimeRange,
     variableState,
     datasourceStore,
-    timeZone,
   };
 }
 
