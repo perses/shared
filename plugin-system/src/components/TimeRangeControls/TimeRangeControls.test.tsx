@@ -21,8 +21,8 @@ import { TimeRangeProviderBasic, TimeRangeProviderWithQueryParams } from '@perse
 import { MemoryRouter } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
-import { TimeRangeControls } from './TimeRangeControls';
 import { useTimeZoneParams } from '../../runtime/TimeRangeProvider/query-params';
+import { TimeRangeControls } from './TimeRangeControls';
 
 /**
  * Test helper to render a React component with some common app-level providers wrapped around it.

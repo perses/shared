@@ -80,7 +80,6 @@ export function TimeRangeControls({
   // Convert height to a string, then use the string for styling
   const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
 
-
   // add time preset if one does not match duration given in time range
   if (
     'pastDuration' in timeRange &&

@@ -21,9 +21,8 @@ export interface TimeZoneOption {
  * @returns Array of timezone options
  */
 export function getTimeZoneOptions(): TimeZoneOption[] {
-  const native = ((Intl as unknown as { supportedValuesOf?: (k: string) => string[] }).supportedValuesOf?.(
-    'timeZone'
-  ) ?? []);
+  const native =
+    (Intl as unknown as { supportedValuesOf?: (k: string) => string[] }).supportedValuesOf?.('timeZone') ?? [];
   const values = ['local', 'UTC', ...native].filter((v, i, arr) => arr.indexOf(v) === i);
   return values.map((value) => ({ value, display: value === 'local' ? 'Local' : value.replace(/_/g, ' ') }));
 }

@@ -49,7 +49,7 @@ export const DateTimeRangePicker = ({
 }: AbsoluteTimeFormProps): ReactElement => {
   // Time range values as dates that can be used as a time range.
   const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
-    const timeRangeInputs = useMemo<AbsoluteTimeRangeInputValue>(() => {
+  const timeRangeInputs = useMemo<AbsoluteTimeRangeInputValue>(() => {
     return {
       start: formatWithTimeZone(timeRange.start, DATE_TIME_FORMAT, timeZone),
       end: formatWithTimeZone(timeRange.end, DATE_TIME_FORMAT, timeZone),
