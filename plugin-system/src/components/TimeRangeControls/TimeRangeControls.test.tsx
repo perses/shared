@@ -22,6 +22,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { TimeRangeControls } from './TimeRangeControls';
+import { useTimeZoneParams } from '../../runtime/TimeRangeProvider/query-params';
 
 /**
  * Test helper to render a React component with some common app-level providers wrapped around it.
@@ -47,6 +48,11 @@ describe('TimeRangeControls', () => {
   const testDefaultTimeRange = { pastDuration: '30m' as DurationString };
   const testDefaultRefreshInterval = '0s';
 
+  const ControlsWithTZ = (): ReactElement => {
+    const { timeZone, setTimeZone } = useTimeZoneParams('local');
+    return <TimeRangeControls timeZone={timeZone} onTimeZoneChange={(tz) => setTimeZone(tz.value)} />;
+  };
+
   const renderTimeRangeControls = (testURLParams: boolean): void => {
     renderWithContext(
       <>
@@ -55,14 +61,14 @@ describe('TimeRangeControls', () => {
             initialRefreshInterval={testDefaultRefreshInterval}
             initialTimeRange={testDefaultTimeRange}
           >
-            <TimeRangeControls />
+            <ControlsWithTZ />
           </TimeRangeProviderWithQueryParams>
         ) : (
           <TimeRangeProviderBasic
             initialRefreshInterval={testDefaultRefreshInterval}
             initialTimeRange={testDefaultTimeRange}
           >
-            <TimeRangeControls />
+            <ControlsWithTZ />
           </TimeRangeProviderBasic>
         )}
       </>,

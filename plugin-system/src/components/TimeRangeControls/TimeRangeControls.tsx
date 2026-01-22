@@ -28,7 +28,7 @@ import {
   buildRelativeTimeOption,
 } from '@perses-dev/components';
 import { AbsoluteTimeRange, DurationString, parseDurationString, RelativeTimeRange } from '@perses-dev/core';
-import { ReactElement, useCallback, useState, useEffect } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { TOOLTIP_TEXT } from '../../constants';
 import {
   useTimeRange,
@@ -36,8 +36,6 @@ import {
   useTimeRangeOptionsSetting,
   useShowZoomRangeSetting,
 } from '../../runtime';
-import { useTimeZoneParams } from '../../runtime/TimeRangeProvider/query-params';
-
 export const DEFAULT_REFRESH_INTERVAL_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '0s' }, display: 'Off' },
   { value: { pastDuration: '5s' }, display: '5s' },
@@ -58,8 +56,8 @@ interface TimeRangeControlsProps {
   showCustomTimeRange?: boolean;
   showZoomButtons?: boolean;
   timePresets?: TimeOption[];
-  timeZone?: string;
-  onTimeZoneChange?: (timeZone: TimeZoneOption) => void;
+  timeZone: string;
+  onTimeZoneChange: (timeZone: TimeZoneOption) => void;
 }
 
 export function TimeRangeControls({
@@ -75,9 +73,6 @@ export function TimeRangeControls({
 }: TimeRangeControlsProps): ReactElement {
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
 
-  // Use URL-managed timezone when props are not provided
-  const { timeZone: urlTimeZone, setTimeZone: setUrlTimeZone } = useTimeZoneParams(timeZone ?? 'local');
-
   const showCustomTimeRangeValue = useShowCustomTimeRangeSetting(showCustomTimeRange);
   const showZoomInOutButtons = useShowZoomRangeSetting(showZoomButtons);
   const timePresetsValue = useTimeRangeOptionsSetting(timePresets);
@@ -85,14 +80,6 @@ export function TimeRangeControls({
   // Convert height to a string, then use the string for styling
   const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
 
-  // Track local timezone selection if parent doesn't manage it
-  const [localTimeZone, setLocalTimeZone] = useState<string | undefined>(timeZone);
-  useEffect(() => {
-    // keep local state in sync when parent prop changes
-    setLocalTimeZone(timeZone);
-  }, [timeZone]);
-
-  const effectiveTimeZone = localTimeZone ?? urlTimeZone;
 
   // add time preset if one does not match duration given in time range
   if (
@@ -181,18 +168,10 @@ export function TimeRangeControls({
   // If a timezone change occurs, propagate then refresh data
   const handleTimeZoneChange = useCallback(
     (tz: TimeZoneOption) => {
-      // update local timezone state for formatting
-      setLocalTimeZone(tz.value);
-      if (onTimeZoneChange) {
-        onTimeZoneChange(tz);
-      }
-      // when parent doesn't manage timezone, persist to URL
-      if (!onTimeZoneChange) {
-        setUrlTimeZone(tz.value);
-      }
+      onTimeZoneChange(tz);
       refresh();
     },
-    [onTimeZoneChange, refresh, setUrlTimeZone]
+    [onTimeZoneChange, refresh]
   );
 
   return (
@@ -204,7 +183,7 @@ export function TimeRangeControls({
           onChange={setTimeRange}
           height={height}
           showCustomTimeRange={showCustomTimeRangeValue}
-          timeZone={effectiveTimeZone}
+          timeZone={timeZone}
           timeZoneOptions={getTimeZoneOptions()}
           onTimeZoneChange={handleTimeZoneChange}
         />

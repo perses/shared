@@ -14,6 +14,7 @@
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { TimeRangeControls } from '@perses-dev/plugin-system';
+import { useTimeZoneParams } from '@perses-dev/plugin-system';
 import { ReactElement, ReactNode } from 'react';
 import { OnSaveDashboard, useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
@@ -52,6 +53,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
   } = props;
 
   const { isEditMode } = useEditMode();
+  const { timeZone, setTimeZone } = useTimeZoneParams('local');
 
   const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));
   const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
@@ -125,7 +127,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
           </Box>
           <Stack direction="row" ml="auto" flexWrap="wrap" justifyContent="end">
             <Stack direction="row" spacing={1} mt={1} ml={1}>
-              <TimeRangeControls />
+              <TimeRangeControls timeZone={timeZone} onTimeZoneChange={(tz) => setTimeZone(tz.value)} />
               <DownloadButton />
               <EditJsonButton isReadonly={!isEditMode} />
             </Stack>
