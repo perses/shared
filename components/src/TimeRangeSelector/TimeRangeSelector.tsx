@@ -84,13 +84,16 @@ export function TimeRangeSelector({
   );
 
   const [open, setOpen] = useState(false);
-  const tzOptions = useMemo(() => timeZoneOptions ?? getTimeZoneOptions(), [timeZoneOptions]);
+  const tzOptions = timeZoneOptions ?? getTimeZoneOptions();
   const [tzAnchorEl, setTzAnchorEl] = useState<HTMLElement | null>(null);
   const tzOpen = Boolean(tzAnchorEl);
-  const tzLabel = useMemo(
-    () => tzOptions.find((o) => o.value === timeZone)?.display ?? timeZone,
-    [tzOptions, timeZone]
-  );
+  const tzLabel = tzOptions.find((o) => o.value === timeZone)?.display ?? timeZone;
+  const tzAutocompleteOptions = tzOptions.map((o) => ({ id: o.value, label: o.display }));
+  let tzAutocompleteValue: SettingsAutocompleteOption | undefined = undefined;
+  {
+    const current = tzOptions.find((o) => o.value === timeZone);
+    if (current) tzAutocompleteValue = { id: current.value, label: current.display };
+  }
 
   return (
     <>
@@ -109,14 +112,8 @@ export function TimeRangeSelector({
           }}
         >
           <SettingsAutocomplete
-            options={useMemo<SettingsAutocompleteOption[]>(
-              () => tzOptions.map((o) => ({ id: o.value, label: o.display })),
-              [tzOptions]
-            )}
-            value={useMemo<SettingsAutocompleteOption | undefined>(() => {
-              const current = tzOptions.find((o) => o.value === timeZone);
-              return current ? { id: current.value, label: current.display } : undefined;
-            }, [tzOptions, timeZone])}
+            options={tzAutocompleteOptions}
+            value={tzAutocompleteValue}
             onChange={(_e, option) => {
               if (option) {
                 const selected = tzOptions.find((o) => o.value === option.id);

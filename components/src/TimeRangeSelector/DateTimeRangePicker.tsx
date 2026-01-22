@@ -58,10 +58,7 @@ export const DateTimeRangePicker = ({
 
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
 
-  const changeTimeRange = (newTime: string | Date, segment: keyof AbsoluteTimeRange): void => {
-    if (typeof newTime === 'string') {
-      return;
-    }
+  const changeTimeRange = (newTime: Date, segment: keyof AbsoluteTimeRange): void => {
     setTimeRange((prevTimeRange) => {
       return {
         ...prevTimeRange,
@@ -70,11 +67,11 @@ export const DateTimeRangePicker = ({
     });
   };
 
-  const onChangeStartTime = (newStartTime: string | Date): void => {
+  const onChangeStartTime = (newStartTime: Date): void => {
     changeTimeRange(newStartTime, 'start');
   };
 
-  const onChangeEndTime = (newEndTime: string | Date): void => {
+  const onChangeEndTime = (newEndTime: Date): void => {
     changeTimeRange(newEndTime, 'end');
   };
 

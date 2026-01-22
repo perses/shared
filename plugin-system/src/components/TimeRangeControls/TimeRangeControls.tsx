@@ -164,13 +164,11 @@ export function TimeRangeControls({
   const setHalfTimeRange = (): void => setTimeRange(halfTimeRange());
   const setDoubleTimeRange = (): void => setTimeRange(doubleTimeRange());
 
-  // If a timezone change occurs, propagate then refresh data
   const handleTimeZoneChange = useCallback(
     (tz: TimeZoneOption) => {
       onTimeZoneChange(tz);
-      refresh();
     },
-    [onTimeZoneChange, refresh]
+    [onTimeZoneChange]
   );
 
   return (
