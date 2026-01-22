@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import { Box, Stack, Typography, Button } from '@mui/material';
 import { DateTimeField, LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
@@ -49,47 +49,25 @@ export const DateTimeRangePicker = ({
 }: AbsoluteTimeFormProps): ReactElement => {
   // Time range values as dates that can be used as a time range.
   const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
-
-  // Time range values as strings used to populate the text inputs. May not
-  // be valid as dates when the user is typing.
-  const [timeRangeInputs, setTimeRangeInputs] = useState<AbsoluteTimeRangeInputValue>({
-    start: formatWithTimeZone(initialTimeRange.start, DATE_TIME_FORMAT, timeZone),
-    end: formatWithTimeZone(initialTimeRange.end, DATE_TIME_FORMAT, timeZone),
-  });
+    const timeRangeInputs = useMemo<AbsoluteTimeRangeInputValue>(() => {
+    return {
+      start: formatWithTimeZone(timeRange.start, DATE_TIME_FORMAT, timeZone),
+      end: formatWithTimeZone(timeRange.end, DATE_TIME_FORMAT, timeZone),
+    };
+  }, [timeRange.start, timeRange.end, timeZone]);
 
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
 
-  // Reformat inputs when timezone changes so UI reflects current selection
-  useEffect(() => {
-    setTimeRangeInputs({
-      start: formatWithTimeZone(timeRange.start, DATE_TIME_FORMAT, timeZone),
-      end: formatWithTimeZone(timeRange.end, DATE_TIME_FORMAT, timeZone),
-    });
-  }, [timeZone, timeRange.start, timeRange.end]);
-
   const changeTimeRange = (newTime: string | Date, segment: keyof AbsoluteTimeRange): void => {
-    const isInputChange = typeof newTime === 'string';
-    const newInputTime = isInputChange ? newTime : formatWithTimeZone(newTime, DATE_TIME_FORMAT, timeZone);
-
-    setTimeRangeInputs((prevTimeRangeInputs) => {
+    if (typeof newTime === 'string') {
+      return;
+    }
+    setTimeRange((prevTimeRange) => {
       return {
-        ...prevTimeRangeInputs,
-        [segment]: newInputTime,
+        ...prevTimeRange,
+        [segment]: newTime,
       };
     });
-
-    // When the change is a string from an input, do not try to convert it to
-    // a date because there are likely to be interim stages of editing where it
-    // is not valid as a date. When the change is a Date from the calendar/clock
-    // interface, we can be sure it is a date.
-    if (!isInputChange) {
-      setTimeRange((prevTimeRange) => {
-        return {
-          ...prevTimeRange,
-          [segment]: newTime,
-        };
-      });
-    }
   };
 
   const onChangeStartTime = (newStartTime: string | Date): void => {
@@ -102,12 +80,11 @@ export const DateTimeRangePicker = ({
 
   const updateDateRange = (): { start: Date; end: Date } | undefined => {
     const newDates = {
-      start: new Date(timeRangeInputs.start),
-      end: new Date(timeRangeInputs.end),
+      start: timeRange.start,
+      end: timeRange.end,
     };
     const isValidDateRange = validateDateRange(newDates.start, newDates.end);
     if (isValidDateRange) {
-      setTimeRange(newDates);
       return newDates;
     }
   };
@@ -143,7 +120,7 @@ export const DateTimeRangePicker = ({
               displayStaticWrapperAs="desktop"
               openTo="day"
               disableHighlightToday={true}
-              value={initialTimeRange.start}
+              value={timeRange.start}
               onChange={(newValue) => {
                 if (newValue === null) return;
                 onChangeStartTime(newValue);
@@ -169,7 +146,7 @@ export const DateTimeRangePicker = ({
               displayStaticWrapperAs="desktop"
               openTo="day"
               disableHighlightToday={true}
-              value={initialTimeRange.end}
+              value={timeRange.end}
               minDateTime={timeRange.start}
               onChange={(newValue) => {
                 if (newValue === null) return;
