@@ -87,7 +87,23 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
   function handleCancel(): void {
-    if (JSON.stringify(initialValues) !== JSON.stringify(form.getValues())) {
+    const currentValues = form.getValues();
+
+    // Normalize display: if both name and description are undefined, set display to undefined
+    const normalizeDisplay = (values: PanelEditorValues): PanelEditorValues => {
+      if (
+        values.panelDefinition.spec.display?.name === undefined &&
+        values.panelDefinition.spec.display?.description === undefined
+      ) {
+        values.panelDefinition.spec.display = undefined;
+      }
+      return values;
+    };
+
+    const normalizedInitial = normalizeDisplay(JSON.parse(JSON.stringify(initialValues)));
+    const normalizedCurrent = normalizeDisplay(JSON.parse(JSON.stringify(currentValues)));
+
+    if (JSON.stringify(normalizedInitial) !== JSON.stringify(normalizedCurrent)) {
       setDiscardDialogOpened(true);
     } else {
       onClose();
@@ -145,7 +161,6 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                 render={({ field, fieldState }) => (
                   <TextField
                     {...field}
-                    required
                     fullWidth
                     label="Name"
                     error={!!fieldState.error}

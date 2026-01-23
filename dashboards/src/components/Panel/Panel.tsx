@@ -112,31 +112,16 @@ export const Panel = memo(function Panel(props: PanelProps) {
   const [pluginActions, setPluginActions] = useState<ReactNode[]>([]);
 
   useEffect(() => {
-    let cancelled = false;
-
     const loadPluginActions = async (): Promise<void> => {
       const panelPluginKind = definition.spec.plugin.kind;
-      const panelProps = panelPropsForActions;
 
-      if (!panelPluginKind || !panelProps) {
-        if (!cancelled) {
-          setPluginActions([]);
-        }
+      if (!panelPluginKind || !panelPropsForActions || !getPlugin || typeof getPlugin !== 'function') {
+        setPluginActions([]);
         return;
       }
 
       try {
-        // Add defensive check for getPlugin availability
-        if (!getPlugin || typeof getPlugin !== 'function') {
-          if (!cancelled) {
-            setPluginActions([]);
-          }
-          return;
-        }
-
         const plugin = await getPlugin('Panel', panelPluginKind);
-
-        if (cancelled) return;
 
         // More defensive checking for plugin and actions
         if (
@@ -146,9 +131,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           !Array.isArray(plugin.actions) ||
           plugin.actions.length === 0
         ) {
-          if (!cancelled) {
-            setPluginActions([]);
-          }
+          setPluginActions([]);
           return;
         }
 
@@ -159,7 +142,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
             const ActionComponent = action.component;
             try {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              return <ActionComponent key={`plugin-action-${index}`} {...(panelProps as any)} />;
+              return <ActionComponent key={`plugin-action-${index}`} {...(panelPropsForActions as any)} />;
             } catch (error) {
               console.warn(`Failed to render plugin action ${index}:`, error);
               return null;
@@ -167,26 +150,14 @@ export const Panel = memo(function Panel(props: PanelProps) {
           })
           .filter((item): item is ReactNode => Boolean(item));
 
-        if (!cancelled) {
-          setPluginActions(headerActions);
-        }
+        setPluginActions(headerActions);
       } catch (error) {
-        if (!cancelled) {
-          console.warn('Failed to load plugin actions:', error);
-          setPluginActions([]);
-        }
+        console.warn('Failed to load plugin actions:', error);
+        setPluginActions([]);
       }
     };
 
-    // Use setTimeout to defer the async operation to the next tick
-    const timeoutId = setTimeout(() => {
-      loadPluginActions();
-    }, 0);
-
-    return (): void => {
-      cancelled = true;
-      clearTimeout(timeoutId);
-    };
+    loadPluginActions();
   }, [definition.spec.plugin.kind, panelPropsForActions, getPlugin]);
 
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {

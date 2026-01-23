@@ -49,4 +49,13 @@ import (
 	}
 }
 
-#transform: #joinByColumnValueTransform | #mergeColumnsTransform | #mergeIndexedColumnsTransform | #mergeSeries
+#extractColumnFieldsTransform: {
+	kind: "ExtractColumnFields"
+	spec: {
+		column: string
+		format: "JSON" | "Regex" | "SplitByDelimiter" | "KeyValuePairs"
+		matcher?: string
+	}
+}
+
+#transform: #joinByColumnValueTransform | #mergeColumnsTransform | #mergeIndexedColumnsTransform | #mergeSeries | #extractColumnFieldsTransform

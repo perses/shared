@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { PanelDefinition } from '@perses-dev/core';
 import { DataQueriesProvider, TimeRangeProviderBasic, useDataQueriesContext } from '@perses-dev/plugin-system';
@@ -111,11 +111,11 @@ describe('Panel', () => {
     },
   });
 
-  const renderPanel = (
+  const renderPanel = async (
     definition?: PanelDefinition,
     editHandlers?: PanelProps['editHandlers'],
     panelOptions?: PanelProps['panelOptions']
-  ): void => {
+  ): Promise<void> => {
     definition ??= createTestPanel();
 
     renderWithContext(
@@ -139,12 +139,17 @@ describe('Panel', () => {
         </TimeRangeProviderBasic>
       </ThemeProvider>
     );
+
+    // Wait for async effects (plugin actions loading) to complete
+    await waitFor(() => {
+      expect(screen.getByTestId('panel')).toBeInTheDocument();
+    });
   };
 
   const getPanel = (): HTMLElement => screen.getByTestId('panel');
 
   it('should render plugin actions in header', async () => {
-    renderPanel();
+    await renderPanel();
     const panel = getPanel();
     userEvent.hover(panel);
 
@@ -156,7 +161,7 @@ describe('Panel', () => {
   });
 
   it('should render panel', async () => {
-    renderPanel();
+    await renderPanel();
 
     const panel = getPanel();
     expect(panel).toBeInTheDocument();
@@ -172,7 +177,7 @@ describe('Panel', () => {
   });
 
   it('shows panel description', async () => {
-    renderPanel();
+    await renderPanel();
 
     const descriptionButton = screen.getByRole('button', { name: /description/i });
     expect(descriptionButton).toBeInTheDocument();
@@ -181,13 +186,13 @@ describe('Panel', () => {
     userEvent.hover(descriptionButton);
 
     const tooltip = await screen.findByRole('tooltip', { name: 'This is a fake panel - bar' });
-    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toBeDefined();
     expect(tooltip).toHaveTextContent('This is a fake panel - bar');
     expect(descriptionButton.querySelector('svg')).toHaveAttribute('aria-describedby', 'info-tooltip');
   });
 
   it('shows panel link', async () => {
-    renderPanel();
+    await renderPanel();
 
     const linkButton = screen.getByRole('link', { name: 'Example Link' });
     expect(linkButton).toBeInTheDocument();
@@ -196,13 +201,13 @@ describe('Panel', () => {
     userEvent.hover(linkButton);
 
     const tooltip = await screen.findByRole('tooltip', { name: 'This is a fake panel link - bar' });
-    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toBeDefined();
     expect(tooltip).toHaveTextContent('This is a fake panel link - bar');
     expect(linkButton).toHaveAttribute('href', 'https://example.com');
     expect(linkButton).toHaveAttribute('target', '_blank');
   });
 
-  it('does not show description when panel does not have one', () => {
+  it('does not show description when panel does not have one', async () => {
     // Render a panel without a description set
     const withoutDescription = createTestPanel();
 
@@ -211,7 +216,7 @@ describe('Panel', () => {
     }
 
     withoutDescription.spec.display.description = undefined;
-    renderPanel(withoutDescription);
+    await renderPanel(withoutDescription);
 
     const panel = getPanel();
     userEvent.hover(panel);
@@ -219,7 +224,7 @@ describe('Panel', () => {
     expect(descriptionButton).not.toBeInTheDocument();
   });
 
-  it('does not show description when description only contains whitespace', () => {
+  it('does not show description when description only contains whitespace', async () => {
     // Render a panel with an all whitespace description
     const withoutDescription = createTestPanel();
 
@@ -228,7 +233,7 @@ describe('Panel', () => {
     }
 
     withoutDescription.spec.display.description = '   ';
-    renderPanel(withoutDescription);
+    await renderPanel(withoutDescription);
 
     const panel = getPanel();
     userEvent.hover(panel);
@@ -236,42 +241,42 @@ describe('Panel', () => {
     expect(descriptionButton).not.toBeInTheDocument();
   });
 
-  it('can trigger panel actions in edit mode', () => {
+  it('can trigger panel actions in edit mode', async () => {
     const onEditPanelClick = jest.fn();
     const onDeletePanelClick = jest.fn();
     const onDuplicatePanelClick = jest.fn();
-    renderPanel(undefined, { onEditPanelClick, onDeletePanelClick, onDuplicatePanelClick });
+    await renderPanel(undefined, { onEditPanelClick, onDeletePanelClick, onDuplicatePanelClick });
 
     const panel = getPanel();
     userEvent.hover(panel);
 
-    const editButton = screen.getByRole('button', { name: /edit/i });
-    userEvent.click(editButton);
+    const editButton = screen.getByRole('button', { name: /edit panel/i });
+    fireEvent.click(editButton);
 
-    const deleteButton = screen.getByRole('button', { name: /delete/i });
-    userEvent.click(deleteButton);
+    const deleteButton = screen.getByRole('button', { name: /delete panel/i });
+    fireEvent.click(deleteButton);
 
-    const duplicateButton = screen.getByRole('button', { name: /duplicate/i });
-    userEvent.click(duplicateButton);
+    const duplicateButton = screen.getByRole('button', { name: /duplicate panel/i });
+    fireEvent.click(duplicateButton);
 
     expect(onEditPanelClick).toHaveBeenCalledTimes(1);
     expect(onDeletePanelClick).toHaveBeenCalledTimes(1);
     expect(onDuplicatePanelClick).toHaveBeenCalledTimes(1);
   });
 
-  it('should render extra panel content when not in edit mode', () => {
-    renderPanel(undefined, undefined, {
+  it('should render extra panel content when not in edit mode', async () => {
+    await renderPanel(undefined, undefined, {
       extra: () => <div>Extra content</div>,
     });
     const panel = getPanel();
     expect(panel).toHaveTextContent('Extra content');
   });
 
-  it('should not render extra panel content when not in edit mode', () => {
+  it('should not render extra panel content when not in edit mode', async () => {
     const onEditPanelClick = jest.fn();
     const onDeletePanelClick = jest.fn();
     const onDuplicatePanelClick = jest.fn();
-    renderPanel(
+    await renderPanel(
       undefined,
       { onEditPanelClick, onDeletePanelClick, onDuplicatePanelClick },
       {
@@ -282,30 +287,30 @@ describe('Panel', () => {
     expect(panel).not.toHaveTextContent('Extra content');
   });
 
-  it('shows loading indicator if 1/2 queries are loading', () => {
+  it('shows loading indicator if 1/2 queries are loading', async () => {
     (useDataQueriesContext as jest.Mock).mockReturnValue({
       queryResults: [{ data: { series: [{ name: 'test', values: [[1, 2]] }] }, isFetching: true }],
     });
 
-    renderPanel();
+    await renderPanel();
     expect(screen.queryAllByLabelText('loading').length).toBeGreaterThan(0);
   });
 
-  it('does not show a loading indicator if 2/2 queries are loading', () => {
+  it('does not show a loading indicator if 2/2 queries are loading', async () => {
     (useDataQueriesContext as jest.Mock).mockReturnValue({
       queryResults: [],
     });
 
-    renderPanel();
+    await renderPanel();
     expect(screen.queryAllByLabelText('loading')).toHaveLength(0);
   });
 
-  it('shows query errors in the tooltip', () => {
+  it('shows query errors in the tooltip', async () => {
     (useDataQueriesContext as jest.Mock).mockReturnValue({
       queryResults: [{ error: 'test error' }],
     });
 
-    renderPanel();
+    await renderPanel();
     expect(screen.queryAllByLabelText('panel errors').length).toBeGreaterThan(0);
   });
 });

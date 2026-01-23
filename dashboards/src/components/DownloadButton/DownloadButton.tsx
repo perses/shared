@@ -27,7 +27,7 @@ export function DownloadButton(): ReactElement {
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>): void => {
     setAnchorEl(event.currentTarget);
   };
-  const handleItemClick = (format: 'json' | 'yaml', shape?: 'cr') => (): void => {
+  const handleItemClick = (format: 'json' | 'yaml', shape?: 'cr-v1alpha1' | 'cr-v1alpha2') => (): void => {
     setAnchorEl(null);
 
     const { contentType, content } = serializeDashboard(dashboard, format, shape);
@@ -36,7 +36,7 @@ export function DownloadButton(): ReactElement {
     // Create blob URL
     const hiddenLinkUrl = URL.createObjectURL(new Blob([content], { type: contentType }));
     // Simulate click
-    hiddenLinkRef.current.download = `${dashboard.metadata.name}${shape === 'cr' ? '-cr' : ''}.${format}`;
+    hiddenLinkRef.current.download = `${dashboard.metadata.name}${shape ? `-${shape}` : ''}.${format}`;
     hiddenLinkRef.current.href = hiddenLinkUrl;
     hiddenLinkRef.current.click();
     // Remove blob URL (for memory management)
@@ -70,7 +70,8 @@ export function DownloadButton(): ReactElement {
             <MenuList>
               <MenuItem onClick={handleItemClick('json')}>JSON</MenuItem>
               <MenuItem onClick={handleItemClick('yaml')}>YAML</MenuItem>
-              <MenuItem onClick={handleItemClick('yaml', 'cr')}>YAML (CR)</MenuItem>
+              <MenuItem onClick={handleItemClick('yaml', 'cr-v1alpha2')}>YAML (CR v1alpha2)</MenuItem>
+              <MenuItem onClick={handleItemClick('yaml', 'cr-v1alpha1')}>YAML (CR v1alpha1)</MenuItem>
             </MenuList>
           </ClickAwayListener>
         </div>
