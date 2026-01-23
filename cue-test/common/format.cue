@@ -14,6 +14,6 @@
 package common
 
 myFormat: #format & {
-    decimalPlaces: 0
-    shortValues:   false
+	decimalPlaces: 0
+	shortValues:   false
 }

@@ -13,10 +13,6 @@
 
 package common
 
-#datasourceSelector: {
-	_kind: string
-	datasource?: =~#variableSyntaxRegex | {
-		kind:  _kind
-		name?: string
-	}
-}
+myDsVarSelector: #datasourceSelector & { _kind: "MyDatasource" }
+
+myDsVarSelector: #datasourceSelector & { datasource: "$dsVar" }

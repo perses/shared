@@ -22,8 +22,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// This script goes through the CUE files and validates each of them against its
-// corresponding test file, if it exists.
+// This script validates CUE schema packages against their corresponding test packages.
+// It merges all .cue files within each package directory to properly handle imports and
+// package-level definitions.
 
 const (
 	schemasDir = "cue"
@@ -33,50 +34,81 @@ const (
 // dirsInScope specifies which subdirectories under cue/ to validate
 var dirsInScope = []string{"common"}
 
-func findCueFiles(baseDir string, subDir string) ([]string, error) {
-	var files []string
-	dirPath := filepath.Join(baseDir, subDir)
+// NB: this function assume 1 dirInScope = 1 package. CUE allows multiple packages per dirInScope, but this is not used here.
+func findPackages(basePath string, dirInScope string) ([]string, error) {
+	var packages []string
+	dirPath := filepath.Join(basePath, dirInScope)
+
+	// Include the root directory itself
+	packages = append(packages, dirInScope)
 
 	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if !info.IsDir() && filepath.Ext(path) == ".cue" {
-			// Convert to relative path from baseDir
-			relPath, err := filepath.Rel(baseDir, path)
+		if info.IsDir() && path != dirPath {
+			relPath, err := filepath.Rel(basePath, path)
 			if err != nil {
 				return err
 			}
-			files = append(files, relPath)
+			packages = append(packages, relPath)
 		}
 
 		return nil
 	})
 
-	return files, err
+	return packages, err
 }
 
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return !os.IsNotExist(err)
-}
+// vetPackage validates CUE files in schemaDir against test files in testDir.
+// It collects all .cue files from both directories and runs `cue vet` on them together,
+// allowing CUE to merge files in the same package and resolve imports properly.
+// The command runs from schemasDir to ensure cue.mod/module.cue is accessible for imports.
+func vetPackage(schemaDir, testDir string) error {
+	logrus.Debugf("Validating package %s against %s", schemaDir, testDir)
 
-func runCueVet(schemaFile, testFile string) error {
-	logrus.Debugf("Validating %s against %s", schemaFile, testFile)
+	// Get list of all .cue files in both directories
+	schemaFiles, err := filepath.Glob(filepath.Join(schemaDir, "*.cue"))
+	if err != nil {
+		return fmt.Errorf("failed to glob schema files: %w", err)
+	}
+	testFiles, err := filepath.Glob(filepath.Join(testDir, "*.cue"))
+	if err != nil {
+		return fmt.Errorf("failed to glob test files: %w", err)
+	}
 
-	cmd := exec.Command("cue", "vet", "-c", schemaFile, testFile)
+	// Build command args with paths relative to schemasDir (cue/)
+	args := []string{"vet"}
+	for _, f := range schemaFiles {
+		rel, err := filepath.Rel(schemasDir, f)
+		if err != nil {
+			return fmt.Errorf("failed to get relative path for %s: %w", f, err)
+		}
+		args = append(args, rel)
+	}
+	for _, f := range testFiles {
+		// testFiles are in ../cue-test relative to schemasDir
+		rel, err := filepath.Rel(schemasDir, f)
+		if err != nil {
+			return fmt.Errorf("failed to get relative path for %s: %w", f, err)
+		}
+		args = append(args, rel)
+	}
+
+	cmd := exec.Command("cue", args...)
+	cmd.Dir = schemasDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to validate %s: %w", schemaFile, err)
+		return fmt.Errorf("failed to validate %s: %w", schemaDir, err)
 	}
 
 	return nil
 }
 
-func validateCueFiles() error {
+func validateCueSchemas() error {
 	logrus.Debugf("Starting CUE files validation")
 
 	// Check if cue command is available
@@ -88,25 +120,27 @@ func validateCueFiles() error {
 	skippedCount := 0
 	errCount := 0
 
-	for _, subDir := range dirsInScope {
-		logrus.Debugf("Processing directory: %s", subDir)
-		files, err := findCueFiles(schemasDir, subDir)
+	for _, dirInScope := range dirsInScope {
+		logrus.Debugf("Processing directory: %s", dirInScope)
+		packageDirs, err := findPackages(schemasDir, dirInScope)
 		if err != nil {
-			return fmt.Errorf("failed to find CUE files in %s/%s: %w", schemasDir, subDir, err)
+			return fmt.Errorf("failed to find directories in %s/%s: %w", schemasDir, dirInScope, err)
 		}
 
-		for _, file := range files {
-			schemaFile := filepath.Join(schemasDir, file)
-			testFile := filepath.Join(testDir, file)
-			if !fileExists(testFile) {
-				logrus.Debugf("Skipping %s: test file %s not found", schemaFile, testFile)
+		for _, packageDir := range packageDirs {
+			schemaDir := filepath.Join(schemasDir, packageDir)
+			testDir := filepath.Join(testDir, packageDir)
+
+			// Check if corresponding test directory exists
+			if _, err := os.Stat(testDir); os.IsNotExist(err) {
+				logrus.Debugf("Skipping %s: test directory %s not found", schemaDir, testDir)
 				skippedCount++
 				continue
 			}
 
-			logrus.Infof("Validating %s with test file %s", schemaFile, testFile)
-			if err := runCueVet(schemaFile, testFile); err != nil {
-				logrus.Errorf("Validation failed for %s: %v", schemaFile, err)
+			logrus.Infof("Validating package %s with test package %s", schemaDir, testDir)
+			if err := vetPackage(schemaDir, testDir); err != nil {
+				logrus.Errorf("Validation failed for %s: %v", schemaDir, err)
 				errCount++
 			}
 
@@ -122,7 +156,7 @@ func validateCueFiles() error {
 }
 
 func main() {
-	if err := validateCueFiles(); err != nil {
+	if err := validateCueSchemas(); err != nil {
 		logrus.Fatal(err)
 	}
 }

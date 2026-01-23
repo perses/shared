@@ -38,3 +38,5 @@ import (
 		secret?: string
 	}
 }
+
+#baseHTTPDatasourceSpec: { directUrl: common.#url } | { proxy: #HTTPProxy }
