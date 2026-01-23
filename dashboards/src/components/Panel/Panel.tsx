@@ -12,10 +12,17 @@
 // limitations under the License.
 
 import { Card, CardContent, CardProps } from '@mui/material';
-import { ErrorAlert, ErrorBoundary, SelectionProvider, combineSx, useId } from '@perses-dev/components';
+import {
+  ErrorAlert,
+  ErrorBoundary,
+  ItemActionsProvider,
+  SelectionProvider,
+  combineSx,
+  useId,
+} from '@perses-dev/components';
 import { PanelDefinition, PanelGroupItemId } from '@perses-dev/core';
-import { useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
-import { ReactNode, memo, useMemo, useState, useEffect } from 'react';
+import { ActionOptions, useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
+import { ReactNode, memo, useEffect, useMemo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { PanelContent } from './PanelContent';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
@@ -170,72 +177,80 @@ export const Panel = memo(function Panel(props: PanelProps) {
 
   // default value for showIcons: if the dashboard is in editing mode or the panel is in fullscreen mode: 'always', otherwise 'hover'
   const showIcons = panelOptions?.showIcons ?? (editHandlers || readHandlers?.isPanelViewed ? 'always' : 'hover');
+  const itemActionsConfig = definition.spec.plugin.spec?.actions
+    ? (definition.spec.plugin.spec.actions as ActionOptions)
+    : undefined;
+  const itemActionsListConfig =
+    itemActionsConfig?.enabled && itemActionsConfig.displayInHeader ? itemActionsConfig.actionsList : [];
 
   return (
-    <Card
-      component="section"
-      sx={combineSx(
-        {
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          flexFlow: 'column nowrap',
-          ':hover': { '--panel-hover': 'block' },
-        },
-        sx
-      )}
-      variant="outlined"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      aria-labelledby={headerId}
-      aria-describedby={headerId}
-      data-testid="panel"
-      {...others}
-    >
-      {!panelOptions?.hideHeader && (
-        <PanelHeader
-          extra={panelOptions?.extra?.({ panelDefinition: definition, panelGroupItemId })}
-          id={headerId}
-          title={definition.spec.display?.name ?? ''}
-          description={definition.spec.display?.description}
-          queryResults={queryResults}
-          readHandlers={readHandlers}
-          editHandlers={editHandlers}
-          viewQueriesHandler={viewQueriesHandler}
-          links={definition.spec.links}
-          pluginActions={pluginActions}
-          showIcons={showIcons}
-          sx={{ py: '2px', pl: '8px', pr: '2px' }}
-          dimension={contentDimensions}
-        />
-      )}
-      <CardContent
-        component="figure"
-        sx={{
-          position: 'relative',
-          overflow: 'hidden',
-          flexGrow: 1,
-          margin: 0,
-          padding: 0,
-          // Override MUI default style for last-child
-          ':last-child': {
-            padding: 0,
-          },
-        }}
-        ref={setContentElement}
-      >
-        <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[definition.spec, queryResults]}>
-          <SelectionProvider>
-            <PanelContent
-              definition={definition}
-              panelPluginKind={definition.spec.plugin.kind}
-              spec={definition.spec.plugin.spec}
-              contentDimensions={contentDimensions}
+    <SelectionProvider>
+      <ItemActionsProvider>
+        <Card
+          component="section"
+          sx={combineSx(
+            {
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              flexFlow: 'column nowrap',
+              ':hover': { '--panel-hover': 'block' },
+            },
+            sx
+          )}
+          variant="outlined"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          aria-labelledby={headerId}
+          aria-describedby={headerId}
+          data-testid="panel"
+          {...others}
+        >
+          {!panelOptions?.hideHeader && (
+            <PanelHeader
+              extra={panelOptions?.extra?.({ panelDefinition: definition, panelGroupItemId })}
+              id={headerId}
+              title={definition.spec.display?.name ?? ''}
+              description={definition.spec.display?.description}
               queryResults={queryResults}
+              readHandlers={readHandlers}
+              editHandlers={editHandlers}
+              viewQueriesHandler={viewQueriesHandler}
+              links={definition.spec.links}
+              pluginActions={pluginActions}
+              itemActionsListConfig={itemActionsListConfig}
+              showIcons={showIcons}
+              sx={{ py: '2px', pl: '8px', pr: '2px' }}
+              dimension={contentDimensions}
             />
-          </SelectionProvider>
-        </ErrorBoundary>
-      </CardContent>
-    </Card>
+          )}
+          <CardContent
+            component="figure"
+            sx={{
+              position: 'relative',
+              overflow: 'hidden',
+              flexGrow: 1,
+              margin: 0,
+              padding: 0,
+              // Override MUI default style for last-child
+              ':last-child': {
+                padding: 0,
+              },
+            }}
+            ref={setContentElement}
+          >
+            <ErrorBoundary FallbackComponent={ErrorAlert} resetKeys={[definition.spec, queryResults]}>
+              <PanelContent
+                definition={definition}
+                panelPluginKind={definition.spec.plugin.kind}
+                spec={definition.spec.plugin.spec}
+                contentDimensions={contentDimensions}
+                queryResults={queryResults}
+              />
+            </ErrorBoundary>
+          </CardContent>
+        </Card>
+      </ItemActionsProvider>
+    </SelectionProvider>
   );
 });

@@ -11,23 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Stack, useTheme } from '@mui/material';
 import {
-  useReactTable,
-  getCoreRowModel,
   ColumnDef,
-  RowSelectionState,
   OnChangeFn,
   Row,
-  Table as TanstackTable,
+  RowSelectionState,
   SortingState,
-  getSortedRowModel,
+  Table as TanstackTable,
+  getCoreRowModel,
   getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
 } from '@tanstack/react-table';
-import { useTheme } from '@mui/material';
 import { ReactElement, useCallback, useMemo } from 'react';
-import { VirtualizedTable } from './VirtualizedTable';
 import { TableCheckbox } from './TableCheckbox';
-import { TableProps, persesColumnsToTanstackColumns, DEFAULT_COLUMN_WIDTH } from './model/table-model';
+import { VirtualizedTable } from './VirtualizedTable';
+import { DEFAULT_COLUMN_WIDTH, TableProps, persesColumnsToTanstackColumns } from './model/table-model';
 
 const DEFAULT_GET_ROW_ID = (data: unknown, index: number): string => {
   return `${index}`;
@@ -59,6 +59,8 @@ export function Table<TableData>({
   getRowId = DEFAULT_GET_ROW_ID,
   rowSelection = DEFAULT_ROW_SELECTION,
   sorting = DEFAULT_SORTING,
+  getItemActions,
+  hasItemActions,
   pagination,
   onPaginationChange,
   rowSelectionVariant = 'standard',
@@ -111,6 +113,21 @@ export function Table<TableData>({
     onSortingChange?.(newSorting);
   };
 
+  const actionsColumn: ColumnDef<TableData> = useMemo(() => {
+    return {
+      id: 'itemActions',
+      header: 'Actions',
+      cell: ({ row }): ReactElement => {
+        return (
+          <Stack direction="row" alignItems="center">
+            {getItemActions?.({ id: row.id, data: row.original })}
+          </Stack>
+        );
+      },
+      enableSorting: false,
+    };
+  }, [getItemActions]);
+
   const checkboxColumn: ColumnDef<TableData> = useMemo(() => {
     return {
       id: 'checkboxRowSelect',
@@ -146,12 +163,16 @@ export function Table<TableData>({
   const tableColumns: Array<ColumnDef<TableData>> = useMemo(() => {
     const initTableColumns = persesColumnsToTanstackColumns(columns);
 
+    if (hasItemActions) {
+      initTableColumns.unshift(actionsColumn);
+    }
+
     if (checkboxSelection) {
       initTableColumns.unshift(checkboxColumn);
     }
 
     return initTableColumns;
-  }, [checkboxColumn, checkboxSelection, columns]);
+  }, [checkboxColumn, checkboxSelection, columns, hasItemActions, actionsColumn]);
 
   const table = useReactTable({
     data,
