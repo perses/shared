@@ -11,12 +11,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package common
+package proxy
 
-#datasourceSelector: {
-	_kind: string
-	datasource?: =~#variableSyntaxRegex | {
-		kind:  _kind
-		name?: string
+myDirectSpec: #baseHTTPDatasourceSpec & {
+	directUrl: "http://localhost:8080"
+}
+
+myProxySpec: #baseHTTPDatasourceSpec & {
+	proxy: #HTTPProxy & {
+		kind: "HTTPProxy"
+		spec: {
+			url: "https://prometheus.demo.prometheus.io"
+			allowedEndpoints: [
+				{
+					endpointPattern: "/api/v1/labels"
+					method:          "POST"
+				},
+				{
+					endpointPattern: "/api/v1/series"
+					method:          "POST"
+				},
+			]
+		}
 	}
 }
