@@ -11,12 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, MenuItem, Popover, Select } from '@mui/material';
+import { Box, MenuItem, Popover, Select, IconButton, TextField } from '@mui/material';
 import Calendar from 'mdi-material-ui/Calendar';
+import EarthIcon from 'mdi-material-ui/Earth';
 import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { useTimeZone } from '../context';
+import { TimeZoneOption, getTimeZoneOptions } from '../model/timeZoneOption';
 import { TimeOption } from '../model';
+import { SettingsAutocomplete, SettingsAutocompleteOption } from '../SettingsAutocomplete';
 import { DateTimeRangePicker } from './DateTimeRangePicker';
 import { buildCustomTimeOption, formatTimeRange } from './utils';
 
@@ -43,6 +46,10 @@ interface TimeRangeSelectorProps {
    * Defaults to true.
    */
   showCustomTimeRange?: boolean;
+  /** Optional explicit timezone and change handler to enable changing tz from the selector */
+  timeZone?: string;
+  timeZoneOptions?: TimeZoneOption[];
+  onTimeZoneChange?: (timeZone: TimeZoneOption) => void;
 }
 
 /**
@@ -57,48 +64,74 @@ export function TimeRangeSelector({
   onChange,
   height,
   showCustomTimeRange = true,
+  timeZone: timeZoneProp,
+  timeZoneOptions,
+  onTimeZoneChange,
 }: TimeRangeSelectorProps): ReactElement {
-  const { timeZone } = useTimeZone();
+  const { timeZone: ctxTimeZone } = useTimeZone();
+  const timeZone = timeZoneProp ?? ctxTimeZone;
 
-  const anchorEl = useRef(); // Used to position the absolute time range picker
-
-  // Control the open state of the absolute time range picker
+  const anchorEl = useRef();
   const [showCustomDateSelector, setShowCustomDateSelector] = useState(false);
 
-  // Build the initial value of the absolute time range picker
   const convertedTimeRange = useMemo(() => {
     return isRelativeTimeRange(value) ? toAbsoluteTimeRange(value) : value;
   }, [value]);
 
-  // Last option is the absolute time range option (custom)
-  // If the value is an absolute time range, we display this time range
-  // If the value is a relative time range, we make a default CustomTimeOption built from undefined value
   const lastOption = useMemo(
     () => buildCustomTimeOption(isRelativeTimeRange(value) ? undefined : value, timeZone),
     [value, timeZone]
   );
 
-  // Control the open state of the select component to prevent the menu from closing when the custom date picker is
-  // opened.
-  //
-  // Note that the value state of the select is here for display only. The real value (the one from props) is managed
-  // by click events on each menu item.
-  // This is a trick to get around the limitation of select with menu item that doesn't support objects as value...
   const [open, setOpen] = useState(false);
+  const tzOptions = timeZoneOptions ?? getTimeZoneOptions();
+  const [tzAnchorEl, setTzAnchorEl] = useState<HTMLElement | null>(null);
+  const tzOpen = Boolean(tzAnchorEl);
+  const tzLabel = tzOptions.find((o) => o.value === timeZone)?.display ?? timeZone;
+  const tzAutocompleteOptions = tzOptions.map((o) => ({ id: o.value, label: o.display }));
+  let tzAutocompleteValue: SettingsAutocompleteOption | undefined = undefined;
+  {
+    const current = tzOptions.find((o) => o.value === timeZone);
+    if (current) tzAutocompleteValue = { id: current.value, label: current.display };
+  }
 
   return (
     <>
       <Popover
+        anchorEl={tzAnchorEl}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        open={tzOpen}
+        onClose={() => setTzAnchorEl(null)}
+        sx={(theme) => ({ padding: theme.spacing(1) })}
+      >
+        <Box
+          sx={{ p: 1, minWidth: 260 }}
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <SettingsAutocomplete
+            options={tzAutocompleteOptions}
+            value={tzAutocompleteValue}
+            onChange={(_e, option) => {
+              if (option) {
+                const selected = tzOptions.find((o) => o.value === option.id);
+                if (selected) onTimeZoneChange?.(selected);
+              }
+              setTzAnchorEl(null);
+            }}
+            disableClearable
+            renderInput={(params) => <TextField {...params} placeholder="Search timezones" size="small" />}
+          />
+        </Box>
+      </Popover>
+      <Popover
         anchorEl={anchorEl.current}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
         open={showCustomDateSelector}
         onClose={() => setShowCustomDateSelector(false)}
-        sx={(theme) => ({
-          padding: theme.spacing(2),
-        })}
+        sx={(theme) => ({ padding: theme.spacing(2) })}
       >
         <DateTimeRangePicker
           initialTimeRange={convertedTimeRange}
@@ -108,6 +141,7 @@ export function TimeRangeSelector({
             setOpen(false);
           }}
           onCancel={() => setShowCustomDateSelector(false)}
+          timeZone={timeZone}
         />
       </Popover>
       <Box ref={anchorEl}>
@@ -116,22 +150,41 @@ export function TimeRangeSelector({
           value={formatTimeRange(value, timeZone)}
           onClick={() => setOpen(!open)}
           IconComponent={Calendar}
-          inputProps={{
-            'aria-label': `Select time range. Currently set to ${value}`,
-          }}
+          inputProps={{ 'aria-label': `Select time range. Currently set to ${value}` }}
           sx={{
-            // `transform: none` prevents calendar icon from flipping over when menu is open
-            '.MuiSelect-icon': {
-              marginTop: '1px',
-              transform: 'none',
-            },
-            // paddingRight creates more space for the calendar icon (it's a bigger icon)
-            '.MuiSelect-select.MuiSelect-outlined.MuiInputBase-input': {
-              paddingRight: '36px',
-            },
+            '.MuiSelect-icon': { marginTop: '1px', transform: 'none' },
+            '.MuiSelect-select.MuiSelect-outlined.MuiInputBase-input': { paddingRight: '36px' },
             '.MuiSelect-select': height ? { lineHeight: height, paddingY: 0 } : {},
           }}
         >
+          <MenuItem
+            disableRipple
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            sx={{ cursor: 'default', '&:hover': { backgroundColor: 'transparent' }, py: 0.5, px: 1 }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <Box sx={{ typography: 'subtitle1' }}>Time Range</Box>
+                <Box sx={{ color: 'text.secondary', typography: 'caption', mt: 0.25 }}>Timezone: {tzLabel}</Box>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', pr: 1, ml: 1.5 }}>
+                <IconButton
+                  size="small"
+                  aria-label="Select timezone"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setTzAnchorEl(e.currentTarget);
+                  }}
+                >
+                  <EarthIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            </Box>
+          </MenuItem>
           {timeOptions.map((item, idx) => (
             <MenuItem
               key={idx}

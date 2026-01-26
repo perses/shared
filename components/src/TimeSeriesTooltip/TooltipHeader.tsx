@@ -15,7 +15,7 @@ import { Box, Divider, Typography, Stack, Switch } from '@mui/material';
 import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import { memo, ReactElement } from 'react';
-import { getDateAndTime } from '../utils';
+import { useTimeZone } from '../context/TimeZoneProvider';
 import { NearbySeriesArray } from './nearby-series';
 import {
   TOOLTIP_BG_COLOR_FALLBACK,
@@ -43,13 +43,16 @@ export const TooltipHeader = memo(function TooltipHeader({
   onShowAllClick,
   onUnpinClick,
 }: TooltipHeaderProps) {
+  const { formatWithUserTimeZone } = useTimeZone();
   const seriesTimeMs = nearbySeries[0]?.date ?? null;
   if (seriesTimeMs === null) {
     return null;
   }
 
   const formatTimeSeriesHeader = (timeMs: number): ReactElement => {
-    const { formattedTime, formattedDate } = getDateAndTime(timeMs);
+    const date = new Date(timeMs);
+    const formattedDate = formatWithUserTimeZone(date, 'MMM dd, yyyy - ');
+    const formattedTime = formatWithUserTimeZone(date, 'HH:mm:ss');
     return (
       <Box>
         <Typography

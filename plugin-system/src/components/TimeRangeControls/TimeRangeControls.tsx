@@ -23,6 +23,8 @@ import {
   TimeOption,
   ToolbarIconButton,
   TimeRangeSelector,
+  TimeZoneOption,
+  getTimeZoneOptions,
   buildRelativeTimeOption,
 } from '@perses-dev/components';
 import { AbsoluteTimeRange, DurationString, parseDurationString, RelativeTimeRange } from '@perses-dev/core';
@@ -34,7 +36,6 @@ import {
   useTimeRangeOptionsSetting,
   useShowZoomRangeSetting,
 } from '../../runtime';
-
 export const DEFAULT_REFRESH_INTERVAL_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '0s' }, display: 'Off' },
   { value: { pastDuration: '5s' }, display: '5s' },
@@ -55,6 +56,8 @@ interface TimeRangeControlsProps {
   showCustomTimeRange?: boolean;
   showZoomButtons?: boolean;
   timePresets?: TimeOption[];
+  timeZone: string;
+  onTimeZoneChange: (timeZone: TimeZoneOption) => void;
 }
 
 export function TimeRangeControls({
@@ -65,6 +68,8 @@ export function TimeRangeControls({
   showCustomTimeRange,
   showZoomButtons = true,
   timePresets,
+  timeZone,
+  onTimeZoneChange,
 }: TimeRangeControlsProps): ReactElement {
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
 
@@ -159,6 +164,13 @@ export function TimeRangeControls({
   const setHalfTimeRange = (): void => setTimeRange(halfTimeRange());
   const setDoubleTimeRange = (): void => setTimeRange(doubleTimeRange());
 
+  const handleTimeZoneChange = useCallback(
+    (tz: TimeZoneOption) => {
+      onTimeZoneChange(tz);
+    },
+    [onTimeZoneChange]
+  );
+
   return (
     <Stack direction="row" spacing={1}>
       {showTimeRangeSelector && (
@@ -168,6 +180,9 @@ export function TimeRangeControls({
           onChange={setTimeRange}
           height={height}
           showCustomTimeRange={showCustomTimeRangeValue}
+          timeZone={timeZone}
+          timeZoneOptions={getTimeZoneOptions()}
+          onTimeZoneChange={handleTimeZoneChange}
         />
       )}
       {showZoomInOutButtons && (

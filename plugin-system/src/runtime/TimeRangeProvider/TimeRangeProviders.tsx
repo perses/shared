@@ -13,8 +13,9 @@
 
 import { DurationString, TimeRangeValue } from '@perses-dev/core';
 import React, { ReactElement } from 'react';
+import { TimeZoneProvider } from '@perses-dev/components';
 import { TimeRangeProvider } from './TimeRangeProvider';
-import { useSetRefreshIntervalParams, useTimeRangeParams } from './query-params';
+import { useSetRefreshIntervalParams, useTimeRangeParams, useTimeZoneParams } from './query-params';
 
 export interface TimeRangeProvidersProps {
   initialTimeRange: TimeRangeValue;
@@ -29,6 +30,7 @@ export function TimeRangeProviderWithQueryParams({
 }: TimeRangeProvidersProps): ReactElement {
   const { timeRange, setTimeRange } = useTimeRangeParams(initialTimeRange);
   const { refreshInterval, setRefreshInterval } = useSetRefreshIntervalParams(initialRefreshInterval);
+  const { timeZone } = useTimeZoneParams('local');
 
   return (
     <TimeRangeProvider
@@ -37,7 +39,7 @@ export function TimeRangeProviderWithQueryParams({
       setTimeRange={setTimeRange}
       setRefreshInterval={setRefreshInterval}
     >
-      {children}
+      <TimeZoneProvider timeZone={timeZone}>{children}</TimeZoneProvider>
     </TimeRangeProvider>
   );
 }

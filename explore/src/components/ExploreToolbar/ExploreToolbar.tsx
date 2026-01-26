@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Stack, Box, useTheme, useMediaQuery } from '@mui/material';
-import { TimeRangeControls } from '@perses-dev/plugin-system';
+import { TimeRangeControls, useTimeZoneParams } from '@perses-dev/plugin-system';
 import React, { ReactElement } from 'react';
 
 export interface ExploreToolbarProps {
@@ -23,6 +23,7 @@ export const ExploreToolbar = (props: ExploreToolbarProps): ReactElement => {
   const { exploreTitleComponent } = props;
 
   const isBiggerThanLg = useMediaQuery(useTheme().breakpoints.up('lg'));
+  const { timeZone, setTimeZone } = useTimeZoneParams('local');
 
   const testId = 'explore-toolbar';
 
@@ -37,7 +38,7 @@ export const ExploreToolbar = (props: ExploreToolbarProps): ReactElement => {
           flexWrap={isBiggerThanLg ? 'nowrap' : 'wrap-reverse'}
           justifyContent="end"
         >
-          <TimeRangeControls />
+          <TimeRangeControls timeZone={timeZone} onTimeZoneChange={(tz) => setTimeZone(tz.value)} />
         </Stack>
       </Box>
     </Stack>

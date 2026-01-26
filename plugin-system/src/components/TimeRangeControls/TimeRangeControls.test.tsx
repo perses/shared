@@ -18,6 +18,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { ReactElement } from 'react';
 import { SnackbarProvider } from '@perses-dev/components';
 import { TimeRangeProviderBasic, TimeRangeProviderWithQueryParams } from '@perses-dev/plugin-system';
+import { MemoryRouter } from 'react-router-dom';
+import { QueryParamProvider } from 'use-query-params';
+import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
+import { useTimeZoneParams } from '../../runtime/TimeRangeProvider/query-params';
 import { TimeRangeControls } from './TimeRangeControls';
 
 /**
@@ -28,9 +32,13 @@ export function renderWithContext(ui: React.ReactElement, options?: Omit<RenderO
   const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });
 
   const BaseRender = (): ReactElement => (
-    <QueryClientProvider client={queryClient}>
-      <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>{ui}</SnackbarProvider>
-    </QueryClientProvider>
+    <MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <QueryParamProvider adapter={ReactRouter6Adapter}>
+          <SnackbarProvider anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>{ui}</SnackbarProvider>
+        </QueryParamProvider>
+      </QueryClientProvider>
+    </MemoryRouter>
   );
 
   return render(<BaseRender />, options);
@@ -40,6 +48,11 @@ describe('TimeRangeControls', () => {
   const testDefaultTimeRange = { pastDuration: '30m' as DurationString };
   const testDefaultRefreshInterval = '0s';
 
+  const ControlsWithTZ = (): ReactElement => {
+    const { timeZone, setTimeZone } = useTimeZoneParams('local');
+    return <TimeRangeControls timeZone={timeZone} onTimeZoneChange={(tz) => setTimeZone(tz.value)} />;
+  };
+
   const renderTimeRangeControls = (testURLParams: boolean): void => {
     renderWithContext(
       <>
@@ -48,14 +61,14 @@ describe('TimeRangeControls', () => {
             initialRefreshInterval={testDefaultRefreshInterval}
             initialTimeRange={testDefaultTimeRange}
           >
-            <TimeRangeControls />
+            <ControlsWithTZ />
           </TimeRangeProviderWithQueryParams>
         ) : (
           <TimeRangeProviderBasic
             initialRefreshInterval={testDefaultRefreshInterval}
             initialTimeRange={testDefaultTimeRange}
           >
-            <TimeRangeControls />
+            <ControlsWithTZ />
           </TimeRangeProviderBasic>
         )}
       </>,

@@ -11,7 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './graph';
-export * from './theme';
-export * from './timeOption';
-export * from './timeZoneOption';
+export interface TimeZoneOption {
+  value: string;
+  display: string;
+}
+
+/**
+ * Get all available timezone options
+ * @returns Array of timezone options
+ */
+export function getTimeZoneOptions(): TimeZoneOption[] {
+  const native =
+    (Intl as unknown as { supportedValuesOf?: (k: string) => string[] }).supportedValuesOf?.('timeZone') ?? [];
+  const values = ['local', 'UTC', ...native].filter((v, i, arr) => arr.indexOf(v) === i);
+  return values.map((value) => ({ value, display: value === 'local' ? 'Local' : value.replace(/_/g, ' ') }));
+}

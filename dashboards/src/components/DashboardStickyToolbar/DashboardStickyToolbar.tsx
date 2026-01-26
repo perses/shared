@@ -25,7 +25,7 @@ import {
 } from '@mui/material';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
-import { TimeRangeControls } from '@perses-dev/plugin-system';
+import { TimeRangeControls, useTimeZoneParams } from '@perses-dev/plugin-system';
 import { VariableList } from '../Variables';
 
 interface DashboardStickyToolbarProps {
@@ -40,6 +40,8 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): Reac
   const isSticky = scrollTrigger && props.initialVariableIsSticky && isPin;
 
   const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
+
+  const { timeZone, setTimeZone } = useTimeZoneParams('local');
 
   return (
     // marginBottom={-1} counteracts the marginBottom={1} on every variable input.
@@ -96,7 +98,7 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): Reac
               direction="row"
               justifyContent="end"
             >
-              <TimeRangeControls />
+              <TimeRangeControls timeZone={timeZone} onTimeZoneChange={(tz) => setTimeZone(tz.value)} />
             </Stack>
           )}
         </Box>
