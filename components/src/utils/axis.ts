@@ -23,10 +23,44 @@ export interface YAxisConfig {
   max?: number;
 }
 
-// Average character width in pixels (approximate for typical UI fonts)
-const AVG_CHAR_WIDTH = 7;
-// Base padding for axis labels (spacing, axis line, etc.)
-const AXIS_LABEL_PADDING = 12;
+// Character width multipliers (approximate for typical UI fonts)
+const CHAR_WIDTH_BASE = 8;
+const CHAR_WIDTH_MULTIPLIERS = {
+  dot: 0.5, // Dots and periods are very narrow
+  uppercase: 0.9,
+  lowercase: 0.65, // Lowercase letters slightly narrower
+  digit: 0.7,
+  symbol: 0.7, // Symbols like %, $, etc.
+  space: 0.5, // Spaces
+};
+const AXIS_LABEL_PADDING = 14;
+
+/**
+ * Calculate the width of a single character based on its type
+ */
+function getCharWidth(char?: string): number {
+  if (!char || char.length === 0) {
+    return 0;
+  }
+
+  if (char === '.' || char === ',' || char === ':') {
+    return CHAR_WIDTH_BASE * CHAR_WIDTH_MULTIPLIERS.dot;
+  }
+  if (char === ' ') {
+    return CHAR_WIDTH_BASE * CHAR_WIDTH_MULTIPLIERS.space;
+  }
+  if (char >= 'A' && char <= 'Z') {
+    return CHAR_WIDTH_BASE * CHAR_WIDTH_MULTIPLIERS.uppercase;
+  }
+  if (char >= 'a' && char <= 'z') {
+    return CHAR_WIDTH_BASE * CHAR_WIDTH_MULTIPLIERS.lowercase;
+  }
+  if (char >= '0' && char <= '9') {
+    return CHAR_WIDTH_BASE * CHAR_WIDTH_MULTIPLIERS.digit;
+  }
+  // Symbols like %, $, -, +, etc.
+  return CHAR_WIDTH_BASE * CHAR_WIDTH_MULTIPLIERS.symbol;
+}
 
 /**
  * Estimate the pixel width needed for an axis label based on the formatted max value.
@@ -34,7 +68,12 @@ const AXIS_LABEL_PADDING = 12;
  */
 function estimateLabelWidth(format: FormatOptions | undefined, maxValue: number): number {
   const formattedLabel = formatValue(maxValue, format);
-  return formattedLabel.length * AVG_CHAR_WIDTH + AXIS_LABEL_PADDING;
+  // Calculate width based on individual character types
+  let totalWidth = 0;
+  for (let i = 0; i < formattedLabel.length; i++) {
+    totalWidth += getCharWidth(formattedLabel[i]);
+  }
+  return totalWidth;
 }
 
 /*
@@ -92,12 +131,6 @@ export function getFormattedMultipleYAxes(
 
   // Additional Y axes (right side) for each unique format
   additionalFormats.forEach((format, index) => {
-    // For subsequent axes, add the width of the previous axis's labels
-    if (index > 0 && maxValues) {
-      const prevMaxValue = maxValues[index - 1] ?? 1000;
-      cumulativeOffset += estimateLabelWidth(additionalFormats[index - 1], prevMaxValue);
-    }
-
     const rightAxisConfig: YAXisComponentOption = {
       type: 'value',
       position: 'right',
@@ -115,6 +148,10 @@ export function getFormattedMultipleYAxes(
       show: baseAxis?.show,
     };
     axes.push(rightAxisConfig);
+    // For subsequent axes, add the width of the previous axis's labels
+    if (maxValues) {
+      cumulativeOffset += estimateLabelWidth(format, maxValues[index] ?? 1000) + AXIS_LABEL_PADDING;
+    }
   });
 
   return axes;
