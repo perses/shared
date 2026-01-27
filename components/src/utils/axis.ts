@@ -24,56 +24,24 @@ export interface YAxisConfig {
 }
 
 // Character width multipliers (approximate for typical UI fonts)
-const CHAR_WIDTH_BASE = 8;
-const CHAR_WIDTH_MULTIPLIERS = {
-  dot: 0.5, // Dots and periods are very narrow
-  uppercase: 0.9,
-  lowercase: 0.65, // Lowercase letters slightly narrower
-  digit: 0.7,
-  symbol: 0.7, // Symbols like %, $, etc.
-  space: 0.5, // Spaces
-};
-const AXIS_LABEL_PADDING = 14;
+const CHAR_WIDTH_BASE = 6;
+const AXIS_LABEL_PADDING = 10; // Extra padding to avoid label clipping
 
 /**
- * Calculate the width of a single character based on its type
- */
-function getCharWidth(char?: string): number {
-  if (!char || char.length === 0) {
-    return 0;
-  }
-
-  if (char === '.' || char === ',' || char === ':') {
-    return CHAR_WIDTH_BASE * CHAR_WIDTH_MULTIPLIERS.dot;
-  }
-  if (char === ' ') {
-    return CHAR_WIDTH_BASE * CHAR_WIDTH_MULTIPLIERS.space;
-  }
-  if (char >= 'A' && char <= 'Z') {
-    return CHAR_WIDTH_BASE * CHAR_WIDTH_MULTIPLIERS.uppercase;
-  }
-  if (char >= 'a' && char <= 'z') {
-    return CHAR_WIDTH_BASE * CHAR_WIDTH_MULTIPLIERS.lowercase;
-  }
-  if (char >= '0' && char <= '9') {
-    return CHAR_WIDTH_BASE * CHAR_WIDTH_MULTIPLIERS.digit;
-  }
-  // Symbols like %, $, -, +, etc.
-  return CHAR_WIDTH_BASE * CHAR_WIDTH_MULTIPLIERS.symbol;
-}
-
-/**
- * Estimate the pixel width needed for an axis label based on the formatted max value.
- * This provides dynamic spacing that adapts to the actual data scale.
+ * Estimate the pixel width needed for an axis label using Canvas API.
  */
 function estimateLabelWidth(format: FormatOptions | undefined, maxValue: number): number {
   const formattedLabel = formatValue(maxValue, format);
-  // Calculate width based on individual character types
-  let totalWidth = 0;
-  for (let i = 0; i < formattedLabel.length; i++) {
-    totalWidth += getCharWidth(formattedLabel[i]);
+  // Create a canvas element (reuse if possible for performance)
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) {
+    // Fallback to estimation if canvas not available
+    return formattedLabel.length * CHAR_WIDTH_BASE;
   }
-  return totalWidth;
+  context.font = '12px sans-serif';
+  const metrics = context.measureText(formattedLabel);
+  return metrics.width;
 }
 
 /*
@@ -120,6 +88,8 @@ export function getFormattedMultipleYAxes(
         formatter: (value: number): string => {
           return formatValue(value, baseFormat);
         },
+        // Let ECharts handle width automatically
+        overflow: 'truncate',
       },
     },
     baseAxis
