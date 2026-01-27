@@ -11,37 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { Switch, SwitchProps } from '@mui/material';
-import {
-  FormatOptions,
-  UNIT_CONFIG,
-  UnitConfig,
-  isUnitWithDecimalPlaces,
-  isUnitWithShortValues,
-  shouldShortenValues,
-} from '@perses-dev/core';
+import { FormatOptions, isUnitWithDecimalPlaces, isUnitWithShortValues, shouldShortenValues } from '@perses-dev/core';
 import { ReactElement } from 'react';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
+import { UnitSelector } from './UnitSelector';
 
 export interface FormatControlsProps {
   value: FormatOptions;
   onChange: (unit: FormatOptions) => void;
   disabled?: boolean;
 }
-
-type AutocompleteUnitOption = UnitConfig & {
-  id: NonNullable<FormatOptions['unit']>;
-};
-
-const KIND_OPTIONS: readonly AutocompleteUnitOption[] = Object.entries(UNIT_CONFIG)
-  .map<AutocompleteUnitOption>(([id, config]) => {
-    return {
-      ...config,
-      id: id as AutocompleteUnitOption['id'],
-      group: config.group || 'Decimal',
-    };
-  })
-  .filter((config) => !config.disableSelectorOption);
 
 const DECIMAL_PLACES_OPTIONS: Array<{ id: string; label: string; decimalPlaces?: number }> = [
   { id: 'default', label: 'Default', decimalPlaces: undefined },
@@ -62,8 +42,8 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
   const hasDecimalPlaces = isUnitWithDecimalPlaces(value);
   const hasShortValues = isUnitWithShortValues(value);
 
-  const handleKindChange = (_: unknown, newValue: AutocompleteUnitOption | null): void => {
-    onChange({ unit: newValue?.id || 'decimal' } as FormatOptions); // Fallback to 'decimal' if no unit is selected
+  const handleUnitChange = (newValue: FormatOptions | undefined): void => {
+    onChange(newValue || { unit: 'decimal' }); // Fallback to 'decimal' if undefined
   };
 
   const handleDecimalPlacesChange = ({
@@ -90,8 +70,6 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
     }
   };
 
-  const unitConfig = UNIT_CONFIG[value?.unit || 'decimal'];
-
   return (
     <>
       <OptionsEditorControl
@@ -106,16 +84,7 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
       />
       <OptionsEditorControl
         label="Unit"
-        control={
-          <SettingsAutocomplete<AutocompleteUnitOption, false, true>
-            value={{ id: value?.unit || 'decimal', ...unitConfig }}
-            options={KIND_OPTIONS}
-            groupBy={(option) => option.group ?? 'Decimal'}
-            onChange={handleKindChange}
-            disableClearable
-            disabled={disabled}
-          />
-        }
+        control={<UnitSelector value={value} onChange={handleUnitChange} disabled={disabled} />}
       />
       <OptionsEditorControl
         label="Decimals"

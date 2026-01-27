@@ -26,16 +26,20 @@ export const OptionsEditorControl = ({ label, control, description }: OptionsEdi
   // controls for a11y.
   const generatedControlId = useId('EditorSectionControl');
   const controlId = `${generatedControlId}-control`;
+  const labelId = `${generatedControlId}-label`;
 
   const controlProps = {
     id: controlId,
+    'aria-labelledby': labelId,
   };
 
   return (
     <FormControl>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Stack direction="row" alignItems="center" justifyContent="center">
-          <FormLabel htmlFor={controlId}>{label}</FormLabel>
+          <FormLabel id={labelId} htmlFor={controlId}>
+            {label}
+          </FormLabel>
           {description && (
             <InfoTooltip description={description} enterDelay={100}>
               <IconButton

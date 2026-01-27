@@ -74,12 +74,26 @@ export function SettingsAutocomplete<
 >({
   options,
   renderInput = (params): ReactElement => <TextField {...params} />,
+  id,
+  'aria-labelledby': ariaLabelledby,
   ...otherProps
 }: SettingsAutocompleteProps<OptionType, Multiple, DisableClearable>): ReactElement {
   const getOptionLabel: UseAutocompleteProps<OptionType, undefined, boolean, undefined>['getOptionLabel'] = (
     option
   ) => {
     return option.label ?? option.id;
+  };
+
+  // Merge id and aria-labelledby props into the input element for proper accessibility
+  // and form association, while still allowing custom renderInput implementations.
+  const handleRenderInput: AutocompleteProps<OptionType, Multiple, DisableClearable, false>['renderInput'] = (
+    params
+  ) => {
+    const mergedParams = {
+      ...params,
+      inputProps: { ...params.inputProps, id, 'aria-labelledby': ariaLabelledby },
+    };
+    return renderInput(mergedParams);
   };
 
   // Note: this component currently is not virtualized because it is specific
@@ -92,7 +106,7 @@ export function SettingsAutocomplete<
       getOptionDisabled={(option) => !!option.disabled}
       getOptionLabel={getOptionLabel}
       options={options}
-      renderInput={renderInput}
+      renderInput={handleRenderInput}
       renderOption={({ key, ...props }, option) => {
         return (
           <li key={key} {...props}>
