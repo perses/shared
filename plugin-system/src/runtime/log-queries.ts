@@ -18,6 +18,7 @@ import { useDatasourceStore } from './datasources';
 import { usePluginRegistry } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
 import { useVariableValues } from './variables';
+import { jitterDelay } from './utils';
 
 export type LogQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'LogQuery', PluginSpec>;
 export const LOG_QUERY_KEY = 'LogQuery';
@@ -46,6 +47,7 @@ export function useLogQueries(definitions: LogQueryDefinition[]): Array<UseQuery
         refetchOnReconnect: false,
         staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<LogQueryResult> => {
+          await jitterDelay();
           const plugin = await getPlugin(LOG_QUERY_KEY, logQueryKind);
           const data = await plugin.getLogData(definition.spec.plugin.spec, context, signal);
           return data;
