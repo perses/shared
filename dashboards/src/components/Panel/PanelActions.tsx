@@ -368,7 +368,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           {isVisible(PANEL_ACTIONS.FULLSCREEN) && readActions}
           {editActions}
           {/* Show plugin actions inside a menu if it gets crowded */}
-          {isVisible(PANEL_ACTIONS.PLUGIN_ACTIONS) && renderedPluginActions &&
+          {isVisible(PANEL_ACTIONS.PLUGIN_ACTIONS) &&
+            renderedPluginActions &&
             (pluginActions.length <= 1 ? (
               renderedPluginActions
             ) : (
