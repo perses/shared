@@ -18,6 +18,7 @@ import { useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-sys
 import { ReactNode, memo, useMemo, useState, useEffect } from 'react';
 import useResizeObserver from 'use-resize-observer';
 import { PanelContent } from './PanelContent';
+import type { PanelActionConfig } from './PanelActions';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 
 export interface PanelProps extends CardProps<'section'> {
@@ -45,6 +46,12 @@ export type PanelOptions = {
    * It will only be rendered when the panel is in edit mode.
    */
   extra?: (props: PanelExtraProps) => ReactNode;
+  /**
+   * Controls which actions are visible in the panel header.
+   * - undefined: show all actions (default Perses behavior)
+   * - defined entries: set per-action visibility (false hides)
+   */
+  actions?: PanelActionConfig;
 };
 
 export type PanelExtraProps = {
@@ -205,6 +212,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           links={definition.spec.links}
           pluginActions={pluginActions}
           showIcons={showIcons}
+          actions={panelOptions?.actions}
           sx={{ py: '2px', pl: '8px', pr: '2px' }}
           dimension={contentDimensions}
         />

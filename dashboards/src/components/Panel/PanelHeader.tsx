@@ -32,8 +32,9 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   viewQueriesHandler?: PanelActionsProps['viewQueriesHandler'];
   readHandlers?: PanelActionsProps['readHandlers'];
   editHandlers?: PanelActionsProps['editHandlers'];
-  pluginActions?: ReactNode[]; // Add pluginActions prop
+  pluginActions?: ReactNode[];
   showIcons: PanelOptions['showIcons'];
+  actions?: PanelOptions['actions'];
   dimension?: { width: number };
 }
 
@@ -49,6 +50,7 @@ export function PanelHeader({
   extra,
   pluginActions,
   showIcons,
+  actions,
   viewQueriesHandler,
   dimension,
   ...rest
@@ -103,6 +105,7 @@ export function PanelHeader({
             queryResults={queryResults}
             pluginActions={pluginActions}
             showIcons={showIcons}
+            actions={actions}
           />
         </Stack>
       }
