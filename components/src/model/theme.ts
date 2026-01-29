@@ -29,6 +29,7 @@ export interface PersesChartsTheme {
   sparkline: {
     width: number;
     color: string;
+    areaOpacity: number;
   };
   /**
    * Theming for the container that wraps a chart.
