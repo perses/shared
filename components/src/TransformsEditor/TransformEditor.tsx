@@ -11,205 +11,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  Autocomplete,
-  FormControlLabel,
-  MenuItem,
-  Stack,
-  StackProps,
-  Switch,
-  Typography,
-  TextField as MuiTextField,
-} from '@mui/material';
-import {
-  JoinByColumnValueTransform,
-  MergeColumnsTransform,
-  MergeIndexedColumnsTransform,
-  MergeSeriesTransform,
-  Transform,
-} from '@perses-dev/core';
+import { MenuItem, Stack, StackProps, Typography } from '@mui/material';
+import { Transform } from '@perses-dev/core';
 import { ReactElement } from 'react';
 import { TextField } from '../controls';
+import { JoinByColumnValueTransformEditor } from './JoinByColumnValueTransformEditor';
+import { MergeColumnsTransformEditor } from './MergeColumnsTransformEditor';
+import { MergeIndexedColumnsTransformEditor } from './MergeIndexedColumnsTransformEditor';
+import { MergeSeriesTransformEditor } from './MergeSeriesTransformEditor';
 
-interface TransformSpecEditorProps<Spec> {
+export interface TransformSpecEditorProps<Spec> {
   value: Spec;
   onChange: (transform: Spec) => void;
-}
-
-function JoinByColumnValueTransformEditor({
-  value,
-  onChange,
-}: TransformSpecEditorProps<JoinByColumnValueTransform>): ReactElement {
-  return (
-    <Stack direction="row">
-      <Autocomplete
-        freeSolo
-        multiple
-        id="join-columns"
-        sx={{ width: '100%' }}
-        options={[]} // TODO: autofill columns name when query results is available to panel editors
-        value={value.spec.columns ?? []}
-        renderInput={(params) => <MuiTextField {...params} variant="outlined" label="Columns" required />}
-        onChange={(_, columns) => {
-          onChange({
-            ...value,
-            spec: {
-              ...value.spec,
-              columns: columns,
-            },
-          });
-        }}
-      />
-      <FormControlLabel
-        label="Enabled"
-        labelPlacement="start"
-        control={
-          <Switch
-            value={!value.spec.disabled}
-            checked={!value.spec.disabled}
-            onChange={(e) =>
-              onChange({
-                ...value,
-                spec: { ...value.spec, disabled: !e.target.checked },
-              })
-            }
-          />
-        }
-      />
-    </Stack>
-  );
-}
-
-function MergeColumnsTransformEditor({
-  value,
-  onChange,
-}: TransformSpecEditorProps<MergeColumnsTransform>): ReactElement {
-  return (
-    <Stack direction="row" gap={1} alignItems="center">
-      <Autocomplete
-        freeSolo
-        multiple
-        id="merge-columns-columns"
-        sx={{ width: '100%' }}
-        options={[]}
-        value={value.spec.columns ?? []}
-        renderInput={(params) => <MuiTextField {...params} variant="outlined" label="Columns" required />}
-        onChange={(_, columns) => {
-          onChange({
-            ...value,
-            spec: {
-              ...value.spec,
-              columns: columns,
-            },
-          });
-        }}
-      />
-
-      <TextField
-        id="merge-columns-name"
-        variant="outlined"
-        label="Output Name"
-        value={value.spec.name ?? ''}
-        sx={{ width: '100%' }}
-        onChange={(name) => {
-          onChange({
-            ...value,
-            spec: {
-              ...value.spec,
-              name: name,
-            },
-          });
-        }}
-        required
-      />
-      <FormControlLabel
-        label="Enabled"
-        labelPlacement="start"
-        control={
-          <Switch
-            value={!value.spec.disabled}
-            checked={!value.spec.disabled}
-            onChange={(e) =>
-              onChange({
-                ...value,
-                spec: { ...value.spec, disabled: !e.target.checked },
-              })
-            }
-          />
-        }
-      />
-    </Stack>
-  );
-}
-
-function MergeIndexedColumnsTransformEditor({
-  value,
-  onChange,
-}: TransformSpecEditorProps<MergeIndexedColumnsTransform>): ReactElement {
-  return (
-    <Stack direction="row">
-      <TextField
-        id="merge-indexed-columns"
-        variant="outlined"
-        label="Column"
-        placeholder="Example: 'value' for merging 'value #1', 'value #2' and 'value #...'"
-        value={value.spec.column ?? ''}
-        sx={{ width: '100%' }}
-        onChange={(column) => {
-          onChange({
-            ...value,
-            spec: { ...value.spec, column: column },
-          });
-        }}
-        required
-      />
-      <FormControlLabel
-        label="Enabled"
-        labelPlacement="start"
-        control={
-          <Switch
-            value={!value.spec.disabled}
-            checked={!value.spec.disabled}
-            onChange={(e) =>
-              onChange({
-                ...value,
-                spec: { ...value.spec, disabled: !e.target.checked },
-              })
-            }
-          />
-        }
-      />
-    </Stack>
-  );
-}
-
-function MergeSeriesTransformEditor({ value, onChange }: TransformSpecEditorProps<MergeSeriesTransform>): ReactElement {
-  return (
-    <Stack direction="row">
-      <FormControlLabel
-        label="Enabled"
-        labelPlacement="start"
-        control={
-          <Switch
-            value={!value.spec.disabled}
-            checked={!value.spec.disabled}
-            onChange={(e) =>
-              onChange({
-                ...value,
-                spec: { ...value.spec, disabled: !e.target.checked },
-              })
-            }
-          />
-        }
-      />
-    </Stack>
-  );
 }
 
 export interface TransformEditorProps extends Omit<StackProps, 'children' | 'value' | 'onChange'> {
   value: Transform;
   onChange: (transform: Transform) => void;
 }
+
+type TransformKindInfo = Record<Transform['kind'], { label: string; description: string }>;
+
+export const TRANSFORMS_KINDS: TransformKindInfo = {
+  JoinByColumnValue: {
+    label: 'Join by column value',
+    description: 'Regroup rows with equal cell value in a column',
+  },
+  MergeColumns: {
+    label: 'Merge columns',
+    description: 'Multiple columns are merged to one column',
+  },
+  MergeIndexedColumns: {
+    label: 'Merge indexed columns',
+    description: 'Indexed columns are merged to one column',
+  },
+  MergeSeries: {
+    label: 'Merge series',
+    description: 'Series will be merged by their labels',
+  },
+};
 
 export function TransformEditor({ value, onChange, ...props }: TransformEditorProps): ReactElement {
   return (
@@ -220,30 +60,14 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
         value={value.kind}
         onChange={(kind) => onChange({ ...value, kind: kind as unknown as Transform['kind'] } as Transform)}
       >
-        <MenuItem value="JoinByColumnValue">
-          <Stack>
-            <Typography>Join by column value</Typography>
-            <Typography variant="caption">Regroup rows with equal cell value in a column</Typography>
-          </Stack>
-        </MenuItem>
-        <MenuItem value="MergeColumns">
-          <Stack>
-            <Typography>Merge columns</Typography>
-            <Typography variant="caption">Multiple columns are merged to one column</Typography>
-          </Stack>
-        </MenuItem>
-        <MenuItem value="MergeIndexedColumns">
-          <Stack>
-            <Typography>Merge indexed columns</Typography>
-            <Typography variant="caption">Indexed columns are merged to one column</Typography>
-          </Stack>
-        </MenuItem>
-        <MenuItem value="MergeSeries">
-          <Stack>
-            <Typography>Merge series</Typography>
-            <Typography variant="caption">Series will be merged by their labels</Typography>
-          </Stack>
-        </MenuItem>
+        {Object.entries(TRANSFORMS_KINDS).map(([kind, info]) => (
+          <MenuItem data-testid={`menu-item-${kind}`} key={kind} value={kind}>
+            <Stack>
+              <Typography>{info.label}</Typography>
+              <Typography variant="caption">{info.description}</Typography>
+            </Stack>
+          </MenuItem>
+        ))}
       </TextField>
       {value.kind === 'JoinByColumnValue' && <JoinByColumnValueTransformEditor value={value} onChange={onChange} />}
       {value.kind === 'MergeColumns' && <MergeColumnsTransformEditor value={value} onChange={onChange} />}
