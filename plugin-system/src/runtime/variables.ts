@@ -11,30 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, useContext, useMemo } from 'react';
-import { VariableValue } from '@perses-dev/core';
+import {
+  VariableOption,
+  VariableState,
+  VariableStateMap,
+  parseVariables,
+  replaceVariables,
+} from '@perses-dev/components';
 import { immerable } from 'immer';
-import { VariableOption } from '../model';
-import { parseVariables, replaceVariables } from '../utils';
+import { createContext, useContext, useMemo } from 'react';
 import { useBuiltinVariableValues } from './builtin-variables';
 
-export type VariableState = {
-  value: VariableValue;
-  options?: VariableOption[];
-  loading: boolean;
-  error?: Error;
-  /**
-   * If a local variable is overriding an external variable, local var will have the flag ``overriding=true``.
-   */
-  overriding?: boolean;
-  /**
-   * If a local variable is overriding an external variable, external var will have the flag ``overridden=true``.
-   */
-  overridden?: boolean;
-  defaultValue?: VariableValue;
-};
-
-export type VariableStateMap = Record<string, VariableState>;
+// Re-export types from @perses-dev/components for backwards compatibility
+export type { VariableOption, VariableState, VariableStateMap };
 
 /**
  * Structure used as key in the {@link VariableStoreStateMap}.

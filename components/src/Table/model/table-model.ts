@@ -23,7 +23,7 @@ import {
   RowSelectionState,
   SortingState,
 } from '@tanstack/react-table';
-import { CSSProperties } from 'react';
+import { CSSProperties, ReactNode } from 'react';
 
 export const DEFAULT_COLUMN_WIDTH = 150;
 export const DEFAULT_COLUMN_HEIGHT = 40;
@@ -168,6 +168,16 @@ export interface TableProps<TableData> {
    * is enabled. If not set, a default color is used.
    */
   getCheckboxColor?: (rowData: TableData) => string;
+
+  /**
+   * Item actions to render for each row.
+   */
+  getItemActions?: ({ id, data }: { id: string; data: unknown }) => ReactNode[];
+
+  /**
+   * Item actions should be created
+   */
+  hasItemActions?: boolean;
 }
 
 function calculateTableCellHeight(lineHeight: CSSProperties['lineHeight'], paddingY: string): number {

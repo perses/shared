@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parseVariables, replaceVariable, replaceVariables } from './variables';
+import { parseVariables, replaceVariable, replaceVariables } from './variable-interpolation';
 
 describe('parseVariables()', () => {
   const tests = [
@@ -152,6 +152,15 @@ describe('replaceVariables() with custom formats', () => {
         var2: { value: 'world', loading: false },
       },
       expected: 'hello ["perses","prometheus"] ["world"]',
+    },
+    // json stringified object
+    {
+      text: 'hello ${var1:json} ${var2:json}',
+      state: {
+        var1: { value: ['{"one":"perses","two":"prometheus"}', '{"second":"value"}'], loading: false },
+        var2: { value: 'world', loading: false },
+      },
+      expected: 'hello [{"one":"perses","two":"prometheus"},{"second":"value"}] ["world"]',
     },
     // lucene
     {

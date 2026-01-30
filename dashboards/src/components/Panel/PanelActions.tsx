@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Stack, Box, Popover, CircularProgress, styled, PopoverPosition } from '@mui/material';
-import { isValidElement, PropsWithChildren, ReactNode, useMemo, useState } from 'react';
+import { isValidElement, PropsWithChildren, ReactElement, ReactNode, useMemo, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import { QueryData } from '@perses-dev/plugin-system';
 import DatabaseSearch from 'mdi-material-ui/DatabaseSearch';
@@ -26,6 +26,7 @@ import MenuIcon from 'mdi-material-ui/Menu';
 import AlertIcon from 'mdi-material-ui/Alert';
 import AlertCircleIcon from 'mdi-material-ui/AlertCircle';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
+import LightningBoltIcon from 'mdi-material-ui/LightningBolt';
 import { Link, Notice } from '@perses-dev/core';
 import {
   ARIA_LABEL_TEXT,
@@ -64,6 +65,8 @@ export interface PanelActionsProps {
   };
   queryResults: QueryData[];
   pluginActions?: ReactNode[];
+  itemActions?: ReactNode[];
+  areItemActionsDisabled?: boolean;
   showIcons: PanelOptions['showIcons'];
 }
 
@@ -85,6 +88,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   links,
   queryResults,
   pluginActions = [],
+  itemActions = [],
   showIcons,
 }) => {
   const descriptionAction = useMemo((): ReactNode | undefined => {
@@ -266,7 +270,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         <OnHover>
           <OverflowMenu title={title}>
             {descriptionAction} {linksAction} {queryStateIndicator} {noticesIndicator} {extraActions} {viewQueryAction}
-            {readActions} {pluginActions}
+            {readActions} {pluginActions} {itemActions}
             {editActions}
           </OverflowMenu>
           {moveAction}
@@ -290,7 +294,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           {extraActions}
           {readActions}
           <OverflowMenu title={title}>
-            {editActions} {viewQueryAction} {pluginActions}
+            {editActions} {viewQueryAction} {pluginActions} {itemActions}
           </OverflowMenu>
           {moveAction}
         </OnHover>
@@ -315,6 +319,15 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
           {readActions} {editActions}
           {/* Show plugin actions inside a menu if it gets crowded */}
           {pluginActions.length <= 1 ? pluginActions : <OverflowMenu title={title}>{pluginActions}</OverflowMenu>}
+          {itemActions.length <= 1 ? (
+            itemActions
+          ) : (
+            <InfoTooltip description={`${itemActions.length} actions`}>
+              <OverflowMenu icon={<LightningBoltIcon fontSize="inherit" />} direction="column" title={title}>
+                {itemActions}
+              </OverflowMenu>
+            </InfoTooltip>
+          )}
           {moveAction}
         </OnHover>
       </ConditionalBox>
@@ -322,7 +335,9 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   );
 };
 
-const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children, title }) => {
+const OverflowMenu: React.FC<
+  PropsWithChildren<{ title: string; icon?: ReactElement; direction?: 'row' | 'column' }>
+> = ({ children, title, icon, direction = 'row' }) => {
   const [anchorPosition, setAnchorPosition] = useState<PopoverPosition>();
 
   // do not show overflow menu if there is no content (for example, edit actions are hidden)
@@ -351,7 +366,7 @@ const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children
         aria-label={ARIA_LABEL_TEXT.showPanelActions(title)}
         size="small"
       >
-        <MenuIcon fontSize="inherit" />
+        {icon ?? <MenuIcon fontSize="inherit" />}
       </HeaderIconButton>
       <Popover
         id={id}
@@ -364,7 +379,7 @@ const OverflowMenu: React.FC<PropsWithChildren<{ title: string }>> = ({ children
           horizontal: 'left',
         }}
       >
-        <Stack direction="row" alignItems="center" sx={{ padding: 1 }} onClick={handleClose}>
+        <Stack direction={direction} alignItems="center" sx={{ padding: 1 }} onClick={handleClose}>
           {children}
         </Stack>
       </Popover>

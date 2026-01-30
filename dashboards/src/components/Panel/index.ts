@@ -14,3 +14,4 @@
 export * from './HeaderIconButton';
 export * from './Panel';
 export * from './PanelPluginLoader';
+export * from './useSelectionItemActions';
