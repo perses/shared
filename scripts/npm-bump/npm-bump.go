@@ -20,7 +20,6 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/perses/perses/scripts/pkg/command"
 	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
 )
@@ -28,16 +27,17 @@ import (
 var versionPattern = regexp.MustCompile(`^\d+\.\d+\.\d+(?:-[\w\d.]+)?$`)
 
 func updatePackageVersion(workspaces []string, workspacePath string, newVersion string) error {
-	// Use npm version command with --no-git-tag-version to avoid creating git tags
-	// and --allow-same-version to allow setting the same version
-	if err := command.RunInDirectory(workspacePath, "npm", "version", newVersion, "--no-git-tag-version", "--allow-same-version"); err != nil {
-		return err
-	}
 	pkgPath := filepath.Join(workspacePath, "package.json")
 	data, err := os.ReadFile(pkgPath)
 	if err != nil {
 		logrus.WithError(err).Fatalf("unable to read the file %s", pkgPath)
 	}
+
+	// First, update the package version in the package.json
+	bumpVersion := regexp.MustCompile(`"version":\s*"[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?"`)
+	data = bumpVersion.ReplaceAll(data, []byte(fmt.Sprintf(`"version": "%s"`, newVersion)))
+
+	// Then, update all @perses-dev/* dependencies to the new version
 	for _, workspace := range workspaces {
 		bumpNPMDeps := regexp.MustCompile(fmt.Sprintf(`"@perses-dev/%s":\s*"(\^)?[0-9]+\.[0-9]+\.[0-9]+(-(alpha|beta|rc)\.[0-9]+)?"`, workspace))
 		data = bumpNPMDeps.ReplaceAll(data, []byte(fmt.Sprintf(`"@perses-dev/%s": "%s"`, workspace, newVersion)))
@@ -67,6 +67,7 @@ func main() {
 		return
 	}
 
+	// First, update the root package.json
 	if err := updatePackageVersion(workspaces, ".", version); err != nil {
 		logrus.WithError(err).Fatal("failed to update root package.json")
 	}
