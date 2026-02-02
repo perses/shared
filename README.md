@@ -85,33 +85,67 @@ npm run reinstall
 npm run clear-turbo-cache
 ```
 
-### Linking with the Perses UI
+### Linking with Local Projects
 
-To link these shared libraries with your local Perses UI development environment, use the provided script:
+To link these shared libraries with your local Perses UI or plugins development environment, use the provided script:
 
 ```bash
 ./scripts/link-with-perses/link-with-perses.sh
 ```
 
-The script will back up your current dependencies, build and link the shared libraries for local development. It will search  for the Perses UI app as a sibling directory by default. See the script helper for more details:
+The script will back up your current dependencies, build and link the shared libraries for local development. By default, it will search for the Perses UI app as a sibling directory. You can also link with plugins by using the `--plugins` flag.
+
+For detailed usage information:
 
 ```bash
 ./scripts/link-with-perses/link-with-perses.sh --help
 ```
 
-> [!WARNING]
-> As the shared dependencies are file references, you cannot build the Perses UI for production while linked to local shared libraries. Make sure to unlink the shared libraries before building for production.
+Common commands:
 
-#### Regular workflow
+```bash
+# Link with Perses UI (default, sibling directory at ../perses)
+./scripts/link-with-perses/link-with-perses.sh link
+
+# Link with Perses UI at custom location
+./scripts/link-with-perses/link-with-perses.sh link --perses ~/projects/perses
+
+# Link with plugins (sibling directory at ../plugins)
+./scripts/link-with-perses/link-with-perses.sh link --plugins
+
+# Link with plugins at custom location
+./scripts/link-with-perses/link-with-perses.sh link --plugins ~/projects/plugins
+
+# Check link status
+./scripts/link-with-perses/link-with-perses.sh status --plugins
+
+# Unlink
+./scripts/link-with-perses/link-with-perses.sh unlink
+```
+
+> [!WARNING]
+> As the shared dependencies are file references, you cannot build for production while linked to local shared libraries. Make sure to unlink the shared libraries before building for production.
+
+#### Workflow for Perses UI Development
 
 1. Clone the perses repo [https://github.com/perses/perses](https://github.com/perses/perses)
 2. From the perses `ui` folder install the ui dependencies with `npm install`.
 3. From the perses root folder, start the Perses API in dev mode with `./scripts/api_backend_dev.sh`.
 4. Clone this shared repo and install dependencies with `npm install`. ⚠️ Do not rename the cloned repo, otherwise it breaks the paths resolution on the perses repo side.
-5. From the shared root folder, run `./scripts/link-with-perses/link-with-perses.sh`. If your perses repo is in a different location than a sibling directory, use the `--path` option to specify its location.
+5. From the shared root folder, run `./scripts/link-with-perses/link-with-perses.sh link`. If your perses repo is in a different location than a sibling directory, use the `--perses` option to specify its location.
 6. From the perses `ui/app` folder, run `npm run start:shared` to start the Perses UI in dev mode using the linked shared libraries with hot module reloading.
 7. Make changes to the shared libraries and see them reflected in your local Perses UI.
 8. When done, run `./scripts/link-with-perses/link-with-perses.sh unlink` to restore the original dependencies in the Perses UI.
+
+#### Workflow for Plugins Development
+
+1. Clone the plugins repo [https://github.com/perses/plugins](https://github.com/perses/plugins)
+2. From the plugins root folder install dependencies with `npm install`.
+3. Clone this shared repo and install dependencies with `npm install`.
+4. From the shared root folder, run `./scripts/link-with-perses/link-with-perses.sh link --plugins`. If your plugins repo is in a different location than a sibling directory, use the `--plugins` option with the custom path.
+5. From the plugins root folder, run the appropriate development command for your plugin.
+6. Make changes to the shared libraries and see them reflected in your plugins.
+7. When done, run `./scripts/link-with-perses/link-with-perses.sh unlink --plugins` to restore the original dependencies in the plugins repo.
 
 ## Contributing
 
