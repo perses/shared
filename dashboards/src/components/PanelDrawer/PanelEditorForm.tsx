@@ -32,12 +32,13 @@ import { PanelQueriesSharedControls } from './PanelQueriesSharedControls';
 export interface PanelEditorFormProps {
   initialValues: PanelEditorValues;
   initialAction: Action;
+  panelKey?: string;
   onSave: (values: PanelEditorValues) => void;
   onClose: () => void;
 }
 
 export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
-  const { initialValues, initialAction, onSave, onClose } = props;
+  const { initialValues, initialAction, panelKey, onSave, onClose } = props;
   const panelGroups = useListPanelGroups();
   const { panelDefinition, setName, setDescription, setLinks, setQueries, setPlugin, setPanelDefinition } =
     usePanelEditor(initialValues.panelDefinition);
@@ -142,7 +143,10 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
             borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
           }}
         >
-          <Typography variant="h2">{titleAction} Panel</Typography>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Typography variant="h2">{titleAction} Panel</Typography>
+            {panelKey && <Typography variant="subtitle1">(ID: {panelKey})</Typography>}
+          </Stack>
           <Stack direction="row" spacing={1} marginLeft="auto">
             <Button variant="contained" disabled={!form.formState.isValid} onClick={handleSubmit}>
               {submitText}
