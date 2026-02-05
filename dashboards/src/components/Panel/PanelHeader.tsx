@@ -59,7 +59,7 @@ export function PanelHeader({
   const titleElementId = `${id}-title`;
   const descriptionTooltipId = `${id}-description`;
 
-  const title = useReplaceVariablesInString(rawTitle) as string;
+  const title = useReplaceVariablesInString(rawTitle);
   const description = useReplaceVariablesInString(rawDescription);
   const variableState = useAllVariableValues();
 
@@ -76,62 +76,97 @@ export function PanelHeader({
 
   return (
     <>
-      <CardHeader
-        id={id}
-        component="header"
-        aria-labelledby={titleElementId}
-        aria-describedby={descriptionTooltipId}
-        disableTypography
-        title={
-          <Stack direction="row" alignItems="center" height="var(--panel-header-height, 30px)">
-            <Tooltip title={title} disableHoverListener={!isEllipsisActive}>
-              <Typography
-                id={titleElementId}
-                variant="subtitle1"
-                ref={textRef}
-                sx={{
-                  // `minHeight` guarantees that the header has the correct height
-                  // when there is no title (i.e. in the preview)
-                  lineHeight: '24px',
-                  minHeight: '26px',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}
-              >
-                {title}
-              </Typography>
-            </Tooltip>
-            <PanelActions
-              title={title}
-              description={description}
-              descriptionTooltipId={descriptionTooltipId}
-              links={links}
-              readHandlers={readHandlers}
-              editHandlers={editHandlers}
-              viewQueriesHandler={viewQueriesHandler}
-              extra={extra}
-              queryResults={queryResults}
-              pluginActions={pluginActions}
-              itemActions={actionButtons}
-              showIcons={showIcons}
-            />
-          </Stack>
-        }
-        sx={combineSx(
-          (theme) => ({
-            containerType: 'inline-size',
-            containerName: HEADER_ACTIONS_CONTAINER_NAME,
-            padding: theme.spacing(1),
-            borderBottom: `solid 1px ${theme.palette.divider}`,
-            '.MuiCardHeader-content': {
-              overflow: 'hidden',
+      {title ? (
+        <CardHeader
+          id={id}
+          component="header"
+          aria-labelledby={titleElementId}
+          aria-describedby={descriptionTooltipId}
+          disableTypography
+          title={
+            <Stack direction="row" alignItems="center" height="var(--panel-header-height, 30px)">
+              <Tooltip title={title} disableHoverListener={!isEllipsisActive}>
+                <Typography
+                  id={titleElementId}
+                  variant="subtitle1"
+                  ref={textRef}
+                  sx={{
+                    // `minHeight` guarantees that the header has the correct height
+                    // when there is no title (i.e. in the preview)
+                    lineHeight: '24px',
+                    minHeight: '26px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                >
+                  {title}
+                </Typography>
+              </Tooltip>
+              <PanelActions
+                title={title}
+                description={description}
+                descriptionTooltipId={descriptionTooltipId}
+                links={links}
+                readHandlers={readHandlers}
+                editHandlers={editHandlers}
+                viewQueriesHandler={viewQueriesHandler}
+                extra={extra}
+                queryResults={queryResults}
+                pluginActions={pluginActions}
+                itemActions={actionButtons}
+                showIcons={showIcons}
+              />
+            </Stack>
+          }
+          sx={combineSx(
+            (theme) => ({
+              containerType: 'inline-size',
+              containerName: HEADER_ACTIONS_CONTAINER_NAME,
+              padding: theme.spacing(1),
+              borderBottom: `solid 1px ${theme.palette.divider}`,
+              '.MuiCardHeader-content': {
+                overflow: 'hidden',
+              },
+            }),
+            sx
+          )}
+          {...rest}
+        />
+      ) : (
+        <Stack
+          id={id}
+          component="header"
+          aria-describedby={descriptionTooltipId}
+          sx={combineSx(
+            {
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              zIndex: 5,
+              containerType: 'inline-size',
+              containerName: HEADER_ACTIONS_CONTAINER_NAME,
             },
-          }),
-          sx
-        )}
-        {...rest}
-      />
+            sx
+          )}
+          {...rest}
+        >
+          <PanelActions
+            title={title}
+            description={description}
+            descriptionTooltipId={descriptionTooltipId}
+            links={links}
+            readHandlers={readHandlers}
+            editHandlers={editHandlers}
+            viewQueriesHandler={viewQueriesHandler}
+            extra={extra}
+            queryResults={queryResults}
+            pluginActions={pluginActions}
+            itemActions={actionButtons}
+            showIcons={showIcons}
+          />
+        </Stack>
+      )}
       {confirmDialog}
     </>
   );

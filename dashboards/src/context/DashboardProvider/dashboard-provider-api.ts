@@ -227,6 +227,22 @@ export function useDeletePanelGroupDialog(): {
   };
 }
 
+export function usePanelKey(panelGroupItemId?: PanelGroupItemId): string | undefined {
+  const panelKey = useDashboardStore(
+    useCallback(
+      (store) => {
+        if (panelGroupItemId === undefined) {
+          return undefined;
+        }
+
+        return store.panelGroups[panelGroupItemId.panelGroupId]?.itemPanelKeys[panelGroupItemId.panelGroupItemLayoutId];
+      },
+      [panelGroupItemId]
+    )
+  );
+  return panelKey;
+}
+
 /**
  * Gets an individual panel in the store. Throws if the panel can't be found.
  */

@@ -29,7 +29,7 @@ import { ReactElement, useState, useMemo, ReactNode, useCallback } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PanelEditorValues } from '@perses-dev/core';
 import { useVariableValues, VariableContext } from '@perses-dev/plugin-system';
-import { usePanelEditor } from '../../context';
+import { usePanelEditor, usePanelKey } from '../../context';
 import { PanelEditorForm } from './PanelEditorForm';
 
 /**
@@ -37,6 +37,7 @@ import { PanelEditorForm } from './PanelEditorForm';
  */
 export const PanelDrawer = (): ReactElement => {
   const panelEditor = usePanelEditor();
+  const panelKey = usePanelKey(panelEditor?.panelGroupItemId);
 
   // When the user clicks close, start closing but don't call the store yet to keep values stable during animtation
   const [isClosing, setIsClosing] = useState(false);
@@ -77,13 +78,14 @@ export const PanelDrawer = (): ReactElement => {
       <Drawer
         isOpen={isOpen}
         onClose={handleClickOut}
-        SlideProps={{ onExited: handleExited }}
+        slotProps={{ transition: { onExited: handleExited } }}
         data-testid="panel-editor"
       >
         {/* When the drawer is opened, we should have panel editor state (this also ensures the form state gets reset between opens) */}
         {panelEditor && (
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <PanelEditorForm
+              panelKey={panelKey}
               initialAction={panelEditor.mode}
               initialValues={panelEditor.initialValues}
               onSave={handleSave}
@@ -93,7 +95,7 @@ export const PanelDrawer = (): ReactElement => {
         )}
       </Drawer>
     );
-  }, [handleExited, handleSave, isOpen, panelEditor]);
+  }, [handleExited, handleSave, isOpen, panelEditor, panelKey]);
 
   // If the panel editor is using a repeat variable, we need to wrap the drawer in a VariableContext.Provider
   if (panelEditor?.panelGroupItemId?.repeatVariable) {

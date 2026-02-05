@@ -46,7 +46,7 @@ const noticeTypeToIcon: Record<Notice['type'], ReactNode> = {
 };
 
 export interface PanelActionsProps {
-  title: string;
+  title?: string;
   description?: string;
   descriptionTooltipId: string;
   links?: Link[];
@@ -336,7 +336,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 };
 
 const OverflowMenu: React.FC<
-  PropsWithChildren<{ title: string; icon?: ReactElement; direction?: 'row' | 'column' }>
+  PropsWithChildren<{ title?: string; icon?: ReactElement; direction?: 'row' | 'column' }>
 > = ({ children, title, icon, direction = 'row' }) => {
   const [anchorPosition, setAnchorPosition] = useState<PopoverPosition>();
 

@@ -45,11 +45,14 @@ export const ARIA_LABEL_TEXT = {
   moveGroupDown: (groupName: string): string => `move group ${groupName} down`,
   moveGroupUp: (groupName: string): string => `move group ${groupName} up`,
   // Panel buttons
-  viewPanel: (panelName: string): string => `toggle panel ${panelName} view mode`,
-  editPanel: (panelName: string): string => `edit panel ${panelName}`,
-  duplicatePanel: (panelName: string): string => `duplicate panel ${panelName}`,
-  deletePanel: (panelName: string): string => `delete panel ${panelName}`,
-  showPanelActions: (panelName: string): string => `show panel actions for ${panelName}`,
-  movePanel: (panelName: string): string => `move panel ${panelName}`,
-  openQueryView: (panelName: string): string => `open query view for panel ${panelName}`,
+  viewPanel: (panelName?: string): string =>
+    panelName ? `toggle panel ${panelName} view mode` : 'toggle panel view mode',
+  editPanel: (panelName?: string): string => (panelName ? `edit panel ${panelName}` : 'edit panel'),
+  duplicatePanel: (panelName?: string): string => (panelName ? `duplicate panel ${panelName}` : 'duplicate panel'),
+  deletePanel: (panelName?: string): string => (panelName ? `delete panel ${panelName}` : 'delete panel'),
+  showPanelActions: (panelName?: string): string =>
+    panelName ? `show panel actions for ${panelName}` : 'show panel actions',
+  movePanel: (panelName?: string): string => (panelName ? `move panel ${panelName}` : 'move panel'),
+  openQueryView: (panelName?: string): string =>
+    panelName ? `open query view for panel ${panelName}` : 'open query view for panel',
 };
