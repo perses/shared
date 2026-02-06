@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { Box, Checkbox, Divider, FormControlLabel, Theme, Typography, ClickAwayListener } from '@mui/material';
+import { Box, Checkbox, Divider, FormControlLabel, Theme, Typography, Popover } from '@mui/material';
 
 interface Props {
   id: string;
@@ -22,6 +22,8 @@ interface Props {
   handleFilterClose: () => void;
   theme: Theme;
   width: string;
+  anchor: HTMLButtonElement;
+  open: boolean;
 }
 
 export const ColumnFilterDropdown = ({
@@ -32,48 +34,25 @@ export const ColumnFilterDropdown = ({
   handleFilterClose,
   theme,
   width,
+  open,
+  anchor,
 }: Props): ReactElement => {
   const values = [...new Set(allValues)].filter((v) => v !== null).sort();
 
   if (!values.length) {
     return (
-      <ClickAwayListener onClickAway={handleFilterClose}>
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            zIndex: 9999,
-            marginTop: '4px',
-          }}
-        >
-          <Box
-            data-filter-dropdown
-            data-testid={id}
-            sx={{
-              width: width,
-              padding: 10,
-              backgroundColor: theme.palette.background.paper,
-              border: `1px solid ${theme.palette.divider}`,
-              boxShadow: theme.shadows[4],
-            }}
-          >
-            <Typography sx={{ color: theme.palette.text.secondary, fontSize: 14 }}>No values found</Typography>
-          </Box>
-        </Box>
-      </ClickAwayListener>
-    );
-  }
-
-  return (
-    <ClickAwayListener onClickAway={handleFilterClose}>
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '100%',
-          left: 0,
-          zIndex: 9999,
-          marginTop: '4px',
+      <Popover
+        sx={{ marginTop: '4px', marginLeft: '8px' }}
+        open={open}
+        anchorEl={anchor}
+        onClose={handleFilterClose}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
         }}
       >
         <Box
@@ -81,60 +60,91 @@ export const ColumnFilterDropdown = ({
           data-testid={id}
           sx={{
             width: width,
-            padding: '10px',
+            padding: 10,
             backgroundColor: theme.palette.background.paper,
             border: `1px solid ${theme.palette.divider}`,
             boxShadow: theme.shadows[4],
-            maxHeight: 250,
-            overflowY: 'auto',
           }}
         >
-          <Box style={{ marginBottom: 8, fontSize: 14, fontWeight: 'bold' }}>
+          <Typography sx={{ color: theme.palette.text.secondary, fontSize: 14 }}>No values found</Typography>
+        </Box>
+      </Popover>
+    );
+  }
+
+  return (
+    <Popover
+      sx={{ marginTop: '4px', marginLeft: '8px' }}
+      open={open}
+      anchorEl={anchor}
+      onClose={handleFilterClose}
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'right',
+      }}
+    >
+      <Box
+        data-filter-dropdown
+        data-testid={id}
+        sx={{
+          width: width,
+          padding: '10px',
+          backgroundColor: theme.palette.background.paper,
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: theme.shadows[4],
+          maxHeight: 250,
+          overflowY: 'auto',
+        }}
+      >
+        <Box style={{ marginBottom: 8, fontSize: 14, fontWeight: 'bold' }}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={selectedValues.length === values.length && values.length > 0}
+                onChange={(e) => onFilterChange(e.target.checked ? values : [])}
+                indeterminate={selectedValues.length > 0 && selectedValues.length < values.length}
+              />
+            }
+            label={<Typography sx={{ color: 'text.primary' }}>Select All ({values.length})</Typography>}
+          />
+        </Box>
+        <Divider sx={{ my: 1 }} />
+        {values.map((value, index) => (
+          <Box key={`value-${index}`} style={{ marginBottom: 4 }}>
             <FormControlLabel
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: '2px 0',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
               control={
                 <Checkbox
-                  checked={selectedValues.length === values.length && values.length > 0}
-                  onChange={(e) => onFilterChange(e.target.checked ? values : [])}
-                  indeterminate={selectedValues.length > 0 && selectedValues.length < values.length}
+                  size="small"
+                  checked={selectedValues.includes(value)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      onFilterChange([...selectedValues, value]);
+                    } else {
+                      onFilterChange(selectedValues.filter((v) => v !== value));
+                    }
+                  }}
                 />
               }
-              label={<Typography sx={{ color: 'text.primary' }}>Select All ({values.length})</Typography>}
+              label={
+                <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 14 }}>
+                  {!value && value !== 0 ? '(empty)' : String(value)}
+                </Typography>
+              }
             />
           </Box>
-          <Divider sx={{ my: 1 }} />
-          {values.map((value, index) => (
-            <Box key={`value-${index}`} style={{ marginBottom: 4 }}>
-              <FormControlLabel
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '2px 0',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={selectedValues.includes(value)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        onFilterChange([...selectedValues, value]);
-                      } else {
-                        onFilterChange(selectedValues.filter((v) => v !== value));
-                      }
-                    }}
-                  />
-                }
-                label={
-                  <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 14 }}>
-                    {!value && value !== 0 ? '(empty)' : String(value)}
-                  </Typography>
-                }
-              />
-            </Box>
-          ))}
-        </Box>
+        ))}
       </Box>
-    </ClickAwayListener>
+    </Popover>
   );
 };

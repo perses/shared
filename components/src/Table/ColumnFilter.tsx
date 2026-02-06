@@ -43,18 +43,18 @@ export function ColumnFilter<TableData>({
   const theme = useTheme();
   const dropdownId = id.concat('-dropdown');
 
-  const [filterAnchorEl, setFilterAnchorEl] = useState<{ [key: string]: HTMLElement | undefined }>({});
+  const [filterAnchorEl, setFilterAnchorEl] = useState<HTMLButtonElement | undefined>(undefined);
   const [calculatedWidth, setCalculatedWidth] = useState<string>('0px');
 
   const handleFilterClick = (event: React.MouseEvent<HTMLButtonElement>, columnId: string): void => {
     event.preventDefault();
     event.stopPropagation();
-    setFilterAnchorEl({ ...filterAnchorEl, [columnId]: event.currentTarget });
+    setFilterAnchorEl(event.target as HTMLButtonElement);
     setOpenFilterColumn(columnId);
   };
 
   const handleFilterClose = (): void => {
-    setFilterAnchorEl({});
+    setFilterAnchorEl(undefined);
     setOpenFilterColumn(undefined);
   };
 
@@ -154,9 +154,10 @@ export function ColumnFilter<TableData>({
       >
         ▼
       </ButtonBase>
-
-      {openFilterColumn === column.accessorKey && (
+      {filterAnchorEl && (
         <ColumnFilterDropdown
+          anchor={filterAnchorEl}
+          open={openFilterColumn === column.accessorKey}
           id={dropdownId}
           width={calculatedWidth}
           allValues={columnUniqueValues[column.accessorKey as string] || []}
