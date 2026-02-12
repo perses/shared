@@ -30,6 +30,19 @@ import (
 	write_timeout?: time.Duration
 }
 
+#MariaDB: {
+	// params Connection parameters
+	params?: {[string]: string}
+	// max_allowed_packet Max packet size allowed
+	max_allowed_packet?: number
+	// timeout Dial timeout
+	timeout?: time.Duration
+	// read_timeout I/O read timeout
+	read_timeout?: time.Duration
+	// write_timeout I/O read timeout
+	write_timeout?: time.Duration
+}
+
 #Postgres: {
 	// options specifies command-line options to send to the server at connection start
 	options?: string
@@ -46,7 +59,7 @@ import (
 #SQLProxy: {
 	kind: "SQLProxy"
 	spec: {
-		driver: "mysql" | "postgres"
+		driver: "mysql" | "mariadb" | "postgres"
 		// host is the hostname and port of the datasource. It is not the hostname of the proxy.
 		// The Perses server is the proxy, so it needs to know where to redirect the request.
 		host: string
@@ -57,7 +70,11 @@ import (
 		secret?: string
 		// mysql specific driver configurations
 		mysql?: #MySQL
+		// mariadb specific driver configurations
+		mariadb?: #MariaDB
 		// postgres specific driver configurations
 		postgres?: #Postgres
 	}
 }
+
+#baseSQLDatasourceSpec: { driver: "mysql" | "mariadb" | "postgres", host: string, database: string }| { proxy: #SQLProxy }
