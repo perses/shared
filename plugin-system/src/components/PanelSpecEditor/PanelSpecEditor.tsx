@@ -15,7 +15,13 @@ import { ErrorAlert, JSONEditor, LinksEditor } from '@perses-dev/components';
 import { PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { Control, Controller } from 'react-hook-form';
 import { forwardRef, ReactElement } from 'react';
-import { QueryCountProvider, useDataQueriesContext, usePlugin } from '../../runtime';
+import {
+  QueryCountProvider,
+  QueryEditorOptionsProvider,
+  QueryOptions,
+  useDataQueriesContext,
+  usePlugin,
+} from '../../runtime';
 import { PanelPlugin } from '../../model';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
 import { MultiQueryEditor } from '../MultiQueryEditor';
@@ -24,6 +30,7 @@ import { PluginEditorRef } from '../PluginEditor';
 export interface PanelSpecEditorProps {
   control: Control<PanelEditorValues>;
   panelDefinition: PanelDefinition;
+  queryOptions?: QueryOptions;
   onQueriesChange: (queries: QueryDefinition[]) => void;
   onQueryRun: (index: number, query: QueryDefinition) => void;
   onPluginSpecChange: (spec: UnknownSpec) => void;
@@ -31,7 +38,7 @@ export interface PanelSpecEditorProps {
 }
 
 export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>((props, ref): ReactElement | null => {
-  const { control, panelDefinition, onQueriesChange, onQueryRun, onPluginSpecChange, onJSONChange } = props;
+  const { control, panelDefinition, queryOptions, onQueriesChange, onQueryRun, onPluginSpecChange, onJSONChange } = props;
   const { kind } = panelDefinition.spec.plugin;
   const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
 
@@ -132,9 +139,11 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
   });
 
   return (
-    <QueryCountProvider queryCount={(panelDefinition.spec.queries ?? []).length}>
-      <OptionsEditorTabs key={tabs.length} tabs={tabs} />
-    </QueryCountProvider>
+    <QueryEditorOptionsProvider options={queryOptions}>
+      <QueryCountProvider queryCount={(panelDefinition.spec.queries ?? []).length}>
+        <OptionsEditorTabs key={tabs.length} tabs={tabs} />
+      </QueryCountProvider>
+    </QueryEditorOptionsProvider>
   );
 });
 
