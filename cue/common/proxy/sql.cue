@@ -30,19 +30,6 @@ import (
 	write_timeout?: time.Duration
 }
 
-#MariaDB: {
-	// params Connection parameters
-	params?: {[string]: string}
-	// max_allowed_packet Max packet size allowed
-	max_allowed_packet?: number
-	// timeout Dial timeout
-	timeout?: time.Duration
-	// read_timeout I/O read timeout
-	read_timeout?: time.Duration
-	// write_timeout I/O read timeout
-	write_timeout?: time.Duration
-}
-
 #Postgres: {
 	// options specifies command-line options to send to the server at connection start
 	options?: string
@@ -71,7 +58,7 @@ import (
 		// mysql specific driver configurations
 		mysql?: #MySQL
 		// mariadb specific driver configurations
-		mariadb?: #MariaDB
+		mariadb?: #MySQL
 		// postgres specific driver configurations
 		postgres?: #Postgres
 	}
