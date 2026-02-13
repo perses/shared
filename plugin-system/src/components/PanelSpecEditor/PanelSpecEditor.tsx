@@ -38,7 +38,8 @@ export interface PanelSpecEditorProps {
 }
 
 export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>((props, ref): ReactElement | null => {
-  const { control, panelDefinition, queryOptions, onQueriesChange, onQueryRun, onPluginSpecChange, onJSONChange } = props;
+  const { control, panelDefinition, queryOptions, onQueriesChange, onQueryRun, onPluginSpecChange, onJSONChange } =
+    props;
   const { kind } = panelDefinition.spec.plugin;
   const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
 
