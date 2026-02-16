@@ -87,9 +87,16 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
             <IconButton size="small" onClick={() => onCollapseExpand(index)}>
               {isCollapsed ? <ChevronRight /> : <ChevronDown />}
             </IconButton>
-            <Typography variant="overline" component="h4">
-              Query #{index + 1}
-            </Typography>
+            <Stack gap={0.5} direction="row" alignItems="center">
+              <Typography variant="overline" component="h4">
+                Query #{index + 1}
+              </Typography>
+              {query.hidden && (
+                <Typography variant="caption" color="secondary" component="span" fontStyle="italic">
+                  Disabled
+                </Typography>
+              )}
+            </Stack>
           </Stack>
           <Stack direction="row" alignItems="center">
             {queryResult?.isFetching && <CircularProgress aria-label="loading" size="1.125rem" />}
