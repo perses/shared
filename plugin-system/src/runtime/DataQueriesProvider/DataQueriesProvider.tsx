@@ -74,6 +74,7 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
       spec: {
         plugin: definition,
       },
+      hidden: definition.hidden,
     };
   });
 

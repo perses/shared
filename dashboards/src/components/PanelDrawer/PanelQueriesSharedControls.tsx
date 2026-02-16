@@ -57,6 +57,7 @@ export function PanelQueriesSharedControls({
         return {
           kind: query.spec.plugin.kind,
           spec: query.spec.plugin.spec,
+          hidden: query.hidden,
         };
       }) ?? []
   );
@@ -67,10 +68,34 @@ export function PanelQueriesSharedControls({
       newDefinitions[index] = {
         kind: newDef.spec.plugin.kind,
         spec: newDef.spec.plugin.spec,
+        hidden: newDef.hidden,
       };
       return newDefinitions;
     });
   }, []);
+
+  const handleQueriesChange = useCallback(
+    (queries: QueryDefinition[]) => {
+      const didChangeVisibility = queries.some(
+        (query) => query.hidden !== previewDefinition.find((p) => p.kind === query.spec.plugin.kind)?.hidden
+      );
+
+      if (didChangeVisibility) {
+        setPreviewDefinition(
+          queries.map((query) => {
+            return {
+              kind: query.spec.plugin.kind,
+              spec: query.spec.plugin.spec,
+              hidden: query.hidden,
+            };
+          })
+        );
+      }
+
+      onQueriesChange(queries);
+    },
+    [onQueriesChange, previewDefinition]
+  );
 
   return (
     <DataQueriesProvider definitions={previewDefinition} options={{ suggestedStepMs, ...pluginQueryOptions }}>
@@ -88,7 +113,7 @@ export function PanelQueriesSharedControls({
             control={control}
             panelDefinition={panelDefinition}
             onJSONChange={onJSONChange}
-            onQueriesChange={onQueriesChange}
+            onQueriesChange={handleQueriesChange}
             onQueryRun={handleRunQuery}
             onPluginSpecChange={onPluginSpecChange}
           />

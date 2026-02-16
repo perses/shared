@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { forwardRef, ReactElement, useState } from 'react';
+import { forwardRef, ReactElement, useCallback, useState } from 'react';
 import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
@@ -138,6 +138,20 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
     });
   };
 
+  const handleVisibilityToggle = useCallback(
+    (index: number, isHidden: boolean) => {
+      onChange(
+        produce(queries, (draft) => {
+          const entry = draft?.[index];
+          if (entry) {
+            entry.hidden = !isHidden;
+          }
+        })
+      );
+    },
+    [onChange, queries]
+  );
+
   // show one query input if queries is empty
   const queryDefinitions: QueryDefinition[] = queries.length
     ? queries
@@ -162,6 +176,8 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
             onQueryRun={handleQueryRun}
             onDelete={queries.length > 1 ? handleQueryDelete : undefined}
             onCollapseExpand={handleQueryCollapseExpand}
+            onVisibilityToggle={handleVisibilityToggle}
+            isHidden={query.hidden}
           />
         ))}
       </Stack>
