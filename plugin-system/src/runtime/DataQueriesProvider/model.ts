@@ -18,7 +18,7 @@ import { useListPluginMetadata } from '../plugin-registry';
 
 export type QueryOptions = Record<string, unknown>;
 export interface DataQueriesProviderProps<QueryPluginSpec = UnknownSpec> {
-  definitions: Array<Definition<QueryPluginSpec>>;
+  definitions: Array<Definition<QueryPluginSpec> & { hidden?: boolean }>;
   children?: ReactNode;
   options?: QueryOptions;
   queryOptions?: Omit<QueryObserverOptions, 'queryKey'>;
