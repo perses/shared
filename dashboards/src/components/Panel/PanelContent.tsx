@@ -35,12 +35,15 @@ export function PanelContent(props: PanelContentProps): ReactElement {
   const queryResultsWithData = useMemo(
     () =>
       queryResults.flatMap((q) =>
-        q.data && !q.definition?.hidden ? [{ data: q.data, definition: q.definition }] : []
+        q.data && !q.definition?.spec.hidden ? [{ data: q.data, definition: q.definition }] : []
       ),
     [queryResults]
   );
 
-  const areAllQueriesHidden = useMemo(() => queryResults.every((q) => q.definition?.hidden ?? false), [queryResults]);
+  const areAllQueriesHidden = useMemo(
+    () => queryResults.every((q) => q.definition?.spec.hidden ?? false),
+    [queryResults]
+  );
 
   // Show fullsize skeleton if the panel plugin is loading.
   if (isPanelLoading) {

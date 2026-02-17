@@ -89,7 +89,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
     return {
       kind: query.spec.plugin.kind,
       spec: query.spec.plugin.spec,
-      hidden: query.hidden,
+      hidden: query.spec.hidden,
     };
   });
 

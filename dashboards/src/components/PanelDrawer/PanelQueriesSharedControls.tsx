@@ -57,7 +57,7 @@ export function PanelQueriesSharedControls({
         return {
           kind: query.spec.plugin.kind,
           spec: query.spec.plugin.spec,
-          hidden: query.hidden,
+          hidden: query.spec.hidden,
         };
       }) ?? []
   );
@@ -68,7 +68,7 @@ export function PanelQueriesSharedControls({
       newDefinitions[index] = {
         kind: newDef.spec.plugin.kind,
         spec: newDef.spec.plugin.spec,
-        hidden: newDef.hidden,
+        hidden: newDef.spec.hidden,
       };
       return newDefinitions;
     });
@@ -77,7 +77,7 @@ export function PanelQueriesSharedControls({
   const handleQueriesChange = useCallback(
     (queries: QueryDefinition[]) => {
       const didChangeVisibility = queries.some(
-        (query) => query.hidden !== previewDefinition.find((p) => p.kind === query.spec.plugin.kind)?.hidden
+        (query) => query.spec.hidden !== previewDefinition.find((p) => p.kind === query.spec.plugin.kind)?.spec.hidden
       );
 
       if (didChangeVisibility) {
@@ -86,7 +86,7 @@ export function PanelQueriesSharedControls({
             return {
               kind: query.spec.plugin.kind,
               spec: query.spec.plugin.spec,
-              hidden: query.hidden,
+              hidden: query.spec.hidden,
             };
           })
         );
