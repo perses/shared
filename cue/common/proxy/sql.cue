@@ -46,7 +46,7 @@ import (
 #SQLProxy: {
 	kind: "SQLProxy"
 	spec: {
-		driver: "mysql" | "postgres"
+		driver: "mysql" | "mariadb" | "postgres"
 		// host is the hostname and port of the datasource. It is not the hostname of the proxy.
 		// The Perses server is the proxy, so it needs to know where to redirect the request.
 		host: string
@@ -57,7 +57,11 @@ import (
 		secret?: string
 		// mysql specific driver configurations
 		mysql?: #MySQL
+		// mariadb specific driver configurations
+		mariadb?: #MySQL
 		// postgres specific driver configurations
 		postgres?: #Postgres
 	}
 }
+
+#baseSQLDatasourceSpec: { driver: "mysql" | "mariadb" | "postgres", host: string, database: string }| { proxy: #SQLProxy }
