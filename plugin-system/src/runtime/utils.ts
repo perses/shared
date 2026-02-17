@@ -28,3 +28,21 @@ export function getVariableValuesKey(v: VariableStateMap): string {
     .map((v) => JSON.stringify(v.value))
     .join(',');
 }
+
+/**
+ * Adds a random jitter delay to distribute query requests over time.
+ * This helps reduce server load by preventing all panels from firing queries in bursts.
+ */
+export function jitterDelay(minMs = 0, maxMs = 500): Promise<void> {
+  const safeMin = Number.isFinite(minMs) ? minMs : 0;
+  const safeMax = Number.isFinite(maxMs) ? maxMs : 0;
+  const normalizedMin = Math.max(0, Math.min(safeMin, safeMax));
+  const normalizedMax = Math.max(0, Math.max(safeMin, safeMax));
+
+  if (normalizedMax === 0) {
+    return Promise.resolve();
+  }
+
+  const delay = Math.floor(Math.random() * (normalizedMax - normalizedMin + 1)) + normalizedMin;
+  return new Promise((resolve) => setTimeout(resolve, delay));
+}
