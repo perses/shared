@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { KeyboardEventHandler, useCallback, useState } from 'react';
+import { FocusEventHandler, KeyboardEventHandler, useCallback, useState } from 'react';
 
 export interface UseTableKeyboardNavProps {
   maxRows: number;
@@ -59,6 +59,7 @@ export function useTableKeyboardNav({ maxRows, maxColumns, onActiveCellChange }:
   isActive: boolean;
   onTableKeyDown: KeyboardEventHandler<HTMLTableElement>;
   onCellFocus: (cellPosition: TableCellPosition) => void;
+  onTableBlur: FocusEventHandler<HTMLTableElement>;
 } {
   const [activeCell, setActiveCell] = useState<TableCellPosition>(DEFAULT_ACTIVE_CELL);
   const [isActive, setIsActive] = useState(false);
@@ -122,10 +123,18 @@ export function useTableKeyboardNav({ maxRows, maxColumns, onActiveCellChange }:
     [maxColumns, maxRows, onActiveCellChange]
   );
 
+  const handleTableBlur: FocusEventHandler<HTMLTableElement> = useCallback((e) => {
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsActive(false);
+      setActiveCell(DEFAULT_ACTIVE_CELL);
+    }
+  }, []);
+
   return {
     activeCell,
     isActive,
     onTableKeyDown: handleKeyDown,
     onCellFocus: handleCellFocus,
+    onTableBlur: handleTableBlur,
   };
 }

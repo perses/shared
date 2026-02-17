@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TableVirtuosoHandle } from 'react-virtuoso';
-import { KeyboardEventHandler, MutableRefObject, RefObject } from 'react';
+import { FocusEventHandler, KeyboardEventHandler, MutableRefObject, RefObject } from 'react';
 import { useTableKeyboardNav, UseTableKeyboardNavProps } from './useTableKeyboardNav';
 
 interface UseVirtualizedTableKeyboardNavProps extends Omit<UseTableKeyboardNavProps, 'onActiveCellChange'> {
@@ -43,6 +43,7 @@ export function useVirtualizedTableKeyboardNav({
   isActive: boolean;
   onTableKeyDown: KeyboardEventHandler<HTMLTableElement>;
   onCellFocus: (cellPosition: TableCellPosition) => void;
+  onTableBlur: FocusEventHandler<HTMLTableElement>;
 } {
   const baseKeyboard = useTableKeyboardNav({
     maxRows,
