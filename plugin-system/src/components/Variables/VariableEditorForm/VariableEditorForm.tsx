@@ -329,11 +329,7 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                   }
                   value={field.value ?? ''}
                   onChange={(event) => {
-                    if (event.target.value === '') {
-                      field.onChange(undefined);
-                    } else {
-                      field.onChange(event);
-                    }
+                    field.onChange(event.target.value);
                   }}
                 />
               )}
