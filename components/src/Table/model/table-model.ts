@@ -14,6 +14,7 @@
 import { Theme } from '@mui/material';
 import { Link } from '@perses-dev/core';
 import {
+  AccessorFn,
   AccessorKeyColumnDef,
   CellContext,
   ColumnDef,
@@ -274,7 +275,26 @@ declare module '@tanstack/table-core' {
     headerDescription?: TableColumnConfig<TData>['headerDescription'];
     cellDescription?: TableColumnConfig<TData>['cellDescription'];
     dataLink?: TableColumnConfig<TData>['dataLink'];
+    linkConfig?: TableColumnConfig<TData>['linkConfig'];
   }
+}
+
+interface LinkConfig {
+  /**
+   * A template string used to generate a URL for the column's cell values.
+   * The template can include placeholders that will be replaced with the
+   * corresponding cell data. For example, `{__value.text}` in the template will be
+   * replaced with the value of the current cell.
+   */
+  urlTemplate?: string;
+
+  /**
+   * When set to `true`, the generated URL (from `urlTemplate`) will open in a
+   * new browser tab. If `false` or undefined, the URL will open in
+   * the same tab.
+   * @default false
+   */
+  openInNewTab?: boolean;
 }
 
 // Column link settings
@@ -290,12 +310,27 @@ export interface TableColumnConfig<TableData>
   // https://github.com/TanStack/table/issues/4241
   // TODO: revisit issue thread and see if there are any workarounds we can
   // use.
+  // LOGZ.IO CHANGE:: group by array field [APPZ-994] (changed to ColumnDef instead of AccessorKeyColumnDef)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  extends Pick<AccessorKeyColumnDef<TableData, any>, 'accessorKey' | 'cell' | 'sortingFn'> {
+  extends Pick<ColumnDef<TableData, any>, 'cell' | 'sortingFn' | 'id'> {
   /**
    * Text to display in the header for the column.
    */
   header: string;
+
+  /**
+   * Key to access the data for this column. Used when the column accesses a property directly.
+   * Cannot be used together with accessorFn.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  accessorKey?: AccessorKeyColumnDef<TableData, any>['accessorKey'];
+
+  /**
+   * Function to access the data for this column. Used when custom logic is needed to retrieve the value.
+   * Cannot be used together with accessorKey.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  accessorFn?: AccessorFn<TableData, any>;
 
   /**
    * Alignment of the content in the cell.
@@ -342,6 +377,12 @@ export interface TableColumnConfig<TableData>
    * a link with the value of the cell as the dynamic section
    */
   dataLink?: DataLink;
+
+  /**
+   * Configuration for turning cell values into clickable links.
+   * Use URL templates with placeholders to create dynamic links based on cell data.
+   */
+  linkConfig?: LinkConfig;
 }
 
 /**
@@ -351,7 +392,7 @@ export function persesColumnsToTanstackColumns<TableData>(
   columns: Array<TableColumnConfig<TableData>>
 ): Array<ColumnDef<TableData>> {
   const tableCols: Array<ColumnDef<TableData>> = columns.map(
-    ({ width, align, headerDescription, cellDescription, enableSorting, dataLink, ...otherProps }) => {
+    ({ width, align, headerDescription, cellDescription, enableSorting, dataLink, linkConfig, ...otherProps }) => {
       // Tanstack Table does not support an "auto" value to naturally size to fit
       // the space in a table. We translate our custom "auto" setting to 0 size
       // for these columns, so it is easy to fall back to auto when rendering.
@@ -384,6 +425,7 @@ export function persesColumnsToTanstackColumns<TableData>(
           headerDescription,
           cellDescription,
           dataLink,
+          linkConfig,
         },
       };
 

@@ -1,4 +1,4 @@
-// Copyright The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -64,7 +64,7 @@ export function DatasourceEditor(props: {
           closeDiscardChangesConfirmationDialog();
         },
         description:
-          'You have unapplied changes. Are you sure you want to discard these changes? Changes cannot be recovered.',
+          'You have unsaved changes in this panel. Are you sure you want to discard them? This action can’t be undone.', // LOGZ.IO CHANGE END:: Micro copy changes [APPZ-260]
       });
     } else {
       props.onCancel();

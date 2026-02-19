@@ -1,4 +1,4 @@
-// Copyright The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -38,6 +38,36 @@ type VariableProps = {
   source?: string;
 };
 
+//LOGZ.IO CHANGE START:: Variable input width calculation [APPZ-1764]
+let measurementCanvas: HTMLCanvasElement | null = null;
+let measurementContext: CanvasRenderingContext2D | null = null;
+
+function getMeasurementContext(): CanvasRenderingContext2D | null {
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  if (!measurementCanvas) {
+    measurementCanvas = document.createElement('canvas');
+    measurementContext = measurementCanvas.getContext('2d');
+  }
+
+  return measurementContext;
+}
+
+function getTextWidth(text: string, font: string): number {
+  const context = getMeasurementContext();
+
+  if (!context) {
+    return text.length * 8;
+  }
+
+  context.font = font;
+  const metrics = context.measureText(text);
+  return Math.ceil(metrics.width);
+}
+//LOGZ.IO CHANGE END:: Variable input width calculation [APPZ-1764]
+
 function variableOptionToVariableValue(options: VariableOption | VariableOption[] | null): VariableValue {
   if (options === null) {
     return null;
@@ -49,6 +79,34 @@ function variableOptionToVariableValue(options: VariableOption | VariableOption[
   }
   return options.value;
 }
+// LOGZ.IO CHANGE START:: Prevented infinite rerender loop once value is set to 'All' (DEFAULT_ALL_VALUE)[APPZ-1271]
+function canonicalizeVariableValue(value: VariableValue | undefined): VariableValue | undefined {
+  if (Array.isArray(value)) {
+    if (value.includes(DEFAULT_ALL_VALUE)) {
+      return [DEFAULT_ALL_VALUE];
+    }
+    return [...value].sort();
+  }
+  return value;
+}
+
+function valuesEqualConsideringAll(a: VariableValue | undefined, b: VariableValue | undefined): boolean {
+  const ax = canonicalizeVariableValue(a);
+  const bx = canonicalizeVariableValue(b);
+  const isAll = (v: VariableValue | undefined): boolean => v === DEFAULT_ALL_VALUE;
+  const isAllArray = (v: VariableValue | undefined): boolean =>
+    Array.isArray(v) && v.length === 1 && v[0] === DEFAULT_ALL_VALUE;
+  if ((isAllArray(ax) && isAll(bx)) || (isAll(ax) && isAllArray(bx))) return true;
+  if (Array.isArray(ax) && Array.isArray(bx)) {
+    if (ax.length !== bx.length) return false;
+    for (let i = 0; i < ax.length; i++) {
+      if (ax[i] !== bx[i]) return false;
+    }
+    return true;
+  }
+  return ax === bx;
+}
+// LOGZ.IO CHANGE END:: Prevented infinite rerender loop once value is set to 'All' (DEFAULT_ALL_VALUE)[APPZ-1271]
 
 export function Variable({ name, source }: VariableProps): ReactElement {
   const ctx = useVariableDefinitionAndState(name, source);
@@ -158,19 +216,25 @@ const StyledPopper = (props: PopperProps): ReactElement => (
   <Popper {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
 );
 
-const LETTER_HSIZE = 8; // approximation
-const ARROW_OFFSET = 40; // right offset for list variables (= take into account the dropdown toggle size)
+//LOGZ.IO CHANGE START:: Variable input width calculation [APPZ-1764]
+const VARIABLE_INPUT_FONT = '400 14px Roboto, sans-serif';
+
+const ARROW_DROPDOWN_WIDTH = 40;
+const PADDING_BUFFER = 20;
 const getWidthPx = (inputValue: string, kind: 'list' | 'text'): number => {
-  const width = (inputValue.length + 1) * LETTER_HSIZE + (kind === 'list' ? ARROW_OFFSET : 0);
-  if (width < MIN_VARIABLE_WIDTH) {
+  const textWidth = getTextWidth(inputValue, VARIABLE_INPUT_FONT);
+
+  const totalWidth = textWidth + (kind === 'list' ? ARROW_DROPDOWN_WIDTH : 0) + PADDING_BUFFER;
+
+  if (totalWidth < MIN_VARIABLE_WIDTH) {
     return MIN_VARIABLE_WIDTH;
-  } else if (width > MAX_VARIABLE_WIDTH) {
+  } else if (totalWidth > MAX_VARIABLE_WIDTH) {
     return MAX_VARIABLE_WIDTH;
   } else {
-    return width;
+    return totalWidth;
   }
 };
-
+//LOGZ.IO CHANGE END:: Variable input width calculation [APPZ-1764]
 function ListVariable({ name, source }: VariableProps): ReactElement {
   const ctx = useVariableDefinitionAndState(name, source);
   const definition = ctx.definition as ListVariableDefinition;
@@ -198,10 +262,11 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
 
   // Update value when changed
   useEffect(() => {
-    if (value) {
+    // LOGZ.IO CHANGE:: Prevented infinite rerender loop once value is set to 'All' (DEFAULT_ALL_VALUE)[APPZ-1271]
+    if (value && !valuesEqualConsideringAll(value, ctx.state?.value)) {
       setVariableValue(name, value, source);
     }
-  }, [setVariableValue, name, value, source]);
+  }, [setVariableValue, name, value, source, ctx.state?.value]); // LOGZ.IO CHANGE:: Prevented infinite rerender loop once value is set to 'All' (DEFAULT_ALL_VALUE)[APPZ-1271]
 
   // Update loading when changed
   useEffect(() => {
@@ -286,7 +351,8 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
           const { key, ...optionProps } = props;
           return (
             <li key={key} {...optionProps} style={{ padding: 0 }}>
-              <Checkbox style={{ marginRight: 8 }} checked={selected} />
+              {/* LOGZ.IO CHANGE:: Variable input width calculation [APPZ-1764] */}
+              <Checkbox checked={selected} />
               {option.label}
             </li>
           );

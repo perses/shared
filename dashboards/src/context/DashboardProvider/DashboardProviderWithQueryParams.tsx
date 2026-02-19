@@ -15,7 +15,11 @@ import { ReactElement } from 'react';
 import { JsonParam, useQueryParam } from 'use-query-params';
 import { DashboardProvider, DashboardProviderProps } from './DashboardProvider';
 
-export function DashboardProviderWithQueryParams({ children, initialState }: DashboardProviderProps): ReactElement {
+export function DashboardProviderWithQueryParams({
+  children,
+  initialState,
+  dashboardStoreApiRef,
+}: DashboardProviderProps): ReactElement {
   const [viewPanelRef, setViewPanelRef] = useQueryParam('viewPanelRef', JsonParam);
 
   return (
@@ -25,6 +29,9 @@ export function DashboardProviderWithQueryParams({ children, initialState }: Das
         viewPanelRef: viewPanelRef ?? undefined, // viewPanelRef can be null, forcing to undefined
         setViewPanelRef: setViewPanelRef,
       }}
+      // LOGZ.IO CHANGE START:: Add support for dashboardStoreApiRef
+      dashboardStoreApiRef={dashboardStoreApiRef}
+      // LOGZ.IO CHANGE END:: Add support for dashboardStoreApiRef
     >
       {children}
     </DashboardProvider>

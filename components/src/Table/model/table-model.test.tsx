@@ -176,6 +176,7 @@ describe('persesColumnToTanstackColumn', () => {
         width: 'auto',
         align: 'right',
         dataLink: undefined,
+        linkConfig: undefined, // LOGZ.IO CHANGE:: add linkConfig to tanstack column [APPZ-260]
       },
       {
         accessorKey: 'value',
@@ -183,6 +184,7 @@ describe('persesColumnToTanstackColumn', () => {
         headerDescription: 'The total number of values.',
         width: 120,
         dataLink: undefined,
+        linkConfig: undefined, // LOGZ.IO CHANGE:: add linkConfig to tanstack column [APPZ-260]
         cell: (data) => <strong>{data.getValue()}</strong>,
         cellDescription: (data) => `Desc for ${data.getValue()}`,
       },

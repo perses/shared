@@ -12,17 +12,27 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
-import { Box } from '@mui/material';
-import { NearbySeriesArray } from './nearby-series';
-import { SeriesInfo } from './SeriesInfo';
+import { VirtualizedSeries } from './VirtualizedSeries';
+import { NearbySeriesArray } from './types';
 
 export interface TooltipContentProps {
   series: NearbySeriesArray | null;
   wrapLabels?: boolean;
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
+  allowActions?: boolean;
+  onSelected?: (seriesIdx: number) => void;
+  // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
 }
 
 export function TooltipContent(props: TooltipContentProps): ReactElement | null {
-  const { series, wrapLabels } = props;
+  const {
+    series,
+    wrapLabels,
+    // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
+    onSelected,
+    allowActions,
+    // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
+  } = props;
 
   const sortedFocusedSeries = useMemo(() => {
     if (series === null) return null;
@@ -32,31 +42,14 @@ export function TooltipContent(props: TooltipContentProps): ReactElement | null 
   if (series === null || sortedFocusedSeries === null) {
     return null;
   }
-  // TODO: use react-virtuoso to improve performance
+  // LOGZ.IO CHANGE START:: Performance optimization [APPZ-359]
   return (
-    <Box
-      sx={(theme) => ({
-        display: 'table',
-        padding: theme.spacing(0.5, 2),
-      })}
-    >
-      {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
-        if (datumIdx === null || seriesIdx === null) return null;
-        const key = seriesIdx.toString() + datumIdx.toString();
-
-        return (
-          <SeriesInfo
-            key={key}
-            seriesName={seriesName}
-            y={y}
-            formattedY={formattedY}
-            markerColor={markerColor}
-            totalSeries={sortedFocusedSeries.length}
-            wrapLabels={wrapLabels}
-            emphasizeText={isClosestToCursor}
-          />
-        );
-      })}
-    </Box>
+    <VirtualizedSeries
+      allowActions={allowActions}
+      sortedFocusedSeries={sortedFocusedSeries}
+      wrapLabels={wrapLabels}
+      onSelected={onSelected}
+    />
   );
+  // LOGZ.IO CHANGE END:: Performance optimization [APPZ-359]
 }

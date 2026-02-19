@@ -1,4 +1,4 @@
-// Copyright The Perses Authors
+// Copyright 2025 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -34,7 +34,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   const panelDefinition = usePanel(panelGroupItemId);
 
   const {
-    spec: { queries },
+    spec: { queries = [] },
   } = panelDefinition;
 
   const { isEditMode } = useEditMode();
@@ -84,19 +84,25 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
 
   const { data: plugin } = usePlugin('Panel', panelDefinition.spec.plugin.kind);
 
-  const queryDefinitions = queries ?? [];
-  const definitions = queryDefinitions.map((query) => {
-    return {
-      kind: query.spec.plugin.kind,
-      spec: query.spec.plugin.spec,
-    };
-  });
+  const definitions = useMemo(
+    () =>
+      queries.map((query) => {
+        return {
+          kind: query.spec.plugin.kind,
+          spec: query.spec.plugin.spec,
+          hidden: query.spec.hidden ?? false, // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
+        };
+      }),
+    [queries]
+  );
 
-  const pluginQueryOptions =
-    typeof plugin?.queryOptions === 'function'
-      ? plugin?.queryOptions(panelDefinition.spec.plugin.spec)
-      : plugin?.queryOptions;
-
+  const pluginQueryOptions = useMemo(
+    () =>
+      typeof plugin?.queryOptions === 'function'
+        ? plugin?.queryOptions(panelDefinition.spec.plugin.spec)
+        : plugin?.queryOptions,
+    [plugin, panelDefinition.spec.plugin.spec]
+  );
   return (
     <Box
       ref={ref}
@@ -121,11 +127,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
           />
         )}
       </DataQueriesProvider>
-      <QueryViewerDialog
-        open={openQueryViewer}
-        queryDefinitions={queryDefinitions}
-        onClose={() => setOpenQueryViewer(false)}
-      />
+      <QueryViewerDialog open={openQueryViewer} queryDefinitions={queries} onClose={() => setOpenQueryViewer(false)} />
     </Box>
   );
 }

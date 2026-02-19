@@ -1,4 +1,4 @@
-// Copyright The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -16,6 +16,7 @@ import Reload from 'mdi-material-ui/Reload';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ReactElement, useCallback } from 'react';
 import { UnknownSpec } from '@perses-dev/core';
+import { OnChangeOptions } from '../../model';
 import { PluginKindSelect } from '../PluginKindSelect';
 import { PluginSpecEditor } from '../PluginSpecEditor';
 import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
@@ -39,14 +40,15 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
     isReadonly,
     onRunQuery,
     filteredQueryPlugins,
+    index, // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
     ...others
   } = props;
 
   const { pendingSelection, isLoading, error, onSelectionChange, onSpecChange } = usePluginEditor(props);
 
   const handleSpecChange = useCallback(
-    (nextSpec: UnknownSpec) => {
-      onSpecChange(nextSpec);
+    (nextSpec: UnknownSpec, options?: OnChangeOptions) => {
+      onSpecChange(nextSpec, options); // LOGZ.IO CHANGE:: APPZ-1234 support forceUpdate to trigger query run on change
     },
     [onSpecChange]
   );
@@ -97,6 +99,7 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
           value={value.spec}
           onChange={handleSpecChange}
           isReadonly={isReadonly}
+          index={index} // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
         />
       </ErrorBoundary>
     </Box>

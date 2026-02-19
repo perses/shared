@@ -11,18 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Divider, Typography, Stack, Switch } from '@mui/material';
-import Pin from 'mdi-material-ui/Pin';
-import PinOutline from 'mdi-material-ui/PinOutline';
+import { Box, Typography, Stack, Switch, IconButton } from '@mui/material';
 import { memo, ReactElement } from 'react';
-import { useTimeZone } from '../context/TimeZoneProvider';
-import { NearbySeriesArray } from './nearby-series';
-import {
-  TOOLTIP_BG_COLOR_FALLBACK,
-  TOOLTIP_MAX_WIDTH,
-  PIN_TOOLTIP_HELP_TEXT,
-  UNPIN_TOOLTIP_HELP_TEXT,
-} from './tooltip-model';
+import Close from 'mdi-material-ui/Close';
+import { getDateAndTime } from '../utils';
+import { NearbySeriesArray } from './types';
+import { TOOLTIP_BG_COLOR_FALLBACK, TOOLTIP_MAX_WIDTH } from './tooltip-model';
 
 export interface TooltipHeaderProps {
   nearbySeries: NearbySeriesArray;
@@ -43,27 +37,27 @@ export const TooltipHeader = memo(function TooltipHeader({
   onShowAllClick,
   onUnpinClick,
 }: TooltipHeaderProps) {
-  const { formatWithUserTimeZone } = useTimeZone();
   const seriesTimeMs = nearbySeries[0]?.date ?? null;
   if (seriesTimeMs === null) {
     return null;
   }
 
   const formatTimeSeriesHeader = (timeMs: number): ReactElement => {
-    const date = new Date(timeMs);
-    const formattedDate = formatWithUserTimeZone(date, 'MMM dd, yyyy - ');
-    const formattedTime = formatWithUserTimeZone(date, 'HH:mm:ss');
+    const { formattedTime, formattedDate } = getDateAndTime(timeMs);
     return (
       <Box>
         <Typography
           variant="caption"
           sx={(theme) => ({
-            color: theme.palette.common.white,
+            // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
+            color: theme.palette.text.primary,
+            fontSize: 12,
+            // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
           })}
         >
           {formattedDate}
         </Typography>
-        <Typography variant="caption">
+        <Typography fontSize={12} variant="caption">
           <strong>{formattedTime}</strong>
         </Typography>
       </Box>
@@ -73,18 +67,19 @@ export const TooltipHeader = memo(function TooltipHeader({
   // TODO: accurately calc whether more series are outside scrollable region using yBuffer, avg series name length, TOOLTIP_MAX_HEIGHT
   const showAllSeriesToggle = enablePinning && totalSeries > 5;
 
-  const pinTooltipHelpText = isTooltipPinned ? UNPIN_TOOLTIP_HELP_TEXT : PIN_TOOLTIP_HELP_TEXT;
-
   return (
     <Box
       sx={(theme) => ({
         width: '100%',
         maxWidth: TOOLTIP_MAX_WIDTH,
         padding: theme.spacing(1.5, 2, 0.5, 2),
-        backgroundColor: theme.palette.designSystem?.grey[800] ?? TOOLTIP_BG_COLOR_FALLBACK,
-        position: 'sticky',
         top: 0,
         left: 0,
+        // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
+        backgroundColor: theme.palette.background.paper ?? TOOLTIP_BG_COLOR_FALLBACK,
+        borderBottom: `1px solid ${theme.palette.divider}`,
+        position: 'sticky',
+        // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
       })}
     >
       <Box
@@ -97,7 +92,7 @@ export const TooltipHeader = memo(function TooltipHeader({
         }}
       >
         {formatTimeSeriesHeader(seriesTimeMs)}
-        <Stack direction="row" gap={1} sx={{ marginLeft: 'auto' }}>
+        <Stack direction="row" gap={0.5} sx={{ marginLeft: 'auto' }}>
           {showAllSeriesToggle && (
             <Stack direction="row" gap={0.5} alignItems="center" sx={{ textAlign: 'right' }}>
               <Typography sx={{ fontSize: 11 }}>Show All</Typography>
@@ -122,40 +117,24 @@ export const TooltipHeader = memo(function TooltipHeader({
           )}
           {enablePinning && (
             <Stack direction="row" alignItems="center">
-              <Typography
-                sx={{
-                  marginRight: 0.5,
-                  fontSize: 11,
-                  verticalAlign: 'middle',
-                }}
-              >
-                {pinTooltipHelpText}
-              </Typography>
-              {isTooltipPinned ? (
-                <Pin
+              {/* LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377] */}
+              {isTooltipPinned && (
+                <IconButton
+                  size="small"
                   onClick={() => {
                     if (onUnpinClick !== undefined) {
                       onUnpinClick();
                     }
                   }}
-                  sx={{
-                    fontSize: 16,
-                    cursor: 'pointer',
-                  }}
-                />
-              ) : (
-                <PinOutline sx={{ fontSize: 16 }} />
+                >
+                  <Close sx={{ fontSize: 14 }} />
+                </IconButton>
               )}
+              {/* LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377] */}
             </Stack>
           )}
         </Stack>
       </Box>
-      <Divider
-        sx={(theme) => ({
-          width: '100%',
-          borderColor: theme.palette.grey['500'],
-        })}
-      />
     </Box>
   );
 });

@@ -15,11 +15,11 @@ import { BoxProps } from '@mui/material';
 import { UnknownSpec } from '@perses-dev/core';
 import { useState, useRef, useEffect } from 'react';
 import { produce } from 'immer';
-import { PanelPlugin, PluginType } from '../../model';
+import { OnChangeOptions, PanelPlugin, PluginType } from '../../model';
 import { PluginKindSelectProps } from '../PluginKindSelect';
-import { PluginSpecEditorProps } from '../PluginSpecEditor';
 import { usePlugin, usePluginRegistry } from '../../runtime';
 import { useEvent } from '../../utils';
+import { PluginSpecEditorProps } from '../PluginSpecEditor';
 
 export interface PluginEditorSelection {
   type: PluginType;
@@ -42,8 +42,9 @@ export interface PluginEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   isReadonly?: boolean;
   withRunQueryButton?: boolean;
   filteredQueryPlugins?: string[];
-  onChange: (next: PluginEditorValue) => void;
+  onChange: (next: PluginEditorValue, options?: OnChangeOptions) => void; // LOGZ.IO CHANGE:: APPZ-1234 support forceUpdate to trigger query run on change
   onRunQuery?: () => void;
+  index?: number; // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
 }
 
 export interface PluginEditorRef {
@@ -71,7 +72,7 @@ export function usePluginEditor(props: UsePluginEditorProps): {
   isLoading: boolean;
   error: Error | null;
   onSelectionChange: (s: PluginEditorSelection) => void;
-  onSpecChange: (next: UnknownSpec) => void;
+  onSpecChange: (next: UnknownSpec, options?: OnChangeOptions) => void; // LOGZ.IO CHANGE:: APPZ-1234 support forceUpdate to trigger query run on change
   rememberCurrentSpecState: () => void;
 } {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -187,11 +188,12 @@ export function usePluginEditor(props: UsePluginEditorProps): {
   /**
    * Spec changes are independent and always just set the spec state.
    */
-  const onSpecChange: PluginSpecEditorProps['onChange'] = (next) => {
+  const onSpecChange: PluginSpecEditorProps['onChange'] = (next, options) => {
     onChange(
       produce(value, (draft) => {
         draft.spec = next;
-      })
+      }),
+      options // LOGZ.IO CHANGE END:: APPZ-1234 support forceUpdate to trigger query run on change
     );
   };
 

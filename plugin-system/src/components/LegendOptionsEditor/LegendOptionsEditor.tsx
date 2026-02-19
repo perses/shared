@@ -162,7 +162,7 @@ export function LegendOptionsEditor({
             }
           />
           <OptionsEditorControl
-            label="Mode"
+            label="Display" // LOGZ.IO CHANGE:: Micro copy changes [APPZ-260]
             control={
               <ToggleButtonGroup
                 color="primary"
@@ -210,7 +210,7 @@ export function LegendOptionsEditor({
               />
               {showValuesEditor && (
                 <OptionsEditorControl
-                  label="Values"
+                  label="Table values" // LOGZ.IO CHANGE:: Micro copy changes [APPZ-260]
                   control={
                     // For some reason, the inferred option type doesn't always seem to work
                     // quite right when `multiple` is true. Explicitly setting the generics

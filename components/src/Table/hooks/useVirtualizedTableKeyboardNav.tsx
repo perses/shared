@@ -1,4 +1,4 @@
-// Copyright The Perses Authors
+// Copyright 2023 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { TableVirtuosoHandle } from 'react-virtuoso';
-import { KeyboardEventHandler, MutableRefObject, RefObject } from 'react';
+import { FocusEventHandler, KeyboardEventHandler, MutableRefObject, RefObject } from 'react';
 import { useTableKeyboardNav, UseTableKeyboardNavProps } from './useTableKeyboardNav';
 
 interface UseVirtualizedTableKeyboardNavProps extends Omit<UseTableKeyboardNavProps, 'onActiveCellChange'> {
@@ -43,6 +43,7 @@ export function useVirtualizedTableKeyboardNav({
   isActive: boolean;
   onTableKeyDown: KeyboardEventHandler<HTMLTableElement>;
   onCellFocus: (cellPosition: TableCellPosition) => void;
+  onTableBlur: FocusEventHandler<HTMLTableElement>;
 } {
   const baseKeyboard = useTableKeyboardNav({
     maxRows,

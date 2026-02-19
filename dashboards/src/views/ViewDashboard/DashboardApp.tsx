@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, ReactNode, useState } from 'react';
+import { ReactElement, ReactNode, useEffect, useState } from 'react';
 import { Box } from '@mui/material';
-import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
+import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme, useChartsContext } from '@perses-dev/components';
 import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
 import {
@@ -44,6 +44,9 @@ export interface DashboardAppProps {
   dashboardTitleComponent?: ReactNode;
   onSave?: OnSaveDashboard;
   onDiscard?: (entity: DashboardResource) => void;
+  toolbarAddonComponent?: ReactNode; // LOGZ.IO CHANGE:: Support AdHoc filters [APPZ-1228]
+  dashboardControlsComponent?: JSX.Element; // LOGZ.IO CHANGE:: Add support for dashboardControlsComponent
+  onDashboardChange?: (dashboard: DashboardResource) => void; // LOGZ.IO CHANGE:: Alert users when trying to navigate out of dashboard in edit mode that has changes [APPZ-316]
 }
 
 export const DashboardApp = (props: DashboardAppProps): ReactElement => {
@@ -59,9 +62,13 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
     dashboardTitleComponent,
     onSave,
     onDiscard,
+    dashboardControlsComponent, // LOGZ.IO CHANGE:: Add support for dashboardControlsComponent
+    toolbarAddonComponent, // LOGZ.IO CHANGE:: Support AdHoc filters [APPZ-1228]
+    onDashboardChange, // LOGZ.IO CHANGE:: Alert users when trying to navigate out of dashboard in edit mode that has changes [APPZ-316]
   } = props;
 
   const chartsTheme = useChartsTheme();
+  const parentChartsContext = useChartsContext(); // LOGZ.IO CHANGE:: Custom Drilldown preview [APPZ-709]
 
   const { isEditMode, setEditMode } = useEditMode();
   const { dashboard, setDashboard } = useDashboard();
@@ -84,6 +91,12 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
       onDiscard(dashboard as unknown as DashboardResource);
     }
   };
+
+  // LOGZ.IO CHANGE START:: Alert users when trying to navigate out of dashboard in edit mode that has changes [APPZ-316]
+  useEffect(() => {
+    onDashboardChange?.(dashboard as unknown as DashboardResource);
+  }, [dashboard, onDashboardChange, originalDashboard]);
+  // LOGZ.IO CHANGE END:: Alert users when trying to navigate out of dashboard in edit mode that has changes [APPZ-316]
 
   const onEditButtonClick = (): void => {
     setEditMode(true);
@@ -111,10 +124,9 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
     <Box
       sx={{
         flexGrow: 1,
-        overflowX: 'hidden',
-        overflowY: 'auto',
         display: 'flex',
         flexDirection: 'column',
+        height: '100%',
       }}
     >
       <DashboardToolbar
@@ -127,8 +139,18 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
         isDatasourceEnabled={isDatasourceEnabled}
         onEditButtonClick={onEditButtonClick}
         onCancelButtonClick={onCancelButtonClick}
+        dashboardControlsComponent={dashboardControlsComponent}
+        toolbarAddonComponent={toolbarAddonComponent} // LOGZ.IO CHANGE:: Support AdHoc filters [APPZ-1228]
       />
-      <Box sx={{ paddingTop: 2, paddingX: 2, height: '100%' }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflowX: 'hidden',
+          overflowY: 'auto',
+          paddingTop: 1,
+          paddingX: 2,
+        }}
+      >
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <Dashboard
             emptyDashboardProps={{
@@ -137,7 +159,12 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
             }}
           />
         </ErrorBoundary>
-        <ChartsProvider chartsTheme={chartsTheme} enablePinning={false} enableSyncGrouping={false}>
+        <ChartsProvider
+          chartsTheme={chartsTheme}
+          enableSyncGrouping={false}
+          enablePinning={true} // LOGZ.IO CHANGE:: Custom Drilldown preview [APPZ-709]
+          pointActions={parentChartsContext.pointActions || []} // LOGZ.IO CHANGE:: Custom Drilldown preview [APPZ-709]
+        >
           <PanelDrawer />
         </ChartsProvider>
         <PanelGroupDialog />

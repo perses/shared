@@ -17,7 +17,7 @@ import { PanelEditorContext, PanelPreview } from '@perses-dev/dashboards';
 import { DataQueriesProvider, PanelSpecEditor, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import { Definition, PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { Control } from 'react-hook-form';
-import { ReactElement, useCallback, useContext, useMemo, useState } from 'react';
+import { ReactElement, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 export interface PanelQueriesSharedControlsProps {
   control: Control<PanelEditorValues>;
@@ -57,9 +57,27 @@ export function PanelQueriesSharedControls({
         return {
           kind: query.spec.plugin.kind,
           spec: query.spec.plugin.spec,
+          hidden: query.spec.hidden ?? false, // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
         };
       }) ?? []
   );
+
+  // LOGZ.IO CHANGE START:: clear deleted query from preview (only on delete, not every change)
+  const prevQueryCountRef = useRef(panelDefinition.spec.queries?.length ?? 0);
+  useEffect(() => {
+    const currentCount = panelDefinition.spec.queries?.length ?? 0;
+    if (currentCount < prevQueryCountRef.current) {
+      setPreviewDefinition(
+        panelDefinition.spec.queries?.map((query) => ({
+          kind: query.spec.plugin.kind,
+          spec: query.spec.plugin.spec,
+          hidden: query.spec.hidden ?? false,
+        })) ?? []
+      );
+    }
+    prevQueryCountRef.current = currentCount;
+  }, [panelDefinition.spec.queries]);
+  // LOGZ.IO CHANGE END:: clear deleted query from preview (only on delete, not every change)
 
   const handleRunQuery = useCallback((index: number, newDef: QueryDefinition) => {
     setPreviewDefinition((prev) => {
@@ -67,6 +85,7 @@ export function PanelQueriesSharedControls({
       newDefinitions[index] = {
         kind: newDef.spec.plugin.kind,
         spec: newDef.spec.plugin.spec,
+        hidden: newDef.spec.hidden ?? false, // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
       };
       return newDefinitions;
     });

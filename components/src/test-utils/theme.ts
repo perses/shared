@@ -44,4 +44,5 @@ export const mockChartsContext: SharedChartsState = {
   enableSyncGrouping: true,
   lastTooltipPinnedCoords: null,
   setLastTooltipPinnedCoords: () => null,
+  pointActions: [], // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
 };

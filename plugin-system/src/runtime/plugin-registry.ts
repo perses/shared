@@ -60,7 +60,7 @@ export function usePlugin<T extends PluginType>(
     queryKey: ['getPlugin', pluginType, kind],
     queryFn: () => getPlugin(pluginType!, kind),
     ...options,
-  });
+  }) as UseQueryResult<PluginImplementation<T>, Error>;
 }
 
 /**

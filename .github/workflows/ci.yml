@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - main-logzio
   pull_request:
   merge_group:
   release:
@@ -73,29 +74,30 @@ jobs:
       - run: npm ci
       - run: npm run type-check
 
-  release:
-    name: 'release'
-    needs: 'build'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    if: ${{ github.event.release.tag_name }}
-    env:
-      GITHUB_TOKEN: ${{ github.TOKEN }}
-    steps:
-      - name: checkout
-        uses: actions/checkout@v6
-      - uses: perses/github-actions@v0.11.0
-      - uses: ./.github/perses-ci/actions/setup_environment
-        with:
-          enable_npm: true
-          enable_go: true
-          nvmrc_path: './.nvmrc'
-      - name: Download archive
-        uses: actions/download-artifact@v7
-        with:
-          name: archives
-      - name: Publish npm package
-        run: go run ./scripts/npm-publish/npm-publish.go -tag=${{ github.event.release.tag_name }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  # LOGZ.IO CHANGE:: No need for publishing
+  # release:
+  #   name: 'release'
+  #   needs: 'build'
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: write
+  #   if: ${{ github.event.release.tag_name }}
+  #   env:
+  #     GITHUB_TOKEN: ${{ github.TOKEN }}
+  #   steps:
+  #     - name: checkout
+  #       uses: actions/checkout@v6
+  #     - uses: perses/github-actions@v0.11.0
+  #     - uses: ./.github/perses-ci/actions/setup_environment
+  #       with:
+  #         enable_npm: true
+  #         enable_go: true
+  #         nvmrc_path: './.nvmrc'
+  #     - name: Download archive
+  #       uses: actions/download-artifact@v7
+  #       with:
+  #         name: archives
+  #     - name: Publish npm package
+  #       run: go run ./scripts/npm-publish/npm-publish.go -tag=${{ github.event.release.tag_name }}
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

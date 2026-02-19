@@ -11,13 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './SeriesInfo';
-export * from './SeriesLabelsStack';
-export * from './SeriesMarker';
-export * from './TimeChartTooltip';
-export * from './TooltipContent';
-export * from './TooltipHeader';
-export * from './nearby-series';
-export * from './tooltip-model';
-export * from './utils';
-export * from './types';
+// LOGZ.IO FILE
+
+export type MutableRef<T> = React.RefCallback<T> | React.MutableRefObject<T | null> | null;
+
+/**
+ * Utility to assign a value to a React ref regardless of its type (callback or object ref)
+ * @param ref The React ref to assign to
+ * @param value The value to assign to the ref
+ */
+export function assignRef<T>(ref: MutableRef<T> | null | undefined, value: T): void {
+  if (ref) {
+    if (typeof ref === 'function') {
+      ref(value);
+    } else {
+      ref.current = value;
+    }
+  }
+}

@@ -29,6 +29,12 @@ export interface Plugin<Spec> {
   createInitialOptions: () => Spec;
 }
 
+// LOGZ.IO CHANGE START:: APPZ-1234 support forceUpdate to trigger query run on change
+export interface OnChangeOptions {
+  forceUpdate?: boolean;
+}
+// LOGZ.IO CHANGE END:: APPZ-1234 support forceUpdate to trigger query run on change
+
 /**
  * Common props passed to options editor components.
  */
@@ -36,8 +42,9 @@ export interface OptionsEditorProps<Spec> {
   // TODO: These are temporary and may not actually make sense, so replace
   // with whatever makes sense as visual editing evolves
   value: Spec;
-  onChange: (next: Spec) => void;
+  onChange: (next: Spec, options?: OnChangeOptions) => void; // LOGZ.IO CHANGE:: APPZ-1234 support forceUpdate to trigger query run on change
   isReadonly?: boolean;
+  index?: number; // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
 }
 
 /**

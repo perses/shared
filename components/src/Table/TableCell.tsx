@@ -19,7 +19,7 @@ import {
   styled,
   useTheme,
 } from '@mui/material';
-import { ReactElement, useEffect, useMemo, useRef } from 'react';
+import { ReactElement, useCallback, useEffect, useMemo, useRef } from 'react';
 import { hasDataFieldPatterns, replaceDataFields } from '../utils/data-field-interpolation';
 import { DataLink, TableCellAlignment, TableDensity, getTableCellLayout } from './model/table-model';
 
@@ -75,6 +75,10 @@ export interface TableCellProps extends Omit<MuiTableCellProps, 'tabIndex' | 'al
   backgroundColor?: string;
   dataLink?: DataLink;
   adjacentCellsValuesMap?: Record<string, string>;
+  // LOGZ.IO CHANGE START
+  link?: string;
+  openInNewTab?: boolean;
+  // LOGZ.IO CHANGE END
 }
 
 export function TableCell({
@@ -93,6 +97,10 @@ export function TableCell({
   backgroundColor,
   dataLink,
   adjacentCellsValuesMap,
+  // LOGZ.IO CHANGE START
+  link,
+  openInNewTab,
+  // LOGZ.IO CHANGE END
   ...otherProps
 }: TableCellProps): ReactElement {
   const theme = useTheme();
@@ -136,6 +144,37 @@ export function TableCell({
     }
     return dataLink;
   }, [dataLink, adjacentCellsValuesMap]);
+
+  // LOGZ.IO CHANGE START
+  const handleLinkClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.stopPropagation();
+  }, []);
+
+  const cellContent = useMemo(() => {
+    if (!link) return children;
+
+    return (
+      <Link
+        href={link}
+        target={openInNewTab ? '_blank' : undefined}
+        rel={openInNewTab ? 'noopener noreferrer' : undefined}
+        underline="hover"
+        color="primary"
+        onClick={handleLinkClick}
+        sx={{
+          display: 'block',
+          width: '100%',
+          height: '100%',
+          whiteSpace: 'inherit',
+          overflow: 'inherit',
+          textOverflow: 'inherit',
+        }}
+      >
+        {children}
+      </Link>
+    );
+  }, [link, openInNewTab, children, handleLinkClick]);
+  // LOGZ.IO CHANGE END
 
   return (
     <StyledMuiTableCell
@@ -202,7 +241,7 @@ export function TableCell({
             {children}
           </Link>
         ) : (
-          children
+          cellContent
         )}
       </Box>
     </StyledMuiTableCell>

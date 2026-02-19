@@ -12,30 +12,19 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { LineSeriesOption } from 'echarts/charts';
-import { formatValue, TimeSeriesValueTuple, FormatOptions, TimeSeries } from '@perses-dev/core';
-import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping, DatapointInfo } from '../model';
+import { formatValue, FormatOptions, TimeSeries, TimeSeriesMetadata } from '@perses-dev/core';
+import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping } from '../model';
 import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp } from '../utils';
 import { CursorCoordinates, CursorData, EMPTY_TOOLTIP_DATA } from './tooltip-model';
+import { gatherCandidates, findClosestCandidate, processCandidates } from './utils';
+import { NearbySeriesArray } from './types';
+
+// LOGZ.IO CHANGE START:: Tooltip is not behaving correctly [APPZ-1418]
 
 // increase multipliers to show more series in tooltip
-export const INCREASE_NEARBY_SERIES_MULTIPLIER = 5.5; // adjusts how many series show in tooltip (higher == more series shown)
-export const DYNAMIC_NEARBY_SERIES_MULTIPLIER = 30; // used for adjustment after series number divisor
+export const INCREASE_NEARBY_SERIES_MULTIPLIER = 1; // adjusts how many series show in tooltip (higher == more series shown)
+export const DYNAMIC_NEARBY_SERIES_MULTIPLIER = 10; // used for adjustment after series number divisor
 export const SHOW_FEWER_SERIES_LIMIT = 5;
-
-export interface NearbySeriesInfo {
-  seriesIdx: number | null;
-  datumIdx: number | null;
-  seriesName: string;
-  date: number;
-  markerColor: string;
-  x: number;
-  y: number;
-  formattedY: string;
-  isClosestToCursor: boolean;
-}
-
-export type NearbySeriesArray = NearbySeriesInfo[];
 
 /**
  * Returns formatted series data for the points that are close to the user's cursor.
@@ -47,29 +36,21 @@ export function checkforNearbyTimeSeries(
   pointInGrid: number[],
   yBuffer: number,
   chart: EChartsInstance,
+  mousePixelX?: number,
+  seriesMetadata?: TimeSeriesMetadata[],
   format?: FormatOptions,
   seriesFormatMap?: Map<string, FormatOptions>,
-  // in the case of multi-axis, we need the cursor Y position in pixel space
+  selectedSeriesIdx?: number | null,
   cursorPixelY?: number
 ): NearbySeriesArray {
-  const currentNearbySeriesData: NearbySeriesArray = [];
   const cursorX: number | null = pointInGrid[0] ?? null;
   const cursorY: number | null = pointInGrid[1] ?? null;
 
-  if (cursorX === null || cursorY === null) return currentNearbySeriesData;
+  if (cursorX === null || cursorY === null) return EMPTY_TOOLTIP_DATA;
 
-  if (chart.dispatchAction === undefined) return currentNearbySeriesData;
+  if (chart.dispatchAction === undefined) return EMPTY_TOOLTIP_DATA;
 
-  if (!Array.isArray(data)) return currentNearbySeriesData;
-  const nearbySeriesIndexes: number[] = [];
-  const emphasizedSeriesIndexes: number[] = [];
-  const nonEmphasizedSeriesIndexes: number[] = [];
-  const emphasizedDatapoints: DatapointInfo[] = [];
-  const duplicateDatapoints: DatapointInfo[] = [];
-
-  const totalSeries = data.length;
-
-  const yValueCounts: Map<number, number> = new Map();
+  if (!Array.isArray(data)) return EMPTY_TOOLTIP_DATA;
 
   // Only need to loop through first dataset source since getCommonTimeScale ensures xAxis timestamps are consistent
   const firstTimeSeriesValues = data[0]?.values;
@@ -79,144 +60,36 @@ export function checkforNearbyTimeSeries(
     return EMPTY_TOOLTIP_DATA;
   }
 
-  // For multi-axis support: convert yBuffer to pixel space for consistent comparison
-  // This allows us to compare series on different Y axes fairly
-  let yBufferPixels: number | null = null;
-  if (cursorPixelY !== undefined) {
-    // Convert a point at cursorY and cursorY + yBuffer to pixels to get the buffer in pixel space
-    const cursorPoint = chart.convertToPixel('grid', [0, cursorY]);
-    const bufferPoint = chart.convertToPixel('grid', [0, cursorY + yBuffer]);
-    if (cursorPoint && bufferPoint && cursorPoint[1] !== undefined && bufferPoint[1] !== undefined) {
-      yBufferPixels = Math.abs(bufferPoint[1] - cursorPoint[1]);
-    }
+  const candidates = gatherCandidates({
+    data,
+    seriesMapping,
+    closestTimestamp,
+    cursorY,
+    yBuffer,
+    chart,
+    mousePixelX,
+    seriesMetadata,
+    selectedSeriesIdx,
+    cursorPixelY,
+  });
+
+  if (candidates.length === 0) {
+    batchDispatchNearbySeriesActions(chart, [], [], [], [], []);
+    return EMPTY_TOOLTIP_DATA;
   }
 
-  // find the timestamp with data that is closest to cursorX
-  for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
-    const currentSeries = seriesMapping[seriesIdx];
-    if (!currentSeries) break;
+  const winner = findClosestCandidate(candidates);
 
-    const currentDataset = totalSeries > 0 ? data[seriesIdx] : null;
-    if (!currentDataset) break;
+  const {
+    currentNearbySeriesData,
+    emphasizedSeriesIndexes,
+    nonEmphasizedSeriesIndexes,
+    emphasizedDatapoints,
+    duplicateDatapoints,
+    nearbySeriesIndexes,
+  } = processCandidates(candidates, winner, seriesFormatMap, format);
 
-    const currentDatasetValues: TimeSeriesValueTuple[] = currentDataset.values;
-    if (currentDatasetValues === undefined || !Array.isArray(currentDatasetValues)) break;
-    const lineSeries = currentSeries as LineSeriesOption;
-    const currentSeriesName = lineSeries.name ? lineSeries.name.toString() : '';
-    const seriesId = lineSeries.id ? lineSeries.id.toString() : '';
-    const markerColor = lineSeries.color ?? '#000';
-
-    // Get the format for this series (from seriesFormatMap or fallback to default format)
-    const seriesFormat = seriesFormatMap?.get(seriesId) ?? format;
-
-    if (Array.isArray(data)) {
-      for (let datumIdx = 0; datumIdx < currentDatasetValues.length; datumIdx++) {
-        const nearbyTimeSeries = currentDatasetValues[datumIdx];
-        if (nearbyTimeSeries === undefined || !Array.isArray(nearbyTimeSeries)) break;
-
-        const xValue = nearbyTimeSeries[0];
-        const yValue = nearbyTimeSeries[1];
-        // TODO: ensure null values not displayed in tooltip
-        if (yValue !== undefined && yValue !== null) {
-          if (closestTimestamp === xValue) {
-            // Check if this series is nearby the cursor
-            let isNearby = false;
-
-            // For multi-axis: compare in pixel space
-            if (cursorPixelY !== undefined && yBufferPixels !== null) {
-              const dataPointPixel = chart.convertToPixel({ seriesIndex: seriesIdx }, [datumIdx, yValue]);
-              if (dataPointPixel && dataPointPixel[1] !== undefined) {
-                const pixelDistance = Math.abs(cursorPixelY - dataPointPixel[1]);
-                isNearby = pixelDistance <= yBufferPixels;
-              } else {
-                // Fallback to data-space comparison for primary axis
-                isNearby = cursorY <= yValue + yBuffer && cursorY >= yValue - yBuffer;
-              }
-            } else {
-              // Fallback to original data-space comparison
-              isNearby = cursorY <= yValue + yBuffer && cursorY >= yValue - yBuffer;
-            }
-
-            if (isNearby) {
-              // show fewer bold series in tooltip when many total series
-              const minPercentRange = totalSeries > SHOW_FEWER_SERIES_LIMIT ? 2 : 5;
-              const percentRangeToCheck = Math.max(minPercentRange, 100 / totalSeries);
-
-              // For isClosestToCursor, also use pixel space for multi-axis
-              let isClosestToCursor = false;
-              if (cursorPixelY !== undefined) {
-                const dataPointPixel = chart.convertToPixel({ seriesIndex: seriesIdx }, [datumIdx, yValue]);
-                if (dataPointPixel && dataPointPixel[1] !== undefined) {
-                  const pixelDistance = Math.abs(cursorPixelY - dataPointPixel[1]);
-                  // Use percentage of buffer for "closest" determination
-                  const tightBufferPixels = (yBufferPixels ?? 50) * (percentRangeToCheck / 100);
-                  isClosestToCursor = pixelDistance <= Math.max(tightBufferPixels, 5);
-                } else {
-                  isClosestToCursor = isWithinPercentageRange({
-                    valueToCheck: cursorY,
-                    baseValue: yValue,
-                    percentage: percentRangeToCheck,
-                  });
-                }
-              } else {
-                isClosestToCursor = isWithinPercentageRange({
-                  valueToCheck: cursorY,
-                  baseValue: yValue,
-                  percentage: percentRangeToCheck,
-                });
-              }
-
-              if (isClosestToCursor) {
-                // shows as bold in tooltip, customize 'emphasis' options in getTimeSeries util
-                emphasizedSeriesIndexes.push(seriesIdx);
-
-                // Used to determine which datapoint to apply select styles to.
-                // Accounts for cases where lines may be rendered directly on top of eachother.
-                const duplicateValuesCount = yValueCounts.get(yValue) ?? 0;
-                yValueCounts.set(yValue, duplicateValuesCount + 1);
-                if (duplicateValuesCount > 0) {
-                  duplicateDatapoints.push({
-                    seriesIndex: seriesIdx,
-                    dataIndex: datumIdx,
-                    seriesName: currentSeriesName,
-                    yValue: yValue,
-                  });
-                }
-
-                // keep track of all bold datapoints in tooltip so that 'select' state only applied to topmost
-                emphasizedDatapoints.push({
-                  seriesIndex: seriesIdx,
-                  dataIndex: datumIdx,
-                  seriesName: currentSeriesName,
-                  yValue: yValue,
-                });
-              } else {
-                nonEmphasizedSeriesIndexes.push(seriesIdx);
-                // ensure series far away from cursor are not highlighted
-                chart.dispatchAction({
-                  type: 'downplay',
-                  seriesIndex: seriesIdx,
-                });
-              }
-              const formattedY = formatValue(yValue, seriesFormat);
-              currentNearbySeriesData.push({
-                seriesIdx: seriesIdx,
-                datumIdx: datumIdx,
-                seriesName: currentSeriesName,
-                date: closestTimestamp,
-                x: xValue,
-                y: yValue,
-                formattedY: formattedY,
-                markerColor: markerColor.toString(),
-                isClosestToCursor,
-              });
-              nearbySeriesIndexes.push(seriesIdx);
-            }
-          }
-        }
-      }
-    }
-  }
+  // LOGZ.IO CHANGE END:: Tooltip is not behaving correctly [APPZ-1418]
 
   batchDispatchNearbySeriesActions(
     chart,
@@ -302,6 +175,7 @@ export function legacyCheckforNearbySeries(
                 formattedY: formattedY,
                 markerColor: markerColor.toString(),
                 isClosestToCursor,
+                isSelected: false, // LOGZ.IO CHANGE:: Drilldown panel [APPZ-377]
               });
               nearbySeriesIndexes.push(seriesIdx);
             }
@@ -354,6 +228,10 @@ export function getNearbySeriesData({
   format,
   seriesFormatMap,
   showAllSeries = false,
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
+  seriesMetadata,
+  selectedSeriesIdx,
+  // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
 }: {
   mousePos: CursorData['coords'];
   pinnedPos: CursorCoordinates | null;
@@ -363,6 +241,10 @@ export function getNearbySeriesData({
   format?: FormatOptions;
   seriesFormatMap?: Map<string, FormatOptions>;
   showAllSeries?: boolean;
+  // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
+  seriesMetadata?: TimeSeriesMetadata[];
+  selectedSeriesIdx?: number | null;
+  // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
 }): NearbySeriesArray {
   if (chart === undefined || mousePos === null) return EMPTY_TOOLTIP_DATA;
 
@@ -422,8 +304,13 @@ export function getNearbySeriesData({
       pointInGrid,
       yBuffer,
       chart,
+      // LOGZ.IO CHANGE START:: Drilldown panel [APPZ-377]
+      mousePos.plotCanvas.x,
+      seriesMetadata,
       format,
       seriesFormatMap,
+      selectedSeriesIdx,
+      // LOGZ.IO CHANGE END:: Drilldown panel [APPZ-377]
       hasMultipleYAxes ? cursorPixelY : undefined
     );
   }
@@ -465,6 +352,7 @@ export function getYBuffer({
   if (showAllSeries) {
     return yInterval * 10; // roughly correlates with grid so entire canvas is searched
   }
+
   // never let nearby series range be less than roughly the size of a single tick
   const yBufferMin = yInterval * 0.3;
 
@@ -473,6 +361,7 @@ export function getYBuffer({
     const adjustedBuffer = (yInterval * DYNAMIC_NEARBY_SERIES_MULTIPLIER) / totalSeries;
     return Math.max(yBufferMin, adjustedBuffer);
   }
+
   // increase multiplier to expand nearby series range
   return Math.max(yBufferMin, yInterval * INCREASE_NEARBY_SERIES_MULTIPLIER);
 }

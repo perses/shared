@@ -11,13 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './SeriesInfo';
-export * from './SeriesLabelsStack';
-export * from './SeriesMarker';
-export * from './TimeChartTooltip';
-export * from './TooltipContent';
-export * from './TooltipHeader';
-export * from './nearby-series';
-export * from './tooltip-model';
-export * from './utils';
-export * from './types';
+// LOGZ.IO CHANGE FILE:: Performance optimization [APPZ-359]
+
+export * from './array-memo';
+export * from './stable-queries';

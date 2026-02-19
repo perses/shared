@@ -32,7 +32,7 @@ export interface EmptyDashboardProps {
   /**
    * Descriptive text, which can be a bit longer.
    */
-  description?: string;
+  description?: ReactNode; // LOGZ.IO CHANGE:: APPZ-1234 add ReactNode type
 
   /**
    * Additional text that will be displayed at the bottom of the empty state.
@@ -64,7 +64,7 @@ const DEFAULT_DESCRIPTION = {
 
 // Constants from specifics in designs to make the default messaging look good.
 const CONTAINER_WIDTH = '500px';
-const PRIMARY_CONTENT_WIDTH = '289px';
+const PRIMARY_CONTENT_WIDTH = undefined; // LOGZ.IO CHANGE:: APPZ-1234 remove primary content width
 
 const COMMON_BUTTON_PROPS = {
   variant: 'outlined',

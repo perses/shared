@@ -36,6 +36,8 @@ export interface DashboardToolbarProps {
   onEditButtonClick: () => void;
   onCancelButtonClick: () => void;
   onSave?: OnSaveDashboard;
+  dashboardControlsComponent?: JSX.Element; // LOGZ.IO CHANGE:: Add support for dashboardControlsComponent
+  toolbarAddonComponent?: ReactNode; // LOGZ.IO CHANGE:: Add support for toolbarAddonComponent
 }
 
 export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => {
@@ -49,6 +51,8 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
     onEditButtonClick,
     onCancelButtonClick,
     onSave,
+    dashboardControlsComponent,
+    toolbarAddonComponent,
   } = props;
 
   const { isEditMode } = useEditMode();
@@ -97,7 +101,8 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
             <>
               {isBiggerThanSm && (
                 <Stack direction="row" gap={1} ml="auto">
-                  <EditButton onClick={onEditButtonClick} />
+                  {dashboardControlsComponent}
+                  {!isReadonly && <EditButton onClick={onEditButtonClick} />}
                 </Stack>
               )}
             </>
@@ -108,15 +113,18 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
             display: 'flex',
             width: '100%',
             alignItems: 'start',
-            padding: (theme) => theme.spacing(1, 2, 0, 2),
+            padding: (theme) => theme.spacing(1, 2, 1, 2),
             flexDirection: isBiggerThanMd ? 'row' : 'column',
             flexWrap: 'nowrap',
             gap: 1,
+            borderBottom: '1px solid',
+            borderColor: (theme) => theme.palette.divider,
           }}
         >
           <Box width="100%">
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <DashboardStickyToolbar
+                toolbarAddonComponent={toolbarAddonComponent} // LOGZ.IO CHANGE:: Support AdHoc filters [APPZ-1228]
                 initialVariableIsSticky={initialVariableIsSticky}
                 sx={{
                   backgroundColor: ({ palette }) => palette.background.default,

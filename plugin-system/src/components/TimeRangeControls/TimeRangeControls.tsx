@@ -1,4 +1,4 @@
-// Copyright The Perses Authors
+// Copyright 2024 The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -36,14 +36,20 @@ import {
   useTimeRangeOptionsSetting,
   useShowZoomRangeSetting,
 } from '../../runtime';
+
+// LOGZ.IO CHANGE START:: Change refresh time interval options [APPZ-364]
 export const DEFAULT_REFRESH_INTERVAL_OPTIONS: TimeOption[] = [
   { value: { pastDuration: '0s' }, display: 'Off' },
-  { value: { pastDuration: '5s' }, display: '5s' },
-  { value: { pastDuration: '10s' }, display: '10s' },
-  { value: { pastDuration: '15s' }, display: '15s' },
   { value: { pastDuration: '30s' }, display: '30s' },
-  { value: { pastDuration: '60s' }, display: '1m' },
+  { value: { pastDuration: '1m' }, display: '1m' },
+  { value: { pastDuration: '5m' }, display: '5m' },
+  { value: { pastDuration: '15m' }, display: '15m' },
+  { value: { pastDuration: '30m' }, display: '30m' },
+  { value: { pastDuration: '1h' }, display: '1h' },
+  { value: { pastDuration: '2h' }, display: '2h' },
+  { value: { pastDuration: '1d' }, display: '1d' },
 ];
+// LOGZ.IO CHANGE END:: Change refresh time interval options [APPZ-364]
 
 const DEFAULT_HEIGHT = '34px';
 

@@ -25,6 +25,7 @@ import { VirtualizedTableContainer } from './VirtualizedTableContainer';
 import { TableCellConfigs, TableProps, TableRowEventOpts } from './model/table-model';
 import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
 import { TableFoot } from './TableFoot';
+import { replaceCellVariables } from './services/url-template.service';
 
 type TableCellPosition = {
   row: number;
@@ -64,6 +65,7 @@ export function VirtualizedTable<TableData>({
   rowCount,
 }: VirtualizedTableProps<TableData>): ReactElement {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
+
   // Use a ref for these values because they are only needed for keyboard
   // focus interactions and setting them on state will lead to a significant
   // amount of unnecessary re-renders.
@@ -71,7 +73,6 @@ export function VirtualizedTable<TableData>({
     startIndex: 0,
     endIndex: 0,
   });
-
   const setVisibleRange: TableVirtuosoProps<TableData, unknown>['rangeChanged'] = (newVisibleRange) => {
     visibleRange.current = newVisibleRange;
   };
@@ -97,7 +98,15 @@ export function VirtualizedTable<TableData>({
     return {
       Scroller: VirtualizedTableContainer,
       Table: (props): ReactElement => {
-        return <InnerTable {...props} width={width} density={density} onKeyDown={keyboardNav.onTableKeyDown} />;
+        return (
+          <InnerTable
+            {...props}
+            width={width}
+            density={density}
+            onKeyDown={keyboardNav.onTableKeyDown}
+            onBlur={keyboardNav.onTableBlur}
+          />
+        );
       },
       TableHead,
       TableFoot,
@@ -127,7 +136,16 @@ export function VirtualizedTable<TableData>({
       },
       TableBody,
     };
-  }, [density, keyboardNav.onTableKeyDown, onRowClick, onRowMouseOut, onRowMouseOver, rows, width]);
+  }, [
+    density,
+    keyboardNav.onTableKeyDown,
+    keyboardNav.onTableBlur,
+    onRowClick,
+    onRowMouseOut,
+    onRowMouseOver,
+    rows,
+    width,
+  ]);
 
   const handleChangePage = (_event: React.MouseEvent<HTMLButtonElement> | null, newPage: number): void => {
     if (!pagination || !onPaginationChange) return;
@@ -218,6 +236,7 @@ export function VirtualizedTable<TableData>({
             <>
               {row.getVisibleCells().map((cell, i, cells) => {
                 const position: TableCellPosition = {
+                  // Add 1 to the row index because the header is row 0
                   row: index + 1,
                   column: i,
                 };
@@ -235,6 +254,13 @@ export function VirtualizedTable<TableData>({
                    We may want to add parameters to a link from neighboring cells in the future as well.
                    If this is the case, the value of the neighboring cells should be read from here and be replaced. (Bing discussed at the moment, not decided yet)
                 */
+
+                // LOGZ.IO CHANGE START
+                const cellURLTemplate = cell.column.columnDef.meta?.linkConfig?.urlTemplate;
+                const openInNewTab = cell.column.columnDef.meta?.linkConfig?.openInNewTab;
+
+                const link = replaceCellVariables(cellURLTemplate, cell.column.id, cellContent, row.original);
+                // LOGZ.IO CHANGE END
 
                 const cellDescriptionDef = cell.column.columnDef.meta?.cellDescription;
                 let description: string | undefined = undefined;
@@ -280,6 +306,10 @@ export function VirtualizedTable<TableData>({
                     backgroundColor={cellConfig?.backgroundColor ?? undefined}
                     dataLink={cell.column.columnDef.meta?.dataLink}
                     adjacentCellsValuesMap={adjacentCellsValuesMap}
+                    // LOGZ.IO CHANGE START
+                    link={link}
+                    openInNewTab={openInNewTab}
+                    // LOGZ.IO CHANGE END
                   >
                     {cellConfig?.text || cellContent}
                   </TableCell>

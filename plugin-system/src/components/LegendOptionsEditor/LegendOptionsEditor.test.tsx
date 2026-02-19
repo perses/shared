@@ -34,11 +34,11 @@ describe('LegendOptionsEditor', () => {
   };
 
   const getLegendModeSelector = (): HTMLElement => {
-    return screen.getByRole('group', { name: 'Mode' });
+    return screen.getByRole('group', { name: 'Display' }); // LOGZ.IO CHANGE:: Micro copy changes [APPZ-260]
   };
 
   const getLegendValuesSelector = (): HTMLElement => {
-    return screen.getByRole('combobox', { name: 'Values' });
+    return screen.getByRole('combobox', { name: 'Table values' }); // LOGZ.IO CHANGE:: Micro copy changes [APPZ-260]
   };
 
   it('can change legend visibility by clicking', () => {

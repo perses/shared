@@ -24,7 +24,7 @@ export const DashboardDiscardChangesConfirmationDialog = (): ReactElement | null
     <DiscardChangesConfirmationDialog
       description={
         dialog.description ||
-        'You have unsaved changes in this dashboard. Are you sure you want to discard these changes? Changes cannot be recovered.'
+        'You have unsaved changes in this dashboard. Are you sure you want to discard them? This action can’t be undone.' // LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260]
       }
       isOpen={true}
       onCancel={dialog.onCancel}

@@ -102,7 +102,7 @@ export function VariableEditor(props: {
           closeDiscardChangesConfirmationDialog();
         },
         description:
-          'You have unapplied changes. Are you sure you want to discard these changes? Changes cannot be recovered.',
+          'You have unsaved changes in this panel. Are you sure you want to discard them? This action can’t be undone.', // LOGZ.IO CHANGE START:: Micro copy changes [APPZ-260]
       });
     } else {
       props.onCancel();
@@ -230,6 +230,12 @@ export function VariableEditor(props: {
           </Box>
           <Box padding={2} sx={{ overflowY: 'scroll' }}>
             <Stack spacing={2}>
+              {/* LOGZ.IO CHANGE START:: unidash add tooltips to make features more clear to users [APPZ-348] */}
+              <Typography variant="h4">
+                Define and manage variables to make your dashboards dynamic. Use built-in or custom variables to filter
+                data or modify individual panels without affecting the entire dashboard.
+              </Typography>
+              {/* LOGZ.IO CHANGE END:: unidash add tooltips to make features more clear to users [APPZ-348] */}
               <Stack spacing={2}>
                 {!validation.isValid &&
                   validation.errors.map((error) => (

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
+import { ReactElement, ReactNode, useState } from 'react';
 import {
   AppBar,
   Box,
@@ -26,11 +26,14 @@ import {
 import PinOutline from 'mdi-material-ui/PinOutline';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
 import { TimeRangeControls, useTimeZoneParams } from '@perses-dev/plugin-system';
+import { ExternalVariableDefinition, VariableDefinition } from '@perses-dev/core';
 import { VariableList } from '../Variables';
+import { useExternalVariableDefinitions, useVariableDefinitions } from '../../context';
 
 interface DashboardStickyToolbarProps {
   initialVariableIsSticky?: boolean;
   sx?: SxProps<Theme>;
+  toolbarAddonComponent?: ReactNode; // LOGZ.IO CHANGE:: Support AdHoc filters [APPZ-1228]
 }
 
 export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): ReactElement {
@@ -42,6 +45,9 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): Reac
   const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
 
   const { timeZone, setTimeZone } = useTimeZoneParams('local');
+  const variableDefinitions: VariableDefinition[] = useVariableDefinitions();
+  const externalVariableDefinitions: ExternalVariableDefinition[] = useExternalVariableDefinitions();
+  const variablesLength = variableDefinitions.length + externalVariableDefinitions.length;
 
   return (
     // marginBottom={-1} counteracts the marginBottom={1} on every variable input.
@@ -83,7 +89,8 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): Reac
             }}
             gap={1}
           >
-            <VariableList />
+            {variablesLength > 0 && <VariableList />}
+            {props.toolbarAddonComponent} {/* LOGZ.IO CHANGE:: Support AdHoc filters [APPZ-1228] */}
             {props.initialVariableIsSticky && (
               <IconButton style={{ width: 'fit-content', height: 'fit-content' }} onClick={() => setIsPin(!isPin)}>
                 {isPin ? <PinOutline /> : <PinOffOutline />}

@@ -40,6 +40,7 @@ import { createDuplicatePanelSlice, DuplicatePanelSlice } from './duplicate-pane
 import { createEditJsonDialogSlice, EditJsonDialogSlice } from './edit-json-dialog-slice';
 import { createPanelDefinition } from './common';
 import { createViewPanelSlice, ViewPanelSlice, VirtualPanelRef } from './view-panel-slice';
+import { assignRef, MutableRef } from './assign-ref';
 
 export interface DashboardStoreState
   extends PanelGroupSlice,
@@ -84,18 +85,27 @@ export interface DashboardStoreProps {
 
 export interface DashboardProviderProps {
   initialState: DashboardStoreProps;
+  dashboardStoreApiRef?: MutableRef<DashboardStoreState>; // LOGZ.IO CHANGE END:: Add support for dashboardStoreApiRef
   children?: ReactNode;
 }
 
-export function DashboardProvider(props: DashboardProviderProps): ReactElement {
-  // Prevent calling createDashboardStore every time it rerenders
+export function DashboardProvider({ dashboardStoreApiRef, ...props }: DashboardProviderProps): ReactElement {
   const createDashboardStore = useCallback(initStore, [props]);
-  const [store] = useState(createDashboardStore(props));
 
   // load plugin to retrieve initial spec if default panel kind is defined
   const { defaultPluginKinds } = usePluginRegistry();
   const defaultPanelKind = defaultPluginKinds?.['Panel'] ?? '';
   const { data: plugin } = usePlugin('Panel', defaultPanelKind);
+
+  // LOGZ.IO CHANGE START:: Add support for dashboardStoreApiRef
+  const [store] = useState(() => {
+    const newStore = createDashboardStore(props);
+
+    assignRef(dashboardStoreApiRef, newStore.getState());
+
+    return newStore;
+  }); // prevent calling createDashboardStore every time it rerenders
+  // LOGZ.IO CHANGE END:: Add support for dashboardStoreApiRef
 
   useEffect(() => {
     if (plugin === undefined) return;
