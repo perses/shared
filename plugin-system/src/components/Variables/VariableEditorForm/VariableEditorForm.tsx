@@ -136,6 +136,10 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     form.setValue('spec.allowMultiple', false);
   }
 
+  if (!_allowAllValue && values.spec.customAllValue !== undefined) {
+    form.setValue('spec.customAllValue', undefined);
+  }
+
   if (!values.spec.plugin) {
     form.setValue('spec.plugin', { kind: 'StaticListVariable', spec: {} });
   }
