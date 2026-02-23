@@ -36,8 +36,8 @@ import {
   TOOLTIP_TEXT,
 } from '../../constants';
 import { HeaderIconButton } from './HeaderIconButton';
-import { PanelLinks } from './PanelLinks';
 import { PanelOptions } from './Panel';
+import { LinksDisplay } from '../LinksDisplay';
 
 const noticeTypeToIcon: Record<Notice['type'], ReactNode> = {
   error: <AlertCircleIcon color="error" />,
@@ -109,7 +109,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [descriptionTooltipId, description]);
 
-  const linksAction = links && links.length > 0 && <PanelLinks links={links} />;
+  const linksAction = links && links.length > 0 && <LinksDisplay links={links} variant="panel" />;
   const extraActions = editHandlers === undefined && extra;
 
   const queryStateIndicator = useMemo((): ReactNode | undefined => {

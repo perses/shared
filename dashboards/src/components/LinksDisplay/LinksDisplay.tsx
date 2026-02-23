@@ -11,35 +11,58 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, Link as LinkComponent, Menu, MenuItem, Theme } from '@mui/material';
+import { IconButton, Link as LinkComponent, Menu, MenuItem, Theme, Chip } from '@mui/material';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import { Link } from '@perses-dev/core';
 import { MouseEvent, ReactElement, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 
-export function PanelLinks({ links }: { links: Link[] }): ReactElement {
+type LinksVariant = 'dashboard' | 'panel';
+
+interface LinksProps {
+  links: Link[];
+  variant: LinksVariant;
+}
+
+export function LinksDisplay({ links, variant }: LinksProps): ReactElement|null {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isMenuOpened = Boolean(anchorEl);
+
   const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>): void => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = (): void => {
     setAnchorEl(null);
   };
 
-  // If there is only one link, show it directly
-  if (links.length === 1 && links[0]) {
-    const link = links[0];
-    return <LinkButton link={link} />;
+  if (links.length === 0) {
+    return null;
   }
 
-  // Else we show a menu with a list of all links
+  // Panel variant: single link shows as icon button
+  if (variant === 'panel' && links.length === 1 && links[0]) {
+    return <LinkButton link={links[0]} />;
+  }
+
+  // Dashboard variant: 1-3 links show as chips
+  if (variant === 'dashboard' && links.length <= 3) {
+    return (
+      <>
+        {links.map((link: Link) => (
+          <LinkChip key={link.url} link={link} />
+        ))}
+      </>
+    );
+  }
+
+  // Default: show dropdown menu for multiple links
   return (
     <>
       <InfoTooltip description={`${links.length} links`} enterDelay={100}>
         <IconButton
-          aria-label="Panel links"
+          aria-label={variant === 'dashboard' ? 'Dashboard links' : 'Panel links'}
           size="small"
           onClick={handleOpenMenu}
           sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
@@ -57,7 +80,7 @@ export function PanelLinks({ links }: { links: Link[] }): ReactElement {
         open={isMenuOpened}
         onClose={handleClose}
         MenuListProps={{
-          'aria-labelledby': 'panel-links',
+          'aria-labelledby': variant === 'dashboard' ? 'dashboard-links' : 'panel-links',
         }}
       >
         {links.map((link: Link) => (
@@ -65,6 +88,25 @@ export function PanelLinks({ links }: { links: Link[] }): ReactElement {
         ))}
       </Menu>
     </>
+  );
+}
+
+function LinkChip({ link }: { link: Link }): ReactElement {
+  const { url, name, tooltip, targetBlank } = useLink(link);
+
+  return (
+    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+      <Chip
+        label={name ?? url}
+        component="a"
+        href={url}
+        target={targetBlank ? '_blank' : '_self'}
+        clickable
+        size="small"
+        icon={<LaunchIcon fontSize="small" />}
+        sx={(theme) => ({ height: theme.spacing(3) })}
+      />
+    </InfoTooltip>
   );
 }
 
