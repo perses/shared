@@ -12,20 +12,7 @@
 // limitations under the License.
 
 import { DispatchWithoutAction, ReactElement, useCallback, useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  Switch,
-  TextField,
-  Grid,
-  FormControlLabel,
-  MenuItem,
-  Stack,
-  Divider,
-  IconButton,
-  Tooltip,
-} from '@mui/material';
-import CloseIcon from 'mdi-material-ui/Close';
+import { Box, Typography, Switch, TextField, Grid, FormControlLabel, MenuItem, Stack, Divider } from '@mui/material';
 import { VariableDefinition, ListVariableDefinition, Action } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useFormContext, useWatch } from 'react-hook-form';
@@ -144,15 +131,13 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     name: 'spec.sort',
   }) as SortMethodName;
 
-  const [customAllDisplayValue, setCustomAllDisplayValue] = useState(_customAllValue ?? '');
-  const [isCustomAllReset, setIsCustomAllReset] = useState(false);
+  // State for managing whether to use custom all value
+  const [useCustomAllValue, setUseCustomAllValue] = useState(_customAllValue !== undefined);
 
+  // Sync switch state when form value changes externally
   useEffect(() => {
-    if (!isCustomAllReset) {
-      setCustomAllDisplayValue(_customAllValue ?? '');
-    }
-    setIsCustomAllReset(false);
-  }, [_customAllValue, isCustomAllReset]);
+    setUseCustomAllValue(_customAllValue !== undefined);
+  }, [_customAllValue]);
 
   // When variable kind is selected we need to provide default values
   // TODO: check if react-hook-form has a better way to do this
@@ -337,58 +322,53 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
             Enables an option to include all variable values
           </Typography>
           {_allowAllValue && (
-            <Controller
-              control={control}
-              name="spec.customAllValue"
-              render={({ field, fieldState }) => (
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                  <TextField
-                    name={field.name}
-                    onBlur={field.onBlur}
-                    ref={field.ref}
-                    fullWidth
-                    label="Custom All Value"
-                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                    InputProps={{
-                      readOnly: action === 'read',
-                    }}
-                    error={!!fieldState.error}
-                    helperText={
-                      fieldState.error?.message
-                        ? fieldState.error.message
-                        : `When All is selected, this value will be used. Current: ${values.spec.customAllValue === undefined ? 'default (undefined)' : `"${values.spec.customAllValue}"`}`
-                    }
-                    value={customAllDisplayValue}
+            <Stack spacing={1}>
+              <FormControlLabel
+                label="Use Custom All Value"
+                control={
+                  <Switch
+                    checked={useCustomAllValue}
+                    readOnly={action === 'read'}
                     onChange={(event) => {
-                      const newValue = event.target.value;
-                      setCustomAllDisplayValue(newValue);
-                      if (newValue === '') {
-                        field.onChange(undefined);
+                      if (action === 'read') return;
+                      const isEnabled = event.target.checked;
+                      setUseCustomAllValue(isEnabled);
+                      if (!isEnabled) {
+                        form.setValue('spec.customAllValue', undefined);
                       } else {
-                        field.onChange(newValue);
+                        form.setValue('spec.customAllValue', '');
                       }
                     }}
                   />
-                  {action !== 'read' && (
-                    <Tooltip title="Reset to default (undefined)">
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setIsCustomAllReset(true);
-                          setCustomAllDisplayValue('');
-                          setTimeout(() => {
-                            field.onChange(undefined);
-                            field.onBlur();
-                          }, 0);
-                        }}
-                      >
-                        <CloseIcon />
-                      </IconButton>
-                    </Tooltip>
+                }
+              />
+              <Typography variant="caption" sx={{ mt: -0.5 }}>
+                Enable to set a custom value when &quot;All&quot; is selected
+              </Typography>
+              {useCustomAllValue && (
+                <Controller
+                  control={control}
+                  name="spec.customAllValue"
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Custom All Value"
+                      InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                      InputProps={{
+                        readOnly: action === 'read',
+                      }}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      value={field.value ?? ''}
+                      onChange={(event) => {
+                        field.onChange(event.target.value || '');
+                      }}
+                    />
                   )}
-                </Box>
+                />
               )}
-            />
+            </Stack>
           )}
         </Stack>
       </Stack>
