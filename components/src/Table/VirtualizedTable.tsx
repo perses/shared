@@ -97,7 +97,15 @@ export function VirtualizedTable<TableData>({
     return {
       Scroller: VirtualizedTableContainer,
       Table: (props): ReactElement => {
-        return <InnerTable {...props} width={width} density={density} onKeyDown={keyboardNav.onTableKeyDown} />;
+        return (
+          <InnerTable
+            {...props}
+            width={width}
+            density={density}
+            onKeyDown={keyboardNav.onTableKeyDown}
+            onBlur={keyboardNav.onTableBlur}
+          />
+        );
       },
       TableHead,
       TableFoot,
@@ -127,7 +135,16 @@ export function VirtualizedTable<TableData>({
       },
       TableBody,
     };
-  }, [density, keyboardNav.onTableKeyDown, onRowClick, onRowMouseOut, onRowMouseOver, rows, width]);
+  }, [
+    density,
+    keyboardNav.onTableKeyDown,
+    keyboardNav.onTableBlur,
+    onRowClick,
+    onRowMouseOut,
+    onRowMouseOver,
+    rows,
+    width,
+  ]);
 
   const handleChangePage = (_event: React.MouseEvent<HTMLButtonElement> | null, newPage: number): void => {
     if (!pagination || !onPaginationChange) return;
