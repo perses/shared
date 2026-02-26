@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DispatchWithoutAction, ReactElement, useCallback, useState, useEffect } from 'react';
+import { DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
 import { Box, Typography, Switch, TextField, Grid, FormControlLabel, MenuItem, Stack, Divider } from '@mui/material';
 import { VariableDefinition, ListVariableDefinition, Action } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
@@ -130,14 +130,6 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     control: control,
     name: 'spec.sort',
   }) as SortMethodName;
-
-  // State for managing whether to use custom all value
-  const [useCustomAllValue, setUseCustomAllValue] = useState(_customAllValue !== undefined);
-
-  // Sync switch state when form value changes externally
-  useEffect(() => {
-    setUseCustomAllValue(_customAllValue !== undefined);
-  }, [_customAllValue]);
 
   // When variable kind is selected we need to provide default values
   // TODO: check if react-hook-form has a better way to do this
@@ -327,16 +319,15 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                 label="Use Custom All Value"
                 control={
                   <Switch
-                    checked={useCustomAllValue}
+                    checked={_customAllValue !== undefined}
                     readOnly={action === 'read'}
                     onChange={(event) => {
                       if (action === 'read') return;
                       const isEnabled = event.target.checked;
-                      setUseCustomAllValue(isEnabled);
-                      if (!isEnabled) {
-                        form.setValue('spec.customAllValue', undefined);
-                      } else {
+                      if (isEnabled) {
                         form.setValue('spec.customAllValue', '');
+                      } else {
+                        form.setValue('spec.customAllValue', undefined);
                       }
                     }}
                   />
@@ -345,7 +336,7 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
               <Typography variant="caption" sx={{ mt: -0.5 }}>
                 Enable to set a custom value when &quot;All&quot; is selected
               </Typography>
-              {useCustomAllValue && (
+              {_customAllValue !== undefined && (
                 <Controller
                   control={control}
                   name="spec.customAllValue"
