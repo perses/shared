@@ -15,7 +15,7 @@ import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { TimeRangeControls, useTimeZoneParams } from '@perses-dev/plugin-system';
 import { ReactElement, ReactNode } from 'react';
-import { OnSaveDashboard, useEditMode } from '../../context';
+import { OnSaveDashboard, useEditMode, useDashboardLinks } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
 import { DownloadButton } from '../DownloadButton';
@@ -25,6 +25,8 @@ import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
 import { SaveDashboardButton } from '../SaveDashboardButton';
 import { DashboardStickyToolbar } from '../DashboardStickyToolbar';
+import { EditDashboardLinksButton } from '../DashboardLinks';
+import { LinksDisplay } from '../LinksDisplay';
 
 export interface DashboardToolbarProps {
   dashboardName: string;
@@ -33,6 +35,7 @@ export interface DashboardToolbarProps {
   isReadonly: boolean;
   isVariableEnabled: boolean;
   isDatasourceEnabled: boolean;
+  isLinksEnabled?: boolean;
   onEditButtonClick: () => void;
   onCancelButtonClick: () => void;
   onSave?: OnSaveDashboard;
@@ -46,6 +49,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
     isReadonly,
     isVariableEnabled,
     isDatasourceEnabled,
+    isLinksEnabled = true,
     onEditButtonClick,
     onCancelButtonClick,
     onSave,
@@ -53,6 +57,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
 
   const { isEditMode } = useEditMode();
   const { timeZone, setTimeZone } = useTimeZoneParams('local');
+  const dashboardLinks = useDashboardLinks();
 
   const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));
   const isBiggerThanMd = useMediaQuery(useTheme().breakpoints.up('md'));
@@ -75,6 +80,11 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
           sx={{ backgroundColor: (theme) => theme.palette.primary.main + (isEditMode ? '30' : '0') }}
         >
           {dashboardTitle}
+          {!isEditMode && dashboardLinks.length > 0 && (
+            <Box ml={2} display="flex" alignItems="center">
+              <LinksDisplay links={dashboardLinks} variant="dashboard" />
+            </Box>
+          )}
           {isEditMode ? (
             <Stack direction="row" gap={1} ml="auto">
               {isReadonly && (
@@ -85,6 +95,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
               <Stack direction="row" spacing={0.5} ml={1} whiteSpace="nowrap">
                 {isVariableEnabled && <EditVariablesButton />}
                 {isDatasourceEnabled && <EditDatasourcesButton />}
+                {isLinksEnabled && <EditDashboardLinksButton />}
                 <AddPanelButton />
                 <AddGroupButton />
               </Stack>

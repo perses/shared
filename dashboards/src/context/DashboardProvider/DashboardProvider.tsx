@@ -26,6 +26,7 @@ import {
   DEFAULT_REFRESH_INTERVAL,
   DatasourceSpec,
   EphemeralDashboardResource,
+  Link,
 } from '@perses-dev/core';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
@@ -62,6 +63,8 @@ export interface DashboardStoreState
   refreshInterval: DurationString;
   display?: Display;
   datasources?: Record<string, DatasourceSpec>;
+  links?: Link[];
+  setLinks: (links: Link[]) => void;
   ttl?: DurationString;
 }
 
@@ -123,7 +126,15 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
   const {
     kind,
     metadata,
-    spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL, datasources, layouts = [], panels = {} },
+    spec: {
+      display,
+      duration,
+      refreshInterval = DEFAULT_REFRESH_INTERVAL,
+      datasources,
+      layouts = [],
+      panels = {},
+      links = [],
+    },
   } = dashboardResource;
 
   const ttl = 'ttl' in dashboardResource.spec ? dashboardResource.spec.ttl : undefined;
@@ -153,15 +164,19 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           duration,
           refreshInterval,
           datasources,
+          links,
           ttl,
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean): void => {
             set({ isEditMode });
           },
+          setLinks: (links: Link[]): void => {
+            set({ links });
+          },
           setDashboard: ({
             kind,
             metadata,
-            spec: { display, panels = {}, layouts = [], duration, refreshInterval, datasources = {} },
+            spec: { display, panels = {}, layouts = [], duration, refreshInterval, datasources = {}, links = [] },
           }): void => {
             set((state) => {
               state.kind = kind;
@@ -174,6 +189,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
               state.duration = duration;
               state.refreshInterval = refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
               state.datasources = datasources;
+              state.links = links;
               // TODO: add ttl here to e.g allow edition from JSON view, but probably requires quite some refactoring
             });
           },
