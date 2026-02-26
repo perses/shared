@@ -15,7 +15,7 @@ import { ErrorAlert, JSONEditor, LinksEditor } from '@perses-dev/components';
 import { PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { Control, Controller } from 'react-hook-form';
 import { forwardRef, ReactElement } from 'react';
-import { QueryCountProvider, useDataQueriesContext, usePlugin } from '../../runtime';
+import { useDataQueriesContext, usePlugin } from '../../runtime';
 import { PanelPlugin } from '../../model';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
 import { MultiQueryEditor } from '../MultiQueryEditor';
@@ -131,11 +131,7 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
     ),
   });
 
-  return (
-    <QueryCountProvider queryCount={(panelDefinition.spec.queries ?? []).length}>
-      <OptionsEditorTabs key={tabs.length} tabs={tabs} />
-    </QueryCountProvider>
-  );
+  return <OptionsEditorTabs key={tabs.length} tabs={tabs} />;
 });
 
 PanelSpecEditor.displayName = 'PanelSpecEditor';

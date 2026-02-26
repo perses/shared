@@ -21,6 +21,5 @@ export * from './trace-queries';
 export * from './profile-queries';
 export * from './item-actions';
 export * from './DataQueriesProvider';
-export * from './QueryCountProvider';
 export * from './RouterProvider';
 export * from './UsageMetricsProvider';

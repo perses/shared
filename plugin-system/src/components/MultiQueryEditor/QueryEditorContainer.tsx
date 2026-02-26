@@ -13,15 +13,28 @@
 
 import { produce } from 'immer';
 import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
-import { Stack, IconButton, Typography, BoxProps, Box, CircularProgress } from '@mui/material';
+import {
+  Stack,
+  IconButton,
+  Typography,
+  BoxProps,
+  Box,
+  CircularProgress,
+  TextField,
+  Button,
+  InputAdornment,
+} from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
-import { forwardRef, ReactElement } from 'react';
+import { forwardRef, ReactElement, useState } from 'react';
 import AlertIcon from 'mdi-material-ui/Alert';
 import { InfoTooltip } from '@perses-dev/components';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import CheckIcon from 'mdi-material-ui/Check';
 import { QueryData } from '../../runtime';
 import { PluginEditor, PluginEditorProps, PluginEditorRef } from '../PluginEditor';
+import { defaultQueryName } from './utils';
 
 /**
  * Properties for {@link QueryEditorContainer}
@@ -66,6 +79,20 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
       onQueryRun,
       onCollapseExpand,
     } = props;
+
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [name, setName] = useState(query.spec.name ?? defaultQueryName(index));
+
+    function handleNameChange(): void {
+      setIsEditingName(false);
+      onChange(
+        index,
+        produce(query, (draft) => {
+          draft.spec.name = name;
+        })
+      );
+    }
+
     return (
       <Stack key={index} spacing={1}>
         <Stack
@@ -75,13 +102,57 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
           borderBottom={1}
           borderColor={(theme) => theme.palette.divider}
         >
-          <Stack direction="row">
-            <IconButton size="small" onClick={() => onCollapseExpand(index)}>
+          <Stack direction="row" gap={1}>
+            <IconButton
+              size="small"
+              sx={{ width: 'fit-content', height: 'fit-content' }}
+              onClick={() => onCollapseExpand(index)}
+            >
               {isCollapsed ? <ChevronRight /> : <ChevronDown />}
             </IconButton>
-            <Typography variant="overline" component="h4">
-              Query #{index + 1}
-            </Typography>
+            <Stack
+              direction="row"
+              gap={1}
+              alignItems="center"
+              alignContent="center"
+              sx={{
+                '&:hover button': {
+                  visibility: 'visible',
+                },
+              }}
+            >
+              {isEditingName ? (
+                <TextField
+                  size="small"
+                  variant="outlined"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton size="small" aria-label="save query name" onClick={handleNameChange} edge="end">
+                          <CheckIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              ) : (
+                <>
+                  <Typography variant="overline" component="h4">
+                    {name}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => setIsEditingName(true)}
+                    sx={{ visibility: isCollapsed ? 'hidden' : 'visible' }}
+                  >
+                    <PencilIcon fontSize="small" />
+                  </Button>
+                </>
+              )}
+            </Stack>
           </Stack>
           <Stack direction="row" alignItems="center">
             {queryResult?.isFetching && <CircularProgress aria-label="loading" size="1.125rem" />}

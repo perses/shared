@@ -23,6 +23,7 @@ describe('PanelSpecEditor', () => {
   const renderComponent = (props: Omit<PanelSpecEditorProps, 'control'>): void => {
     const DataQueriesProviderMock = (childProps: { children: ReactElement }): ReactElement => {
       const ctx = {
+        queryDefinitions: [],
         queryResults: [],
         refetchAll: (): void => {},
         isFetching: false,

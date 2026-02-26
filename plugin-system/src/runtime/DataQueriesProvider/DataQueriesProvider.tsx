@@ -25,7 +25,6 @@ import {
   transformQueryResults,
   DataQueriesContextType,
   QueryData,
-  useQueryType,
 } from './model';
 
 export const DataQueriesContext = createContext<DataQueriesContextType | undefined>(undefined);
@@ -41,6 +40,9 @@ export function useDataQueriesContext(): DataQueriesContextType {
 export function useDataQueries<T extends keyof QueryType>(queryType: T): UseDataQueryResults<QueryType[T]> {
   const ctx = useDataQueriesContext();
 
+  // Filter query definitions based on the specified query type
+  const filteredQueryDefinitions = ctx.queryDefinitions.filter((definition) => definition.kind === queryType);
+
   // Filter the query results based on the specified query type
   const filteredQueryResults = ctx.queryResults.filter(
     (queryResult) => queryResult?.definition?.kind === queryType
@@ -50,52 +52,36 @@ export function useDataQueries<T extends keyof QueryType>(queryType: T): UseData
   const filteredErrors = ctx.errors.filter((errors, index) => ctx.queryResults[index]?.definition?.kind === queryType);
 
   // Create a new context object with the filtered results and errors
-  const filteredCtx = {
+  return {
+    queryDefinitions: filteredQueryDefinitions,
     queryResults: filteredQueryResults,
     isFetching: filteredQueryResults.some((result) => result.isFetching),
     isLoading: filteredQueryResults.some((result) => result.isLoading),
     refetchAll: ctx.refetchAll,
     errors: filteredErrors,
   };
-
-  return filteredCtx;
 }
 
 export function DataQueriesProvider(props: DataQueriesProviderProps): ReactElement {
   const { definitions, options, children, queryOptions } = props;
 
-  // Returns a query kind, for example "TimeSeriesQuery" = getQueryType("PrometheusTimeSeriesQuery")
-  const getQueryType = useQueryType();
-
-  const queryDefinitions = definitions.map((definition) => {
-    const type = getQueryType(definition.kind);
-    return {
-      kind: type,
-      spec: {
-        plugin: definition,
-      },
-    };
-  });
-
   const usageMetrics = useUsageMetrics();
 
   // Filter definitions for time series query and other future query plugins
-  const timeSeriesQueries = queryDefinitions.filter(
+  const timeSeriesQueries = definitions.filter(
     (definition) => definition.kind === 'TimeSeriesQuery'
   ) as TimeSeriesQueryDefinition[];
   const timeSeriesResults = useTimeSeriesQueries(timeSeriesQueries, options, queryOptions);
 
-  const traceQueries = queryDefinitions.filter(
-    (definition) => definition.kind === 'TraceQuery'
-  ) as TraceQueryDefinition[];
+  const traceQueries = definitions.filter((definition) => definition.kind === 'TraceQuery') as TraceQueryDefinition[];
   const traceResults = useTraceQueries(traceQueries);
 
-  const profileQueries = queryDefinitions.filter(
+  const profileQueries = definitions.filter(
     (definition) => definition.kind === 'ProfileQuery'
   ) as ProfileQueryDefinition[];
   const profileResults = useProfileQueries(profileQueries);
 
-  const logQueries = queryDefinitions.filter((definition) => definition.kind === 'LogQuery') as LogQueryDefinition[];
+  const logQueries = definitions.filter((definition) => definition.kind === 'LogQuery') as LogQueryDefinition[];
   const logResults = useLogQueries(logQueries);
 
   const refetchAll = useCallback(() => {
@@ -126,6 +112,7 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
     }
 
     return {
+      queryDefinitions: definitions,
       queryResults: mergedQueryResults,
       isFetching: mergedQueryResults.some((result) => result.isFetching),
       isLoading: mergedQueryResults.some((result) => result.isLoading),
@@ -133,16 +120,17 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
       errors: mergedQueryResults.map((result) => result.error),
     };
   }, [
-    timeSeriesQueries,
     timeSeriesResults,
-    traceQueries,
+    timeSeriesQueries,
     traceResults,
-    profileQueries,
+    traceQueries,
     profileResults,
-    logQueries,
+    profileQueries,
     logResults,
-    refetchAll,
+    logQueries,
     queryOptions?.enabled,
+    definitions,
+    refetchAll,
     usageMetrics,
   ]);
 

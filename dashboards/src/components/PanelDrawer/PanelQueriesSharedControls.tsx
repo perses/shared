@@ -51,23 +51,13 @@ export function PanelQueriesSharedControls({
     [panelDefinition.spec.plugin.spec, pluginPreview]
   );
 
-  const [previewDefinition, setPreviewDefinition] = useState(
-    () =>
-      panelDefinition.spec.queries?.map((query) => {
-        return {
-          kind: query.spec.plugin.kind,
-          spec: query.spec.plugin.spec,
-        };
-      }) ?? []
-  );
+  const [previewDefinition, setPreviewDefinition] = useState(panelDefinition.spec.queries ?? []);
 
   const handleRunQuery = useCallback((index: number, newDef: QueryDefinition) => {
     setPreviewDefinition((prev) => {
       const newDefinitions = [...prev];
-      newDefinitions[index] = {
-        kind: newDef.spec.plugin.kind,
-        spec: newDef.spec.plugin.spec,
-      };
+      newDefinitions[index] = newDef;
+
       return newDefinitions;
     });
   }, []);

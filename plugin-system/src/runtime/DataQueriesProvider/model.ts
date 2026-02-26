@@ -11,20 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, QueryDefinition, UnknownSpec, QueryDataType } from '@perses-dev/core';
+import { QueryDefinition, UnknownSpec, QueryDataType } from '@perses-dev/core';
 import { QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
-import { ReactNode, useCallback, useMemo } from 'react';
-import { useListPluginMetadata } from '../plugin-registry';
+import { ReactNode } from 'react';
 
 export type QueryOptions = Record<string, unknown>;
-export interface DataQueriesProviderProps<QueryPluginSpec = UnknownSpec> {
-  definitions: Array<Definition<QueryPluginSpec>>;
+export interface DataQueriesProviderProps<Kind = unknown, PluginSpec = UnknownSpec> {
+  definitions: Array<QueryDefinition<Kind, PluginSpec>>;
   children?: ReactNode;
   options?: QueryOptions;
   queryOptions?: Omit<QueryObserverOptions, 'queryKey'>;
 }
 
 export interface DataQueriesContextType {
+  queryDefinitions: QueryDefinition[];
   queryResults: QueryData[];
   refetchAll: () => void;
   isFetching: boolean;
@@ -56,94 +56,4 @@ export function transformQueryResults(results: UseQueryResult[], definitions: Qu
       error,
     } as QueryData;
   });
-}
-
-export function useQueryType(): (pluginKind: string) => string | undefined {
-  const { data: timeSeriesQueryPlugins, isLoading: isTimeSeriesQueryLoading } = useListPluginMetadata([
-    'TimeSeriesQuery',
-  ]);
-  const { data: traceQueryPlugins, isLoading: isTraceQueryPluginLoading } = useListPluginMetadata(['TraceQuery']);
-  const { data: profileQueryPlugins, isLoading: isProfileQueryPluginLoading } = useListPluginMetadata(['ProfileQuery']);
-  const { data: logQueries, isLoading: isLogQueryPluginLoading } = useListPluginMetadata(['LogQuery']);
-
-  // For example, `map: {"TimeSeriesQuery":["PrometheusTimeSeriesQuery"],"TraceQuery":["TempoTraceQuery"]}`
-  const queryTypeMap = useMemo(() => {
-    const map: Record<string, string[]> = {
-      TimeSeriesQuery: [],
-      TraceQuery: [],
-      ProfileQuery: [],
-      LogQuery: [],
-    };
-
-    if (timeSeriesQueryPlugins) {
-      timeSeriesQueryPlugins.forEach((plugin) => {
-        map[plugin.kind]?.push(plugin.spec.name);
-      });
-    }
-
-    if (traceQueryPlugins) {
-      traceQueryPlugins.forEach((plugin) => {
-        map[plugin.kind]?.push(plugin.spec.name);
-      });
-    }
-
-    if (profileQueryPlugins) {
-      profileQueryPlugins.forEach((plugin) => {
-        map[plugin.kind]?.push(plugin.spec.name);
-      });
-    }
-
-    if (logQueries) {
-      logQueries.forEach((plugin) => {
-        map[plugin.kind]?.push(plugin.spec.name);
-      });
-    }
-
-    return map;
-  }, [timeSeriesQueryPlugins, traceQueryPlugins, profileQueryPlugins, logQueries]);
-
-  const getQueryType = useCallback(
-    (pluginKind: string) => {
-      const isLoading = (pluginKind: string): boolean => {
-        switch (pluginKind) {
-          case 'PrometheusTimeSeriesQuery':
-            return isTimeSeriesQueryLoading;
-          case 'TempoTraceQuery':
-            return isTraceQueryPluginLoading;
-          case 'PyroscopeProfileQuery':
-            return isProfileQueryPluginLoading;
-          case 'LokiLogQuery':
-            return isLogQueryPluginLoading;
-        }
-
-        return (
-          isTraceQueryPluginLoading ||
-          isTimeSeriesQueryLoading ||
-          isProfileQueryPluginLoading ||
-          isLogQueryPluginLoading
-        );
-      };
-
-      if (isLoading(pluginKind)) {
-        return undefined;
-      }
-
-      for (const queryType in queryTypeMap) {
-        if (queryTypeMap[queryType]?.includes(pluginKind)) {
-          return queryType;
-        }
-      }
-
-      throw new Error(`Unable to determine the query type: ${pluginKind}`);
-    },
-    [
-      queryTypeMap,
-      isTimeSeriesQueryLoading,
-      isTraceQueryPluginLoading,
-      isProfileQueryPluginLoading,
-      isLogQueryPluginLoading,
-    ]
-  );
-
-  return getQueryType;
 }
