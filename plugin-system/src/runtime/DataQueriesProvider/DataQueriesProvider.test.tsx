@@ -97,9 +97,12 @@ describe('useDataQueries', (): void => {
   it('should return the correct data for TimeSeriesQuery', () => {
     const definitions = [
       {
-        kind: 'PrometheusTimeSeriesQuery',
+        kind: 'TimeSeriesQuery',
         spec: {
-          query: 'up',
+          kind: 'PrometheusTimeSeriesQuery',
+          spec: {
+            query: 'up',
+          },
         },
       },
     ];
@@ -117,9 +120,12 @@ describe('useDataQueries', (): void => {
   it('should return the correct data for TraceQuery', () => {
     const definitions = [
       {
-        kind: 'TempoTraceQuery',
+        kind: 'TraceQuery',
         spec: {
-          query: '{ duration > 1000ms }',
+          kind: 'TempoTraceQuery',
+          spec: {
+            query: '{ duration > 1000ms }',
+          },
         },
       },
     ];
