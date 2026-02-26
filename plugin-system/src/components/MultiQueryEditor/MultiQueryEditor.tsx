@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { forwardRef, ReactElement, useCallback, useState } from 'react';
+import { forwardRef, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
@@ -30,6 +30,7 @@ export interface MultiQueryEditorProps {
   onQueryRun: (index: number, query: QueryDefinition) => void;
 }
 
+// LOGZ.IO CHANGE START:: APPZ-1695 support log queries in MultiQueryEditor
 function useDefaultQueryDefinition(
   queryTypes: QueryPluginType[],
   filteredQueryPlugins?: string[]
@@ -44,7 +45,7 @@ function useDefaultQueryDefinition(
   const defaultQueryType = queryTypes[0]!;
   // Then the default plugin kind
   // Use as default the plugin kind explicitly set as default or the first in the list
-  const { data: queryPlugins, isLoading } = useListPluginMetadata(queryTypes);
+  const { data: queryPlugins, isLoading: isMetadataLoading } = useListPluginMetadata(queryTypes);
   const { defaultPluginKinds } = usePluginRegistry();
 
   let defaultQueryKind: string = '';
@@ -55,22 +56,29 @@ function useDefaultQueryDefinition(
     defaultQueryKind = defaultPluginKinds?.[defaultQueryType] ?? queryPlugins?.[0]?.spec.name ?? '';
   }
 
-  const { data: defaultQueryPlugin } = usePlugin(defaultQueryType, defaultQueryKind, {
+  const { data: defaultQueryPlugin, isLoading: isPluginLoading } = usePlugin(defaultQueryType, defaultQueryKind, {
     throwOnError: true, // LOGZ.IO CHANGE: `useErrorBoundary` was changed to `throwOnError` for tanstack query v4 -> v5 support
     enabled: true,
   });
 
   // This default query definition is used if no query is provided initially or when we add a new query
-  return {
-    defaultInitialQueryDefinition: {
+  const defaultInitialQueryDefinition = useMemo(
+    () => ({
       kind: defaultQueryType,
       spec: {
         plugin: { kind: defaultQueryKind, spec: defaultQueryPlugin?.createInitialOptions() || {} },
       },
-    },
-    isLoading,
+    }),
+    [defaultQueryType, defaultQueryKind, defaultQueryPlugin]
+  );
+
+  return {
+    defaultInitialQueryDefinition,
+    isLoading: isMetadataLoading || isPluginLoading,
   };
 }
+
+// LOGZ.IO CHANGE END:: APPZ-1695 support log queries in MultiQueryEditor
 
 /**
  * A component render a list of {@link QueryEditorContainer} for the given query definitions.
@@ -86,6 +94,18 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
   const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes, filteredQueryPlugins);
   // State for which queries are collapsed
   const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
+
+  // LOGZ.IO CHANGE START:: APPZ-1695 replace incompatible queries when panel type changes
+  useEffect(() => {
+    if (isLoading || queries.length === 0) return;
+
+    const hasIncompatible = queries.some((q) => !queryTypes.includes(q.kind as QueryPluginType));
+    if (!hasIncompatible) return;
+
+    onChange([defaultInitialQueryDefinition]);
+    onQueryRun(0, defaultInitialQueryDefinition);
+  }, [queryTypes, queries, isLoading, defaultInitialQueryDefinition, onChange, onQueryRun]);
+  // LOGZ.IO CHANGE END:: APPZ-1695 replace incompatible queries when panel type changes
 
   // Query handlers
   const handleQueryChange = useCallback(

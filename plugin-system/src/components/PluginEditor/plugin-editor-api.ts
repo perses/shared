@@ -134,10 +134,15 @@ export function usePluginEditor(props: UsePluginEditorProps): {
 
     // Fire an onChange to change to the pending kind with initial values from the plugin
     rememberCurrentSpecState();
-    onChange({
-      selection: pendingSelection,
-      spec: plugin.createInitialOptions ? plugin.createInitialOptions() : {},
-    });
+    // LOGZ.IO CHANGE START:: APPZ-1695 auto-execute query on kind change
+    onChange(
+      {
+        selection: pendingSelection,
+        spec: plugin.createInitialOptions ? plugin.createInitialOptions() : {},
+      },
+      { forceUpdate: true }
+    );
+    // LOGZ.IO CHANGE END:: APPZ-1695 auto-execute query on kind change
 
     if (pendingSelection.type === 'Panel') {
       const panelPlugin = plugin as PanelPlugin;
@@ -167,10 +172,15 @@ export function usePluginEditor(props: UsePluginEditorProps): {
     const previousState = prevSpecState.current[nextSelection.type]?.[nextSelection.kind];
     if (previousState !== undefined) {
       rememberCurrentSpecState();
-      onChange({
-        selection: nextSelection,
-        spec: previousState,
-      });
+      // LOGZ.IO CHANGE START:: APPZ-1695 auto-execute query on kind change
+      onChange(
+        {
+          selection: nextSelection,
+          spec: previousState,
+        },
+        { forceUpdate: true }
+      );
+      // LOGZ.IO CHANGE END:: APPZ-1695 auto-execute query on kind change
     } else {
       // Otherwise, kick off the async loading process
       setPendingSelection(nextSelection);

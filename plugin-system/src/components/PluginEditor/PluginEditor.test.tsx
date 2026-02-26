@@ -84,10 +84,15 @@ describe('PluginEditor', () => {
 
     // Make sure onChange was only called once (i.e. initializes both kind and spec at the same time
     expect(onChange).toHaveBeenCalledTimes(1);
-    expect(onChange).toHaveBeenCalledWith({
-      selection: { type: 'Variable', kind: 'ErnieVariable2' },
-      spec: { variableOption2: '' },
-    });
+    // LOGZ.IO CHANGE START:: APPZ-1695 account for forceUpdate in onChange
+    expect(onChange).toHaveBeenCalledWith(
+      {
+        selection: { type: 'Variable', kind: 'ErnieVariable2' },
+        spec: { variableOption2: '' },
+      },
+      { forceUpdate: true }
+    );
+    // LOGZ.IO CHANGE END:: APPZ-1695 account for forceUpdate in onChange
   });
 
   it('remembers previous spec values', async () => {

@@ -14,7 +14,15 @@
 import { Grid, Typography } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PanelEditorContext, PanelPreview } from '@perses-dev/dashboards';
-import { DataQueriesProvider, PanelSpecEditor, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
+// LOGZ.IO CHANGE START:: Import PanelSpecChangeProvider for bidirectional panel-settings sync [APPZ-1695]
+import {
+  DataQueriesProvider,
+  PanelSpecChangeProvider,
+  PanelSpecEditor,
+  usePlugin,
+  useSuggestedStepMs,
+} from '@perses-dev/plugin-system';
+// LOGZ.IO CHANGE END:: Import PanelSpecChangeProvider for bidirectional panel-settings sync [APPZ-1695]
 import { Definition, PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { Control } from 'react-hook-form';
 import { ReactElement, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -62,11 +70,12 @@ export function PanelQueriesSharedControls({
       }) ?? []
   );
 
-  // LOGZ.IO CHANGE START:: clear deleted query from preview (only on delete, not every change)
+  // LOGZ.IO CHANGE START:: sync preview when queries are added or removed [APPZ-1695]
   const prevQueryCountRef = useRef(panelDefinition.spec.queries?.length ?? 0);
   useEffect(() => {
     const currentCount = panelDefinition.spec.queries?.length ?? 0;
-    if (currentCount < prevQueryCountRef.current) {
+
+    if (currentCount !== prevQueryCountRef.current) {
       setPreviewDefinition(
         panelDefinition.spec.queries?.map((query) => ({
           kind: query.spec.plugin.kind,
@@ -77,7 +86,7 @@ export function PanelQueriesSharedControls({
     }
     prevQueryCountRef.current = currentCount;
   }, [panelDefinition.spec.queries]);
-  // LOGZ.IO CHANGE END:: clear deleted query from preview (only on delete, not every change)
+  // LOGZ.IO CHANGE END:: sync preview when queries are added or removed [APPZ-1695]
 
   const handleRunQuery = useCallback((index: number, newDef: QueryDefinition) => {
     setPreviewDefinition((prev) => {
@@ -91,28 +100,32 @@ export function PanelQueriesSharedControls({
     });
   }, []);
 
+  // LOGZ.IO CHANGE START:: Wrap with PanelSpecChangeProvider for bidirectional panel-settings sync [APPZ-1695]
   return (
-    <DataQueriesProvider definitions={previewDefinition} options={{ suggestedStepMs, ...pluginQueryOptions }}>
-      <Grid item xs={12}>
-        <Typography variant="h4" marginBottom={1}>
-          Preview
-        </Typography>
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <PanelPreview panelDefinition={panelDefinition} />
-        </ErrorBoundary>
-      </Grid>
-      <Grid item xs={12}>
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <PanelSpecEditor
-            control={control}
-            panelDefinition={panelDefinition}
-            onJSONChange={onJSONChange}
-            onQueriesChange={onQueriesChange}
-            onQueryRun={handleRunQuery}
-            onPluginSpecChange={onPluginSpecChange}
-          />
-        </ErrorBoundary>
-      </Grid>
-    </DataQueriesProvider>
+    <PanelSpecChangeProvider value={onPluginSpecChange}>
+      <DataQueriesProvider definitions={previewDefinition} options={{ suggestedStepMs, ...pluginQueryOptions }}>
+        <Grid item xs={12}>
+          <Typography variant="h4" marginBottom={1}>
+            Preview
+          </Typography>
+          <ErrorBoundary FallbackComponent={ErrorAlert}>
+            <PanelPreview panelDefinition={panelDefinition} />
+          </ErrorBoundary>
+        </Grid>
+        <Grid item xs={12}>
+          <ErrorBoundary FallbackComponent={ErrorAlert}>
+            <PanelSpecEditor
+              control={control}
+              panelDefinition={panelDefinition}
+              onJSONChange={onJSONChange}
+              onQueriesChange={onQueriesChange}
+              onQueryRun={handleRunQuery}
+              onPluginSpecChange={onPluginSpecChange}
+            />
+          </ErrorBoundary>
+        </Grid>
+      </DataQueriesProvider>
+    </PanelSpecChangeProvider>
   );
+  // LOGZ.IO CHANGE END:: Wrap with PanelSpecChangeProvider for bidirectional panel-settings sync [APPZ-1695]
 }

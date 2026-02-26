@@ -48,20 +48,18 @@ export function PanelPluginLoader(props: PanelPluginProps): ReactElement {
     throw new Error(`Missing PanelComponent from panel plugin for kind '${kind}'`);
   }
 
-  for (const queryResult of supportedQueryResults) {
-    if (!supportedQueryTypes.includes(queryResult.definition.kind)) {
-      throw new Error(
-        `This panel does not support queries of type '${queryResult.definition.kind}'. Supported query types: ${supportedQueryTypes.join(', ')}.`
-      );
-    }
-  }
+  // LOGZ.IO CHANGE START:: APPZ-1695 filter incompatible queries instead of throwing during panel type transitions
+  const compatibleQueryResults = supportedQueryResults.filter((queryResult) =>
+    supportedQueryTypes.includes(queryResult.definition.kind)
+  );
+  // LOGZ.IO CHANGE END:: APPZ-1695 filter incompatible queries instead of throwing during panel type transitions
 
   return (
     <PanelComponent
       spec={spec}
       contentDimensions={contentDimensions}
       definition={definition}
-      queryResults={supportedQueryResults}
+      queryResults={compatibleQueryResults}
     />
   );
 }

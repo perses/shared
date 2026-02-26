@@ -114,6 +114,10 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
             return isProfileQueryPluginLoading;
           case 'LokiLogQuery':
             return isLogQueryPluginLoading;
+          // LOGZ.IO CHANGE START:: Handle LuceneLogQuery loading state [APPZ-1695]
+          case 'LuceneLogQuery':
+            return isLogQueryPluginLoading;
+          // LOGZ.IO CHANGE END:: Handle LuceneLogQuery loading state [APPZ-1695]
         }
 
         return (

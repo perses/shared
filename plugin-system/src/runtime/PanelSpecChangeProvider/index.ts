@@ -11,16 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasource';
-export * from './legend';
-export * from './panels';
-export * from './plugins';
-export * from './plugin-base';
-export * from './plugin-loading';
-export * from './time-series-queries';
-export * from './trace-queries';
-export * from './profile-queries';
-export * from './variables';
-// LOGZ.IO CHANGE START:: Export log query types [APPZ-1695]
-export * from './log-queries';
-// LOGZ.IO CHANGE END:: Export log query types [APPZ-1695]
+// LOGZ.IO CHANGE START:: PanelSpecChangeProvider barrel export [APPZ-1695]
+export { PanelSpecChangeProvider, usePanelSpecChange } from './PanelSpecChangeProvider';
+// LOGZ.IO CHANGE END:: PanelSpecChangeProvider barrel export [APPZ-1695]
