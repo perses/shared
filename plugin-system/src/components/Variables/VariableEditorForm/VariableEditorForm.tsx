@@ -121,6 +121,11 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     name: 'spec.allowAllValue',
   });
 
+  const _customAllValue = useWatch<VariableDefinition, 'spec.customAllValue'>({
+    control: control,
+    name: 'spec.customAllValue',
+  });
+
   const sortMethod = useWatch<VariableDefinition, 'spec.sort'>({
     control: control,
     name: 'spec.sort',
@@ -309,35 +314,52 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
             Enables an option to include all variable values
           </Typography>
           {_allowAllValue && (
-            <Controller
-              control={control}
-              name="spec.customAllValue"
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  label="Custom All Value"
-                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                  InputProps={{
-                    readOnly: action === 'read',
-                  }}
-                  error={!!fieldState.error}
-                  helperText={
-                    fieldState.error?.message
-                      ? fieldState.error.message
-                      : 'When All is selected, this value will be used'
-                  }
-                  value={field.value ?? ''}
-                  onChange={(event) => {
-                    if (event.target.value === '') {
-                      field.onChange(undefined);
-                    } else {
-                      field.onChange(event);
-                    }
-                  }}
+            <Stack spacing={1}>
+              <FormControlLabel
+                label="Use Custom All Value"
+                control={
+                  <Switch
+                    checked={_customAllValue !== undefined}
+                    readOnly={action === 'read'}
+                    onChange={(event) => {
+                      if (action === 'read') return;
+                      const isEnabled = event.target.checked;
+                      if (isEnabled) {
+                        form.setValue('spec.customAllValue', '');
+                      } else {
+                        form.setValue('spec.customAllValue', undefined);
+                      }
+                    }}
+                  />
+                }
+              />
+              <Typography variant="caption" sx={{ mt: -0.5 }}>
+                Enable to set a custom value when &quot;All&quot; is selected
+              </Typography>
+              {_customAllValue !== undefined && (
+                <Controller
+                  control={control}
+                  name="spec.customAllValue"
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Custom All Value"
+                      InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                      InputProps={{
+                        readOnly: action === 'read',
+                      }}
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      value={field.value ?? ''}
+                      onChange={(event) => {
+                        field.onChange(event.target.value || '');
+                      }}
+                    />
+                  )}
                 />
               )}
-            />
+            </Stack>
           )}
         </Stack>
       </Stack>
