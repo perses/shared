@@ -99,14 +99,6 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
 
   const { data: plugin } = usePlugin('Panel', panelDefinition.spec.plugin.kind);
 
-  const queryDefinitions = queries ?? [];
-  const definitions = queryDefinitions.map((query) => {
-    return {
-      kind: query.spec.plugin.kind,
-      spec: query.spec.plugin.spec,
-    };
-  });
-
   const pluginQueryOptions =
     typeof plugin?.queryOptions === 'function'
       ? plugin?.queryOptions(panelDefinition.spec.plugin.spec)
@@ -125,7 +117,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
       }}
     >
       <DataQueriesProvider
-        definitions={definitions}
+        definitions={queries ?? []}
         options={{ suggestedStepMs, ...pluginQueryOptions }}
         queryOptions={{ enabled: shouldQuery }}
       >
@@ -142,7 +134,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
       </DataQueriesProvider>
       <QueryViewerDialog
         open={openQueryViewer}
-        queryDefinitions={queryDefinitions}
+        queryDefinitions={queries ?? []}
         onClose={() => setOpenQueryViewer(false)}
       />
     </Box>
