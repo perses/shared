@@ -13,10 +13,12 @@
 
 import { produce } from 'immer';
 import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
-import { Stack, IconButton, Typography, BoxProps, Box, CircularProgress } from '@mui/material';
+import { Stack, IconButton, Typography, BoxProps, Box, CircularProgress, Tooltip } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
+import EyeIcon from 'mdi-material-ui/Eye';
+import EyeOffIcon from 'mdi-material-ui/EyeOff';
 import { forwardRef, ReactElement } from 'react';
 import AlertIcon from 'mdi-material-ui/Alert';
 import { InfoTooltip } from '@perses-dev/components';
@@ -36,7 +38,9 @@ interface QueryEditorContainerProps {
   onQueryRun: (index: number, query: QueryDefinition) => void;
   onCollapseExpand: (index: number) => void;
   isCollapsed?: boolean;
+  isHidden?: boolean;
   onDelete?: (index: number) => void;
+  onVisibilityToggle?: (index: number, isHidden: boolean) => void;
 }
 
 /**
@@ -46,9 +50,11 @@ interface QueryEditorContainerProps {
  * @param index the index of the query in the list
  * @param query the query definition
  * @param isCollapsed whether the query editor is collapsed or not
+ * @param isHidden whether the query is hidden or not
  * @param onDelete callback when the query is deleted
  * @param onChange callback when the query is changed
  * @param onCollapseExpand callback when the query is collapsed or expanded
+ * @param onVisibilityToggle callback when the query is hidden or shown
  * @constructor
  */
 
@@ -61,10 +67,12 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
       queryResult,
       filteredQueryPlugins,
       isCollapsed,
+      isHidden,
       onDelete,
       onChange,
       onQueryRun,
       onCollapseExpand,
+      onVisibilityToggle,
     } = props;
     return (
       <Stack key={index} spacing={1}>
@@ -79,9 +87,16 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
             <IconButton size="small" onClick={() => onCollapseExpand(index)}>
               {isCollapsed ? <ChevronRight /> : <ChevronDown />}
             </IconButton>
-            <Typography variant="overline" component="h4">
-              Query #{index + 1}
-            </Typography>
+            <Stack gap={0.5} direction="row" alignItems="center">
+              <Typography variant="overline" component="h4">
+                Query #{index + 1}
+              </Typography>
+              {isHidden && (
+                <Typography variant="caption" color="secondary" component="span" fontStyle="italic">
+                  Disabled
+                </Typography>
+              )}
+            </Stack>
           </Stack>
           <Stack direction="row" alignItems="center">
             {queryResult?.isFetching && <CircularProgress aria-label="loading" size="1.125rem" />}
@@ -116,6 +131,18 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
                   </Typography>
                 </Stack>
               </InfoTooltip>
+            )}
+            {onVisibilityToggle && (
+              <Tooltip title={isHidden ? 'Show in chart' : 'Hide from chart'}>
+                <IconButton
+                  aria-label={isHidden ? 'show query in chart' : 'hide query from chart'}
+                  size="small"
+                  onClick={() => onVisibilityToggle?.(index, isHidden ?? false)}
+                  sx={{ color: isHidden ? 'text.disabled' : 'text.secondary' }}
+                >
+                  {isHidden ? <EyeOffIcon /> : <EyeIcon />}
+                </IconButton>
+              </Tooltip>
             )}
             {onDelete && (
               <IconButton aria-label="delete query" size="small" onClick={() => onDelete && onDelete(index)}>
