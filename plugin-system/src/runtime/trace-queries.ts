@@ -18,7 +18,7 @@ import { useDatasourceStore } from './datasources';
 import { usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
 import { useAllVariableValues } from './variables';
-import { filterVariableStateMap, getVariableValuesKey } from './utils';
+import { filterVariableStateMap, getVariableValuesKey, jitterDelay } from './utils';
 export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TraceQuery', PluginSpec>;
 export const TRACE_QUERY_KEY = 'TraceQuery';
 
@@ -51,6 +51,7 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQ
         refetchOnReconnect: false,
         staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<TraceData> => {
+          await jitterDelay();
           const plugin = await getPlugin(TRACE_QUERY_KEY, traceQueryKind);
           const data = await plugin.getTraceData(definition.spec.plugin.spec, context, signal);
           return data;
