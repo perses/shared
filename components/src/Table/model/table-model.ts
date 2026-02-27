@@ -178,6 +178,12 @@ export interface TableProps<TableData> {
    * Item actions should be created
    */
   hasItemActions?: boolean;
+
+  /**
+   * When `true`, enables filtering functionality in the table.
+   * Default: `false`
+   */
+  filteringEnabled?: boolean;
 }
 
 function calculateTableCellHeight(lineHeight: CSSProperties['lineHeight'], paddingY: string): number {

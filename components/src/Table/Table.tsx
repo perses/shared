@@ -14,6 +14,7 @@
 import { Stack, useTheme } from '@mui/material';
 import {
   ColumnDef,
+  ColumnFiltersState,
   OnChangeFn,
   Row,
   RowSelectionState,
@@ -24,10 +25,13 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { ReactElement, useCallback, useMemo } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
+
 import { TableCheckbox } from './TableCheckbox';
 import { VirtualizedTable } from './VirtualizedTable';
 import { DEFAULT_COLUMN_WIDTH, TableProps, persesColumnsToTanstackColumns } from './model/table-model';
+
+import { TableFilter } from './TableFilters';
 
 const DEFAULT_GET_ROW_ID = (data: unknown, index: number): string => {
   return `${index}`;
@@ -64,6 +68,8 @@ export function Table<TableData>({
   pagination,
   onPaginationChange,
   rowSelectionVariant = 'standard',
+  filteringEnabled = false,
+  width,
   ...otherProps
 }: TableProps<TableData>): ReactElement {
   const theme = useTheme();
@@ -102,8 +108,8 @@ export function Table<TableData>({
         e.nativeEvent && (e.nativeEvent instanceof MouseEvent || e.nativeEvent instanceof KeyboardEvent)
           ? (e.nativeEvent as PointerEvent)
           : undefined;
-      const isModifed = !!nativePointerEvent?.metaKey || !!nativePointerEvent?.shiftKey;
-      handleRowSelectionEvent(table, row, isModifed);
+      const isModified = !!nativePointerEvent?.metaKey || !!nativePointerEvent?.shiftKey;
+      handleRowSelectionEvent(table, row, isModified);
     },
     [handleRowSelectionEvent]
   );
@@ -174,8 +180,26 @@ export function Table<TableData>({
     return initTableColumns;
   }, [checkboxColumn, checkboxSelection, columns, hasItemActions, actionsColumn]);
 
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const filteredData = useMemo(() => {
+    if (!filteringEnabled || !columnFilters.length) {
+      return [...data];
+    }
+
+    return data.filter((row) =>
+      columnFilters.every(({ id, value }) => {
+        const rowValue = (row as Record<string, unknown>)[id];
+        const filterValues = value as Array<string | number>;
+        // Use optional chaining and early return for clarity
+        if (!filterValues?.length) return true;
+        return filterValues.includes(rowValue as string | number);
+      })
+    );
+  }, [data, filteringEnabled, columnFilters]);
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns: tableColumns,
     getRowId,
     getCoreRowModel: getCoreRowModel(),
@@ -207,19 +231,31 @@ export function Table<TableData>({
   );
 
   return (
-    <VirtualizedTable
-      {...otherProps}
-      density={density}
-      defaultColumnWidth={defaultColumnWidth}
-      defaultColumnHeight={defaultColumnHeight}
-      onRowClick={handleRowClick}
-      rows={table.getRowModel().rows}
-      columns={table.getAllFlatColumns()}
-      headers={table.getHeaderGroups()}
-      cellConfigs={cellConfigs}
-      pagination={pagination}
-      onPaginationChange={onPaginationChange}
-      rowCount={table.getRowCount()}
-    />
+    <>
+      {filteringEnabled && (
+        <TableFilter
+          columnFilters={columnFilters}
+          setColumnFilters={setColumnFilters}
+          columns={columns}
+          width={width}
+          data={data}
+        />
+      )}
+      <VirtualizedTable
+        {...otherProps}
+        width={width}
+        density={density}
+        defaultColumnWidth={defaultColumnWidth}
+        defaultColumnHeight={defaultColumnHeight}
+        onRowClick={handleRowClick}
+        rows={table.getRowModel().rows}
+        columns={table.getAllFlatColumns()}
+        headers={table.getHeaderGroups()}
+        cellConfigs={cellConfigs}
+        pagination={pagination}
+        onPaginationChange={onPaginationChange}
+        rowCount={table.getRowCount()}
+      />
+    </>
   );
 }
