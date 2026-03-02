@@ -33,7 +33,6 @@ import {
   useVariableValues,
   VariableStateMap,
 } from '../../runtime';
-import { parseVariables } from '../../utils';
 
 const DATASOURCE_VARIABLE_VALUE_PREFIX = '__DATASOURCE_VARIABLE_VALUE__';
 const VARIABLE_IDENTIFIER = '$';
@@ -95,13 +94,17 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
       }))
     );
 
-    const datasourceOptionsMap = new Map(datasourceOptions.map((option) => [option.name, option]));
+    // LOGZ.IO CHANGE START:: APPZ-2108-renaming-account-breaks-dashboards
+    const allItems = (data || []).flatMap((itemGroup) => itemGroup.items);
+    const displayNameSet = new Set(datasourceOptions.map((option) => option.name));
+    const selectorNameSet = new Set(allItems.map((item) => item.selector.name));
 
     const variableOptions = Object.entries(variables).flatMap<DataSourceOption>(([name, variable]) => {
       if (Array.isArray(variable.value)) return [];
 
-      const associatedDatasource = datasourceOptionsMap.get(variable.value ?? '');
-      if (!associatedDatasource) return [];
+      const isKnownDatasource = displayNameSet.has(variable.value ?? '') || selectorNameSet.has(variable.value ?? '');
+      if (!isKnownDatasource) return [];
+      // LOGZ.IO CHANGE END:: APPZ-2108-renaming-account-breaks-dashboards
 
       return {
         groupLabel: 'Variables',
@@ -244,29 +247,28 @@ export const datasourceSelectValueToSelector = (
     return value;
   }
 
-  const [variableName] = parseVariables(value);
-  const variable = variables[variableName ?? ''];
+  // LOGZ.IO CHANGE START:: APPZ-2108-renaming-account-breaks-dashboards
+  const variableName = value.substring(VARIABLE_IDENTIFIER.length);
+  const variable = variables[variableName];
 
-  // If the variable is not defined or if its value is an array, we cannot determine a selector and return undefined
   if (!variable || Array.isArray(variable.value)) {
     return undefined;
   }
+  const allItems = (datasourceSelectItemGroups || []).flatMap((itemGroup) => itemGroup.items);
 
-  const associatedDatasource = (datasourceSelectItemGroups || [])
-    .flatMap((itemGroup) => itemGroup.items)
-    .find((datasource) => datasource.name === variable.value);
+  const associatedDatasource =
+    allItems.find((datasource) => datasource.name === variable.value) ??
+    allItems.find((datasource) => datasource.selector.name === variable.value);
 
-  // If the variable value is not a datasource, we cannot determine a selector and return undefined
-  if (associatedDatasource === undefined) {
+  if (!associatedDatasource) {
     return undefined;
   }
 
-  const datasourceSelector: DatasourceSelector = {
+  return {
     kind: associatedDatasource.selector.kind,
     name: associatedDatasource.selector.name,
   };
-
-  return datasourceSelector;
+  // LOGZ.IO CHANGE END:: APPZ-2108-renaming-account-breaks-dashboards
 };
 
 export const useDatasourceSelectValueToSelector = (
