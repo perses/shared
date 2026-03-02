@@ -242,11 +242,13 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   const moveAction = useMemo((): ReactNode | undefined => {
     if (editActions && !readHandlers?.isPanelViewed) {
       return (
-        <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
-          <HeaderIconButton aria-label={ARIA_LABEL_TEXT.movePanel(title)} size="small">
-            <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
-          </HeaderIconButton>
-        </InfoTooltip>
+        <Box sx={{ background: (theme) => theme.palette.background.default }}>
+          <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
+            <HeaderIconButton aria-label={ARIA_LABEL_TEXT.movePanel(title)} size="small">
+              <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
+            </HeaderIconButton>
+          </InfoTooltip>
+        </Box>
       );
     }
     return undefined;
@@ -358,7 +360,7 @@ const OverflowMenu: React.FC<
   const id = open ? 'actions-menu' : undefined;
 
   return (
-    <>
+    <Box sx={{ background: (theme) => theme.palette.background.default }}>
       <HeaderIconButton
         className="show-actions"
         aria-describedby={id}
@@ -383,6 +385,6 @@ const OverflowMenu: React.FC<
           {children}
         </Stack>
       </Popover>
-    </>
+    </Box>
   );
 };
