@@ -27,7 +27,7 @@ jobs:
       - name: build libraries
         run: 'npm run build'
       - name: store libraries archives
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: archives
           path: |
@@ -92,7 +92,7 @@ jobs:
           enable_go: true
           nvmrc_path: './.nvmrc'
       - name: Download archive
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: archives
       - name: Publish npm package
