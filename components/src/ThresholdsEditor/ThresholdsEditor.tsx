@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement, useEffect, useRef, useState } from 'react';
+import React, { ReactElement, useEffect, useRef } from 'react';
 import { produce } from 'immer';
 import { IconButton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import PlusIcon from 'mdi-material-ui/Plus';
@@ -44,11 +44,7 @@ export function ThresholdsEditor({
   } = chartsTheme;
   const defaultThresholdColor = thresholds?.defaultColor ?? defaultColor;
 
-  const [steps, setSteps] = useState(thresholds?.steps);
-  useEffect(() => {
-    setSteps(thresholds?.steps);
-  }, [thresholds?.steps]);
-
+  const steps = thresholds?.steps;
   // every time a new threshold is added, we want to focus the recently added input
   const recentlyAddedInputRef = useRef<HTMLInputElement | null>(null);
   const focusRef = useRef(false);
@@ -59,14 +55,16 @@ export function ThresholdsEditor({
   }, [steps?.length]);
 
   const handleThresholdValueChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
-    setSteps(
-      produce(steps, (draft) => {
-        const step = draft?.[i];
-        if (step) {
-          step.value = Number(e.target.value);
-        }
-      })
-    );
+    if (thresholds !== undefined) {
+      onChange(
+        produce(thresholds, (draft) => {
+          const step = draft.steps?.[i];
+          if (step) {
+            step.value = Number(e.target.value);
+          }
+        })
+      );
+    }
   };
 
   const handleThresholdColorChange = (color: string, i: number): void => {
