@@ -26,7 +26,7 @@ import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode, TimeS
 import { useTimeRange } from './TimeRangeProvider';
 import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
-import { filterVariableStateMap, getVariableValuesKey } from './utils';
+import { filterVariableStateMap, getVariableValuesKey, jitterDelay } from './utils';
 import { useAllVariableValues } from './variables';
 
 export interface UseTimeSeriesQueryOptions {
@@ -139,6 +139,7 @@ export function useTimeSeriesQueries(
         staleTime: Infinity,
         queryKey: queryKey,
         queryFn: async ({ signal }: { signal: AbortSignal }): Promise<TimeSeriesData> => {
+          await jitterDelay();
           const plugin = await getPlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
           const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, context, signal);
           return data;
