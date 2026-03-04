@@ -49,38 +49,47 @@ export function getTheme(mode: PaletteMode, options: Parameters<typeof createThe
     palette: getPaletteOptions(mode),
     typography,
     mixins: {},
-    components,
+    components: getComponents(mode),
     ...options,
   });
 }
 
 // Overrides for component default prop values and styles go here
-const components: ThemeOptions['components'] = {
-  MuiAlert,
-  MuiFormControl: {
-    defaultProps: {
-      size: 'small',
+function getComponents(mode: PaletteMode): ThemeOptions['components'] {
+  return {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          colorScheme: mode,
+        },
+      },
     },
-  },
-  MuiPaper,
-  MuiTextField: {
-    defaultProps: {
-      size: 'small',
+    MuiAlert,
+    MuiFormControl: {
+      defaultProps: {
+        size: 'small',
+      },
     },
-  },
-  MuiDrawer: {
-    styleOverrides: {
-      paper: getModalBackgroundStyle,
+    MuiPaper,
+    MuiTextField: {
+      defaultProps: {
+        size: 'small',
+      },
     },
-  },
-  MuiDialog: {
-    styleOverrides: {
-      paper: getModalBackgroundStyle,
+    MuiDrawer: {
+      styleOverrides: {
+        paper: getModalBackgroundStyle,
+      },
     },
-  },
-  MuiPopover: {
-    styleOverrides: {
-      paper: getModalBackgroundStyle,
+    MuiDialog: {
+      styleOverrides: {
+        paper: getModalBackgroundStyle,
+      },
     },
-  },
-};
+    MuiPopover: {
+      styleOverrides: {
+        paper: getModalBackgroundStyle,
+      },
+    },
+  };
+}
