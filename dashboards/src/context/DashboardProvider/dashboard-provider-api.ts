@@ -16,6 +16,7 @@ import {
   DashboardResource,
   DurationString,
   EphemeralDashboardResource,
+  Link,
   PanelDefinition,
   PanelGroupId,
   PanelGroupDefinition,
@@ -63,6 +64,25 @@ export function useDashboardActions(): {
     openAddPanelGroup: () => openAddPanelGroup(),
     openAddPanel: () => openAddPanel(),
   };
+}
+
+const selectDashboardLinks: (state: DashboardStoreState) => Link[] | undefined = (state: DashboardStoreState) =>
+  state.links;
+/**
+ * Returns the dashboard links.
+ */
+export function useDashboardLinks(): Link[] {
+  return useDashboardStore(selectDashboardLinks) ?? [];
+}
+
+const selectDashboardLinksActions: (state: DashboardStoreState) => { setLinks: (links: Link[]) => void } = (
+  state: DashboardStoreState
+) => ({ setLinks: state.setLinks });
+/**
+ * Returns actions that can be performed on dashboard links.
+ */
+export function useDashboardLinksActions(): { setLinks: (links: Link[]) => void } {
+  return useDashboardStore(selectDashboardLinksActions);
 }
 
 const selectPanelGroupOrder = (state: DashboardStoreState): number[] => state.panelGroupOrder;
