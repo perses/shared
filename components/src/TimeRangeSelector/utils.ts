@@ -16,6 +16,7 @@ import { AbsoluteTimeRange, isRelativeTimeRange, TimeRangeValue } from '@perses-
 import { formatWithTimeZone } from '../utils';
 
 export const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
+export const DAYJS_DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
 export interface CustomTimeOption {
   value: TimeRangeValue | undefined;
