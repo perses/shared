@@ -14,12 +14,18 @@
 import { ReactElement, useMemo, useState } from 'react';
 import { Box, Stack, Typography, Button } from '@mui/material';
 import { DateTimeField, LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { AbsoluteTimeRange } from '@perses-dev/core';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { ErrorAlert } from '../ErrorAlert';
-import { formatWithTimeZone } from '../utils/format';
-import { DATE_TIME_FORMAT, validateDateRange } from './utils';
+import { formatWithTimeZone } from '../utils/format-dayjs';
+import { DAYJS_DATE_TIME_FORMAT, validateDateRange } from './utils';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface AbsoluteTimeFormProps {
   initialTimeRange: AbsoluteTimeRange;
@@ -29,7 +35,7 @@ interface AbsoluteTimeFormProps {
 }
 
 type AbsoluteTimeRangeInputValue = {
-  [Property in keyof AbsoluteTimeRange]: string;
+  [Property in keyof AbsoluteTimeRange]: dayjs.Dayjs;
 };
 
 /**
@@ -47,31 +53,33 @@ export const DateTimeRangePicker = ({
   onCancel,
   timeZone,
 }: AbsoluteTimeFormProps): ReactElement => {
+  const stdTimeZone = timeZone.toLowerCase() === 'local' ? Intl.DateTimeFormat().resolvedOptions().timeZone : timeZone;
   // Time range values as dates that can be used as a time range.
   const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
+
   const timeRangeInputs = useMemo<AbsoluteTimeRangeInputValue>(() => {
     return {
-      start: formatWithTimeZone(timeRange.start, DATE_TIME_FORMAT, timeZone),
-      end: formatWithTimeZone(timeRange.end, DATE_TIME_FORMAT, timeZone),
+      start: formatWithTimeZone(timeRange.start, timeZone),
+      end: formatWithTimeZone(timeRange.end, timeZone),
     };
   }, [timeRange.start, timeRange.end, timeZone]);
 
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
 
-  const changeTimeRange = (newTime: Date, segment: keyof AbsoluteTimeRange): void => {
+  const changeTimeRange = (newTime: dayjs.Dayjs, segment: keyof AbsoluteTimeRange): void => {
     setTimeRange((prevTimeRange) => {
       return {
         ...prevTimeRange,
-        [segment]: newTime,
+        [segment]: newTime.toDate(),
       };
     });
   };
 
-  const onChangeStartTime = (newStartTime: Date): void => {
+  const onChangeStartTime = (newStartTime: dayjs.Dayjs): void => {
     changeTimeRange(newStartTime, 'start');
   };
 
-  const onChangeEndTime = (newEndTime: Date): void => {
+  const onChangeEndTime = (newEndTime: dayjs.Dayjs): void => {
     changeTimeRange(newEndTime, 'end');
   };
 
@@ -94,7 +102,7 @@ export const DateTimeRangePicker = ({
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Stack
         spacing={2}
         sx={(theme) => ({
@@ -114,10 +122,11 @@ export const DateTimeRangePicker = ({
               Select Start Time
             </Typography>
             <StaticDateTimePicker
+              timezone={stdTimeZone}
               displayStaticWrapperAs="desktop"
               openTo="day"
               disableHighlightToday={true}
-              value={timeRange.start}
+              value={dayjs(timeRange.start)}
               onChange={(newValue) => {
                 if (newValue === null) return;
                 onChangeStartTime(newValue);
@@ -140,11 +149,12 @@ export const DateTimeRangePicker = ({
               Select End Time
             </Typography>
             <StaticDateTimePicker
+              timezone={stdTimeZone}
               displayStaticWrapperAs="desktop"
               openTo="day"
               disableHighlightToday={true}
-              value={timeRange.end}
-              minDateTime={timeRange.start}
+              value={dayjs(timeRange.end)}
+              minDateTime={dayjs(timeRange.start)}
               onChange={(newValue) => {
                 if (newValue === null) return;
                 onChangeEndTime(newValue);
@@ -161,27 +171,27 @@ export const DateTimeRangePicker = ({
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <DateTimeField
               label="Start Time"
-              value={new Date(timeRangeInputs.start)}
-              onChange={(event: Date | null) => {
+              value={timeRangeInputs.start}
+              onChange={(event: dayjs.Dayjs | null) => {
                 if (event) {
                   onChangeStartTime(event);
                 }
               }}
               onBlur={() => updateDateRange()}
-              format={DATE_TIME_FORMAT}
+              format={DAYJS_DATE_TIME_FORMAT}
             />
           </ErrorBoundary>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <DateTimeField
               label="End Time"
-              value={new Date(timeRangeInputs.end)}
-              onChange={(event: Date | null) => {
+              value={timeRangeInputs.end}
+              onChange={(event: dayjs.Dayjs | null) => {
                 if (event) {
                   onChangeEndTime(event);
                 }
               }}
               onBlur={() => updateDateRange()}
-              format={DATE_TIME_FORMAT}
+              format={DAYJS_DATE_TIME_FORMAT}
             />
           </ErrorBoundary>
         </Stack>
