@@ -21,7 +21,7 @@ import { ErrorBoundary } from '../ErrorBoundary';
 import { ErrorAlert } from '../ErrorAlert';
 import { DATE_TIME_FORMAT, validateDateRange } from './utils';
 
-interface AbsoluteTimeFormProps {
+export interface AbsoluteTimeFormProps {
   initialTimeRange: AbsoluteTimeRange;
   onChange: (timeRange: AbsoluteTimeRange) => void;
   onCancel: () => void;
@@ -47,7 +47,6 @@ export const DateTimeRangePicker = ({
     ? Intl.DateTimeFormat().resolvedOptions().timeZone
     : timeZone;
   const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
-
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
 
   const changeTimeRange = (newTime: Date, segment: keyof AbsoluteTimeRange): void => {
@@ -154,6 +153,7 @@ export const DateTimeRangePicker = ({
         <Stack direction="row" alignItems="center" gap={1} pl={1} pr={1}>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <DateTimeField
+              data-testid="start_time_input"
               timezone={stdTimeZone}
               label="Start Time"
               value={new TZDate(timeRange.start, stdTimeZone)}
@@ -168,6 +168,7 @@ export const DateTimeRangePicker = ({
           </ErrorBoundary>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <DateTimeField
+              data-testid="end_time_input"
               timezone={stdTimeZone}
               label="End Time"
               value={new TZDate(timeRange.end, stdTimeZone)}
