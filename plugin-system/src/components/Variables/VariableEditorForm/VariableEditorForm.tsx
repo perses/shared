@@ -209,13 +209,11 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                 }}
                 error={!!fieldState.error}
                 value={field.value ?? ''}
+                // LOGZ.IO CHANGE START:: Fix clearing capturing regexp field [APPZ-1996]
                 onChange={(event) => {
-                  if (event.target.value === '') {
-                    field.onChange(undefined);
-                  } else {
-                    field.onChange(event);
-                  }
+                  field.onChange(event);
                 }}
+                // LOGZ.IO CHANGE END:: Fix clearing capturing regexp field [APPZ-1996]
                 helperText={
                   fieldState.error?.message
                     ? fieldState.error.message
@@ -337,13 +335,11 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                       : 'When All is selected, this value will be used'
                   }
                   value={field.value ?? ''}
+                  // LOGZ.IO CHANGE START:: Fix clearing customAllValue field [APPZ-1996]
                   onChange={(event) => {
-                    if (event.target.value === '') {
-                      field.onChange(undefined);
-                    } else {
-                      field.onChange(event);
-                    }
+                    field.onChange(event);
                   }}
+                  // LOGZ.IO CHANGE END:: Fix clearing customAllValue field [APPZ-1996]
                 />
               )}
             />
@@ -397,6 +393,16 @@ export function VariableEditorForm({
     ) {
       delete result.spec.display;
     }
+    // LOGZ.IO CHANGE START:: Clean up empty optional string fields for ListVariable [APPZ-1996]
+    if (result.kind === 'ListVariable') {
+      if (result.spec.capturingRegexp === '') {
+        result.spec = { ...result.spec, capturingRegexp: undefined };
+      }
+      if (result.spec.customAllValue === '') {
+        result.spec = { ...result.spec, customAllValue: undefined };
+      }
+    }
+    // LOGZ.IO CHANGE END:: Clean up empty optional string fields for ListVariable [APPZ-1996]
     return result;
   }
 
