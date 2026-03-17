@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec } from '@perses-dev/core';
+import { UnknownSpec } from '@perses-dev/spec';
 import { DatasourcePlugin } from './datasource';
 import { PanelPlugin } from './panels';
 import { Plugin } from './plugin-base';

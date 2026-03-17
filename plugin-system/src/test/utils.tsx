@@ -13,7 +13,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
-import { DEFAULT_DASHBOARD_DURATION } from '@perses-dev/core';
+import { DEFAULT_DASHBOARD_DURATION } from '@perses-dev/core'; // TODO what should we do with this value ?
 import { PluginRegistry } from '../components';
 import { DefaultPluginKinds } from '../model';
 import { TimeRangeProviderBasic } from '../runtime';

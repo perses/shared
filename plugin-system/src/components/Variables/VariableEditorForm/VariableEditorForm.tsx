@@ -13,7 +13,8 @@
 
 import { DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
 import { Box, Typography, Switch, TextField, Grid, FormControlLabel, MenuItem, Stack, Divider } from '@mui/material';
-import { VariableDefinition, ListVariableDefinition, Action } from '@perses-dev/core';
+import { VariableDefinition, ListVariableDefinition } from '@perses-dev/spec';
+import { Action } from '@perses-dev/core';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

@@ -13,7 +13,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { TransformsEditor } from '@perses-dev/components';
-import { Transform } from '@perses-dev/core';
+import { Transform } from '@perses-dev/core'; // TODO
 
 describe('TransformsEditor', () => {
   function renderTableColumnsEditor(value: Transform[], onChange = jest.fn()): void {

@@ -15,7 +15,8 @@ import { ReactElement, useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
-import { BuiltinVariableDefinition, VariableDefinition, ExternalVariableDefinition } from '@perses-dev/core';
+import { ExternalVariableDefinition } from '@perses-dev/core'; // TODO
+import { BuiltinVariableDefinition, VariableDefinition } from '@perses-dev/spec';
 import { useBuiltinVariableDefinitions } from '@perses-dev/plugin-system';
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useExternalVariableDefinitions, useVariableDefinitionActions, useVariableDefinitions } from '../../context';

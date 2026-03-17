@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { OptionsEditorControl, SettingsAutocomplete } from '@perses-dev/components';
-import { CALCULATIONS_CONFIG, CalculationConfig, CalculationType } from '@perses-dev/core';
+import { CALCULATIONS_CONFIG, CalculationConfig, CalculationType } from '@perses-dev/core'; // TODO weird this is part of the model from the core package ...
 import { ReactElement } from 'react';
 
 type AutocompleteCalculationOption = CalculationConfig & { id: CalculationType };

@@ -14,7 +14,8 @@
 import { memo, MutableRefObject, useRef, useState } from 'react';
 import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { FormatOptions, TimeSeries } from '@perses-dev/core';
+import { FormatOptions } from '@perses-dev/core'; // TODO
+import { TimeSeries } from '@perses-dev/spec';
 import useResizeObserver from 'use-resize-observer';
 import { TimeChartSeriesMapping } from '../model';
 import { CursorCoordinates, useMousePosition } from './tooltip-model';

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Theme } from '@mui/material';
-import { Link } from '@perses-dev/core';
+import { Link } from '@perses-dev/spec';
 import {
   AccessorKeyColumnDef,
   CellContext,

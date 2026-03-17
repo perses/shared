@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, FormControl, MenuItem, Select } from '@mui/material';
-import { DurationString } from '@perses-dev/core';
+import { DurationString } from '@perses-dev/spec';
 import { ReactElement, useMemo } from 'react';
 import { TimeOption } from '../model';
 

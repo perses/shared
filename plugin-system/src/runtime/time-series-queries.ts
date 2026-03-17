@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesData, TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/core';
+import { TimeSeriesData, TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import {
   Query,
   QueryCache,

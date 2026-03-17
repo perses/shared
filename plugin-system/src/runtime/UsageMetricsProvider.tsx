@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch, QueryDefinition } from '@perses-dev/core';
+import { fetch } from '@perses-dev/core'; // TODO
+import { QueryDefinition } from '@perses-dev/spec';
 import { createContext, ReactElement, ReactNode, useContext } from 'react';
 
 type QueryState = 'pending' | 'success' | 'error';

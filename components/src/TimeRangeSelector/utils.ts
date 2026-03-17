@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { isBefore, isValid } from 'date-fns';
-import { AbsoluteTimeRange, isRelativeTimeRange, TimeRangeValue } from '@perses-dev/core';
+import { AbsoluteTimeRange, isRelativeTimeRange, TimeRangeValue } from '@perses-dev/spec';
 import { formatWithTimeZone } from '../utils';
 
 export const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';

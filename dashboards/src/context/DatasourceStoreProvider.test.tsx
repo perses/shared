@@ -23,14 +23,8 @@ import {
 import { DatasourceStoreProvider } from '@perses-dev/dashboards';
 import { PropsWithChildren, ReactElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  DashboardResource,
-  DashboardSpec,
-  Datasource,
-  DatasourceSpec,
-  GlobalDatasourceResource,
-  DatasourceResource,
-} from '@perses-dev/core';
+import { DashboardResource, Datasource, GlobalDatasourceResource, DatasourceResource } from '@perses-dev/core'; // TODO Datasource should not be used like that, only the spec should be considered
+import { DashboardSpec, DatasourceSpec } from '@perses-dev/spec';
 
 const PROJECT = 'perses';
 const FAKE_PLUGIN_NAME = 'FakeDatasourcePlugin';

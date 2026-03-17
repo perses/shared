@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GlobalDatasourceResource } from '@perses-dev/core';
+import { GlobalDatasourceResource } from '@perses-dev/core'; // TODO
 import { DatasourceStoreProviderProps } from '../context';
 import { getTestDashboard } from './dashboard-provider';
 

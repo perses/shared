@@ -13,7 +13,7 @@
 
 import { useListVariableState } from '@perses-dev/dashboards';
 import { renderHook } from '@testing-library/react';
-import { VariableValue } from '@perses-dev/core';
+import { VariableValue } from '@perses-dev/spec';
 import { VariableOption } from '@perses-dev/plugin-system';
 
 /**

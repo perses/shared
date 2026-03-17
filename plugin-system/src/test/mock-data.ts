@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogData, ProfileData, TimeSeriesData, TraceData } from '@perses-dev/core';
+import { LogData, ProfileData, TimeSeriesData, TraceData } from '@perses-dev/spec';
 
 export const MOCK_TIME_SERIES_DATA: TimeSeriesData = {
   timeRange: {

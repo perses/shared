@@ -13,7 +13,7 @@
 
 import { screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
-import { PanelEditorValues } from '@perses-dev/core';
+import { PanelEditorValues } from '@perses-dev/spec';
 import { ReactElement } from 'react';
 import { renderWithContext } from '../../test';
 import { DataQueriesContext } from '../../runtime';

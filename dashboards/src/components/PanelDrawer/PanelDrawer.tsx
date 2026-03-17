@@ -27,7 +27,7 @@
 
 import { ReactElement, useState, useMemo, ReactNode, useCallback } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PanelEditorValues } from '@perses-dev/core';
+import { PanelEditorValues } from '@perses-dev/spec';
 import { useVariableValues, VariableContext } from '@perses-dev/plugin-system';
 import { usePanelEditor, usePanelKey } from '../../context';
 import { PanelEditorForm } from './PanelEditorForm';

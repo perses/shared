@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ListVariableDefinition } from '@perses-dev/core';
+import { ListVariableDefinition } from '@perses-dev/spec';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { VariableOption } from '../../model';
 import { useDatasourceStore, usePlugin, useTimeRange, useAllVariableValues, VariableStateMap } from '../../runtime';

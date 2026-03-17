@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
+import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core'; // TODO only dashboard spec should be used
 import { ReactElement, ReactNode, useEffect } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';

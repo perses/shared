@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec } from '@perses-dev/core';
+import { UnknownSpec } from '@perses-dev/spec';
 import { PanelPlugin, MockPlugin } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
 

@@ -13,7 +13,7 @@
 
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { LineSeriesOption } from 'echarts/charts';
-import { formatValue, TimeSeriesValueTuple, FormatOptions, TimeSeries } from '@perses-dev/core';
+import { formatValue, TimeSeriesValueTuple, FormatOptions, TimeSeries } from '@perses-dev/core'; // TODO
 import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping, DatapointInfo } from '../model';
 import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp } from '../utils';
 import { CursorCoordinates, CursorData, EMPTY_TOOLTIP_DATA } from './tooltip-model';

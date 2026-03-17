@@ -34,7 +34,8 @@ import {
   AccordionDetails,
 } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
-import { Action, BuiltinVariableDefinition, VariableDefinition, ExternalVariableDefinition } from '@perses-dev/core';
+import { Action, ExternalVariableDefinition } from '@perses-dev/core'; // TODO
+import { BuiltinVariableDefinition, VariableDefinition } from '@perses-dev/spec';
 import { useImmer } from 'use-immer';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import CloneIcon from 'mdi-material-ui/ContentCopy';

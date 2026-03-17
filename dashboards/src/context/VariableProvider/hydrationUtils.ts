@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DEFAULT_ALL_VALUE, VariableValue, VariableDefinition, ExternalVariableDefinition } from '@perses-dev/core';
+import { ExternalVariableDefinition } from '@perses-dev/core'; // TODO
+import { DEFAULT_ALL_VALUE, VariableValue, VariableDefinition } from '@perses-dev/spec';
 import { VariableStoreStateMap, VariableState } from '@perses-dev/plugin-system';
 
 // TODO: move to VariableProvider/utils.ts

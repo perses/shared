@@ -20,7 +20,8 @@ import {
   combineSx,
   useId,
 } from '@perses-dev/components';
-import { PanelDefinition, PanelGroupItemId } from '@perses-dev/core';
+import { PanelGroupItemId } from '@perses-dev/core'; // TODO
+import { PanelDefinition } from '@perses-dev/spec';
 import { ActionOptions, useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
 import { ReactNode, memo, useEffect, useMemo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource } from '@perses-dev/core'; // TODO
 
 const testDashboard: DashboardResource = {
   kind: 'Dashboard',

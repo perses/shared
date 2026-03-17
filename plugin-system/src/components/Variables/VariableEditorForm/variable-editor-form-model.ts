@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ListVariableSpec, TextVariableDefinition, TextVariableSpec, VariableDefinition } from '@perses-dev/core';
+import { ListVariableSpec, TextVariableDefinition, TextVariableSpec, VariableDefinition } from '@perses-dev/spec';
 import { VariableOption } from '../../../model';
 
 export type SortMethodName =

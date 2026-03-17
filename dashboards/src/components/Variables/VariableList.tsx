@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { Box } from '@mui/material';
-import { VariableDefinition, VariableSpec, ExternalVariableDefinition } from '@perses-dev/core';
+import { ExternalVariableDefinition } from '@perses-dev/core'; // TODO
+import { VariableDefinition, VariableSpec } from '@perses-dev/spec';
 import { ReactElement } from 'react';
 import { useExternalVariableDefinitions, useVariableDefinitionAndState, useVariableDefinitions } from '../../context';
 import { MAX_VARIABLE_WIDTH, MIN_VARIABLE_WIDTH } from '../../constants';

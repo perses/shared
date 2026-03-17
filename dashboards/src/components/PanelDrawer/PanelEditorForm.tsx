@@ -13,7 +13,8 @@
 
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { Action, PanelDefinition, PanelEditorValues } from '@perses-dev/core';
+import { Action } from '@perses-dev/core'; // TODO Perses permission should not be used
+import { PanelDefinition, PanelEditorValues } from '@perses-dev/spec';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
   PluginKindSelect,
