@@ -52,7 +52,7 @@ export interface TableProps<TableData> {
   /**
    * Width of the table.
    */
-  width: number;
+  width: number | string;
 
   /**
    * Array of data to render in the table. Each entry in the array will be
@@ -178,6 +178,11 @@ export interface TableProps<TableData> {
    * Item actions should be created
    */
   hasItemActions?: boolean;
+
+  /**
+   * Returns the sub rows for a given row, or `undefined` if there are none.
+   */
+  getSubRows?: (originalRow: TableData, index: number) => undefined | TableData[];
 }
 
 function calculateTableCellHeight(lineHeight: CSSProperties['lineHeight'], paddingY: string): number {
@@ -291,7 +296,7 @@ export interface TableColumnConfig<TableData>
   // TODO: revisit issue thread and see if there are any workarounds we can
   // use.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  extends Pick<AccessorKeyColumnDef<TableData, any>, 'accessorKey' | 'cell' | 'sortingFn'> {
+  extends Pick<AccessorKeyColumnDef<TableData, any>, 'accessorKey' | 'cell' | 'sortingFn' | 'id'> {
   /**
    * Text to display in the header for the column.
    */

@@ -1,9 +1,9 @@
 module github.com/perses/shared
 
-go 1.25.5
+go 1.25.7
 
 require (
-	github.com/perses/perses v0.53.0
+	github.com/perses/perses v0.53.1
 	github.com/sirupsen/logrus v1.9.4
 )
 

@@ -23,6 +23,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  getExpandedRowModel,
 } from '@tanstack/react-table';
 import { ReactElement, useCallback, useMemo } from 'react';
 import { TableCheckbox } from './TableCheckbox';
@@ -64,6 +65,7 @@ export function Table<TableData>({
   pagination,
   onPaginationChange,
   rowSelectionVariant = 'standard',
+  getSubRows,
   ...otherProps
 }: TableProps<TableData>): ReactElement {
   const theme = useTheme();
@@ -177,7 +179,7 @@ export function Table<TableData>({
   const table = useReactTable({
     data,
     columns: tableColumns,
-    getRowId,
+    getRowId: getRowId,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: pagination ? getPaginationRowModel() : undefined,
@@ -187,6 +189,8 @@ export function Table<TableData>({
     enableRowSelection: !!checkboxSelection,
     onRowSelectionChange: handleRowSelectionChange,
     onSortingChange: handleSortingChange,
+    getSubRows: getSubRows,
+    getExpandedRowModel: getSubRows ? getExpandedRowModel() : undefined,
     // For now, defaulting to sort by descending first. We can expose the ability
     // to customize it if/when we have use cases for it.
     sortDescFirst: true,
