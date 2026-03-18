@@ -115,7 +115,7 @@ export function Row({
           }
         />
       )}
-      <Collapse in={isOpen} unmountOnExit appear={false} data-testid="panel-group-content">
+      <Collapse in={isOpen} appear={false} data-testid="panel-group-content">
         <ResponsiveGridLayout
           className="layout"
           breakpoints={{ [GRID_LAYOUT_SMALL_BREAKPOINT]: theme.breakpoints.values.sm, xxs: 0 }}
