@@ -29,7 +29,7 @@ const config: Config.InitialOptions = {
     '^use-resize-observer$': 'use-resize-observer/polyfilled',
 
     // Tell Jest where other Perses packages live since it doesn't know about project references
-    '^@perses-dev/(?!core)(.*)$': '<rootDir>/../$1/src',
+    '^@perses-dev/(components|dashboards|explore|plugin-system)(.*)$': '<rootDir>/../$1/src',
 
     // Configure Jest to handle stylesheets
     '\\.(css|less)$': '<rootDir>/../stylesMock.js',
