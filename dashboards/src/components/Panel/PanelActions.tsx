@@ -35,8 +35,8 @@ import {
   HEADER_SMALL_WIDTH,
   TOOLTIP_TEXT,
 } from '../../constants';
+import { LinksDisplay } from '../LinksDisplay';
 import { HeaderIconButton } from './HeaderIconButton';
-import { PanelLinks } from './PanelLinks';
 import { PanelOptions } from './Panel';
 
 const noticeTypeToIcon: Record<Notice['type'], ReactNode> = {
@@ -109,7 +109,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [descriptionTooltipId, description]);
 
-  const linksAction = links && links.length > 0 && <PanelLinks links={links} />;
+  const linksAction = links && links.length > 0 && <LinksDisplay links={links} variant="panel" />;
   const extraActions = editHandlers === undefined && extra;
 
   const queryStateIndicator = useMemo((): ReactNode | undefined => {
