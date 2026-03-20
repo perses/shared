@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BuiltinVariableDefinition } from '@perses-dev/core';
+import { BuiltinVariableDefinition } from '@perses-dev/spec';
 import { useQueries, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 import { DefaultPluginKinds, PluginImplementation, PluginMetadataWithModule, PluginType } from '../model';

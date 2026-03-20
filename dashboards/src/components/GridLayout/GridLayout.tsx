@@ -12,7 +12,8 @@
 // limitations under the License.
 import { ReactElement, useState } from 'react';
 import { Layouts, Layout } from 'react-grid-layout';
-import { PanelGroupId, PanelGroupDefinition } from '@perses-dev/core';
+import { PanelGroupDefinition } from '@perses-dev/core'; // TODO what should we do about the PanelGroupDefinition ?
+import { PanelGroupId } from '@perses-dev/spec';
 import { useVariableValues, VariableContext } from '@perses-dev/plugin-system';
 import { useEditMode, usePanelGroup, usePanelGroupActions, useViewPanelGroup } from '../../context';
 import { GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';

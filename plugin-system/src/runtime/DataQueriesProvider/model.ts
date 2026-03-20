@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, QueryDefinition, UnknownSpec, QueryDataType } from '@perses-dev/core';
+import { Definition, QueryDefinition, UnknownSpec, QueryDataType } from '@perses-dev/spec';
 import { QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { ReactNode, useCallback, useMemo } from 'react';
 import { useListPluginMetadata } from '../plugin-registry';

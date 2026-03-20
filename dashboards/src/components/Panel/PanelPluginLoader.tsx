@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { usePlugin, PanelProps } from '@perses-dev/plugin-system';
-import { UnknownSpec, QueryDataType } from '@perses-dev/core';
+import { UnknownSpec, QueryDataType } from '@perses-dev/spec';
 import { ReactElement } from 'react';
 import { Skeleton } from '@mui/material';
 

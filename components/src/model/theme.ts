@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ThresholdColorPalette } from '@perses-dev/core';
+import { ThresholdColorPalette } from '@perses-dev/core'; // TODO
 import type {
   EChartsOption,
   BarSeriesOption,

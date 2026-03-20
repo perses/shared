@@ -15,7 +15,7 @@ import { Box } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo, useState } from 'react';
-import { isPanelGroupItemIdEqual, PanelGroupItemId } from '@perses-dev/core';
+import { isPanelGroupItemIdEqual, PanelGroupItemId } from '@perses-dev/core'; // TODO
 import { useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
 import { Panel, PanelProps, PanelOptions } from '../Panel';
 import { QueryViewerDialog } from '../QueryViewerDialog';

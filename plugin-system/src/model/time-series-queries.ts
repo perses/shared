@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Query, QueryKey } from '@tanstack/react-query';
-import { AbsoluteTimeRange, UnknownSpec, TimeSeriesData } from '@perses-dev/core';
+import { AbsoluteTimeRange, UnknownSpec, TimeSeriesData } from '@perses-dev/spec';
 import { DatasourceStore, VariableStateMap } from '../runtime';
 import { Plugin } from './plugin-base';
 

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ErrorAlert, JSONEditor, LinksEditor } from '@perses-dev/components';
-import { PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
+import { PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { Control, Controller } from 'react-hook-form';
 import { forwardRef, ReactElement } from 'react';
 import { QueryCountProvider, useDataQueriesContext, usePlugin } from '../../runtime';

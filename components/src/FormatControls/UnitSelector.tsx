@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormatOptions, UNIT_CONFIG, UnitConfig } from '@perses-dev/core';
+import { FormatOptions, UNIT_CONFIG, UnitConfig } from '@perses-dev/core'; // TODO
 import { ReactElement } from 'react';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
 

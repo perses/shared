@@ -27,18 +27,17 @@ import {
   BuiltinVariableContext,
   useTimeRange,
 } from '@perses-dev/plugin-system';
+import { intervalToPrometheusDuration, ExternalVariableDefinition } from '@perses-dev/core'; // TODO weird to have something related to prometheus in the dashboard package
 import {
   DEFAULT_ALL_VALUE as ALL_VALUE,
   VariableName,
   VariableValue,
   VariableDefinition,
   formatDuration,
-  intervalToPrometheusDuration,
   BuiltinVariableDefinition,
   TextVariableDefinition,
   ListVariableDefinition,
-  ExternalVariableDefinition,
-} from '@perses-dev/core';
+} from '@perses-dev/spec';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 import { hydrateVariableDefinitionStates as hydrateVariableDefinitionStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';

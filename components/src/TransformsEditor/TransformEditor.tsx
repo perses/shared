@@ -27,7 +27,7 @@ import {
   MergeIndexedColumnsTransform,
   MergeSeriesTransform,
   Transform,
-} from '@perses-dev/core';
+} from '@perses-dev/core'; // TODO
 import { ReactElement } from 'react';
 import { TextField } from '../controls';
 

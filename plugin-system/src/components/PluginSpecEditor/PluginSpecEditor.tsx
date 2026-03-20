@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ErrorAlert } from '@perses-dev/components';
-import { UnknownSpec } from '@perses-dev/core';
+import { UnknownSpec } from '@perses-dev/spec';
 import { ReactElement } from 'react';
 import { CircularProgress, Stack } from '@mui/material';
 import { OptionsEditorProps } from '../../model';
