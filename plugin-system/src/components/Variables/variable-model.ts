@@ -16,20 +16,32 @@ import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { VariableOption } from '../../model';
 import { useDatasourceStore, usePlugin, useTimeRange, useAllVariableValues, VariableStateMap } from '../../runtime';
 
+// LOGZ.IO CHANGE START:: Apply capturing regex to label as fallback for datasource variables
+function extractCapturedValue(text: string, regexp: RegExp): string {
+  const matches = text.matchAll(regexp);
+  let concat = '';
+  for (const match of matches) {
+    for (let i = 1; i < match.length; i++) {
+      const m = match[i];
+      if (m !== undefined) {
+        concat = `${concat}${m}`;
+      }
+    }
+  }
+  return concat;
+}
+// LOGZ.IO CHANGE END:: Apply capturing regex to label as fallback for datasource variables
+
 export function filterVariableList(data: VariableOption[], capturedRegexp: RegExp): VariableOption[] {
   const result: VariableOption[] = [];
   const filteredSet = new Set<string>();
   for (const variableValue of data) {
-    const matches = variableValue.value.matchAll(capturedRegexp);
-    let concat = '';
-    for (const match of matches) {
-      for (let i = 1; i < match.length; i++) {
-        const m = match[i];
-        if (m !== undefined) {
-          concat = `${concat}${m}`;
-        }
-      }
+    // LOGZ.IO CHANGE START:: Apply capturing regex to label as fallback for datasource variables
+    let concat = extractCapturedValue(variableValue.value, capturedRegexp);
+    if (concat === '' && variableValue.label) {
+      concat = extractCapturedValue(variableValue.label, capturedRegexp);
     }
+    // LOGZ.IO CHANGE END:: Apply capturing regex to label as fallback for datasource variables
     if (concat !== '' && !filteredSet.has(concat)) {
       // like that we are avoiding to have duplicating variable value
       filteredSet.add(concat);
