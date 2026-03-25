@@ -18,6 +18,7 @@ import {
   CellContext,
   ColumnDef,
   CoreOptions,
+  FilterFn,
   PaginationState,
   RowData,
   RowSelectionState,
@@ -183,6 +184,23 @@ export interface TableProps<TableData> {
    * Returns the sub rows for a given row, or `undefined` if there are none.
    */
   getSubRows?: (originalRow: TableData, index: number) => undefined | TableData[];
+
+  /**
+   * When `true`, a search bar will be rendered above the table that allows
+   * the user to filter rows using a fuzzy global filter.
+   */
+  showSearch?: boolean;
+
+  /**
+   * When `true`, a "Columns" button will be rendered above the table that
+   * opens a dropdown allowing the user to toggle column visibility.
+   */
+  showColumnFilter?: boolean;
+
+  /**
+   * List of column ids that should be hidden when the table is initially rendered.
+   */
+  hiddenColumns?: string[];
 }
 
 function calculateTableCellHeight(lineHeight: CSSProperties['lineHeight'], paddingY: string): number {
@@ -279,6 +297,12 @@ declare module '@tanstack/table-core' {
     headerDescription?: TableColumnConfig<TData>['headerDescription'];
     cellDescription?: TableColumnConfig<TData>['cellDescription'];
     dataLink?: TableColumnConfig<TData>['dataLink'];
+  }
+}
+
+declare module '@tanstack/react-table' {
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>;
   }
 }
 

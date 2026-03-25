@@ -14,21 +14,23 @@
 import { Stack, useTheme } from '@mui/material';
 import {
   ColumnDef,
+  getCoreRowModel,
+  getExpandedRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
   OnChangeFn,
   Row,
   RowSelectionState,
   SortingState,
   Table as TanstackTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
-  getExpandedRowModel,
+  VisibilityState,
 } from '@tanstack/react-table';
-import { ReactElement, useCallback, useMemo } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
+import { useFuzzySearch } from './hooks/useFuzzySearch';
 import { TableCheckbox } from './TableCheckbox';
 import { VirtualizedTable } from './VirtualizedTable';
-import { DEFAULT_COLUMN_WIDTH, TableProps, persesColumnsToTanstackColumns } from './model/table-model';
+import { DEFAULT_COLUMN_WIDTH, persesColumnsToTanstackColumns, TableProps } from './model/table-model';
 
 const DEFAULT_GET_ROW_ID = (data: unknown, index: number): string => {
   return `${index}`;
@@ -66,9 +68,18 @@ export function Table<TableData>({
   onPaginationChange,
   rowSelectionVariant = 'standard',
   getSubRows,
+  showSearch,
+  showColumnFilter,
+  hiddenColumns,
   ...otherProps
 }: TableProps<TableData>): ReactElement {
   const theme = useTheme();
+
+  const { globalFilter, setGlobalFilter, fuzzySearchOptions } = useFuzzySearch<TableData>(showSearch);
+
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    hiddenColumns?.reduce((acc, columnId) => ({ ...acc, [columnId]: false }), {}) ?? {}
+  );
 
   const handleRowSelectionChange: OnChangeFn<RowSelectionState> = (rowSelectionUpdater) => {
     const newRowSelection =
@@ -189,14 +200,18 @@ export function Table<TableData>({
     enableRowSelection: !!checkboxSelection,
     onRowSelectionChange: handleRowSelectionChange,
     onSortingChange: handleSortingChange,
+    onColumnVisibilityChange: setColumnVisibility,
     getSubRows: getSubRows,
     getExpandedRowModel: getSubRows ? getExpandedRowModel() : undefined,
+    ...fuzzySearchOptions,
     // For now, defaulting to sort by descending first. We can expose the ability
     // to customize it if/when we have use cases for it.
     sortDescFirst: true,
     state: {
       rowSelection,
       sorting,
+      globalFilter: showSearch ? globalFilter : undefined,
+      columnVisibility,
       ...(pagination ? { pagination } : {}),
     },
   });
@@ -218,12 +233,17 @@ export function Table<TableData>({
       defaultColumnHeight={defaultColumnHeight}
       onRowClick={handleRowClick}
       rows={table.getRowModel().rows}
-      columns={table.getAllFlatColumns()}
+      columns={table.getVisibleFlatColumns()}
       headers={table.getHeaderGroups()}
       cellConfigs={cellConfigs}
       pagination={pagination}
       onPaginationChange={onPaginationChange}
       rowCount={table.getRowCount()}
+      showSearch={showSearch}
+      showColumnFilter={showColumnFilter}
+      globalFilter={globalFilter}
+      onGlobalFilterChange={setGlobalFilter}
+      allColumns={table.getAllColumns()}
     />
   );
 }
