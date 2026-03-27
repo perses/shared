@@ -37,6 +37,7 @@ export function useDashboard(): {
     duration,
     refreshInterval,
     datasources,
+    links,
     ttl,
   } = useDashboardStore(
     ({
@@ -50,6 +51,7 @@ export function useDashboard(): {
       duration,
       refreshInterval,
       datasources,
+      links,
       ttl,
     }) => ({
       panels,
@@ -62,6 +64,7 @@ export function useDashboard(): {
       duration,
       refreshInterval,
       datasources,
+      links,
       ttl,
     })
   );
@@ -82,6 +85,7 @@ export function useDashboard(): {
             duration,
             refreshInterval,
             datasources,
+            links,
           },
         } as DashboardResource)
       : ({
@@ -95,6 +99,7 @@ export function useDashboard(): {
             duration,
             refreshInterval,
             datasources,
+            links,
             ttl,
           },
         } as EphemeralDashboardResource);

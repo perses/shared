@@ -14,6 +14,7 @@
 export * from './AddGroupButton';
 export * from './AddPanelButton';
 export * from './Dashboard';
+export * from './DashboardLinks';
 export * from './DashboardToolbar';
 export * from './DashboardStickyToolbar';
 export * from './Datasources';
