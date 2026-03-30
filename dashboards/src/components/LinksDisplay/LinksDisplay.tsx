@@ -11,35 +11,75 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, Link as LinkComponent, Menu, MenuItem, Theme } from '@mui/material';
+import { IconButton, Link as LinkComponent, Menu, MenuItem, Theme, Chip, capitalize, Stack } from '@mui/material';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import { Link } from '@perses-dev/spec';
 import { MouseEvent, ReactElement, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 
-export function PanelLinks({ links }: { links: Link[] }): ReactElement {
+type LinksVariant = 'dashboard' | 'panel';
+
+interface LinksProps {
+  links: Link[];
+  variant: LinksVariant;
+}
+
+export function LinksDisplay({ links, variant }: LinksProps): ReactElement | null {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isMenuOpened = Boolean(anchorEl);
   const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>): void => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = (): void => {
     setAnchorEl(null);
   };
 
-  // If there is only one link, show it directly
-  if (links.length === 1 && links[0]) {
-    const link = links[0];
-    return <LinkButton link={link} />;
+  if (links.length === 0) {
+    return null;
   }
 
-  // Else we show a menu with a list of all links
+  // Panel variant: single link shows as icon button
+  if (variant === 'panel' && links.length === 1 && links[0]) {
+    return <LinkButton link={links[0]} />;
+  }
+
+  // Dashboard variant: 1-3 links show as chips
+  // Max character limit for the name and url to prevent overflow
+  // in the dashboard title area, but if either the name or url is too long,
+  // we will fall back to showing the links in a dropdown menu
+  if (variant === 'dashboard' && links.length <= 3) {
+    const canRenderAsChips = links.every((link) => {
+      if (link.name) {
+        return link.name.length < 30;
+      }
+
+      if (link.url) {
+        return link.url.length < 70;
+      }
+
+      return false;
+    });
+
+    if (canRenderAsChips) {
+      return (
+        <Stack direction="row" spacing={1}>
+          {links.map((link: Link) => (
+            <LinkChip key={link.url} link={link} />
+          ))}
+        </Stack>
+      );
+    }
+  }
+
+  // Default: show dropdown menu for multiple links
   return (
     <>
       <InfoTooltip description={`${links.length} links`} enterDelay={100}>
         <IconButton
-          aria-label="Panel links"
+          aria-label={`${capitalize(variant)}-links`}
+          id={`${variant}-links-button`}
           size="small"
           onClick={handleOpenMenu}
           sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
@@ -47,7 +87,7 @@ export function PanelLinks({ links }: { links: Link[] }): ReactElement {
           <LaunchIcon
             aria-describedby="links-icon"
             fontSize="inherit"
-            sx={{ color: (theme) => theme.palette.text.secondary }}
+            sx={{ color: (theme: Theme) => theme.palette.text.secondary }}
           />
         </IconButton>
       </InfoTooltip>
@@ -57,7 +97,7 @@ export function PanelLinks({ links }: { links: Link[] }): ReactElement {
         open={isMenuOpened}
         onClose={handleClose}
         MenuListProps={{
-          'aria-labelledby': 'panel-links',
+          'aria-labelledby': `${variant}-links-button`,
         }}
       >
         {links.map((link: Link) => (
@@ -65,6 +105,25 @@ export function PanelLinks({ links }: { links: Link[] }): ReactElement {
         ))}
       </Menu>
     </>
+  );
+}
+
+function LinkChip({ link }: { link: Link }): ReactElement {
+  const { url, name, tooltip, targetBlank } = useLink(link);
+
+  return (
+    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+      <Chip
+        label={name ?? url}
+        component="a"
+        href={url}
+        target={targetBlank ? '_blank' : '_self'}
+        clickable
+        size="medium"
+        icon={<LaunchIcon color="inherit" fontSize="small" />}
+        sx={(theme) => ({ height: theme.spacing(3) })}
+      />
+    </InfoTooltip>
   );
 }
 
