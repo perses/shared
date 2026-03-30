@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { createContext, ReactElement, useCallback, useContext, useMemo } from 'react';
-import { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/core';
+import { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/spec';
 import { useTimeSeriesQueries } from '../time-series-queries';
 import { useTraceQueries, TraceQueryDefinition } from '../trace-queries';
 import { useProfileQueries, ProfileQueryDefinition } from '../profile-queries';

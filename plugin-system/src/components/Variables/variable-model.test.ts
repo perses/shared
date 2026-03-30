@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useAllVariableValues, usePlugin, VariableOption, VariableStateMap } from '@perses-dev/plugin-system';
-import { ListVariableDefinition } from '@perses-dev/core';
+import { ListVariableDefinition } from '@perses-dev/spec';
 import { renderHookWithContext } from '../../test/render-hook';
 import { filterVariableList, useListVariablePluginValues } from './variable-model';
 

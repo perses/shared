@@ -13,7 +13,7 @@
 
 import { ReactElement, useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
-import { isRelativeTimeRange } from '@perses-dev/core';
+import { isRelativeTimeRange } from '@perses-dev/spec';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import {
   OnSaveDashboard,

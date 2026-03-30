@@ -19,14 +19,12 @@ import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { createContext, ReactElement, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import {
-  DashboardResource,
-  Display,
   ProjectMetadata,
-  DurationString,
+  DashboardResource,
   DEFAULT_REFRESH_INTERVAL,
-  DatasourceSpec,
   EphemeralDashboardResource,
 } from '@perses-dev/core';
+import { Display, DurationString, DatasourceSpec } from '@perses-dev/spec';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';

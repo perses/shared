@@ -17,7 +17,7 @@ import ChevronDown from 'mdi-material-ui/ChevronDown';
 import EyeOffIcon from 'mdi-material-ui/EyeOffOutline';
 import EyeIcon from 'mdi-material-ui/EyeOutline';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { Transform, TRANSFORM_TEXT } from '@perses-dev/core';
+import { Transform, TRANSFORM_TEXT } from '@perses-dev/core'; // TODO
 import { ReactElement } from 'react';
 import { TransformEditor, TransformEditorProps } from './TransformEditor';
 

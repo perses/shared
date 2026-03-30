@@ -15,7 +15,7 @@ import { Box, Button } from '@mui/material';
 import Reload from 'mdi-material-ui/Reload';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ReactElement, useCallback } from 'react';
-import { UnknownSpec } from '@perses-dev/core';
+import { UnknownSpec } from '@perses-dev/spec';
 import { PluginKindSelect } from '../PluginKindSelect';
 import { PluginSpecEditor } from '../PluginSpecEditor';
 import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';

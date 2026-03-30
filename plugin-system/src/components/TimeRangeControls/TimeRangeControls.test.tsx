@@ -13,7 +13,7 @@
 
 import userEvent from '@testing-library/user-event';
 import { screen, RenderOptions, render, RenderResult } from '@testing-library/react';
-import { DurationString } from '@perses-dev/core';
+import { DurationString } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { ReactElement } from 'react';
 import { SnackbarProvider } from '@perses-dev/components';

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { screen, cleanup } from '@testing-library/react';
-import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
+import { QueryDefinition, QueryPluginType } from '@perses-dev/spec';
 import { renderWithContext } from '../../test';
 import { QueryEditorContainer } from './QueryEditorContainer';
 

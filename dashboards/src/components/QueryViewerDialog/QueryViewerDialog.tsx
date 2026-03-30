@@ -15,7 +15,7 @@ import React, { ReactElement, useMemo } from 'react';
 import { Dialog } from '@perses-dev/components';
 import { Button, Divider } from '@mui/material';
 import { PluginSpecEditor } from '@perses-dev/plugin-system';
-import { QueryDefinition } from '@perses-dev/core';
+import { QueryDefinition } from '@perses-dev/spec';
 
 export interface QueryViewerDialogProps {
   open: boolean;

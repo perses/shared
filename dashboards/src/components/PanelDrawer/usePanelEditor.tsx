@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useCallback, useMemo, useState } from 'react';
-import { Definition, Link, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/core';
+import { Definition, Link, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 
 interface UsePanelEditorResult {
   setName: (value: string) => void;

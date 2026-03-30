@@ -14,7 +14,7 @@
 import { Box, MenuItem, Popover, Select, IconButton, TextField } from '@mui/material';
 import Calendar from 'mdi-material-ui/Calendar';
 import EarthIcon from 'mdi-material-ui/Earth';
-import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/core';
+import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/spec';
 import { ReactElement, useMemo, useRef, useState } from 'react';
 import { useTimeZone } from '../context';
 import { TimeZoneOption, getTimeZoneOptions } from '../model/timeZoneOption';

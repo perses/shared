@@ -14,14 +14,12 @@
 import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
 import {
   DashboardResource,
-  DashboardSpec,
-  DatasourceSelector,
-  DatasourceSpec,
   EphemeralDashboardResource,
   DatasourceDefinition,
-  DatasourceApi,
   BuildDatasourceProxyUrlParams,
-} from '@perses-dev/core';
+  DatasourceApi,
+} from '@perses-dev/core'; // TODO
+import { DashboardSpec, DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
 import {
   DatasourceStoreContext,
   DatasourceStore,

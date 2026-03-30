@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { produce } from 'immer';
-import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
+import { QueryDefinition, QueryPluginType } from '@perses-dev/spec';
 import { Stack, IconButton, Typography, BoxProps, Box, CircularProgress } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import ChevronDown from 'mdi-material-ui/ChevronDown';

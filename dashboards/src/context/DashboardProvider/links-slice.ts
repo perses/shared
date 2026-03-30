@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Link } from '@perses-dev/core';
+import { Link } from '@perses-dev/spec';
 import { StateCreator } from 'zustand';
 import { Middleware } from './common';
 

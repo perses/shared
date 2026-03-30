@@ -15,7 +15,8 @@ import { ReactElement, useState } from 'react';
 import { Button } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
-import { DashboardResource, DatasourceSpec, EphemeralDashboardResource } from '@perses-dev/core';
+import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core'; // TODO weird that ephemeral dashboard is required here
+import { DatasourceSpec } from '@perses-dev/spec';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useDashboard } from '../../context';

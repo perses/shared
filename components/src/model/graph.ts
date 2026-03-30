@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeriesValueTuple } from '@perses-dev/core';
+import { TimeSeriesValueTuple } from '@perses-dev/spec';
 import { LineSeriesOption, BarSeriesOption } from 'echarts/charts';
 import { LegendItem } from '../Legend';
 

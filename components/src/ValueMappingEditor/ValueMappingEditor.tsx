@@ -24,7 +24,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PlusIcon from 'mdi-material-ui/Plus';
-import { ValueMapping } from '@perses-dev/core';
+import { ValueMapping } from '@perses-dev/core'; // TODO
 import { FC } from 'react';
 import { OptionsColorPicker } from '../ColorPicker/OptionsColorPicker';
 

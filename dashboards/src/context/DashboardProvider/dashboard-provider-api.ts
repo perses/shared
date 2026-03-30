@@ -14,15 +14,12 @@
 import { useCallback, useMemo } from 'react';
 import {
   DashboardResource,
-  DurationString,
   EphemeralDashboardResource,
-  Link,
-  PanelDefinition,
-  PanelGroupId,
+  PanelGroupItemLayout,
   PanelGroupDefinition,
   PanelGroupItemId,
-  PanelGroupItemLayout,
-} from '@perses-dev/core';
+} from '@perses-dev/core'; // TODO
+import { DurationString, Link, PanelDefinition, PanelGroupId } from '@perses-dev/spec';
 import { DashboardStoreState, useDashboardStore } from './DashboardProvider';
 import { DeletePanelGroupDialogState } from './delete-panel-group-slice';
 import { PanelGroupEditor } from './panel-group-editor-slice';

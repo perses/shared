@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Switch, SwitchProps, ToggleButtonGroup, ToggleButton } from '@mui/material';
-import { DEFAULT_LEGEND, getLegendMode, getLegendPosition, getLegendSize } from '@perses-dev/core';
+import { DEFAULT_LEGEND, getLegendMode, getLegendPosition, getLegendSize } from '@perses-dev/core'; // TODO should go to components
 import { ErrorAlert, OptionsEditorControl, OptionsEditorGroup, SettingsAutocomplete } from '@perses-dev/components';
 import { ReactElement, useMemo } from 'react';
 import {

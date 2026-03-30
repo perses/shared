@@ -20,7 +20,7 @@ import {
   TextVariableDefinition,
   VariableName,
   VariableValue,
-} from '@perses-dev/core';
+} from '@perses-dev/spec';
 import {
   SORT_METHODS,
   SortMethodName,

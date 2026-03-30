@@ -14,7 +14,7 @@
 import { ReactElement, ReactNode, useState } from 'react';
 import { Box } from '@mui/material';
 import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
-import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core';
+import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core'; // TODO only spec should be used
 import { useDatasourceStore } from '@perses-dev/plugin-system';
 import {
   PanelDrawer,

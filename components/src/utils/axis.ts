@@ -13,7 +13,7 @@
 
 import merge from 'lodash/merge';
 import type { XAXisComponentOption, YAXisComponentOption } from 'echarts';
-import { formatValue, FormatOptions } from '@perses-dev/core';
+import { formatValue, FormatOptions } from '@perses-dev/core'; // TODO
 
 export interface YAxisConfig {
   format?: FormatOptions;

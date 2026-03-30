@@ -21,7 +21,7 @@ import {
   isValidLegendPosition,
   LegendSize,
   isValidLegendSize,
-} from '@perses-dev/core';
+} from '@perses-dev/core'; // TODO, maybe this should come from the future utils package
 
 // This file contains legend-related model code specific to panel plugin specs.
 // See the `core` package for common/shared legend model code and the

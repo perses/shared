@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
-import { BuiltinVariableDefinition, DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
+import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core'; // TODO
+import { BuiltinVariableDefinition } from '@perses-dev/spec';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
   TimeRangeProviderWithQueryParams,

@@ -32,7 +32,7 @@ import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import ChevronUp from 'mdi-material-ui/ChevronUp';
-import { Link } from '@perses-dev/core';
+import { Link } from '@perses-dev/spec';
 import { useImmer } from 'use-immer';
 import { InfoTooltip, LinkEditorForm } from '@perses-dev/components';
 import { useDiscardChangesConfirmationDialog } from '../../context';
