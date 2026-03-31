@@ -11,12 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './components';
-export * from './constants';
-export * from './model';
-export * from './runtime';
-export * from './test-utils';
-export * from './utils';
-export * from './context';
-export * from './remote';
-export * from './schema';
+import z from 'zod';
+import { legendModes, legendPositions, legendSizes } from '@perses-dev/core';
+import { legendValues } from '../model/legend';
+
+const allValueOptions = [...legendValues, 'abs', 'relative'] as const;
+
+export const LegendSchema = z.object({
+  position: z.enum([...legendPositions]),
+  mode: z.enum([...legendModes]).optional(),
+  size: z.enum([...legendSizes]).optional(),
+  values: z.array(z.enum(allValueOptions as unknown as [string, ...string[]])).optional(),
+});
