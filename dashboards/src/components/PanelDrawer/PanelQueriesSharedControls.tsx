@@ -106,6 +106,7 @@ export function PanelQueriesSharedControls({
           <PanelSpecEditor
             control={control}
             panelDefinition={panelDefinition}
+            queryOptions={pluginQueryOptions}
             onJSONChange={onJSONChange}
             onQueriesChange={handleOnQueriesChange}
             onQueryRun={handleRunQuery}
