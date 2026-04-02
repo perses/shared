@@ -11,16 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource } from '@perses-dev/core'; // TODO
 import { useContext } from 'react';
 import { StoreApi } from 'zustand';
-import { DashboardContext, DashboardStoreState } from '../context';
+import { DashboardContext, DashboardMinimalResource, DashboardStoreState } from '../context';
 import testDashboard from './testDashboard';
 
 /**
  * Helper to get a test dashboard resource.
  */
-export function getTestDashboard(): DashboardResource {
+export function getTestDashboard(): DashboardMinimalResource {
   // TODO: Should we be cloning this to create a new object each time?
   return testDashboard;
 }

@@ -15,7 +15,6 @@ import { ReactElement, useState } from 'react';
 import { Button } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
-import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core'; // TODO weird that ephemeral dashboard is required here
 import { DatasourceSpec } from '@perses-dev/spec';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
@@ -60,23 +59,13 @@ export function EditDatasourcesButton(): ReactElement {
         {} as Record<string, DatasourceSpec>
       );
 
-    setDashboard(
-      dashboard.kind === 'Dashboard'
-        ? ({
-            ...dashboard,
-            spec: {
-              ...dashboard.spec,
-              datasources: datasources,
-            },
-          } as DashboardResource)
-        : ({
-            ...dashboard,
-            spec: {
-              ...dashboard.spec,
-              datasources: datasources,
-            },
-          } as EphemeralDashboardResource)
-    );
+    setDashboard({
+      ...dashboard,
+      spec: {
+        ...dashboard.spec,
+        datasources: datasources,
+      },
+    });
     setSavedDatasources(newSavedDatasources);
     setLocalDatasources(datasources);
     setIsDatasourceEditorOpen(false);

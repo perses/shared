@@ -11,8 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core'; // TODO metadata should not be used, same for ephemeral dashboard
 import { stringify } from 'yaml';
+import { DashboardMinimalResource } from '../../context';
+
+//TODO: Although the previous comment suggests the metadata not should not be used, I keep them
+// Check git history to find prev comment
 
 type SerializedDashboard = {
   contentType: string;
@@ -20,13 +23,13 @@ type SerializedDashboard = {
 };
 
 function serializeYaml(
-  dashboard: DashboardResource | EphemeralDashboardResource,
+  dashboard: DashboardMinimalResource,
   shape?: 'cr-v1alpha1' | 'cr-v1alpha2'
 ): SerializedDashboard {
   let content: string;
 
   if (shape === 'cr-v1alpha1') {
-    const name = dashboard.metadata.name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    const name = (dashboard.metadata.name as string)?.toLowerCase().replace(/[^a-z0-9-]/g, '-');
     content = stringify(
       {
         apiVersion: 'perses.dev/v1alpha1',
@@ -45,7 +48,7 @@ function serializeYaml(
       { schema: 'yaml-1.1' }
     );
   } else if (shape === 'cr-v1alpha2') {
-    const name = dashboard.metadata.name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    const name = (dashboard.metadata.name as string).toLowerCase().replace(/[^a-z0-9-]/g, '-');
     content = stringify(
       {
         apiVersion: 'perses.dev/v1alpha2',
@@ -73,7 +76,7 @@ function serializeYaml(
 }
 
 export function serializeDashboard(
-  dashboard: DashboardResource | EphemeralDashboardResource,
+  dashboard: DashboardMinimalResource,
   format: 'json' | 'yaml',
   shape?: 'cr-v1alpha1' | 'cr-v1alpha2'
 ): SerializedDashboard {
