@@ -32,7 +32,7 @@
     "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.0.3",
     "@codemirror/lang-json": "^6.0.1",
     "@date-fns/tz": "^1.4.1",
-    "@fontsource/lato": "^4.5.10",
+    "@fontsource/inter": "^5.0.0",
     "@mui/x-date-pickers": "^7.23.1",
     "@perses-dev/core": "0.53.0",
     "@perses-dev/spec": "0.2.0-beta.0",
