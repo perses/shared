@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, EphemeralDashboardResource, PanelGroupDefinition } from '@perses-dev/core'; // TODO
-import { createPanelRef, GridDefinition, PanelGroupId } from '@perses-dev/spec';
-import { useDashboardStore } from './DashboardProvider';
+import { DurationString, PanelGroupDefinition } from '@perses-dev/core';
+import { createPanelRef, DashboardSpec, GridDefinition, PanelGroupId } from '@perses-dev/spec';
+import { DashboardMinimalResource, useDashboardStore } from './DashboardProvider';
 import { useVariableDefinitionActions, useVariableDefinitions } from './VariableProvider';
 
+type DashboardType = Omit<DashboardMinimalResource, 'spec'> & { spec: DashboardSpec & { ttl?: DurationString } };
 export function useDashboard(): {
-  dashboard: DashboardResource | EphemeralDashboardResource;
-  setDashboard: (dashboardResource: DashboardResource | EphemeralDashboardResource) => void;
+  dashboard: DashboardType;
+  setDashboard: (dashboardResource: DashboardMinimalResource) => void;
 } {
   const {
     panels,
@@ -33,8 +34,10 @@ export function useDashboard(): {
     datasources,
     links,
     ttl,
+    dashboardName,
   } = useDashboardStore(
     ({
+      dashboardName,
       panels,
       panelGroups,
       panelGroupOrder,
@@ -60,15 +63,17 @@ export function useDashboard(): {
       datasources,
       links,
       ttl,
+      dashboardName,
     })
   );
   const { setVariableDefinitions } = useVariableDefinitionActions();
   const variables = useVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 
-  const dashboard =
+  const dashboard: DashboardType =
     kind === 'Dashboard'
-      ? ({
+      ? {
+          name: dashboardName,
           kind,
           metadata,
           spec: {
@@ -81,8 +86,9 @@ export function useDashboard(): {
             datasources,
             links,
           },
-        } as DashboardResource)
-      : ({
+        }
+      : {
+          name: dashboardName,
           kind,
           metadata,
           spec: {
@@ -96,9 +102,9 @@ export function useDashboard(): {
             links,
             ttl,
           },
-        } as EphemeralDashboardResource);
+        };
 
-  const setDashboard = (dashboardResource: DashboardResource | EphemeralDashboardResource): void => {
+  const setDashboard = (dashboardResource: DashboardMinimalResource): void => {
     setVariableDefinitions(dashboardResource.spec.variables);
     setDashboardResource(dashboardResource);
   };

@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource } from '@perses-dev/core'; // TODO
+import { DashboardMinimalResource } from '../context';
 
-const testDashboard: DashboardResource = {
+const testDashboard: DashboardMinimalResource = {
+  name: 'Node Stats',
   kind: 'Dashboard',
   metadata: {
     name: 'Node Stats',

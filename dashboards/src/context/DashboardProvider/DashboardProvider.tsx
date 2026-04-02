@@ -18,13 +18,8 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { createContext, ReactElement, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import {
-  ProjectMetadata,
-  DashboardResource,
-  DEFAULT_REFRESH_INTERVAL,
-  EphemeralDashboardResource,
-} from '@perses-dev/core';
-import { Display, DurationString, DatasourceSpec } from '@perses-dev/spec';
+import { DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core';
+import { Display, DurationString, DatasourceSpec, DashboardSpec } from '@perses-dev/spec';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
@@ -39,6 +34,16 @@ import { createEditJsonDialogSlice, EditJsonDialogSlice } from './edit-json-dial
 import { createPanelDefinition } from './common';
 import { createViewPanelSlice, ViewPanelSlice, VirtualPanelRef } from './view-panel-slice';
 import { createLinksSlice, LinksSlice } from './links-slice';
+
+export type DashboardKind = 'Dashboard' | 'EphemeralDashboard';
+export type DashboardGenericMetaData = Record<string, string | number | string[] | undefined>;
+
+export interface DashboardMinimalResource {
+  kind: DashboardKind;
+  name: string;
+  spec: DashboardSpec;
+  metadata: DashboardGenericMetaData;
+}
 
 export interface DashboardStoreState
   extends PanelGroupSlice,
@@ -55,9 +60,10 @@ export interface DashboardStoreState
     LinksSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
-  setDashboard: (dashboard: DashboardResource | EphemeralDashboardResource) => void;
-  kind: DashboardResource['kind'] | EphemeralDashboardResource['kind'];
-  metadata: ProjectMetadata;
+  setDashboard: (dashboard: DashboardMinimalResource) => void;
+  dashboardName: string;
+  kind: DashboardKind;
+  metadata: DashboardGenericMetaData;
   duration: DurationString;
   refreshInterval: DurationString;
   display?: Display;
@@ -76,7 +82,7 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
 }
 
 export interface DashboardStoreProps {
-  dashboardResource: DashboardResource | EphemeralDashboardResource;
+  dashboardResource: DashboardMinimalResource;
   isEditMode?: boolean;
   viewPanelRef?: VirtualPanelRef;
   setViewPanelRef?: (viewPanelRef: VirtualPanelRef | undefined) => void;
@@ -124,11 +130,12 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
     kind,
     metadata,
     spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL, datasources, layouts = [], panels = {} },
+    name,
   } = dashboardResource;
 
   const links = dashboardResource.spec.links ?? [];
 
-  const ttl = 'ttl' in dashboardResource.spec ? dashboardResource.spec.ttl : undefined;
+  const ttl = 'ttl' in dashboardResource.spec ? (dashboardResource.spec.ttl as DurationString) : undefined;
 
   const store = createStore<DashboardStoreState>()(
     immer(
@@ -151,6 +158,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           ...createDiscardChangesDialogSlice(...args),
           ...createEditJsonDialogSlice(...args),
           ...createSaveChangesDialogSlice(...args),
+          dashboardName: name,
           kind,
           metadata,
           display,
@@ -163,12 +171,14 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
             set({ isEditMode });
           },
           setDashboard: ({
+            name,
             kind,
             metadata,
             spec: { display, panels = {}, layouts = [], duration, refreshInterval, datasources = {}, links = [] },
           }): void => {
             set((state) => {
               state.kind = kind;
+              state.dashboardName = name;
               state.metadata = metadata;
               state.display = display;
               state.panels = panels;
