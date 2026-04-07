@@ -50,6 +50,17 @@ export interface DatasourceStore {
   setSavedDatasources(datasources: Record<string, DatasourceSpec>): void;
 }
 
+export interface UnsavedDatasourceStore {
+  /**
+   * Tests the configuration of a datasource by calling the corresponding datasource plugin's health endpoint through the proxy.
+   */
+  testProxyConnection(spec: DatasourceSpec, healthCheckPath: string): Promise<boolean>;
+  /**
+   * Tests the configuration of a datasource by calling the corresponding datasource plugin's health endpoint directly.
+   */
+  testDirectConnection(directUrl: string, healthCheckPath: string): Promise<boolean>;
+}
+
 export interface DatasourceSelectItemGroup {
   group?: string;
   editLink?: string;
@@ -76,11 +87,20 @@ export interface DatasourceSelectItemSelector extends DatasourceSelector {
 }
 
 export const DatasourceStoreContext = createContext<DatasourceStore | undefined>(undefined);
+export const UnsavedDatasourceStoreContext = createContext<UnsavedDatasourceStore | undefined>(undefined);
 
 export function useDatasourceStore(): DatasourceStore {
   const ctx = useContext(DatasourceStoreContext);
   if (ctx === undefined) {
     throw new Error('No DatasourceStoreContext found. Did you forget a Provider?');
+  }
+  return ctx;
+}
+
+export function useUnsavedDatasourceStore(): UnsavedDatasourceStore {
+  const ctx = useContext(UnsavedDatasourceStoreContext);
+  if (ctx === undefined) {
+    throw new Error('No UnsavedDatasourceStoreContext found. Did you forget a Provider?');
   }
   return ctx;
 }
