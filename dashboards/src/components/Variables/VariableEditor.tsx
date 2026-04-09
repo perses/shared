@@ -183,7 +183,7 @@ export function VariableEditor(props: {
     <>
       {currentEditingVariableDefinition && (
         <ValidationProvider>
-          <VariableProviderWithQueryParams initialVariableDefinitions={variableDefinitions}>
+          <VariableProvider initialVariableDefinitions={variableDefinitions}>
             <VariableEditorForm
               initialVariableDefinition={currentEditingVariableDefinition}
               action={variableFormAction}
