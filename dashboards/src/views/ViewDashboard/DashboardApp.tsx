@@ -38,6 +38,7 @@ export interface DashboardAppProps {
   isReadonly: boolean;
   isVariableEnabled: boolean;
   isDatasourceEnabled: boolean;
+  disableShortcuts?: boolean;
   isCreating?: boolean;
   isInitialVariableSticky?: boolean;
   // If true, browser confirmation dialog will be shown when navigating away with unsaved changes (closing tab, ...).
@@ -54,6 +55,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
     isReadonly,
     isVariableEnabled,
     isDatasourceEnabled,
+    disableShortcuts,
     isCreating,
     isInitialVariableSticky,
     isLeavingConfirmDialogEnabled,
@@ -129,7 +131,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
         onEditButtonClick={onEditButtonClick}
         onCancelButtonClick={onCancelButtonClick}
       />
-      <DashboardShortcuts />
+      {!disableShortcuts && <DashboardShortcuts />}
       <Box sx={{ paddingTop: 2, paddingX: 2, height: '100%' }}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <Dashboard
