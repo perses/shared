@@ -13,6 +13,7 @@
 
 import { ChartsProvider, SnackbarProvider, testChartsTheme } from '@perses-dev/components';
 import { mockPluginRegistry, PluginRegistry } from '@perses-dev/plugin-system';
+import { HotkeysProvider } from '@tanstack/react-hotkeys';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { createMemoryHistory, MemoryHistory } from 'history';
@@ -21,6 +22,7 @@ import { Router } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
 import { DatasourceStoreProvider } from '../context';
+import { ScopeProvider } from '../keyboard-shortcuts';
 import { defaultDatasourceProps } from '../test';
 import { MOCK_PLUGINS } from './plugin-registry';
 
@@ -73,7 +75,16 @@ export function renderWithContext(
                 pluginLoader={mockRegistry.pluginLoader}
                 defaultPluginKinds={mockRegistry.defaultPluginKinds}
               >
-                <DatasourceStoreProvider {...defaultDatasourceProps}>{ui}</DatasourceStoreProvider>
+                <HotkeysProvider
+                  defaultOptions={{
+                    hotkey: { preventDefault: true, stopPropagation: true },
+                    hotkeySequence: { timeout: 1000 },
+                  }}
+                >
+                  <ScopeProvider>
+                    <DatasourceStoreProvider {...defaultDatasourceProps}>{ui}</DatasourceStoreProvider>
+                  </ScopeProvider>
+                </HotkeysProvider>
               </PluginRegistry>
             </ChartsProvider>
           </SnackbarProvider>

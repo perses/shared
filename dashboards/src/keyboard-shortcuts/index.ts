@@ -11,7 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './components';
-export * from './context';
-export * from './keyboard-shortcuts';
-export * from './views';
+export * from './types';
+export * from './events';
+export {
+  ScopeProvider,
+  useShortcutScope,
+  useActiveScopes,
+  useFocusedPanel,
+  usePanelFocusHandlers,
+} from './ScopeProvider';
+export { useShortcutPreferences } from './useShortcutPreferences';
+export * from './default-shortcuts';
+export {
+  HotkeysProvider,
+  useHotkey,
+  useHotkeySequence,
+  useHotkeyRegistrations,
+  useHotkeyRecorder,
+} from '@tanstack/react-hotkeys';
+export { formatForDisplay } from '@tanstack/hotkeys';
+export type { HotkeyMeta, HotkeySequence } from '@tanstack/hotkeys';

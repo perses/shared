@@ -19,6 +19,7 @@ import { useDatasourceStore } from '@perses-dev/plugin-system';
 import {
   PanelDrawer,
   Dashboard,
+  DashboardShortcuts,
   PanelGroupDialog,
   DeletePanelGroupDialog,
   DashboardDiscardChangesConfirmationDialog,
@@ -128,6 +129,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
         onEditButtonClick={onEditButtonClick}
         onCancelButtonClick={onCancelButtonClick}
       />
+      <DashboardShortcuts />
       <Box sx={{ paddingTop: 2, paddingX: 2, height: '100%' }}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <Dashboard
