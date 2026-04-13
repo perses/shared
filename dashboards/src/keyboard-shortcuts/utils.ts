@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { HotkeyMeta } from '@tanstack/hotkeys';
+import { HotkeyMeta, HotkeySequence, RegisterableHotkey } from '@tanstack/hotkeys';
 import { PersesShortcutDef } from './types';
 
 /**
@@ -26,6 +26,54 @@ export function buildMeta(def: PersesShortcutDef): HotkeyMeta {
     scope: def.scope,
     displayOverride: def.displayOverride,
   };
+}
+
+/**
+ * Build shared registration options for a shortcut.
+ */
+export function buildShortcutOptions(
+  def: PersesShortcutDef,
+  enabled: boolean
+): {
+  enabled: boolean;
+  meta: HotkeyMeta;
+  ignoreInputs?: boolean;
+} {
+  return {
+    enabled,
+    meta: buildMeta(def),
+    ...(def.ignoreInputs !== undefined ? { ignoreInputs: def.ignoreInputs } : {}),
+  };
+}
+
+/**
+ * Return the shortcut hotkey, throwing if the definition does not declare one.
+ */
+export function requireShortcutHotkey(def: PersesShortcutDef): RegisterableHotkey {
+  if (def.hotkey === undefined) {
+    throw new Error(`Shortcut ${def.id} is missing a hotkey definition`);
+  }
+  return def.hotkey;
+}
+
+/**
+ * Return the shortcut sequence, throwing if the definition does not declare one.
+ */
+export function requireShortcutSequence(def: PersesShortcutDef): HotkeySequence {
+  if (def.sequence === undefined) {
+    throw new Error(`Shortcut ${def.id} is missing a sequence definition`);
+  }
+  return def.sequence;
+}
+
+/**
+ * Return the shortcut event name, throwing if the definition does not declare one.
+ */
+export function requireShortcutEvent(def: PersesShortcutDef): string {
+  if (def.event === undefined) {
+    throw new Error(`Shortcut ${def.id} is missing an event definition`);
+  }
+  return def.event;
 }
 
 /**

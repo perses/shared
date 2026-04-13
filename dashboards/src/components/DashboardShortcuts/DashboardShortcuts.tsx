@@ -11,16 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback, useEffect } from 'react';
+import { ReactElement, useCallback, useEffect, useRef } from 'react';
 import { AbsoluteTimeRange, isRelativeTimeRange, PanelGroupItemId, toAbsoluteTimeRange } from '@perses-dev/core';
+import { useSnackbar } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useHotkeys, useHotkeySequences } from '@tanstack/react-hotkeys';
 import {
   useShortcutScope,
   useActiveScopes,
   useFocusedPanel,
-  buildMeta,
+  buildShortcutOptions,
   dispatchShortcutEvent,
+  requireShortcutEvent,
+  requireShortcutHotkey,
+  requireShortcutSequence,
   SAVE_DASHBOARD_SHORTCUT,
   REFRESH_DASHBOARD_SHORTCUT,
   TOGGLE_EDIT_MODE_SHORTCUT,
@@ -33,37 +37,60 @@ import {
   PANEL_FULLSCREEN_SHORTCUT,
   PANEL_DUPLICATE_SHORTCUT,
   PANEL_DELETE_SHORTCUT,
-  SAVE_DASHBOARD_EVENT,
-  REFRESH_DASHBOARD_EVENT,
-  TOGGLE_EDIT_MODE_EVENT,
-  TIME_ZOOM_OUT_EVENT,
-  TIME_SHIFT_BACK_EVENT,
-  TIME_SHIFT_FORWARD_EVENT,
-  TIME_MAKE_ABSOLUTE_EVENT,
-  TIME_COPY_EVENT,
-  PANEL_EDIT_EVENT,
-  PANEL_FULLSCREEN_EVENT,
-  PANEL_DUPLICATE_EVENT,
-  PANEL_DELETE_EVENT,
 } from '../../keyboard-shortcuts';
 import {
+  OnSaveDashboard,
   useEditMode,
   useDashboardStore,
   DashboardStoreState,
   useViewPanelGroup,
+  useSaveDashboard,
 } from '../../context/DashboardProvider';
 
+const SAVE_SHORTCUT_EDIT_MODE_MESSAGE = 'Enter edit mode to save this dashboard.';
+const SAVE_SHORTCUT_READONLY_MESSAGE = 'This dashboard is read-only. Keyboard save is disabled.';
+const SAVE_SHORTCUT_UNAVAILABLE_MESSAGE = 'Save action is unavailable for this dashboard.';
+
 /**
- * Hook to subscribe to a window event. Automatically cleans up on unmount.
+ * Hook to subscribe to multiple window events. Uses a ref to store the latest handlers,
+ * so event listeners are only added/removed on mount/unmount rather than on every handler change.
  */
-function useWindowEvent(eventName: string, handler: (event: Event) => void): void {
+function useWindowEvents(subscriptions: ReadonlyArray<{ eventName: string; handler: (event: Event) => void }>): void {
+  const handlersRef = useRef(subscriptions);
+  handlersRef.current = subscriptions;
+
   useEffect(() => {
-    window.addEventListener(eventName, handler);
+    const listeners = subscriptions.map(({ eventName }, i) => {
+      const listener = (event: Event): void => {
+        handlersRef.current[i]?.handler(event);
+      };
+      window.addEventListener(eventName, listener);
+      return { eventName, listener };
+    });
+
     return (): void => {
-      window.removeEventListener(eventName, handler);
+      listeners.forEach(({ eventName, listener }) => {
+        window.removeEventListener(eventName, listener);
+      });
     };
-  }, [eventName, handler]);
+    // Event names are module-level constants and never change, so this effect
+    // runs once on mount and cleans up on unmount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 }
+
+const SAVE_DASHBOARD_EVENT = requireShortcutEvent(SAVE_DASHBOARD_SHORTCUT);
+const REFRESH_DASHBOARD_EVENT = requireShortcutEvent(REFRESH_DASHBOARD_SHORTCUT);
+const TOGGLE_EDIT_MODE_EVENT = requireShortcutEvent(TOGGLE_EDIT_MODE_SHORTCUT);
+const TIME_ZOOM_OUT_EVENT = requireShortcutEvent(TIME_ZOOM_OUT_SHORTCUT);
+const TIME_SHIFT_BACK_EVENT = requireShortcutEvent(TIME_SHIFT_BACK_SHORTCUT);
+const TIME_SHIFT_FORWARD_EVENT = requireShortcutEvent(TIME_SHIFT_FORWARD_SHORTCUT);
+const TIME_MAKE_ABSOLUTE_EVENT = requireShortcutEvent(TIME_MAKE_ABSOLUTE_SHORTCUT);
+const TIME_COPY_EVENT = requireShortcutEvent(TIME_COPY_SHORTCUT);
+const PANEL_EDIT_EVENT = requireShortcutEvent(PANEL_EDIT_SHORTCUT);
+const PANEL_FULLSCREEN_EVENT = requireShortcutEvent(PANEL_FULLSCREEN_SHORTCUT);
+const PANEL_DUPLICATE_EVENT = requireShortcutEvent(PANEL_DUPLICATE_SHORTCUT);
+const PANEL_DELETE_EVENT = requireShortcutEvent(PANEL_DELETE_SHORTCUT);
 
 /**
  * Parses a panelKey string back into a PanelGroupItemId.
@@ -97,15 +124,16 @@ const selectPanelStoreActions = (
 });
 
 export interface DashboardShortcutsProps {
-  onSave?: () => void;
+  onSave?: OnSaveDashboard;
   onRefresh?: () => void;
+  isReadonly: boolean;
 }
 
 /**
  * Non-visual component that registers dashboard, time-range, and panel keyboard shortcuts.
  * Must be rendered within a dashboard view that provides DashboardProvider context.
  */
-export function DashboardShortcuts({ onSave, onRefresh }: DashboardShortcutsProps): ReactElement | null {
+export function DashboardShortcuts({ onSave, onRefresh, isReadonly }: DashboardShortcutsProps): ReactElement | null {
   // Activate the dashboard scope
   useShortcutScope('dashboard');
 
@@ -113,90 +141,65 @@ export function DashboardShortcuts({ onSave, onRefresh }: DashboardShortcutsProp
   const focusedPanelKey = useFocusedPanel();
   const { isEditMode, setEditMode } = useEditMode();
   const { timeRange, setTimeRange, refresh } = useTimeRange();
+  const { infoSnackbar, warningSnackbar } = useSnackbar();
   const viewPanel = useViewPanelGroup();
   const { openEditPanel, duplicatePanel, openDeletePanelDialog, setViewPanel, panelEditor } =
     useDashboardStore(selectPanelStoreActions);
+  const { saveDashboard } = useSaveDashboard(onSave);
 
   const dashboardEnabled = activeScopes.has('dashboard');
   const panelEnabled = activeScopes.has('panel');
 
-  // --- Register single-key shortcuts (dashboard + panel) ---
+  useHotkeys(
+    [
+      { def: SAVE_DASHBOARD_SHORTCUT, enabled: dashboardEnabled },
+      { def: PANEL_EDIT_SHORTCUT, enabled: panelEnabled || panelEditor !== undefined },
+      { def: PANEL_FULLSCREEN_SHORTCUT, enabled: panelEnabled || viewPanel !== undefined },
+    ].map(({ def, enabled }) => ({
+      hotkey: requireShortcutHotkey(def),
+      callback: (): void => dispatchShortcutEvent(requireShortcutEvent(def)),
+      options: buildShortcutOptions(def, enabled),
+    }))
+  );
 
-  useHotkeys([
-    {
-      hotkey: SAVE_DASHBOARD_SHORTCUT.hotkey!,
-      callback: (): void => dispatchShortcutEvent(SAVE_DASHBOARD_EVENT),
-      options: { enabled: dashboardEnabled, meta: buildMeta(SAVE_DASHBOARD_SHORTCUT) },
-    },
-    {
-      hotkey: PANEL_EDIT_SHORTCUT.hotkey!,
-      callback: (): void => dispatchShortcutEvent(PANEL_EDIT_EVENT),
-      options: { enabled: panelEnabled || panelEditor !== undefined, meta: buildMeta(PANEL_EDIT_SHORTCUT) },
-    },
-    {
-      hotkey: PANEL_FULLSCREEN_SHORTCUT.hotkey!,
-      callback: (): void => dispatchShortcutEvent(PANEL_FULLSCREEN_EVENT),
-      options: { enabled: panelEnabled || viewPanel !== undefined, meta: buildMeta(PANEL_FULLSCREEN_SHORTCUT) },
-    },
-  ]);
-
-  // --- Register sequence shortcuts (dashboard + time-range + panel) ---
-
-  useHotkeySequences([
-    {
-      sequence: REFRESH_DASHBOARD_SHORTCUT.sequence!,
-      callback: (): void => dispatchShortcutEvent(REFRESH_DASHBOARD_EVENT),
-      options: { enabled: dashboardEnabled, meta: buildMeta(REFRESH_DASHBOARD_SHORTCUT) },
-    },
-    {
-      sequence: TOGGLE_EDIT_MODE_SHORTCUT.sequence!,
-      callback: (): void => dispatchShortcutEvent(TOGGLE_EDIT_MODE_EVENT),
-      options: { enabled: dashboardEnabled, meta: buildMeta(TOGGLE_EDIT_MODE_SHORTCUT) },
-    },
-    {
-      sequence: TIME_ZOOM_OUT_SHORTCUT.sequence!,
-      callback: (): void => dispatchShortcutEvent(TIME_ZOOM_OUT_EVENT),
-      options: { enabled: dashboardEnabled, meta: buildMeta(TIME_ZOOM_OUT_SHORTCUT) },
-    },
-    {
-      sequence: TIME_SHIFT_BACK_SHORTCUT.sequence!,
-      callback: (): void => dispatchShortcutEvent(TIME_SHIFT_BACK_EVENT),
-      options: { enabled: dashboardEnabled, meta: buildMeta(TIME_SHIFT_BACK_SHORTCUT) },
-    },
-    {
-      sequence: TIME_SHIFT_FORWARD_SHORTCUT.sequence!,
-      callback: (): void => dispatchShortcutEvent(TIME_SHIFT_FORWARD_EVENT),
-      options: { enabled: dashboardEnabled, meta: buildMeta(TIME_SHIFT_FORWARD_SHORTCUT) },
-    },
-    {
-      sequence: TIME_MAKE_ABSOLUTE_SHORTCUT.sequence!,
-      callback: (): void => dispatchShortcutEvent(TIME_MAKE_ABSOLUTE_EVENT),
-      options: { enabled: dashboardEnabled, meta: buildMeta(TIME_MAKE_ABSOLUTE_SHORTCUT) },
-    },
-    {
-      sequence: TIME_COPY_SHORTCUT.sequence!,
-      callback: (): void => dispatchShortcutEvent(TIME_COPY_EVENT),
-      options: { enabled: dashboardEnabled, meta: buildMeta(TIME_COPY_SHORTCUT) },
-    },
-    {
-      sequence: PANEL_DUPLICATE_SHORTCUT.sequence!,
-      callback: (): void => dispatchShortcutEvent(PANEL_DUPLICATE_EVENT),
-      options: { enabled: panelEnabled, meta: buildMeta(PANEL_DUPLICATE_SHORTCUT) },
-    },
-    {
-      sequence: PANEL_DELETE_SHORTCUT.sequence!,
-      callback: (): void => dispatchShortcutEvent(PANEL_DELETE_EVENT),
-      options: { enabled: panelEnabled, meta: buildMeta(PANEL_DELETE_SHORTCUT) },
-    },
-  ]);
+  useHotkeySequences(
+    [
+      { def: REFRESH_DASHBOARD_SHORTCUT, enabled: dashboardEnabled },
+      { def: TOGGLE_EDIT_MODE_SHORTCUT, enabled: dashboardEnabled },
+      { def: TIME_ZOOM_OUT_SHORTCUT, enabled: dashboardEnabled },
+      { def: TIME_SHIFT_BACK_SHORTCUT, enabled: dashboardEnabled },
+      { def: TIME_SHIFT_FORWARD_SHORTCUT, enabled: dashboardEnabled },
+      { def: TIME_MAKE_ABSOLUTE_SHORTCUT, enabled: dashboardEnabled },
+      { def: TIME_COPY_SHORTCUT, enabled: dashboardEnabled },
+      { def: PANEL_DUPLICATE_SHORTCUT, enabled: panelEnabled },
+      { def: PANEL_DELETE_SHORTCUT, enabled: panelEnabled },
+    ].map(({ def, enabled }) => ({
+      sequence: requireShortcutSequence(def),
+      callback: (): void => dispatchShortcutEvent(requireShortcutEvent(def)),
+      options: buildShortcutOptions(def, enabled),
+    }))
+  );
 
   // --- Event handlers for dashboard operations ---
 
   const handleSave = useCallback(() => {
-    if (isEditMode && onSave) {
-      onSave();
+    if (isReadonly) {
+      warningSnackbar(SAVE_SHORTCUT_READONLY_MESSAGE);
+      return;
     }
-  }, [isEditMode, onSave]);
+
+    if (!isEditMode) {
+      infoSnackbar(SAVE_SHORTCUT_EDIT_MODE_MESSAGE);
+      return;
+    }
+
+    if (!onSave) {
+      warningSnackbar(SAVE_SHORTCUT_UNAVAILABLE_MESSAGE);
+      return;
+    }
+
+    saveDashboard();
+  }, [infoSnackbar, isEditMode, isReadonly, onSave, saveDashboard, warningSnackbar]);
 
   const handleRefresh = useCallback(() => {
     refresh();
@@ -303,19 +306,20 @@ export function DashboardShortcuts({ onSave, onRefresh }: DashboardShortcutsProp
     }
   }, [focusedPanelKey, isEditMode, openDeletePanelDialog]);
 
-  // Subscribe to custom events
-  useWindowEvent(SAVE_DASHBOARD_EVENT, handleSave);
-  useWindowEvent(REFRESH_DASHBOARD_EVENT, handleRefresh);
-  useWindowEvent(TOGGLE_EDIT_MODE_EVENT, handleToggleEditMode);
-  useWindowEvent(TIME_ZOOM_OUT_EVENT, handleTimeZoomOut);
-  useWindowEvent(TIME_SHIFT_BACK_EVENT, handleTimeShiftBack);
-  useWindowEvent(TIME_SHIFT_FORWARD_EVENT, handleTimeShiftForward);
-  useWindowEvent(TIME_MAKE_ABSOLUTE_EVENT, handleTimeMakeAbsolute);
-  useWindowEvent(TIME_COPY_EVENT, handleTimeCopy);
-  useWindowEvent(PANEL_EDIT_EVENT, handlePanelEdit);
-  useWindowEvent(PANEL_FULLSCREEN_EVENT, handlePanelFullscreen);
-  useWindowEvent(PANEL_DUPLICATE_EVENT, handlePanelDuplicate);
-  useWindowEvent(PANEL_DELETE_EVENT, handlePanelDelete);
+  useWindowEvents([
+    { eventName: SAVE_DASHBOARD_EVENT, handler: handleSave },
+    { eventName: REFRESH_DASHBOARD_EVENT, handler: handleRefresh },
+    { eventName: TOGGLE_EDIT_MODE_EVENT, handler: handleToggleEditMode },
+    { eventName: TIME_ZOOM_OUT_EVENT, handler: handleTimeZoomOut },
+    { eventName: TIME_SHIFT_BACK_EVENT, handler: handleTimeShiftBack },
+    { eventName: TIME_SHIFT_FORWARD_EVENT, handler: handleTimeShiftForward },
+    { eventName: TIME_MAKE_ABSOLUTE_EVENT, handler: handleTimeMakeAbsolute },
+    { eventName: TIME_COPY_EVENT, handler: handleTimeCopy },
+    { eventName: PANEL_EDIT_EVENT, handler: handlePanelEdit },
+    { eventName: PANEL_FULLSCREEN_EVENT, handler: handlePanelFullscreen },
+    { eventName: PANEL_DUPLICATE_EVENT, handler: handlePanelDuplicate },
+    { eventName: PANEL_DELETE_EVENT, handler: handlePanelDelete },
+  ]);
 
   return null;
 }

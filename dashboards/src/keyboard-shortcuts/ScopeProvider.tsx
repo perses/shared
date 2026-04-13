@@ -44,24 +44,48 @@ function useScopeContext(): ScopeContextValue {
 }
 
 export function ScopeProvider({ children }: { children: ReactNode }): ReactElement {
-  // Use a Set stored in a ref (mutated in place) + a version counter to trigger re-renders.
-  const scopesRef = useRef<Set<ShortcutScope>>(new Set(['global']));
-  const [, setVersion] = useState(0);
+  // Keep scope activation reference counts so multiple hook instances can safely share a scope.
+  const scopeRefCountRef = useRef<Record<ShortcutScope, number>>({
+    global: 1,
+    dashboard: 0,
+    panel: 0,
+  });
+  const [activeScopes, setActiveScopes] = useState<Set<ShortcutScope>>(new Set(['global']));
   const [focusedPanelKey, setFocusedPanelKeyState] = useState<string | null>(null);
 
   const activateScope = useCallback((scope: ShortcutScope) => {
-    if (!scopesRef.current.has(scope)) {
-      scopesRef.current = new Set(scopesRef.current);
-      scopesRef.current.add(scope);
-      setVersion((v) => v + 1);
+    const currentCount = scopeRefCountRef.current[scope] ?? 0;
+    const nextCount = currentCount + 1;
+    scopeRefCountRef.current[scope] = nextCount;
+
+    if (currentCount === 0) {
+      setActiveScopes((prev) => {
+        const next = new Set(prev);
+        next.add(scope);
+        return next;
+      });
     }
   }, []);
 
   const deactivateScope = useCallback((scope: ShortcutScope) => {
-    if (scopesRef.current.has(scope)) {
-      scopesRef.current = new Set(scopesRef.current);
-      scopesRef.current.delete(scope);
-      setVersion((v) => v + 1);
+    const currentCount = scopeRefCountRef.current[scope] ?? 0;
+    const baseline = scope === 'global' ? 1 : 0;
+    if (currentCount <= baseline) {
+      return;
+    }
+
+    const nextCount = currentCount - 1;
+    scopeRefCountRef.current[scope] = nextCount;
+
+    if (nextCount === 0) {
+      setActiveScopes((prev) => {
+        if (!prev.has(scope)) {
+          return prev;
+        }
+        const next = new Set(prev);
+        next.delete(scope);
+        return next;
+      });
     }
   }, []);
 
@@ -75,15 +99,14 @@ export function ScopeProvider({ children }: { children: ReactNode }): ReactEleme
 
   const value = useMemo(
     (): ScopeContextValue => ({
-      activeScopes: scopesRef.current,
+      activeScopes,
       activateScope,
       deactivateScope,
       focusedPanelKey,
       setFocusedPanel,
       clearFocusedPanel,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activateScope, deactivateScope, focusedPanelKey, setFocusedPanel, clearFocusedPanel, scopesRef.current]
+    [activeScopes, activateScope, deactivateScope, focusedPanelKey, setFocusedPanel, clearFocusedPanel]
   );
 
   return <ScopeContext.Provider value={value}>{children}</ScopeContext.Provider>;

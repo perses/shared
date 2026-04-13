@@ -131,7 +131,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
         onEditButtonClick={onEditButtonClick}
         onCancelButtonClick={onCancelButtonClick}
       />
-      {!disableShortcuts && <DashboardShortcuts />}
+      {!disableShortcuts && <DashboardShortcuts onSave={onSave} isReadonly={isReadonly} />}
       <Box sx={{ paddingTop: 2, paddingX: 2, height: '100%' }}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <Dashboard

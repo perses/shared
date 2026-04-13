@@ -20,7 +20,14 @@ export {
   useFocusedPanel,
   usePanelFocusHandlers,
 } from './ScopeProvider';
-export { buildMeta, dispatchShortcutEvent } from './utils';
+export {
+  buildMeta,
+  buildShortcutOptions,
+  dispatchShortcutEvent,
+  requireShortcutEvent,
+  requireShortcutHotkey,
+  requireShortcutSequence,
+} from './utils';
 export * from './default-shortcuts';
 export {
   HotkeysProvider,

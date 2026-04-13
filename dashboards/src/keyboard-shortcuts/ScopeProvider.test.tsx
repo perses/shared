@@ -114,6 +114,23 @@ describe('ScopeProvider', () => {
       expect(screen.getByTestId('scopes').textContent).toBe('global');
     });
 
+    it('should keep global scope active after a global activator unmounts', () => {
+      render(
+        <ScopeProvider>
+          <ScopeDisplay />
+          <ToggleableScope scope="global" />
+        </ScopeProvider>
+      );
+
+      expect(screen.getByTestId('scopes').textContent).toBe('global');
+
+      act(() => {
+        screen.getByTestId('toggle-global').click();
+      });
+
+      expect(screen.getByTestId('scopes').textContent).toBe('global');
+    });
+
     it('should handle multiple scopes simultaneously', () => {
       function MultiScope(): ReactElement {
         const [showDashboard, setShowDashboard] = useState(true);
@@ -145,6 +162,43 @@ describe('ScopeProvider', () => {
 
       act(() => {
         screen.getByTestId('remove-panel').click();
+      });
+
+      expect(screen.getByTestId('scopes').textContent).toBe('global');
+    });
+
+    it('should keep a scope active until all activators unmount', () => {
+      function DuplicateScope(): ReactElement {
+        const [showFirst, setShowFirst] = useState(true);
+        const [showSecond, setShowSecond] = useState(true);
+
+        return (
+          <ScopeProvider>
+            <ScopeDisplay />
+            {showFirst && <ScopeActivator scope="dashboard" />}
+            {showSecond && <ScopeActivator scope="dashboard" />}
+            <button data-testid="remove-first" onClick={() => setShowFirst(false)}>
+              remove first
+            </button>
+            <button data-testid="remove-second" onClick={() => setShowSecond(false)}>
+              remove second
+            </button>
+          </ScopeProvider>
+        );
+      }
+
+      render(<DuplicateScope />);
+
+      expect(screen.getByTestId('scopes').textContent).toBe('dashboard,global');
+
+      act(() => {
+        screen.getByTestId('remove-first').click();
+      });
+
+      expect(screen.getByTestId('scopes').textContent).toBe('dashboard,global');
+
+      act(() => {
+        screen.getByTestId('remove-second').click();
       });
 
       expect(screen.getByTestId('scopes').textContent).toBe('global');

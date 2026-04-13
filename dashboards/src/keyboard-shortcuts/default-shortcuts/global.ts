@@ -18,7 +18,7 @@ export const GO_HOME_SHORTCUT: PersesShortcutDef = {
   id: 'go-home',
   sequence: ['G', 'H'],
   name: 'Go to Home',
-  description: 'Navigate to the Home page',
+  description: 'Go to the Home page',
   category: 'global',
   scope: 'global',
 };
@@ -27,7 +27,7 @@ export const GO_EXPLORE_SHORTCUT: PersesShortcutDef = {
   id: 'go-explore',
   sequence: ['G', 'E'],
   name: 'Go to Explore',
-  description: 'Navigate to the Explore page',
+  description: 'Go to the Explore page',
   category: 'global',
   scope: 'global',
 };
@@ -36,7 +36,7 @@ export const GO_PROFILE_SHORTCUT: PersesShortcutDef = {
   id: 'go-profile',
   sequence: ['G', 'P'],
   name: 'Go to Profile',
-  description: 'Navigate to the Profile page',
+  description: 'Go to the Profile page',
   category: 'global',
   scope: 'global',
 };
@@ -55,7 +55,7 @@ export const SHOW_SHORTCUTS_SHORTCUT: PersesShortcutDef = {
   id: 'show-shortcuts',
   hotkey: { key: '?', shift: true },
   name: 'Show Keyboard Shortcuts',
-  description: 'Show the keyboard shortcuts help modal',
+  description: 'Show all the keyboard shortcuts',
   category: 'global',
   scope: 'global',
   event: SHOW_SHORTCUTS_EVENT,
@@ -64,9 +64,9 @@ export const SHOW_SHORTCUTS_SHORTCUT: PersesShortcutDef = {
 
 export const TOGGLE_THEME_SHORTCUT: PersesShortcutDef = {
   id: 'toggle-theme',
-  sequence: ['G', 'T'],
-  name: 'Toggle Theme',
-  description: 'Toggle between dark and light theme',
+  sequence: ['C', 'T'],
+  name: 'Change Theme',
+  description: 'Change between dark and light theme',
   category: 'global',
   scope: 'global',
   event: TOGGLE_THEME_EVENT,
