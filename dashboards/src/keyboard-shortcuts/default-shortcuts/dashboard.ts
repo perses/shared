@@ -21,6 +21,7 @@ export const SAVE_DASHBOARD_SHORTCUT: PersesShortcutDef = {
   description: 'Save the current dashboard',
   category: 'dashboard',
   scope: 'dashboard',
+  event: SAVE_DASHBOARD_EVENT,
 };
 
 export const REFRESH_DASHBOARD_SHORTCUT: PersesShortcutDef = {
@@ -30,6 +31,7 @@ export const REFRESH_DASHBOARD_SHORTCUT: PersesShortcutDef = {
   description: 'Refresh all panels',
   category: 'dashboard',
   scope: 'dashboard',
+  event: REFRESH_DASHBOARD_EVENT,
 };
 
 export const TOGGLE_EDIT_MODE_SHORTCUT: PersesShortcutDef = {
@@ -39,6 +41,7 @@ export const TOGGLE_EDIT_MODE_SHORTCUT: PersesShortcutDef = {
   description: 'Toggle between edit and view mode',
   category: 'dashboard',
   scope: 'dashboard',
+  event: TOGGLE_EDIT_MODE_EVENT,
 };
 
 export const DASHBOARD_SHORTCUTS: PersesShortcutDef[] = [
@@ -46,9 +49,3 @@ export const DASHBOARD_SHORTCUTS: PersesShortcutDef[] = [
   REFRESH_DASHBOARD_SHORTCUT,
   TOGGLE_EDIT_MODE_SHORTCUT,
 ];
-
-export const DASHBOARD_SHORTCUT_EVENTS = {
-  [SAVE_DASHBOARD_SHORTCUT.id]: SAVE_DASHBOARD_EVENT,
-  [REFRESH_DASHBOARD_SHORTCUT.id]: REFRESH_DASHBOARD_EVENT,
-  [TOGGLE_EDIT_MODE_SHORTCUT.id]: TOGGLE_EDIT_MODE_EVENT,
-} as const;

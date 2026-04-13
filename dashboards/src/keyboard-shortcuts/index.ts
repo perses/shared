@@ -20,14 +20,15 @@ export {
   useFocusedPanel,
   usePanelFocusHandlers,
 } from './ScopeProvider';
-export { useShortcutPreferences } from './useShortcutPreferences';
+export { buildMeta, dispatchShortcutEvent } from './utils';
 export * from './default-shortcuts';
 export {
   HotkeysProvider,
   useHotkey,
+  useHotkeys,
   useHotkeySequence,
+  useHotkeySequences,
   useHotkeyRegistrations,
-  useHotkeyRecorder,
 } from '@tanstack/react-hotkeys';
 export { formatForDisplay } from '@tanstack/hotkeys';
 export type { HotkeyMeta, HotkeySequence } from '@tanstack/hotkeys';

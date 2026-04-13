@@ -24,6 +24,8 @@ declare module '@tanstack/hotkeys' {
     category: ShortcutCategory;
     /** Scope in which this shortcut is active */
     scope: ShortcutScope;
+    /** Override for display formatting (e.g. '?' for the show-shortcuts shortcut) */
+    displayOverride?: string;
   }
 }
 
@@ -76,14 +78,8 @@ export interface PersesShortcutDef {
   scope: ShortcutScope;
   /** Override TanStack's smart ignoreInputs default if needed */
   ignoreInputs?: boolean;
-}
-
-/**
- * User override preferences stored in localStorage.
- */
-export interface ShortcutOverrides {
-  /** Version number for future migration support */
-  version: number;
-  /** Map of shortcut ID to overridden key string (or JSON-encoded sequence array), or null to disable */
-  overrides: Record<string, string | null>;
+  /** Custom DOM event name dispatched when this shortcut fires (e.g. 'perses:save-dashboard') */
+  event?: string;
+  /** Override for display formatting (e.g. '?' for the show-shortcuts shortcut) */
+  displayOverride?: string;
 }

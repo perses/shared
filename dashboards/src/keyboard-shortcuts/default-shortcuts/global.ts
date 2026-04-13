@@ -48,6 +48,7 @@ export const OPEN_SEARCH_SHORTCUT: PersesShortcutDef = {
   description: 'Open the search dialog',
   category: 'global',
   scope: 'global',
+  event: OPEN_SEARCH_EVENT,
 };
 
 export const SHOW_SHORTCUTS_SHORTCUT: PersesShortcutDef = {
@@ -57,6 +58,8 @@ export const SHOW_SHORTCUTS_SHORTCUT: PersesShortcutDef = {
   description: 'Show the keyboard shortcuts help modal',
   category: 'global',
   scope: 'global',
+  event: SHOW_SHORTCUTS_EVENT,
+  displayOverride: '?',
 };
 
 export const TOGGLE_THEME_SHORTCUT: PersesShortcutDef = {
@@ -66,6 +69,7 @@ export const TOGGLE_THEME_SHORTCUT: PersesShortcutDef = {
   description: 'Toggle between dark and light theme',
   category: 'global',
   scope: 'global',
+  event: TOGGLE_THEME_EVENT,
 };
 
 export const GLOBAL_SHORTCUTS: PersesShortcutDef[] = [
@@ -76,9 +80,3 @@ export const GLOBAL_SHORTCUTS: PersesShortcutDef[] = [
   SHOW_SHORTCUTS_SHORTCUT,
   TOGGLE_THEME_SHORTCUT,
 ];
-
-export const GLOBAL_SHORTCUT_EVENTS = {
-  [OPEN_SEARCH_SHORTCUT.id]: OPEN_SEARCH_EVENT,
-  [SHOW_SHORTCUTS_SHORTCUT.id]: SHOW_SHORTCUTS_EVENT,
-  [TOGGLE_THEME_SHORTCUT.id]: TOGGLE_THEME_EVENT,
-} as const;

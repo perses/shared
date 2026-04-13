@@ -21,6 +21,7 @@ export const PANEL_EDIT_SHORTCUT: PersesShortcutDef = {
   description: 'Edit the focused panel when in edit mode',
   category: 'focused-panel',
   scope: 'panel',
+  event: PANEL_EDIT_EVENT,
 };
 
 export const PANEL_FULLSCREEN_SHORTCUT: PersesShortcutDef = {
@@ -30,6 +31,7 @@ export const PANEL_FULLSCREEN_SHORTCUT: PersesShortcutDef = {
   description: 'Toggle fullscreen on the focused panel',
   category: 'focused-panel',
   scope: 'panel',
+  event: PANEL_FULLSCREEN_EVENT,
 };
 
 export const PANEL_DUPLICATE_SHORTCUT: PersesShortcutDef = {
@@ -39,6 +41,7 @@ export const PANEL_DUPLICATE_SHORTCUT: PersesShortcutDef = {
   description: 'Duplicate the focused panel',
   category: 'focused-panel',
   scope: 'panel',
+  event: PANEL_DUPLICATE_EVENT,
 };
 
 export const PANEL_DELETE_SHORTCUT: PersesShortcutDef = {
@@ -48,6 +51,7 @@ export const PANEL_DELETE_SHORTCUT: PersesShortcutDef = {
   description: 'Delete the focused panel',
   category: 'focused-panel',
   scope: 'panel',
+  event: PANEL_DELETE_EVENT,
 };
 
 export const PANEL_SHORTCUTS: PersesShortcutDef[] = [
@@ -56,10 +60,3 @@ export const PANEL_SHORTCUTS: PersesShortcutDef[] = [
   PANEL_DUPLICATE_SHORTCUT,
   PANEL_DELETE_SHORTCUT,
 ];
-
-export const PANEL_SHORTCUT_EVENTS = {
-  [PANEL_EDIT_SHORTCUT.id]: PANEL_EDIT_EVENT,
-  [PANEL_FULLSCREEN_SHORTCUT.id]: PANEL_FULLSCREEN_EVENT,
-  [PANEL_DUPLICATE_SHORTCUT.id]: PANEL_DUPLICATE_EVENT,
-  [PANEL_DELETE_SHORTCUT.id]: PANEL_DELETE_EVENT,
-} as const;

@@ -14,14 +14,13 @@
 import { ReactElement, useCallback, useEffect } from 'react';
 import { AbsoluteTimeRange, isRelativeTimeRange, PanelGroupItemId, toAbsoluteTimeRange } from '@perses-dev/core';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { useHotkey, useHotkeySequence } from '@tanstack/react-hotkeys';
-import { HotkeyMeta, HotkeySequence } from '@tanstack/hotkeys';
+import { useHotkeys, useHotkeySequences } from '@tanstack/react-hotkeys';
 import {
   useShortcutScope,
   useActiveScopes,
   useFocusedPanel,
-  useShortcutPreferences,
-  PersesShortcutDef,
+  buildMeta,
+  dispatchShortcutEvent,
   SAVE_DASHBOARD_SHORTCUT,
   REFRESH_DASHBOARD_SHORTCUT,
   TOGGLE_EDIT_MODE_SHORTCUT,
@@ -47,21 +46,12 @@ import {
   PANEL_DUPLICATE_EVENT,
   PANEL_DELETE_EVENT,
 } from '../../keyboard-shortcuts';
-import { useEditMode, useDashboardStore, DashboardStoreState, useViewPanelGroup } from '../../context/DashboardProvider';
-
-function buildMeta(def: PersesShortcutDef): HotkeyMeta {
-  return {
-    id: def.id,
-    name: def.name,
-    description: def.description,
-    category: def.category,
-    scope: def.scope,
-  };
-}
-
-function dispatchShortcutEvent(eventName: string): void {
-  window.dispatchEvent(new CustomEvent(eventName));
-}
+import {
+  useEditMode,
+  useDashboardStore,
+  DashboardStoreState,
+  useViewPanelGroup,
+} from '../../context/DashboardProvider';
 
 /**
  * Hook to subscribe to a window event. Automatically cleans up on unmount.
@@ -121,107 +111,84 @@ export function DashboardShortcuts({ onSave, onRefresh }: DashboardShortcutsProp
 
   const activeScopes = useActiveScopes();
   const focusedPanelKey = useFocusedPanel();
-  const { overrides } = useShortcutPreferences();
   const { isEditMode, setEditMode } = useEditMode();
   const { timeRange, setTimeRange, refresh } = useTimeRange();
   const viewPanel = useViewPanelGroup();
-  const { openEditPanel, duplicatePanel, openDeletePanelDialog, setViewPanel, panelEditor } = useDashboardStore(
-    selectPanelStoreActions
-  );
+  const { openEditPanel, duplicatePanel, openDeletePanelDialog, setViewPanel, panelEditor } =
+    useDashboardStore(selectPanelStoreActions);
 
   const dashboardEnabled = activeScopes.has('dashboard');
   const panelEnabled = activeScopes.has('panel');
 
-  function isDisabled(id: string): boolean {
-    return overrides.overrides[id] === null;
-  }
+  // --- Register single-key shortcuts (dashboard + panel) ---
 
-  // --- Dashboard shortcuts ---
-
-  useHotkey(SAVE_DASHBOARD_SHORTCUT.hotkey!, () => dispatchShortcutEvent(SAVE_DASHBOARD_EVENT), {
-    enabled: dashboardEnabled && !isDisabled(SAVE_DASHBOARD_SHORTCUT.id),
-    meta: buildMeta(SAVE_DASHBOARD_SHORTCUT),
-  });
-
-  useHotkeySequence(
-    (REFRESH_DASHBOARD_SHORTCUT.sequence ?? []) as HotkeySequence,
-    () => dispatchShortcutEvent(REFRESH_DASHBOARD_EVENT),
+  useHotkeys([
     {
-      enabled: dashboardEnabled && !isDisabled(REFRESH_DASHBOARD_SHORTCUT.id),
-      meta: buildMeta(REFRESH_DASHBOARD_SHORTCUT),
-    }
-  );
-
-  useHotkeySequence(
-    (TOGGLE_EDIT_MODE_SHORTCUT.sequence ?? []) as HotkeySequence,
-    () => dispatchShortcutEvent(TOGGLE_EDIT_MODE_EVENT),
+      hotkey: SAVE_DASHBOARD_SHORTCUT.hotkey!,
+      callback: (): void => dispatchShortcutEvent(SAVE_DASHBOARD_EVENT),
+      options: { enabled: dashboardEnabled, meta: buildMeta(SAVE_DASHBOARD_SHORTCUT) },
+    },
     {
-      enabled: dashboardEnabled && !isDisabled(TOGGLE_EDIT_MODE_SHORTCUT.id),
-      meta: buildMeta(TOGGLE_EDIT_MODE_SHORTCUT),
-    }
-  );
-
-  // --- Time range shortcuts ---
-
-  useHotkeySequence(
-    (TIME_ZOOM_OUT_SHORTCUT.sequence ?? []) as HotkeySequence,
-    () => dispatchShortcutEvent(TIME_ZOOM_OUT_EVENT),
-    { enabled: dashboardEnabled && !isDisabled(TIME_ZOOM_OUT_SHORTCUT.id), meta: buildMeta(TIME_ZOOM_OUT_SHORTCUT) }
-  );
-
-  useHotkeySequence(
-    (TIME_SHIFT_BACK_SHORTCUT.sequence ?? []) as HotkeySequence,
-    () => dispatchShortcutEvent(TIME_SHIFT_BACK_EVENT),
-    { enabled: dashboardEnabled && !isDisabled(TIME_SHIFT_BACK_SHORTCUT.id), meta: buildMeta(TIME_SHIFT_BACK_SHORTCUT) }
-  );
-
-  useHotkeySequence(
-    (TIME_SHIFT_FORWARD_SHORTCUT.sequence ?? []) as HotkeySequence,
-    () => dispatchShortcutEvent(TIME_SHIFT_FORWARD_EVENT),
+      hotkey: PANEL_EDIT_SHORTCUT.hotkey!,
+      callback: (): void => dispatchShortcutEvent(PANEL_EDIT_EVENT),
+      options: { enabled: panelEnabled || panelEditor !== undefined, meta: buildMeta(PANEL_EDIT_SHORTCUT) },
+    },
     {
-      enabled: dashboardEnabled && !isDisabled(TIME_SHIFT_FORWARD_SHORTCUT.id),
-      meta: buildMeta(TIME_SHIFT_FORWARD_SHORTCUT),
-    }
-  );
+      hotkey: PANEL_FULLSCREEN_SHORTCUT.hotkey!,
+      callback: (): void => dispatchShortcutEvent(PANEL_FULLSCREEN_EVENT),
+      options: { enabled: panelEnabled || viewPanel !== undefined, meta: buildMeta(PANEL_FULLSCREEN_SHORTCUT) },
+    },
+  ]);
 
-  useHotkeySequence(
-    (TIME_MAKE_ABSOLUTE_SHORTCUT.sequence ?? []) as HotkeySequence,
-    () => dispatchShortcutEvent(TIME_MAKE_ABSOLUTE_EVENT),
+  // --- Register sequence shortcuts (dashboard + time-range + panel) ---
+
+  useHotkeySequences([
     {
-      enabled: dashboardEnabled && !isDisabled(TIME_MAKE_ABSOLUTE_SHORTCUT.id),
-      meta: buildMeta(TIME_MAKE_ABSOLUTE_SHORTCUT),
-    }
-  );
-
-  useHotkeySequence(
-    (TIME_COPY_SHORTCUT.sequence ?? []) as HotkeySequence,
-    () => dispatchShortcutEvent(TIME_COPY_EVENT),
-    { enabled: dashboardEnabled && !isDisabled(TIME_COPY_SHORTCUT.id), meta: buildMeta(TIME_COPY_SHORTCUT) }
-  );
-
-  // --- Panel shortcuts ---
-
-  useHotkey(PANEL_EDIT_SHORTCUT.hotkey!, () => dispatchShortcutEvent(PANEL_EDIT_EVENT), {
-    enabled: (panelEnabled || panelEditor !== undefined) && !isDisabled(PANEL_EDIT_SHORTCUT.id),
-    meta: buildMeta(PANEL_EDIT_SHORTCUT),
-  });
-
-  useHotkey(PANEL_FULLSCREEN_SHORTCUT.hotkey!, () => dispatchShortcutEvent(PANEL_FULLSCREEN_EVENT), {
-    enabled: (panelEnabled || viewPanel !== undefined) && !isDisabled(PANEL_FULLSCREEN_SHORTCUT.id),
-    meta: buildMeta(PANEL_FULLSCREEN_SHORTCUT),
-  });
-
-  useHotkeySequence(
-    (PANEL_DUPLICATE_SHORTCUT.sequence ?? []) as HotkeySequence,
-    () => dispatchShortcutEvent(PANEL_DUPLICATE_EVENT),
-    { enabled: panelEnabled && !isDisabled(PANEL_DUPLICATE_SHORTCUT.id), meta: buildMeta(PANEL_DUPLICATE_SHORTCUT) }
-  );
-
-  useHotkeySequence(
-    (PANEL_DELETE_SHORTCUT.sequence ?? []) as HotkeySequence,
-    () => dispatchShortcutEvent(PANEL_DELETE_EVENT),
-    { enabled: panelEnabled && !isDisabled(PANEL_DELETE_SHORTCUT.id), meta: buildMeta(PANEL_DELETE_SHORTCUT) }
-  );
+      sequence: REFRESH_DASHBOARD_SHORTCUT.sequence!,
+      callback: (): void => dispatchShortcutEvent(REFRESH_DASHBOARD_EVENT),
+      options: { enabled: dashboardEnabled, meta: buildMeta(REFRESH_DASHBOARD_SHORTCUT) },
+    },
+    {
+      sequence: TOGGLE_EDIT_MODE_SHORTCUT.sequence!,
+      callback: (): void => dispatchShortcutEvent(TOGGLE_EDIT_MODE_EVENT),
+      options: { enabled: dashboardEnabled, meta: buildMeta(TOGGLE_EDIT_MODE_SHORTCUT) },
+    },
+    {
+      sequence: TIME_ZOOM_OUT_SHORTCUT.sequence!,
+      callback: (): void => dispatchShortcutEvent(TIME_ZOOM_OUT_EVENT),
+      options: { enabled: dashboardEnabled, meta: buildMeta(TIME_ZOOM_OUT_SHORTCUT) },
+    },
+    {
+      sequence: TIME_SHIFT_BACK_SHORTCUT.sequence!,
+      callback: (): void => dispatchShortcutEvent(TIME_SHIFT_BACK_EVENT),
+      options: { enabled: dashboardEnabled, meta: buildMeta(TIME_SHIFT_BACK_SHORTCUT) },
+    },
+    {
+      sequence: TIME_SHIFT_FORWARD_SHORTCUT.sequence!,
+      callback: (): void => dispatchShortcutEvent(TIME_SHIFT_FORWARD_EVENT),
+      options: { enabled: dashboardEnabled, meta: buildMeta(TIME_SHIFT_FORWARD_SHORTCUT) },
+    },
+    {
+      sequence: TIME_MAKE_ABSOLUTE_SHORTCUT.sequence!,
+      callback: (): void => dispatchShortcutEvent(TIME_MAKE_ABSOLUTE_EVENT),
+      options: { enabled: dashboardEnabled, meta: buildMeta(TIME_MAKE_ABSOLUTE_SHORTCUT) },
+    },
+    {
+      sequence: TIME_COPY_SHORTCUT.sequence!,
+      callback: (): void => dispatchShortcutEvent(TIME_COPY_EVENT),
+      options: { enabled: dashboardEnabled, meta: buildMeta(TIME_COPY_SHORTCUT) },
+    },
+    {
+      sequence: PANEL_DUPLICATE_SHORTCUT.sequence!,
+      callback: (): void => dispatchShortcutEvent(PANEL_DUPLICATE_EVENT),
+      options: { enabled: panelEnabled, meta: buildMeta(PANEL_DUPLICATE_SHORTCUT) },
+    },
+    {
+      sequence: PANEL_DELETE_SHORTCUT.sequence!,
+      callback: (): void => dispatchShortcutEvent(PANEL_DELETE_EVENT),
+      options: { enabled: panelEnabled, meta: buildMeta(PANEL_DELETE_SHORTCUT) },
+    },
+  ]);
 
   // --- Event handlers for dashboard operations ---
 
@@ -349,20 +316,6 @@ export function DashboardShortcuts({ onSave, onRefresh }: DashboardShortcutsProp
   useWindowEvent(PANEL_FULLSCREEN_EVENT, handlePanelFullscreen);
   useWindowEvent(PANEL_DUPLICATE_EVENT, handlePanelDuplicate);
   useWindowEvent(PANEL_DELETE_EVENT, handlePanelDelete);
-
-  // Direct keydown listener for Escape to close panel editor (panel scope may be inactive)
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape' && panelEditor !== undefined) {
-        // Close the panel editor
-        // This is handled by the panel editor component itself
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return (): void => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [panelEditor]);
 
   return null;
 }
