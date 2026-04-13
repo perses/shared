@@ -11,24 +11,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import '@fontsource/lato/300.css';
-import '@fontsource/lato/400.css';
-import '@fontsource/lato/700.css';
-import '@fontsource/lato/900.css';
+import '@fontsource/inter/300.css';
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/inter/900.css';
 import { ThemeOptions } from '@mui/material';
 
 // Font weights need to correspond with the imports at the top of the file
-// (Lato supports 100, 300, 400, 700, 900)
 const fontWeightLight = 300;
 const fontWeightRegular = 400;
-const fontWeightMedium = 700;
+const fontWeightMedium = 600;
 const fontWeightBold = 900;
 
 /**
  * Theme typography options that are the same across both the dark and light themes.
  */
 export const typography: ThemeOptions['typography'] = {
-  fontFamily: '"Lato", sans-serif',
+  fontFamily:
+    'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
 
   fontWeightLight,
   fontWeightRegular,
