@@ -13,4 +13,3 @@
 
 export * from './Table';
 export * from './model/table-model';
-export type { SortingState as TableSortingState, PaginationState as TablePaginationState } from '@tanstack/react-table';
