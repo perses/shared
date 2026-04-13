@@ -13,7 +13,7 @@
 
 import { Checkbox, IconButton, InputAdornment, ListItemText, Menu, MenuItem, Stack } from '@mui/material';
 import { Column } from '@tanstack/react-table';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useCallback, useState } from 'react';
 import Magnify from 'mdi-material-ui/Magnify';
 import Close from 'mdi-material-ui/Close';
 import ViewColumn from 'mdi-material-ui/ViewColumn';
@@ -60,6 +60,12 @@ export function TableToolbar<TableData>({
 }: TableToolbarProps<TableData>): ReactElement | null {
   const [colMenuAnchor, setColMenuAnchor] = useState<null | HTMLElement>(null);
   const colMenuOpen = Boolean(colMenuAnchor);
+  const [searchResetKey, setSearchResetKey] = useState(0);
+
+  const handleSearchClear = useCallback(() => {
+    onGlobalFilterChange('');
+    setSearchResetKey((prev) => prev + 1);
+  }, [onGlobalFilterChange]);
 
   if (!showSearch && !showColumnFilter) {
     return null;
@@ -77,6 +83,7 @@ export function TableToolbar<TableData>({
     >
       {showSearch && (
         <TextField
+          key={searchResetKey}
           placeholder="Search…"
           value={globalFilter}
           onChange={onGlobalFilterChange}
@@ -91,7 +98,7 @@ export function TableToolbar<TableData>({
               ),
               endAdornment: globalFilter !== '' && (
                 <InputAdornment position="end">
-                  <IconButton onClick={() => onGlobalFilterChange('')}>
+                  <IconButton onClick={handleSearchClear}>
                     <Close fontSize="small" />
                   </IconButton>
                 </InputAdornment>

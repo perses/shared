@@ -11,21 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TextFieldProps as MuiTextFieldProps, TextField as MuiTextField } from '@mui/material';
-import { ChangeEvent, ForwardedRef, forwardRef, useCallback, useEffect, useMemo, useState } from 'react';
+import { TextField as MuiTextField, TextFieldProps as MuiTextFieldProps } from '@mui/material';
+import { ChangeEvent, ForwardedRef, forwardRef, useCallback, useMemo, useState } from 'react';
 import debounce from 'lodash/debounce';
 
 type TextFieldProps = Omit<MuiTextFieldProps, 'onChange'> & { debounceMs?: number; onChange?: (value: string) => void };
 
 export const TextField = forwardRef(function (
-  { debounceMs = 250, value: initialValue, onChange, ...props }: TextFieldProps,
+  { debounceMs = 250, value, onChange, ...props }: TextFieldProps,
   ref: ForwardedRef<HTMLDivElement>
 ) {
-  const [currentValue, setCurrentValue] = useState(initialValue);
-
-  useEffect(() => {
-    setCurrentValue(initialValue);
-  }, [initialValue]);
+  const [currentValue, setCurrentValue] = useState(value);
 
   function handleChange(event: ChangeEvent<HTMLInputElement>): void {
     setCurrentValue(event.target.value);
