@@ -30,18 +30,19 @@ import { ViewExploreApp } from './ViewExploreApp';
 
 export interface ViewExploreProps extends Omit<BoxProps, 'children'> {
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
+  projectName?: DatasourceStoreProviderProps['projectName'];
   externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   exploreTitleComponent?: React.ReactNode;
 }
 
 export function ViewExplore(props: ViewExploreProps): ReactElement {
-  const { datasourceApi, externalVariableDefinitions, sx, exploreTitleComponent, ...others } = props;
+  const { datasourceApi, projectName, externalVariableDefinitions, sx, exploreTitleComponent, ...others } = props;
 
   const initialTimeRange = useInitialTimeRange(DEFAULT_DASHBOARD_DURATION);
   const initialRefreshInterval = useInitialRefreshInterval(DEFAULT_REFRESH_INTERVAL);
 
   return (
-    <DatasourceStoreProvider datasourceApi={datasourceApi}>
+    <DatasourceStoreProvider datasourceApi={datasourceApi} projectName={projectName}>
       <TimeRangeProviderWithQueryParams
         initialTimeRange={initialTimeRange}
         initialRefreshInterval={initialRefreshInterval}
