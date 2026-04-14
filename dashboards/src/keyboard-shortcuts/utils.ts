@@ -15,21 +15,7 @@ import { HotkeyMeta, HotkeySequence, RegisterableHotkey } from '@tanstack/hotkey
 import { PersesShortcutDef } from './types';
 
 /**
- * Build TanStack HotkeyMeta from a Perses shortcut definition.
- */
-export function buildMeta(def: PersesShortcutDef): HotkeyMeta {
-  return {
-    id: def.id,
-    name: def.name,
-    description: def.description,
-    category: def.category,
-    scope: def.scope,
-    displayOverride: def.displayOverride,
-  };
-}
-
-/**
- * Build shared registration options for a shortcut.
+ * Build shared registration options for a shortcut, including TanStack HotkeyMeta.
  */
 export function buildShortcutOptions(
   def: PersesShortcutDef,
@@ -41,7 +27,14 @@ export function buildShortcutOptions(
 } {
   return {
     enabled,
-    meta: buildMeta(def),
+    meta: {
+      id: def.id,
+      name: def.name,
+      description: def.description,
+      category: def.category,
+      scope: def.scope,
+      displayOverride: def.displayOverride,
+    },
     ...(def.ignoreInputs !== undefined ? { ignoreInputs: def.ignoreInputs } : {}),
   };
 }

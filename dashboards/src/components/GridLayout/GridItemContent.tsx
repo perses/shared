@@ -106,11 +106,13 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   return (
     <Box
       ref={ref}
+      tabIndex={-1}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       sx={{
         width: '100%',
         height: '100%',
+        outline: 'none',
       }}
     >
       <DataQueriesProvider

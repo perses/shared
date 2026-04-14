@@ -11,18 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback, useEffect, useRef } from 'react';
+import { ReactElement, useCallback } from 'react';
 import { AbsoluteTimeRange, isRelativeTimeRange, PanelGroupItemId, toAbsoluteTimeRange } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useHotkeys, useHotkeySequences } from '@tanstack/react-hotkeys';
 import {
-  useShortcutScope,
-  useActiveScopes,
   useFocusedPanel,
   buildShortcutOptions,
-  dispatchShortcutEvent,
-  requireShortcutEvent,
   requireShortcutHotkey,
   requireShortcutSequence,
   SAVE_DASHBOARD_SHORTCUT,
@@ -52,49 +48,6 @@ import {
 const SAVE_SHORTCUT_EDIT_MODE_MESSAGE = 'Enter edit mode to save this dashboard.';
 const SAVE_SHORTCUT_READONLY_MESSAGE = 'This dashboard is read-only. Keyboard save is disabled.';
 const SAVE_SHORTCUT_UNAVAILABLE_MESSAGE = 'Save action is unavailable for this dashboard.';
-
-/**
- * Hook to subscribe to multiple window events. Uses a ref to store the latest handlers,
- * so event listeners are only added/removed on mount/unmount rather than on every handler change.
- */
-function useWindowEvents(subscriptions: ReadonlyArray<{ eventName: string; handler: (event: Event) => void }>): void {
-  const handlersRef = useRef(subscriptions);
-  handlersRef.current = subscriptions;
-
-  useEffect(() => {
-    const listeners = subscriptions.map(({ eventName }, i) => {
-      const listener = (event: Event): void => {
-        handlersRef.current[i]?.handler(event);
-      };
-      window.addEventListener(eventName, listener);
-      return { eventName, listener };
-    });
-
-    return (): void => {
-      listeners.forEach(({ eventName, listener }) => {
-        window.removeEventListener(eventName, listener);
-      });
-    };
-    // Event names are module-level constants and never change, so this effect
-    // runs once on mount and cleans up on unmount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-}
-
-const SAVE_DASHBOARD_EVENT = requireShortcutEvent(SAVE_DASHBOARD_SHORTCUT);
-const REFRESH_DASHBOARD_EVENT = requireShortcutEvent(REFRESH_DASHBOARD_SHORTCUT);
-const TOGGLE_EDIT_MODE_EVENT = requireShortcutEvent(TOGGLE_EDIT_MODE_SHORTCUT);
-const TIME_ZOOM_OUT_EVENT = requireShortcutEvent(TIME_ZOOM_OUT_SHORTCUT);
-const TIME_ZOOM_IN_EVENT = requireShortcutEvent(TIME_ZOOM_IN_SHORTCUT);
-const TIME_SHIFT_BACK_EVENT = requireShortcutEvent(TIME_SHIFT_BACK_SHORTCUT);
-const TIME_SHIFT_FORWARD_EVENT = requireShortcutEvent(TIME_SHIFT_FORWARD_SHORTCUT);
-const TIME_MAKE_ABSOLUTE_EVENT = requireShortcutEvent(TIME_MAKE_ABSOLUTE_SHORTCUT);
-const TIME_COPY_EVENT = requireShortcutEvent(TIME_COPY_SHORTCUT);
-const TIME_PASTE_EVENT = requireShortcutEvent(TIME_PASTE_SHORTCUT);
-const PANEL_EDIT_EVENT = requireShortcutEvent(PANEL_EDIT_SHORTCUT);
-const PANEL_FULLSCREEN_EVENT = requireShortcutEvent(PANEL_FULLSCREEN_SHORTCUT);
-const PANEL_DUPLICATE_EVENT = requireShortcutEvent(PANEL_DUPLICATE_SHORTCUT);
-const PANEL_DELETE_EVENT = requireShortcutEvent(PANEL_DELETE_SHORTCUT);
 
 /**
  * Parses a panelKey string back into a PanelGroupItemId.
@@ -131,17 +84,21 @@ export interface DashboardShortcutsProps {
   onSave?: OnSaveDashboard;
   onRefresh?: () => void;
   isReadonly: boolean;
+  onEditButtonClick?: () => void;
+  onCancelButtonClick?: () => void;
 }
 
 /**
  * Non-visual component that registers dashboard, time-range, and panel keyboard shortcuts.
  * Must be rendered within a dashboard view that provides DashboardProvider context.
  */
-export function DashboardShortcuts({ onSave, onRefresh, isReadonly }: DashboardShortcutsProps): ReactElement | null {
-  // Activate the dashboard scope
-  useShortcutScope('dashboard');
-
-  const activeScopes = useActiveScopes();
+export function DashboardShortcuts({
+  onSave,
+  onRefresh,
+  isReadonly,
+  onEditButtonClick,
+  onCancelButtonClick,
+}: DashboardShortcutsProps): ReactElement | null {
   const focusedPanelKey = useFocusedPanel();
   const { isEditMode, setEditMode } = useEditMode();
   const { timeRange, setTimeRange, refresh } = useTimeRange();
@@ -151,42 +108,9 @@ export function DashboardShortcuts({ onSave, onRefresh, isReadonly }: DashboardS
     useDashboardStore(selectPanelStoreActions);
   const { saveDashboard } = useSaveDashboard(onSave);
 
-  const dashboardEnabled = activeScopes.has('dashboard');
-  const panelEnabled = activeScopes.has('panel');
+  const panelFocused = focusedPanelKey !== null;
 
-  useHotkeys(
-    [
-      { def: SAVE_DASHBOARD_SHORTCUT, enabled: dashboardEnabled },
-      { def: PANEL_EDIT_SHORTCUT, enabled: panelEnabled || panelEditor !== undefined },
-      { def: PANEL_FULLSCREEN_SHORTCUT, enabled: panelEnabled || viewPanel !== undefined },
-    ].map(({ def, enabled }) => ({
-      hotkey: requireShortcutHotkey(def),
-      callback: (): void => dispatchShortcutEvent(requireShortcutEvent(def)),
-      options: buildShortcutOptions(def, enabled),
-    }))
-  );
-
-  useHotkeySequences(
-    [
-      { def: REFRESH_DASHBOARD_SHORTCUT, enabled: dashboardEnabled },
-      { def: TOGGLE_EDIT_MODE_SHORTCUT, enabled: dashboardEnabled },
-      { def: TIME_ZOOM_OUT_SHORTCUT, enabled: dashboardEnabled },
-      { def: TIME_ZOOM_IN_SHORTCUT, enabled: dashboardEnabled },
-      { def: TIME_SHIFT_BACK_SHORTCUT, enabled: dashboardEnabled },
-      { def: TIME_SHIFT_FORWARD_SHORTCUT, enabled: dashboardEnabled },
-      { def: TIME_MAKE_ABSOLUTE_SHORTCUT, enabled: dashboardEnabled },
-      { def: TIME_COPY_SHORTCUT, enabled: dashboardEnabled },
-      { def: TIME_PASTE_SHORTCUT, enabled: dashboardEnabled },
-      { def: PANEL_DUPLICATE_SHORTCUT, enabled: panelEnabled },
-      { def: PANEL_DELETE_SHORTCUT, enabled: panelEnabled },
-    ].map(({ def, enabled }) => ({
-      sequence: requireShortcutSequence(def),
-      callback: (): void => dispatchShortcutEvent(requireShortcutEvent(def)),
-      options: buildShortcutOptions(def, enabled),
-    }))
-  );
-
-  // --- Event handlers for dashboard operations ---
+  // --- Handlers ---
 
   const handleSave = useCallback(() => {
     if (isReadonly) {
@@ -215,50 +139,66 @@ export function DashboardShortcuts({ onSave, onRefresh, isReadonly }: DashboardS
   }, [refresh, onRefresh]);
 
   const handleToggleEditMode = useCallback(() => {
-    setEditMode(!isEditMode);
-  }, [isEditMode, setEditMode]);
+    if (isEditMode) {
+      // Switching from edit to view: delegate to cancel flow (shows discard dialog if needed)
+      if (onCancelButtonClick) {
+        onCancelButtonClick();
+      } else {
+        setEditMode(false);
+      }
+    } else {
+      // Switching from view to edit: delegate to edit flow (saves original state)
+      if (onEditButtonClick) {
+        onEditButtonClick();
+      } else {
+        setEditMode(true);
+      }
+    }
+  }, [isEditMode, setEditMode, onCancelButtonClick, onEditButtonClick]);
 
   // Time range handlers
-  const handleTimeZoomOut = useCallback(() => {
+
+  /**
+   * Resolves the current time range to absolute and computes its duration in ms.
+   */
+  function resolveAbsoluteRange(): { absoluteRange: AbsoluteTimeRange; durationMs: number } {
     const absoluteRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
-    const duration = absoluteRange.end.getTime() - absoluteRange.start.getTime();
-    const newRange: AbsoluteTimeRange = {
-      start: new Date(absoluteRange.start.getTime() - duration / 2),
-      end: new Date(absoluteRange.end.getTime() + duration / 2),
-    };
-    setTimeRange(newRange);
+    const durationMs = absoluteRange.end.getTime() - absoluteRange.start.getTime();
+    return { absoluteRange, durationMs };
+  }
+
+  const handleTimeZoomOut = useCallback(() => {
+    const { absoluteRange, durationMs } = resolveAbsoluteRange();
+    setTimeRange({
+      start: new Date(absoluteRange.start.getTime() - durationMs / 2),
+      end: new Date(absoluteRange.end.getTime() + durationMs / 2),
+    });
   }, [timeRange, setTimeRange]);
 
   const handleTimeZoomIn = useCallback(() => {
-    const absoluteRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
-    const duration = absoluteRange.end.getTime() - absoluteRange.start.getTime();
-    const newRange: AbsoluteTimeRange = {
-      start: new Date(absoluteRange.start.getTime() + duration / 4),
-      end: new Date(absoluteRange.end.getTime() - duration / 4),
-    };
-    setTimeRange(newRange);
+    const { absoluteRange, durationMs } = resolveAbsoluteRange();
+    setTimeRange({
+      start: new Date(absoluteRange.start.getTime() + durationMs / 4),
+      end: new Date(absoluteRange.end.getTime() - durationMs / 4),
+    });
   }, [timeRange, setTimeRange]);
 
   const handleTimeShiftBack = useCallback(() => {
-    const absoluteRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
-    const duration = absoluteRange.end.getTime() - absoluteRange.start.getTime();
-    const shift = duration / 2;
-    const newRange: AbsoluteTimeRange = {
+    const { absoluteRange, durationMs } = resolveAbsoluteRange();
+    const shift = durationMs / 2;
+    setTimeRange({
       start: new Date(absoluteRange.start.getTime() - shift),
       end: new Date(absoluteRange.end.getTime() - shift),
-    };
-    setTimeRange(newRange);
+    });
   }, [timeRange, setTimeRange]);
 
   const handleTimeShiftForward = useCallback(() => {
-    const absoluteRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
-    const duration = absoluteRange.end.getTime() - absoluteRange.start.getTime();
-    const shift = duration / 2;
-    const newRange: AbsoluteTimeRange = {
+    const { absoluteRange, durationMs } = resolveAbsoluteRange();
+    const shift = durationMs / 2;
+    setTimeRange({
       start: new Date(absoluteRange.start.getTime() + shift),
       end: new Date(absoluteRange.end.getTime() + shift),
-    };
-    setTimeRange(newRange);
+    });
   }, [timeRange, setTimeRange]);
 
   const handleTimeMakeAbsolute = useCallback(() => {
@@ -362,22 +302,43 @@ export function DashboardShortcuts({ onSave, onRefresh, isReadonly }: DashboardS
     }
   }, [focusedPanelKey, isEditMode, openDeletePanelDialog]);
 
-  useWindowEvents([
-    { eventName: SAVE_DASHBOARD_EVENT, handler: handleSave },
-    { eventName: REFRESH_DASHBOARD_EVENT, handler: handleRefresh },
-    { eventName: TOGGLE_EDIT_MODE_EVENT, handler: handleToggleEditMode },
-    { eventName: TIME_ZOOM_OUT_EVENT, handler: handleTimeZoomOut },
-    { eventName: TIME_ZOOM_IN_EVENT, handler: handleTimeZoomIn },
-    { eventName: TIME_SHIFT_BACK_EVENT, handler: handleTimeShiftBack },
-    { eventName: TIME_SHIFT_FORWARD_EVENT, handler: handleTimeShiftForward },
-    { eventName: TIME_MAKE_ABSOLUTE_EVENT, handler: handleTimeMakeAbsolute },
-    { eventName: TIME_COPY_EVENT, handler: handleTimeCopy },
-    { eventName: TIME_PASTE_EVENT, handler: handleTimePaste },
-    { eventName: PANEL_EDIT_EVENT, handler: handlePanelEdit },
-    { eventName: PANEL_FULLSCREEN_EVENT, handler: handlePanelFullscreen },
-    { eventName: PANEL_DUPLICATE_EVENT, handler: handlePanelDuplicate },
-    { eventName: PANEL_DELETE_EVENT, handler: handlePanelDelete },
-  ]);
+  // --- Register shortcuts with TanStack, calling handlers directly ---
+
+  useHotkeys(
+    [
+      { def: SAVE_DASHBOARD_SHORTCUT, enabled: true, callback: handleSave },
+      { def: PANEL_EDIT_SHORTCUT, enabled: panelFocused || panelEditor !== undefined, callback: handlePanelEdit },
+      {
+        def: PANEL_FULLSCREEN_SHORTCUT,
+        enabled: panelFocused || viewPanel !== undefined,
+        callback: handlePanelFullscreen,
+      },
+    ].map(({ def, enabled, callback }) => ({
+      hotkey: requireShortcutHotkey(def),
+      callback,
+      options: buildShortcutOptions(def, enabled),
+    }))
+  );
+
+  useHotkeySequences(
+    [
+      { def: REFRESH_DASHBOARD_SHORTCUT, enabled: true, callback: handleRefresh },
+      { def: TOGGLE_EDIT_MODE_SHORTCUT, enabled: true, callback: handleToggleEditMode },
+      { def: TIME_ZOOM_OUT_SHORTCUT, enabled: true, callback: handleTimeZoomOut },
+      { def: TIME_ZOOM_IN_SHORTCUT, enabled: true, callback: handleTimeZoomIn },
+      { def: TIME_SHIFT_BACK_SHORTCUT, enabled: true, callback: handleTimeShiftBack },
+      { def: TIME_SHIFT_FORWARD_SHORTCUT, enabled: true, callback: handleTimeShiftForward },
+      { def: TIME_MAKE_ABSOLUTE_SHORTCUT, enabled: true, callback: handleTimeMakeAbsolute },
+      { def: TIME_COPY_SHORTCUT, enabled: true, callback: handleTimeCopy },
+      { def: TIME_PASTE_SHORTCUT, enabled: true, callback: handleTimePaste },
+      { def: PANEL_DUPLICATE_SHORTCUT, enabled: panelFocused, callback: handlePanelDuplicate },
+      { def: PANEL_DELETE_SHORTCUT, enabled: panelFocused, callback: handlePanelDelete },
+    ].map(({ def, enabled, callback }) => ({
+      sequence: requireShortcutSequence(def),
+      callback,
+      options: buildShortcutOptions(def, enabled),
+    }))
+  );
 
   return null;
 }

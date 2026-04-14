@@ -11,15 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './axis';
-export * from './browser-storage';
-export * from './chart-actions';
-export * from './combine-sx';
-export * from './component-ids';
-export * from './data-field-interpolation';
-export * from './format';
-export * from './keyboard';
-export * from './memo';
-export * from './selection-interpolation';
-export * from './theme-gen';
-export * from './variable-interpolation';
+import React from 'react';
+
+/**
+ * Creates a keyboard event handler that calls `execute` when Mod+Enter
+ * (Ctrl+Enter on Windows/Linux, Cmd+Enter on Mac) is pressed.
+ * Useful for query editors that should execute on Mod+Enter.
+ */
+export function createModEnterHandler(execute: () => void): React.KeyboardEventHandler<HTMLElement> {
+  return (event: React.KeyboardEvent<HTMLElement>): void => {
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      execute();
+    }
+  };
+}

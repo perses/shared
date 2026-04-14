@@ -13,15 +13,8 @@
 
 export * from './types';
 export * from './events';
+export { PanelFocusProvider, useFocusedPanel, usePanelFocusHandlers } from './PanelFocusProvider';
 export {
-  ScopeProvider,
-  useShortcutScope,
-  useActiveScopes,
-  useFocusedPanel,
-  usePanelFocusHandlers,
-} from './ScopeProvider';
-export {
-  buildMeta,
   buildShortcutOptions,
   dispatchShortcutEvent,
   requireShortcutEvent,
