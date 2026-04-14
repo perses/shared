@@ -14,20 +14,32 @@
 import { PersesShortcutDef } from '../types';
 import {
   TIME_ZOOM_OUT_EVENT,
+  TIME_ZOOM_IN_EVENT,
   TIME_SHIFT_BACK_EVENT,
   TIME_SHIFT_FORWARD_EVENT,
   TIME_MAKE_ABSOLUTE_EVENT,
   TIME_COPY_EVENT,
+  TIME_PASTE_EVENT,
 } from '../events';
 
 export const TIME_ZOOM_OUT_SHORTCUT: PersesShortcutDef = {
   id: 'time-zoom-out',
-  sequence: ['T', 'Z'],
+  sequence: ['T', 'O'],
   name: 'Zoom Out',
   description: 'Zoom out time range (2x)',
   category: 'time-range',
   scope: 'dashboard',
   event: TIME_ZOOM_OUT_EVENT,
+};
+
+export const TIME_ZOOM_IN_SHORTCUT: PersesShortcutDef = {
+  id: 'time-zoom-in',
+  sequence: ['T', 'I'],
+  name: 'Zoom In',
+  description: 'Zoom in time range (½)',
+  category: 'time-range',
+  scope: 'dashboard',
+  event: TIME_ZOOM_IN_EVENT,
 };
 
 export const TIME_SHIFT_BACK_SHORTCUT: PersesShortcutDef = {
@@ -70,10 +82,22 @@ export const TIME_COPY_SHORTCUT: PersesShortcutDef = {
   event: TIME_COPY_EVENT,
 };
 
+export const TIME_PASTE_SHORTCUT: PersesShortcutDef = {
+  id: 'time-paste',
+  sequence: ['T', 'V'],
+  name: 'Paste Time Range',
+  description: 'Paste time range from clipboard',
+  category: 'time-range',
+  scope: 'dashboard',
+  event: TIME_PASTE_EVENT,
+};
+
 export const TIME_RANGE_SHORTCUTS: PersesShortcutDef[] = [
   TIME_ZOOM_OUT_SHORTCUT,
+  TIME_ZOOM_IN_SHORTCUT,
   TIME_SHIFT_BACK_SHORTCUT,
   TIME_SHIFT_FORWARD_SHORTCUT,
   TIME_MAKE_ABSOLUTE_SHORTCUT,
   TIME_COPY_SHORTCUT,
+  TIME_PASTE_SHORTCUT,
 ];

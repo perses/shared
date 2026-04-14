@@ -18,10 +18,12 @@ export const TOGGLE_EDIT_MODE_EVENT = 'perses:toggle-edit-mode';
 
 // Time range events
 export const TIME_ZOOM_OUT_EVENT = 'perses:time-zoom-out';
+export const TIME_ZOOM_IN_EVENT = 'perses:time-zoom-in';
 export const TIME_SHIFT_BACK_EVENT = 'perses:time-shift-back';
 export const TIME_SHIFT_FORWARD_EVENT = 'perses:time-shift-forward';
 export const TIME_MAKE_ABSOLUTE_EVENT = 'perses:time-make-absolute';
 export const TIME_COPY_EVENT = 'perses:time-copy';
+export const TIME_PASTE_EVENT = 'perses:time-paste';
 
 // Panel events
 export const PANEL_EDIT_EVENT = 'perses:panel-edit';

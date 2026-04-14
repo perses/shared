@@ -59,6 +59,9 @@ jest.mock('@perses-dev/components', () => ({
   }),
 }));
 
+const mockSetTimeRange = jest.fn();
+const mockRefresh = jest.fn();
+
 jest.mock('@perses-dev/plugin-system', () => ({
   useTimeRange: (): {
     timeRange: { pastDuration: string };
@@ -66,8 +69,8 @@ jest.mock('@perses-dev/plugin-system', () => ({
     refresh: jest.Mock;
   } => ({
     timeRange: { pastDuration: '30m' },
-    setTimeRange: jest.fn(),
-    refresh: jest.fn(),
+    setTimeRange: mockSetTimeRange,
+    refresh: mockRefresh,
   }),
 }));
 
@@ -90,6 +93,14 @@ jest.mock('../../context/DashboardProvider', () => ({
   }),
   useDashboardStore: (): typeof mockDashboardStoreActions => mockDashboardStoreActions,
   useViewPanelGroup: (): undefined => undefined,
+  useSaveDashboard: (onSave?: (dashboard: DashboardResource) => Promise<void>): { saveDashboard: () => void } => ({
+    saveDashboard: (): void => {
+      if (onSave) {
+        onSave(mockDashboard);
+      }
+      mockSetEditMode(false);
+    },
+  }),
 }));
 
 jest.mock('../../keyboard-shortcuts', () => ({
@@ -105,11 +116,13 @@ jest.mock('../../keyboard-shortcuts', () => ({
   SAVE_DASHBOARD_SHORTCUT: { hotkey: 'Mod+S', event: 'perses:save-dashboard' },
   REFRESH_DASHBOARD_SHORTCUT: { sequence: ['D', 'R'], event: 'perses:refresh-dashboard' },
   TOGGLE_EDIT_MODE_SHORTCUT: { sequence: ['D', 'M'], event: 'perses:toggle-edit-mode' },
-  TIME_ZOOM_OUT_SHORTCUT: { sequence: ['T', 'Z'], event: 'perses:time-zoom-out' },
+  TIME_ZOOM_OUT_SHORTCUT: { sequence: ['T', 'O'], event: 'perses:time-zoom-out' },
+  TIME_ZOOM_IN_SHORTCUT: { sequence: ['T', 'I'], event: 'perses:time-zoom-in' },
   TIME_SHIFT_BACK_SHORTCUT: { sequence: ['T', 'ArrowLeft'], event: 'perses:time-shift-back' },
   TIME_SHIFT_FORWARD_SHORTCUT: { sequence: ['T', 'ArrowRight'], event: 'perses:time-shift-forward' },
   TIME_MAKE_ABSOLUTE_SHORTCUT: { sequence: ['T', 'A'], event: 'perses:time-make-absolute' },
   TIME_COPY_SHORTCUT: { sequence: ['T', 'C'], event: 'perses:time-copy' },
+  TIME_PASTE_SHORTCUT: { sequence: ['T', 'V'], event: 'perses:time-paste' },
   PANEL_EDIT_SHORTCUT: { hotkey: 'E', event: 'perses:panel-edit' },
   PANEL_FULLSCREEN_SHORTCUT: { hotkey: 'V', event: 'perses:panel-fullscreen' },
   PANEL_DUPLICATE_SHORTCUT: { sequence: ['P', 'D'], event: 'perses:panel-duplicate' },
@@ -119,10 +132,12 @@ jest.mock('../../keyboard-shortcuts', () => ({
   REFRESH_DASHBOARD_EVENT: 'perses:refresh-dashboard',
   TOGGLE_EDIT_MODE_EVENT: 'perses:toggle-edit-mode',
   TIME_ZOOM_OUT_EVENT: 'perses:time-zoom-out',
+  TIME_ZOOM_IN_EVENT: 'perses:time-zoom-in',
   TIME_SHIFT_BACK_EVENT: 'perses:time-shift-back',
   TIME_SHIFT_FORWARD_EVENT: 'perses:time-shift-forward',
   TIME_MAKE_ABSOLUTE_EVENT: 'perses:time-make-absolute',
   TIME_COPY_EVENT: 'perses:time-copy',
+  TIME_PASTE_EVENT: 'perses:time-paste',
   PANEL_EDIT_EVENT: 'perses:panel-edit',
   PANEL_FULLSCREEN_EVENT: 'perses:panel-fullscreen',
   PANEL_DUPLICATE_EVENT: 'perses:panel-duplicate',
@@ -130,6 +145,7 @@ jest.mock('../../keyboard-shortcuts', () => ({
 }));
 
 const SAVE_DASHBOARD_EVENT = 'perses:save-dashboard';
+const TIME_PASTE_EVENT = 'perses:time-paste';
 
 describe('DashboardShortcuts save behavior', () => {
   beforeEach(() => {
@@ -178,6 +194,89 @@ describe('DashboardShortcuts save behavior', () => {
     await waitFor(() => {
       expect(onSave).toHaveBeenCalledWith(mockDashboard);
       expect(mockSetEditMode).toHaveBeenCalledWith(false);
+    });
+  });
+});
+
+describe('DashboardShortcuts paste time range behavior', () => {
+  beforeEach(() => {
+    mockIsEditMode = false;
+    jest.clearAllMocks();
+  });
+
+  it('sets time range when clipboard contains a valid time range', async () => {
+    const start = '2026-04-13T10:00:00.000Z';
+    const end = '2026-04-13T11:00:00.000Z';
+    Object.assign(navigator, {
+      clipboard: { readText: jest.fn().mockResolvedValue(`${start} - ${end}`) },
+    });
+
+    render(<DashboardShortcuts isReadonly={false} />);
+
+    act(() => {
+      window.dispatchEvent(new CustomEvent(TIME_PASTE_EVENT));
+    });
+
+    await waitFor(() => {
+      expect(mockSetTimeRange).toHaveBeenCalledWith({
+        start: new Date(start),
+        end: new Date(end),
+      });
+    });
+  });
+
+  it('shows a warning snackbar when clipboard text is not a valid time range', async () => {
+    Object.assign(navigator, {
+      clipboard: { readText: jest.fn().mockResolvedValue('not a time range') },
+    });
+
+    render(<DashboardShortcuts isReadonly={false} />);
+
+    act(() => {
+      window.dispatchEvent(new CustomEvent(TIME_PASTE_EVENT));
+    });
+
+    await waitFor(() => {
+      expect(mockSetTimeRange).not.toHaveBeenCalled();
+      expect(mockWarningSnackbar).toHaveBeenCalledWith(
+        'Clipboard does not contain a valid time range. Expected format: "<ISO date format> - <ISO date format>".'
+      );
+    });
+  });
+
+  it('shows a warning snackbar when start is not before end', async () => {
+    const start = '2026-04-13T12:00:00.000Z';
+    const end = '2026-04-13T10:00:00.000Z';
+    Object.assign(navigator, {
+      clipboard: { readText: jest.fn().mockResolvedValue(`${start} - ${end}`) },
+    });
+
+    render(<DashboardShortcuts isReadonly={false} />);
+
+    act(() => {
+      window.dispatchEvent(new CustomEvent(TIME_PASTE_EVENT));
+    });
+
+    await waitFor(() => {
+      expect(mockSetTimeRange).not.toHaveBeenCalled();
+      expect(mockWarningSnackbar).toHaveBeenCalledWith('Invalid time range: start must be before end.');
+    });
+  });
+
+  it('shows a warning snackbar when clipboard read fails', async () => {
+    Object.assign(navigator, {
+      clipboard: { readText: jest.fn().mockRejectedValue(new Error('Permission denied')) },
+    });
+
+    render(<DashboardShortcuts isReadonly={false} />);
+
+    act(() => {
+      window.dispatchEvent(new CustomEvent(TIME_PASTE_EVENT));
+    });
+
+    await waitFor(() => {
+      expect(mockSetTimeRange).not.toHaveBeenCalled();
+      expect(mockWarningSnackbar).toHaveBeenCalledWith('Unable to read from clipboard. Check browser permissions.');
     });
   });
 });

@@ -29,10 +29,12 @@ import {
   REFRESH_DASHBOARD_SHORTCUT,
   TOGGLE_EDIT_MODE_SHORTCUT,
   TIME_ZOOM_OUT_SHORTCUT,
+  TIME_ZOOM_IN_SHORTCUT,
   TIME_SHIFT_BACK_SHORTCUT,
   TIME_SHIFT_FORWARD_SHORTCUT,
   TIME_MAKE_ABSOLUTE_SHORTCUT,
   TIME_COPY_SHORTCUT,
+  TIME_PASTE_SHORTCUT,
   PANEL_EDIT_SHORTCUT,
   PANEL_FULLSCREEN_SHORTCUT,
   PANEL_DUPLICATE_SHORTCUT,
@@ -83,10 +85,12 @@ const SAVE_DASHBOARD_EVENT = requireShortcutEvent(SAVE_DASHBOARD_SHORTCUT);
 const REFRESH_DASHBOARD_EVENT = requireShortcutEvent(REFRESH_DASHBOARD_SHORTCUT);
 const TOGGLE_EDIT_MODE_EVENT = requireShortcutEvent(TOGGLE_EDIT_MODE_SHORTCUT);
 const TIME_ZOOM_OUT_EVENT = requireShortcutEvent(TIME_ZOOM_OUT_SHORTCUT);
+const TIME_ZOOM_IN_EVENT = requireShortcutEvent(TIME_ZOOM_IN_SHORTCUT);
 const TIME_SHIFT_BACK_EVENT = requireShortcutEvent(TIME_SHIFT_BACK_SHORTCUT);
 const TIME_SHIFT_FORWARD_EVENT = requireShortcutEvent(TIME_SHIFT_FORWARD_SHORTCUT);
 const TIME_MAKE_ABSOLUTE_EVENT = requireShortcutEvent(TIME_MAKE_ABSOLUTE_SHORTCUT);
 const TIME_COPY_EVENT = requireShortcutEvent(TIME_COPY_SHORTCUT);
+const TIME_PASTE_EVENT = requireShortcutEvent(TIME_PASTE_SHORTCUT);
 const PANEL_EDIT_EVENT = requireShortcutEvent(PANEL_EDIT_SHORTCUT);
 const PANEL_FULLSCREEN_EVENT = requireShortcutEvent(PANEL_FULLSCREEN_SHORTCUT);
 const PANEL_DUPLICATE_EVENT = requireShortcutEvent(PANEL_DUPLICATE_SHORTCUT);
@@ -167,10 +171,12 @@ export function DashboardShortcuts({ onSave, onRefresh, isReadonly }: DashboardS
       { def: REFRESH_DASHBOARD_SHORTCUT, enabled: dashboardEnabled },
       { def: TOGGLE_EDIT_MODE_SHORTCUT, enabled: dashboardEnabled },
       { def: TIME_ZOOM_OUT_SHORTCUT, enabled: dashboardEnabled },
+      { def: TIME_ZOOM_IN_SHORTCUT, enabled: dashboardEnabled },
       { def: TIME_SHIFT_BACK_SHORTCUT, enabled: dashboardEnabled },
       { def: TIME_SHIFT_FORWARD_SHORTCUT, enabled: dashboardEnabled },
       { def: TIME_MAKE_ABSOLUTE_SHORTCUT, enabled: dashboardEnabled },
       { def: TIME_COPY_SHORTCUT, enabled: dashboardEnabled },
+      { def: TIME_PASTE_SHORTCUT, enabled: dashboardEnabled },
       { def: PANEL_DUPLICATE_SHORTCUT, enabled: panelEnabled },
       { def: PANEL_DELETE_SHORTCUT, enabled: panelEnabled },
     ].map(({ def, enabled }) => ({
@@ -223,6 +229,16 @@ export function DashboardShortcuts({ onSave, onRefresh, isReadonly }: DashboardS
     setTimeRange(newRange);
   }, [timeRange, setTimeRange]);
 
+  const handleTimeZoomIn = useCallback(() => {
+    const absoluteRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
+    const duration = absoluteRange.end.getTime() - absoluteRange.start.getTime();
+    const newRange: AbsoluteTimeRange = {
+      start: new Date(absoluteRange.start.getTime() + duration / 4),
+      end: new Date(absoluteRange.end.getTime() - duration / 4),
+    };
+    setTimeRange(newRange);
+  }, [timeRange, setTimeRange]);
+
   const handleTimeShiftBack = useCallback(() => {
     const absoluteRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
     const duration = absoluteRange.end.getTime() - absoluteRange.start.getTime();
@@ -254,10 +270,50 @@ export function DashboardShortcuts({ onSave, onRefresh, isReadonly }: DashboardS
   const handleTimeCopy = useCallback(() => {
     const absoluteRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
     const text = `${absoluteRange.start.toISOString()} - ${absoluteRange.end.toISOString()}`;
-    navigator.clipboard.writeText(text).catch(() => {
-      // Ignore clipboard errors
-    });
-  }, [timeRange]);
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        infoSnackbar('Time range copied to clipboard.');
+      })
+      .catch(() => {
+        warningSnackbar('Failed to copy time range to clipboard.');
+      });
+  }, [timeRange, infoSnackbar, warningSnackbar]);
+
+  const handleTimePaste = useCallback(() => {
+    const FORMAT_HINT = 'Expected format: "<ISO date format> - <ISO date format>".';
+    navigator.clipboard
+      .readText()
+      .then((text) => {
+        const parts = text.split(' - ');
+        if (parts.length !== 2) {
+          warningSnackbar(`Clipboard does not contain a valid time range. ${FORMAT_HINT}`);
+          return;
+        }
+        const startStr = parts[0];
+        const endStr = parts[1];
+        if (startStr === undefined || endStr === undefined) {
+          warningSnackbar(`Clipboard does not contain a valid time range. ${FORMAT_HINT}`);
+          return;
+        }
+        const start = new Date(startStr.trim());
+        const end = new Date(endStr.trim());
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          warningSnackbar(`Clipboard does not contain a valid time range. ${FORMAT_HINT}`);
+          return;
+        }
+        if (start >= end) {
+          warningSnackbar('Invalid time range: start must be before end.');
+          return;
+        }
+        const newRange: AbsoluteTimeRange = { start, end };
+        setTimeRange(newRange);
+        infoSnackbar('Time range pasted from clipboard.');
+      })
+      .catch(() => {
+        warningSnackbar('Unable to read from clipboard. Check browser permissions.');
+      });
+  }, [setTimeRange, infoSnackbar, warningSnackbar]);
 
   // Panel handlers
   const handlePanelEdit = useCallback(() => {
@@ -311,10 +367,12 @@ export function DashboardShortcuts({ onSave, onRefresh, isReadonly }: DashboardS
     { eventName: REFRESH_DASHBOARD_EVENT, handler: handleRefresh },
     { eventName: TOGGLE_EDIT_MODE_EVENT, handler: handleToggleEditMode },
     { eventName: TIME_ZOOM_OUT_EVENT, handler: handleTimeZoomOut },
+    { eventName: TIME_ZOOM_IN_EVENT, handler: handleTimeZoomIn },
     { eventName: TIME_SHIFT_BACK_EVENT, handler: handleTimeShiftBack },
     { eventName: TIME_SHIFT_FORWARD_EVENT, handler: handleTimeShiftForward },
     { eventName: TIME_MAKE_ABSOLUTE_EVENT, handler: handleTimeMakeAbsolute },
     { eventName: TIME_COPY_EVENT, handler: handleTimeCopy },
+    { eventName: TIME_PASTE_EVENT, handler: handleTimePaste },
     { eventName: PANEL_EDIT_EVENT, handler: handlePanelEdit },
     { eventName: PANEL_FULLSCREEN_EVENT, handler: handlePanelFullscreen },
     { eventName: PANEL_DUPLICATE_EVENT, handler: handlePanelDuplicate },
