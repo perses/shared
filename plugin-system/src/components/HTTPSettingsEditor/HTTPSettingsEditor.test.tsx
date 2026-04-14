@@ -16,7 +16,30 @@ import userEvent from '@testing-library/user-event';
 import { HTTPDatasourceSpec } from '@perses-dev/core';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ReactElement } from 'react';
+import { SnackbarContext } from '@perses-dev/components';
+import { UnsavedDatasourceStore } from '../../runtime';
 import { HTTPSettingsEditor } from './HTTPSettingsEditor';
+
+const mockTestProxyConnection = jest.fn();
+const mockTestDirectConnection = jest.fn();
+const mockSuccessSnackbar = jest.fn();
+const mockExceptionSnackbar = jest.fn();
+
+jest.mock('@perses-dev/plugin-system', () => ({
+  ...jest.requireActual('@perses-dev/plugin-system'),
+  useUnsavedDatasourceStore: (): UnsavedDatasourceStore => ({
+    testProxyConnection: mockTestProxyConnection,
+    testDirectConnection: mockTestDirectConnection,
+  }),
+}));
+
+jest.mock('@perses-dev/components', () => ({
+  ...jest.requireActual('@perses-dev/components'),
+  useSnackbar: (): Partial<SnackbarContext> => ({
+    successSnackbar: mockSuccessSnackbar,
+    exceptionSnackbar: mockExceptionSnackbar,
+  }),
+}));
 
 describe('HTTPSettingsEditor - Request Headers', () => {
   const initialSpecDirect: HTTPDatasourceSpec = {
@@ -484,6 +507,234 @@ describe('HTTPSettingsEditor - Request Headers', () => {
 
       iconButtons.forEach((btn) => {
         expect(btn).toBeDisabled();
+      });
+    });
+  });
+});
+
+describe('HTTPSettingsEditor - Test Connection', () => {
+  const initialSpecDirect: HTTPDatasourceSpec = {
+    directUrl: '',
+  };
+
+  const initialSpecProxy: HTTPDatasourceSpec = {
+    proxy: {
+      kind: 'HTTPProxy',
+      spec: {
+        url: '',
+      },
+    },
+  };
+
+  const renderComponent = (value: HTTPDatasourceSpec, onChange = jest.fn()): ReturnType<typeof render> => {
+    const Wrapper = (): ReactElement => {
+      const methods = useForm();
+      return (
+        <FormProvider {...methods}>
+          <HTTPSettingsEditor
+            value={value}
+            onChange={onChange}
+            initialSpecDirect={initialSpecDirect}
+            initialSpecProxy={initialSpecProxy}
+            datasourcePluginKind="PrometheusDatasource"
+            healthCheckPath="/api/v1/query"
+          />
+        </FormProvider>
+      );
+    };
+    return render(<Wrapper />);
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('Proxy mode', () => {
+    it('should show "Test Connection" button when URL is set', () => {
+      const value: HTTPDatasourceSpec = {
+        proxy: {
+          kind: 'HTTPProxy',
+          spec: {
+            url: 'http://localhost:9090',
+          },
+        },
+      };
+
+      renderComponent(value);
+
+      expect(screen.getByRole('button', { name: /test connection/i })).toBeInTheDocument();
+    });
+
+    it('should disable "Test Connection" button when proxy URL is empty', () => {
+      const value: HTTPDatasourceSpec = {
+        proxy: {
+          kind: 'HTTPProxy',
+          spec: {
+            url: '',
+          },
+        },
+      };
+
+      renderComponent(value);
+
+      expect(screen.getByRole('button', { name: /test connection/i })).toBeDisabled();
+    });
+
+    it('should show success snackbar when proxy connection is healthy', async () => {
+      mockTestProxyConnection.mockResolvedValue(true);
+
+      const value: HTTPDatasourceSpec = {
+        proxy: {
+          kind: 'HTTPProxy',
+          spec: {
+            url: 'http://localhost:9090',
+          },
+        },
+      };
+
+      renderComponent(value);
+
+      const testButton = screen.getByRole('button', { name: /test connection/i });
+      await userEvent.click(testButton);
+
+      await waitFor(() => {
+        expect(mockTestProxyConnection).toHaveBeenCalledWith(
+          expect.objectContaining({
+            default: false,
+            plugin: expect.objectContaining({
+              kind: 'PrometheusDatasource',
+              spec: expect.objectContaining({
+                proxy: expect.objectContaining({
+                  spec: expect.objectContaining({
+                    allowedEndpoints: [{ endpointPattern: '/api/v1/query', method: 'GET' }],
+                  }),
+                }),
+              }),
+            }),
+          }),
+          '/api/v1/query'
+        );
+        expect(mockSuccessSnackbar).toHaveBeenCalledWith('Datasource is healthy');
+      });
+    });
+
+    it('should show error snackbar when proxy connection is not healthy', async () => {
+      mockTestProxyConnection.mockResolvedValue(false);
+
+      const value: HTTPDatasourceSpec = {
+        proxy: {
+          kind: 'HTTPProxy',
+          spec: {
+            url: 'http://localhost:9090',
+          },
+        },
+      };
+
+      renderComponent(value);
+
+      const testButton = screen.getByRole('button', { name: /test connection/i });
+      await userEvent.click(testButton);
+
+      await waitFor(() => {
+        expect(mockTestProxyConnection).toHaveBeenCalled();
+        expect(mockExceptionSnackbar).toHaveBeenCalledWith(expect.any(Error));
+      });
+    });
+
+    it('should append healthCheckPath to existing allowedEndpoints', async () => {
+      mockTestProxyConnection.mockResolvedValue(true);
+
+      const value: HTTPDatasourceSpec = {
+        proxy: {
+          kind: 'HTTPProxy',
+          spec: {
+            url: 'http://localhost:9090',
+            allowedEndpoints: [{ endpointPattern: '/api/v1/labels', method: 'GET' }],
+          },
+        },
+      };
+
+      renderComponent(value);
+
+      const testButton = screen.getByRole('button', { name: /test connection/i });
+      await userEvent.click(testButton);
+
+      await waitFor(() => {
+        expect(mockTestProxyConnection).toHaveBeenCalledWith(
+          expect.objectContaining({
+            plugin: expect.objectContaining({
+              spec: expect.objectContaining({
+                proxy: expect.objectContaining({
+                  spec: expect.objectContaining({
+                    allowedEndpoints: [
+                      { endpointPattern: '/api/v1/labels', method: 'GET' },
+                      { endpointPattern: '/api/v1/query', method: 'GET' },
+                    ],
+                  }),
+                }),
+              }),
+            }),
+          }),
+          '/api/v1/query'
+        );
+      });
+    });
+  });
+
+  describe('Direct mode', () => {
+    it('should show "Test Connection" button when direct URL is set', () => {
+      const value: HTTPDatasourceSpec = {
+        directUrl: 'http://localhost:9090',
+      };
+
+      renderComponent(value);
+
+      expect(screen.getByRole('button', { name: /test connection/i })).toBeInTheDocument();
+    });
+
+    it('should disable "Test Connection" button when direct URL is empty', () => {
+      const value: HTTPDatasourceSpec = {
+        directUrl: '',
+      };
+
+      renderComponent(value);
+
+      expect(screen.getByRole('button', { name: /test connection/i })).toBeDisabled();
+    });
+
+    it('should show success snackbar when direct connection is healthy', async () => {
+      mockTestDirectConnection.mockResolvedValue(true);
+
+      const value: HTTPDatasourceSpec = {
+        directUrl: 'http://localhost:9090',
+      };
+
+      renderComponent(value);
+
+      const testButton = screen.getByRole('button', { name: /test connection/i });
+      await userEvent.click(testButton);
+
+      await waitFor(() => {
+        expect(mockTestDirectConnection).toHaveBeenCalledWith('http://localhost:9090', '/api/v1/query');
+        expect(mockSuccessSnackbar).toHaveBeenCalledWith('Datasource is healthy');
+      });
+    });
+
+    it('should show error snackbar when direct connection is not healthy', async () => {
+      mockTestDirectConnection.mockResolvedValue(false);
+
+      const value: HTTPDatasourceSpec = {
+        directUrl: 'http://localhost:9090',
+      };
+
+      renderComponent(value);
+
+      const testButton = screen.getByRole('button', { name: /test connection/i });
+      await userEvent.click(testButton);
+
+      await waitFor(() => {
+        expect(mockTestDirectConnection).toHaveBeenCalledWith('http://localhost:9090', '/api/v1/query');
+        expect(mockExceptionSnackbar).toHaveBeenCalledWith(expect.any(Error));
       });
     });
   });
