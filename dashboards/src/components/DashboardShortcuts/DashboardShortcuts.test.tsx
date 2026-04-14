@@ -13,6 +13,7 @@
 
 import { act, render, waitFor } from '@testing-library/react';
 import { DashboardResource } from '@perses-dev/core';
+import { useHotkeys, useHotkeySequences } from '@tanstack/react-hotkeys';
 import { DashboardShortcuts } from './DashboardShortcuts';
 
 const mockInfoSnackbar = jest.fn();
@@ -74,9 +75,17 @@ jest.mock('@perses-dev/plugin-system', () => ({
   }),
 }));
 
+// Capture the latest callbacks passed to TanStack hooks so tests can invoke them directly.
+let latestHotkeyConfigs: Array<{ hotkey: string; callback: () => void }> = [];
+let latestSequenceConfigs: Array<{ sequence: string[]; callback: () => void }> = [];
+
 jest.mock('@tanstack/react-hotkeys', () => ({
-  useHotkeys: jest.fn(),
-  useHotkeySequences: jest.fn(),
+  useHotkeys: jest.fn((configs: Array<{ hotkey: string; callback: () => void }>) => {
+    latestHotkeyConfigs = configs;
+  }),
+  useHotkeySequences: jest.fn((configs: Array<{ sequence: string[]; callback: () => void }>) => {
+    latestSequenceConfigs = configs;
+  }),
 }));
 
 jest.mock('../../context', () => ({
@@ -104,12 +113,8 @@ jest.mock('../../context/DashboardProvider', () => ({
 }));
 
 jest.mock('../../keyboard-shortcuts', () => ({
-  useShortcutScope: jest.fn(),
-  useActiveScopes: (): Set<string> => new Set(['global', 'dashboard']),
   useFocusedPanel: (): null => null,
   buildShortcutOptions: jest.fn(() => ({ enabled: true, meta: {} })),
-  dispatchShortcutEvent: jest.fn(),
-  requireShortcutEvent: (def: { event?: string }): string => def.event ?? 'missing-event',
   requireShortcutHotkey: (def: { hotkey?: string }): string => def.hotkey ?? 'missing-hotkey',
   requireShortcutSequence: (def: { sequence?: string[] }): string[] => def.sequence ?? ['missing-sequence'],
 
@@ -127,29 +132,36 @@ jest.mock('../../keyboard-shortcuts', () => ({
   PANEL_FULLSCREEN_SHORTCUT: { hotkey: 'V', event: 'perses:panel-fullscreen' },
   PANEL_DUPLICATE_SHORTCUT: { sequence: ['P', 'D'], event: 'perses:panel-duplicate' },
   PANEL_DELETE_SHORTCUT: { sequence: ['P', 'R'], event: 'perses:panel-delete' },
-
-  SAVE_DASHBOARD_EVENT: 'perses:save-dashboard',
-  REFRESH_DASHBOARD_EVENT: 'perses:refresh-dashboard',
-  TOGGLE_EDIT_MODE_EVENT: 'perses:toggle-edit-mode',
-  TIME_ZOOM_OUT_EVENT: 'perses:time-zoom-out',
-  TIME_ZOOM_IN_EVENT: 'perses:time-zoom-in',
-  TIME_SHIFT_BACK_EVENT: 'perses:time-shift-back',
-  TIME_SHIFT_FORWARD_EVENT: 'perses:time-shift-forward',
-  TIME_MAKE_ABSOLUTE_EVENT: 'perses:time-make-absolute',
-  TIME_COPY_EVENT: 'perses:time-copy',
-  TIME_PASTE_EVENT: 'perses:time-paste',
-  PANEL_EDIT_EVENT: 'perses:panel-edit',
-  PANEL_FULLSCREEN_EVENT: 'perses:panel-fullscreen',
-  PANEL_DUPLICATE_EVENT: 'perses:panel-duplicate',
-  PANEL_DELETE_EVENT: 'perses:panel-delete',
 }));
 
-const SAVE_DASHBOARD_EVENT = 'perses:save-dashboard';
-const TIME_PASTE_EVENT = 'perses:time-paste';
+/**
+ * Helper to find and invoke a captured hotkey callback by key string.
+ */
+function triggerHotkey(hotkey: string): void {
+  const config = latestHotkeyConfigs.find((c) => c.hotkey === hotkey);
+  if (!config) {
+    throw new Error(`No registered hotkey found for "${hotkey}"`);
+  }
+  config.callback();
+}
+
+/**
+ * Helper to find and invoke a captured sequence callback by sequence array.
+ */
+function triggerSequence(sequence: string[]): void {
+  const key = JSON.stringify(sequence);
+  const config = latestSequenceConfigs.find((c) => JSON.stringify(c.sequence) === key);
+  if (!config) {
+    throw new Error(`No registered sequence found for ${key}`);
+  }
+  config.callback();
+}
 
 describe('DashboardShortcuts save behavior', () => {
   beforeEach(() => {
     mockIsEditMode = false;
+    latestHotkeyConfigs = [];
+    latestSequenceConfigs = [];
     jest.clearAllMocks();
   });
 
@@ -158,7 +170,7 @@ describe('DashboardShortcuts save behavior', () => {
     render(<DashboardShortcuts onSave={onSave} isReadonly={false} />);
 
     act(() => {
-      window.dispatchEvent(new CustomEvent(SAVE_DASHBOARD_EVENT));
+      triggerHotkey('Mod+S');
     });
 
     await waitFor(() => {
@@ -173,7 +185,7 @@ describe('DashboardShortcuts save behavior', () => {
     render(<DashboardShortcuts onSave={onSave} isReadonly={true} />);
 
     act(() => {
-      window.dispatchEvent(new CustomEvent(SAVE_DASHBOARD_EVENT));
+      triggerHotkey('Mod+S');
     });
 
     await waitFor(() => {
@@ -188,7 +200,7 @@ describe('DashboardShortcuts save behavior', () => {
     render(<DashboardShortcuts onSave={onSave} isReadonly={false} />);
 
     act(() => {
-      window.dispatchEvent(new CustomEvent(SAVE_DASHBOARD_EVENT));
+      triggerHotkey('Mod+S');
     });
 
     await waitFor(() => {
@@ -201,6 +213,8 @@ describe('DashboardShortcuts save behavior', () => {
 describe('DashboardShortcuts paste time range behavior', () => {
   beforeEach(() => {
     mockIsEditMode = false;
+    latestHotkeyConfigs = [];
+    latestSequenceConfigs = [];
     jest.clearAllMocks();
   });
 
@@ -214,7 +228,7 @@ describe('DashboardShortcuts paste time range behavior', () => {
     render(<DashboardShortcuts isReadonly={false} />);
 
     act(() => {
-      window.dispatchEvent(new CustomEvent(TIME_PASTE_EVENT));
+      triggerSequence(['T', 'V']);
     });
 
     await waitFor(() => {
@@ -233,7 +247,7 @@ describe('DashboardShortcuts paste time range behavior', () => {
     render(<DashboardShortcuts isReadonly={false} />);
 
     act(() => {
-      window.dispatchEvent(new CustomEvent(TIME_PASTE_EVENT));
+      triggerSequence(['T', 'V']);
     });
 
     await waitFor(() => {
@@ -254,7 +268,7 @@ describe('DashboardShortcuts paste time range behavior', () => {
     render(<DashboardShortcuts isReadonly={false} />);
 
     act(() => {
-      window.dispatchEvent(new CustomEvent(TIME_PASTE_EVENT));
+      triggerSequence(['T', 'V']);
     });
 
     await waitFor(() => {
@@ -271,12 +285,77 @@ describe('DashboardShortcuts paste time range behavior', () => {
     render(<DashboardShortcuts isReadonly={false} />);
 
     act(() => {
-      window.dispatchEvent(new CustomEvent(TIME_PASTE_EVENT));
+      triggerSequence(['T', 'V']);
     });
 
     await waitFor(() => {
       expect(mockSetTimeRange).not.toHaveBeenCalled();
       expect(mockWarningSnackbar).toHaveBeenCalledWith('Unable to read from clipboard. Check browser permissions.');
+    });
+  });
+});
+
+describe('DashboardShortcuts toggle edit mode behavior', () => {
+  beforeEach(() => {
+    mockIsEditMode = false;
+    latestHotkeyConfigs = [];
+    latestSequenceConfigs = [];
+    jest.clearAllMocks();
+  });
+
+  it('calls onCancelButtonClick when toggling from edit to view mode', async () => {
+    mockIsEditMode = true;
+    const onCancelButtonClick = jest.fn();
+    render(<DashboardShortcuts isReadonly={false} onCancelButtonClick={onCancelButtonClick} />);
+
+    act(() => {
+      triggerSequence(['D', 'M']);
+    });
+
+    await waitFor(() => {
+      expect(onCancelButtonClick).toHaveBeenCalled();
+      expect(mockSetEditMode).not.toHaveBeenCalled();
+    });
+  });
+
+  it('calls onEditButtonClick when toggling from view to edit mode', async () => {
+    mockIsEditMode = false;
+    const onEditButtonClick = jest.fn();
+    render(<DashboardShortcuts isReadonly={false} onEditButtonClick={onEditButtonClick} />);
+
+    act(() => {
+      triggerSequence(['D', 'M']);
+    });
+
+    await waitFor(() => {
+      expect(onEditButtonClick).toHaveBeenCalled();
+      expect(mockSetEditMode).not.toHaveBeenCalled();
+    });
+  });
+
+  it('falls back to setEditMode(false) when toggling from edit to view without onCancelButtonClick', async () => {
+    mockIsEditMode = true;
+    render(<DashboardShortcuts isReadonly={false} />);
+
+    act(() => {
+      triggerSequence(['D', 'M']);
+    });
+
+    await waitFor(() => {
+      expect(mockSetEditMode).toHaveBeenCalledWith(false);
+    });
+  });
+
+  it('falls back to setEditMode(true) when toggling from view to edit without onEditButtonClick', async () => {
+    mockIsEditMode = false;
+    render(<DashboardShortcuts isReadonly={false} />);
+
+    act(() => {
+      triggerSequence(['D', 'M']);
+    });
+
+    await waitFor(() => {
+      expect(mockSetEditMode).toHaveBeenCalledWith(true);
     });
   });
 });
