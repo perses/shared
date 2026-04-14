@@ -11,14 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, EphemeralDashboardResource, PanelGroupDefinition } from '@perses-dev/core'; // TODO
-import { createPanelRef, GridDefinition, PanelGroupId } from '@perses-dev/spec';
+import { DurationString, PanelGroupDefinition } from '@perses-dev/core';
+import { createPanelRef, DashboardSpec, GridDefinition, PanelGroupId } from '@perses-dev/spec';
+import { DashboardResource } from '../model';
 import { useDashboardStore } from './DashboardProvider';
 import { useVariableDefinitionActions, useVariableDefinitions } from './VariableProvider';
 
+type DashboardType = Omit<DashboardResource, 'spec'> & { spec: DashboardSpec & { ttl?: DurationString } };
 export function useDashboard(): {
-  dashboard: DashboardResource | EphemeralDashboardResource;
-  setDashboard: (dashboardResource: DashboardResource | EphemeralDashboardResource) => void;
+  dashboard: DashboardType;
+  setDashboard: (dashboardResource: DashboardResource) => void;
 } {
   const {
     panels,
@@ -66,9 +68,9 @@ export function useDashboard(): {
   const variables = useVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 
-  const dashboard =
+  const dashboard: DashboardType =
     kind === 'Dashboard'
-      ? ({
+      ? {
           kind,
           metadata,
           spec: {
@@ -81,8 +83,8 @@ export function useDashboard(): {
             datasources,
             links,
           },
-        } as DashboardResource)
-      : ({
+        }
+      : {
           kind,
           metadata,
           spec: {
@@ -96,9 +98,9 @@ export function useDashboard(): {
             links,
             ttl,
           },
-        } as EphemeralDashboardResource);
+        };
 
-  const setDashboard = (dashboardResource: DashboardResource | EphemeralDashboardResource): void => {
+  const setDashboard = (dashboardResource: DashboardResource): void => {
     setVariableDefinitions(dashboardResource.spec.variables);
     setDashboardResource(dashboardResource);
   };

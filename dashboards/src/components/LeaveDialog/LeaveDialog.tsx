@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core'; // TODO only dashboard spec should be used
 import { ReactElement, ReactNode, useEffect } from 'react';
 import { useBlocker } from 'react-router-dom';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import type { BlockerFunction } from '@remix-run/router';
+import { DashboardResource } from '../../model';
 
 const handleRouteChange = (event: BeforeUnloadEvent): string => {
   event.preventDefault();
@@ -69,8 +69,8 @@ export function LeaveDialog({
   original,
   current,
 }: {
-  original: DashboardResource | EphemeralDashboardResource | undefined;
-  current: DashboardResource | EphemeralDashboardResource;
+  original: DashboardResource | undefined;
+  current: DashboardResource;
 }): ReactNode {
   const handleIsBlocked: BlockerFunction = (ctx) => {
     if (JSON.stringify(original) !== JSON.stringify(current)) {

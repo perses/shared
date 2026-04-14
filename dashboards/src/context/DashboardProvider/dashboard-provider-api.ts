@@ -12,14 +12,9 @@
 // limitations under the License.
 
 import { useCallback, useMemo } from 'react';
-import {
-  DashboardResource,
-  EphemeralDashboardResource,
-  PanelGroupItemLayout,
-  PanelGroupDefinition,
-  PanelGroupItemId,
-} from '@perses-dev/core'; // TODO
+import { PanelGroupItemLayout, PanelGroupDefinition, PanelGroupItemId } from '@perses-dev/core'; // TODO
 import { DurationString, Link, PanelDefinition, PanelGroupId } from '@perses-dev/spec';
+import { DashboardResource } from '../../model';
 import { DashboardStoreState, useDashboardStore } from './DashboardProvider';
 import { DeletePanelGroupDialogState } from './delete-panel-group-slice';
 import { PanelGroupEditor } from './panel-group-editor-slice';
@@ -41,7 +36,7 @@ export function useEditMode(): { setEditMode: (isEditMode: boolean) => void; isE
 const selectDashboardActions: ({ setDashboard, openAddPanelGroup, openAddPanel }: DashboardStoreState) => {
   openAddPanelGroup: () => void;
   openAddPanel: (panelGroupId?: PanelGroupId) => void;
-  setDashboard: (dashboard: DashboardResource | EphemeralDashboardResource) => void;
+  setDashboard: (dashboard: DashboardResource) => void;
 } = ({ setDashboard, openAddPanelGroup, openAddPanel }: DashboardStoreState) => ({
   setDashboard,
   openAddPanelGroup,
@@ -53,7 +48,7 @@ const selectDashboardActions: ({ setDashboard, openAddPanelGroup, openAddPanel }
 export function useDashboardActions(): {
   openAddPanelGroup: () => void;
   openAddPanel: () => void;
-  setDashboard: (dashboard: DashboardResource | EphemeralDashboardResource) => void;
+  setDashboard: (dashboard: DashboardResource) => void;
 } {
   const { setDashboard, openAddPanelGroup, openAddPanel } = useDashboardStore(selectDashboardActions);
   return {

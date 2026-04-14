@@ -23,8 +23,9 @@ import {
 import { DatasourceStoreProvider } from '@perses-dev/dashboards';
 import { PropsWithChildren, ReactElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { DashboardResource, Datasource, GlobalDatasourceResource, DatasourceResource } from '@perses-dev/core'; // TODO Datasource should not be used like that, only the spec should be considered
-import { DashboardSpec, DatasourceSpec } from '@perses-dev/spec';
+import { Datasource, GlobalDatasourceResource, DatasourceResource } from '@perses-dev/core';
+import { DashboardSpec, DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
+import { DashboardResource } from '../model/DashboardResource';
 
 const PROJECT = 'perses';
 const FAKE_PLUGIN_NAME = 'FakeDatasourcePlugin';
@@ -494,9 +495,13 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
       listGlobalDatasources: jest.fn().mockReturnValue(Promise.resolve(data.input.datasources.global)),
     };
     const queryClient = new QueryClient();
-    const dashboard = {
-      spec: { datasources: data.input.datasources.local } as Partial<DashboardSpec>,
-    } as DashboardResource;
+    const dashboard: DashboardResource = {
+      spec: {
+        datasources: data.input.datasources.local as Record<string, DatasourceSpec<UnknownSpec>>,
+      } as DashboardSpec,
+      kind: 'Dashboard',
+      metadata: { name: 'test_dashboard', project: 'test_project' },
+    };
     const wrapper = ({ children }: PropsWithChildren): ReactElement => {
       return (
         <PluginRegistry {...mockPluginRegistry(MOCK_DS_PLUGIN)}>
