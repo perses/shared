@@ -29,10 +29,7 @@ function usePanelFocusContext(): PanelFocusContextValue {
   return ctx;
 }
 
-/**
- * Provider for panel focus tracking. Tracks which dashboard panel is currently
- * focused (hovered) so that panel-scoped keyboard shortcuts know which panel to act on.
- */
+/** Tracks which dashboard panel is currently focused (hovered) for panel-scoped shortcuts. */
 export function PanelFocusProvider({ children }: { children: ReactNode }): ReactElement {
   const [focusedPanelKey, setFocusedPanelKeyState] = useState<string | null>(null);
 
@@ -56,21 +53,13 @@ export function PanelFocusProvider({ children }: { children: ReactNode }): React
   return <PanelFocusContext.Provider value={value}>{children}</PanelFocusContext.Provider>;
 }
 
-/**
- * Returns the currently focused panel key, or null.
- */
 export function useFocusedPanel(): string | null {
   return usePanelFocusContext().focusedPanelKey;
 }
 
 const PANEL_FOCUS_DEBOUNCE_MS = 50;
 
-/**
- * Returns debounced onMouseEnter/onMouseLeave handlers for panel focus tracking.
- * Sets the focused panel key on mouse enter (debounced) and clears it on mouse leave.
- * The onMouseEnter handler also focuses the panel element for keyboard accessibility.
- * Add `tabIndex={-1}` to the panel element for focus-on-hover to work.
- */
+/** Debounced mouse enter/leave handlers for panel focus. Add `tabIndex={-1}` to the panel element. */
 export function usePanelFocusHandlers(panelKey: string): {
   onMouseEnter: (e: React.MouseEvent<HTMLElement>) => void;
   onMouseLeave: () => void;
@@ -101,7 +90,6 @@ export function usePanelFocusHandlers(panelKey: string): {
     clearFocusedPanel();
   }, [clearFocusedPanel]);
 
-  // Clean up timer on unmount
   useEffect(() => {
     return (): void => {
       if (timerRef.current !== null) {

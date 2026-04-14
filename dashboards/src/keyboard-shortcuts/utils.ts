@@ -14,9 +14,6 @@
 import { HotkeyMeta, HotkeySequence, RegisterableHotkey } from '@tanstack/hotkeys';
 import { PersesShortcutDef } from './types';
 
-/**
- * Build shared registration options for a shortcut, including TanStack HotkeyMeta.
- */
 export function buildShortcutOptions(
   def: PersesShortcutDef,
   enabled: boolean
@@ -39,9 +36,6 @@ export function buildShortcutOptions(
   };
 }
 
-/**
- * Return the shortcut hotkey, throwing if the definition does not declare one.
- */
 export function requireShortcutHotkey(def: PersesShortcutDef): RegisterableHotkey {
   if (def.hotkey === undefined) {
     throw new Error(`Shortcut ${def.id} is missing a hotkey definition`);
@@ -49,9 +43,6 @@ export function requireShortcutHotkey(def: PersesShortcutDef): RegisterableHotke
   return def.hotkey;
 }
 
-/**
- * Return the shortcut sequence, throwing if the definition does not declare one.
- */
 export function requireShortcutSequence(def: PersesShortcutDef): HotkeySequence {
   if (def.sequence === undefined) {
     throw new Error(`Shortcut ${def.id} is missing a sequence definition`);
@@ -59,9 +50,6 @@ export function requireShortcutSequence(def: PersesShortcutDef): HotkeySequence 
   return def.sequence;
 }
 
-/**
- * Return the shortcut event name, throwing if the definition does not declare one.
- */
 export function requireShortcutEvent(def: PersesShortcutDef): string {
   if (def.event === undefined) {
     throw new Error(`Shortcut ${def.id} is missing an event definition`);
@@ -69,9 +57,6 @@ export function requireShortcutEvent(def: PersesShortcutDef): string {
   return def.event;
 }
 
-/**
- * Dispatch a custom DOM event on `window` for cross-component shortcut communication.
- */
 export function dispatchShortcutEvent(eventName: string): void {
   window.dispatchEvent(new CustomEvent(eventName));
 }

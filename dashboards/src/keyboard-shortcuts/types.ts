@@ -13,9 +13,7 @@
 
 import { HotkeySequence, RegisterableHotkey } from '@tanstack/hotkeys';
 
-/**
- * Extend TanStack's HotkeyMeta with Perses-specific fields via declaration merging.
- */
+/** Extend TanStack's HotkeyMeta with Perses-specific fields. */
 declare module '@tanstack/hotkeys' {
   interface HotkeyMeta {
     /** Unique kebab-case identifier, e.g., "go-home", "save-dashboard" */
@@ -29,22 +27,10 @@ declare module '@tanstack/hotkeys' {
   }
 }
 
-/**
- * The scope in which a shortcut is active.
- * - `global`: Active on every route
- * - `dashboard`: Active only when viewing/editing a dashboard
- * - `panel`: Active only when a panel is focused (hovered)
- */
 export type ShortcutScope = 'global' | 'dashboard' | 'panel';
 
-/**
- * Category for grouping shortcuts in the help modal.
- */
 export type ShortcutCategory = 'global' | 'time-range' | 'dashboard' | 'focused-panel';
 
-/**
- * The display labels for shortcut categories in the help modal.
- */
 export const SHORTCUT_CATEGORY_LABELS: Record<ShortcutCategory, string> = {
   global: 'Global',
   'time-range': 'Time Range',
@@ -52,33 +38,22 @@ export const SHORTCUT_CATEGORY_LABELS: Record<ShortcutCategory, string> = {
   'focused-panel': 'Focused Panel',
 };
 
-/**
- * Order of categories in the help modal.
- */
 export const SHORTCUT_CATEGORY_ORDER: ShortcutCategory[] = ['global', 'time-range', 'dashboard', 'focused-panel'];
 
-/**
- * Definition of a Perses keyboard shortcut (data only, no callback).
- * Used as the source of truth for default shortcut definitions.
- */
+/** Shortcut definition (data only, no callback). */
 export interface PersesShortcutDef {
-  /** Unique kebab-case identifier, e.g., "go-home", "save-dashboard" */
   id: string;
-  /** TanStack hotkey for single-key shortcuts (e.g., "Mod+S", "E", "Escape", or RawHotkey object) */
+  /** TanStack hotkey for single-key shortcuts (e.g., "Mod+S", "E", or RawHotkey object) */
   hotkey?: RegisterableHotkey;
   /** TanStack sequence array for multi-key sequences (e.g., ['G', 'H']) */
   sequence?: HotkeySequence;
-  /** Human-readable name for display */
   name: string;
-  /** Description for help modal */
   description: string;
-  /** Category for grouping in help modal */
   category: ShortcutCategory;
-  /** Scope in which this shortcut is active */
   scope: ShortcutScope;
   /** Override TanStack's smart ignoreInputs default if needed */
   ignoreInputs?: boolean;
-  /** Custom DOM event name dispatched when this shortcut fires (e.g. 'perses:save-dashboard') */
+  /** Custom DOM event name dispatched when this shortcut fires */
   event?: string;
   /** Override for display formatting (e.g. '?' for the show-shortcuts shortcut) */
   displayOverride?: string;

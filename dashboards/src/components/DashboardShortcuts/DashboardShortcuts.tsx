@@ -49,9 +49,6 @@ const SAVE_SHORTCUT_EDIT_MODE_MESSAGE = 'Enter edit mode to save this dashboard.
 const SAVE_SHORTCUT_READONLY_MESSAGE = 'This dashboard is read-only. Keyboard save is disabled.';
 const SAVE_SHORTCUT_UNAVAILABLE_MESSAGE = 'Save action is unavailable for this dashboard.';
 
-/**
- * Parses a panelKey string back into a PanelGroupItemId.
- */
 function parsePanelKey(panelKey: string): PanelGroupItemId | null {
   const dashIndex = panelKey.indexOf('-');
   if (dashIndex === -1) return null;
@@ -88,10 +85,7 @@ export interface DashboardShortcutsProps {
   onCancelButtonClick?: () => void;
 }
 
-/**
- * Non-visual component that registers dashboard, time-range, and panel keyboard shortcuts.
- * Must be rendered within a dashboard view that provides DashboardProvider context.
- */
+/** Registers dashboard, time-range, and panel keyboard shortcuts. Requires DashboardProvider context. */
 export function DashboardShortcuts({
   onSave,
   onRefresh,
@@ -158,9 +152,6 @@ export function DashboardShortcuts({
 
   // Time range handlers
 
-  /**
-   * Resolves the current time range to absolute and computes its duration in ms.
-   */
   function resolveAbsoluteRange(): { absoluteRange: AbsoluteTimeRange; durationMs: number } {
     const absoluteRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
     const durationMs = absoluteRange.end.getTime() - absoluteRange.start.getTime();
@@ -302,7 +293,7 @@ export function DashboardShortcuts({
     }
   }, [focusedPanelKey, isEditMode, openDeletePanelDialog]);
 
-  // --- Register shortcuts with TanStack, calling handlers directly ---
+  // Register shortcuts
 
   useHotkeys(
     [
