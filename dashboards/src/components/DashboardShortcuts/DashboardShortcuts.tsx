@@ -127,10 +127,11 @@ export function DashboardShortcuts({
 
   const handleRefresh = useCallback(() => {
     refresh();
+    infoSnackbar('Dashboard refreshed.');
     if (onRefresh) {
       onRefresh();
     }
-  }, [refresh, onRefresh]);
+  }, [refresh, infoSnackbar, onRefresh]);
 
   const handleToggleEditMode = useCallback(() => {
     if (isEditMode) {

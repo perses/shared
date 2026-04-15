@@ -31,6 +31,7 @@ import {
   LeaveDialog,
 } from '../../components';
 import { OnSaveDashboard, useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
+import { PanelFocusProvider } from '../../keyboard-shortcuts';
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource | EphemeralDashboardResource;
@@ -111,16 +112,17 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
   };
 
   return (
-    <Box
-      sx={{
-        flexGrow: 1,
-        overflowX: 'hidden',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      <DashboardToolbar
+    <PanelFocusProvider>
+      <Box
+        sx={{
+          flexGrow: 1,
+          overflowX: 'hidden',
+          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <DashboardToolbar
         dashboardName={dashboardResource.metadata.name}
         dashboardTitleComponent={dashboardTitleComponent}
         initialVariableIsSticky={isInitialVariableSticky}
@@ -161,6 +163,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
           <LeaveDialog original={originalDashboard} current={dashboard} />
         )}
       </Box>
-    </Box>
+      </Box>
+    </PanelFocusProvider>
   );
 };
