@@ -124,46 +124,46 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
         }}
       >
         <DashboardToolbar
-        dashboardName={dashboardResource.metadata.name}
-        dashboardTitleComponent={dashboardTitleComponent}
-        initialVariableIsSticky={isInitialVariableSticky}
-        onSave={onSave}
-        isReadonly={isReadonly}
-        isVariableEnabled={isVariableEnabled}
-        isDatasourceEnabled={isDatasourceEnabled}
-        onEditButtonClick={onEditButtonClick}
-        onCancelButtonClick={onCancelButtonClick}
-      />
-      {!disableShortcuts && (
-        <DashboardShortcuts
+          dashboardName={dashboardResource.metadata.name}
+          dashboardTitleComponent={dashboardTitleComponent}
+          initialVariableIsSticky={isInitialVariableSticky}
           onSave={onSave}
           isReadonly={isReadonly}
+          isVariableEnabled={isVariableEnabled}
+          isDatasourceEnabled={isDatasourceEnabled}
           onEditButtonClick={onEditButtonClick}
           onCancelButtonClick={onCancelButtonClick}
         />
-      )}
-      <Box sx={{ paddingTop: 2, paddingX: 2, height: '100%' }}>
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <Dashboard
-            emptyDashboardProps={{
-              onEditButtonClick,
-              ...emptyDashboardProps,
-            }}
+        {!disableShortcuts && (
+          <DashboardShortcuts
+            onSave={onSave}
+            isReadonly={isReadonly}
+            onEditButtonClick={onEditButtonClick}
+            onCancelButtonClick={onCancelButtonClick}
           />
-        </ErrorBoundary>
-        <ChartsProvider chartsTheme={chartsTheme} enablePinning={false} enableSyncGrouping={false}>
-          <PanelDrawer />
-        </ChartsProvider>
-        <PanelGroupDialog />
-        <DeletePanelGroupDialog />
-        <DeletePanelDialog />
-        <DashboardDiscardChangesConfirmationDialog />
-        <EditJsonDialog isReadonly={!isEditMode} disableMetadataEdition={!isCreating} />
-        <SaveChangesConfirmationDialog />
-        {isLeavingConfirmDialogEnabled && isEditMode && (
-          <LeaveDialog original={originalDashboard} current={dashboard} />
         )}
-      </Box>
+        <Box sx={{ paddingTop: 2, paddingX: 2, height: '100%' }}>
+          <ErrorBoundary FallbackComponent={ErrorAlert}>
+            <Dashboard
+              emptyDashboardProps={{
+                onEditButtonClick,
+                ...emptyDashboardProps,
+              }}
+            />
+          </ErrorBoundary>
+          <ChartsProvider chartsTheme={chartsTheme} enablePinning={false} enableSyncGrouping={false}>
+            <PanelDrawer />
+          </ChartsProvider>
+          <PanelGroupDialog />
+          <DeletePanelGroupDialog />
+          <DeletePanelDialog />
+          <DashboardDiscardChangesConfirmationDialog />
+          <EditJsonDialog isReadonly={!isEditMode} disableMetadataEdition={!isCreating} />
+          <SaveChangesConfirmationDialog />
+          {isLeavingConfirmDialogEnabled && isEditMode && (
+            <LeaveDialog original={originalDashboard} current={dashboard} />
+          )}
+        </Box>
       </Box>
     </PanelFocusProvider>
   );

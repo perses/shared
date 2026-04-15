@@ -11,7 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactElement, ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 interface PanelFocusContextValue {
   focusedPanelKey: string | null;

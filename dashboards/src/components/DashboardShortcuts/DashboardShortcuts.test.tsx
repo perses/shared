@@ -13,7 +13,6 @@
 
 import { act, render, waitFor } from '@testing-library/react';
 import { DashboardResource } from '@perses-dev/core';
-import { useHotkeys, useHotkeySequences } from '@tanstack/react-hotkeys';
 import { DashboardShortcuts } from './DashboardShortcuts';
 
 const mockInfoSnackbar = jest.fn();
