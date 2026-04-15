@@ -22,6 +22,7 @@ export const PANEL_EDIT_SHORTCUT: PersesShortcutDef = {
   category: 'focused-panel',
   scope: 'panel',
   event: PANEL_EDIT_EVENT,
+  ignoreInputs: true,
 };
 
 export const PANEL_FULLSCREEN_SHORTCUT: PersesShortcutDef = {
@@ -32,6 +33,7 @@ export const PANEL_FULLSCREEN_SHORTCUT: PersesShortcutDef = {
   category: 'focused-panel',
   scope: 'panel',
   event: PANEL_FULLSCREEN_EVENT,
+  ignoreInputs: true,
 };
 
 export const PANEL_DUPLICATE_SHORTCUT: PersesShortcutDef = {

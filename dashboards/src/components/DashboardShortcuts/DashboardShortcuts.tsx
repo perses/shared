@@ -12,7 +12,13 @@
 // limitations under the License.
 
 import { ReactElement, useCallback } from 'react';
-import { AbsoluteTimeRange, isRelativeTimeRange, PanelGroupItemId, toAbsoluteTimeRange } from '@perses-dev/core';
+import {
+  AbsoluteTimeRange,
+  TimeRangeValue,
+  isRelativeTimeRange,
+  PanelGroupItemId,
+  toAbsoluteTimeRange,
+} from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useHotkeys, useHotkeySequences } from '@tanstack/react-hotkeys';
@@ -59,6 +65,12 @@ function parsePanelKey(panelKey: string): PanelGroupItemId | null {
   if (isNaN(panelGroupId)) return null;
 
   return { panelGroupId, panelGroupItemLayoutId };
+}
+
+function resolveAbsoluteRange(timeRange: TimeRangeValue): { absoluteRange: AbsoluteTimeRange; durationMs: number } {
+  const absoluteRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
+  const durationMs = absoluteRange.end.getTime() - absoluteRange.start.getTime();
+  return { absoluteRange, durationMs };
 }
 
 const selectPanelStoreActions = (
@@ -153,14 +165,8 @@ export function DashboardShortcuts({
 
   // Time range handlers
 
-  function resolveAbsoluteRange(): { absoluteRange: AbsoluteTimeRange; durationMs: number } {
-    const absoluteRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
-    const durationMs = absoluteRange.end.getTime() - absoluteRange.start.getTime();
-    return { absoluteRange, durationMs };
-  }
-
   const handleTimeZoomOut = useCallback(() => {
-    const { absoluteRange, durationMs } = resolveAbsoluteRange();
+    const { absoluteRange, durationMs } = resolveAbsoluteRange(timeRange);
     setTimeRange({
       start: new Date(absoluteRange.start.getTime() - durationMs / 2),
       end: new Date(absoluteRange.end.getTime() + durationMs / 2),
@@ -168,7 +174,7 @@ export function DashboardShortcuts({
   }, [timeRange, setTimeRange]);
 
   const handleTimeZoomIn = useCallback(() => {
-    const { absoluteRange, durationMs } = resolveAbsoluteRange();
+    const { absoluteRange, durationMs } = resolveAbsoluteRange(timeRange);
     setTimeRange({
       start: new Date(absoluteRange.start.getTime() + durationMs / 4),
       end: new Date(absoluteRange.end.getTime() - durationMs / 4),
@@ -176,7 +182,7 @@ export function DashboardShortcuts({
   }, [timeRange, setTimeRange]);
 
   const handleTimeShiftBack = useCallback(() => {
-    const { absoluteRange, durationMs } = resolveAbsoluteRange();
+    const { absoluteRange, durationMs } = resolveAbsoluteRange(timeRange);
     const shift = durationMs / 2;
     setTimeRange({
       start: new Date(absoluteRange.start.getTime() - shift),
@@ -185,7 +191,7 @@ export function DashboardShortcuts({
   }, [timeRange, setTimeRange]);
 
   const handleTimeShiftForward = useCallback(() => {
-    const { absoluteRange, durationMs } = resolveAbsoluteRange();
+    const { absoluteRange, durationMs } = resolveAbsoluteRange(timeRange);
     const shift = durationMs / 2;
     setTimeRange({
       start: new Date(absoluteRange.start.getTime() + shift),
