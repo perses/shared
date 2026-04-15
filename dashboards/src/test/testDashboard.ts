@@ -11,9 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource } from '@perses-dev/core'; // TODO
+import { DashboardResource } from '../model';
 
-const testDashboard: DashboardResource = {
+type DashboardResourceTest = Omit<DashboardResource, 'metadata'> & {
+  metadata: {
+    name: string;
+    project: string;
+    createdAt: string;
+    updatedAt: string;
+    version: number;
+  };
+};
+
+const testDashboard: DashboardResourceTest = {
   kind: 'Dashboard',
   metadata: {
     name: 'Node Stats',

@@ -14,8 +14,8 @@
 import { ReactElement, ReactNode, useState } from 'react';
 import { Box } from '@mui/material';
 import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
-import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core'; // TODO only spec should be used
 import { useDatasourceStore } from '@perses-dev/plugin-system';
+import { DashboardSpec } from '@perses-dev/spec';
 import {
   PanelDrawer,
   Dashboard,
@@ -32,9 +32,10 @@ import {
 } from '../../components';
 import { OnSaveDashboard, useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
 import { PanelFocusProvider } from '../../keyboard-shortcuts';
+import { DashboardResource } from '../../model';
 
 export interface DashboardAppProps {
-  dashboardResource: DashboardResource | EphemeralDashboardResource;
+  dashboardResource: DashboardResource;
   emptyDashboardProps?: Partial<EmptyDashboardProps>;
   isReadonly: boolean;
   isVariableEnabled: boolean;
@@ -46,7 +47,7 @@ export interface DashboardAppProps {
   isLeavingConfirmDialogEnabled?: boolean;
   dashboardTitleComponent?: ReactNode;
   onSave?: OnSaveDashboard;
-  onDiscard?: (entity: DashboardResource) => void;
+  onDiscard?: (name: string, spec: DashboardSpec) => void;
 }
 
 export const DashboardApp = (props: DashboardAppProps): ReactElement => {
@@ -68,10 +69,10 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
   const chartsTheme = useChartsTheme();
 
   const { isEditMode, setEditMode } = useEditMode();
+
   const { dashboard, setDashboard } = useDashboard();
-  const [originalDashboard, setOriginalDashboard] = useState<
-    DashboardResource | EphemeralDashboardResource | undefined
-  >(undefined);
+  const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
+
   const { setSavedDatasources } = useDatasourceStore();
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
@@ -85,7 +86,7 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
     setEditMode(false);
     closeDiscardChangesConfirmationDialog();
     if (onDiscard) {
-      onDiscard(dashboard as unknown as DashboardResource);
+      onDiscard(dashboard.metadata.name, dashboard.spec);
     }
   };
 
