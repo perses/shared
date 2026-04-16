@@ -17,7 +17,7 @@ import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
 import { AnnotationDefinition } from '@perses-dev/spec';
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
-import { useAnnotationDefinitionActions, useAnnotationDefinitions } from '../../context';
+import { useAnnotationActions, useAnnotationDefinitions } from '../../context';
 import { AnnotationEditor } from './AnnotationsEditor';
 
 export interface EditAnnotationsButtonProps extends Pick<ButtonProps, 'fullWidth'> {
@@ -45,7 +45,7 @@ export function EditAnnotationsButton({
 }: EditAnnotationsButtonProps): ReactElement {
   const [isAnnotationEditorOpen, setIsAnnotationEditorOpen] = useState(false);
   const annotationDefinitions: AnnotationDefinition[] = useAnnotationDefinitions();
-  const { setAnnotationDefinitions } = useAnnotationDefinitionActions();
+  const { setAnnotationDefinitions } = useAnnotationActions();
 
   const openAnnotationEditor = (): void => {
     setIsAnnotationEditorOpen(true);

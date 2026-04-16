@@ -16,6 +16,7 @@ import { createPanelRef, DashboardSpec, GridDefinition, PanelGroupId } from '@pe
 import { DashboardResource } from '../model';
 import { useDashboardStore } from './DashboardProvider';
 import { useVariableDefinitionActions, useVariableDefinitions } from './VariableProvider';
+import { useAnnotationActions, useAnnotationDefinitions } from './AnnotationProvider';
 
 type DashboardType = Omit<DashboardResource, 'spec'> & { spec: DashboardSpec & { ttl?: DurationString } };
 export function useDashboard(): {
@@ -65,8 +66,10 @@ export function useDashboard(): {
     })
   );
   const { setVariableDefinitions } = useVariableDefinitionActions();
+  const { setAnnotationDefinitions } = useAnnotationActions();
   // TODO: annotations
   const variables = useVariableDefinitions();
+  const annotations = useAnnotationDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 
   const dashboard: DashboardType =
@@ -79,6 +82,7 @@ export function useDashboard(): {
             panels,
             layouts,
             variables,
+            annotations,
             duration,
             refreshInterval,
             datasources,
@@ -93,6 +97,7 @@ export function useDashboard(): {
             panels,
             layouts,
             variables,
+            annotations,
             duration,
             refreshInterval,
             datasources,
@@ -104,6 +109,9 @@ export function useDashboard(): {
   const setDashboard = (dashboardResource: DashboardResource): void => {
     // TODO: annotations
     setVariableDefinitions(dashboardResource.spec.variables);
+    if (dashboardResource.spec.annotations) {
+      setAnnotationDefinitions(dashboardResource.spec.annotations);
+    }
     setDashboardResource(dashboardResource);
   };
 

@@ -1,77 +1,148 @@
-import { createContext, ReactNode, useContext, useMemo } from 'react';
-import {
-  AnnotationData,
-  AnnotationDefinition,
-  VariableDefinition,
-} from '@perses-dev/spec';
-import { useAnnotations } from '@perses-dev/plugin-system';
-import { UseQueryResult } from '@tanstack/react-query';
+import { createContext, ReactNode, useContext, useState } from 'react';
+import { AnnotationData, AnnotationDefinition } from '@perses-dev/spec';
+import { createStore, StoreApi, useStore } from 'zustand';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
+import { shallow } from 'zustand/shallow';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+import { AnnotationHydrationWrapper } from './AnnotationHydrationWrapper';
 
 export type AnnotationState = {
-  definition: AnnotationDefinition;
   data: AnnotationData | null;
   isPending: boolean;
-  error?: unknown | null;
+  error?: Error;
 };
 
 export type AnnotationStateMap = {
   [name: string]: AnnotationState;
 };
 
-export function useHydrateAnnotationDefinitions(definitions: AnnotationDefinition[]): AnnotationStateMap {
-  const annotations: Array<UseQueryResult<AnnotationData>> = useAnnotations(definitions);
+type AnnotationStoreState = {
+  annotationDefinitions: AnnotationDefinition[];
+  annotationState: AnnotationStateMap;
+};
 
-  return useMemo(() => {
-    const result: AnnotationStateMap = {};
+type AnnotationStoreActions = {
+  setAnnotationDefinitions: (definitions: AnnotationDefinition[]) => void;
+  setAnnotationState: (name: string, state: AnnotationState) => void;
+};
 
-    for (const [index, definition] of definitions.entries()) {
-      const query = annotations[index] ?? null;
-      if (query) {
-        result[definition.spec.display.name] = {
-          definition,
-          data: query.data ?? null,
-          isPending: query.isLoading,
-          error: query?.error ?? null,
-        };
-      }
-    }
+type AnnotationStore = AnnotationStoreState & AnnotationStoreActions;
 
-    return result;
-  }, [annotations, definitions]);
+const AnnotationStoreContext = createContext<StoreApi<AnnotationStore> | undefined>(undefined);
+
+export function useAnnotationStoreCtx(): StoreApi<AnnotationStore> {
+  const context = useContext(AnnotationStoreContext);
+  if (!context) {
+    throw new Error('AnnotationStoreContext not initialized');
+  }
+  return context;
 }
 
-const AnnotationDefinitionContext = createContext<AnnotationStateMap | undefined>(undefined);
+export function useAnnotationDefinitions(): AnnotationDefinition[] {
+  const store = useAnnotationStoreCtx();
+  return useStore(store, (s) => s.annotationDefinitions);
+}
+
+export function useAnnotationStates(annotationNames?: string[]): AnnotationStateMap {
+  const store = useAnnotationStoreCtx();
+  return useStoreWithEqualityFn(
+    store,
+    (s) => {
+      if (annotationNames) {
+        const result: AnnotationStateMap = {};
+        annotationNames.forEach((name) => {
+          const s = store.getState().annotationState[name];
+          if (s) {
+            result[name] = s;
+          }
+        });
+        return result;
+      }
+
+      return s.annotationState;
+    },
+    (left, right) => {
+      return JSON.stringify(left) === JSON.stringify(right);
+    }
+  );
+}
+
+export function useAnnotationActions(): AnnotationStoreActions {
+  const store = useAnnotationStoreCtx();
+  return useStoreWithEqualityFn(
+    store,
+    (s) => {
+      return {
+        setAnnotationState: s.setAnnotationState,
+        setAnnotationDefinitions: s.setAnnotationDefinitions,
+      };
+    },
+    shallow
+  );
+}
+
+export function useAnnotationDefinitionAndState(name: string): {
+  definition: AnnotationDefinition | undefined;
+  state: AnnotationState | undefined;
+} {
+  const store = useAnnotationStoreCtx();
+  return useStore(store, (s) => {
+    return {
+      definition: s.annotationDefinitions.find((d) => d.spec.display.name === name),
+      state: s.annotationState[name],
+    };
+  });
+}
+
+interface AnnotationStoreArgs {
+  initialAnnotationDefinitions?: AnnotationDefinition[];
+}
+
+function createAnnotationStore({ initialAnnotationDefinitions = [] }: AnnotationStoreArgs): StoreApi<AnnotationStore> {
+  const store = createStore<AnnotationStore>()(
+    devtools(
+      immer((set, _get) => ({
+        annotationDefinitions: initialAnnotationDefinitions,
+        annotationState: {} as Record<string, AnnotationState>,
+        setAnnotationDefinitions(definitions: AnnotationDefinition[]): void {
+          set(
+            (s) => {
+              s.annotationDefinitions = definitions;
+            },
+            false,
+            '[Annotations] setAnnotationDefinitions' // Used for action name in Redux devtools
+          );
+        },
+        setAnnotationState: (name: string, state: AnnotationState): void => {
+          set(
+            (s) => {
+              s.annotationState[name] = state;
+            },
+            false,
+            '[Annotations] setAnnotationState' // Used for action name in Redux devtools
+          );
+        },
+      }))
+    )
+  );
+  return store;
+}
 
 export interface AnnotationProviderProps {
   children: ReactNode;
-  initialAnnotations?: AnnotationDefinition[];
+  initialAnnotationDefinitions?: AnnotationDefinition[];
 }
 
-export function AnnotationRuntimeProvider({ children, initialAnnotations = [] }: AnnotationProviderProps): ReactNode {
-  // TODO: will be used for hydrating store states
-  // executing useQuery here on annotations
-  // infinite refresh loop ?
-  //
-  const state: AnnotationStateMap = useHydrateAnnotationDefinitions(initialAnnotations);
+export function AnnotationProvider({
+  children,
+  initialAnnotationDefinitions = [],
+}: AnnotationProviderProps): ReactNode {
+  const [store] = useState(() => createAnnotationStore({ initialAnnotationDefinitions }));
 
-  return <AnnotationDefinitionContext.Provider value={state}>{children}</AnnotationDefinitionContext.Provider>;
-}
-
-export function AnnotationProvider({ children, initialAnnotations = [] }: AnnotationProviderProps): ReactNode {
-  // TODO: refactor to use a store
-  const state: AnnotationStateMap = useHydrateAnnotationDefinitions(initialAnnotations);
-
-  return <AnnotationDefinitionContext.Provider value={state}>{children}</AnnotationDefinitionContext.Provider>;
-}
-
-export function useAnnotationStateMap(): AnnotationStateMap {
-  const ctx = useContext(AnnotationDefinitionContext);
-  if (ctx === undefined) {
-    throw new Error('No AnnotationDefinitionContext found. Did you forget a provider?');
-  }
-  return ctx;
-}
-
-export function setAnnotationDefinitions(definitions: VariableDefinition[]): void {
-  const newAnnotations = useHydrateAnnotationDefinitions(definitions);
+  return (
+    <AnnotationStoreContext.Provider value={store}>
+      <AnnotationHydrationWrapper>{children}</AnnotationHydrationWrapper>
+    </AnnotationStoreContext.Provider>
+  );
 }
