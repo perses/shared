@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnnotationData, AnnotationDefinition } from '@perses-dev/core';
+import { AnnotationData, AnnotationDefinition } from '@perses-dev/spec';
 import { QueryKey, useQueries, UseQueryResult } from '@tanstack/react-query';
 import { AnnotationContext, AnnotationPlugin } from '../model/annotations';
 import { usePluginRegistry, usePlugins } from './plugin-registry';
@@ -19,110 +19,6 @@ import { useTimeRange } from './TimeRangeProvider';
 import { useAllVariableValues } from './variables';
 import { useDatasourceStore } from './datasources';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
-//
-// export type AnnotationState = {
-//   value: AnnotationData | null;
-//   loading: boolean;
-//   error?: Error;
-// };
-//
-// export type AnnotationStateMap = Record<string, AnnotationState>;
-//
-// /**
-//  * Structure used as key in the {@link AnnotationStoreStateMap}.
-//  */
-// export type AnnotationStateKey = {
-//   /**
-//    * name of the annotation we want to access in the state.
-//    */
-//   name: string;
-// };
-
-// /**
-//  * A state map with two entry keys, materialized by {@link AnnotationStateKey} structure.
-//  */
-// export class AnnotationStoreStateMap {
-//   /**
-//    * "Immerable" is mandatory to be able to use this class in an immer context.
-//    * Ref: https://docs.pmnd.rs/zustand/integrations/immer-middleware#gotchas
-//    */
-//   [immerable] = true;
-//
-//   private readonly _state: Record<string, AnnotationState> = {};
-//
-//   /**
-//    * Get annotation state by key.
-//    * @param key
-//    */
-//   get(key: AnnotationStateKey): AnnotationState | undefined {
-//     return this._state[key.name];
-//   }
-//
-//   /**
-//    * Set annotation state by key.
-//    * @param key
-//    * @param value
-//    */
-//   set(key: AnnotationStateKey, value: AnnotationState): AnnotationState | undefined {
-//     this._state[key.name] = value;
-//     return value;
-//   }
-//
-//   /**
-//    * Check presence of annotation state by key.
-//    * @param key
-//    */
-//   has(key: AnnotationStateKey): boolean {
-//     return this._state[key.name] !== undefined;
-//   }
-//
-//   /**
-//    * Delete annotation state by key.
-//    * @param key
-//    */
-//   delete(key: AnnotationStateKey): boolean {
-//     const result = this.has(key);
-//     // Delete source state from state if empty
-//     delete this._state[key.name];
-//
-//     return result;
-//   }
-// }
-//
-// export type AnnotationSrv = {
-//   state: AnnotationStateMap;
-// };
-//
-// export const AnnotationContext = createContext<AnnotationSrv | undefined>(undefined);
-//
-// function useAnnotationContext(): AnnotationSrv {
-//   const ctx = useContext(AnnotationContext);
-//   if (ctx === undefined) {
-//     throw new Error('No AnnotationContext found. Did you forget a Provider?');
-//   }
-//   return ctx;
-// }
-//
-// export function useAnnotationValues(names?: string[]): AnnotationStateMap {
-//   const { state } = useAnnotationContext();
-//
-//   const values = useMemo(() => {
-//     const values: AnnotationStateMap = {};
-//     names?.forEach((name) => {
-//       const s = state[name];
-//       if (s) {
-//         values[name] = s;
-//       }
-//     });
-//     return values;
-//   }, [state, names]);
-//
-//   if (names === undefined) {
-//     return state;
-//   }
-//
-//   return values;
-// }
 
 export const ANNOTATION_KEY = 'Annotation';
 
@@ -171,7 +67,7 @@ function getQueryOptions({
   };
 }
 
-export function useAnnotations(definitions: AnnotationDefinition[]): Array<UseQueryResult<AnnotationData[]>> {
+export function useAnnotations(definitions: AnnotationDefinition[]): Array<UseQueryResult<AnnotationData>> {
   const { getPlugin } = usePluginRegistry();
   const context = useAnnotationContext();
 

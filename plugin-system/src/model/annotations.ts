@@ -1,4 +1,4 @@
-import { AbsoluteTimeRange, AnnotationData, UnknownSpec } from '@perses-dev/core';
+import { AbsoluteTimeRange, AnnotationData, UnknownSpec } from '@perses-dev/spec';
 import { DatasourceStore, VariableStateMap } from '@perses-dev/plugin-system';
 import { Plugin } from './plugin-base';
 

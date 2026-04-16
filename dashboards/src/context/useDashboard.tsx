@@ -65,6 +65,7 @@ export function useDashboard(): {
     })
   );
   const { setVariableDefinitions } = useVariableDefinitionActions();
+  // TODO: annotations
   const variables = useVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 
@@ -101,6 +102,7 @@ export function useDashboard(): {
         };
 
   const setDashboard = (dashboardResource: DashboardResource): void => {
+    // TODO: annotations
     setVariableDefinitions(dashboardResource.spec.variables);
     setDashboardResource(dashboardResource);
   };

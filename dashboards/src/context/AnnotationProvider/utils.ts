@@ -11,31 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnnotationData, AnnotationDefinition } from '@perses-dev/core';
-import { AnnotationStoreStateMap, AnnotationState } from '@perses-dev/plugin-system';
-
-function hydrateAnnotationState(annotation: AnnotationDefinition, value?: AnnotationData): AnnotationState {
-  const annoState: AnnotationState = {
-    value: null,
-    loading: false,
-  };
-
-  annoState.value = value ?? null;
-
-  return AnnotationState;
-}
-
-/**
- * Build the local annotation states according to the given definitions
- * @param definitions local annotation definitions. Dynamic part.
- */
-export function hydrateAnnotationDefinitionStates(definitions: AnnotationDefinition[]): AnnotationStoreStateMap {
-  const state: AnnotationStoreStateMap = new AnnotationStoreStateMap();
-
-  for (const definition of definitions) {
-    const name = definition.spec.display.name;
-    state.set({ name }, hydrateAnnotationState(definition));
-  }
-
-  return state;
-}
+// import { AnnotationData, AnnotationDefinition } from '@perses-dev/spec';
+// import { AnnotationStoreStateMap, AnnotationState } from '@perses-dev/plugin-system';
+//
+// function hydrateAnnotationState(annotation: AnnotationDefinition, value?: AnnotationData): AnnotationState {
+//   const annoState: AnnotationState = {
+//     value: null,
+//     loading: false,
+//   };
+//
+//   annoState.value = value ?? null;
+//
+//   return AnnotationState;
+// }
+//
+// /**
+//  * Build the local annotation states according to the given definitions
+//  * @param definitions local annotation definitions. Dynamic part.
+//  */
+// export function hydrateAnnotationDefinitionStates(definitions: AnnotationDefinition[]): AnnotationStoreStateMap {
+//   const state: AnnotationStoreStateMap = new AnnotationStoreStateMap();
+//
+//   for (const definition of definitions) {
+//     const name = definition.spec.display.name;
+//     state.set({ name }, hydrateAnnotationState(definition));
+//   }
+//
+//   return state;
+// }
