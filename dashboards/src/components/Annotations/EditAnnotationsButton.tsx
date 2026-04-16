@@ -15,7 +15,7 @@ import { ReactElement, useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
-import { AnnotationDefinition } from '@perses-dev/core';
+import { AnnotationDefinition } from '@perses-dev/spec';
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useAnnotationDefinitionActions, useAnnotationDefinitions } from '../../context';
 import { AnnotationEditor } from './AnnotationsEditor';

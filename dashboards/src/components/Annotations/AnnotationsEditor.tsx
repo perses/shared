@@ -29,7 +29,8 @@ import {
   styled,
 } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
-import { Action, AnnotationDefinition } from '@perses-dev/core';
+import { Action } from '@perses-dev/core';
+import { AnnotationDefinition, Definition, UnknownSpec } from '@perses-dev/spec';
 import { useImmer } from 'use-immer';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
@@ -101,7 +102,7 @@ export function AnnotationEditor(props: {
         kind: 'Annotation',
         spec: {
           display: { name: 'NewAnnotation' },
-          plugin: {},
+          plugin: {} as Definition<UnknownSpec>,
         },
       });
     });
