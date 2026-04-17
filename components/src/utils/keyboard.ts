@@ -22,6 +22,7 @@ export function createModEnterHandler(execute: () => void): React.KeyboardEventH
   return (event: React.KeyboardEvent<HTMLElement>): void => {
     if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
       event.preventDefault();
+      event.stopPropagation();
       execute();
     }
   };
