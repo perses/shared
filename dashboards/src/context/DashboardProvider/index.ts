@@ -18,4 +18,4 @@ export type { PanelGroupEditor, PanelGroupEditorValues } from './panel-group-edi
 export type { DeletePanelDialogState } from './delete-panel-slice';
 export type { DiscardChangesConfirmationDialogState } from './discard-changes-dialog-slice';
 export { useSaveDashboard } from './use-save-dashboard';
-export type { UseSaveDashboardResult } from './use-save-dashboard';
+export type { SaveDashboardResult } from './use-save-dashboard';
