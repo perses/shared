@@ -19,7 +19,7 @@ import { useDashboard } from '../useDashboard';
 import { OnSaveDashboard } from './common';
 import { useEditMode, useSaveChangesConfirmationDialog } from './dashboard-provider-api';
 
-export interface UseSaveDashboardResult {
+export interface SaveDashboardResult {
   /**
    * Triggers the save flow. If time range, refresh interval, or variable defaults have been
    * modified, opens the SaveChangesConfirmationDialog before saving. Otherwise saves directly.
@@ -43,7 +43,7 @@ export interface UseSaveDashboardResult {
  *
  * Used by both SaveDashboardButton and DashboardShortcuts to ensure consistent save behavior.
  */
-export function useSaveDashboard(onSave?: OnSaveDashboard): UseSaveDashboardResult {
+export function useSaveDashboard(onSave?: OnSaveDashboard): SaveDashboardResult {
   const [isSaving, setSaving] = useState(false);
   const { dashboard, setDashboard } = useDashboard();
   const { setEditMode } = useEditMode();
