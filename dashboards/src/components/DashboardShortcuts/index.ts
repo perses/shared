@@ -11,5 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { DashboardShortcuts } from './DashboardShortcuts';
-export type { DashboardShortcutsProps } from './DashboardShortcuts';
+export { useDashboardShortcuts } from './useDashboardShortcuts';
+export type { UseDashboardShortcutsOptions } from './useDashboardShortcuts';

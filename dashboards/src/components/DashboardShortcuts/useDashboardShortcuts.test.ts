@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { act, render, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { DashboardResource } from '@perses-dev/core';
-import { DashboardShortcuts } from './DashboardShortcuts';
+import { useDashboardShortcuts } from './useDashboardShortcuts';
 
 const mockInfoSnackbar = jest.fn();
 const mockWarningSnackbar = jest.fn();
@@ -156,7 +156,7 @@ function triggerSequence(sequence: string[]): void {
   config.callback();
 }
 
-describe('DashboardShortcuts save behavior', () => {
+describe('useDashboardShortcuts save behavior', () => {
   beforeEach(() => {
     mockIsEditMode = false;
     latestHotkeyConfigs = [];
@@ -166,7 +166,7 @@ describe('DashboardShortcuts save behavior', () => {
 
   it('shows an info snackbar when save shortcut is used outside edit mode', async () => {
     const onSave = jest.fn(async () => undefined);
-    render(<DashboardShortcuts onSave={onSave} isReadonly={false} />);
+    renderHook(() => useDashboardShortcuts({ onSave, isReadonly: false }));
 
     act(() => {
       triggerHotkey('Mod+S');
@@ -181,7 +181,7 @@ describe('DashboardShortcuts save behavior', () => {
   it('shows a warning snackbar when dashboard is read-only', async () => {
     const onSave = jest.fn(async () => undefined);
     mockIsEditMode = true;
-    render(<DashboardShortcuts onSave={onSave} isReadonly={true} />);
+    renderHook(() => useDashboardShortcuts({ onSave, isReadonly: true }));
 
     act(() => {
       triggerHotkey('Mod+S');
@@ -196,7 +196,7 @@ describe('DashboardShortcuts save behavior', () => {
   it('calls save callback and exits edit mode when save shortcut is used in edit mode', async () => {
     const onSave = jest.fn(async () => undefined);
     mockIsEditMode = true;
-    render(<DashboardShortcuts onSave={onSave} isReadonly={false} />);
+    renderHook(() => useDashboardShortcuts({ onSave, isReadonly: false }));
 
     act(() => {
       triggerHotkey('Mod+S');
@@ -209,7 +209,7 @@ describe('DashboardShortcuts save behavior', () => {
   });
 });
 
-describe('DashboardShortcuts paste time range behavior', () => {
+describe('useDashboardShortcuts paste time range behavior', () => {
   beforeEach(() => {
     mockIsEditMode = false;
     latestHotkeyConfigs = [];
@@ -224,7 +224,7 @@ describe('DashboardShortcuts paste time range behavior', () => {
       clipboard: { readText: jest.fn().mockResolvedValue(`${start} - ${end}`) },
     });
 
-    render(<DashboardShortcuts isReadonly={false} />);
+    renderHook(() => useDashboardShortcuts({ isReadonly: false }));
 
     act(() => {
       triggerSequence(['T', 'V']);
@@ -243,7 +243,7 @@ describe('DashboardShortcuts paste time range behavior', () => {
       clipboard: { readText: jest.fn().mockResolvedValue('not a time range') },
     });
 
-    render(<DashboardShortcuts isReadonly={false} />);
+    renderHook(() => useDashboardShortcuts({ isReadonly: false }));
 
     act(() => {
       triggerSequence(['T', 'V']);
@@ -264,7 +264,7 @@ describe('DashboardShortcuts paste time range behavior', () => {
       clipboard: { readText: jest.fn().mockResolvedValue(`${start} - ${end}`) },
     });
 
-    render(<DashboardShortcuts isReadonly={false} />);
+    renderHook(() => useDashboardShortcuts({ isReadonly: false }));
 
     act(() => {
       triggerSequence(['T', 'V']);
@@ -281,7 +281,7 @@ describe('DashboardShortcuts paste time range behavior', () => {
       clipboard: { readText: jest.fn().mockRejectedValue(new Error('Permission denied')) },
     });
 
-    render(<DashboardShortcuts isReadonly={false} />);
+    renderHook(() => useDashboardShortcuts({ isReadonly: false }));
 
     act(() => {
       triggerSequence(['T', 'V']);
@@ -294,7 +294,7 @@ describe('DashboardShortcuts paste time range behavior', () => {
   });
 });
 
-describe('DashboardShortcuts toggle edit mode behavior', () => {
+describe('useDashboardShortcuts toggle edit mode behavior', () => {
   beforeEach(() => {
     mockIsEditMode = false;
     latestHotkeyConfigs = [];
@@ -305,7 +305,7 @@ describe('DashboardShortcuts toggle edit mode behavior', () => {
   it('calls onCancelButtonClick when toggling from edit to view mode', async () => {
     mockIsEditMode = true;
     const onCancelButtonClick = jest.fn();
-    render(<DashboardShortcuts isReadonly={false} onCancelButtonClick={onCancelButtonClick} />);
+    renderHook(() => useDashboardShortcuts({ isReadonly: false, onCancelButtonClick }));
 
     act(() => {
       triggerSequence(['D', 'M']);
@@ -320,7 +320,7 @@ describe('DashboardShortcuts toggle edit mode behavior', () => {
   it('calls onEditButtonClick when toggling from view to edit mode', async () => {
     mockIsEditMode = false;
     const onEditButtonClick = jest.fn();
-    render(<DashboardShortcuts isReadonly={false} onEditButtonClick={onEditButtonClick} />);
+    renderHook(() => useDashboardShortcuts({ isReadonly: false, onEditButtonClick }));
 
     act(() => {
       triggerSequence(['D', 'M']);
@@ -334,7 +334,7 @@ describe('DashboardShortcuts toggle edit mode behavior', () => {
 
   it('falls back to setEditMode(false) when toggling from edit to view without onCancelButtonClick', async () => {
     mockIsEditMode = true;
-    render(<DashboardShortcuts isReadonly={false} />);
+    renderHook(() => useDashboardShortcuts({ isReadonly: false }));
 
     act(() => {
       triggerSequence(['D', 'M']);
@@ -347,7 +347,7 @@ describe('DashboardShortcuts toggle edit mode behavior', () => {
 
   it('falls back to setEditMode(true) when toggling from view to edit without onEditButtonClick', async () => {
     mockIsEditMode = false;
-    render(<DashboardShortcuts isReadonly={false} />);
+    renderHook(() => useDashboardShortcuts({ isReadonly: false }));
 
     act(() => {
       triggerSequence(['D', 'M']);

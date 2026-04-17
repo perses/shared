@@ -11,14 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback } from 'react';
-import {
-  AbsoluteTimeRange,
-  TimeRangeValue,
-  isRelativeTimeRange,
-  PanelGroupItemId,
-  toAbsoluteTimeRange,
-} from '@perses-dev/core';
+import { useCallback } from 'react';
+import { AbsoluteTimeRange, TimeRangeValue, isRelativeTimeRange, toAbsoluteTimeRange } from '@perses-dev/spec';
+import { PanelGroupItemId } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useHotkeys, useHotkeySequences } from '@tanstack/react-hotkeys';
@@ -67,10 +62,21 @@ function parsePanelKey(panelKey: string): PanelGroupItemId | null {
   return { panelGroupId, panelGroupItemLayoutId };
 }
 
-function resolveAbsoluteRange(timeRange: TimeRangeValue): { absoluteRange: AbsoluteTimeRange; durationMs: number } {
+// Zoom limits: 1 second minimum, 10 years maximum
+const MIN_ZOOM_DURATION_MS = 1_000;
+const MAX_ZOOM_DURATION_MS = 10 * 365.25 * 24 * 60 * 60 * 1_000;
+
+function resolveAbsoluteRange(timeRange: TimeRangeValue): {
+  absoluteRange: AbsoluteTimeRange;
+  durationMs: number;
+  midpointMs: number;
+} {
   const absoluteRange = isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange;
-  const durationMs = absoluteRange.end.getTime() - absoluteRange.start.getTime();
-  return { absoluteRange, durationMs };
+  const startMs = absoluteRange.start.getTime();
+  const endMs = absoluteRange.end.getTime();
+  const durationMs = endMs - startMs;
+  const midpointMs = Math.round(startMs + durationMs / 2);
+  return { absoluteRange, durationMs, midpointMs };
 }
 
 const selectPanelStoreActions = (
@@ -89,22 +95,24 @@ const selectPanelStoreActions = (
   panelEditor: state.panelEditor,
 });
 
-export interface DashboardShortcutsProps {
+export interface UseDashboardShortcutsOptions {
   onSave?: OnSaveDashboard;
   onRefresh?: () => void;
   isReadonly: boolean;
   onEditButtonClick?: () => void;
   onCancelButtonClick?: () => void;
+  disabled?: boolean;
 }
 
 /** Registers dashboard, time-range, and panel keyboard shortcuts. Requires DashboardProvider context. */
-export function DashboardShortcuts({
+export function useDashboardShortcuts({
   onSave,
   onRefresh,
   isReadonly,
   onEditButtonClick,
   onCancelButtonClick,
-}: DashboardShortcutsProps): ReactElement | null {
+  disabled = false,
+}: UseDashboardShortcutsOptions): void {
   const focusedPanelKey = useFocusedPanel();
   const { isEditMode, setEditMode } = useEditMode();
   const { timeRange, setTimeRange, refresh } = useTimeRange();
@@ -166,24 +174,28 @@ export function DashboardShortcuts({
   // Time range handlers
 
   const handleTimeZoomOut = useCallback(() => {
-    const { absoluteRange, durationMs } = resolveAbsoluteRange(timeRange);
+    const { durationMs, midpointMs } = resolveAbsoluteRange(timeRange);
+    const newDuration = Math.min(durationMs * 2, MAX_ZOOM_DURATION_MS);
+    const halfNew = Math.round(newDuration / 2);
     setTimeRange({
-      start: new Date(absoluteRange.start.getTime() - durationMs / 2),
-      end: new Date(absoluteRange.end.getTime() + durationMs / 2),
+      start: new Date(midpointMs - halfNew),
+      end: new Date(midpointMs + halfNew),
     });
   }, [timeRange, setTimeRange]);
 
   const handleTimeZoomIn = useCallback(() => {
-    const { absoluteRange, durationMs } = resolveAbsoluteRange(timeRange);
+    const { durationMs, midpointMs } = resolveAbsoluteRange(timeRange);
+    const newDuration = Math.max(Math.round(durationMs / 2), MIN_ZOOM_DURATION_MS);
+    const halfNew = Math.round(newDuration / 2);
     setTimeRange({
-      start: new Date(absoluteRange.start.getTime() + durationMs / 4),
-      end: new Date(absoluteRange.end.getTime() - durationMs / 4),
+      start: new Date(midpointMs - halfNew),
+      end: new Date(midpointMs + halfNew),
     });
   }, [timeRange, setTimeRange]);
 
   const handleTimeShiftBack = useCallback(() => {
     const { absoluteRange, durationMs } = resolveAbsoluteRange(timeRange);
-    const shift = durationMs / 2;
+    const shift = Math.round(durationMs / 2);
     setTimeRange({
       start: new Date(absoluteRange.start.getTime() - shift),
       end: new Date(absoluteRange.end.getTime() - shift),
@@ -192,7 +204,7 @@ export function DashboardShortcuts({
 
   const handleTimeShiftForward = useCallback(() => {
     const { absoluteRange, durationMs } = resolveAbsoluteRange(timeRange);
-    const shift = durationMs / 2;
+    const shift = Math.round(durationMs / 2);
     setTimeRange({
       start: new Date(absoluteRange.start.getTime() + shift),
       end: new Date(absoluteRange.end.getTime() + shift),
@@ -228,12 +240,7 @@ export function DashboardShortcuts({
           warningSnackbar(`Clipboard does not contain a valid time range. ${FORMAT_HINT}`);
           return;
         }
-        const startStr = parts[0];
-        const endStr = parts[1];
-        if (startStr === undefined || endStr === undefined) {
-          warningSnackbar(`Clipboard does not contain a valid time range. ${FORMAT_HINT}`);
-          return;
-        }
+        const [startStr, endStr] = parts as [string, string];
         const start = new Date(startStr.trim());
         const end = new Date(endStr.trim());
         if (isNaN(start.getTime()) || isNaN(end.getTime())) {
@@ -254,7 +261,7 @@ export function DashboardShortcuts({
   }, [setTimeRange, infoSnackbar, warningSnackbar]);
 
   // Panel handlers
-  const handlePanelEdit = useCallback(() => {
+  const handlePanelEditToggle = useCallback(() => {
     if (panelEditor !== undefined) {
       panelEditor.close();
       return;
@@ -268,7 +275,7 @@ export function DashboardShortcuts({
     }
   }, [focusedPanelKey, isEditMode, openEditPanel, panelEditor]);
 
-  const handlePanelFullscreen = useCallback(() => {
+  const handlePanelFullscreenToggle = useCallback(() => {
     if (viewPanel !== undefined) {
       setViewPanel(undefined);
       return;
@@ -304,12 +311,16 @@ export function DashboardShortcuts({
 
   useHotkeys(
     [
-      { def: SAVE_DASHBOARD_SHORTCUT, enabled: true, callback: handleSave },
-      { def: PANEL_EDIT_SHORTCUT, enabled: panelFocused || panelEditor !== undefined, callback: handlePanelEdit },
+      { def: SAVE_DASHBOARD_SHORTCUT, enabled: !disabled, callback: handleSave },
+      {
+        def: PANEL_EDIT_SHORTCUT,
+        enabled: !disabled && (panelFocused || panelEditor !== undefined),
+        callback: handlePanelEditToggle,
+      },
       {
         def: PANEL_FULLSCREEN_SHORTCUT,
-        enabled: panelFocused || viewPanel !== undefined,
-        callback: handlePanelFullscreen,
+        enabled: !disabled && (panelFocused || viewPanel !== undefined),
+        callback: handlePanelFullscreenToggle,
       },
     ].map(({ def, enabled, callback }) => ({
       hotkey: requireShortcutHotkey(def),
@@ -320,23 +331,21 @@ export function DashboardShortcuts({
 
   useHotkeySequences(
     [
-      { def: REFRESH_DASHBOARD_SHORTCUT, enabled: true, callback: handleRefresh },
-      { def: TOGGLE_EDIT_MODE_SHORTCUT, enabled: true, callback: handleToggleEditMode },
-      { def: TIME_ZOOM_OUT_SHORTCUT, enabled: true, callback: handleTimeZoomOut },
-      { def: TIME_ZOOM_IN_SHORTCUT, enabled: true, callback: handleTimeZoomIn },
-      { def: TIME_SHIFT_BACK_SHORTCUT, enabled: true, callback: handleTimeShiftBack },
-      { def: TIME_SHIFT_FORWARD_SHORTCUT, enabled: true, callback: handleTimeShiftForward },
-      { def: TIME_MAKE_ABSOLUTE_SHORTCUT, enabled: true, callback: handleTimeMakeAbsolute },
-      { def: TIME_COPY_SHORTCUT, enabled: true, callback: handleTimeCopy },
-      { def: TIME_PASTE_SHORTCUT, enabled: true, callback: handleTimePaste },
-      { def: PANEL_DUPLICATE_SHORTCUT, enabled: panelFocused, callback: handlePanelDuplicate },
-      { def: PANEL_DELETE_SHORTCUT, enabled: panelFocused, callback: handlePanelDelete },
+      { def: REFRESH_DASHBOARD_SHORTCUT, enabled: !disabled, callback: handleRefresh },
+      { def: TOGGLE_EDIT_MODE_SHORTCUT, enabled: !disabled, callback: handleToggleEditMode },
+      { def: TIME_ZOOM_OUT_SHORTCUT, enabled: !disabled, callback: handleTimeZoomOut },
+      { def: TIME_ZOOM_IN_SHORTCUT, enabled: !disabled, callback: handleTimeZoomIn },
+      { def: TIME_SHIFT_BACK_SHORTCUT, enabled: !disabled, callback: handleTimeShiftBack },
+      { def: TIME_SHIFT_FORWARD_SHORTCUT, enabled: !disabled, callback: handleTimeShiftForward },
+      { def: TIME_MAKE_ABSOLUTE_SHORTCUT, enabled: !disabled, callback: handleTimeMakeAbsolute },
+      { def: TIME_COPY_SHORTCUT, enabled: !disabled, callback: handleTimeCopy },
+      { def: TIME_PASTE_SHORTCUT, enabled: !disabled, callback: handleTimePaste },
+      { def: PANEL_DUPLICATE_SHORTCUT, enabled: !disabled && panelFocused, callback: handlePanelDuplicate },
+      { def: PANEL_DELETE_SHORTCUT, enabled: !disabled && panelFocused, callback: handlePanelDelete },
     ].map(({ def, enabled, callback }) => ({
       sequence: requireShortcutSequence(def),
       callback,
       options: buildShortcutOptions(def, enabled),
     }))
   );
-
-  return null;
 }
