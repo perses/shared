@@ -43,6 +43,10 @@ function usePanelFocusContext(): PanelFocusContextValue {
 export function PanelFocusProvider({ children }: { children: ReactNode }): ReactElement {
   const [focusedPanelKey, setFocusedPanelKeyState] = useState<string | null>(null);
 
+  // This wrapper narrow the setter type (string-only / null-only) and provide
+  // stable references for the useMemo context value below. React guarantees
+  // setFocusedPanelKeyState is stable, but useCallback makes the stability
+  // explicit and satisfies exhaustive-deps when used in useMemo.
   const setFocusedPanel = useCallback((panelKey: string) => {
     setFocusedPanelKeyState(panelKey);
   }, []);
