@@ -22,6 +22,7 @@ import { TimeOption } from '../model';
 import { SettingsAutocomplete, SettingsAutocompleteOption } from '../SettingsAutocomplete';
 import { DateTimeRangePicker } from './DateTimeRangePicker';
 import { buildCustomTimeOption, formatTimeRange } from './utils';
+import { getGMTOffset } from '../utils/format';
 
 interface TimeRangeSelectorProps {
   /**
@@ -83,11 +84,20 @@ export function TimeRangeSelector({
     [value, timeZone]
   );
 
+  const selectedDisplay = useMemo(() => {
+    const match = timeOptions.find(
+      (opt) => formatTimeRange(opt.value, timeZone) === formatTimeRange(value, timeZone)
+    );
+  
+    return match?.display ?? formatTimeRange(value, timeZone);
+  }, [value, timeOptions, timeZone]);
+
   const [open, setOpen] = useState(false);
   const tzOptions = timeZoneOptions ?? getTimeZoneOptions();
   const [tzAnchorEl, setTzAnchorEl] = useState<HTMLElement | null>(null);
   const tzOpen = Boolean(tzAnchorEl);
   const tzLabel = tzOptions.find((o) => o.value === timeZone)?.display ?? timeZone;
+  const tzOffset = getGMTOffset(timeZone);
   const tzAutocompleteOptions = tzOptions.map((o) => ({ id: o.value, label: o.display }));
   let tzAutocompleteValue: SettingsAutocompleteOption | undefined = undefined;
   {
@@ -150,6 +160,14 @@ export function TimeRangeSelector({
           value={formatTimeRange(value, timeZone)}
           onClick={() => setOpen(!open)}
           IconComponent={Calendar}
+          renderValue={() => (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <span>{selectedDisplay}</span>
+              <Box sx={{ typography: 'caption', color: 'text.secondary' }}>
+                · {tzOffset}
+              </Box>
+            </Box>
+          )}
           inputProps={{ 'aria-label': `Select time range. Currently set to ${value}` }}
           sx={{
             '.MuiSelect-icon': { marginTop: '1px', transform: 'none' },

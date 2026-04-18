@@ -10,7 +10,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import { dateFormatOptionsWithTimeZone, formatWithTimeZone } from './format';
+import { dateFormatOptionsWithTimeZone, formatWithTimeZone, getGMTOffset } from './format';
 
 const DATE = new Date(168523200000);
 
@@ -43,5 +43,24 @@ describe('dateFormatOptionsWithTimeZone', () => {
     expect(dateFormatOptionsWithTimeZone(DATE_FORMAT_OPTIONS, 'browser').timeZone).toBeUndefined();
     expect(dateFormatOptionsWithTimeZone(DATE_FORMAT_OPTIONS, 'local').timeZone).toBeUndefined();
     expect(dateFormatOptionsWithTimeZone(DATE_FORMAT_OPTIONS).timeZone).toBeUndefined();
+  });
+});
+
+describe('getGMTOffset', () => {
+  it('should return GMT offset for UTC', () => {
+    expect(getGMTOffset('UTC')).toContain('GMT');
+  });
+
+  it('should return GMT offset for a specific timezone', () => {
+    const offset = getGMTOffset('Africa/Asmara');
+    expect(offset).toContain('GMT');
+  });
+
+  it('should fallback to browser timezone for local/browser', () => {
+    const localOffset = getGMTOffset('local');
+    const browserOffset = getGMTOffset('browser');
+
+    expect(localOffset).toContain('GMT');
+    expect(browserOffset).toContain('GMT');
   });
 });
