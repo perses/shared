@@ -52,7 +52,7 @@ describe('getGMTOffset', () => {
   });
 
   it('should return GMT offset for a specific timezone', () => {
-    const offset = getGMTOffset('Africa/Asmara');
+    const offset = getGMTOffset('America/Los_Angeles');
     expect(offset).toContain('GMT');
   });
 
