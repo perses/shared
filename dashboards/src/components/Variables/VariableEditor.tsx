@@ -46,7 +46,13 @@ import ContentDuplicate from 'mdi-material-ui/ContentDuplicate';
 import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
 
-import { ValidationProvider, VARIABLE_TYPES, VariableEditorForm, VariableState } from '@perses-dev/plugin-system';
+import {
+  useResolveListVariableValues,
+  ValidationProvider,
+  VARIABLE_TYPES,
+  VariableEditorForm,
+  VariableState,
+} from '@perses-dev/plugin-system';
 import { InfoTooltip } from '@perses-dev/components';
 import { useDiscardChangesConfirmationDialog, VariableProvider } from '../../context';
 import { hydrateVariableDefinitionStates } from '../../context/VariableProvider/hydrationUtils';
@@ -89,6 +95,8 @@ export function VariableEditor(props: {
     return [hydrateVariableDefinitionStates(variableDefinitions, {}, externalVariableDefinitions)];
   }, [externalVariableDefinitions, variableDefinitions]);
   const currentEditingVariableDefinition = typeof variableEditIdx === 'number' && variableDefinitions[variableEditIdx];
+
+  const { initialValues, isLoading: isResolvingVariables } = useResolveListVariableValues(variableDefinitions);
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
@@ -181,9 +189,14 @@ export function VariableEditor(props: {
 
   return (
     <>
-      {currentEditingVariableDefinition && (
-        <ValidationProvider>
-          <VariableProvider initialVariableDefinitions={variableDefinitions}>
+      {currentEditingVariableDefinition && !isResolvingVariables && (
+        <VariableProvider
+          initialVariableDefinitions={variableDefinitions}
+          externalVariableDefinitions={externalVariableDefinitions}
+          builtinVariableDefinitions={builtinVariableDefinitions}
+          initialValues={initialValues}
+        >
+          <ValidationProvider>
             <VariableEditorForm
               initialVariableDefinition={currentEditingVariableDefinition}
               action={variableFormAction}
@@ -202,8 +215,8 @@ export function VariableEditor(props: {
                 setVariableEditIdx(null);
               }}
             />
-          </VariableProvider>
-        </ValidationProvider>
+          </ValidationProvider>
+        </VariableProvider>
       )}
       {!currentEditingVariableDefinition && (
         <>

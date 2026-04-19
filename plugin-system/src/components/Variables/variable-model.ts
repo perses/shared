@@ -11,10 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ListVariableDefinition } from '@perses-dev/spec';
-import { useQuery, UseQueryResult } from '@tanstack/react-query';
-import { VariableOption } from '../../model';
-import { useDatasourceStore, usePlugin, useTimeRange, useAllVariableValues, VariableStateMap } from '../../runtime';
+import { ListVariableDefinition, VariableDefinition, VariableValue } from '@perses-dev/spec';
+import { useQueries, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
+import { useCallback, useMemo, useState } from 'react';
+import { GetVariableOptionsContext, VariableOption, VariablePlugin } from '../../model';
+import {
+  useAllVariableValues,
+  useDatasourceStore,
+  usePlugin,
+  usePlugins,
+  useTimeRange,
+  VariableStateMap,
+} from '../../runtime';
 
 export function filterVariableList(data: VariableOption[], capturedRegexp: RegExp): VariableOption[] {
   const result: VariableOption[] = [];
@@ -39,49 +47,151 @@ export function filterVariableList(data: VariableOption[], capturedRegexp: RegEx
   return result;
 }
 
-export function useListVariablePluginValues(definition: ListVariableDefinition): UseQueryResult<VariableOption[]> {
-  const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
+function useVariablePluginContext(): GetVariableOptionsContext {
   const datasourceStore = useDatasourceStore();
   const allVariables = useAllVariableValues();
   const { absoluteTimeRange: timeRange } = useTimeRange();
 
-  const variablePluginCtx = { timeRange, datasourceStore, variables: allVariables };
+  return { timeRange, datasourceStore, variables: allVariables };
+}
 
-  const spec = definition.spec.plugin.spec;
+const getVariableQueryConfig = (
+  definition: ListVariableDefinition,
+  variablePluginCtx: GetVariableOptionsContext,
+  variablePlugin: VariablePlugin | undefined,
+  enabled: boolean,
+  onFetched?: (name: string, options: VariableOption[], definition: ListVariableDefinition) => void
+): UseQueryOptions<VariableOption[]> => {
   const capturingRegexp =
     definition.spec.capturingRegexp !== undefined ? new RegExp(definition.spec.capturingRegexp, 'g') : undefined;
+  const variablesValueKey = getVariableValuesKey(variablePluginCtx.variables);
+  return {
+    queryKey: ['variable', definition, variablePluginCtx.timeRange, variablesValueKey],
+    queryFn: async ({ signal }): Promise<VariableOption[]> => {
+      const resp = await variablePlugin?.getVariableOptions(definition.spec.plugin.spec, variablePluginCtx, signal);
+      if (!resp?.data?.length) {
+        onFetched?.(definition.spec.name, [], definition);
+        return [];
+      }
+      const options = capturingRegexp ? filterVariableList(resp.data, capturingRegexp) : resp.data;
+      onFetched?.(definition.spec.name, options, definition);
+      return options;
+    },
+    enabled,
+  };
+};
 
-  let dependsOnVariables: string[] = Object.keys(allVariables); // Default to all variables
+function resolveDependsOnVariables(
+  variablePlugin: VariablePlugin | undefined,
+  variablePluginCtx: GetVariableOptionsContext,
+  definition: ListVariableDefinition
+): string[] {
+  let dependsOnVariables: string[] = Object.keys(variablePluginCtx.variables); // Default to all variables
   if (variablePlugin?.dependsOn) {
-    const dependencies = variablePlugin.dependsOn(spec, variablePluginCtx);
+    const dependencies = variablePlugin.dependsOn(definition.spec.plugin.spec, variablePluginCtx);
     dependsOnVariables = dependencies.variables ? dependencies.variables : dependsOnVariables;
   }
   // Exclude self variable to avoid circular dependency
-  dependsOnVariables = dependsOnVariables.filter((v) => v !== definition.spec.name);
+  return dependsOnVariables.filter((v) => v !== definition.spec.name);
+}
 
-  const variables = useAllVariableValues(dependsOnVariables);
+export function useListVariablePluginValues(definition: ListVariableDefinition): UseQueryResult<VariableOption[]> {
+  const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
 
-  let waitToLoad = false;
-  if (dependsOnVariables) {
-    waitToLoad = dependsOnVariables.some((v) => variables[v]?.loading);
+  const variablePluginCtx = useVariablePluginContext();
+
+  const dependsOnVariables = resolveDependsOnVariables(variablePlugin, variablePluginCtx, definition);
+
+  const dependentVariables = useAllVariableValues(dependsOnVariables);
+  const waitToLoad = dependsOnVariables.some((v) => dependentVariables[v]?.loading);
+
+  const ctx = { ...variablePluginCtx, variables: dependentVariables };
+
+  return useQuery(getVariableQueryConfig(definition, ctx, variablePlugin, !!variablePlugin && !waitToLoad));
+}
+
+function resolveDefaultValue(definition: ListVariableDefinition, options: VariableOption[]): VariableValue {
+  const { defaultValue, allowMultiple } = definition.spec;
+  if (defaultValue !== undefined && defaultValue !== null) {
+    return defaultValue;
   }
+  if (options.length > 0 && options[0]?.value) {
+    const first = options[0].value;
+    return allowMultiple ? [first] : first;
+  }
+  return allowMultiple ? [] : '';
+}
 
-  const variablesValueKey = getVariableValuesKey(variables);
+/**
+ * Resolves initial values for all ListVariable definitions by fetching their options in dependency order.
+ * Returns a map of variable names to their resolved default values, merging with any already-provided outer variables.
+ */
+export function useResolveListVariableValues(variableDefinitions: VariableDefinition[]): {
+  initialValues: Record<string, VariableValue>;
+  isLoading: boolean;
+} {
+  const { timeRange, datasourceStore, variables: outerVariables } = useVariablePluginContext();
 
-  return useQuery({
-    queryKey: ['variable', definition, timeRange, variablesValueKey],
-    queryFn: async ({ signal }) => {
-      const resp = await variablePlugin?.getVariableOptions(spec, { datasourceStore, variables, timeRange }, signal);
-      if (!resp?.data?.length) {
-        return [];
+  const listVariables = useMemo(
+    () =>
+      variableDefinitions
+        .filter((v): v is ListVariableDefinition => v.kind === 'ListVariable')
+        // query only variables that are not already provided by outerVariables
+        .filter((v) => outerVariables[v.spec.name] === undefined),
+    [outerVariables, variableDefinitions]
+  );
+
+  const pluginResults = usePlugins(
+    'Variable',
+    listVariables.map((d) => ({ kind: d.spec.plugin.kind }))
+  );
+
+  // Resolved variable state, seeded with outer variables. Updated by onFetched when queries resolve.
+  // Needed because of dependencies between variables that require multiple rounds of fetching.
+  const [variables, setVariables] = useState<VariableStateMap>(outerVariables);
+
+  const onFetched = useCallback((name: string, options: VariableOption[], definition: ListVariableDefinition) => {
+    setVariables((prev) => ({
+      ...prev,
+      [name]: { value: resolveDefaultValue(definition, options), loading: false, options },
+    }));
+  }, []);
+
+  const queryResults = useQueries({
+    queries: listVariables.map((definition, index) => {
+      const plugin = pluginResults[index]?.data;
+      const isPluginLoading = pluginResults[index]?.isLoading ?? true;
+
+      const dependsOn = resolveDependsOnVariables(plugin, { timeRange, datasourceStore, variables }, definition);
+
+      const hasPendingDeps = dependsOn.some(
+        (v) => (variables[v] === undefined && listVariables.some((lv) => lv.spec.name === v)) || variables[v]?.loading
+      );
+
+      const dependentVariables: VariableStateMap = {};
+      for (const v of dependsOn) {
+        const state = variables[v];
+        if (state) {
+          dependentVariables[v] = state;
+        }
       }
-      if (!capturingRegexp) {
-        return resp.data;
-      }
-      return filterVariableList(resp.data, capturingRegexp);
-    },
-    enabled: !!variablePlugin || waitToLoad,
+
+      const ctx = { timeRange, datasourceStore, variables: dependentVariables };
+      return getVariableQueryConfig(definition, ctx, plugin, !hasPendingDeps && !isPluginLoading, onFetched);
+    }),
   });
+
+  const initialValues: Record<string, VariableValue> = useMemo(
+    () =>
+      Object.fromEntries(
+        Object.entries(variables)
+          .filter(([, state]) => state?.value !== undefined)
+          .map(([name, state]) => [name, state!.value])
+      ),
+    [variables]
+  );
+
+  return { initialValues, isLoading: queryResults.some((r) => r.isLoading) };
 }
 
 /**
