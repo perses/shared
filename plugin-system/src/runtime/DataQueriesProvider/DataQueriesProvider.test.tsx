@@ -115,7 +115,7 @@ describe('useQueryType', () => {
     const { result } = renderHook(() => useQueryType());
 
     const getQueryType = result.current;
-    expect(() => getQueryType('UnknownQuery')).toThrowError(`Unable to determine the query type: UnknownQuery`);
+    expect(() => getQueryType('UnknownQuery')).toThrow(`Unable to determine the query type: UnknownQuery`);
   });
 
   it('should return undefined if useListPluginMetadata is still loading', () => {

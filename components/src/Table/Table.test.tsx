@@ -1153,14 +1153,14 @@ describe('table', () => {
     expect(cell1).toHaveTextContent('test');
 
     const cell2 = await screen.findByTestId('0_value');
-    expect(cell2.firstChild).toHaveStyle({ 'background-color': 'red' });
+    expect(cell2.firstChild).toHaveStyle({ 'background-color': 'rgb(255, 0, 0)' });
 
     const cell3 = await screen.findByTestId('0_color');
-    expect(cell3.firstChild).toHaveStyle({ color: 'green' });
+    expect(cell3.firstChild).toHaveStyle({ color: 'rgb(0, 128, 0)' });
 
     const cell4 = await screen.findByTestId('1_color');
     expect(cell4).not.toHaveTextContent('test');
-    expect(cell4.firstChild).not.toHaveStyle({ 'background-color': 'red' });
+    expect(cell4.firstChild).not.toHaveStyle({ 'background-color': 'rgb(255, 0, 0)' });
     expect(cell4.firstChild).not.toHaveStyle({ color: 'green' });
   });
 });
