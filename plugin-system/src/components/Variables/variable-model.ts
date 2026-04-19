@@ -130,15 +130,11 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
   initialValues: Record<string, VariableValue>;
   isLoading: boolean;
 } {
-  const { timeRange, datasourceStore, variables: outerVariables } = useVariablePluginContext();
+  const { timeRange, datasourceStore } = useVariablePluginContext();
 
   const listVariables = useMemo(
-    () =>
-      variableDefinitions
-        .filter((v): v is ListVariableDefinition => v.kind === 'ListVariable')
-        // query only variables that are not already provided by outerVariables
-        .filter((v) => outerVariables[v.spec.name] === undefined),
-    [outerVariables, variableDefinitions]
+    () => variableDefinitions.filter((v): v is ListVariableDefinition => v.kind === 'ListVariable'),
+    [variableDefinitions]
   );
 
   const pluginResults = usePlugins(
@@ -146,9 +142,9 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
     listVariables.map((d) => ({ kind: d.spec.plugin.kind }))
   );
 
-  // Resolved variable state, seeded with outer variables. Updated by onFetched when queries resolve.
+  // Resolved variable state. Updated by onFetched when queries resolve.
   // Needed because of dependencies between variables that require multiple rounds of fetching.
-  const [variables, setVariables] = useState<VariableStateMap>(outerVariables);
+  const [variables, setVariables] = useState<VariableStateMap>({});
 
   const onFetched = useCallback((name: string, options: VariableOption[], definition: ListVariableDefinition) => {
     setVariables((prev) => ({

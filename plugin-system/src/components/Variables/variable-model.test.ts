@@ -322,7 +322,6 @@ describe('useResolveListVariableValues', () => {
 
     expect(getOptionsB).toHaveBeenCalled();
     expect(result.current.initialValues).toEqual({
-      VarA: 'outer-a',
       VarB: 'b1',
     });
   });
