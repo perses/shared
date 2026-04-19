@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { Box, useForkRef } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo, useState } from 'react';
@@ -40,11 +40,20 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   const { isEditMode } = useEditMode();
   const { openEditPanel, openDeletePanelDialog, duplicatePanel, viewPanel } = usePanelActions(panelGroupItemId);
   const viewPanelGroupItemId = useViewPanelGroup();
-  const { ref, inView } = useInView({
-    threshold: 0.2, // we have the flexibility to adjust this threshold to trigger queries slightly earlier or later based on performance
+
+  const { ref: queryRef, inView: shouldQuery } = useInView({
+    threshold: 0,
     initialInView: false,
     triggerOnce: true,
   });
+
+  const { ref: renderRef, inView: shouldRender } = useInView({
+    threshold: 0.2,
+    initialInView: false,
+    triggerOnce: false,
+  });
+
+  const mergedRef = useForkRef(renderRef, queryRef);
 
   const [openQueryViewer, setOpenQueryViewer] = useState(false);
 
@@ -99,7 +108,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
 
   return (
     <Box
-      ref={ref}
+      ref={mergedRef}
       sx={{
         width: '100%',
         height: '100%',
@@ -108,9 +117,9 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
       <DataQueriesProvider
         definitions={definitions}
         options={{ suggestedStepMs, ...pluginQueryOptions }}
-        queryOptions={{ enabled: inView }}
+        queryOptions={{ enabled: shouldQuery }}
       >
-        {inView && (
+        {shouldRender && (
           <Panel
             definition={panelDefinition}
             readHandlers={readHandlers}

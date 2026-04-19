@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Box, Popover, CircularProgress, styled, PopoverPosition } from '@mui/material';
-import { isValidElement, PropsWithChildren, ReactElement, ReactNode, useMemo, useState } from 'react';
+import { Stack, Box, CircularProgress, styled, Popper, ClickAwayListener } from '@mui/material';
+import { isValidElement, PropsWithChildren, ReactElement, ReactNode, useMemo, useState, MouseEvent } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import { QueryData } from '@perses-dev/plugin-system';
 import DatabaseSearch from 'mdi-material-ui/DatabaseSearch';
@@ -338,9 +338,28 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 };
 
 const OverflowMenu: React.FC<
-  PropsWithChildren<{ title?: string; icon?: ReactElement; direction?: 'row' | 'column' }>
-> = ({ children, title, icon, direction = 'row' }) => {
-  const [anchorPosition, setAnchorPosition] = useState<PopoverPosition>();
+  PropsWithChildren<{
+    title?: string;
+    icon?: ReactElement;
+    direction?: 'row' | 'column';
+    placement?:
+      | 'bottom'
+      | 'top'
+      | 'left'
+      | 'right'
+      | 'bottom-start'
+      | 'bottom-end'
+      | 'top-start'
+      | 'top-end'
+      | 'left-start'
+      | 'left-end'
+      | 'right-start'
+      | 'right-end';
+    offsetX?: number;
+    offsetY?: number;
+  }>
+> = ({ children, title, icon, direction = 'row', placement = 'bottom', offsetX = -2, offsetY = -25 }) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   // do not show overflow menu if there is no content (for example, edit actions are hidden)
   const hasContent = isValidElement(children) || (Array.isArray(children) && children.some(isValidElement));
@@ -348,15 +367,15 @@ const OverflowMenu: React.FC<
     return null;
   }
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
-    setAnchorPosition(event.currentTarget.getBoundingClientRect());
+  const handleClick = (event: MouseEvent<HTMLElement>): void => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
   };
 
   const handleClose = (): void => {
-    setAnchorPosition(undefined);
+    setAnchorEl(null);
   };
 
-  const open = Boolean(anchorPosition);
+  const open = Boolean(anchorEl);
   const id = open ? 'actions-menu' : undefined;
 
   return (
@@ -370,21 +389,31 @@ const OverflowMenu: React.FC<
       >
         {icon ?? <MenuIcon fontSize="inherit" />}
       </HeaderIconButton>
-      <Popover
+      <Popper
         id={id}
         open={open}
-        anchorReference="anchorPosition"
-        anchorPosition={anchorPosition}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
+        anchorEl={anchorEl}
+        placement={placement}
+        modifiers={[
+          {
+            name: 'offset',
+            options: {
+              offset: [offsetX, offsetY],
+            },
+          },
+        ]}
+        sx={{
+          backgroundColor: (theme) => theme.palette.background.paper,
+          borderRadius: 1,
+          boxShadow: (theme) => theme.shadows[4],
         }}
       >
-        <Stack direction={direction} alignItems="center" sx={{ padding: 1 }} onClick={handleClose}>
-          {children}
-        </Stack>
-      </Popover>
+        <ClickAwayListener onClickAway={handleClose}>
+          <Stack direction={direction} alignItems="center" sx={{ padding: 1 }} onClick={handleClose}>
+            {children}
+          </Stack>
+        </ClickAwayListener>
+      </Popper>
     </Box>
   );
 };

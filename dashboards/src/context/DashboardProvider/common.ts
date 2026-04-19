@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource, EphemeralDashboardResource } from '@perses-dev/core'; // TODO
 import { PanelDefinition, UnknownSpec } from '@perses-dev/spec';
+import { DashboardResource } from '../../model';
 
-export type OnSaveDashboard = (dashboard: DashboardResource | EphemeralDashboardResource) => Promise<unknown>;
+export type OnSaveDashboard = (dashboard: DashboardResource) => Promise<unknown>;
 
 /**
  * The middleware applied to the DashboardStore (can be used as generic argument in StateCreator).
