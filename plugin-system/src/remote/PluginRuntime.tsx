@@ -92,43 +92,43 @@ const getPluginRuntime = (): ModuleFederation => {
         },
         // TODO should we add @perses-dev/spec here ?
         '@perses-dev/core': {
-          version: '0.53.0-beta.3',
+          version: '0.53.1',
           lib: () => require('@perses-dev/core'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.53.0-beta.3',
+            requiredVersion: '^0.53.1',
           },
         },
         '@perses-dev/components': {
-          version: '0.53.0-beta.3',
+          version: '0.53.1',
           lib: () => require('@perses-dev/components'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.53.0-beta.3',
+            requiredVersion: '^0.53.1',
           },
         },
         '@perses-dev/plugin-system': {
-          version: '0.53.0-beta.3',
+          version: '0.53.1',
           lib: () => require('@perses-dev/plugin-system'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.53.0-beta.3',
+            requiredVersion: '^0.53.1',
           },
         },
         '@perses-dev/explore': {
-          version: '0.53.0-beta.3',
+          version: '0.53.1',
           lib: () => require('@perses-dev/explore'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^^0.53.0-beta.3',
+            requiredVersion: '^0.53.1',
           },
         },
         '@perses-dev/dashboards': {
-          version: '0.53.0-beta.3',
+          version: '0.53.1',
           lib: () => require('@perses-dev/dashboards'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^^0.53.0-beta.3',
+            requiredVersion: '^0.53.1',
           },
         },
         // Below are the shared modules that are used by the plugins, this can be part of the SDK
