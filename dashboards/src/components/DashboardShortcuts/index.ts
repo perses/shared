@@ -11,11 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './common';
-export * from './dashboard-provider-api';
-export * from './DashboardProvider';
-export type { PanelGroupEditor, PanelGroupEditorValues } from './panel-group-editor-slice';
-export type { DeletePanelDialogState } from './delete-panel-slice';
-export type { DiscardChangesConfirmationDialogState } from './discard-changes-dialog-slice';
-export { useSaveDashboard } from './use-save-dashboard';
-export type { SaveDashboardResult } from './use-save-dashboard';
+export { useDashboardShortcuts } from './useDashboardShortcuts';
+export type { UseDashboardShortcutsOptions } from './useDashboardShortcuts';

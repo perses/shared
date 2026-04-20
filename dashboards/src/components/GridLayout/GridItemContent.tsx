@@ -17,6 +17,7 @@ import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/
 import React, { ReactElement, useMemo, useState } from 'react';
 import { isPanelGroupItemIdEqual, PanelGroupItemId } from '@perses-dev/core'; // TODO
 import { useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
+import { usePanelFocusHandlers } from '../../keyboard-shortcuts';
 import { Panel, PanelProps, PanelOptions } from '../Panel';
 import { QueryViewerDialog } from '../QueryViewerDialog';
 
@@ -40,6 +41,11 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   const { isEditMode } = useEditMode();
   const { openEditPanel, openDeletePanelDialog, duplicatePanel, viewPanel } = usePanelActions(panelGroupItemId);
   const viewPanelGroupItemId = useViewPanelGroup();
+
+  // Panel focus tracking for keyboard shortcuts
+  const { onMouseEnter, onMouseLeave } = usePanelFocusHandlers(
+    `${panelGroupItemId.panelGroupId}-${panelGroupItemId.panelGroupItemLayoutId}`
+  );
 
   const { ref: queryRef, inView: shouldQuery } = useInView({
     threshold: 0,
@@ -109,9 +115,13 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   return (
     <Box
       ref={mergedRef}
+      tabIndex={-1}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       sx={{
         width: '100%',
         height: '100%',
+        outline: 'none',
       }}
     >
       <DataQueriesProvider
