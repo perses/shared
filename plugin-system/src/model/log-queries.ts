@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AbsoluteTimeRange, UnknownSpec, LogData } from '@perses-dev/spec';
+import { AbsoluteTimeRange, UnknownSpec, LogData, QueryDefinition } from '@perses-dev/spec';
 import { DatasourceStore, Plugin, VariableStateMap } from '@perses-dev/plugin-system';
 
 export interface LogQueryResult {
@@ -36,4 +36,5 @@ type LogQueryPluginDependencies = {
 export interface LogQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   getLogData: (spec: Spec, ctx: LogQueryContext, abortSignal?: AbortSignal) => Promise<LogQueryResult>;
   dependsOn?: (spec: Spec, ctx: LogQueryContext) => LogQueryPluginDependencies;
+  createVolumeQuery?: (spec: Spec, ctx: LogQueryContext) => QueryDefinition | null;
 }
