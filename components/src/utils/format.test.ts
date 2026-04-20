@@ -47,20 +47,21 @@ describe('dateFormatOptionsWithTimeZone', () => {
 });
 
 describe('getGMTOffset', () => {
-  it('should return GMT offset for UTC', () => {
-    expect(getGMTOffset('UTC')).toContain('GMT');
+  it('should return correct GMT offset for UTC', () => {
+    expect(getGMTOffset('UTC')).toBe('GMT+0');
   });
 
-  it('should return GMT offset for a specific timezone', () => {
+  it('should return valid GMT offset format for a specific timezone', () => {
     const offset = getGMTOffset('America/Los_Angeles');
-    expect(offset).toContain('GMT');
+
+    expect(offset).toMatch(/^GMT[+-]\d{1,2}(:\d{2})?$/);
   });
 
   it('should fallback to browser timezone for local/browser', () => {
     const localOffset = getGMTOffset('local');
     const browserOffset = getGMTOffset('browser');
 
-    expect(localOffset).toContain('GMT');
-    expect(browserOffset).toContain('GMT');
+    expect(localOffset).toMatch(/^GMT[+-]\d{1,2}(:\d{2})?$/);
+    expect(browserOffset).toMatch(/^GMT[+-]\d{1,2}(:\d{2})?$/);
   });
 });

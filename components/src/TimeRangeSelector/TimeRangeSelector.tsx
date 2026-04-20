@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, MenuItem, Popover, Select, IconButton, TextField } from '@mui/material';
+import { Box, MenuItem, Popover, Select, IconButton, TextField, Stack } from '@mui/material';
 import Calendar from 'mdi-material-ui/Calendar';
 import EarthIcon from 'mdi-material-ui/Earth';
 import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/spec';
@@ -20,9 +20,9 @@ import { useTimeZone } from '../context';
 import { TimeZoneOption, getTimeZoneOptions } from '../model/timeZoneOption';
 import { TimeOption } from '../model';
 import { SettingsAutocomplete, SettingsAutocompleteOption } from '../SettingsAutocomplete';
+import { getGMTOffset } from '../utils/format';
 import { DateTimeRangePicker } from './DateTimeRangePicker';
 import { buildCustomTimeOption, formatTimeRange } from './utils';
-import { getGMTOffset } from '../utils/format';
 
 interface TimeRangeSelectorProps {
   /**
@@ -83,14 +83,6 @@ export function TimeRangeSelector({
     () => buildCustomTimeOption(isRelativeTimeRange(value) ? undefined : value, timeZone),
     [value, timeZone]
   );
-
-  const selectedDisplay = useMemo(() => {
-    const match = timeOptions.find(
-      (opt) => formatTimeRange(opt.value, timeZone) === formatTimeRange(value, timeZone)
-    );
-  
-    return match?.display ?? formatTimeRange(value, timeZone);
-  }, [value, timeOptions, timeZone]);
 
   const [open, setOpen] = useState(false);
   const tzOptions = timeZoneOptions ?? getTimeZoneOptions();
@@ -161,12 +153,10 @@ export function TimeRangeSelector({
           onClick={() => setOpen(!open)}
           IconComponent={Calendar}
           renderValue={() => (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <span>{selectedDisplay}</span>
-              <Box sx={{ typography: 'caption', color: 'text.secondary' }}>
-                · {tzOffset}
-              </Box>
-            </Box>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <span>{formatTimeRange(value, timeZone)}</span>
+              <Box sx={{ typography: 'caption', color: 'text.secondary' }}>· {tzOffset}</Box>
+            </Stack>
           )}
           inputProps={{ 'aria-label': `Select time range. Currently set to ${value}` }}
           sx={{

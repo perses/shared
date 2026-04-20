@@ -35,7 +35,7 @@ export function dateFormatOptionsWithTimeZone(
   return dateFormatOptions;
 }
 
-export function   formatWithTimeZone(date: Date, formatString: string, timeZone?: string): string {
+export function formatWithTimeZone(date: Date, formatString: string, timeZone?: string): string {
   /*
    * if timeZone is provided, and is not local|browser,
    * then format using timeZone option (recognize UTC regardless of uppercase/lowercase)
@@ -56,8 +56,8 @@ export function getGMTOffset(timeZone?: string): string {
     !timeZone || lower === 'local' || lower === 'browser'
       ? Intl.DateTimeFormat().resolvedOptions().timeZone
       : lower === 'utc'
-      ? 'UTC'
-      : timeZone;
+        ? 'UTC'
+        : timeZone;
 
   try {
     const formatter = new Intl.DateTimeFormat('en-US', {
@@ -68,9 +68,12 @@ export function getGMTOffset(timeZone?: string): string {
     const parts = formatter.formatToParts(new Date());
     const tzPart = parts.find((p) => p.type === 'timeZoneName');
 
-    return tzPart?.value ?? '';
+    const value = tzPart?.value ?? '';
+
+    if (value === 'GMT') return 'GMT+0';
+    return value;
   } catch {
-    return '';
+    return 'GMT+0';
   }
 }
 
