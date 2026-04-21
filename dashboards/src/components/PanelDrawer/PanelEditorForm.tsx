@@ -13,16 +13,16 @@
 
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { Action } from '@perses-dev/core'; // TODO Perses permission should not be used
 import { PanelDefinition, PanelEditorValues } from '@perses-dev/spec';
-import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import {
-  PluginKindSelect,
-  usePluginEditor,
+  DiscardChangesConfirmationDialog,
+  ErrorAlert,
+  ErrorBoundary,
+  Action,
   getTitleAction,
   getSubmitText,
-  useValidationSchemas,
-} from '@perses-dev/plugin-system';
+} from '@perses-dev/components';
+import { PluginKindSelect, usePluginEditor, useValidationSchemas } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useListPanelGroups } from '../../context';

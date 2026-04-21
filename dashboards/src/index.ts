@@ -16,3 +16,4 @@ export * from './context';
 export * from './keyboard-shortcuts';
 export * from './views';
 export * from './model';
+export * from './constants';
