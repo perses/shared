@@ -11,27 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState, useMemo, ReactElement } from 'react';
+import { ReactElement, useMemo, useState } from 'react';
 import {
-  Button,
-  Stack,
-  Box,
-  TableContainer,
-  TableBody,
-  TableRow,
-  TableCell as MuiTableCell,
-  Table,
-  TableHead,
-  Switch,
-  Typography,
-  IconButton,
-  Alert,
-  styled,
-  capitalize,
-  Tooltip,
   Accordion,
-  AccordionSummary,
   AccordionDetails,
+  AccordionSummary,
+  Alert,
+  Box,
+  Button,
+  capitalize,
+  CircularProgress,
+  IconButton,
+  Stack,
+  styled,
+  Switch,
+  Table,
+  TableBody,
+  TableCell as MuiTableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography,
 } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import { Action, ExternalVariableDefinition } from '@perses-dev/core'; // TODO
@@ -46,9 +47,15 @@ import ContentDuplicate from 'mdi-material-ui/ContentDuplicate';
 import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
 
-import { ValidationProvider, VariableEditorForm, VariableState, VARIABLE_TYPES } from '@perses-dev/plugin-system';
+import {
+  ValidationProvider,
+  VARIABLE_TYPES,
+  VariableEditorForm,
+  VariableState,
+  useResolveListVariableValues,
+} from '@perses-dev/plugin-system';
 import { InfoTooltip } from '@perses-dev/components';
-import { useDiscardChangesConfirmationDialog } from '../../context';
+import { useDiscardChangesConfirmationDialog, VariableProvider } from '../../context';
 import { hydrateVariableDefinitionStates } from '../../context/VariableProvider/hydrationUtils';
 import { BuiltinVariableAccordions } from './BuiltinVariableAccordions';
 
@@ -182,26 +189,26 @@ export function VariableEditor(props: {
   return (
     <>
       {currentEditingVariableDefinition && (
-        <ValidationProvider>
-          <VariableEditorForm
-            initialVariableDefinition={currentEditingVariableDefinition}
-            action={variableFormAction}
-            isDraft={true}
-            onActionChange={setVariableFormAction}
-            onSave={(definition: VariableDefinition) => {
-              setVariableDefinitions((draft) => {
-                draft[variableEditIdx] = definition;
-                setVariableEditIdx(null);
-              });
-            }}
-            onClose={() => {
-              if (variableFormAction === 'create') {
-                removeVariable(variableEditIdx);
-              }
+        <VariableEditorFormWithContext
+          variableDefinitions={variableDefinitions}
+          externalVariableDefinitions={externalVariableDefinitions}
+          builtinVariableDefinitions={builtinVariableDefinitions}
+          currentEditingVariableDefinition={currentEditingVariableDefinition}
+          variableFormAction={variableFormAction}
+          onActionChange={setVariableFormAction}
+          onSave={(definition: VariableDefinition) => {
+            setVariableDefinitions((draft) => {
+              draft[variableEditIdx] = definition;
               setVariableEditIdx(null);
-            }}
-          />
-        </ValidationProvider>
+            });
+          }}
+          onClose={() => {
+            if (variableFormAction === 'create') {
+              removeVariable(variableEditIdx);
+            }
+            setVariableEditIdx(null);
+          }}
+        />
       )}
       {!currentEditingVariableDefinition && (
         <>
@@ -424,6 +431,67 @@ export function VariableEditor(props: {
 const TableCell = styled(MuiTableCell)(({ theme }) => ({
   borderBottom: `solid 1px ${theme.palette.divider}`,
 }));
+
+interface VariableEditorFormWithContextProps {
+  variableDefinitions: VariableDefinition[];
+  externalVariableDefinitions: ExternalVariableDefinition[];
+  builtinVariableDefinitions: BuiltinVariableDefinition[];
+  currentEditingVariableDefinition: VariableDefinition;
+  variableFormAction: Action;
+  onActionChange: (action: Action) => void;
+  onSave: (definition: VariableDefinition) => void;
+  onClose: () => void;
+}
+
+function VariableEditorFormWithContext({
+  variableDefinitions,
+  externalVariableDefinitions,
+  builtinVariableDefinitions,
+  currentEditingVariableDefinition,
+  variableFormAction,
+  onActionChange,
+  onSave,
+  onClose,
+}: VariableEditorFormWithContextProps): ReactElement | null {
+  const { initialValues, isLoading } = useResolveListVariableValues(variableDefinitions);
+
+  if (isLoading) {
+    return (
+      <Stack
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+          width: '100%',
+          overflow: 'hidden',
+        }}
+      >
+        <CircularProgress aria-label="loading" />
+      </Stack>
+    );
+  }
+
+  return (
+    <VariableProvider
+      initialVariableDefinitions={variableDefinitions}
+      externalVariableDefinitions={externalVariableDefinitions}
+      builtinVariableDefinitions={builtinVariableDefinitions}
+      initialValues={initialValues}
+    >
+      <ValidationProvider>
+        <VariableEditorForm
+          initialVariableDefinition={currentEditingVariableDefinition}
+          action={variableFormAction}
+          isDraft={true}
+          onActionChange={onActionChange}
+          onSave={onSave}
+          onClose={onClose}
+        />
+      </ValidationProvider>
+    </VariableProvider>
+  );
+}
 
 export function VariableName(props: { name: string; state: VariableState | undefined }): ReactElement {
   const { name, state } = props;
