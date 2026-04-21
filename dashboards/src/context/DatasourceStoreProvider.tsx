@@ -12,13 +12,7 @@
 // limitations under the License.
 
 import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
-import {
-  DashboardResource,
-  EphemeralDashboardResource,
-  DatasourceDefinition,
-  BuildDatasourceProxyUrlParams,
-  DatasourceApi,
-} from '@perses-dev/core'; // TODO
+import { DatasourceDefinition, BuildDatasourceProxyUrlParams, DatasourceApi } from '@perses-dev/core'; // TODO
 import { DashboardSpec, DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
 import {
   DatasourceStoreContext,
@@ -29,9 +23,10 @@ import {
   DatasourceClient,
   DatasourceSelectItem,
 } from '@perses-dev/plugin-system';
+import { DashboardResource } from '../model/DashboardResource';
 
 export interface DatasourceStoreProviderProps {
-  dashboardResource?: DashboardResource | EphemeralDashboardResource;
+  dashboardResource?: DashboardResource;
   projectName?: string;
   datasourceApi: DatasourceApi;
   children?: ReactNode;
@@ -71,7 +66,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
 
     if (project) {
       // Try to find it at the project level as a Datasource resource
-      const datasource = await datasourceApi.getDatasource(project, selector);
+      const datasource = await datasourceApi.getDatasource(String(project), selector);
       if (datasource !== undefined) {
         return {
           spec: datasource.spec,
@@ -126,7 +121,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
     async (datasourcePluginName: string): Promise<DatasourceSelectItemGroup[]> => {
       const [pluginMetadata, datasources, globalDatasources] = await Promise.all([
         listPluginMetadata(['Datasource']),
-        project ? datasourceApi.listDatasources(project, datasourcePluginName) : [],
+        project ? datasourceApi.listDatasources(String(project), datasourcePluginName) : [],
         datasourceApi.listGlobalDatasources(datasourcePluginName),
       ]);
 
@@ -182,23 +177,13 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
   const setLocalDatasources = useCallback(
     (datasources: Record<string, DatasourceSpec>) => {
       if (dashboardResource) {
-        setDashboardResource(
-          dashboardResource.kind === 'Dashboard'
-            ? ({
-                ...dashboardResource,
-                spec: {
-                  ...dashboardResource.spec,
-                  datasources: datasources,
-                },
-              } as DashboardResource)
-            : ({
-                ...dashboardResource,
-                spec: {
-                  ...dashboardResource.spec,
-                  datasources: datasources,
-                },
-              } as EphemeralDashboardResource)
-        );
+        setDashboardResource({
+          ...dashboardResource,
+          spec: {
+            ...dashboardResource.spec,
+            datasources: datasources,
+          },
+        });
       }
     },
     [dashboardResource]

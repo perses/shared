@@ -13,6 +13,8 @@
 
 export * from './datasource';
 export * from './legend';
+export * from './log-queries';
+export * from './log-volume-utils';
 export * from './panels';
 export * from './plugins';
 export * from './plugin-base';
