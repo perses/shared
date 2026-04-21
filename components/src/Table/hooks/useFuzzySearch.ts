@@ -34,7 +34,7 @@ export interface UseFuzzySearchResult<TableData> {
  * Returns fuzzy search state and the corresponding `useReactTable` options.
  * Filter options are disabled when `showSearch` is falsy.
  */
-export function useFuzzySearch<TableData>(showSearch: boolean | undefined): UseFuzzySearchResult<TableData> {
+export function useFuzzySearch<TableData>(isSearchEnabled: boolean | undefined): UseFuzzySearchResult<TableData> {
   const [globalFilter, setGlobalFilter] = useState('');
 
   return {
@@ -42,9 +42,9 @@ export function useFuzzySearch<TableData>(showSearch: boolean | undefined): UseF
     setGlobalFilter,
     fuzzySearchOptions: {
       filterFns: { fuzzy: fuzzyFilter },
-      globalFilterFn: showSearch ? 'fuzzy' : undefined,
-      getFilteredRowModel: showSearch ? getFilteredRowModel() : undefined,
-      filterFromLeafRows: showSearch,
+      globalFilterFn: isSearchEnabled ? 'fuzzy' : undefined,
+      getFilteredRowModel: isSearchEnabled ? getFilteredRowModel() : undefined,
+      filterFromLeafRows: isSearchEnabled,
       onGlobalFilterChange: setGlobalFilter,
     },
   };

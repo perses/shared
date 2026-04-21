@@ -186,22 +186,35 @@ export interface TableProps<TableData> {
   getSubRows?: (originalRow: TableData, index: number) => undefined | TableData[];
 
   /**
+   * List of column ids that should be hidden when the table is initially rendered.
+   */
+  hiddenColumns?: string[];
+
+  /**
+   * Configuration for the table toolbar at the top of table, which includes the search input and column filter button.
+   * If not provided, the toolbar will not be rendered.
+   */
+  tableToolbarConfig?: TableToolbarConfig;
+}
+
+export type TableToolbarConfig = {
+  /**
    * When `true`, a search bar will be rendered above the table that allows
    * the user to filter rows using a fuzzy global filter.
    */
-  showSearch?: boolean;
+  isSearchEnabled?: boolean;
 
   /**
    * When `true`, a "Columns" button will be rendered above the table that
    * opens a dropdown allowing the user to toggle column visibility.
    */
-  showColumnFilter?: boolean;
+  isColumnFilterEnabled?: boolean;
 
   /**
-   * List of column ids that should be hidden when the table is initially rendered.
+   * Max height for the column filter menu.
    */
-  hiddenColumns?: string[];
-}
+  columnFilterMenuMaxHeight?: number | string;
+};
 
 function calculateTableCellHeight(lineHeight: CSSProperties['lineHeight'], paddingY: string): number {
   // Doing a bunch of math to enforce height to avoid weirdness with mismatched

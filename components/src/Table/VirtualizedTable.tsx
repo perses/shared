@@ -15,7 +15,7 @@ import { Column, flexRender, HeaderGroup, Row } from '@tanstack/react-table';
 import { Box, TablePagination, TableRow as MuiTableRow } from '@mui/material';
 import { TableComponents, TableVirtuoso, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
 import { ReactElement, useMemo, useRef } from 'react';
-import { TableToolbar } from './TableToolbar';
+import { TableToolbar, TableToolbarProps } from './TableToolbar';
 import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
@@ -35,19 +35,22 @@ type TableCellPosition = {
 export type VirtualizedTableProps<TableData> = Required<
   Pick<TableProps<TableData>, 'height' | 'width' | 'density' | 'defaultColumnWidth' | 'defaultColumnHeight'>
 > &
-  Pick<
-    TableProps<TableData>,
-    'onRowMouseOver' | 'onRowMouseOut' | 'pagination' | 'onPaginationChange' | 'showSearch' | 'showColumnFilter'
-  > & {
+  Pick<TableProps<TableData>, 'onRowMouseOver' | 'onRowMouseOut' | 'pagination' | 'onPaginationChange'> & {
     onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
     rows: Array<Row<TableData>>;
     columns: Array<Column<TableData, unknown>>;
     headers: Array<HeaderGroup<TableData>>;
     cellConfigs?: TableCellConfigs;
     rowCount: number;
-    globalFilter: string;
-    onGlobalFilterChange: (value: string) => void;
-    allColumns: Array<Column<TableData>>;
+    toolbarConfig: Pick<
+      TableToolbarProps<TableData>,
+      | 'isSearchEnabled'
+      | 'globalFilter'
+      | 'onGlobalFilterChange'
+      | 'isColumnFilterEnabled'
+      | 'columns'
+      | 'columnFilterMenuMaxHeight'
+    >;
   };
 
 // Separating out the virtualized table because we may want a paginated table
@@ -69,11 +72,7 @@ export function VirtualizedTable<TableData>({
   pagination,
   onPaginationChange,
   rowCount,
-  showSearch,
-  showColumnFilter,
-  globalFilter,
-  onGlobalFilterChange,
-  allColumns,
+  toolbarConfig,
 }: VirtualizedTableProps<TableData>): ReactElement {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
   // Use a ref for these values because they are only needed for keyboard
@@ -170,15 +169,8 @@ export function VirtualizedTable<TableData>({
 
   return (
     <>
-      <TableToolbar
-        showSearch={showSearch}
-        globalFilter={globalFilter}
-        onGlobalFilterChange={onGlobalFilterChange}
-        showColumnFilter={showColumnFilter}
-        columns={allColumns}
-        width={width}
-      />
-      <Box style={{ width, height }}>
+      <Box style={{ width, height, display: 'flex', flexDirection: 'column' }}>
+        <TableToolbar {...toolbarConfig} width={width} />
         <TableVirtuoso
           ref={virtuosoRef}
           totalCount={rows.length}

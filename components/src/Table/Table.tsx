@@ -68,14 +68,15 @@ export function Table<TableData>({
   onPaginationChange,
   rowSelectionVariant = 'standard',
   getSubRows,
-  showSearch,
-  showColumnFilter,
   hiddenColumns,
+  tableToolbarConfig,
   ...otherProps
 }: TableProps<TableData>): ReactElement {
   const theme = useTheme();
 
-  const { globalFilter, setGlobalFilter, fuzzySearchOptions } = useFuzzySearch<TableData>(showSearch);
+  const { globalFilter, setGlobalFilter, fuzzySearchOptions } = useFuzzySearch<TableData>(
+    tableToolbarConfig?.isSearchEnabled
+  );
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     hiddenColumns?.reduce((acc, columnId) => ({ ...acc, [columnId]: false }), {}) ?? {}
@@ -210,7 +211,7 @@ export function Table<TableData>({
     state: {
       rowSelection,
       sorting,
-      globalFilter: showSearch ? globalFilter : undefined,
+      globalFilter: tableToolbarConfig?.isSearchEnabled ? globalFilter : undefined,
       columnVisibility,
       ...(pagination ? { pagination } : {}),
     },
@@ -239,11 +240,14 @@ export function Table<TableData>({
       pagination={pagination}
       onPaginationChange={onPaginationChange}
       rowCount={table.getRowCount()}
-      showSearch={showSearch}
-      showColumnFilter={showColumnFilter}
-      globalFilter={globalFilter}
-      onGlobalFilterChange={setGlobalFilter}
-      allColumns={table.getAllColumns()}
+      toolbarConfig={{
+        isSearchEnabled: tableToolbarConfig?.isSearchEnabled,
+        globalFilter,
+        onGlobalFilterChange: setGlobalFilter,
+        isColumnFilterEnabled: tableToolbarConfig?.isColumnFilterEnabled,
+        columns: table.getAllColumns(),
+        columnFilterMenuMaxHeight: tableToolbarConfig?.columnFilterMenuMaxHeight,
+      }}
     />
   );
 }

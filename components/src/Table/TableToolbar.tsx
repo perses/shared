@@ -23,7 +23,7 @@ export interface TableToolbarProps<TableData> {
   /**
    * When `true`, a search input is rendered.
    */
-  showSearch?: boolean;
+  isSearchEnabled?: boolean;
 
   /**
    * Current value of the global filter / search query.
@@ -38,7 +38,7 @@ export interface TableToolbarProps<TableData> {
   /**
    * When `true`, a "Columns" button is rendered that opens a column visibility dropdown.
    */
-  showColumnFilter?: boolean;
+  isColumnFilterEnabled?: boolean;
 
   /**
    * All columns from the table instance, used to build the visibility menu.
@@ -48,15 +48,21 @@ export interface TableToolbarProps<TableData> {
    * The width of the toolbar, used to determine when to switch to a more compact layout.
    */
   width: number | string;
+
+  /**
+   * Max height for the column filter menu.
+   */
+  columnFilterMenuMaxHeight?: number | string;
 }
 
 export function TableToolbar<TableData>({
-  showSearch,
+  isSearchEnabled,
   globalFilter,
   onGlobalFilterChange,
-  showColumnFilter,
+  isColumnFilterEnabled,
   columns,
   width,
+  columnFilterMenuMaxHeight = 400,
 }: TableToolbarProps<TableData>): ReactElement | null {
   const [colMenuAnchor, setColMenuAnchor] = useState<null | HTMLElement>(null);
   const colMenuOpen = Boolean(colMenuAnchor);
@@ -67,7 +73,7 @@ export function TableToolbar<TableData>({
     setSearchResetKey((prev) => prev + 1);
   }, [onGlobalFilterChange]);
 
-  if (!showSearch && !showColumnFilter) {
+  if (!isSearchEnabled && !isColumnFilterEnabled) {
     return null;
   }
 
@@ -81,10 +87,10 @@ export function TableToolbar<TableData>({
       padding="0.5rem"
       sx={{ backgroundColor: (theme) => theme.palette.background.default }}
     >
-      {showSearch && (
+      {isSearchEnabled && (
         <TextField
           key={searchResetKey}
-          placeholder="Search…"
+          placeholder="Search..."
           value={globalFilter}
           onChange={onGlobalFilterChange}
           variant="standard"
@@ -108,7 +114,7 @@ export function TableToolbar<TableData>({
           sx={{ flexGrow: 1 }}
         />
       )}
-      {showColumnFilter && (
+      {isColumnFilterEnabled && (
         <>
           <IconButton
             onClick={(e) => setColMenuAnchor(e.currentTarget)}
@@ -123,7 +129,7 @@ export function TableToolbar<TableData>({
             open={colMenuOpen}
             onClose={() => setColMenuAnchor(null)}
             slotProps={{ list: { dense: true } }}
-            sx={{ maxHeight: 400 }}
+            sx={{ maxHeight: columnFilterMenuMaxHeight }}
           >
             {columns.map((column) => {
               const header = column.columnDef.header;

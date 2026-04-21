@@ -21,7 +21,7 @@ function TableToolbarWrapper(props: Partial<TableToolbarProps<unknown>> = {}): R
 
   return (
     <TableToolbar
-      showSearch
+      isSearchEnabled
       globalFilter={globalFilter}
       onGlobalFilterChange={setGlobalFilter}
       columns={[]}
