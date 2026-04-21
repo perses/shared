@@ -96,7 +96,7 @@ describe('useListVariablePluginValues', () => {
     },
   };
 
-  it('should filter self variable from deps and ctx when dependsOn is not passed', () => {
+  it('should default to empty dependency array when dependsOn is not passed', () => {
     const variables: VariableStateMap = {
       NewVariable: { loading: false, value: [] },
       NewVariable2: { loading: false, value: [] },
@@ -115,13 +115,9 @@ describe('useListVariablePluginValues', () => {
 
     renderHookWithContext(() => useListVariablePluginValues(definition));
 
-    const allVariablesWithoutSelf = Object.fromEntries(
-      Object.entries(variables).filter(([key]) => key !== definition.spec.name)
-    );
-
     const expectedCtx = {
       datasourceStore: {},
-      variables: allVariablesWithoutSelf,
+      variables: {},
       timeRange: expect.any(Object),
     };
 
@@ -322,6 +318,7 @@ describe('useResolveListVariableValues', () => {
 
     expect(getOptionsB).toHaveBeenCalled();
     expect(result.current.initialValues).toEqual({
+      VarA: 'outer-a',
       VarB: 'b1',
     });
   });

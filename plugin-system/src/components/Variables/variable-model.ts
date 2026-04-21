@@ -86,13 +86,11 @@ function resolveDependsOnVariables(
   variablePluginCtx: GetVariableOptionsContext,
   definition: ListVariableDefinition
 ): string[] {
-  let dependsOnVariables: string[] = Object.keys(variablePluginCtx.variables); // Default to all variables
   if (variablePlugin?.dependsOn) {
     const dependencies = variablePlugin.dependsOn(definition.spec.plugin.spec, variablePluginCtx);
-    dependsOnVariables = dependencies.variables ? dependencies.variables : dependsOnVariables;
+    return dependencies.variables ? dependencies.variables.filter((v) => v !== definition.spec.name) : []; // Exclude self variable to avoid circular dependency and default to empty array to avoid deadlock
   }
-  // Exclude self variable to avoid circular dependency
-  return dependsOnVariables.filter((v) => v !== definition.spec.name);
+  return [];
 }
 
 export function useListVariablePluginValues(definition: ListVariableDefinition): UseQueryResult<VariableOption[]> {
@@ -130,7 +128,7 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
   initialValues: Record<string, VariableValue>;
   isLoading: boolean;
 } {
-  const { timeRange, datasourceStore } = useVariablePluginContext();
+  const { timeRange, datasourceStore, variables: outerVariableValues } = useVariablePluginContext();
 
   const listVariables = useMemo(
     () => variableDefinitions.filter((v): v is ListVariableDefinition => v.kind === 'ListVariable'),
@@ -144,10 +142,14 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
 
   // Resolved variable state. Updated by onFetched when queries resolve.
   // Needed because of dependencies between variables that require multiple rounds of fetching.
-  const [variables, setVariables] = useState<VariableStateMap>({});
+  const [resolvedVariables, setResolvedVariables] = useState<VariableStateMap>({});
+
+  const allVariables = useMemo(() => {
+    return { ...outerVariableValues, ...resolvedVariables };
+  }, [outerVariableValues, resolvedVariables]);
 
   const onFetched = useCallback((name: string, options: VariableOption[], definition: ListVariableDefinition) => {
-    setVariables((prev) => ({
+    setResolvedVariables((prev) => ({
       ...prev,
       [name]: { value: resolveDefaultValue(definition, options), loading: false, options },
     }));
@@ -158,15 +160,21 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
       const plugin = pluginResults[index]?.data;
       const isPluginLoading = pluginResults[index]?.isLoading ?? true;
 
-      const dependsOn = resolveDependsOnVariables(plugin, { timeRange, datasourceStore, variables }, definition);
+      const dependsOn = resolveDependsOnVariables(
+        plugin,
+        { timeRange, datasourceStore, variables: allVariables },
+        definition
+      );
 
       const hasPendingDeps = dependsOn.some(
-        (v) => (variables[v] === undefined && listVariables.some((lv) => lv.spec.name === v)) || variables[v]?.loading
+        (v) =>
+          (resolvedVariables[v] === undefined && listVariables.some((lv) => lv.spec.name === v)) ||
+          allVariables[v]?.loading
       );
 
       const dependentVariables: VariableStateMap = {};
       for (const v of dependsOn) {
-        const state = variables[v];
+        const state = allVariables[v];
         if (state) {
           dependentVariables[v] = state;
         }
@@ -180,11 +188,11 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
   const initialValues: Record<string, VariableValue> = useMemo(
     () =>
       Object.fromEntries(
-        Object.entries(variables)
+        Object.entries(allVariables)
           .filter(([, state]) => state?.value !== undefined)
           .map(([name, state]) => [name, state!.value])
       ),
-    [variables]
+    [allVariables]
   );
 
   return { initialValues, isLoading: queryResults.some((r) => r.isLoading) };
