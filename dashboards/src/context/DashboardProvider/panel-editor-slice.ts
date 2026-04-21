@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action, PanelGroupItemId, PanelGroupDefinition, PanelGroupItemLayout } from '@perses-dev/core'; // TODO
+import { PanelGroupItemId, PanelGroupDefinition, PanelGroupItemLayout } from '@perses-dev/core'; // TODO
+import { Action } from '@perses-dev/components';
 import { PanelEditorValues, PanelGroupId } from '@perses-dev/spec';
 import { StateCreator } from 'zustand';
 import { generatePanelKey, getYForNewRow } from '../../utils';

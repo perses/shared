@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action } from '@perses-dev/core'; // TODO this is weird the plugin-system is providing component depending on the RBAC system of Perses.
+export type Action = 'create' | 'read' | 'update' | 'delete' | '*';
 
 export function getTitleAction(action: Action, isDraft: boolean): string {
   if (action === 'read') return 'View';

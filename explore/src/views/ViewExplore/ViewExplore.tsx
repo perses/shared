@@ -17,13 +17,15 @@ import {
   useInitialRefreshInterval,
   useInitialTimeRange,
 } from '@perses-dev/plugin-system';
-import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '@perses-dev/core'; // TODO
+
 import { ErrorAlert, ErrorBoundary, combineSx } from '@perses-dev/components';
 import {
   DatasourceStoreProviderProps,
   VariableProviderProps,
   DatasourceStoreProvider,
   VariableProvider,
+  DEFAULT_DASHBOARD_DURATION,
+  DEFAULT_REFRESH_INTERVAL,
 } from '@perses-dev/dashboards';
 import React, { ReactElement } from 'react';
 import { ViewExploreApp } from './ViewExploreApp';
