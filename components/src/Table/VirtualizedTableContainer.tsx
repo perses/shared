@@ -13,7 +13,7 @@
 
 import { TableContainer as MuiTableContainer, TableContainerProps as MuiTableContainerProps } from '@mui/material';
 import { forwardRef } from 'react';
-import { combineSx } from '@perses-dev/components';
+import { combineSx } from '../utils/combine-sx';
 
 type VirtualizedTableContainerProps = MuiTableContainerProps;
 
