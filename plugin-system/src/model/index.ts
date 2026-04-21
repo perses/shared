@@ -23,3 +23,4 @@ export * from './time-series-queries';
 export * from './trace-queries';
 export * from './profile-queries';
 export * from './variables';
+export * from './calculations';

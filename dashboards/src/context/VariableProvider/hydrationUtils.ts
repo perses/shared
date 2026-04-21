@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ExternalVariableDefinition } from '@perses-dev/core'; // TODO
 import { DEFAULT_ALL_VALUE, VariableValue, VariableDefinition } from '@perses-dev/spec';
 import { VariableStoreStateMap, VariableState } from '@perses-dev/plugin-system';
+import { ExternalVariableDefinition } from '../../model/VariableDefinition';
 
 // TODO: move to VariableProvider/utils.ts
 function hydrateVariableState(variable: VariableDefinition, initialValue?: VariableValue): VariableState {

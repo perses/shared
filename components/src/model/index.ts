@@ -16,3 +16,4 @@ export * from './theme';
 export * from './timeOption';
 export * from './timeZoneOption';
 export * from './action';
+export * from './legend';
