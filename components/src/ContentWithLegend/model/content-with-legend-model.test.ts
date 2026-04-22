@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { createTheme } from '@mui/material';
-import { legendModes, legendSizes } from '@perses-dev/core'; // TODO
+import { legendModes, legendSizes } from '../../model';
 import * as table from '../../Table';
 import {
   ContentWithLegendLayoutOpts,

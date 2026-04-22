@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Query, QueryKey } from '@tanstack/react-query';
-import { AbsoluteTimeRange, UnknownSpec, TimeSeriesData } from '@perses-dev/spec';
+import { AbsoluteTimeRange, UnknownSpec, TimeSeriesData, UnixTimeMs } from '@perses-dev/spec';
 import { DatasourceStore, VariableStateMap } from '../runtime';
 import { Plugin } from './plugin-base';
 
@@ -49,3 +49,18 @@ export interface TimeSeriesQueryContext {
 }
 
 export type TimeSeriesDataQuery = Query<TimeSeriesData, unknown, TimeSeriesData, QueryKey>;
+
+export type TimeSeriesValueTuple = [timestamp: UnixTimeMs, value: number | null];
+
+export type BucketTuple = [number, string, string, string]; // [bucket, upperBound, lowerBound, count]
+
+export type HistogramValue = { count: number; sum: string; buckets?: BucketTuple[] };
+
+export type TimeSeriesHistogramTuple = [unixTimeSeconds: UnixTimeMs, value: HistogramValue];
+
+export function isTimeSeriesValueTuple(data: TimeSeriesValueTuple): data is TimeSeriesValueTuple {
+  if (data.length !== 2) return false;
+  return true;
+}
+
+export type Labels = Record<string, string>;

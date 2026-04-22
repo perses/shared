@@ -13,7 +13,7 @@
 
 import { ReactElement } from 'react';
 import { Box, useTheme } from '@mui/material';
-import { getLegendSize } from '@perses-dev/core'; // TODO
+import { getLegendSize } from '../model';
 import { Legend } from '../Legend';
 import { ContentWithLegendProps, getContentWithLegendLayout } from './model/content-with-legend-model';
 

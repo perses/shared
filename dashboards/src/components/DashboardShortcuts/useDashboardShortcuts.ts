@@ -13,10 +13,10 @@
 
 import { useCallback } from 'react';
 import { AbsoluteTimeRange, TimeRangeValue, isRelativeTimeRange, toAbsoluteTimeRange } from '@perses-dev/spec';
-import { PanelGroupItemId } from '@perses-dev/core';
 import { useSnackbar } from '@perses-dev/components';
 import { useTimeRange } from '@perses-dev/plugin-system';
 import { useHotkeys, useHotkeySequences } from '@tanstack/react-hotkeys';
+import { PanelGroupItemId } from '../../model';
 import {
   useFocusedPanel,
   buildShortcutOptions,

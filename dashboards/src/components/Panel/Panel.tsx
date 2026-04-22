@@ -20,11 +20,11 @@ import {
   combineSx,
   useId,
 } from '@perses-dev/components';
-import { PanelGroupItemId } from '@perses-dev/core'; // TODO
 import { PanelDefinition } from '@perses-dev/spec';
 import { ActionOptions, useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
 import { ReactNode, memo, useEffect, useMemo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
+import { PanelGroupItemId } from '../../model';
 import { PanelContent } from './PanelContent';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 

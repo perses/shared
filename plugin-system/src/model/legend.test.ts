@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LegendOptionsBase } from '@perses-dev/core'; // TODO
+import { LegendOptionsBase } from '@perses-dev/components';
 import { validateLegendSpec } from './legend';
 
 describe('validateLegendSpec', () => {
