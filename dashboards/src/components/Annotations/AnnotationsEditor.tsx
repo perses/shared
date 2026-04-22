@@ -65,9 +65,8 @@ export function AnnotationEditor(props: {
   const [annotationFormAction, setAnnotationFormAction] = useState<Action>('update');
 
   const validation = useMemo(() => getValidation(annotationDefinitions), [annotationDefinitions]);
-  const currentEditingAnnotationDefinition: AnnotationDefinition | undefined = annotationEditIdx
-    ? annotationDefinitions[annotationEditIdx]
-    : undefined;
+  const currentEditingAnnotationDefinition: AnnotationDefinition | undefined =
+    annotationEditIdx !== null ? annotationDefinitions[annotationEditIdx] : undefined;
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
@@ -148,7 +147,7 @@ export function AnnotationEditor(props: {
 
   return (
     <>
-      {annotationEditIdx && currentEditingAnnotationDefinition ? (
+      {annotationEditIdx !== null && currentEditingAnnotationDefinition ? (
         <ValidationProvider>
           <AnnotationEditorForm
             initialAnnotationDefinition={currentEditingAnnotationDefinition}

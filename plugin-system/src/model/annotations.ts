@@ -5,7 +5,7 @@ import { Plugin } from './plugin-base';
 /**
  * An object containing all the dependencies of a AnnotationQuery.
  */
-type AnnotationQueryQueryPluginDependencies = {
+export type AnnotationQueryQueryPluginDependencies = {
   /**
    * Returns a list of variables name this annotation query depends on.
    */
@@ -16,7 +16,7 @@ type AnnotationQueryQueryPluginDependencies = {
  * A plugin for running annotation queries.
  */
 export interface AnnotationPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
-  getAnnotationData: (spec: Spec, ctx: AnnotationContext, abortSignal?: AbortSignal) => Promise<AnnotationData>;
+  getAnnotationData: (spec: Spec, ctx: AnnotationContext, abortSignal?: AbortSignal) => Promise<AnnotationData[]>;
   dependsOn?: (spec: Spec, ctx: AnnotationContext) => AnnotationQueryQueryPluginDependencies;
 }
 
@@ -25,6 +25,6 @@ export interface AnnotationPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
  */
 export interface AnnotationContext {
   datasourceStore: DatasourceStore;
-  absoluteTimeRange?: AbsoluteTimeRange;
+  absoluteTimeRange: AbsoluteTimeRange;
   variableState: VariableStateMap;
 }

@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export * from './annotations';
 export * from './datasource';
 export * from './legend';
 export * from './panels';

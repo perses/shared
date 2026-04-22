@@ -1,29 +1,29 @@
 import { ReactNode, useMemo } from 'react';
-import { AnnotationData, AnnotationDefinition } from '@perses-dev/spec';
+import { AnnotationData } from '@perses-dev/spec';
 import { AnnotationStateMap, useAnnotationActions, useAnnotationDefinitions } from '@perses-dev/dashboards';
 import { useAnnotations } from '@perses-dev/plugin-system';
 import { UseQueryResult } from '@tanstack/react-query';
 
-export function useHydrateAnnotationDefinitions(definitions: AnnotationDefinition[]): AnnotationStateMap {
-  const annotations: Array<UseQueryResult<AnnotationData>> = useAnnotations(definitions);
-
-  return useMemo(() => {
-    const result: AnnotationStateMap = {};
-
-    for (const [index, definition] of definitions.entries()) {
-      const query = annotations[index] ?? null;
-      if (query) {
-        result[definition.spec.display.name] = {
-          data: query.data ?? null,
-          isPending: query.isLoading,
-          error: (query?.error as Error) ?? null,
-        };
-      }
-    }
-
-    return result;
-  }, [annotations, definitions]);
-}
+// export function useHydrateAnnotationDefinitions(definitions: AnnotationDefinition[]): AnnotationStateMap {
+//   const annotations: Array<UseQueryResult<AnnotationData[]>> = useAnnotations(definitions);
+//
+//   return useMemo(() => {
+//     const result: AnnotationStateMap = {};
+//
+//     for (const [index, definition] of definitions.entries()) {
+//       const query = annotations[index] ?? null;
+//       if (query) {
+//         result[definition.spec.display.name] = {
+//           data: query.data ?? null,
+//           isPending: query.isLoading,
+//           error: (query?.error as Error) ?? null,
+//         };
+//       }
+//     }
+//
+//     return result;
+//   }, [annotations, definitions]);
+// }
 
 interface AnnotationHydrationWrapperProps {
   children: ReactNode;
@@ -39,7 +39,7 @@ interface AnnotationHydrationWrapperProps {
 export function AnnotationHydrationWrapper({ children }: AnnotationHydrationWrapperProps): ReactNode {
   const annotationDefinitions = useAnnotationDefinitions();
   const { setAnnotationState } = useAnnotationActions();
-  const annotations: Array<UseQueryResult<AnnotationData>> = useAnnotations(annotationDefinitions);
+  const annotations: Array<UseQueryResult<AnnotationData[]>> = useAnnotations(annotationDefinitions);
 
   useMemo(() => {
     const result: AnnotationStateMap = {};

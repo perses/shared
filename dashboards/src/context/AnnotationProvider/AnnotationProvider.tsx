@@ -8,7 +8,7 @@ import { immer } from 'zustand/middleware/immer';
 import { AnnotationHydrationWrapper } from './AnnotationHydrationWrapper';
 
 export type AnnotationState = {
-  data: AnnotationData | null;
+  data: AnnotationData[] | null;
   isPending: boolean;
   error?: Error;
 };
@@ -34,7 +34,7 @@ const AnnotationStoreContext = createContext<StoreApi<AnnotationStore> | undefin
 export function useAnnotationStoreCtx(): StoreApi<AnnotationStore> {
   const context = useContext(AnnotationStoreContext);
   if (!context) {
-    throw new Error('AnnotationStoreContext not initialized');
+    return createAnnotationStore({ initialAnnotationDefinitions: [] });
   }
   return context;
 }
@@ -92,6 +92,27 @@ export function useAnnotationDefinitionAndState(name: string): {
       definition: s.annotationDefinitions.find((d) => d.spec.display.name === name),
       state: s.annotationState[name],
     };
+  });
+}
+
+export type AnnotationDefinitionWithData = {
+  definition: AnnotationDefinition;
+  data: AnnotationData[];
+};
+
+export function useAnnotationsWithData(): AnnotationDefinitionWithData[] {
+  const store = useAnnotationStoreCtx();
+
+  return useStore(store, (s) => {
+    return s.annotationDefinitions
+      .map((definition) => {
+        const state = s.annotationState[definition.spec.display.name];
+        return {
+          definition,
+          data: state?.data,
+        };
+      })
+      .filter((annotation) => !!annotation.data) as AnnotationDefinitionWithData[];
   });
 }
 

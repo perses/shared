@@ -67,7 +67,7 @@ function getQueryOptions({
   };
 }
 
-export function useAnnotations(definitions: AnnotationDefinition[]): Array<UseQueryResult<AnnotationData>> {
+export function useAnnotations(definitions: AnnotationDefinition[]): Array<UseQueryResult<AnnotationData[]>> {
   const { getPlugin } = usePluginRegistry();
   const context = useAnnotationContext();
 
@@ -89,7 +89,7 @@ export function useAnnotations(definitions: AnnotationDefinition[]): Array<UseQu
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
         staleTime: Infinity,
-        queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<AnnotationData> => {
+        queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<AnnotationData[]> => {
           const plugin = await getPlugin(ANNOTATION_KEY, annotationKind);
           const data = await plugin.getAnnotationData(definition.spec.plugin.spec, context, signal);
           return data;
