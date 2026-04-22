@@ -11,23 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './graph';
-export * from './theme';
-export * from './timeOption';
-export * from './timeZoneOption';
-export * from './action';
-export * from './legend';
-export * from './time';
-export * from './bits';
-export * from './bytes';
-export * from './currency';
-export * from './percent';
-export * from './temperature';
-export * from './decimal';
-export * from './throughput';
-export * from './formatterCache';
-export * from './units';
-export * from './utils';
-export * from './types';
-export * from './thresholds';
-export * from './transforms';
+export const MAX_SIGNIFICANT_DIGITS = 3;

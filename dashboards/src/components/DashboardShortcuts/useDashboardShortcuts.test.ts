@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { DashboardResource } from '@perses-dev/core';
+import { DashboardResource } from '../../model';
 import { useDashboardShortcuts } from './useDashboardShortcuts';
 
 const mockInfoSnackbar = jest.fn();

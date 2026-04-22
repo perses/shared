@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ThresholdColorPalette } from '@perses-dev/core'; // TODO
 import type {
   EChartsOption,
   BarSeriesOption,
@@ -22,6 +21,7 @@ import type {
   XAXisComponentOption,
   YAXisComponentOption,
 } from 'echarts';
+import { ThresholdColorPalette } from './thresholds';
 
 export interface PersesChartsTheme {
   echartsTheme: EChartsTheme;

@@ -21,15 +21,17 @@ import {
   Typography,
   TextField as MuiTextField,
 } from '@mui/material';
+
+import { ReactElement } from 'react';
+
+import { TextField } from '../controls';
 import {
   JoinByColumnValueTransform,
   MergeColumnsTransform,
   MergeIndexedColumnsTransform,
   MergeSeriesTransform,
   Transform,
-} from '@perses-dev/core'; // TODO
-import { ReactElement } from 'react';
-import { TextField } from '../controls';
+} from '../model';
 
 interface TransformSpecEditorProps<Spec> {
   value: Spec;

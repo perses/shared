@@ -20,11 +20,11 @@ import {
   getSubmitText,
   getTitleAction,
 } from '@perses-dev/components';
-import { DatasourceDefinition } from '@perses-dev/core'; // TODO
 import { DispatchWithoutAction, ReactElement, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { useValidationSchemas } from '../../context';
 import { PluginEditor } from '../PluginEditor';
+import { DatasourceDefinition } from '../../model';
 
 interface DatasourceEditorFormProps {
   initialDatasourceDefinition: DatasourceDefinition;

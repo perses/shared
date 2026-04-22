@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { render, screen, fireEvent } from '@testing-library/react';
-import { TransformsEditor } from '@perses-dev/components';
-import { Transform } from '@perses-dev/core'; // TODO
+import { Transform } from '../model';
+import { TransformsEditor } from '.';
 
 describe('TransformsEditor', () => {
   function renderTableColumnsEditor(value: Transform[], onChange = jest.fn()): void {
