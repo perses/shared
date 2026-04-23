@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// import { AnnotationData, AnnotationDefinition } from '@perses-dev/spec';
+// import { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
 // import { AnnotationStoreStateMap, AnnotationState } from '@perses-dev/plugin-system';
 //
-// function hydrateAnnotationState(annotation: AnnotationDefinition, value?: AnnotationData): AnnotationState {
+// function hydrateAnnotationState(annotation: AnnotationSpec, value?: AnnotationData): AnnotationState {
 //   const annoState: AnnotationState = {
 //     value: null,
 //     loading: false,
@@ -29,7 +29,7 @@
 //  * Build the local annotation states according to the given definitions
 //  * @param definitions local annotation definitions. Dynamic part.
 //  */
-// export function hydrateAnnotationDefinitionStates(definitions: AnnotationDefinition[]): AnnotationStoreStateMap {
+// export function hydrateAnnotationSpecStates(definitions: AnnotationSpec[]): AnnotationStoreStateMap {
 //   const state: AnnotationStoreStateMap = new AnnotationStoreStateMap();
 //
 //   for (const definition of definitions) {

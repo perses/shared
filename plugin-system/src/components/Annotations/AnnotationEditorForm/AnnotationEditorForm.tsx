@@ -14,7 +14,7 @@
 import { DispatchWithoutAction, ReactElement, useState } from 'react';
 import { Box, Typography, TextField, Grid, Divider } from '@mui/material';
 import { Action } from '@perses-dev/core';
-import { AnnotationDefinition } from '@perses-dev/spec';
+import { AnnotationSpec } from '@perses-dev/spec';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,18 +24,18 @@ import { useValidationSchemas } from '../../../context';
 
 interface KindAnnotationEditorFormProps {
   action: Action;
-  control: Control<AnnotationDefinition>;
+  control: Control<AnnotationSpec>;
 }
 
 function AnnotationPluginControl({ action, control }: KindAnnotationEditorFormProps): ReactElement {
-  const plugin = useWatch<AnnotationDefinition, 'spec.plugin'>({ control, name: 'spec.plugin' });
+  const plugin = useWatch<AnnotationSpec, 'plugin'>({ control, name: 'plugin' });
   const kind = plugin?.kind;
   const pluginSpec = plugin?.spec;
 
   return (
     <Controller
       control={control}
-      name="spec.plugin"
+      name="plugin"
       render={({ field }) => {
         return (
           <PluginEditor
@@ -62,18 +62,18 @@ function AnnotationPluginControl({ action, control }: KindAnnotationEditorFormPr
 }
 
 interface AnnotationEditorFormProps {
-  initialAnnotationDefinition: AnnotationDefinition;
+  initialAnnotationSpec: AnnotationSpec;
   action: Action;
   isDraft: boolean;
   isReadonly?: boolean;
   onActionChange?: (action: Action) => void;
-  onSave: (def: AnnotationDefinition) => void;
+  onSave: (def: AnnotationSpec) => void;
   onClose: () => void;
   onDelete?: DispatchWithoutAction;
 }
 
 export function AnnotationEditorForm({
-  initialAnnotationDefinition,
+  initialAnnotationSpec,
   action,
   isDraft,
   isReadonly,
@@ -87,13 +87,13 @@ export function AnnotationEditorForm({
   const submitText = getSubmitText(action, isDraft);
 
   const { annotationEditorSchema } = useValidationSchemas();
-  const form = useForm<AnnotationDefinition>({
+  const form = useForm<AnnotationSpec>({
     resolver: zodResolver(annotationEditorSchema),
     mode: 'onBlur',
-    defaultValues: initialAnnotationDefinition,
+    defaultValues: initialAnnotationSpec,
   });
 
-  const processForm: SubmitHandler<AnnotationDefinition> = (data: AnnotationDefinition) => {
+  const processForm: SubmitHandler<AnnotationSpec> = (data: AnnotationSpec) => {
     // reset display attributes to undefined when empty, because we don't want to save empty strings
     onSave(data);
   };
@@ -103,7 +103,7 @@ export function AnnotationEditorForm({
   // - update action: ask for discard approval if changed
   // - read action: don´t ask for discard approval
   function handleCancel(): void {
-    if (JSON.stringify(initialAnnotationDefinition) !== JSON.stringify(form.getValues())) {
+    if (JSON.stringify(initialAnnotationSpec) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);
     } else {
       onClose();
@@ -137,7 +137,7 @@ export function AnnotationEditorForm({
           <Grid item xs={12}>
             <Controller
               control={form.control}
-              name="spec.display.name"
+              name="display.name"
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}
@@ -162,7 +162,7 @@ export function AnnotationEditorForm({
           <Grid item xs={12}>
             <Controller
               control={form.control}
-              name="spec.display.description"
+              name="display.description"
               render={({ field, fieldState }) => (
                 <TextField
                   {...field}

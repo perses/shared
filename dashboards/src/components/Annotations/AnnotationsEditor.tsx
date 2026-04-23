@@ -30,7 +30,7 @@ import {
 } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
 import { Action } from '@perses-dev/core';
-import { AnnotationDefinition, Definition, UnknownSpec } from '@perses-dev/spec';
+import { AnnotationSpec, Definition, UnknownSpec } from '@perses-dev/spec';
 import { useImmer } from 'use-immer';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
@@ -40,11 +40,11 @@ import ArrowDown from 'mdi-material-ui/ArrowDown';
 import { ValidationProvider, AnnotationEditorForm } from '@perses-dev/plugin-system';
 import { useDiscardChangesConfirmationDialog } from '../../context';
 
-function getValidation(annotationDefinitions: AnnotationDefinition[]): { isValid: boolean; errors: string[] } {
+function getValidation(annotationSpecs: AnnotationSpec[]): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
   /**  Annotation names must be unique */
-  const annotationNames = annotationDefinitions.map((annotationDefinition) => annotationDefinition.spec.display.name);
+  const annotationNames = annotationSpecs.map((annotationSpec) => annotationSpec.display.name);
   const uniqueAnnotationNames = new Set(annotationNames);
   if (annotationNames.length !== uniqueAnnotationNames.size) {
     errors.push('Annotation names must be unique');
@@ -56,22 +56,22 @@ function getValidation(annotationDefinitions: AnnotationDefinition[]): { isValid
 }
 
 export function AnnotationEditor(props: {
-  annotationDefinitions: AnnotationDefinition[];
-  onChange: (annotationDefinitions: AnnotationDefinition[]) => void;
+  annotationSpecs: AnnotationSpec[];
+  onChange: (annotationSpecs: AnnotationSpec[]) => void;
   onCancel: () => void;
 }): ReactElement {
-  const [annotationDefinitions, setAnnotationDefinitions] = useImmer(props.annotationDefinitions);
+  const [annotationSpecs, setAnnotationSpecs] = useImmer(props.annotationSpecs);
   const [annotationEditIdx, setAnnotationEditIdx] = useState<number | null>(null);
   const [annotationFormAction, setAnnotationFormAction] = useState<Action>('update');
 
-  const validation = useMemo(() => getValidation(annotationDefinitions), [annotationDefinitions]);
-  const currentEditingAnnotationDefinition: AnnotationDefinition | undefined =
-    annotationEditIdx !== null ? annotationDefinitions[annotationEditIdx] : undefined;
+  const validation = useMemo(() => getValidation(annotationSpecs), [annotationSpecs]);
+  const currentEditingAnnotationSpec: AnnotationSpec | undefined =
+    annotationEditIdx !== null ? annotationSpecs[annotationEditIdx] : undefined;
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
   const handleCancel = (): void => {
-    if (JSON.stringify(props.annotationDefinitions) !== JSON.stringify(annotationDefinitions)) {
+    if (JSON.stringify(props.annotationSpecs) !== JSON.stringify(annotationSpecs)) {
       openDiscardChangesConfirmationDialog({
         onDiscardChanges: () => {
           closeDiscardChangesConfirmationDialog();
@@ -89,23 +89,20 @@ export function AnnotationEditor(props: {
   };
 
   const removeAnnotation = (index: number): void => {
-    setAnnotationDefinitions((draft) => {
+    setAnnotationSpecs((draft) => {
       draft.splice(index, 1);
     });
   };
 
   const addAnnotation = (): void => {
     setAnnotationFormAction('create');
-    setAnnotationDefinitions((draft) => {
+    setAnnotationSpecs((draft) => {
       draft.push({
-        kind: 'Annotation',
-        spec: {
-          display: { name: 'NewAnnotation' },
-          plugin: {} as Definition<UnknownSpec>,
-        },
+        display: { name: 'NewAnnotation' },
+        plugin: {} as Definition<UnknownSpec>,
       });
     });
-    setAnnotationEditIdx(annotationDefinitions.length);
+    setAnnotationEditIdx(annotationSpecs.length);
   };
 
   const editAnnotation = (index: number): void => {
@@ -114,17 +111,17 @@ export function AnnotationEditor(props: {
   };
 
   const toggleAnnotationVisibility = (index: number, visible: boolean): void => {
-    setAnnotationDefinitions((draft) => {
+    setAnnotationSpecs((draft) => {
       const v = draft[index];
       if (!v) {
         return;
       }
-      v.spec.display.hidden = !visible;
+      v.display.hidden = !visible;
     });
   };
 
   const changeAnnotationOrder = (index: number, direction: 'up' | 'down'): void => {
-    setAnnotationDefinitions((draft) => {
+    setAnnotationSpecs((draft) => {
       if (direction === 'up') {
         const prevElement = draft[index - 1];
         const currentElement = draft[index];
@@ -147,15 +144,15 @@ export function AnnotationEditor(props: {
 
   return (
     <>
-      {annotationEditIdx !== null && currentEditingAnnotationDefinition ? (
+      {annotationEditIdx !== null && currentEditingAnnotationSpec ? (
         <ValidationProvider>
           <AnnotationEditorForm
-            initialAnnotationDefinition={currentEditingAnnotationDefinition}
+            initialAnnotationSpec={currentEditingAnnotationSpec}
             action={annotationFormAction}
             isDraft={true}
             onActionChange={setAnnotationFormAction}
-            onSave={(definition: AnnotationDefinition) => {
-              setAnnotationDefinitions((draft) => {
+            onSave={(definition: AnnotationSpec) => {
+              setAnnotationSpecs((draft) => {
                 draft[annotationEditIdx] = definition;
                 setAnnotationEditIdx(null);
               });
@@ -181,10 +178,10 @@ export function AnnotationEditor(props: {
             <Typography variant="h2">Edit Dashboard Annotations</Typography>
             <Stack direction="row" spacing={1} marginLeft="auto">
               <Button
-                disabled={props.annotationDefinitions === annotationDefinitions || !validation.isValid}
+                disabled={props.annotationSpecs === annotationSpecs || !validation.isValid}
                 variant="contained"
                 onClick={() => {
-                  props.onChange(annotationDefinitions);
+                  props.onChange(annotationSpecs);
                 }}
               >
                 Apply
@@ -215,28 +212,28 @@ export function AnnotationEditor(props: {
                       </TableRow>
                     </TableHead>
                     <TableBody>
-                      {annotationDefinitions.map((v, idx) => (
-                        <TableRow key={v.spec.display.name}>
+                      {annotationSpecs.map((v, idx) => (
+                        <TableRow key={v.display.name}>
                           <TableCell component="th" scope="row">
                             <Switch
-                              checked={v.spec.display?.hidden !== true}
+                              checked={v.display?.hidden !== true}
                               onChange={(e) => {
                                 toggleAnnotationVisibility(idx, e.target.checked);
                               }}
                             />
                           </TableCell>
                           <TableCell component="th" scope="row" sx={{ fontWeight: 'bold' }}>
-                            {v.spec.display.name}
+                            {v.display.name}
                           </TableCell>
-                          <TableCell>{v.kind}</TableCell>
-                          <TableCell>{v.spec.display?.description ?? ''}</TableCell>
+                          <TableCell>{v.plugin.kind}</TableCell>
+                          <TableCell>{v.display?.description ?? ''}</TableCell>
                           <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                             <IconButton onClick={() => changeAnnotationOrder(idx, 'up')} disabled={idx === 0}>
                               <ArrowUp />
                             </IconButton>
                             <IconButton
                               onClick={() => changeAnnotationOrder(idx, 'down')}
-                              disabled={idx === annotationDefinitions.length - 1}
+                              disabled={idx === annotationSpecs.length - 1}
                             >
                               <ArrowDown />
                             </IconButton>

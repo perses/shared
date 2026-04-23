@@ -20,9 +20,9 @@ import {
   variableDefinitionSchema,
   buildPanelEditorSchema,
   buildVariableDefinitionSchema,
-  AnnotationDefinition,
-  annotationDefinitionSchema,
-  buildAnnotationDefinitionSchema,
+  AnnotationSpec,
+  annotationSpecSchema,
+  buildAnnotationSpecSchema,
 } from '@perses-dev/spec';
 
 import { z } from 'zod';
@@ -32,7 +32,7 @@ export interface ValidationSchemas {
   datasourceEditorSchema: z.Schema<DatasourceDefinition>;
   panelEditorSchema: z.Schema<PanelEditorValues>;
   variableEditorSchema: z.Schema<VariableDefinition>;
-  annotationEditorSchema: z.Schema<AnnotationDefinition>;
+  annotationEditorSchema: z.Schema<AnnotationSpec>;
   setDatasourceEditorSchemaPlugin: (pluginSchema: PluginSchema) => void;
   setPanelEditorSchemaPlugin: (pluginSchema: PluginSchema) => void;
   setVariableEditorSchemaPlugin: (pluginSchema: PluginSchema) => void;
@@ -62,8 +62,7 @@ export function ValidationProvider({ children }: ValidationProviderProps): React
   const [panelEditorSchema, setPanelEditorSchema] = useState<z.Schema<PanelEditorValues>>(defaultPanelEditorSchema); // TODO I don't get why this does not compile
   const [variableEditorSchema, setVariableEditorSchema] =
     useState<z.Schema<VariableDefinition>>(variableDefinitionSchema);
-  const [annotationEditorSchema, setAnnotationEditorSchema] =
-    useState<z.Schema<AnnotationDefinition>>(annotationDefinitionSchema);
+  const [annotationEditorSchema, setAnnotationEditorSchema] = useState<z.Schema<AnnotationSpec>>(annotationSpecSchema);
 
   function setDatasourceEditorSchemaPlugin(pluginSchema: PluginSchema): void {
     setDatasourceEditorSchema(buildDatasourceDefinitionSchema(pluginSchema));
@@ -78,7 +77,7 @@ export function ValidationProvider({ children }: ValidationProviderProps): React
   }
 
   function setAnnotationEditorSchemaPlugin(pluginSchema: PluginSchema): void {
-    setAnnotationEditorSchema(buildAnnotationDefinitionSchema(pluginSchema));
+    setAnnotationEditorSchema(buildAnnotationSpecSchema(pluginSchema));
   }
 
   return (
