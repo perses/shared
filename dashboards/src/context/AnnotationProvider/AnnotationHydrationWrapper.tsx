@@ -1,29 +1,8 @@
 import { ReactNode, useMemo } from 'react';
 import { AnnotationData } from '@perses-dev/spec';
-import { AnnotationStateMap, useAnnotationActions, useAnnotationDefinitions } from '@perses-dev/dashboards';
+import { AnnotationStateMap, useAnnotationActions, useAnnotationSpecs } from '@perses-dev/dashboards';
 import { useAnnotations } from '@perses-dev/plugin-system';
 import { UseQueryResult } from '@tanstack/react-query';
-
-// export function useHydrateAnnotationDefinitions(definitions: AnnotationDefinition[]): AnnotationStateMap {
-//   const annotations: Array<UseQueryResult<AnnotationData[]>> = useAnnotations(definitions);
-//
-//   return useMemo(() => {
-//     const result: AnnotationStateMap = {};
-//
-//     for (const [index, definition] of definitions.entries()) {
-//       const query = annotations[index] ?? null;
-//       if (query) {
-//         result[definition.spec.display.name] = {
-//           data: query.data ?? null,
-//           isPending: query.isLoading,
-//           error: (query?.error as Error) ?? null,
-//         };
-//       }
-//     }
-//
-//     return result;
-//   }, [annotations, definitions]);
-// }
 
 interface AnnotationHydrationWrapperProps {
   children: ReactNode;
@@ -37,17 +16,17 @@ interface AnnotationHydrationWrapperProps {
  * that can trigger the hydration manually, so we need to do it at provider level.
  */
 export function AnnotationHydrationWrapper({ children }: AnnotationHydrationWrapperProps): ReactNode {
-  const annotationDefinitions = useAnnotationDefinitions();
+  const annotationSpecs = useAnnotationSpecs();
   const { setAnnotationState } = useAnnotationActions();
-  const annotations: Array<UseQueryResult<AnnotationData[]>> = useAnnotations(annotationDefinitions);
+  const annotations: Array<UseQueryResult<AnnotationData[]>> = useAnnotations(annotationSpecs);
 
   useMemo(() => {
     const result: AnnotationStateMap = {};
 
-    for (const [index, definition] of annotationDefinitions.entries()) {
+    for (const [index, definition] of annotationSpecs.entries()) {
       const query = annotations[index] ?? null;
       if (query) {
-        setAnnotationState(definition.spec.display.name, {
+        setAnnotationState(definition.display.name, {
           data: query.data ?? null,
           isPending: query.isLoading,
           error: (query?.error as Error) ?? null,
@@ -56,7 +35,7 @@ export function AnnotationHydrationWrapper({ children }: AnnotationHydrationWrap
     }
 
     return result;
-  }, [annotationDefinitions, annotations, setAnnotationState]);
+  }, [annotationSpecs, annotations, setAnnotationState]);
 
   return <>{children}</>;
 }

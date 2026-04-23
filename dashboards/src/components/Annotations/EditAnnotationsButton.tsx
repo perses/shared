@@ -15,9 +15,9 @@ import { ReactElement, useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
-import { AnnotationDefinition } from '@perses-dev/spec';
+import { AnnotationSpec } from '@perses-dev/spec';
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
-import { useAnnotationActions, useAnnotationDefinitions } from '../../context';
+import { useAnnotationActions, useAnnotationSpecs } from '../../context';
 import { AnnotationEditor } from './AnnotationsEditor';
 
 export interface EditAnnotationsButtonProps extends Pick<ButtonProps, 'fullWidth'> {
@@ -44,8 +44,8 @@ export function EditAnnotationsButton({
   fullWidth,
 }: EditAnnotationsButtonProps): ReactElement {
   const [isAnnotationEditorOpen, setIsAnnotationEditorOpen] = useState(false);
-  const annotationDefinitions: AnnotationDefinition[] = useAnnotationDefinitions();
-  const { setAnnotationDefinitions } = useAnnotationActions();
+  const annotationSpecs: AnnotationSpec[] = useAnnotationSpecs();
+  const { setAnnotationSpecs } = useAnnotationActions();
 
   const openAnnotationEditor = (): void => {
     setIsAnnotationEditorOpen(true);
@@ -77,10 +77,10 @@ export function EditAnnotationsButton({
         data-testid="annotation-editor"
       >
         <AnnotationEditor
-          annotationDefinitions={annotationDefinitions}
+          annotationSpecs={annotationSpecs}
           onCancel={closeAnnotationEditor}
-          onChange={(annotations: AnnotationDefinition[]) => {
-            setAnnotationDefinitions(annotations);
+          onChange={(annotations: AnnotationSpec[]) => {
+            setAnnotationSpecs(annotations);
             setIsAnnotationEditorOpen(false);
           }}
         />

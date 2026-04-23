@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { AnnotationData, AnnotationDefinition } from '@perses-dev/spec';
+import { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
 import { QueryKey, useQueries, UseQueryResult } from '@tanstack/react-query';
-import { AnnotationContext, AnnotationPlugin } from '../model/annotations';
+import { AnnotationContext, AnnotationPlugin } from '../model';
 import { usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
 import { useAllVariableValues } from './variables';
@@ -40,7 +40,7 @@ function getQueryOptions({
   context,
 }: {
   plugin?: AnnotationPlugin;
-  definition: AnnotationDefinition;
+  definition: AnnotationSpec;
   context: AnnotationContext;
 }): {
   queryKey: QueryKey;
@@ -48,7 +48,7 @@ function getQueryOptions({
 } {
   const { variableState, absoluteTimeRange } = context;
 
-  const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
+  const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.plugin.spec, context) : {};
   const variableDependencies = dependencies?.variables;
 
   const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
@@ -67,13 +67,13 @@ function getQueryOptions({
   };
 }
 
-export function useAnnotations(definitions: AnnotationDefinition[]): Array<UseQueryResult<AnnotationData[]>> {
+export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryResult<AnnotationData[]>> {
   const { getPlugin } = usePluginRegistry();
   const context = useAnnotationContext();
 
   const pluginLoaderResponse = usePlugins(
     'Annotation',
-    definitions.map((d) => ({ kind: d.spec.plugin.kind }))
+    definitions.map((d) => ({ kind: d.plugin.kind }))
   );
 
   // useQueries() handles data fetching from query plugins (e.g. traceQL queries, promQL queries)
@@ -81,7 +81,7 @@ export function useAnnotations(definitions: AnnotationDefinition[]): Array<UseQu
     queries: definitions.map((definition, idx) => {
       const plugin = pluginLoaderResponse[idx]?.data;
       const { queryEnabled, queryKey } = getQueryOptions({ context, definition, plugin });
-      const annotationKind = definition?.spec?.plugin?.kind;
+      const annotationKind = definition?.plugin?.kind;
       return {
         enabled: queryEnabled,
         queryKey: queryKey,
@@ -91,7 +91,7 @@ export function useAnnotations(definitions: AnnotationDefinition[]): Array<UseQu
         staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<AnnotationData[]> => {
           const plugin = await getPlugin(ANNOTATION_KEY, annotationKind);
-          const data = await plugin.getAnnotationData(definition.spec.plugin.spec, context, signal);
+          const data = await plugin.getAnnotationData(definition.plugin.spec, context, signal);
           return data;
         },
       };

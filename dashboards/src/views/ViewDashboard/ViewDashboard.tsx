@@ -121,7 +121,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
             externalVariableDefinitions={externalVariableDefinitions}
             builtinVariableDefinitions={builtinVariables}
           >
-            <AnnotationProvider initialAnnotationDefinitions={spec.annotations ?? []}>
+            <AnnotationProvider initialAnnotationSpecs={spec.annotations ?? []}>
               <Box
                 sx={combineSx(
                   {
