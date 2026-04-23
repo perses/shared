@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo } from 'react';
 import { AnnotationData } from '@perses-dev/spec';
 import { AnnotationStateMap, useAnnotationActions, useAnnotationSpecs } from '@perses-dev/dashboards';
 import { useAnnotations } from '@perses-dev/plugin-system';
@@ -20,9 +20,7 @@ export function AnnotationHydrationWrapper({ children }: AnnotationHydrationWrap
   const { setAnnotationState } = useAnnotationActions();
   const annotations: Array<UseQueryResult<AnnotationData[]>> = useAnnotations(annotationSpecs);
 
-  useMemo(() => {
-    const result: AnnotationStateMap = {};
-
+  useEffect(() => {
     for (const [index, definition] of annotationSpecs.entries()) {
       const query = annotations[index] ?? null;
       if (query) {
@@ -33,8 +31,6 @@ export function AnnotationHydrationWrapper({ children }: AnnotationHydrationWrap
         });
       }
     }
-
-    return result;
   }, [annotationSpecs, annotations, setAnnotationState]);
 
   return <>{children}</>;

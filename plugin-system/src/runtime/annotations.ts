@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
-import { QueryKey, useQueries, UseQueryResult } from '@tanstack/react-query';
+import { QueryKey, useQueries, useQuery, UseQueryResult } from '@tanstack/react-query';
 import { AnnotationContext, AnnotationPlugin } from '../model';
-import { usePluginRegistry, usePlugins } from './plugin-registry';
+import { filterVariableList } from '../components';
+import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
 import { useAllVariableValues } from './variables';
 import { useDatasourceStore } from './datasources';
@@ -96,5 +97,45 @@ export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryRes
         },
       };
     }),
+  });
+}
+
+export function useAnnotationData(spec: AnnotationSpec): UseQueryResult<AnnotationData[]> {
+  const { data: annotationPlugin } = usePlugin('Annotation', spec.plugin.kind);
+
+  const datasourceStore = useDatasourceStore();
+  const allVariables = useAllVariableValues();
+  const { absoluteTimeRange: timeRange } = useTimeRange();
+  const variablePluginCtx = { absoluteTimeRange: timeRange, datasourceStore, variableState: allVariables };
+
+  let dependsOnVariables: string[] = Object.keys(allVariables); // Default to all variables
+  if (annotationPlugin?.dependsOn) {
+    const dependencies = annotationPlugin.dependsOn(spec.plugin.spec, variablePluginCtx);
+    dependsOnVariables = dependencies.variables ? dependencies.variables : dependsOnVariables;
+  }
+
+  const variables = useAllVariableValues(dependsOnVariables);
+
+  let waitToLoad = false;
+  if (dependsOnVariables) {
+    waitToLoad = dependsOnVariables.some((v) => variables[v]?.loading);
+  }
+
+  const variablesValueKey = getVariableValuesKey(variables);
+
+  return useQuery({
+    queryKey: ['annotation', spec, timeRange, variablesValueKey],
+    queryFn: async ({ signal }) => {
+      const resp = await annotationPlugin?.getAnnotationData(
+        spec.plugin.spec,
+        { ...variablePluginCtx, variableState: variables },
+        signal
+      );
+      if (!resp?.length) {
+        return [];
+      }
+      return resp;
+    },
+    enabled: !!annotationPlugin || waitToLoad,
   });
 }
