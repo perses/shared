@@ -11,23 +11,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DispatchWithoutAction, ReactElement, useState } from 'react';
+import { DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
 import { Box, Typography, TextField, Grid, Divider } from '@mui/material';
 import { Action } from '@perses-dev/core';
 import { AnnotationSpec } from '@perses-dev/spec';
 import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import { getSubmitText, getTitleAction } from '../../../utils';
 import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
+import { AnnotationPreview } from './AnnotationPreview';
+
+function FallbackPreview(): ReactElement {
+  return <div>Error previewing annotations</div>;
+}
 
 interface KindAnnotationEditorFormProps {
   action: Action;
   control: Control<AnnotationSpec>;
+  onRunQuery: () => void;
 }
 
-function AnnotationPluginControl({ action, control }: KindAnnotationEditorFormProps): ReactElement {
+function AnnotationPluginControl({ action, control, onRunQuery }: KindAnnotationEditorFormProps): ReactElement {
   const plugin = useWatch<AnnotationSpec, 'plugin'>({ control, name: 'plugin' });
   const kind = plugin?.kind;
   const pluginSpec = plugin?.spec;
@@ -54,6 +61,7 @@ function AnnotationPluginControl({ action, control }: KindAnnotationEditorFormPr
             onChange={(v) => {
               field.onChange({ kind: v.selection.kind, spec: v.spec });
             }}
+            onRunQuery={onRunQuery}
           />
         );
       }}
@@ -82,6 +90,8 @@ export function AnnotationEditorForm({
   onClose,
   onDelete,
 }: AnnotationEditorFormProps): ReactElement {
+  const queryClient = useQueryClient();
+
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
@@ -92,6 +102,22 @@ export function AnnotationEditorForm({
     mode: 'onBlur',
     defaultValues: initialAnnotationSpec,
   });
+
+  /* We use `previewDefinition` to explicitly update the spec
+   * that will be used for preview when running query. The reason why we do this is to avoid
+   * having to re-fetch the values when the user is still editing the spec.
+   * Using structuredClone to not have reference issues with nested objects.
+   */
+  const [previewSpec, setPreviewSpec] = useState(structuredClone(form.getValues()));
+
+  const handleRunQuery = useCallback(async () => {
+    const values = form.getValues();
+    if (JSON.stringify(previewSpec) === JSON.stringify(values)) {
+      await queryClient.invalidateQueries({ queryKey: ['annotation', previewSpec] });
+    } else {
+      setPreviewSpec(structuredClone(values));
+    }
+  }, [form, previewSpec, queryClient]);
 
   const processForm: SubmitHandler<AnnotationSpec> = (data: AnnotationSpec) => {
     // reset display attributes to undefined when empty, because we don't want to save empty strings
@@ -186,8 +212,12 @@ export function AnnotationEditorForm({
 
         <Divider />
 
+        <ErrorBoundary FallbackComponent={FallbackPreview} resetKeys={[previewSpec]}>
+          <AnnotationPreview spec={previewSpec} sx={{ marginY: 2 }} />
+        </ErrorBoundary>
+
         <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <AnnotationPluginControl action={action} control={form.control} />
+          <AnnotationPluginControl action={action} control={form.control} onRunQuery={handleRunQuery} />
         </ErrorBoundary>
       </Box>
       <DiscardChangesConfirmationDialog
