@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import React from 'react';
 import { HotkeyMeta, HotkeySequence, RegisterableHotkey } from '@tanstack/hotkeys';
 import { PersesShortcutDef } from './types';
 
@@ -59,4 +60,19 @@ export function requireShortcutEvent(def: PersesShortcutDef): string {
 
 export function dispatchShortcutEvent(eventName: string): void {
   window.dispatchEvent(new CustomEvent(eventName));
+}
+
+/**
+ * Creates an onKeyDown handler that fires `execute` on exact Mod+Enter (Cmd+Enter on Mac, Ctrl+Enter on others).
+ * Performs exact modifier matching: Mod+Shift+Enter or Mod+Alt+Enter will NOT trigger the handler.
+ * Designed for use with CodeMirror editors via the onKeyDown prop, where it must call
+ * preventDefault() before CodeMirror processes the key event.
+ */
+export function createModEnterHandler(execute: () => void): React.KeyboardEventHandler<HTMLElement> {
+  return (event: React.KeyboardEvent<HTMLElement>): void => {
+    if (event.key === 'Enter' && (event.ctrlKey || event.metaKey) && !event.shiftKey && !event.altKey) {
+      event.preventDefault();
+      execute();
+    }
+  };
 }

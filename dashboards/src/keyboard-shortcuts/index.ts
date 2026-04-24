@@ -16,6 +16,7 @@ export * from './events';
 export { PanelFocusProvider, useFocusedPanel, usePanelFocusHandlers } from './PanelFocusProvider';
 export {
   buildShortcutOptions,
+  createModEnterHandler,
   dispatchShortcutEvent,
   requireShortcutEvent,
   requireShortcutHotkey,
