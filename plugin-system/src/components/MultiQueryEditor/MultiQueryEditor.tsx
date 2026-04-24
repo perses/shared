@@ -15,7 +15,7 @@ import { forwardRef, ReactElement, useState } from 'react';
 import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
-import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
+import { QueryDefinition, QueryPluginType } from '@perses-dev/spec';
 import { QueryData, useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
 import { PluginEditorRef } from '../PluginEditor';
 import { QueryEditorContainer } from './QueryEditorContainer';

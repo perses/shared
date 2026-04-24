@@ -11,23 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './graph';
-export * from './theme';
-export * from './timeOption';
-export * from './timeZoneOption';
-export * from './action';
-export * from './legend';
-export * from './time';
-export * from './bits';
-export * from './bytes';
-export * from './currency';
-export * from './percent';
-export * from './temperature';
-export * from './decimal';
-export * from './throughput';
-export * from './formatterCache';
-export * from './units';
-export * from './utils';
-export * from './types';
-export * from './thresholds';
-export * from './transforms';
+export interface StepOptions {
+  value: number;
+  color?: string;
+  name?: string;
+}
+
+export interface ThresholdOptions {
+  mode?: 'percent' | 'absolute';
+  defaultColor?: string;
+  max?: number; // is this same as the max in GaugeChartOptions? can we remove?
+  steps?: StepOptions[];
+}
+
+export interface ThresholdColorPalette {
+  defaultColor: string;
+  palette: string[];
+}

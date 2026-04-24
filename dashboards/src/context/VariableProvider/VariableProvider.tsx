@@ -475,7 +475,6 @@ function createVariableDefinitionStore({
  * You can define one list of variable definition by source and as many source as you want.
  * The order of the sources is important as first one will take precedence on the following ones, in case they have same names.
  */
-// ExternalVariableDefinition is now imported from @perses-dev/core
 
 export interface VariableProviderProps {
   children: ReactNode;
