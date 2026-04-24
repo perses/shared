@@ -90,6 +90,7 @@ export function TimeRangeSelector({
   const tzOpen = Boolean(tzAnchorEl);
   const tzLabel = tzOptions.find((o) => o.value === timeZone)?.display ?? timeZone;
   const tzOffset = getGMTOffset(timeZone);
+  const localOffset = getGMTOffset('local');
   const tzAutocompleteOptions = tzOptions.map((o) => ({ id: o.value, label: o.display }));
   let tzAutocompleteValue: SettingsAutocompleteOption | undefined = undefined;
   {
@@ -155,7 +156,9 @@ export function TimeRangeSelector({
           renderValue={() => (
             <Stack direction="row" alignItems="center" spacing={1}>
               <span>{formatTimeRange(value, timeZone)}</span>
-              <Box sx={{ typography: 'caption', color: 'text.secondary' }}>· {tzOffset}</Box>
+              {tzOffset !== localOffset && (
+                <Box sx={{ typography: 'caption', color: 'text.secondary' }}>· {tzOffset}</Box>
+              )}
             </Stack>
           )}
           inputProps={{ 'aria-label': `Select time range. Currently set to ${value}` }}
