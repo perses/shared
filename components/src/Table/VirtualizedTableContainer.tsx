@@ -19,13 +19,6 @@ type VirtualizedTableContainerProps = MuiTableContainerProps;
 
 export const VirtualizedTableContainer = forwardRef<HTMLDivElement, VirtualizedTableContainerProps>(
   function VirtualizedTableContainer(props, ref) {
-    return (
-      <MuiTableContainer
-        {...props}
-        tabIndex={-1}
-        ref={ref}
-        sx={combineSx({ flexGrow: 1, scrollbarGutter: 'stable' }, props.sx)}
-      />
-    );
+    return <MuiTableContainer {...props} tabIndex={-1} ref={ref} sx={combineSx({ flexGrow: 1 }, props.sx)} />;
   }
 );
