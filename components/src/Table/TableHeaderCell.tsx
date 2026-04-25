@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TableSortLabel, Typography, tableSortLabelClasses } from '@mui/material';
+import { TableSortLabel, Typography, tableSortLabelClasses, Box, Divider } from '@mui/material';
 import { ReactElement } from 'react';
 import { TableCell, TableCellProps } from './TableCell';
 import { SortDirection } from './model/table-model';
@@ -35,6 +35,27 @@ export interface TableHeaderCellProps extends TableCellProps {
    * unsorted.)
    */
   nextSortDirection?: SortDirection;
+
+  /**
+   * Configuration for column resizing interactions.
+   * When included, the header will include a resize handle (divider).
+   */
+  resizeConfig?: ResizeConfig;
+}
+interface ResizeConfig {
+  /**
+   * Handler called when a column resize event is triggered.
+   */
+  resizeHandler: (event: unknown) => void;
+  /**
+   * Handler called when a column reset size event is triggered (double click on the resize handle).
+   */
+  resetSizeHandler: () => void;
+
+  /**
+   * Indicates whether the column is currently being resized.
+   */
+  isResizing: boolean;
 }
 
 export function TableHeaderCell({
@@ -42,6 +63,7 @@ export function TableHeaderCell({
   sortDirection,
   nextSortDirection,
   children,
+  resizeConfig,
   ...cellProps
 }: TableHeaderCellProps): ReactElement {
   const showSortLabel = !!onSort;
@@ -84,6 +106,40 @@ export function TableHeaderCell({
         </TableSortLabel>
       ) : (
         headerText
+      )}
+      {resizeConfig && (
+        <Box
+          onMouseDown={(_e) => {
+            if (_e.detail === 2) {
+              resizeConfig.resetSizeHandler();
+              return;
+            }
+            resizeConfig.resizeHandler(_e);
+          }}
+          onTouchStart={resizeConfig.resizeHandler}
+          onDoubleClick={resizeConfig.resetSizeHandler}
+          sx={{
+            position: 'absolute',
+            height: '100%',
+            top: 0,
+            right: '4px',
+            cursor: 'col-resize',
+          }}
+        >
+          <Divider
+            flexItem
+            orientation="vertical"
+            sx={(theme) => ({
+              backgroundColor: resizeConfig.isResizing ? theme.palette.action.active : theme.palette.divider,
+              borderRadius: '2px',
+              borderWidth: '2px',
+              height: '100%',
+              touchAction: 'none',
+              transform: 'translateX(4px)',
+              userSelect: 'none',
+            })}
+          />
+        </Box>
       )}
     </TableCell>
   );
