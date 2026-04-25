@@ -168,6 +168,88 @@ describe('persesColumnToTanstackColumn', () => {
     );
   });
 
+  describe('with defaultColumn config', () => {
+    test('applies `enableResizing` from defaultColumn when not set on column', () => {
+      const persesColumns: Array<TableColumnConfig<MockTableData>> = [{ accessorKey: 'label', header: 'Name' }];
+      const tanstackColumns = persesColumnsToTanstackColumns(persesColumns, { enableResizing: true });
+      expect(tanstackColumns[0]).toEqual(
+        expect.objectContaining({
+          enableResizing: true,
+        })
+      );
+    });
+
+    test('column-level `enableResizing` overrides defaultColumn', () => {
+      const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+        { accessorKey: 'label', header: 'Name', enableResizing: false },
+      ];
+      const tanstackColumns = persesColumnsToTanstackColumns(persesColumns, { enableResizing: true });
+      expect(tanstackColumns[0]).toEqual(
+        expect.objectContaining({
+          enableResizing: false,
+        })
+      );
+    });
+
+    test('applies `minWidth` and `maxWidth` from defaultColumn when resizing is enabled', () => {
+      const persesColumns: Array<TableColumnConfig<MockTableData>> = [{ accessorKey: 'label', header: 'Name' }];
+      const tanstackColumns = persesColumnsToTanstackColumns(persesColumns, {
+        enableResizing: true,
+        minWidth: 80,
+        maxWidth: 500,
+      });
+      expect(tanstackColumns[0]).toEqual(
+        expect.objectContaining({
+          minSize: 80,
+          maxSize: 500,
+        })
+      );
+    });
+
+    test('uses default min/max widths when resizing is enabled but none are provided in defaultColumn', () => {
+      const persesColumns: Array<TableColumnConfig<MockTableData>> = [{ accessorKey: 'label', header: 'Name' }];
+      const tanstackColumns = persesColumnsToTanstackColumns(persesColumns, { enableResizing: true });
+      expect(tanstackColumns[0]).toEqual(
+        expect.objectContaining({
+          minSize: 60,
+          maxSize: 1000,
+        })
+      );
+    });
+
+    test('uses zero size props for auto-width columns when resizing is disabled (defaultColumn provided)', () => {
+      const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+        { accessorKey: 'label', header: 'Name', width: 'auto' },
+      ];
+      const tanstackColumns = persesColumnsToTanstackColumns(persesColumns, { enableResizing: false });
+      expect(tanstackColumns[0]).toEqual(
+        expect.objectContaining({
+          size: 0,
+          minSize: 0,
+          maxSize: 0,
+        })
+      );
+    });
+
+    test('applies numeric width with min/max from defaultColumn when resizing is enabled', () => {
+      const persesColumns: Array<TableColumnConfig<MockTableData>> = [
+        { accessorKey: 'value', header: 'Count', width: 200 },
+      ];
+      const tanstackColumns = persesColumnsToTanstackColumns(persesColumns, {
+        enableResizing: true,
+        minWidth: 100,
+        maxWidth: 400,
+      });
+      expect(tanstackColumns[0]).toEqual(
+        expect.objectContaining({
+          size: 200,
+          minSize: 100,
+          maxSize: 400,
+        })
+      );
+    });
+  });
+
   test('transforms perses columns to tanstack columns', () => {
     const persesColumns: Array<TableColumnConfig<MockTableData>> = [
       {
