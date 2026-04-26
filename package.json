@@ -17,6 +17,7 @@
   "workspaces": [
     "components",
     "dashboards",
+    "design-tokens",
     "plugin-system",
     "explore"
   ],
