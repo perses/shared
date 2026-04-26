@@ -155,7 +155,10 @@ export function TimeRangeSelector({
           IconComponent={Calendar}
           renderValue={() => (
             <Stack direction="row" alignItems="center" spacing={1}>
-              <span>{formatTimeRange(value, timeZone)}</span>
+              <span>
+                {timeOptions.find((opt) => formatTimeRange(opt.value, timeZone) === formatTimeRange(value, timeZone))
+                  ?.display ?? formatTimeRange(value, timeZone)}
+              </span>
               {tzOffset !== localOffset && (
                 <Box sx={{ typography: 'caption', color: 'text.secondary' }}>· {tzOffset}</Box>
               )}
