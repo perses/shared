@@ -39,7 +39,9 @@
     "test": "cross-env TZ=UTC jest",
     "test:watch": "cross-env TZ=UTC jest --watch",
     "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint --fix src --ext .ts,.tsx"
+    "lint:fix": "eslint --fix src --ext .ts,.tsx",
+    "ladle": "ladle serve",
+    "ladle:build": "ladle build"
   },
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.4.0",
@@ -67,6 +69,7 @@
     "react-virtuoso": "^4.12.2"
   },
   "devDependencies": {
+    "@ladle/react": "^5.1.1",
     "@types/lodash": "^4.17.20",
     "copyfiles": "^2.4.1"
   },

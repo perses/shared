@@ -1,0 +1,50 @@
+/* Copyright The Perses Authors */
+/* Licensed under the Apache License, Version 2.0 (the "License"); */
+/* you may not use this file except in compliance with the License. */
+/* You may obtain a copy of the License at */
+/* */
+/* http://www.apache.org/licenses/LICENSE-2.0 */
+/* */
+/* Unless required by applicable law or agreed to in writing, software */
+/* distributed under the License is distributed on an "AS IS" BASIS, */
+/* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. */
+/* See the License for the specific language governing permissions and */
+/* limitations under the License. */
+
+@layer perses.components {
+  .ps-Alert {
+    display: flex;
+    align-items: center;
+    gap: var(--perses-spacing-sm);
+    padding: var(--perses-spacing-md) var(--perses-spacing-lg);
+    border-radius: var(--perses-radius-md);
+    font-family: var(--perses-font-family);
+    font-size: var(--perses-font-size-xs);
+    line-height: var(--perses-line-height-normal);
+    border: 1px solid;
+  }
+
+  .ps-Alert[data-severity="error"] {
+    background: var(--perses-status-bg-error);
+    color: var(--perses-status-text-error);
+    border-color: var(--perses-status-border-error);
+  }
+
+  .ps-Alert[data-severity="warning"] {
+    background: var(--perses-status-bg-warning);
+    color: var(--perses-status-text-warning);
+    border-color: var(--perses-status-border-warning);
+  }
+
+  .ps-Alert[data-severity="success"] {
+    background: var(--perses-status-bg-success);
+    color: var(--perses-status-text-success);
+    border-color: var(--perses-status-border-success);
+  }
+
+  .ps-Alert[data-severity="info"] {
+    background: var(--perses-status-bg-info);
+    color: var(--perses-status-text-info);
+    border-color: var(--perses-status-border-info);
+  }
+}

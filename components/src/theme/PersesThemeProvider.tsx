@@ -20,7 +20,7 @@ interface PersesThemeProviderProps {
   children: ReactNode;
 }
 
-export function PersesThemeProvider({ mode, children }: PersesThemeProviderProps) {
+export function PersesThemeProvider({ mode, children }: PersesThemeProviderProps): JSX.Element {
   useEffect(() => {
     document.documentElement.dataset.persesMode = mode;
   }, [mode]);

@@ -11,7 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { Alert } from './primitives/Alert/Alert';
-export type { AlertProps } from './primitives/Alert/Alert';
-export { Button } from './primitives/Button/Button';
-export type { ButtonProps } from './primitives/Button/Button';
+import { ReactNode } from 'react';
+
+type AlertSeverity = 'error' | 'warning' | 'success' | 'info';
+
+export interface AlertProps extends React.ComponentPropsWithoutRef<'div'> {
+  severity?: AlertSeverity;
+  children: ReactNode;
+}
+
+export function Alert({ severity = 'info', className, children, ...props }: AlertProps): JSX.Element {
+  return (
+    <div role="alert" className={`ps-Alert ${className ?? ''}`.trim()} data-severity={severity} {...props}>
+      {children}
+    </div>
+  );
+}

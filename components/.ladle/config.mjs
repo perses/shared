@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { Alert } from './primitives/Alert/Alert';
-export type { AlertProps } from './primitives/Alert/Alert';
-export { Button } from './primitives/Button/Button';
-export type { ButtonProps } from './primitives/Button/Button';
+export default {
+  stories: 'src/next/**/*.stories.tsx',
+  defaultStory: 'button--all-variants-and-colors',
+};

@@ -11,7 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { Alert } from './primitives/Alert/Alert';
-export type { AlertProps } from './primitives/Alert/Alert';
-export { Button } from './primitives/Button/Button';
-export type { ButtonProps } from './primitives/Button/Button';
+import type { Story } from '@ladle/react';
+import { Alert } from './Alert';
+
+export const AllSeverities: Story = () => (
+  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+    <Alert severity="error">Error alert</Alert>
+    <Alert severity="warning">Warning alert</Alert>
+    <Alert severity="success">Success alert</Alert>
+    <Alert severity="info">Info alert</Alert>
+  </div>
+);

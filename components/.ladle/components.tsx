@@ -11,7 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { Alert } from './primitives/Alert/Alert';
-export type { AlertProps } from './primitives/Alert/Alert';
-export { Button } from './primitives/Button/Button';
-export type { ButtonProps } from './primitives/Button/Button';
+import type { GlobalProvider } from '@ladle/react';
+import '@perses-dev/design-tokens/css';
+import '../src/next/css/index.css';
+
+export const Provider: GlobalProvider = ({ children, globalState }) => {
+  return (
+    <section data-perses-mode={globalState.theme === 'dark' ? 'dark' : 'light'} style={{ fontFamily: 'monospace' }}>
+      {children}
+    </section>
+  );
+};
