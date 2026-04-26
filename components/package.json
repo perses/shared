@@ -14,12 +14,26 @@
   "module": "dist/index.js",
   "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./next": {
+      "import": "./dist/next/index.js",
+      "require": "./dist/cjs/next/index.js",
+      "types": "./dist/next/index.d.ts"
+    },
+    "./next/css": "./dist/next/css/index.css"
+  },
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
     "build:cjs": "swc ./src -d dist/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
     "build:esm": "swc ./src -d dist --strip-leading-paths --config-file ../.swcrc",
     "build:types": "tsc --project tsconfig.build.json",
+    "build:next-css": "copyfiles -u 1 \"src/next/**/*.css\" dist",
     "type-check": "tsc --noEmit",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
     "test": "cross-env TZ=UTC jest",
@@ -53,7 +67,8 @@
     "react-virtuoso": "^4.12.2"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.20"
+    "@types/lodash": "^4.17.20",
+    "copyfiles": "^2.4.1"
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",
