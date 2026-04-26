@@ -94,20 +94,16 @@
     --perses-color-white: #ffffff;
     --perses-color-black: #000000;
 
-    /* ---- Spacing (8px base) ---- */
+    /* ---- Spacing (rem) ---- */
     --perses-spacing-0: 0;
-    --perses-spacing-0_5: 4px;
-    --perses-spacing-1: 8px;
-    --perses-spacing-1_5: 12px;
-    --perses-spacing-2: 16px;
-    --perses-spacing-2_5: 20px;
-    --perses-spacing-3: 24px;
-    --perses-spacing-4: 32px;
-    --perses-spacing-5: 40px;
-    --perses-spacing-6: 48px;
-    --perses-spacing-8: 64px;
-    --perses-spacing-10: 80px;
-    --perses-spacing-12: 96px;
+    --perses-spacing-xs: 0.25rem;
+    --perses-spacing-sm: 0.5rem;
+    --perses-spacing-md: 0.75rem;
+    --perses-spacing-lg: 1rem;
+    --perses-spacing-xl: 1.25rem;
+    --perses-spacing-2xl: 1.5rem;
+    --perses-spacing-3xl: 2rem;
+    --perses-spacing-4xl: 3rem;
 
     /* ---- Border Radius ---- */
     --perses-radius-none: 0;
