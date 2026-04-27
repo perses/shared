@@ -109,15 +109,14 @@ export function TableHeaderCell({
       )}
       {resizeConfig && (
         <Box
-          onMouseDown={(_e) => {
-            if (_e.detail === 2) {
+          onMouseDown={(e) => {
+            if (e.detail === 2) {
               resizeConfig.resetSizeHandler();
               return;
             }
-            resizeConfig.resizeHandler(_e);
+            resizeConfig.resizeHandler(e);
           }}
           onTouchStart={resizeConfig.resizeHandler}
-          onDoubleClick={resizeConfig.resetSizeHandler}
           sx={{
             position: 'absolute',
             height: '100%',
