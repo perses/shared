@@ -20,11 +20,18 @@ import { ColorPicker } from './ColorPicker';
 export interface OptionsColorPickerProps {
   label: string;
   color: string;
+  size?: 'small' | 'medium' | 'large';
   onColorChange: (color: string) => void;
   onClear?: () => void;
 }
 
-export function OptionsColorPicker({ label, color, onColorChange, onClear }: OptionsColorPickerProps): ReactElement {
+export function OptionsColorPicker({
+  label,
+  color,
+  size = 'small',
+  onColorChange,
+  onClear,
+}: OptionsColorPickerProps): ReactElement {
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const isOpen = Boolean(anchorEl);
 
@@ -43,7 +50,7 @@ export function OptionsColorPicker({ label, color, onColorChange, onClear }: Opt
   return (
     <>
       <ColorIconButton
-        size="small"
+        size={size}
         aria-label={`change ${label} color`}
         isSelected={isOpen}
         iconColor={color}

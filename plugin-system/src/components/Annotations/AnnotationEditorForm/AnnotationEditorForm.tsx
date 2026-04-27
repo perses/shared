@@ -12,17 +12,26 @@
 // limitations under the License.
 
 import { DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
-import { Box, Typography, TextField, Grid, Divider } from '@mui/material';
+import { Box, Typography, TextField, Grid, Divider, Stack, Switch, FormControlLabel, IconButton } from '@mui/material';
 import { Action } from '@perses-dev/core';
 import { AnnotationSpec } from '@perses-dev/spec';
-import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
+import {
+  DiscardChangesConfirmationDialog,
+  ErrorAlert,
+  ErrorBoundary,
+  FormActions,
+  OptionsColorPicker,
+} from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
+import InvertColorsIcon from 'mdi-material-ui/InvertColors';
 import { getSubmitText, getTitleAction } from '../../../utils';
 import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
 import { AnnotationPreview } from './AnnotationPreview';
+
+const DEFAULT_ANNOTATION_COLOR = '#FF6B6B';
 
 function FallbackPreview(): ReactElement {
   return <div>Error previewing annotations</div>;
@@ -186,27 +195,54 @@ export function AnnotationEditorForm({
             />
           </Grid>
           <Grid item xs={12}>
-            <Controller
-              control={form.control}
-              name="display.description"
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  label="Description"
-                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                  InputProps={{
-                    readOnly: action === 'read',
-                  }}
-                  error={!!fieldState.error}
-                  helperText={fieldState.error?.message}
-                  value={field.value ?? ''}
-                  onChange={(event) => {
-                    field.onChange(event);
-                  }}
-                />
-              )}
-            />
+            <Stack direction="row" gap={1}>
+              <Controller
+                control={form.control}
+                name="display.color"
+                render={({ field }) => {
+                  const isEnabled = field.value !== undefined;
+                  return (
+                    <>
+                      {isEnabled ? (
+                        <OptionsColorPicker
+                          size="medium"
+                          label="annotation"
+                          color={field.value ?? DEFAULT_ANNOTATION_COLOR}
+                          onColorChange={(color) => field.onChange(color)}
+                          onClear={() => field.onChange(undefined)}
+                        />
+                      ) : (
+                        <IconButton size="medium" onClick={() => field.onChange(DEFAULT_ANNOTATION_COLOR)}>
+                          <InvertColorsIcon />
+                        </IconButton>
+                      )}
+                    </>
+                  );
+                }}
+              />
+
+              <Controller
+                control={form.control}
+                name="display.description"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Description"
+                    InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                    InputProps={{
+                      readOnly: action === 'read',
+                    }}
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    value={field.value ?? ''}
+                    onChange={(event) => {
+                      field.onChange(event);
+                    }}
+                  />
+                )}
+              />
+            </Stack>
           </Grid>
         </Grid>
 
