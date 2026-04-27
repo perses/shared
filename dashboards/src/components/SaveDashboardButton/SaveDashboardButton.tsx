@@ -11,17 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
+import { ReactElement } from 'react';
 import { Button, ButtonProps } from '@mui/material';
-import { isRelativeTimeRange } from '@perses-dev/spec';
-import { useTimeRange } from '@perses-dev/plugin-system';
-import {
-  OnSaveDashboard,
-  useDashboard,
-  useEditMode,
-  useSaveChangesConfirmationDialog,
-  useVariableDefinitionActions,
-} from '../../context';
+import { OnSaveDashboard, useSaveDashboard } from '../../context';
 
 export interface SaveDashboardButtonProps extends Pick<ButtonProps, 'fullWidth'> {
   onSave?: OnSaveDashboard;
@@ -34,70 +26,10 @@ export const SaveDashboardButton = ({
   isDisabled,
   variant = 'contained',
 }: SaveDashboardButtonProps): ReactElement => {
-  const [isSavingDashboard, setSavingDashboard] = useState<boolean>(false);
-  const { dashboard, setDashboard } = useDashboard();
-  const { getSavedVariablesStatus, setVariableDefaultValues } = useVariableDefinitionActions();
-  const { isSavedVariableModified } = getSavedVariablesStatus();
-  const { timeRange, refreshInterval } = useTimeRange();
-  const { setEditMode } = useEditMode();
-  const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
-
-  const onSaveButtonClick = (): void => {
-    const isSavedDurationModified =
-      isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
-
-    const isSavedRefreshIntervalModified = dashboard.spec.refreshInterval !== refreshInterval;
-
-    // Save dashboard
-    // - if active timeRange from plugin-system is relative and different from currently saved
-    // - or if the saved variables are different from currently saved
-    if (isSavedDurationModified || isSavedVariableModified || isSavedRefreshIntervalModified) {
-      openSaveChangesConfirmationDialog({
-        onSaveChanges: (saveDefaultTimeRange, saveDefaultRefreshInterval, saveDefaultVariables) => {
-          if (isRelativeTimeRange(timeRange) && saveDefaultTimeRange) {
-            dashboard.spec.duration = timeRange.pastDuration;
-          }
-          if (saveDefaultVariables) {
-            const variables = setVariableDefaultValues();
-            dashboard.spec.variables = variables;
-          }
-          if (saveDefaultRefreshInterval && isSavedRefreshIntervalModified) {
-            dashboard.spec.refreshInterval = refreshInterval;
-          }
-          setDashboard(dashboard);
-          saveDashboard();
-        },
-        onCancel: () => {
-          closeSaveChangesConfirmationDialog();
-        },
-        isSavedDurationModified,
-        isSavedVariableModified,
-        isSavedRefreshIntervalModified,
-      });
-    } else {
-      saveDashboard();
-    }
-  };
-
-  const saveDashboard = async (): Promise<void> => {
-    if (onSave) {
-      try {
-        setSavingDashboard(true);
-        await onSave(dashboard);
-        closeSaveChangesConfirmationDialog();
-        setEditMode(false);
-      } catch (error) {
-        throw new Error(`An error occurred while saving the dashboard. ${error}`);
-      } finally {
-        setSavingDashboard(false);
-      }
-    } else {
-      setEditMode(false);
-    }
-  };
+  const { saveDashboard, isSaving } = useSaveDashboard(onSave);
 
   return (
-    <Button variant={variant} onClick={onSaveButtonClick} disabled={isDisabled || isSavingDashboard}>
+    <Button variant={variant} onClick={saveDashboard} disabled={isDisabled || isSaving}>
       Save
     </Button>
   );

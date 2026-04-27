@@ -35,7 +35,6 @@ import {
   Typography,
 } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
-import { Action, ExternalVariableDefinition } from '@perses-dev/core'; // TODO
 import { BuiltinVariableDefinition, VariableDefinition } from '@perses-dev/spec';
 import { useImmer } from 'use-immer';
 import PencilIcon from 'mdi-material-ui/Pencil';
@@ -54,7 +53,8 @@ import {
   VariableState,
   useResolveListVariableValues,
 } from '@perses-dev/plugin-system';
-import { InfoTooltip } from '@perses-dev/components';
+import { InfoTooltip, Action } from '@perses-dev/components';
+import { ExternalVariableDefinition } from '../../model/VariableDefinition';
 import { useDiscardChangesConfirmationDialog, VariableProvider } from '../../context';
 import { hydrateVariableDefinitionStates } from '../../context/VariableProvider/hydrationUtils';
 import { BuiltinVariableAccordions } from './BuiltinVariableAccordions';

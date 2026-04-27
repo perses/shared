@@ -14,12 +14,19 @@
 import { DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
 import { Box, Typography, Switch, TextField, Grid, FormControlLabel, MenuItem, Stack, Divider } from '@mui/material';
 import { VariableDefinition, ListVariableDefinition } from '@perses-dev/spec';
-import { Action } from '@perses-dev/core';
-import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
+
+import {
+  DiscardChangesConfirmationDialog,
+  ErrorAlert,
+  ErrorBoundary,
+  FormActions,
+  Action,
+  getSubmitText,
+  getTitleAction,
+} from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
-import { getSubmitText, getTitleAction } from '../../../utils';
 import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
 import { VARIABLE_TYPES } from '../variable-model';

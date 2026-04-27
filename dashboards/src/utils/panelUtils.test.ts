@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelGroupItemLayout } from '@perses-dev/core'; // TODO
+import { PanelGroupItemLayout } from '../model'; // TODO
 import { insertPanelInLayout, UnpositionedPanelGroupItemLayout } from './panelUtils';
 
 describe('insertPanelInLayout', () => {

@@ -19,6 +19,7 @@ import { DashboardSpec } from '@perses-dev/spec';
 import {
   PanelDrawer,
   Dashboard,
+  useDashboardShortcuts,
   PanelGroupDialog,
   DeletePanelGroupDialog,
   DashboardDiscardChangesConfirmationDialog,
@@ -30,6 +31,7 @@ import {
   LeaveDialog,
 } from '../../components';
 import { OnSaveDashboard, useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
+import { PanelFocusProvider } from '../../keyboard-shortcuts';
 import { DashboardResource } from '../../model';
 
 export interface DashboardAppProps {
@@ -38,6 +40,7 @@ export interface DashboardAppProps {
   isReadonly: boolean;
   isVariableEnabled: boolean;
   isDatasourceEnabled: boolean;
+  disableShortcuts?: boolean;
   isCreating?: boolean;
   isInitialVariableSticky?: boolean;
   // If true, browser confirmation dialog will be shown when navigating away with unsaved changes (closing tab, ...).
@@ -48,12 +51,21 @@ export interface DashboardAppProps {
 }
 
 export const DashboardApp = (props: DashboardAppProps): ReactElement => {
+  return (
+    <PanelFocusProvider>
+      <DashboardAppContent {...props} />
+    </PanelFocusProvider>
+  );
+};
+
+const DashboardAppContent = (props: DashboardAppProps): ReactElement => {
   const {
     dashboardResource,
     emptyDashboardProps,
     isReadonly,
     isVariableEnabled,
     isDatasourceEnabled,
+    disableShortcuts,
     isCreating,
     isInitialVariableSticky,
     isLeavingConfirmDialogEnabled,
@@ -107,6 +119,14 @@ export const DashboardApp = (props: DashboardAppProps): ReactElement => {
       });
     }
   };
+
+  useDashboardShortcuts({
+    onSave,
+    isReadonly,
+    onEditButtonClick,
+    onCancelButtonClick,
+    disabled: disableShortcuts,
+  });
 
   return (
     <Box

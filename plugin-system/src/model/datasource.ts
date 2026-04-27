@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BuiltinVariableDefinition, UnknownSpec } from '@perses-dev/spec';
+import { BuiltinVariableDefinition, DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
 import { Plugin } from './plugin-base';
 
 /**
@@ -34,4 +34,12 @@ export interface DatasourceClient {
   // TODO: set kind and define healthCheck function
   kind?: string;
   healthCheck?: () => Promise<boolean>;
+}
+
+/**
+ * An intermediary type to regroup the name and the spec of a datasource.
+ */
+export interface DatasourceDefinition {
+  name: string;
+  spec: DatasourceSpec;
 }

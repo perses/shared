@@ -27,7 +27,7 @@ import {
   BuiltinVariableContext,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import { intervalToPrometheusDuration, ExternalVariableDefinition } from '@perses-dev/core'; // TODO weird to have something related to prometheus in the dashboard package
+import { intervalToPrometheusDuration } from '@perses-dev/core'; // TODO weird to have something related to prometheus in the dashboard package
 import {
   DEFAULT_ALL_VALUE as ALL_VALUE,
   VariableName,
@@ -38,6 +38,7 @@ import {
   TextVariableDefinition,
   ListVariableDefinition,
 } from '@perses-dev/spec';
+import { ExternalVariableDefinition } from '../../model/VariableDefinition';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 import { hydrateVariableDefinitionStates as hydrateVariableDefinitionStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
@@ -477,7 +478,6 @@ function createVariableDefinitionStore({
  * You can define one list of variable definition by source and as many source as you want.
  * The order of the sources is important as first one will take precedence on the following ones, in case they have same names.
  */
-// ExternalVariableDefinition is now imported from @perses-dev/core
 
 export interface VariableProviderProps {
   children: ReactNode;

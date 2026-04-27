@@ -18,6 +18,7 @@ import {
   CellContext,
   ColumnDef,
   CoreOptions,
+  FilterFn,
   PaginationState,
   RowData,
   RowSelectionState,
@@ -52,7 +53,7 @@ export interface TableProps<TableData> {
   /**
    * Width of the table.
    */
-  width: number;
+  width: number | string;
 
   /**
    * Array of data to render in the table. Each entry in the array will be
@@ -178,7 +179,42 @@ export interface TableProps<TableData> {
    * Item actions should be created
    */
   hasItemActions?: boolean;
+
+  /**
+   * Returns the sub rows for a given row, or `undefined` if there are none.
+   */
+  getSubRows?: (originalRow: TableData, index: number) => undefined | TableData[];
+
+  /**
+   * List of column ids that should be hidden when the table is initially rendered.
+   */
+  hiddenColumns?: string[];
+
+  /**
+   * Configuration for the table toolbar at the top of table, which includes the search input and column filter button.
+   * If not provided, the toolbar will not be rendered.
+   */
+  tableToolbarConfig?: TableToolbarConfig;
 }
+
+export type TableToolbarConfig = {
+  /**
+   * When `true`, a search bar will be rendered above the table that allows
+   * the user to filter rows using a fuzzy global filter.
+   */
+  isSearchEnabled?: boolean;
+
+  /**
+   * When `true`, a "Columns" button will be rendered above the table that
+   * opens a dropdown allowing the user to toggle column visibility.
+   */
+  isColumnFilterEnabled?: boolean;
+
+  /**
+   * Max height for the column filter menu.
+   */
+  columnFilterMenuMaxHeight?: number | string;
+};
 
 function calculateTableCellHeight(lineHeight: CSSProperties['lineHeight'], paddingY: string): number {
   // Doing a bunch of math to enforce height to avoid weirdness with mismatched
@@ -277,6 +313,13 @@ declare module '@tanstack/table-core' {
   }
 }
 
+declare module '@tanstack/react-table' {
+  //add fuzzy filter to the filterFns. Allows us to use "fuzzy" as a value for `globalFilterFn` in our table options.
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>;
+  }
+}
+
 // Column link settings
 // The URL could be set to a static link or could be constructed dynamically
 // The URL may include reference to the variables or neighboring cells in the row
@@ -291,7 +334,7 @@ export interface TableColumnConfig<TableData>
   // TODO: revisit issue thread and see if there are any workarounds we can
   // use.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  extends Pick<AccessorKeyColumnDef<TableData, any>, 'accessorKey' | 'cell' | 'sortingFn'> {
+  extends Pick<AccessorKeyColumnDef<TableData, any>, 'accessorKey' | 'cell' | 'sortingFn' | 'id'> {
   /**
    * Text to display in the header for the column.
    */

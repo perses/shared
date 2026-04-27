@@ -14,8 +14,8 @@
 import { ReactElement, RefObject, useState } from 'react';
 import { Stack, FormLabel, TextField, IconButton, Box } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { ThresholdOptions } from '@perses-dev/core'; // TODO
 import { OptionsColorPicker } from '../ColorPicker/OptionsColorPicker';
+import { ThresholdOptions } from '../model';
 
 export interface ThresholdInputProps {
   label: string;

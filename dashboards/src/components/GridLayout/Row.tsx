@@ -12,13 +12,13 @@
 // limitations under the License.
 
 import { Collapse, useTheme } from '@mui/material';
-import { PanelGroupDefinition, PanelGroupItemLayout } from '@perses-dev/core'; // TODO should go somewhere else
 import { PanelGroupId } from '@perses-dev/spec';
 import { PanelOptions, useViewPanelGroup } from '@perses-dev/dashboards';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
+import { PanelGroupDefinition, PanelGroupItemLayout } from '../../model';
 import { GridContainer } from './GridContainer';
 import { GridItemContent } from './GridItemContent';
 import { GridTitle } from './GridTitle';

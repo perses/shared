@@ -13,7 +13,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
-import { DEFAULT_DASHBOARD_DURATION } from '@perses-dev/core'; // TODO what should we do with this value ?
+import { DurationString } from '@perses-dev/spec';
 import { PluginRegistry } from '../components';
 import { DefaultPluginKinds } from '../model';
 import { TimeRangeProviderBasic } from '../runtime';
@@ -28,6 +28,7 @@ export function getTestContextWrapper(contextOptions?: ContextOptions) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } },
   });
+  const DEFAULT_DASHBOARD_DURATION: DurationString = '1h';
   const timeRange = { start: new Date(Date.now() - Number(DEFAULT_DASHBOARD_DURATION)), end: new Date() };
 
   return function Wrapper({ children }: { children: ReactNode }): ReactNode {

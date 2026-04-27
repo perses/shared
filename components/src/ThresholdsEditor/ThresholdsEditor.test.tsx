@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ThresholdOptions } from '@perses-dev/core'; // TODO
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { produce } from 'immer';
 import { ChartsProvider } from '../context/ChartsProvider';
 import { testChartsTheme } from '../test-utils';
+import { ThresholdOptions } from '../model';
 import { ThresholdsEditor } from './ThresholdsEditor';
 
 describe('ThresholdsEditor', () => {

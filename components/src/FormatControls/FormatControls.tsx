@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import { Switch, SwitchProps } from '@mui/material';
-import { FormatOptions, isUnitWithDecimalPlaces, isUnitWithShortValues, shouldShortenValues } from '@perses-dev/core'; // TODO
+
 import { ReactElement } from 'react';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
+import { FormatOptions, isUnitWithDecimalPlaces, isUnitWithShortValues, shouldShortenValues } from '../model';
 import { UnitSelector } from './UnitSelector';
 
 export interface FormatControlsProps {

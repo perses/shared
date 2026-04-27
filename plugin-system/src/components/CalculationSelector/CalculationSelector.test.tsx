@@ -13,7 +13,7 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CalculationType } from '@perses-dev/core'; // TODO to come from the utils lib ?
+import { CalculationType } from '../../model'; // TODO to come from the utils lib ?
 import { CalculationSelector } from './CalculationSelector';
 
 describe('CalculationSelector', () => {

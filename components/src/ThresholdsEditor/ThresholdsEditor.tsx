@@ -16,11 +16,11 @@ import { produce } from 'immer';
 import { IconButton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { Stack } from '@mui/system';
-import { ThresholdOptions } from '@perses-dev/core'; // TODO
 import { useChartsTheme } from '../context/ChartsProvider';
 import { OptionsEditorControl, OptionsEditorGroup } from '../OptionsEditorLayout';
 import { InfoTooltip } from '../InfoTooltip';
 import { OptionsColorPicker } from '../ColorPicker/OptionsColorPicker';
+import { ThresholdOptions } from '../model';
 import { ThresholdInput } from './ThresholdInput';
 
 export interface ThresholdsEditorProps {
