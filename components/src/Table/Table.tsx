@@ -212,7 +212,7 @@ export function Table<TableData>({
     // For now, defaulting to sort by descending first. We can expose the ability
     // to customize it if/when we have use cases for it.
     sortDescFirst: true,
-    columnResizeMode: columnResizeMode,
+    columnResizeMode,
     state: {
       rowSelection,
       sorting,
