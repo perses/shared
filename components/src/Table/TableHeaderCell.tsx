@@ -42,13 +42,14 @@ export interface TableHeaderCellProps extends TableCellProps {
    */
   resizeConfig?: ResizeConfig;
 }
-interface ResizeConfig {
+
+export interface ResizeConfig {
   /**
    * Handler called when a column resize event is triggered.
    */
   resizeHandler: (event: unknown) => void;
   /**
-   * Handler called when a column reset size event is triggered (double click on the resize handle).
+   * Handler called when a column reset size event is triggered (double-click on the resize handle).
    */
   resetSizeHandler: () => void;
 
