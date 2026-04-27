@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
 import {
   Card,
@@ -13,30 +13,40 @@ import {
   Typography,
 } from '@mui/material';
 import { useAnnotationData } from '@perses-dev/plugin-system';
-import { formatWithTimeZone, InfoTooltip } from '@perses-dev/components';
+import { InfoTooltip, useTimeZone } from '@perses-dev/components';
 import AlertIcon from 'mdi-material-ui/Alert';
 
-export const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
+const formatDate = (timeMs: number, format: (date: Date, format: string) => string): { date: string; time: string } => {
+  const d = new Date(timeMs);
+  return {
+    date: format(d, 'MMM dd, yyyy'),
+    time: format(d, 'HH:mm:ss'),
+  };
+};
 
-interface AnnotationPreviewCardProps {
+interface AnnotationPreviewCardProps extends CardProps {
   value: AnnotationData;
+  formatWithUserTimeZone: (date: Date, format: string) => string;
 }
 
-function AnnotationPreviewCard(props: AnnotationPreviewCardProps): ReactNode {
+function AnnotationPreviewCard({ value, formatWithUserTimeZone, ...props }: AnnotationPreviewCardProps): ReactNode {
+  const start = formatDate(value.start, formatWithUserTimeZone);
+  const end = value.end !== undefined ? formatDate(value.start, formatWithUserTimeZone) : null;
+
   const tags = useMemo(() => {
-    return Object.entries(props.value.tags ?? []).map(([key, value]) => {
+    return Object.entries(value.tags ?? []).map(([key, value]) => {
       return { key: key, value: value };
     });
-  }, [props.value.tags]);
+  }, [value.tags]);
 
   return (
-    <Card>
+    <Card {...props}>
       <CardContent>
-        <Stack gap={1}>
-          <Typography variant="h3">{props.value.title}</Typography>
-          <Typography>{props.value.legend}</Typography>
+        <Stack gap={2}>
+          {value.title && <Typography variant="h3">{value.title}</Typography>}
+          {value.legend && <Typography>{value.legend}</Typography>}
 
-          <Stack flexWrap="wrap" direction="row" gap={0.5} paddingTop={2}>
+          <Stack flexWrap="wrap" direction="row" gap={0.5}>
             {tags.map((tag) => (
               <Chip size="small" key={`${tag.key}=${tag.value}`} label={`${tag.key}: ${tag.value}`} />
             ))}
@@ -45,14 +55,17 @@ function AnnotationPreviewCard(props: AnnotationPreviewCardProps): ReactNode {
 
         <Divider sx={{ marginY: 2 }} />
 
-        <Stack justifyContent="space-between" gap={0.5}>
-          <Stack direction="row">
-            <Typography>{formatWithTimeZone(new Date(props.value.start * 1000), DATE_TIME_FORMAT)}</Typography>
-          </Stack>
-          {props.value.end !== undefined && (
-            <Stack direction="row">
-              <Typography>{formatWithTimeZone(new Date(props.value.end * 1000), DATE_TIME_FORMAT)}</Typography>
-            </Stack>
+        <Stack gap={0.5} direction="row">
+          <Typography variant="caption">
+            {start.date} - <strong>{start.time}</strong>
+          </Typography>
+          {end && (
+            <>
+              <Typography variant="caption">{' → '}</Typography>
+              <Typography variant="caption">
+                {end.date} - <strong>{end.time}</strong>
+              </Typography>
+            </>
           )}
         </Stack>
       </CardContent>
@@ -66,6 +79,14 @@ export interface AnnotationPreviewProps extends CardProps {
 
 export function AnnotationPreview({ spec, ...props }: AnnotationPreviewProps): ReactNode {
   const { data, isFetching, error } = useAnnotationData(spec);
+  const { formatWithUserTimeZone } = useTimeZone();
+
+  const [showAll, setShowAll] = useState<boolean>(false);
+  const annotationsToShow = showAll ? data : data?.slice(0, 1);
+  let notShown = 0;
+  if (data && data?.length > 0 && annotationsToShow) {
+    notShown = data.length - annotationsToShow.length;
+  }
 
   const stateIndicator = useMemo((): ReactNode | undefined => {
     if (isFetching) {
@@ -97,9 +118,20 @@ export function AnnotationPreview({ spec, ...props }: AnnotationPreviewProps): R
         }
       />
       <CardContent sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, paddingY: 0 }}>
-        {data?.map((item, index) => (
-          <AnnotationPreviewCard key={index} value={item} />
+        {annotationsToShow?.map((item, index) => (
+          <AnnotationPreviewCard
+            key={index}
+            value={item}
+            formatWithUserTimeZone={formatWithUserTimeZone}
+            sx={{ width: '100%' }}
+          />
         ))}
+        {notShown > 0 && (
+          <Chip onClick={() => setShowAll(true)} variant="outlined" size="small" label={`+${notShown} more`} />
+        )}
+        {showAll && data && data.length > 1 && (
+          <Chip onClick={() => setShowAll(false)} variant="outlined" size="small" label="-" />
+        )}
       </CardContent>
     </Card>
   );
