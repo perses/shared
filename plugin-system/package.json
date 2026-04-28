@@ -30,15 +30,15 @@
   "dependencies": {
     "@module-federation/enhanced": "^2.3.3",
     "@perses-dev/components": "0.54.0-beta.1",
-    "@perses-dev/core": "0.53.0",
-    "@perses-dev/spec": "0.2.0-beta.0",
+    "@perses-dev/core": "0.53.1",
+    "@perses-dev/spec": "0.2.0-beta.1",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
-    "immer": "^10.1.1",
+    "immer": "^11.1.4",
     "react-hook-form": "^7.46.1",
     "use-immer": "^0.11.0",
     "use-query-params": "^2.2.1",
-    "zod": "^3.25.76"
+    "zod": "^4.3.6"
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",
