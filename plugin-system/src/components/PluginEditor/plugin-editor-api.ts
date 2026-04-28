@@ -135,10 +135,29 @@ export function usePluginEditor(props: UsePluginEditorProps): {
     // Fire an onChange to change to the pending kind with initial values from the plugin
     rememberCurrentSpecState();
     // LOGZ.IO CHANGE START:: APPZ-1695 auto-execute query on kind change
+    // LOGZ.IO CHANGE START:: Preserve panel-level settings that live on
+    // `plugin.spec` across visualization-type switches. `dataLinks` is set in
+    // the editor at the panel level, so `createInitialOptions` would otherwise
+    // overwrite it on the first switch to a new kind. The "switch back to a
+    // previously-seen kind" path is handled separately via `prevSpecState`. [APPZ-2424]
+    const nextSpec: UnknownSpec = plugin.createInitialOptions ? plugin.createInitialOptions() : {};
+    const preservedFields: readonly string[] = ['dataLinks'];
+    if (value.spec && typeof value.spec === 'object') {
+      const priorSpec = value.spec as Record<string, unknown>;
+      preservedFields.forEach((field) => {
+        const prior = priorSpec[field];
+        if (prior === undefined) return;
+        // Shallow-clone objects so the carried value does not share a reference
+        // with the cached prior spec in `prevSpecState`.
+        (nextSpec as Record<string, unknown>)[field] =
+          prior && typeof prior === 'object' && !Array.isArray(prior) ? { ...prior } : prior;
+      });
+    }
+    // LOGZ.IO CHANGE END:: Preserve panel-level settings across viz switches [APPZ-2424]
     onChange(
       {
         selection: pendingSelection,
-        spec: plugin.createInitialOptions ? plugin.createInitialOptions() : {},
+        spec: nextSpec,
       },
       { forceUpdate: true }
     );
@@ -161,6 +180,7 @@ export function usePluginEditor(props: UsePluginEditorProps): {
     onHideQuery,
     hideQueryState,
     value.selection,
+    value.spec, // LOGZ.IO CHANGE:: read inside the effect to preserve `dataLinks` across viz switches [APPZ-2424]
   ]);
 
   /**

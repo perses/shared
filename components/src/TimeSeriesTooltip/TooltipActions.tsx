@@ -16,6 +16,7 @@ import { Box, Icon, MenuItem, Stack, Typography } from '@mui/material';
 import Magnify from 'mdi-material-ui/Magnify';
 import {
   DRILLDOWN_HELP_TEXT,
+  isActionVisible,
   PointAction,
   SELECT_SERIES_HELP_TEXT,
   TOOLTIP_BG_COLOR_FALLBACK,
@@ -30,6 +31,10 @@ export interface TooltipActionProps {
   onUnpinClick?: () => void;
 }
 export const TooltipActions: React.FC<TooltipActionProps> = ({ actions, selectedSeries, onUnpinClick, isPinned }) => {
+  // LOGZ.IO CHANGE START:: Per-point action visibility [APPZ-2424]
+  const visibleActions = selectedSeries ? actions.filter((action) => isActionVisible(action, selectedSeries)) : actions;
+  // LOGZ.IO CHANGE END:: Per-point action visibility [APPZ-2424]
+
   return (
     <Box
       sx={(theme) => ({
@@ -76,7 +81,7 @@ export const TooltipActions: React.FC<TooltipActionProps> = ({ actions, selected
         </Box>
       ) : (
         <Stack my={0.5}>
-          {actions.map((action) => {
+          {visibleActions.map((action) => {
             return (
               <MenuItem
                 disabled={selectedSeries === undefined}
