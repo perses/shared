@@ -31,3 +31,4 @@ export * from './utils';
 export * from './types';
 export * from './thresholds';
 export * from './transforms';
+export * from './value-mapping';

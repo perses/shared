@@ -27,7 +27,6 @@ import {
   BuiltinVariableContext,
   useTimeRange,
 } from '@perses-dev/plugin-system';
-import { intervalToPrometheusDuration } from '@perses-dev/core'; // TODO weird to have something related to prometheus in the dashboard package
 import {
   DEFAULT_ALL_VALUE as ALL_VALUE,
   VariableName,
@@ -37,6 +36,7 @@ import {
   BuiltinVariableDefinition,
   TextVariableDefinition,
   ListVariableDefinition,
+  intervalToDuration,
 } from '@perses-dev/spec';
 import { ExternalVariableDefinition } from '../../model/VariableDefinition';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
@@ -280,7 +280,7 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps): Re
         kind: 'BuiltinVariable',
         spec: {
           name: '__range',
-          value: () => formatDuration(intervalToPrometheusDuration(absoluteTimeRange)),
+          value: () => formatDuration(intervalToDuration(absoluteTimeRange)),
           source: 'Dashboard',
           display: {
             name: '__range',

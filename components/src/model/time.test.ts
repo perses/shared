@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Duration } from 'date-fns';
-import { intervalToPrometheusDuration } from '@perses-dev/core';
-import { AbsoluteTimeRange, formatDuration } from '@perses-dev/spec';
+
+import { AbsoluteTimeRange, formatDuration, intervalToDuration } from '@perses-dev/spec';
 import { formatValue } from './units';
 import { FormatTestCase, IntervalTestCase, UnitTestCase } from './types';
 import { getFormatterStats } from './formatterCache';
@@ -309,7 +309,7 @@ describe('intervalToPrometheusDuration', () => {
     'returns $expected when time range is $timeRange',
     (args: IntervalTestCase) => {
       const { timeRange, expected } = args;
-      expect(intervalToPrometheusDuration(timeRange)).toEqual(expected);
+      expect(intervalToDuration(timeRange)).toEqual(expected);
     }
   );
 });

@@ -21,8 +21,10 @@ import {
   buildPanelEditorSchema,
   buildVariableDefinitionSchema,
 } from '@perses-dev/spec';
-import { DatasourceDefinition, datasourceDefinitionSchema, buildDatasourceDefinitionSchema } from '@perses-dev/core'; // Todo these things should not be part of the plugin system. Only the spec should be used
+
 import { z } from 'zod';
+import { buildDatasourceDefinitionSchema, datasourceDefinitionSchema } from '@perses-dev/core';
+import { DatasourceDefinition } from '../model';
 
 export interface ValidationSchemas {
   datasourceEditorSchema: z.Schema<DatasourceDefinition>;
