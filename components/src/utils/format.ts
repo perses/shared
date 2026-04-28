@@ -49,6 +49,34 @@ export function formatWithTimeZone(date: Date, formatString: string, timeZone?: 
   }
 }
 
+export function getGMTOffset(timeZone?: string): string {
+  const lower = timeZone?.toLowerCase();
+
+  const resolvedTimeZone =
+    !timeZone || lower === 'local' || lower === 'browser'
+      ? Intl.DateTimeFormat().resolvedOptions().timeZone
+      : lower === 'utc'
+        ? 'UTC'
+        : timeZone;
+
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: resolvedTimeZone,
+      timeZoneName: 'shortOffset',
+    });
+
+    const parts = formatter.formatToParts(new Date());
+    const tzPart = parts.find((p) => p.type === 'timeZoneName');
+
+    const value = tzPart?.value ?? '';
+
+    if (value === 'GMT') return 'GMT+0';
+    return value;
+  } catch {
+    return 'GMT+0';
+  }
+}
+
 // https://echarts.apache.org/en/option.html#xAxis.axisLabel.formatter
 export function getFormattedAxisLabel(rangeMs: number):
   | string
