@@ -212,7 +212,7 @@ export interface TableProps<TableData> {
    * consistent constraints (e.g. min/max width) or enabling resizing across
    * all columns without repeating the configuration per column.
    */
-  defaultColumn?: DefaultColumnConfig;
+  defaultColumnConfig?: DefaultColumnConfig;
 }
 
 export interface DefaultColumnConfig {

@@ -71,7 +71,7 @@ export function Table<TableData>({
   hiddenColumns,
   tableToolbarConfig,
   columnResizeMode = 'onChange',
-  defaultColumn,
+  defaultColumnConfig,
   ...otherProps
 }: TableProps<TableData>): ReactElement {
   const theme = useTheme();
@@ -179,7 +179,7 @@ export function Table<TableData>({
   }, [theme.palette.text.primary, density, getCheckboxColor, handleCheckboxChange]);
 
   const tableColumns: Array<ColumnDef<TableData>> = useMemo(() => {
-    const initTableColumns = persesColumnsToTanstackColumns(columns, defaultColumn);
+    const initTableColumns = persesColumnsToTanstackColumns(columns, defaultColumnConfig);
 
     if (hasItemActions) {
       initTableColumns.unshift(actionsColumn);
@@ -190,7 +190,7 @@ export function Table<TableData>({
     }
 
     return initTableColumns;
-  }, [columns, defaultColumn, hasItemActions, checkboxSelection, actionsColumn, checkboxColumn]);
+  }, [columns, defaultColumnConfig, hasItemActions, checkboxSelection, actionsColumn, checkboxColumn]);
 
   const table = useReactTable({
     data,
