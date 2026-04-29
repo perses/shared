@@ -11,41 +11,82 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch } from '@perses-dev/core'; // TODO
 import { QueryDefinition } from '@perses-dev/spec';
-import { createContext, ReactElement, ReactNode, useContext } from 'react';
+import { createContext, ReactElement, ReactNode, useContext, useEffect, useState } from 'react';
 
 type QueryState = 'pending' | 'success' | 'error';
 
-interface UsageMetrics {
+export interface UsageMetrics {
+  project: string;
+  dashboard: string;
+  renderDurationMs: number;
+  renderErrorCount: number;
+}
+
+interface UsageMetricsContext {
   project: string;
   dashboard: string;
   startRenderTime: number;
   renderDurationMs: number;
+  setRenderDurationMs: React.Dispatch<React.SetStateAction<number>>;
   renderErrorCount: number;
+  setRenderErrorCount: React.Dispatch<React.SetStateAction<number>>;
   pendingQueries: Map<string, QueryState>;
+  setPendingQueries: React.Dispatch<React.SetStateAction<Map<string, QueryState>>>;
   apiPrefix?: string;
+  submitMetrics: (metrics: UsageMetrics) => Promise<void>;
 }
 
-interface UsageMetricsProps {
+export interface UsageMetricsProps {
   project: string;
   dashboard: string;
   apiPrefix?: string;
   children: ReactNode;
+  submitMetrics: (metrics: UsageMetrics) => Promise<void>;
 }
 
 interface UseUsageMetricsResults {
   markQuery: (definition: QueryDefinition, state: QueryState) => void;
 }
 
-export const UsageMetricsContext = createContext<UsageMetrics | undefined>(undefined);
+export const UsageMetricsContext = createContext<UsageMetricsContext | undefined>(undefined);
 
-export const useUsageMetricsContext = (): UsageMetrics | undefined => {
+export const useUsageMetricsContext = (): UsageMetricsContext | undefined => {
   return useContext(UsageMetricsContext);
 };
 
 export const useUsageMetrics = (): UseUsageMetricsResults => {
   const ctx = useUsageMetricsContext();
+
+  useEffect(() => {
+    if (!ctx) {
+      return;
+    }
+    const {
+      dashboard,
+      project,
+      renderErrorCount,
+      pendingQueries,
+      renderDurationMs,
+      startRenderTime,
+      submitMetrics,
+      setRenderDurationMs,
+    } = ctx;
+
+    /* This means no query has run yet, so it should return 
+       The subsequent logic makes sense when a-some queries have been running
+    */
+    if (!pendingQueries.size) {
+      return;
+    }
+
+    const allDone = [...pendingQueries.values()].every((p) => p !== 'pending');
+    if (renderDurationMs === 0 && allDone) {
+      const finalDuration = Date.now() - startRenderTime;
+      setRenderDurationMs(finalDuration);
+      submitMetrics({ dashboard, project, renderDurationMs, renderErrorCount });
+    }
+  }, [ctx]);
 
   return {
     markQuery: (definition: QueryDefinition, newState: QueryState): void => {
@@ -60,45 +101,41 @@ export const useUsageMetrics = (): UseUsageMetricsResults => {
       }
 
       if (ctx.pendingQueries.get(definitionKey) !== newState) {
-        ctx.pendingQueries.set(definitionKey, newState);
+        ctx.setPendingQueries((prev) => {
+          const map = new Map(prev);
+          map.set(definitionKey, newState);
+          return map;
+        });
         if (newState === 'error') {
-          ctx.renderErrorCount += 1;
-        }
-
-        const allDone = [...ctx.pendingQueries.values()].every((p) => p !== 'pending');
-        if (ctx.renderDurationMs === 0 && allDone) {
-          ctx.renderDurationMs = Date.now() - ctx.startRenderTime;
-          submitMetrics(ctx);
+          ctx.setRenderErrorCount((prev) => prev + 1);
         }
       }
     },
   };
 };
 
-const submitMetrics = async (stats: UsageMetrics): Promise<void> => {
-  await fetch(`${stats.apiPrefix ?? ''}/api/v1/view`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      project: stats.project,
-      dashboard: stats.dashboard,
-      render_time: stats.renderDurationMs / 1000,
-      render_errors: stats.renderErrorCount,
-    }),
-  });
-};
-
-export const UsageMetricsProvider = ({ apiPrefix, project, dashboard, children }: UsageMetricsProps): ReactElement => {
-  const ctx: UsageMetrics = {
+export const UsageMetricsProvider = ({
+  apiPrefix,
+  project,
+  dashboard,
+  children,
+  submitMetrics,
+}: UsageMetricsProps): ReactElement => {
+  const [renderDurationMs, setRenderDurationMs] = useState(0);
+  const [pendingQueries, setPendingQueries] = useState(new Map());
+  const [renderErrorCount, setRenderErrorCount] = useState(0);
+  const ctx: UsageMetricsContext = {
     project: project,
     dashboard: dashboard,
-    renderErrorCount: 0,
+    renderErrorCount,
     startRenderTime: Date.now(),
-    renderDurationMs: 0,
-    pendingQueries: new Map(),
+    renderDurationMs,
+    setRenderDurationMs,
+    setPendingQueries,
+    setRenderErrorCount,
+    pendingQueries,
     apiPrefix,
+    submitMetrics,
   };
 
   return <UsageMetricsContext.Provider value={ctx}>{children}</UsageMetricsContext.Provider>;

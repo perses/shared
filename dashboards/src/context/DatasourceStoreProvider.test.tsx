@@ -24,8 +24,36 @@ import { DatasourceStoreProvider } from '@perses-dev/dashboards';
 import { PropsWithChildren, ReactElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DashboardSpec, DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
-import { Datasource, DatasourceResource, GlobalDatasourceResource } from '@perses-dev/core';
 import { DashboardResource } from '../model/DashboardResource';
+
+/* All GlobalDatasourceResource, DatasourceResource, etc ... 
+   have been used for the test purpose only, creating a wrong dependency to the core!
+   We either move this test (somehow) to the Perses/UI or we need to duplicate the types
+*/
+interface ProjectMetadata extends Metadata {
+  project: string;
+}
+
+interface Metadata {
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  version?: number;
+  tags?: string[];
+}
+
+interface GlobalDatasourceResource {
+  kind: 'GlobalDatasource';
+  metadata: Metadata;
+  spec: DatasourceSpec;
+}
+
+interface DatasourceResource {
+  kind: 'Datasource';
+  metadata: ProjectMetadata;
+  spec: DatasourceSpec;
+}
+type Datasource = DatasourceResource | GlobalDatasourceResource;
 
 const PROJECT = 'perses';
 const FAKE_PLUGIN_NAME = 'FakeDatasourcePlugin';
