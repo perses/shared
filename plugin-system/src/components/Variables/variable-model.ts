@@ -113,7 +113,7 @@ function resolveDefaultValue(definition: ListVariableDefinition, options: Variab
   if (defaultValue !== undefined && defaultValue !== null) {
     return defaultValue;
   }
-  if (options.length > 0 && options[0]?.value) {
+  if (options[0]?.value) {
     const first = options[0].value;
     return allowMultiple ? [first] : first;
   }
