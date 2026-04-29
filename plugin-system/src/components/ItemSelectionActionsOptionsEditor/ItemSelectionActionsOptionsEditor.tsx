@@ -109,6 +109,7 @@ export interface WebhookAction extends BaseAction {
   method: HttpMethod;
   contentType: ContentType;
   headers?: Record<string, string>;
+  fetch: (...args: Parameters<typeof globalThis.fetch>) => Promise<Response>;
 }
 
 export interface EventAction extends BaseAction {
@@ -191,6 +192,7 @@ function createDefaultWebhookAction(): WebhookAction {
     contentType: 'none',
     batchMode: 'individual',
     enabled: true,
+    fetch: globalThis.fetch,
   };
 }
 

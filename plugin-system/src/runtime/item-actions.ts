@@ -18,7 +18,6 @@ import {
   SelectionItem,
   VariableStateMap,
 } from '@perses-dev/components';
-import { fetch } from '@perses-dev/core'; // TODO should be part of an utils package
 import { ItemAction, EventAction, WebhookAction } from '../components/ItemSelectionActionsOptionsEditor';
 
 const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH']);
@@ -192,7 +191,7 @@ async function executeWebhookIndividual<Id>(
       }
 
       // Make the request
-      const response = await fetch(urlResult.text, {
+      const response = await action.fetch(urlResult.text, {
         method: action.method,
         headers: buildWebhookHeaders(action),
         body: body,
@@ -257,7 +256,7 @@ async function executeWebhookBatch<Id>(
     }
 
     // Make the request
-    const response = await fetch(urlResult.text, {
+    const response = await action.fetch(urlResult.text, {
       method: action.method,
       headers: buildWebhookHeaders(action),
       body: body,
