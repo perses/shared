@@ -58,6 +58,7 @@ exports[`persesColumnToTanstackColumn transforms perses columns to tanstack colu
 [
   {
     "accessorKey": "label",
+    "enableResizing": false,
     "enableSorting": false,
     "header": "Name",
     "maxSize": 0,
@@ -73,6 +74,7 @@ exports[`persesColumnToTanstackColumn transforms perses columns to tanstack colu
   {
     "accessorKey": "value",
     "cell": [Function],
+    "enableResizing": false,
     "enableSorting": false,
     "header": "Count",
     "meta": {
