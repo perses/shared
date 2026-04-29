@@ -70,6 +70,8 @@ export function Table<TableData>({
   getSubRows,
   hiddenColumns,
   tableToolbarConfig,
+  columnResizeMode = 'onChange',
+  defaultColumnConfig,
   ...otherProps
 }: TableProps<TableData>): ReactElement {
   const theme = useTheme();
@@ -139,6 +141,7 @@ export function Table<TableData>({
         );
       },
       enableSorting: false,
+      enableResizing: false,
     };
   }, [getItemActions]);
 
@@ -171,11 +174,12 @@ export function Table<TableData>({
         );
       },
       enableSorting: false,
+      enableResizing: false,
     };
   }, [theme.palette.text.primary, density, getCheckboxColor, handleCheckboxChange]);
 
   const tableColumns: Array<ColumnDef<TableData>> = useMemo(() => {
-    const initTableColumns = persesColumnsToTanstackColumns(columns);
+    const initTableColumns = persesColumnsToTanstackColumns(columns, defaultColumnConfig);
 
     if (hasItemActions) {
       initTableColumns.unshift(actionsColumn);
@@ -186,7 +190,7 @@ export function Table<TableData>({
     }
 
     return initTableColumns;
-  }, [checkboxColumn, checkboxSelection, columns, hasItemActions, actionsColumn]);
+  }, [columns, defaultColumnConfig, hasItemActions, checkboxSelection, actionsColumn, checkboxColumn]);
 
   const table = useReactTable({
     data,
@@ -208,6 +212,7 @@ export function Table<TableData>({
     // For now, defaulting to sort by descending first. We can expose the ability
     // to customize it if/when we have use cases for it.
     sortDescFirst: true,
+    columnResizeMode,
     state: {
       rowSelection,
       sorting,
@@ -235,6 +240,8 @@ export function Table<TableData>({
       onRowClick={handleRowClick}
       rows={table.getRowModel().rows}
       columns={table.getVisibleFlatColumns()}
+      columnSizing={table.getState().columnSizing}
+      columnSizingInfo={table.getState().columnSizingInfo}
       headers={table.getHeaderGroups()}
       cellConfigs={cellConfigs}
       pagination={pagination}
