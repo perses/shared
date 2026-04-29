@@ -125,7 +125,7 @@ function resolveDefaultValue(definition: ListVariableDefinition, options: Variab
  * Returns a map of variable names to their resolved default values, merging with any already-provided outer variables.
  */
 export function useResolveListVariableValues(variableDefinitions: VariableDefinition[]): {
-  initialValues: Record<string, VariableValue>;
+  initialVariableValues: Record<string, VariableValue>;
   isLoading: boolean;
 } {
   const { timeRange, datasourceStore, variables: outerVariableValues } = useVariablePluginContext();
@@ -185,7 +185,7 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
     }),
   });
 
-  const initialValues: Record<string, VariableValue> = useMemo(
+  const initialVariableValues: Record<string, VariableValue> = useMemo(
     () =>
       Object.fromEntries(
         Object.entries(allVariables)
@@ -195,7 +195,7 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
     [allVariables]
   );
 
-  return { initialValues, isLoading: queryResults.some((r) => r.isLoading) };
+  return { initialVariableValues, isLoading: queryResults.some((r) => r.isLoading) };
 }
 
 /**

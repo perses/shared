@@ -217,7 +217,7 @@ describe('useResolveListVariableValues', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.initialValues).toEqual({
+    expect(result.current.initialVariableValues).toEqual({
       VarA: 'opt1',
       VarB: 'opt1',
     });
@@ -258,7 +258,7 @@ describe('useResolveListVariableValues', () => {
 
     expect(getOptionsA).toHaveBeenCalled();
     expect(getOptionsB).toHaveBeenCalled();
-    expect(result.current.initialValues).toEqual({
+    expect(result.current.initialVariableValues).toEqual({
       VarA: 'a1',
       VarB: 'b1',
     });
@@ -317,7 +317,7 @@ describe('useResolveListVariableValues', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(getOptionsB).toHaveBeenCalled();
-    expect(result.current.initialValues).toEqual({
+    expect(result.current.initialVariableValues).toEqual({
       VarA: 'outer-a',
       VarB: 'b1',
     });
@@ -357,7 +357,7 @@ describe('useResolveListVariableValues', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.initialValues).toEqual({
+    expect(result.current.initialVariableValues).toEqual({
       VarA: 'a1',
       VarB: 'b1',
       VarC: 'c1',
@@ -399,7 +399,7 @@ describe('useResolveListVariableValues', () => {
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.initialValues).toEqual({
+    expect(result.current.initialVariableValues).toEqual({
       VarA: 'a1',
       VarB: 'b1',
       VarC: 'c1',

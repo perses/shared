@@ -453,7 +453,7 @@ function VariableEditorFormWithContext({
   onSave,
   onClose,
 }: VariableEditorFormWithContextProps): ReactElement | null {
-  const { initialValues, isLoading } = useResolveListVariableValues(variableDefinitions);
+  const { initialVariableValues, isLoading } = useResolveListVariableValues(variableDefinitions);
 
   if (isLoading) {
     return (
@@ -477,7 +477,7 @@ function VariableEditorFormWithContext({
       initialVariableDefinitions={variableDefinitions}
       externalVariableDefinitions={externalVariableDefinitions}
       builtinVariableDefinitions={builtinVariableDefinitions}
-      initialValues={initialValues}
+      initialVariableValues={initialVariableValues}
     >
       <ValidationProvider>
         <VariableEditorForm
