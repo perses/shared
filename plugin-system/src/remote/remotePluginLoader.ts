@@ -85,6 +85,10 @@ export function remotePluginLoader(options?: RemotePluginLoaderOptions): PluginL
 
   return {
     getInstalledPlugins: async (): Promise<PluginModuleResource[]> => {
+      /* TODO: This is already using the globalThis fetch and not the core one
+         So, we don''t have any dependency to the core here. 
+         The question is if the developer did that intentionally?!
+      */
       const pluginsResponse = await fetch(pluginsApiPath);
 
       const plugins = await pluginsResponse.json();

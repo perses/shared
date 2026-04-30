@@ -11,12 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { GlobalDatasourceResource } from '@perses-dev/core';
 import { DatasourceStoreProviderProps } from '../context';
 import { getTestDashboard } from './dashboard-provider';
 
 export const prometheusDemoUrl = 'https://prometheus.demo.prometheus.io';
-export const prometheusDemo: GlobalDatasourceResource = {
+export const prometheusDemo = {
   kind: 'GlobalDatasource',
   metadata: {
     name: 'PrometheusDemo',
