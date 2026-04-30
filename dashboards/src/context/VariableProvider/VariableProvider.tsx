@@ -331,14 +331,17 @@ interface VariableDefinitionStoreArgs {
   initialVariableDefinitions?: VariableDefinition[];
   externalVariableDefinitions?: ExternalVariableDefinition[];
   queryParams?: ReturnType<typeof useVariableQueryParams>;
+  initialVariableValues?: Record<string, VariableValue>;
 }
 
 function createVariableDefinitionStore({
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   queryParams,
+  initialVariableValues,
 }: VariableDefinitionStoreArgs): StoreApi<VariableDefinitionStore> {
-  const initialParams = getInitalValuesFromQueryParameters(queryParams ? queryParams[0] : {});
+  const queryParamValues = getInitalValuesFromQueryParameters(queryParams ? queryParams[0] : {});
+  const initialParams = { ...queryParamValues, ...initialVariableValues };
   const store = createStore<VariableDefinitionStore>()(
     devtools(
       immer((set, get) => ({
@@ -481,6 +484,7 @@ export interface VariableProviderProps {
   initialVariableDefinitions?: VariableDefinition[];
   externalVariableDefinitions?: ExternalVariableDefinition[];
   builtinVariableDefinitions?: BuiltinVariableDefinition[];
+  initialVariableValues?: Record<string, VariableValue>;
 }
 
 // TODO: merge the different providers related to Variables under a single one (and keep "VariableProvider" as a name)
@@ -489,9 +493,10 @@ export function VariableProvider({
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   builtinVariableDefinitions = [],
+  initialVariableValues,
 }: VariableProviderProps): ReactElement {
   const [store] = useState(() =>
-    createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions })
+    createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions, initialVariableValues })
   );
 
   return (

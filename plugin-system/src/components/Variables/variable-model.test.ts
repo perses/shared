@@ -11,10 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useAllVariableValues, usePlugin, VariableOption, VariableStateMap } from '@perses-dev/plugin-system';
-import { ListVariableDefinition } from '@perses-dev/spec';
+import {
+  useAllVariableValues,
+  usePlugin,
+  usePlugins,
+  VariableOption,
+  VariableStateMap,
+} from '@perses-dev/plugin-system';
+import { ListVariableDefinition, VariableDefinition } from '@perses-dev/spec';
+import { waitFor } from '@testing-library/react';
 import { renderHookWithContext } from '../../test/render-hook';
-import { filterVariableList, useListVariablePluginValues } from './variable-model';
+import { filterVariableList, useListVariablePluginValues, useResolveListVariableValues } from './variable-model';
 
 describe('filterVariableList', () => {
   const testSuite = [
@@ -61,6 +68,7 @@ describe('filterVariableList', () => {
 jest.mock('../../runtime', () => ({
   ...jest.requireActual('../../runtime'),
   usePlugin: jest.fn(),
+  usePlugins: jest.fn(),
   useDatasourceStore: jest.fn().mockReturnValue({}),
   useAllVariableValues: jest.fn(),
   useTimeRange: jest.fn().mockReturnValue({
@@ -88,7 +96,7 @@ describe('useListVariablePluginValues', () => {
     },
   };
 
-  it('should filter self variable from deps and ctx when dependsOn is not passed', () => {
+  it('should default to empty dependency array when dependsOn is not passed', () => {
     const variables: VariableStateMap = {
       NewVariable: { loading: false, value: [] },
       NewVariable2: { loading: false, value: [] },
@@ -107,13 +115,9 @@ describe('useListVariablePluginValues', () => {
 
     renderHookWithContext(() => useListVariablePluginValues(definition));
 
-    const allVariablesWithoutSelf = Object.fromEntries(
-      Object.entries(variables).filter(([key]) => key !== definition.spec.name)
-    );
-
     const expectedCtx = {
       datasourceStore: {},
-      variables: allVariablesWithoutSelf,
+      variables: {},
       timeRange: expect.any(Object),
     };
 
@@ -163,5 +167,246 @@ describe('useListVariablePluginValues', () => {
       expectedCtx,
       expect.any(AbortSignal)
     );
+  });
+});
+
+describe('useResolveListVariableValues', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  function makeDefinition(name: string, pluginKind = 'PrometheusLabelValuesVariable'): ListVariableDefinition {
+    return {
+      kind: 'ListVariable',
+      spec: {
+        name,
+        display: {},
+        allowAllValue: false,
+        allowMultiple: false,
+        plugin: { kind: pluginKind, spec: {} },
+      },
+    };
+  }
+
+  function mockOuterVariables(variables: VariableStateMap): void {
+    (useAllVariableValues as jest.Mock).mockImplementation((names?: string[]) =>
+      names ? Object.fromEntries(Object.entries(variables).filter(([k]) => names.includes(k))) : variables
+    );
+  }
+
+  it('should resolve independent variables and return their default values', async () => {
+    const definitions: VariableDefinition[] = [makeDefinition('VarA'), makeDefinition('VarB')];
+
+    const getVariableOptionsMock = jest.fn().mockResolvedValue({
+      data: [
+        { label: 'opt1', value: 'opt1' },
+        { label: 'opt2', value: 'opt2' },
+      ],
+    });
+
+    (usePlugins as jest.Mock).mockReturnValue(
+      definitions.map(() => ({
+        data: { getVariableOptions: getVariableOptionsMock },
+        isLoading: false,
+      }))
+    );
+
+    mockOuterVariables({});
+
+    const { result } = renderHookWithContext(() => useResolveListVariableValues(definitions));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.initialVariableValues).toEqual({
+      VarA: 'opt1',
+      VarB: 'opt1',
+    });
+  });
+
+  it('should resolve dependent variable after its dependency resolves', async () => {
+    const varA = makeDefinition('VarA');
+    const varB = makeDefinition('VarB');
+    const definitions: VariableDefinition[] = [varA, varB];
+
+    const getOptionsA = jest.fn().mockResolvedValue({
+      data: [{ label: 'a1', value: 'a1' }],
+    });
+    const getOptionsB = jest.fn().mockResolvedValue({
+      data: [{ label: 'b1', value: 'b1' }],
+    });
+
+    // VarB depends on VarA
+    (usePlugins as jest.Mock).mockReturnValue([
+      {
+        data: { getVariableOptions: getOptionsA },
+        isLoading: false,
+      },
+      {
+        data: {
+          getVariableOptions: getOptionsB,
+          dependsOn: jest.fn().mockReturnValue({ variables: ['VarA'] }),
+        },
+        isLoading: false,
+      },
+    ]);
+
+    mockOuterVariables({});
+
+    const { result } = renderHookWithContext(() => useResolveListVariableValues(definitions));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(getOptionsA).toHaveBeenCalled();
+    expect(getOptionsB).toHaveBeenCalled();
+    expect(result.current.initialVariableValues).toEqual({
+      VarA: 'a1',
+      VarB: 'b1',
+    });
+  });
+
+  it('should not fetch when a dependency is still loading', () => {
+    const varA = makeDefinition('VarA');
+    const varB = makeDefinition('VarB');
+    const definitions: VariableDefinition[] = [varA, varB];
+
+    const getOptionsB = jest.fn().mockResolvedValue({ data: [] });
+    (usePlugins as jest.Mock).mockReturnValue([
+      { data: undefined, isLoading: true },
+      {
+        data: {
+          getVariableOptions: getOptionsB,
+          dependsOn: jest.fn().mockReturnValue({ variables: ['VarA'] }),
+        },
+        isLoading: false,
+      },
+    ]);
+
+    mockOuterVariables({});
+
+    const { result } = renderHookWithContext(() => useResolveListVariableValues(definitions));
+
+    expect(result.current.isLoading).toBe(true);
+    expect(getOptionsB).not.toHaveBeenCalled();
+  });
+
+  it('should resolve dependent variables when parent is provided', async () => {
+    const definitions: VariableDefinition[] = [makeDefinition('VarB')];
+
+    const outerVariables: VariableStateMap = {
+      VarA: { loading: false, value: 'outer-a' },
+    };
+
+    const getOptionsB = jest.fn().mockResolvedValue({
+      data: [{ label: 'b1', value: 'b1' }],
+    });
+
+    (usePlugins as jest.Mock).mockReturnValue([
+      {
+        data: {
+          getVariableOptions: getOptionsB,
+          dependsOn: jest.fn().mockReturnValue({ variables: ['VarA'] }),
+        },
+        isLoading: false,
+      },
+    ]);
+
+    mockOuterVariables(outerVariables);
+
+    const { result } = renderHookWithContext(() => useResolveListVariableValues(definitions));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(getOptionsB).toHaveBeenCalled();
+    expect(result.current.initialVariableValues).toEqual({
+      VarA: 'outer-a',
+      VarB: 'b1',
+    });
+  });
+
+  it('should handle multiple variables depending on the same resolved parent', async () => {
+    const varA = makeDefinition('VarA');
+    const varB = makeDefinition('VarB');
+    const varC = makeDefinition('VarC');
+    const definitions: VariableDefinition[] = [varA, varB, varC];
+
+    const getOptionsA = jest.fn().mockResolvedValue({ data: [{ label: 'a1', value: 'a1' }] });
+    const getOptionsB = jest.fn().mockResolvedValue({ data: [{ label: 'b1', value: 'b1' }] });
+    const getOptionsC = jest.fn().mockResolvedValue({ data: [{ label: 'c1', value: 'c1' }] });
+
+    (usePlugins as jest.Mock).mockReturnValue([
+      { data: { getVariableOptions: getOptionsA }, isLoading: false },
+      {
+        data: {
+          getVariableOptions: getOptionsB,
+          dependsOn: jest.fn().mockReturnValue({ variables: ['VarA'] }),
+        },
+        isLoading: false,
+      },
+      {
+        data: {
+          getVariableOptions: getOptionsC,
+          dependsOn: jest.fn().mockReturnValue({ variables: ['VarA'] }),
+        },
+        isLoading: false,
+      },
+    ]);
+
+    mockOuterVariables({});
+
+    const { result } = renderHookWithContext(() => useResolveListVariableValues(definitions));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.initialVariableValues).toEqual({
+      VarA: 'a1',
+      VarB: 'b1',
+      VarC: 'c1',
+    });
+  });
+
+  it('should handle a chain of three dependent variables in order', async () => {
+    const varA = makeDefinition('VarA');
+    const varB = makeDefinition('VarB');
+    const varC = makeDefinition('VarC');
+    const definitions: VariableDefinition[] = [varA, varB, varC];
+
+    const getOptionsA = jest.fn().mockResolvedValue({ data: [{ label: 'a1', value: 'a1' }] });
+    const getOptionsB = jest.fn().mockResolvedValue({ data: [{ label: 'b1', value: 'b1' }] });
+    const getOptionsC = jest.fn().mockResolvedValue({ data: [{ label: 'c1', value: 'c1' }] });
+
+    // A → B → C chain
+    (usePlugins as jest.Mock).mockReturnValue([
+      { data: { getVariableOptions: getOptionsA }, isLoading: false },
+      {
+        data: {
+          getVariableOptions: getOptionsB,
+          dependsOn: jest.fn().mockReturnValue({ variables: ['VarA'] }),
+        },
+        isLoading: false,
+      },
+      {
+        data: {
+          getVariableOptions: getOptionsC,
+          dependsOn: jest.fn().mockReturnValue({ variables: ['VarB'] }),
+        },
+        isLoading: false,
+      },
+    ]);
+
+    mockOuterVariables({});
+
+    const { result } = renderHookWithContext(() => useResolveListVariableValues(definitions));
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.initialVariableValues).toEqual({
+      VarA: 'a1',
+      VarB: 'b1',
+      VarC: 'c1',
+    });
+
+    expect(getOptionsA).toHaveBeenCalled();
+    expect(getOptionsB).toHaveBeenCalled();
+    expect(getOptionsC).toHaveBeenCalled();
   });
 });
