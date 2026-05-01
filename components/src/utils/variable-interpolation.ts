@@ -202,24 +202,50 @@ export function parseVariablesAndFormat(text: string): Map<string, Interpolation
   return matches;
 }
 
+// LOGZ.IO CHANGE START:: Fixed-point variable interpolation so customAllValue containing $var is fully resolved [APPZ-2474]
+// Iterate replacement until the text stops changing. Grafana resolves nested variable
+// references recursively (e.g. customAllValue ".+-$type-.+" referenced via $name produces
+// ".+-data-.+" once $type is also resolved); the original single-pass implementation parsed
+// $vars from the original text only, leaving any $var introduced by a substitution literal.
+// Cap depth to bail on cycles ($a -> "$b", $b -> "$a"). Convergence is guaranteed in normal
+// cases — once a pass produces no change (all remaining $vars are unknown / already resolved)
+// the loop exits.
+const MAX_INTERPOLATION_DEPTH = 10;
+
 /**
- * Replace all variables in text with their values from the variable state map
+ * Replace all variables in text with their values from the variable state map.
+ *
+ * Iterates until a fixed point so substitutions that introduce new $var references
+ * (e.g. a customAllValue of ".+-$type-.+") are fully resolved. Bails after
+ * MAX_INTERPOLATION_DEPTH passes to break cycles, returning the partially-resolved text.
  */
 export function replaceVariables(text: string, variableState: VariableStateMap): string {
-  const variablesMap = parseVariablesAndFormat(text);
-  const variables = Array.from(variablesMap.keys());
   let finalText = text;
-  variables
-    // Sorting variables by their length.
-    // In order to not have a variable name have contained in another variable name.
-    // i.e.: $__range replacing $__range_ms => '3600_ms' instead of '3600000'
-    .sort((a, b) => b.length - a.length)
-    .forEach((v) => {
-      const variable = variableState[v];
-      if (variable && variable.value !== undefined) {
-        finalText = replaceVariable(finalText, v, variable?.value, variablesMap.get(v));
-      }
-    });
-
+  for (let depth = 0; depth < MAX_INTERPOLATION_DEPTH; depth++) {
+    const variablesMap = parseVariablesAndFormat(finalText);
+    const variables = Array.from(variablesMap.keys());
+    const previous = finalText;
+    variables
+      // Sorting variables by their length.
+      // In order to not have a variable name have contained in another variable name.
+      // i.e.: $__range replacing $__range_ms => '3600_ms' instead of '3600000'
+      .sort((a, b) => b.length - a.length)
+      .forEach((v) => {
+        const variable = variableState[v];
+        if (variable && variable.value !== undefined) {
+          finalText = replaceVariable(finalText, v, variable?.value, variablesMap.get(v));
+        }
+      });
+    if (finalText === previous) {
+      // Fixed point: nothing changed this pass (either fully resolved, or all
+      // remaining $vars are unknown — both cases would loop forever).
+      return finalText;
+    }
+  }
+  // eslint-disable-next-line no-console
+  console.warn(
+    `[perses] replaceVariables hit max interpolation depth (${MAX_INTERPOLATION_DEPTH}); possible cyclic variable reference. Returning partially-resolved text.`
+  );
   return finalText;
 }
+// LOGZ.IO CHANGE END:: Fixed-point variable interpolation [APPZ-2474]

@@ -158,7 +158,7 @@ describe('PluginEditor', () => {
 
     await screen.findByLabelText('ErnieVariable2 editor');
 
-    const carriedSpec = (onChange.mock.calls[0]?.[0] as { spec: { dataLinks: object } }).spec;
+    const carriedSpec = (jest.mocked(onChange).mock.calls[0]?.[0] as unknown as { spec: { dataLinks: object } }).spec;
     expect(carriedSpec.dataLinks).toEqual(priorDataLinks);
     expect(carriedSpec.dataLinks).not.toBe(priorDataLinks);
   });

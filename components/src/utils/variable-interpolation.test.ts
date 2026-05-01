@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parseVariables, replaceVariable, replaceVariables } from './variable-interpolation';
+import { parseVariables, replaceVariable, replaceVariables, VariableStateMap } from './variable-interpolation';
 
 describe('parseVariables()', () => {
   const tests = [
@@ -267,3 +267,122 @@ describe('replaceVariables() with custom formats', () => {
     });
   });
 });
+
+// LOGZ.IO CHANGE START:: Tests for fixed-point variable interpolation [APPZ-2474]
+describe('replaceVariables() with recursive interpolation', () => {
+  // Annotate as VariableStateMap[] so TS doesn't widen heterogeneous shapes into a union with
+  // optional fields (which conflicts with VariableStateMap's required-VariableState index sig).
+  const tests: Array<{ name: string; text: string; state: VariableStateMap; expected: string }> = [
+    {
+      name: 'two-step recursion: $a -> "world-$b" -> "world-foo"',
+      text: '$a',
+      state: {
+        a: { value: 'world-$b', loading: false },
+        b: { value: 'foo', loading: false },
+      },
+      expected: 'world-foo',
+    },
+    {
+      name: 'three-step chain: $a -> $b -> $c -> "final"',
+      text: '$a',
+      state: {
+        a: { value: '$b', loading: false },
+        b: { value: '$c', loading: false },
+        c: { value: 'final', loading: false },
+      },
+      expected: 'final',
+    },
+    {
+      name: 'bug repro: customAllValue with nested $type resolves through $name',
+      text: 'rate(node_cpu_seconds_total{instance=~"$name"}[5m])',
+      state: {
+        name: { value: '.+-$type-.+', loading: false },
+        type: { value: 'worker', loading: false },
+      },
+      expected: 'rate(node_cpu_seconds_total{instance=~".+-worker-.+"}[5m])',
+    },
+    {
+      name: 'original behavior preserved: both vars in original text',
+      text: '$a $b',
+      state: {
+        a: { value: '$b', loading: false },
+        b: { value: 'X', loading: false },
+      },
+      expected: 'X X',
+    },
+    {
+      name: 'format spec inside an interpolated value',
+      text: '$a',
+      state: {
+        a: { value: '${b:csv}', loading: false },
+        b: { value: ['x', 'y'], loading: false },
+      },
+      expected: 'x,y',
+    },
+    {
+      name: 'inner var unresolved stays literal (no infinite loop)',
+      text: '$a',
+      state: {
+        a: { value: '$missing', loading: false },
+      },
+      expected: '$missing',
+    },
+  ];
+
+  tests.forEach(({ name, text, state, expected }) => {
+    it(name, () => {
+      expect(replaceVariables(text, state)).toEqual(expected);
+    });
+  });
+
+  it('breaks two-variable cycles without throwing and warns once', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const result = replaceVariables('$a', {
+        a: { value: '$b', loading: false },
+        b: { value: '$a', loading: false },
+      });
+      // The exact text on overflow is implementation-defined ($a or $b);
+      // the contract is "doesn't throw, warns once, returns a string".
+      expect(typeof result).toBe('string');
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn.mock.calls[0]?.[0]).toMatch(/max interpolation depth/i);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('handles self-cycles without infinite loop', () => {
+    // $a -> "$a" replaces to itself; fixed-point detection exits on the first pass.
+    // Depth cap is never hit, so no warning is emitted — the loop is just a no-op.
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      const result = replaceVariables('$a', {
+        a: { value: '$a', loading: false },
+      });
+      expect(result).toBe('$a');
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it('warns when a non-cyclic chain exceeds max depth', () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    try {
+      // 12-link chain: v0 -> $v1 -> $v2 -> ... -> $v11 -> "end"
+      // At depth 10 we'd still have $v10 unresolved → warning fires.
+      const state: Record<string, { value: string; loading: boolean }> = {};
+      for (let i = 0; i < 11; i++) {
+        state[`v${i}`] = { value: `$v${i + 1}`, loading: false };
+      }
+      state['v11'] = { value: 'end', loading: false };
+      const result = replaceVariables('$v0', state);
+      expect(typeof result).toBe('string');
+      expect(warn).toHaveBeenCalledTimes(1);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+});
+// LOGZ.IO CHANGE END:: Tests for fixed-point variable interpolation [APPZ-2474]
