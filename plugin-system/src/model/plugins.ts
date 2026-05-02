@@ -21,6 +21,8 @@ import { ProfileQueryPlugin } from './profile-queries';
 import { VariablePlugin } from './variables';
 import { ExplorePlugin } from './explore';
 import { LogQueryPlugin } from './log-queries';
+import { AlertsQueryPlugin } from './alerts-queries';
+import { SilencesQueryPlugin } from './silences-queries';
 
 export interface PluginModuleSpec {
   plugins: PluginMetadata[];
@@ -81,6 +83,8 @@ export interface SupportedPlugins {
   TraceQuery: TraceQueryPlugin;
   ProfileQuery: ProfileQueryPlugin;
   LogQuery: LogQueryPlugin;
+  AlertsQuery: AlertsQueryPlugin;
+  SilencesQuery: SilencesQueryPlugin;
   Datasource: DatasourcePlugin;
   Explore: ExplorePlugin;
 }

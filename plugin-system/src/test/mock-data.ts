@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { LogData, ProfileData, TimeSeriesData, TraceData } from '@perses-dev/spec';
+import { AlertsData, LogData, ProfileData, SilencesData, TimeSeriesData, TraceData } from '@perses-dev/spec';
 
 export const MOCK_TIME_SERIES_DATA: TimeSeriesData = {
   timeRange: {
@@ -115,6 +115,54 @@ export const MOCK_PROFILE_DATA: ProfileData = {
     units: 'samples',
     name: 'cpu',
   },
+};
+
+export const MOCK_ALERTS_DATA: AlertsData = {
+  alerts: [
+    {
+      labels: {
+        alertname: 'HighErrorRate',
+        severity: 'critical',
+        service: 'backend',
+      },
+      annotations: {
+        summary: 'High error rate detected',
+      },
+      status: { state: 'active', silencedBy: [], inhibitedBy: [], mutedBy: [] },
+      startsAt: '2024-01-01T00:00:00Z',
+      endsAt: '2024-01-02T00:00:00Z',
+      updatedAt: '2024-01-01T12:00:00Z',
+      receivers: [{ name: 'cluster-01' }],
+      fingerprint: 'abc123',
+    },
+  ],
+};
+
+export const MOCK_SILENCES_DATA: SilencesData = {
+  silences: [
+    {
+      id: 'silence-1',
+      matchers: [
+        {
+          name: 'alertname',
+          value: 'HighErrorRate',
+          isRegex: false,
+          isEqual: true,
+        },
+      ],
+      startsAt: '2024-01-01T00:00:00Z',
+      endsAt: '2024-01-02T00:00:00Z',
+      createdBy: 'admin',
+      comment: 'Maintenance window',
+      updatedAt: '2024-01-01T00:00:00Z',
+      annotations: {
+        summary: 'Silence for HighErrorRate alert during maintenance',
+      },
+      status: {
+        state: 'active',
+      },
+    },
+  ],
 };
 
 // Remote Plugin Loader Test Fixtures
