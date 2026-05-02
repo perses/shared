@@ -16,6 +16,8 @@ import { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/spec';
 import { useTimeSeriesQueries } from '../time-series-queries';
 import { useTraceQueries, TraceQueryDefinition } from '../trace-queries';
 import { useProfileQueries, ProfileQueryDefinition } from '../profile-queries';
+import { useAlertsQueries, AlertsQueryDefinition } from '../alerts-queries';
+import { useSilencesQueries, SilencesQueryDefinition } from '../silences-queries';
 
 import { useUsageMetrics } from '../UsageMetricsProvider';
 import { LogQueryDefinition, useLogQueries } from '../log-queries';
@@ -98,12 +100,24 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
   const logQueries = queryDefinitions.filter((definition) => definition.kind === 'LogQuery') as LogQueryDefinition[];
   const logResults = useLogQueries(logQueries);
 
+  const alertsQueries = queryDefinitions.filter(
+    (definition) => definition.kind === 'AlertsQuery'
+  ) as AlertsQueryDefinition[];
+  const alertsResults = useAlertsQueries(alertsQueries);
+
+  const silencesQueries = queryDefinitions.filter(
+    (definition) => definition.kind === 'SilencesQuery'
+  ) as SilencesQueryDefinition[];
+  const silencesResults = useSilencesQueries(silencesQueries);
+
   const refetchAll = useCallback(() => {
     timeSeriesResults.forEach((result) => result.refetch());
     traceResults.forEach((result) => result.refetch());
     profileResults.forEach((result) => result.refetch());
     logResults.forEach((result) => result.refetch());
-  }, [timeSeriesResults, traceResults, profileResults, logResults]);
+    alertsResults.forEach((result) => result.refetch());
+    silencesResults.forEach((result) => result.refetch());
+  }, [timeSeriesResults, traceResults, profileResults, logResults, alertsResults, silencesResults]);
 
   const ctx = useMemo(() => {
     const mergedQueryResults = [
@@ -111,6 +125,8 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
       ...transformQueryResults(traceResults, traceQueries),
       ...transformQueryResults(profileResults, profileQueries),
       ...transformQueryResults(logResults, logQueries),
+      ...transformQueryResults(alertsResults, alertsQueries),
+      ...transformQueryResults(silencesResults, silencesQueries),
     ];
 
     if (queryOptions?.enabled) {
@@ -141,6 +157,10 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
     profileResults,
     logQueries,
     logResults,
+    alertsQueries,
+    alertsResults,
+    silencesQueries,
+    silencesResults,
     refetchAll,
     queryOptions?.enabled,
     usageMetrics,
