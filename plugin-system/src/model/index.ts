@@ -24,3 +24,5 @@ export * from './trace-queries';
 export * from './profile-queries';
 export * from './variables';
 export * from './calculations';
+export * from './alerts-queries';
+export * from './silences-queries';

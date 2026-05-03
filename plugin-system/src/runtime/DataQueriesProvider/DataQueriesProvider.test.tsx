@@ -13,7 +13,14 @@
 
 import React, { ReactElement } from 'react';
 import { renderHook } from '@testing-library/react';
-import { MOCK_TIME_SERIES_DATA, MOCK_TRACE_DATA, MOCK_PROFILE_DATA, MOCK_LOG_DATA } from '../../test';
+import {
+  MOCK_TIME_SERIES_DATA,
+  MOCK_TRACE_DATA,
+  MOCK_PROFILE_DATA,
+  MOCK_LOG_DATA,
+  MOCK_ALERTS_DATA,
+  MOCK_SILENCES_DATA,
+} from '../../test';
 import { useListPluginMetadata } from '../plugin-registry';
 import { DataQueriesProvider, useDataQueries } from './DataQueriesProvider';
 import { useQueryType } from './model';
@@ -32,6 +39,14 @@ jest.mock('../profile-queries', () => ({
 
 jest.mock('../log-queries', () => ({
   useLogQueries: jest.fn().mockImplementation(() => [{ data: MOCK_LOG_DATA }]),
+}));
+
+jest.mock('../alerts-queries', () => ({
+  useAlertsQueries: jest.fn().mockImplementation(() => [{ data: MOCK_ALERTS_DATA }]),
+}));
+
+jest.mock('../silences-queries', () => ({
+  useSilencesQueries: jest.fn().mockImplementation(() => [{ data: MOCK_SILENCES_DATA }]),
 }));
 
 jest.mock('../plugin-registry', () => ({
@@ -54,6 +69,24 @@ jest.mock('../plugin-registry', () => ({
           name: 'TempoTraceQuery',
         },
         kind: 'TraceQuery',
+      },
+      {
+        spec: {
+          display: {
+            name: 'Alertmanager Alerts Query',
+          },
+          name: 'AlertmanagerAlertsQuery',
+        },
+        kind: 'AlertsQuery',
+      },
+      {
+        spec: {
+          display: {
+            name: 'Alertmanager Silences Query',
+          },
+          name: 'AlertmanagerSilencesQuery',
+        },
+        kind: 'SilencesQuery',
       },
     ],
     isLoading: false,
@@ -100,6 +133,42 @@ describe('useDataQueries', (): void => {
     });
     expect(traceResult.current.queryResults[0]?.data).toEqual(MOCK_TRACE_DATA);
   });
+
+  it('should return the correct data for AlertsQuery', () => {
+    const definitions = [
+      {
+        kind: 'AlertmanagerAlertsQuery',
+        spec: {},
+      },
+    ];
+
+    const wrapper = ({ children }: React.PropsWithChildren): ReactElement => {
+      return <DataQueriesProvider definitions={definitions}>{children}</DataQueriesProvider>;
+    };
+
+    const { result } = renderHook(() => useDataQueries('AlertsQuery'), {
+      wrapper,
+    });
+    expect(result.current.queryResults[0]?.data).toEqual(MOCK_ALERTS_DATA);
+  });
+
+  it('should return the correct data for SilencesQuery', () => {
+    const definitions = [
+      {
+        kind: 'AlertmanagerSilencesQuery',
+        spec: {},
+      },
+    ];
+
+    const wrapper = ({ children }: React.PropsWithChildren): ReactElement => {
+      return <DataQueriesProvider definitions={definitions}>{children}</DataQueriesProvider>;
+    };
+
+    const { result } = renderHook(() => useDataQueries('SilencesQuery'), {
+      wrapper,
+    });
+    expect(result.current.queryResults[0]?.data).toEqual(MOCK_SILENCES_DATA);
+  });
 });
 
 describe('useQueryType', () => {
@@ -109,6 +178,8 @@ describe('useQueryType', () => {
     const getQueryType = result.current;
     expect(getQueryType('PrometheusTimeSeriesQuery')).toBe('TimeSeriesQuery');
     expect(getQueryType('TempoTraceQuery')).toBe('TraceQuery');
+    expect(getQueryType('AlertmanagerAlertsQuery')).toBe('AlertsQuery');
+    expect(getQueryType('AlertmanagerSilencesQuery')).toBe('SilencesQuery');
   });
 
   it('should throw an error if query type is not found ', () => {

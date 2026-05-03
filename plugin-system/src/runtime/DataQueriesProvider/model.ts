@@ -65,6 +65,10 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
   const { data: traceQueryPlugins, isLoading: isTraceQueryPluginLoading } = useListPluginMetadata(['TraceQuery']);
   const { data: profileQueryPlugins, isLoading: isProfileQueryPluginLoading } = useListPluginMetadata(['ProfileQuery']);
   const { data: logQueries, isLoading: isLogQueryPluginLoading } = useListPluginMetadata(['LogQuery']);
+  const { data: alertsQueryPlugins, isLoading: isAlertsQueryPluginLoading } = useListPluginMetadata(['AlertsQuery']);
+  const { data: silencesQueryPlugins, isLoading: isSilencesQueryPluginLoading } = useListPluginMetadata([
+    'SilencesQuery',
+  ]);
 
   // For example, `map: {"TimeSeriesQuery":["PrometheusTimeSeriesQuery"],"TraceQuery":["TempoTraceQuery"]}`
   const queryTypeMap = useMemo(() => {
@@ -73,6 +77,8 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
       TraceQuery: [],
       ProfileQuery: [],
       LogQuery: [],
+      AlertsQuery: [],
+      SilencesQuery: [],
     };
 
     if (timeSeriesQueryPlugins) {
@@ -99,8 +105,27 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
       });
     }
 
+    if (alertsQueryPlugins) {
+      alertsQueryPlugins.forEach((plugin) => {
+        map[plugin.kind]?.push(plugin.spec.name);
+      });
+    }
+
+    if (silencesQueryPlugins) {
+      silencesQueryPlugins.forEach((plugin) => {
+        map[plugin.kind]?.push(plugin.spec.name);
+      });
+    }
+
     return map;
-  }, [timeSeriesQueryPlugins, traceQueryPlugins, profileQueryPlugins, logQueries]);
+  }, [
+    timeSeriesQueryPlugins,
+    traceQueryPlugins,
+    profileQueryPlugins,
+    logQueries,
+    alertsQueryPlugins,
+    silencesQueryPlugins,
+  ]);
 
   const getQueryType = useCallback(
     (pluginKind: string) => {
@@ -114,13 +139,19 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
             return isProfileQueryPluginLoading;
           case 'LokiLogQuery':
             return isLogQueryPluginLoading;
+          case 'AlertmanagerAlertsQuery':
+            return isAlertsQueryPluginLoading;
+          case 'AlertmanagerSilencesQuery':
+            return isSilencesQueryPluginLoading;
         }
 
         return (
           isTraceQueryPluginLoading ||
           isTimeSeriesQueryLoading ||
           isProfileQueryPluginLoading ||
-          isLogQueryPluginLoading
+          isLogQueryPluginLoading ||
+          isAlertsQueryPluginLoading ||
+          isSilencesQueryPluginLoading
         );
       };
 
@@ -142,6 +173,8 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
       isTraceQueryPluginLoading,
       isProfileQueryPluginLoading,
       isLogQueryPluginLoading,
+      isAlertsQueryPluginLoading,
+      isSilencesQueryPluginLoading,
     ]
   );
 
