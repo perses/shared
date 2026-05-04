@@ -16,8 +16,8 @@ import { PluginLoader, PluginMetadataWithModule, PluginModuleResource, PluginTyp
 import { useEvent } from '../../utils';
 
 export interface PluginIndexes {
-  // Plugin resources by plugin type and kind (i.e. look up what module a plugin type and kind is in)
-  pluginResourcesByNameAndKind: Map<string, PluginModuleResource>;
+  // Plugin resources by plugin type, kind, registry, and version
+  pluginResourcesByNameKindRegistryVersion: Map<string, PluginModuleResource>;
   // Plugin metadata by plugin type
   pluginMetadataByKind: Map<PluginType, PluginMetadataWithModule[]>;
 }
@@ -34,22 +34,26 @@ export function usePluginIndexes(
     const installedPlugins = await getInstalledPlugins();
 
     // Create the two indexes from the installed plugins
-    const pluginResourcesByNameAndKind = new Map<string, PluginModuleResource>();
+    const pluginResourcesByNameKindRegistryVersion = new Map<string, PluginModuleResource>();
     const pluginMetadataByKind = new Map<PluginType, PluginMetadataWithModule[]>();
 
     for (const resource of installedPlugins) {
+      const {
+        metadata: { version, registry },
+      } = resource;
       for (const pluginMetadata of resource.spec.plugins) {
         const {
           kind,
           spec: { name },
         } = pluginMetadata;
 
-        // Index the plugin by type and kind to point at the module that contains it
-        const key = getTypeAndKindKey(kind, name);
-        if (pluginResourcesByNameAndKind.has(key)) {
-          console.warn(`Got more than one ${kind} plugin for kind ${name}`);
+        const key = getPluginModuleCompoundKey({ kind, name, registry, version });
+        if (pluginResourcesByNameKindRegistryVersion.has(key)) {
+          console.warn(
+            `Got more than one ${kind} plugin for kind ${name}, registry '${registry || 'undefined'}', and version '${version || 'undefined'}'`
+          );
         }
-        pluginResourcesByNameAndKind.set(key, resource);
+        pluginResourcesByNameKindRegistryVersion.set(key, resource);
 
         // Index the metadata by plugin type
         let list = pluginMetadataByKind.get(kind);
@@ -62,7 +66,7 @@ export function usePluginIndexes(
     }
 
     return {
-      pluginResourcesByNameAndKind,
+      pluginResourcesByNameKindRegistryVersion,
       pluginMetadataByKind,
     };
   });
@@ -84,9 +88,17 @@ export function usePluginIndexes(
   return getPluginIndexes;
 }
 
+export type PluginCompoundKey<T extends PluginType> = {
+  kind: T;
+  name: string;
+  registry?: string;
+  version?: string;
+};
+
 /**
- * Gets a unique key for a plugin type/kind that can be used as a cache key.
+ * Gets a unique key for a plugin type/kind/version/registry that can be used as a cache key.
  */
-export function getTypeAndKindKey(kind: PluginType, name: string): string {
-  return `${kind}:${name}`;
+export function getPluginModuleCompoundKey(compoundKey: PluginCompoundKey<PluginType>): string {
+  const { kind, name, registry, version } = compoundKey;
+  return `${kind}:${name}:${registry ?? ''}:${version ?? ''}`;
 }

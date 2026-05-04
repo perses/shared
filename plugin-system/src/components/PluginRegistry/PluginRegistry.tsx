@@ -23,7 +23,8 @@ import {
 } from '../../model';
 import { PluginRegistryContext } from '../../runtime';
 import { useEvent } from '../../utils';
-import { usePluginIndexes, getTypeAndKindKey } from './plugin-indexes';
+import { usePluginIndexes, PluginCompoundKey } from './plugin-indexes';
+import { lookUpDefaultPluginKey } from './getPluginSearchHelper';
 
 export interface PluginRegistryProps {
   pluginLoader: PluginLoader;
@@ -62,28 +63,68 @@ export function PluginRegistry(props: PluginRegistryProps): ReactElement {
   });
 
   const getPlugin = useCallback(
-    async <T extends PluginType>(kind: T, name: string): Promise<PluginImplementation<T>> => {
-      // Get the indexes of the installed plugins
+    async <T extends PluginType>(compoundKeyObj: PluginCompoundKey<T>): Promise<PluginImplementation<T>> => {
       const pluginIndexes = await getPluginIndexes();
+      let resource: PluginModuleResource | undefined = undefined;
+      let pluginModule: Record<string, Plugin<UnknownSpec>> | undefined;
+      const { kind, name, version, registry } = compoundKeyObj;
 
-      // Figure out what module the plugin is in by looking in the index
-      const typeAndKindKey = getTypeAndKindKey(kind, name);
-      const resource = pluginIndexes.pluginResourcesByNameAndKind.get(typeAndKindKey);
-      if (resource === undefined) {
+      /**
+       * By default both version and registry are undefined,
+       * If one or both are passed, the registry will check if the plugin with the specific version and registry is available,
+       * falling back to the current behavior which is returning the default.
+       */
+
+      if (registry || version) {
+        let compoundKey = '';
+        /**
+         * This branch tries to look up a resource deterministically, using a compound_key which consists of kind, name, registry, and version
+         * Based on the user input, the likely keys are
+         * 1- kind:name:registry:version (This is the complete compound key. It is very likely the key is looked up)
+         * 2- kind:name::version (This is very likely, because registry is an optional field of the resource object)
+         * 3- kind:name:registry: (It is impossible to find any combination, because version is a mandatory field of the resource. So, this will be handled by the fallback)
+         * Note: It is likely that the key is not found. However, the search should NOT give up easily!
+         * Instead it should continue with the fallback mechanism
+         */
+        compoundKey = `${kind}:${name}:${registry}:${version}`;
+        resource = pluginIndexes.pluginResourcesByNameKindRegistryVersion.get(compoundKey);
+        if (resource) {
+          pluginModule = (await loadPluginModule(resource)) as Record<string, Plugin<UnknownSpec>>;
+          const plugin = pluginModule?.[`${name}:${registry ?? ''}:${version ?? ''}`];
+          if (!plugin) {
+            throw new Error(
+              `The ${name} plugin for kind '${kind}' is missing from the ${resource.metadata.name} plugin module`
+            );
+          }
+          return plugin as PluginImplementation<T>;
+        }
+      }
+      /**
+       * This is the fallback mechanism branch.
+       * It performs a minimal search using the mandatory inputs from user and returns the default resource
+       * More information can be found in the searchHelper.ts
+       */
+      const resourceKey = lookUpDefaultPluginKey(
+        Array.from(pluginIndexes.pluginResourcesByNameKindRegistryVersion.keys()),
+        {
+          kind,
+          name,
+        }
+      );
+
+      if (!resourceKey) {
         throw new Error(`A ${name} plugin for kind '${kind}' is not installed`);
       }
 
-      // Treat the plugin module as a bunch of named exports that have plugins
-      const pluginModule = (await loadPluginModule(resource)) as Record<string, Plugin<UnknownSpec>>;
+      resource = pluginIndexes.pluginResourcesByNameKindRegistryVersion.get(resourceKey)!;
+      pluginModule = (await loadPluginModule(resource)) as Record<string, Plugin<UnknownSpec>>;
 
-      // We currently assume that plugin modules will have named exports that match the kinds they handle
-      const plugin = pluginModule[name];
-      if (plugin === undefined) {
+      const plugin = pluginModule?.[resourceKey];
+      if (!plugin) {
         throw new Error(
           `The ${name} plugin for kind '${kind}' is missing from the ${resource.metadata.name} plugin module`
         );
       }
-
       return plugin as PluginImplementation<T>;
     },
     [getPluginIndexes, loadPluginModule]

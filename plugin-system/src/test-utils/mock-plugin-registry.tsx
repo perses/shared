@@ -32,7 +32,7 @@ export function mockPluginRegistry(...mockPlugins: MockPlugin[]): Omit<PluginReg
     kind: 'PluginModule',
     metadata: {
       name: 'Fake Plugin Module for Tests',
-      version: '0',
+      version: '1.0.0',
     },
     spec: {
       // Add metadata for all mock plugins
@@ -51,7 +51,9 @@ export function mockPluginRegistry(...mockPlugins: MockPlugin[]): Omit<PluginReg
   const mockPluginModule: Record<string, Plugin<UnknownSpec>> = {};
   for (const mockPlugin of mockPlugins) {
     // "Export" on the module under the same name as the kind the plugin handles
-    mockPluginModule[mockPlugin.spec.name] = mockPlugin.plugin;
+    mockPluginModule[
+      `${mockPlugin.kind}:${mockPlugin.spec.name}:${mockPluginResource.metadata.registry ?? ''}:${mockPluginResource.metadata.version}`
+    ] = mockPlugin.plugin;
   }
 
   const pluginLoader: PluginLoader = {

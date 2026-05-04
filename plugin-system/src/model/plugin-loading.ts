@@ -35,20 +35,33 @@ export interface DynamicImportPlugin {
  * the plugin itself via a dynamic `import()` statement.
  */
 export function dynamicImportPluginLoader(plugins: DynamicImportPlugin[]): PluginLoader {
-  const importMap: Map<PluginModuleResource, DynamicImportPlugin['importPlugin']> = new Map(
-    plugins.map((plugin) => [plugin.resource, plugin.importPlugin])
-  );
-
+  const importMap: Map<string, { resource: PluginModuleResource; importPlugin: DynamicImportPlugin['importPlugin'] }> =
+    new Map();
+  for (const p of plugins) {
+    const {
+      resource,
+      resource: {
+        kind,
+        metadata: { name, registry, version },
+      },
+      importPlugin,
+    } = p;
+    importMap.set(`${kind}:${name}:${registry ?? ''}:${version ?? ''}`, { resource, importPlugin });
+  }
   return {
     async getInstalledPlugins(): Promise<PluginModuleResource[]> {
-      return Promise.resolve(Array.from(importMap.keys()));
+      return Promise.resolve(Array.from(importMap.values()).map((v) => v.resource));
     },
     importPluginModule(resource): Promise<unknown> {
-      const importFn = importMap.get(resource);
-      if (importFn === undefined) {
+      const {
+        kind,
+        metadata: { name, version, registry },
+      } = resource;
+      const { importPlugin } = importMap.get(`${kind}:${name}:${registry ?? ''}:${version ?? ''}`) || {};
+      if (importPlugin === undefined) {
         throw new Error('Plugin not found');
       }
-      return importFn();
+      return importPlugin();
     },
   };
 }

@@ -37,6 +37,8 @@ export interface PluginMetadata {
   kind: PluginType;
   spec: {
     name: string;
+    version?: string;
+    registry?: string;
     display: {
       name: string;
       description?: string;
@@ -50,6 +52,7 @@ export interface PluginMetadata {
 export interface PluginModuleMetadata {
   name: string;
   version: string;
+  registry?: string;
 }
 
 /**

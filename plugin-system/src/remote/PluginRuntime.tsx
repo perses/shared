@@ -214,31 +214,40 @@ const getPluginRuntime = (): ModuleFederation => {
   return instance;
 };
 
-const registerRemote = (name: string, baseURL?: string): void => {
+const registerRemote = (name: string, registry?: string, version?: string, baseURL?: string): void => {
   const pluginRuntime = getPluginRuntime();
-  const existingRemote = pluginRuntime.options.remotes.find((remote) => remote.name === name);
+  const registryName = `${name}:${registry ?? ''}:${version ?? ''}`;
+
+  const existingRemote = pluginRuntime.options.remotes.find((remote) => remote.name === registryName);
   if (!existingRemote) {
-    const remoteEntryURL = baseURL ? `${baseURL}/${name}/mf-manifest.json` : `/plugins/${name}/mf-manifest.json`;
+    const segments = [registry, version].filter(Boolean);
+    const suffix = segments.length ? `/${segments.join('/')}` : '';
+    const prefix = baseURL || '/plugins';
+    const remoteEntryURL = `${prefix}/${name}${suffix}/mf-manifest.json`.replace(/\/+/g, '/');
+
     pluginRuntime.registerRemotes([
       {
-        name,
+        name: registryName,
         entry: remoteEntryURL,
-        alias: name,
+        alias: registryName,
       },
     ]);
   }
 };
 
-export const loadPlugin = async (
-  moduleName: string,
-  pluginName: string,
-  baseURL?: string
-): Promise<RemotePluginModule | null> => {
-  registerRemote(moduleName, baseURL);
+export const loadPlugin = async (target: {
+  moduleName: string;
+  pluginName: string;
+  registry?: string;
+  version?: string;
+  baseURL?: string;
+}): Promise<RemotePluginModule | null> => {
+  const { moduleName, pluginName, registry, version, baseURL } = target;
+  registerRemote(moduleName, registry, version, baseURL);
 
   const pluginRuntime = getPluginRuntime();
-
-  return pluginRuntime.loadRemote<RemotePluginModule>(`${moduleName}/${pluginName}`);
+  const registryName = `${moduleName}:${registry ?? ''}:${version ?? ''}`;
+  return pluginRuntime.loadRemote<RemotePluginModule>(`${registryName}/${pluginName}`);
 };
 
 export function usePluginRuntime({ plugin }: { plugin: PersesPlugin }): {
@@ -247,6 +256,9 @@ export function usePluginRuntime({ plugin }: { plugin: PersesPlugin }): {
 } {
   return {
     pluginRuntime: getPluginRuntime(),
-    loadPlugin: () => loadPlugin(plugin.moduleName, plugin.name, plugin.baseURL),
+    loadPlugin: (): Promise<RemotePluginModule | null> => {
+      const { moduleName, name: pluginName, registry, version, baseURL } = plugin;
+      return loadPlugin({ moduleName, pluginName, registry, version, baseURL });
+    },
   };
 }

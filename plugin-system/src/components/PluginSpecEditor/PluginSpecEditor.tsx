@@ -30,7 +30,6 @@ export function PluginSpecEditor(props: PluginSpecEditorProps): ReactElement | n
     ...others
   } = props;
   const { data: plugin, isLoading, error } = usePlugin(pluginType, pluginKind);
-
   if (error) {
     return <ErrorAlert error={error} />;
   }

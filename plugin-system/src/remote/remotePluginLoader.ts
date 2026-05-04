@@ -88,7 +88,6 @@ export function remotePluginLoader(options?: RemotePluginLoaderOptions): PluginL
       const pluginsResponse = await fetch(pluginsApiPath);
 
       const plugins = await pluginsResponse.json();
-
       let pluginModules: PluginModuleResource[] = [];
 
       if (Array.isArray(plugins)) {
@@ -104,20 +103,35 @@ export function remotePluginLoader(options?: RemotePluginLoaderOptions): PluginL
       return pluginModules;
     },
     importPluginModule: async (resource): Promise<RemotePluginModule> => {
-      const pluginModuleName = resource.metadata.name;
+      const { name: pluginModuleName, version, registry } = resource.metadata;
 
       const pluginModule: RemotePluginModule = {};
 
-      for (const plugin of resource.spec.plugins) {
-        const remotePluginModule = await loadPlugin(pluginModuleName, plugin.spec.name, pluginsAssetsPath);
+      const loadPromises = resource.spec.plugins.map(async (plugin) => {
+        const remotePluginModule = await loadPlugin({
+          moduleName: pluginModuleName,
+          pluginName: plugin.spec.name,
+          registry,
+          version,
+          baseURL: pluginsAssetsPath,
+        });
 
         const remotePlugin = remotePluginModule?.[plugin.spec.name];
         if (remotePlugin) {
-          pluginModule[plugin.spec.name] = remotePlugin;
+          return { name: plugin.spec.name, remotePlugin };
         } else {
           console.error(`RemotePluginLoader: Error loading plugin ${plugin.spec.name}`);
+          return null;
         }
-      }
+      });
+
+      const loadedPlugins = await Promise.all(loadPromises);
+
+      loadedPlugins.forEach((item) => {
+        if (item?.remotePlugin) {
+          pluginModule[`${item.name}:${registry ?? ''}:${version ?? ''}`] = item.remotePlugin;
+        }
+      });
 
       return pluginModule;
     },
