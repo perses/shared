@@ -40,7 +40,6 @@
     "@typescript-eslint/parser": "^8.18.0",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
-    "esbuild-loader": "^4.0.3",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
@@ -56,12 +55,10 @@
     "react-dom": "^18.2.0",
     "react-refresh": "^0.16.0",
     "rimraf": "^5.0.5",
-    "swc-loader": "^0.2.6",
     "terser-webpack-plugin": "^5.3.11",
     "ts-node": "^10.9.2",
     "turbo": "^2.3.4",
-    "typescript": "5.4.5",
-    "wait-on": "^7.0.1"
+    "typescript": "5.4.5"
   },
   "packageManager": "npm@10.9.2"
 }
