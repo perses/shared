@@ -11,11 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './DashboardProvider';
-export * from './DatasourceStoreProvider';
-export * from './VariableProvider';
-export * from './useDashboard';
-export * from './PanelEditorProvider';
 // LOGZ.IO CHANGE START:: Panel-level time range override [APPZ-2474]
-export * from './PanelTimeRangeOverride';
+export * from './PanelTimeRangeOverrideProvider';
+export * from './resolve';
 // LOGZ.IO CHANGE END:: Panel-level time range override [APPZ-2474]

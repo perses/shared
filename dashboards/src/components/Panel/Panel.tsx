@@ -222,6 +222,15 @@ export const Panel = memo(function Panel(props: PanelProps) {
               showIcons={showIcons}
               sx={{ py: '2px', pl: '8px', pr: '2px' }}
               dimension={contentDimensions}
+              // LOGZ.IO CHANGE START:: Panel-level time range override [APPZ-2474]
+              // Read via local cast to avoid declaration-merging on `@perses-dev/core` —
+              // module augmentation triggers TS to re-derive types globally and breaks pre-existing
+              // borderline inferences in unrelated app-ui test fixtures (e.g. `kind: string` not
+              // narrowing to `kind: 'Panel'`). Keep the new fields scoped to consumers.
+              timeFrom={(definition.spec as { timeFrom?: string }).timeFrom}
+              timeShift={(definition.spec as { timeShift?: string }).timeShift}
+              hideTimeOverride={(definition.spec as { hideTimeOverride?: boolean }).hideTimeOverride}
+              // LOGZ.IO CHANGE END:: Panel-level time range override [APPZ-2474]
             />
           )}
           <CardContent

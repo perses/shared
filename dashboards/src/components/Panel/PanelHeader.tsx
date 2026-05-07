@@ -17,6 +17,9 @@ import { Link } from '@perses-dev/core';
 import { ItemAction, QueryData, useAllVariableValues, useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { ReactElement, ReactNode, useRef } from 'react';
 import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants';
+// LOGZ.IO CHANGE START:: Panel-level time range override badge [APPZ-2474]
+import { getPanelTimeOverrideLabel } from '../../context/PanelTimeRangeOverride';
+// LOGZ.IO CHANGE END:: Panel-level time range override badge [APPZ-2474]
 import { PanelActions, PanelActionsProps } from './PanelActions';
 import { PanelOptions } from './Panel';
 import { useSelectionItemActions } from './useSelectionItemActions';
@@ -37,6 +40,11 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   itemActionsListConfig?: ItemAction[];
   showIcons: PanelOptions['showIcons'];
   dimension?: { width: number };
+  // LOGZ.IO CHANGE START:: Panel-level time range override [APPZ-2474]
+  timeFrom?: string;
+  timeShift?: string;
+  hideTimeOverride?: boolean;
+  // LOGZ.IO CHANGE END:: Panel-level time range override [APPZ-2474]
 }
 
 export function PanelHeader({
@@ -54,6 +62,11 @@ export function PanelHeader({
   showIcons,
   viewQueriesHandler,
   dimension,
+  // LOGZ.IO CHANGE START:: Panel-level time range override [APPZ-2474]
+  timeFrom,
+  timeShift,
+  hideTimeOverride,
+  // LOGZ.IO CHANGE END:: Panel-level time range override [APPZ-2474]
   ...rest
 }: PanelHeaderProps): ReactElement {
   const titleElementId = `${id}-title`;
@@ -62,6 +75,9 @@ export function PanelHeader({
   const title = useReplaceVariablesInString(rawTitle);
   const description = useReplaceVariablesInString(rawDescription);
   const variableState = useAllVariableValues();
+  // LOGZ.IO CHANGE START:: Panel-level time range override badge [APPZ-2474]
+  const timeOverrideLabel = getPanelTimeOverrideLabel({ timeFrom, timeShift, hideTimeOverride });
+  // LOGZ.IO CHANGE END:: Panel-level time range override badge [APPZ-2474]
 
   const textRef = useRef<HTMLDivElement>(null);
 
@@ -103,6 +119,18 @@ export function PanelHeader({
                   {title}
                 </Typography>
               </Tooltip>
+              {/* LOGZ.IO CHANGE START:: Panel-level time range override badge [APPZ-2474] */}
+              {timeOverrideLabel && (
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ ml: 1, whiteSpace: 'nowrap', flexShrink: 0 }}
+                  data-testid="panel-time-override-label"
+                >
+                  {timeOverrideLabel}
+                </Typography>
+              )}
+              {/* LOGZ.IO CHANGE END:: Panel-level time range override badge [APPZ-2474] */}
               <PanelActions
                 title={title}
                 description={description}

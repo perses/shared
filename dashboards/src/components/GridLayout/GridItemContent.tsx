@@ -15,8 +15,11 @@ import { Box } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo, useState } from 'react';
-import { isPanelGroupItemIdEqual, PanelGroupItemId } from '@perses-dev/core';
+import { isPanelGroupItemIdEqual, PanelDefinition, PanelGroupItemId } from '@perses-dev/core';
 import { useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
+// LOGZ.IO CHANGE START:: Panel-level time range override [APPZ-2474]
+import { PanelTimeRangeOverrideProvider } from '../../context/PanelTimeRangeOverride';
+// LOGZ.IO CHANGE END:: Panel-level time range override [APPZ-2474]
 import { Panel, PanelProps, PanelOptions } from '../Panel';
 import { QueryViewerDialog } from '../QueryViewerDialog';
 
@@ -79,6 +82,62 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
     };
   }
 
+  return (
+    <Box
+      ref={ref}
+      sx={{
+        width: '100%',
+        height: '100%',
+      }}
+    >
+      {/* LOGZ.IO CHANGE START:: Panel-level time range override (Grafana timeFrom/timeShift) [APPZ-2474]
+          The override needs to wrap useSuggestedStepMs + DataQueriesProvider + Panel so that
+          the panel's queries pick up the overridden range. We extract the time-dependent body
+          into GridItemContentBody so it sits inside the override-aware TimeRangeProvider. Read via
+          local cast to avoid declaration-merging on `@perses-dev/core` PanelSpec — module-level
+          augmentation triggered TS to re-derive types globally and broke pre-existing borderline
+          inferences in unrelated app-ui test fixtures (e.g. `kind: string` not narrowing to
+          `kind: 'Panel'`). Keep the new fields scoped to consumers. */}
+      <PanelTimeRangeOverrideProvider spec={panelDefinition.spec as { timeFrom?: string; timeShift?: string }}>
+        <GridItemContentBody
+          panelDefinition={panelDefinition}
+          width={width}
+          inView={inView}
+          panelGroupItemId={panelGroupItemId}
+          readHandlers={readHandlers}
+          editHandlers={editHandlers}
+          viewQueriesHandler={viewQueriesHandler}
+          panelOptions={props.panelOptions}
+        />
+      </PanelTimeRangeOverrideProvider>
+      {/* LOGZ.IO CHANGE END:: Panel-level time range override [APPZ-2474] */}
+      <QueryViewerDialog open={openQueryViewer} queryDefinitions={queries} onClose={() => setOpenQueryViewer(false)} />
+    </Box>
+  );
+}
+
+// LOGZ.IO CHANGE START:: GridItemContentBody — time-range-aware inner half [APPZ-2474]
+interface GridItemContentBodyProps {
+  panelDefinition: PanelDefinition;
+  width: number;
+  inView: boolean;
+  panelGroupItemId: PanelGroupItemId;
+  readHandlers: PanelProps['readHandlers'];
+  editHandlers: PanelProps['editHandlers'];
+  viewQueriesHandler: PanelProps['viewQueriesHandler'];
+  panelOptions?: PanelOptions;
+}
+
+function GridItemContentBody({
+  panelDefinition,
+  width,
+  inView,
+  panelGroupItemId,
+  readHandlers,
+  editHandlers,
+  viewQueriesHandler,
+  panelOptions,
+}: GridItemContentBodyProps): ReactElement {
   // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
   const suggestedStepMs = useSuggestedStepMs(width);
 
@@ -86,14 +145,14 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
 
   const definitions = useMemo(
     () =>
-      queries.map((query) => {
+      (panelDefinition.spec.queries ?? []).map((query) => {
         return {
           kind: query.spec.plugin.kind,
           spec: query.spec.plugin.spec,
           hidden: query.spec.hidden ?? false, // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
         };
       }),
-    [queries]
+    [panelDefinition.spec.queries]
   );
 
   const pluginQueryOptions = useMemo(
@@ -103,31 +162,24 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
         : plugin?.queryOptions,
     [plugin, panelDefinition.spec.plugin.spec]
   );
+
   return (
-    <Box
-      ref={ref}
-      sx={{
-        width: '100%',
-        height: '100%',
-      }}
+    <DataQueriesProvider
+      definitions={definitions}
+      options={{ suggestedStepMs, ...pluginQueryOptions }}
+      queryOptions={{ enabled: inView }}
     >
-      <DataQueriesProvider
-        definitions={definitions}
-        options={{ suggestedStepMs, ...pluginQueryOptions }}
-        queryOptions={{ enabled: inView }}
-      >
-        {inView && (
-          <Panel
-            definition={panelDefinition}
-            readHandlers={readHandlers}
-            editHandlers={editHandlers}
-            viewQueriesHandler={viewQueriesHandler}
-            panelOptions={props.panelOptions}
-            panelGroupItemId={panelGroupItemId}
-          />
-        )}
-      </DataQueriesProvider>
-      <QueryViewerDialog open={openQueryViewer} queryDefinitions={queries} onClose={() => setOpenQueryViewer(false)} />
-    </Box>
+      {inView && (
+        <Panel
+          definition={panelDefinition}
+          readHandlers={readHandlers}
+          editHandlers={editHandlers}
+          viewQueriesHandler={viewQueriesHandler}
+          panelOptions={panelOptions}
+          panelGroupItemId={panelGroupItemId}
+        />
+      )}
+    </DataQueriesProvider>
   );
 }
+// LOGZ.IO CHANGE END:: GridItemContentBody [APPZ-2474]

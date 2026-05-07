@@ -24,8 +24,11 @@ import {
 } from '@perses-dev/plugin-system';
 // LOGZ.IO CHANGE END:: Import PanelSpecChangeProvider for bidirectional panel-settings sync [APPZ-1695]
 import { Definition, PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
-import { Control } from 'react-hook-form';
+import { Control, FieldPath, useWatch } from 'react-hook-form';
 import { ReactElement, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+// LOGZ.IO CHANGE START:: Wrap editor preview in panel time range override [APPZ-2474]
+import { PanelTimeRangeOverrideProvider } from '../../context/PanelTimeRangeOverride';
+// LOGZ.IO CHANGE END:: Wrap editor preview in panel time range override [APPZ-2474]
 
 export interface PanelQueriesSharedControlsProps {
   control: Control<PanelEditorValues>;
@@ -38,7 +41,45 @@ export interface PanelQueriesSharedControlsProps {
 
 // Component of PanelEditor, it will share queries results to its children with DataQueriesProvider.
 // TODO: consider merging PanelEditorProvider, QueryCountProvider and DataQueriesProvider into a single provider to avoid multiple nested providers.
-export function PanelQueriesSharedControls({
+// LOGZ.IO CHANGE START:: Wrap editor preview/queries in panel time range override so the preview matches the dashboard panel [APPZ-2474]
+// The override needs to wrap useSuggestedStepMs + DataQueriesProvider + PanelPreview, mirroring
+// what GridItemContent does for the dashboard view. The body is split into an inner component so
+// the override-aware TimeRangeProvider sits above the time-range readers. The override values
+// are read live from form state via useWatch (panelDefinition prop comes from `usePanelEditor`,
+// which doesn't track these fields), and merged into a panelDefinition view that the preview
+// and badge consume.
+const TIME_FROM_PATH = 'panelDefinition.spec.timeFrom' as unknown as FieldPath<PanelEditorValues>;
+const TIME_SHIFT_PATH = 'panelDefinition.spec.timeShift' as unknown as FieldPath<PanelEditorValues>;
+const HIDE_OVERRIDE_PATH = 'panelDefinition.spec.hideTimeOverride' as unknown as FieldPath<PanelEditorValues>;
+
+export function PanelQueriesSharedControls(props: PanelQueriesSharedControlsProps): ReactElement {
+  const { control, panelDefinition: basePanelDefinition } = props;
+
+  const timeFromRaw = useWatch({ control, name: TIME_FROM_PATH }) as string | undefined;
+  const timeShiftRaw = useWatch({ control, name: TIME_SHIFT_PATH }) as string | undefined;
+  const hideTimeOverrideRaw = useWatch({ control, name: HIDE_OVERRIDE_PATH }) as boolean | undefined;
+
+  const panelDefinition = useMemo<PanelDefinition>(
+    () => ({
+      ...basePanelDefinition,
+      spec: {
+        ...basePanelDefinition.spec,
+        ...(timeFromRaw !== undefined && timeFromRaw !== '' && { timeFrom: timeFromRaw }),
+        ...(timeShiftRaw !== undefined && timeShiftRaw !== '' && { timeShift: timeShiftRaw }),
+        ...(hideTimeOverrideRaw !== undefined && { hideTimeOverride: hideTimeOverrideRaw }),
+      },
+    }),
+    [basePanelDefinition, timeFromRaw, timeShiftRaw, hideTimeOverrideRaw]
+  );
+
+  return (
+    <PanelTimeRangeOverrideProvider spec={{ timeFrom: timeFromRaw, timeShift: timeShiftRaw }}>
+      <PanelQueriesSharedControlsBody {...props} panelDefinition={panelDefinition} />
+    </PanelTimeRangeOverrideProvider>
+  );
+}
+
+function PanelQueriesSharedControlsBody({
   plugin,
   control,
   panelDefinition,
@@ -50,6 +91,7 @@ export function PanelQueriesSharedControls({
   const panelEditorContext = useContext(PanelEditorContext);
 
   const suggestedStepMs = useSuggestedStepMs(panelEditorContext?.preview.previewPanelWidth);
+  // LOGZ.IO CHANGE END:: Wrap editor preview/queries in panel time range override [APPZ-2474]
 
   const pluginQueryOptions = useMemo(
     () =>

@@ -12,3 +12,6 @@
 // limitations under the License.
 
 export * from './PanelSpecEditor';
+// LOGZ.IO CHANGE START:: Panel-level time range override editor [APPZ-2474]
+export * from './PanelTimeOverrideEditor';
+// LOGZ.IO CHANGE END:: Panel-level time range override editor [APPZ-2474]

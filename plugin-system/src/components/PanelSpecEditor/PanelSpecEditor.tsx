@@ -15,11 +15,15 @@ import { ErrorAlert, JSONEditor, LinksEditor } from '@perses-dev/components';
 import { PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
 import { Control, Controller } from 'react-hook-form';
 import { forwardRef, ReactElement } from 'react';
+import { Stack } from '@mui/material';
 import { QueryCountProvider, useDataQueriesContext, usePlugin } from '../../runtime';
 import { PanelPlugin } from '../../model';
 import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
 import { MultiQueryEditor } from '../MultiQueryEditor';
 import { PluginEditorRef } from '../PluginEditor';
+// LOGZ.IO CHANGE START:: Panel-level time range override editor [APPZ-2474]
+import { PanelTimeOverrideEditor } from './PanelTimeOverrideEditor';
+// LOGZ.IO CHANGE END:: Panel-level time range override editor [APPZ-2474]
 
 export interface PanelSpecEditorProps {
   control: Control<PanelEditorValues>;
@@ -56,29 +60,34 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
     tabs.push({
       label: 'Query',
       content: (
-        <Controller
-          control={control}
-          name="panelDefinition.spec.queries"
-          render={({ field }) => (
-            <MultiQueryEditor
-              ref={ref}
-              queryTypes={plugin.supportedQueryTypes ?? []}
-              queries={panelDefinition.spec.queries ?? []}
-              queryResults={queryResults}
-              onChange={(queries) => {
-                field.onChange(queries);
-                onQueriesChange(queries);
-              }}
-              onQueryRun={(index, query) => {
-                onQueryRun(index, query);
-                // If spec has not changed, refetch to update the data
-                if (JSON.stringify(panelDefinition.spec.queries?.[index]) === JSON.stringify(query)) {
-                  queryResults[index]?.refetch?.();
-                }
-              }}
-            />
-          )}
-        />
+        // LOGZ.IO CHANGE START:: Panel time range override editor sits above MultiQueryEditor (Grafana parity) [APPZ-2474]
+        <Stack spacing={2}>
+          <PanelTimeOverrideEditor control={control} />
+          <Controller
+            control={control}
+            name="panelDefinition.spec.queries"
+            render={({ field }) => (
+              <MultiQueryEditor
+                ref={ref}
+                queryTypes={plugin.supportedQueryTypes ?? []}
+                queries={panelDefinition.spec.queries ?? []}
+                queryResults={queryResults}
+                onChange={(queries) => {
+                  field.onChange(queries);
+                  onQueriesChange(queries);
+                }}
+                onQueryRun={(index, query) => {
+                  onQueryRun(index, query);
+                  // If spec has not changed, refetch to update the data
+                  if (JSON.stringify(panelDefinition.spec.queries?.[index]) === JSON.stringify(query)) {
+                    queryResults[index]?.refetch?.();
+                  }
+                }}
+              />
+            )}
+          />
+        </Stack>
+        // LOGZ.IO CHANGE END:: Panel time range override editor [APPZ-2474]
       ),
     });
   }
