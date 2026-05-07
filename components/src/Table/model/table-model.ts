@@ -249,7 +249,7 @@ export type TableToolbarConfig = {
    * When `isSearchEnabled` is `true`, this determines how fuzzy the matching should be when filtering results.
    * @default 'CONTAINS'
    */
-  searchMatchThreshold?: FuzzyMatchThreshold;
+  fuzzyMatchThreshold?: FuzzyMatchThreshold;
 
   /**
    * When `true`, a "Columns" button will be rendered above the table that

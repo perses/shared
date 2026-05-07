@@ -39,7 +39,7 @@ export interface UseFuzzySearchResult<TableData> {
  */
 export function useFuzzySearch<TableData>(
   isSearchEnabled: boolean | undefined,
-  matchThreshold: FuzzyMatchThreshold
+  threshold: FuzzyMatchThreshold
 ): UseFuzzySearchResult<TableData> {
   const [globalFilter, setGlobalFilter] = useState('');
 
@@ -47,7 +47,7 @@ export function useFuzzySearch<TableData>(
     globalFilter,
     setGlobalFilter,
     fuzzySearchOptions: {
-      filterFns: { fuzzy: getFuzzyFilterFunction(matchThreshold) },
+      filterFns: { fuzzy: getFuzzyFilterFunction(threshold) },
       globalFilterFn: isSearchEnabled ? 'fuzzy' : undefined,
       getFilteredRowModel: isSearchEnabled ? getFilteredRowModel() : undefined,
       filterFromLeafRows: isSearchEnabled,
