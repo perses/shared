@@ -12,14 +12,17 @@
 // limitations under the License.
 
 import { FilterFn, getFilteredRowModel, OnChangeFn, TableOptions } from '@tanstack/react-table';
-import { rankItem } from '@tanstack/match-sorter-utils';
+import { rankings, rankItem } from '@tanstack/match-sorter-utils';
 import { useState } from 'react';
+import { FuzzyMatchThreshold } from '@perses-dev/components';
 
-const fuzzyFilter: FilterFn<unknown> = (row, columnId, value, addMeta) => {
-  const itemRank = rankItem(row.getValue(columnId), value);
-  addMeta({ itemRank });
-  return itemRank.passed;
-};
+const getFuzzyFilterFunction =
+  (threshold: FuzzyMatchThreshold): FilterFn<unknown> =>
+  (row, columnId, value, addMeta) => {
+    const itemRank = rankItem(row.getValue(columnId), value, { threshold: rankings[threshold] });
+    addMeta({ itemRank });
+    return itemRank.passed;
+  };
 
 export interface UseFuzzySearchResult<TableData> {
   globalFilter: string;
@@ -34,14 +37,17 @@ export interface UseFuzzySearchResult<TableData> {
  * Returns fuzzy search state and the corresponding `useReactTable` options.
  * Filter options are disabled when `showSearch` is falsy.
  */
-export function useFuzzySearch<TableData>(isSearchEnabled: boolean | undefined): UseFuzzySearchResult<TableData> {
+export function useFuzzySearch<TableData>(
+  isSearchEnabled: boolean | undefined,
+  matchThreshold: FuzzyMatchThreshold
+): UseFuzzySearchResult<TableData> {
   const [globalFilter, setGlobalFilter] = useState('');
 
   return {
     globalFilter,
     setGlobalFilter,
     fuzzySearchOptions: {
-      filterFns: { fuzzy: fuzzyFilter },
+      filterFns: { fuzzy: getFuzzyFilterFunction(matchThreshold) },
       globalFilterFn: isSearchEnabled ? 'fuzzy' : undefined,
       getFilteredRowModel: isSearchEnabled ? getFilteredRowModel() : undefined,
       filterFromLeafRows: isSearchEnabled,

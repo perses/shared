@@ -77,7 +77,8 @@ export function Table<TableData>({
   const theme = useTheme();
 
   const { globalFilter, setGlobalFilter, fuzzySearchOptions } = useFuzzySearch<TableData>(
-    tableToolbarConfig?.isSearchEnabled
+    tableToolbarConfig?.isSearchEnabled,
+    tableToolbarConfig?.searchMatchThreshold ?? 'CONTAINS'
   );
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
