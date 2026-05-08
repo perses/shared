@@ -52,6 +52,9 @@ export type VirtualizedTableProps<TableData> = Required<
       | 'isColumnFilterEnabled'
       | 'columns'
       | 'columnFilterMenuMaxHeight'
+      | 'isExpandAllEnabled'
+      | 'isAllExpanded'
+      | 'onExpandAllChange'
     >;
   };
 

@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Checkbox, IconButton, InputAdornment, ListItemText, Menu, MenuItem, Stack } from '@mui/material';
+import { Checkbox, IconButton, InputAdornment, ListItemText, Menu, MenuItem, Stack, Tooltip } from '@mui/material';
 import { Column } from '@tanstack/react-table';
 import { ReactElement, useCallback, useState } from 'react';
 import Magnify from 'mdi-material-ui/Magnify';
 import Close from 'mdi-material-ui/Close';
 import ViewColumn from 'mdi-material-ui/ViewColumn';
+import UnfoldMore from 'mdi-material-ui/UnfoldMoreHorizontal';
+import UnfoldLess from 'mdi-material-ui/UnfoldLessHorizontal';
 import { TextField } from '../controls';
 
 export interface TableToolbarProps<TableData> {
@@ -53,6 +55,21 @@ export interface TableToolbarProps<TableData> {
    * Max height for the column filter menu.
    */
   columnFilterMenuMaxHeight?: number | string;
+
+  /**
+   * When `true`, an "Expand All" / "Collapse All" toggle button is rendered.
+   */
+  isExpandAllEnabled?: boolean;
+
+  /**
+   * Whether all rows are currently expanded.
+   */
+  isAllExpanded?: boolean;
+
+  /**
+   * Callback to toggle expand/collapse all rows.
+   */
+  onExpandAllChange?: (event: unknown) => void;
 }
 
 export function TableToolbar<TableData>({
@@ -63,6 +80,9 @@ export function TableToolbar<TableData>({
   columns,
   width,
   columnFilterMenuMaxHeight = 400,
+  isExpandAllEnabled,
+  isAllExpanded,
+  onExpandAllChange,
 }: TableToolbarProps<TableData>): ReactElement | null {
   const [colMenuAnchor, setColMenuAnchor] = useState<null | HTMLElement>(null);
   const colMenuOpen = Boolean(colMenuAnchor);
@@ -73,7 +93,7 @@ export function TableToolbar<TableData>({
     setSearchResetKey((prev) => prev + 1);
   }, [onGlobalFilterChange]);
 
-  if (!isSearchEnabled && !isColumnFilterEnabled) {
+  if (!isSearchEnabled && !isColumnFilterEnabled && !isExpandAllEnabled) {
     return null;
   }
 
@@ -113,6 +133,17 @@ export function TableToolbar<TableData>({
           }}
           sx={{ flexGrow: 1 }}
         />
+      )}
+      {isExpandAllEnabled && (
+        <Tooltip title={isAllExpanded ? 'Collapse all' : 'Expand all'}>
+          <IconButton
+            onClick={onExpandAllChange}
+            color="info"
+            aria-label={isAllExpanded ? 'collapse all rows' : 'expand all rows'}
+          >
+            {isAllExpanded ? <UnfoldLess /> : <UnfoldMore />}
+          </IconButton>
+        </Tooltip>
       )}
       {isColumnFilterEnabled && (
         <>

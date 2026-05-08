@@ -14,6 +14,7 @@
 import { Stack, useTheme } from '@mui/material';
 import {
   ColumnDef,
+  ExpandedState,
   getCoreRowModel,
   getExpandedRowModel,
   getPaginationRowModel,
@@ -76,8 +77,14 @@ export function Table<TableData>({
 }: TableProps<TableData>): ReactElement {
   const theme = useTheme();
 
+  const hasSubRows = !!getSubRows;
+
+  const [expanded, setExpanded] = useState<ExpandedState>({});
+
   const { globalFilter, setGlobalFilter, fuzzySearchOptions } = useFuzzySearch<TableData>(
-    tableToolbarConfig?.isSearchEnabled
+    tableToolbarConfig?.isSearchEnabled,
+    expanded,
+    setExpanded
   );
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
@@ -207,18 +214,20 @@ export function Table<TableData>({
     onSortingChange: handleSortingChange,
     onColumnVisibilityChange: setColumnVisibility,
     getSubRows: getSubRows,
-    getExpandedRowModel: getSubRows ? getExpandedRowModel() : undefined,
+    getExpandedRowModel: hasSubRows ? getExpandedRowModel() : undefined,
     ...fuzzySearchOptions,
     // For now, defaulting to sort by descending first. We can expose the ability
     // to customize it if/when we have use cases for it.
     sortDescFirst: true,
     columnResizeMode,
+    onExpandedChange: setExpanded,
     state: {
       rowSelection,
       sorting,
       globalFilter: tableToolbarConfig?.isSearchEnabled ? globalFilter : undefined,
       columnVisibility,
       ...(pagination ? { pagination } : {}),
+      expanded,
     },
   });
 
@@ -254,6 +263,9 @@ export function Table<TableData>({
         isColumnFilterEnabled: tableToolbarConfig?.isColumnFilterEnabled,
         columns: table.getAllColumns(),
         columnFilterMenuMaxHeight: tableToolbarConfig?.columnFilterMenuMaxHeight,
+        isExpandAllEnabled: hasSubRows,
+        isAllExpanded: table.getIsAllRowsExpanded(),
+        onExpandAllChange: table.getToggleAllRowsExpandedHandler(),
       }}
     />
   );
