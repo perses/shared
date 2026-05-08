@@ -83,6 +83,7 @@ export function Table<TableData>({
 
   const { globalFilter, setGlobalFilter, fuzzySearchOptions } = useFuzzySearch<TableData>(
     tableToolbarConfig?.isSearchEnabled,
+    tableToolbarConfig?.fuzzyMatchThreshold ?? 'CONTAINS',
     expanded,
     setExpanded
   );

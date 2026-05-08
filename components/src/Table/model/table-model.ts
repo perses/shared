@@ -25,6 +25,7 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import { CSSProperties, ReactNode } from 'react';
+import { rankings } from '@tanstack/match-sorter-utils';
 
 export const DEFAULT_COLUMN_WIDTH = 150;
 export const DEFAULT_COLUMN_MIN_WIDTH = 60;
@@ -235,12 +236,20 @@ export interface DefaultColumnConfig {
   enableResizing?: boolean;
 }
 
+export type FuzzyMatchThreshold = keyof typeof rankings;
+
 export type TableToolbarConfig = {
   /**
    * When `true`, a search bar will be rendered above the table that allows
    * the user to filter rows using a fuzzy global filter.
    */
   isSearchEnabled?: boolean;
+
+  /**
+   * When `isSearchEnabled` is `true`, this determines how fuzzy the matching should be when filtering results.
+   * @default 'CONTAINS'
+   */
+  fuzzyMatchThreshold?: FuzzyMatchThreshold;
 
   /**
    * When `true`, a "Columns" button will be rendered above the table that
