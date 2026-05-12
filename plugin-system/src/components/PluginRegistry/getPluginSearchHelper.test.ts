@@ -11,49 +11,82 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { lookUpDefaultPluginKey } from './getPluginSearchHelper';
+import { resolvePluginKeys } from './getPluginSearchHelper';
 
-describe('getPluginSearchHelper', () => {
-  describe('same registers but different versions', () => {
-    const keys: string[] = ['Panel:TimeSeriesChart:dev:1.0.0', 'Panel:TimeSeriesChart:dev:2.0.0'];
-    it('should take the higher version', () => {
-      expect(lookUpDefaultPluginKey(keys, { kind: 'Panel', name: 'TimeSeriesChart' })).toBe(
-        'Panel:TimeSeriesChart:dev:2.0.0'
-      );
-    });
-  });
-
-  describe('with and without registry, versions race', () => {
-    const keys: string[] = [
-      'Panel:TimeSeriesChart:dev:2.0.0',
-      'Panel:TimeSeriesChart::1.0.0',
-      'Panel:TimeSeriesChartX:dev:1.0.0',
-      'Panel:TimeSeriesChartX::2.0.0',
-    ];
-
-    it('should take the higher version', () => {
-      expect(lookUpDefaultPluginKey(keys, { kind: 'Panel', name: 'TimeSeriesChart' })).toBe(
-        'Panel:TimeSeriesChart:dev:2.0.0'
-      );
-
-      expect(lookUpDefaultPluginKey(keys, { kind: 'Panel', name: 'TimeSeriesChartX' })).toBe(
-        'Panel:TimeSeriesChartX::2.0.0'
-      );
-    });
-  });
-
-  describe('with and without registry - same versions - check policy', () => {
-    const keys: string[] = ['Panel:TimeSeriesChart:dev:2.0.0', 'Panel:TimeSeriesChart::2.0.0'];
-    it('should return the one without the registry by default', () => {
-      expect(lookUpDefaultPluginKey(keys, { kind: 'Panel', name: 'TimeSeriesChart' })).toBe(
-        'Panel:TimeSeriesChart::2.0.0'
-      );
+describe('resolvePluginKeys', () => {
+  describe('fallback only (no version/registry in query)', () => {
+    it('should return the higher version when same registry', () => {
+      const keys = ['Panel:TimeSeriesChart:dev:1.0.0', 'Panel:TimeSeriesChart:dev:2.0.0'];
+      expect(resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart' })).toEqual([
+        'Panel:TimeSeriesChart:dev:2.0.0',
+      ]);
     });
 
-    it('should return the one with the registry', () => {
+    it('should return the higher version across registries', () => {
+      const keys = [
+        'Panel:TimeSeriesChart:dev:2.0.0',
+        'Panel:TimeSeriesChart::1.0.0',
+        'Panel:TimeSeriesChartX:dev:1.0.0',
+        'Panel:TimeSeriesChartX::2.0.0',
+      ];
+
+      expect(resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart' })).toEqual([
+        'Panel:TimeSeriesChart:dev:2.0.0',
+      ]);
+
+      expect(resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChartX' })).toEqual([
+        'Panel:TimeSeriesChartX::2.0.0',
+      ]);
+    });
+
+    it('should prefer no-registry variant on version tie by default', () => {
+      const keys = ['Panel:TimeSeriesChart:dev:2.0.0', 'Panel:TimeSeriesChart::2.0.0'];
+      expect(resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart' })).toEqual([
+        'Panel:TimeSeriesChart::2.0.0',
+      ]);
+    });
+
+    it('should prefer registry variant on version tie with registryOverVersion', () => {
+      const keys = ['Panel:TimeSeriesChart:dev:2.0.0', 'Panel:TimeSeriesChart::2.0.0'];
       expect(
-        lookUpDefaultPluginKey(keys, { kind: 'Panel', name: 'TimeSeriesChart' }, { registryOverVersion: true })
-      ).toBe('Panel:TimeSeriesChart:dev:2.0.0');
+        resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart' }, { registryOverVersion: true })
+      ).toEqual(['Panel:TimeSeriesChart:dev:2.0.0']);
+    });
+
+    it('should return empty array when no match', () => {
+      const keys = ['Panel:OtherChart::1.0.0'];
+      expect(resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart' })).toEqual([]);
+    });
+  });
+
+  describe('exact match with version/registry', () => {
+    it('should return exact-match key first, then fallback', () => {
+      const keys = ['Panel:TimeSeriesChart:dev:1.0.0', 'Panel:TimeSeriesChart:dev:2.0.0'];
+      expect(
+        resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart', version: '1.0.0', registry: 'dev' })
+      ).toEqual(['Panel:TimeSeriesChart:dev:1.0.0', 'Panel:TimeSeriesChart:dev:2.0.0']);
+    });
+
+    it('should not duplicate if exact match is the same as fallback', () => {
+      const keys = ['Panel:TimeSeriesChart:dev:2.0.0'];
+      expect(
+        resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart', version: '2.0.0', registry: 'dev' })
+      ).toEqual(['Panel:TimeSeriesChart:dev:2.0.0']);
+    });
+
+    it('should include exact-match key even if it is not in allKeys', () => {
+      const keys = ['Panel:TimeSeriesChart:dev:2.0.0'];
+      expect(
+        resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart', version: '3.0.0', registry: 'dev' })
+      ).toEqual(['Panel:TimeSeriesChart:dev:3.0.0', 'Panel:TimeSeriesChart:dev:2.0.0']);
+    });
+
+    it('should return exact-match key with version only (no registry)', () => {
+      const keys = ['Panel:TimeSeriesChart::1.0.0', 'Panel:TimeSeriesChart::2.0.0'];
+      expect(resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart', version: '1.0.0' })).toEqual([
+        'Panel:TimeSeriesChart::1.0.0',
+        'Panel:TimeSeriesChart::2.0.0',
+      ]);
     });
   });
 });

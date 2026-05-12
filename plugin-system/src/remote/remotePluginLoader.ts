@@ -11,7 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginLoader, PluginMetadata, PluginModuleResource } from '@perses-dev/plugin-system';
+import {
+  PluginLoader,
+  PluginMetadata,
+  PluginModuleResource,
+  PluginType,
+  getPluginModuleCompoundKey,
+} from '@perses-dev/plugin-system';
 import { RemotePluginModule } from './PersesPlugin.types';
 import { loadPlugin } from './PluginRuntime';
 
@@ -118,7 +124,7 @@ export function remotePluginLoader(options?: RemotePluginLoaderOptions): PluginL
 
         const remotePlugin = remotePluginModule?.[plugin.spec.name];
         if (remotePlugin) {
-          return { name: plugin.spec.name, remotePlugin };
+          return { kind: plugin.kind as PluginType, name: plugin.spec.name, remotePlugin };
         } else {
           console.error(`RemotePluginLoader: Error loading plugin ${plugin.spec.name}`);
           return null;
@@ -129,7 +135,8 @@ export function remotePluginLoader(options?: RemotePluginLoaderOptions): PluginL
 
       loadedPlugins.forEach((item) => {
         if (item?.remotePlugin) {
-          pluginModule[`${item.name}:${registry ?? ''}:${version ?? ''}`] = item.remotePlugin;
+          pluginModule[getPluginModuleCompoundKey({ kind: item.kind, name: item.name, registry, version })] =
+            item.remotePlugin;
         }
       });
 

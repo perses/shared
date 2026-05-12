@@ -13,7 +13,14 @@
 
 import { UnknownSpec } from '@perses-dev/spec';
 import { PluginRegistryProps } from '../components';
-import { PluginModuleResource, Plugin, PluginLoader, PluginImplementation, PluginType } from '../model';
+import {
+  PluginModuleResource,
+  Plugin,
+  PluginLoader,
+  PluginImplementation,
+  PluginType,
+  getPluginModuleCompoundKey,
+} from '../model';
 
 export type MockPlugin = {
   [T in PluginType]: {
@@ -52,7 +59,12 @@ export function mockPluginRegistry(...mockPlugins: MockPlugin[]): Omit<PluginReg
   for (const mockPlugin of mockPlugins) {
     // "Export" on the module under the same name as the kind the plugin handles
     mockPluginModule[
-      `${mockPlugin.kind}:${mockPlugin.spec.name}:${mockPluginResource.metadata.registry ?? ''}:${mockPluginResource.metadata.version}`
+      getPluginModuleCompoundKey({
+        kind: mockPlugin.kind,
+        name: mockPlugin.spec.name,
+        registry: mockPluginResource.metadata.registry,
+        version: mockPluginResource.metadata.version,
+      })
     ] = mockPlugin.plugin;
   }
 

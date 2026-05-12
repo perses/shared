@@ -12,8 +12,18 @@
 // limitations under the License.
 
 import { useCallback, useRef } from 'react';
-import { PluginLoader, PluginMetadataWithModule, PluginModuleResource, PluginType } from '../../model';
+import {
+  PluginLoader,
+  PluginMetadataWithModule,
+  PluginModuleResource,
+  PluginType,
+  PluginCompoundKey,
+  getPluginModuleCompoundKey,
+} from '../../model';
 import { useEvent } from '../../utils';
+
+export type { PluginCompoundKey };
+export { getPluginModuleCompoundKey };
 
 export interface PluginIndexes {
   // Plugin resources by plugin type, kind, registry, and version
@@ -80,25 +90,10 @@ export function usePluginIndexes(
       pluginIndexesCache.current = request;
 
       // Remove failed requests from the cache so they can potentially be retried
-      request.catch(() => pluginIndexesCache.current === undefined);
+      request.catch(() => (pluginIndexesCache.current = undefined));
     }
     return request;
   }, [createPluginIndexes]);
 
   return getPluginIndexes;
-}
-
-export type PluginCompoundKey<T extends PluginType> = {
-  kind: T;
-  name: string;
-  registry?: string;
-  version?: string;
-};
-
-/**
- * Gets a unique key for a plugin type/kind/version/registry that can be used as a cache key.
- */
-export function getPluginModuleCompoundKey(compoundKey: PluginCompoundKey<PluginType>): string {
-  const { kind, name, registry, version } = compoundKey;
-  return `${kind}:${name}:${registry ?? ''}:${version ?? ''}`;
 }

@@ -214,16 +214,19 @@ const getPluginRuntime = (): ModuleFederation => {
   return instance;
 };
 
+function getModuleFederationRemoteName(name: string, registry?: string, version?: string): string {
+  return `${name}:${registry ?? ''}:${version ?? ''}`;
+}
+
 const registerRemote = (name: string, registry?: string, version?: string, baseURL?: string): void => {
   const pluginRuntime = getPluginRuntime();
-  const registryName = `${name}:${registry ?? ''}:${version ?? ''}`;
+  const registryName = getModuleFederationRemoteName(name, registry, version);
 
   const existingRemote = pluginRuntime.options.remotes.find((remote) => remote.name === registryName);
   if (!existingRemote) {
-    const segments = [registry, version].filter(Boolean);
-    const suffix = segments.length ? `/${segments.join('/')}` : '';
+    const nameVersionRegistry = [name, version, registry].filter(Boolean).join('~');
     const prefix = baseURL || '/plugins';
-    const remoteEntryURL = `${prefix}/${name}${suffix}/mf-manifest.json`.replace(/\/+/g, '/');
+    const remoteEntryURL = `${prefix}/${nameVersionRegistry}/mf-manifest.json`;
 
     pluginRuntime.registerRemotes([
       {
@@ -246,7 +249,7 @@ export const loadPlugin = async (target: {
   registerRemote(moduleName, registry, version, baseURL);
 
   const pluginRuntime = getPluginRuntime();
-  const registryName = `${moduleName}:${registry ?? ''}:${version ?? ''}`;
+  const registryName = getModuleFederationRemoteName(moduleName, registry, version);
   return pluginRuntime.loadRemote<RemotePluginModule>(`${registryName}/${pluginName}`);
 };
 

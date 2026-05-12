@@ -135,7 +135,7 @@ describe('remotePluginLoader', () => {
         version: '1.0.0',
       });
       expect(result).toEqual({
-        'testPlugin::1.0.0': {
+        'Panel:testPlugin::1.0.0': {
           ...MOCK_REMOTE_PLUGIN_MODULE.testPlugin,
         },
       });
@@ -170,7 +170,7 @@ describe('remotePluginLoader', () => {
           version: '1.0.0',
         });
         expect(result).toEqual({
-          'testPlugin::1.0.0': {
+          'Panel:testPlugin::1.0.0': {
             ...MOCK_REMOTE_PLUGIN_MODULE.testPlugin,
           },
         });
@@ -206,8 +206,8 @@ describe('remotePluginLoader', () => {
       });
 
       expect(result).toEqual({
-        'plugin1::1.0.0': { component: expect.any(Function) },
-        'plugin2::1.0.0': { component: expect.any(Function) },
+        'Panel:plugin1::1.0.0': { component: expect.any(Function) },
+        'Variable:plugin2::1.0.0': { component: expect.any(Function) },
       });
     });
 
@@ -222,7 +222,7 @@ describe('remotePluginLoader', () => {
       const result = await loader.importPluginModule(multiPluginModule);
 
       expect(result).toEqual({
-        'workingPlugin::1.0.0': { component: expect.any(Function) },
+        'Panel:workingPlugin::1.0.0': { component: expect.any(Function) },
       });
       expect(mockConsoleError).toHaveBeenCalledWith('RemotePluginLoader: Error loading plugin failingPlugin');
     });

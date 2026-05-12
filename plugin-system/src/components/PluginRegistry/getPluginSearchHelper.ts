@@ -12,97 +12,90 @@
 // limitations under the License.
 
 import { gt } from 'semver';
-import { PluginType } from '../../model';
+import { PluginType, getPluginModuleCompoundKey } from '../../model';
 import { PluginCompoundKey } from './plugin-indexes';
 
-/**
- * ____ LOOK UP DEFAULT PLUGIN KEYS WITH PLUGIN TYPE (KIND) AND NAME ___
- * This is the fallback mechanism to look up the default plugin using the plugin type (kind) and the name
- * When the version and registry are not available, the function shortlists all plugins which have the kind and name combination
- * If multiple plugins are nominated, the function will follow a precedence policy
- * ___ PLUGIN LOOKUP PRECEDENCE POLICY ___
- * The search finds the latest versions available for plugins with and without registry by keeping them in two separate buckets
- * 1- If nothing found, simply return undefined
- * 2- If only one of the buckets have value, there will be no comparison. Return the one with the value
- * 3- If both have the value, check the Precedence Logic input and act accordingly
- * 3.1- If the one WITH the registry has a greater version, return it.
- * 3.2- If the one WITHOUT the registry has a greater version, return it
- * 3.2.1- If we have a draw consider the policy flag
- */
-
+// When both a registry and non-registry variant exist at the same version,
+// `registryOverVersion: true` prefers the registry variant.
 export interface PluginLookupPrecedenceLogic {
   registryOverVersion: boolean;
 }
 
 const PLUGIN_LOOKUP_PRECEDENCE_LOGIC: PluginLookupPrecedenceLogic = { registryOverVersion: false };
 
-export const lookUpDefaultPluginKey = <T extends PluginType>(
-  pluginModuleResourceMapKeys: string[],
-  query: Pick<PluginCompoundKey<T>, 'kind' | 'name'>,
+/**
+ * Returns an ordered list of candidate 4-part keys to try when resolving a plugin.
+ * If version/registry are specified, the exact-match key comes first.
+ * The best fallback key (highest version, tie-broken by precedence policy) follows.
+ */
+export const resolvePluginKeys = <T extends PluginType>(
+  allKeys: Iterable<string>,
+  query: PluginCompoundKey<T>,
   precedenceLogic: PluginLookupPrecedenceLogic = PLUGIN_LOOKUP_PRECEDENCE_LOGIC
-): string | undefined => {
+): string[] => {
+  const { kind, name, version, registry } = query;
+  const candidates: string[] = [];
+
+  // Exact match first when version or registry is specified
+  if (version || registry) {
+    candidates.push(getPluginModuleCompoundKey({ kind, name, registry, version }));
+  }
+
+  // Find the best fallback by scanning all matching keys
   type PluginBucket = { key: string; version: string };
-  const latestFoundVersionWithRegistry: PluginBucket = { key: '', version: '' };
-  const latestFoundVersionWithoutRegistry: PluginBucket = { key: '', version: '' };
+  const latestWithRegistry: PluginBucket = { key: '', version: '' };
+  const latestWithoutRegistry: PluginBucket = { key: '', version: '' };
 
-  for (const np of pluginModuleResourceMapKeys) {
-    if (!np.startsWith(`${query.kind}:${query.name}:`)) continue;
-    const split = np.split(':');
+  const prefix = `${kind}:${name}:`;
+  for (const key of allKeys) {
+    if (!key.startsWith(prefix)) continue;
+    const split = key.split(':');
 
-    /**
-     * This is not a valid key. A valid key has 4 sections. The registry is optional. It might be empty or holds a value
-     */
     if (split.length !== 4) {
-      console.warn(`An invalid Plugin Resource key detected during default plugin lookup: ${np}`);
+      console.warn(`An invalid Plugin Resource key detected during default plugin lookup: ${key}`);
       continue;
     }
 
-    const [kind, name, registry, version] = split;
-    /**
-     * Such a case is representing a wrong key and it is not technically possible (Just to be precautious)
-     * A resource MUST have kind, name, and version according to its definition and interface
-     * So skip this record
-     */
-    if (!kind || !name || !version) {
-      console.warn(`An invalid Plugin Resource key detected during default plugin lookup: ${np}`);
+    const [, , reg, ver] = split;
+    if (!ver) {
+      console.warn(`An invalid Plugin Resource key detected during default plugin lookup: ${key}`);
       continue;
     }
 
-    if (registry) {
-      if (!latestFoundVersionWithRegistry.key || gt(version, latestFoundVersionWithRegistry.version!)) {
-        latestFoundVersionWithRegistry.key = np;
-        latestFoundVersionWithRegistry.version = version;
+    if (reg) {
+      if (!latestWithRegistry.key || gt(ver, latestWithRegistry.version)) {
+        latestWithRegistry.key = key;
+        latestWithRegistry.version = ver;
       }
-      continue;
-    }
-
-    if (!latestFoundVersionWithoutRegistry.key || gt(version, latestFoundVersionWithoutRegistry.version!)) {
-      latestFoundVersionWithoutRegistry.key = np;
-      latestFoundVersionWithoutRegistry.version = version;
+    } else {
+      if (!latestWithoutRegistry.key || gt(ver, latestWithoutRegistry.version)) {
+        latestWithoutRegistry.key = key;
+        latestWithoutRegistry.version = ver;
+      }
     }
   }
 
-  /* Before it proceeds with the precedence logic, it checks whether so far anything has been found, if not return undefined  */
-  if ([latestFoundVersionWithRegistry, latestFoundVersionWithoutRegistry].every((p) => !p.key)) {
-    return undefined;
-  }
+  // Determine the best fallback key from the two buckets
+  let fallbackKey: string | undefined;
 
-  if (latestFoundVersionWithRegistry.key && latestFoundVersionWithoutRegistry.key) {
+  if (latestWithRegistry.key && latestWithoutRegistry.key) {
     const { registryOverVersion } = precedenceLogic;
 
-    // Registry version is strictly higher
-    if (gt(latestFoundVersionWithRegistry.version, latestFoundVersionWithoutRegistry.version)) {
-      return latestFoundVersionWithRegistry.key;
+    if (gt(latestWithRegistry.version, latestWithoutRegistry.version)) {
+      fallbackKey = latestWithRegistry.key;
+    } else if (gt(latestWithoutRegistry.version, latestWithRegistry.version)) {
+      fallbackKey = latestWithoutRegistry.key;
+    } else {
+      // Versions are equal — use the tie-breaker
+      fallbackKey = registryOverVersion ? latestWithRegistry.key : latestWithoutRegistry.key;
     }
-
-    // None-registry version is strictly higher
-    if (gt(latestFoundVersionWithoutRegistry.version, latestFoundVersionWithRegistry.version)) {
-      return latestFoundVersionWithoutRegistry.key;
-    }
-
-    // Versions are equal - use the tie-breaker
-    return registryOverVersion ? latestFoundVersionWithRegistry.key : latestFoundVersionWithoutRegistry.key;
+  } else {
+    fallbackKey = latestWithRegistry.key || latestWithoutRegistry.key || undefined;
   }
 
-  return latestFoundVersionWithRegistry.key || latestFoundVersionWithoutRegistry?.key;
+  if (fallbackKey && !candidates.includes(fallbackKey)) {
+    candidates.push(fallbackKey);
+  }
+
+  return candidates;
 };

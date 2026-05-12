@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PluginModuleResource } from './plugins';
+import { PluginModuleResource, getPluginModuleCompoundKey } from './plugins';
 
 /**
  * A component capable of loading the resource/metadata for all available plugins, then loading individual plugins for
@@ -46,7 +46,7 @@ export function dynamicImportPluginLoader(plugins: DynamicImportPlugin[]): Plugi
       },
       importPlugin,
     } = p;
-    importMap.set(`${kind}:${name}:${registry ?? ''}:${version ?? ''}`, { resource, importPlugin });
+    importMap.set(getPluginModuleCompoundKey({ kind, name, registry, version }), { resource, importPlugin });
   }
   return {
     async getInstalledPlugins(): Promise<PluginModuleResource[]> {
@@ -57,7 +57,7 @@ export function dynamicImportPluginLoader(plugins: DynamicImportPlugin[]): Plugi
         kind,
         metadata: { name, version, registry },
       } = resource;
-      const { importPlugin } = importMap.get(`${kind}:${name}:${registry ?? ''}:${version ?? ''}`) || {};
+      const { importPlugin } = importMap.get(getPluginModuleCompoundKey({ kind, name, registry, version })) || {};
       if (importPlugin === undefined) {
         throw new Error('Plugin not found');
       }
