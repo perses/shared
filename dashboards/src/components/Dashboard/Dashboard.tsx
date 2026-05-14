@@ -14,8 +14,9 @@
 import { Box, BoxProps } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { ReactElement, useRef } from 'react';
-import { usePanelGroupIds } from '../../context';
-import { GridLayout } from '../GridLayout';
+import { usePanelGroup, usePanelGroupIds } from '../../context';
+import { GridLayout, GridLayoutProps } from '../GridLayout';
+import { TabLayout } from '../TabLayout';
 import { EmptyDashboard, EmptyDashboardProps } from '../EmptyDashboard';
 import { PanelOptions } from '../Panel';
 
@@ -29,6 +30,20 @@ export type DashboardProps = BoxProps & {
   panelOptions?: PanelOptions;
 };
 const HEADER_HEIGHT = 165; // Approximate height of the header in dashboard view (including the navbar and variables toolbar)
+
+function PanelGroupRenderer({ panelGroupId, panelOptions, panelFullHeight }: GridLayoutProps): ReactElement {
+  const group = usePanelGroup(panelGroupId);
+  switch (group.layoutKind) {
+    case 'Tabs':
+      return <TabLayout panelGroupId={panelGroupId} panelOptions={panelOptions} panelFullHeight={panelFullHeight} />;
+    case 'Grid':
+      return <GridLayout panelGroupId={panelGroupId} panelOptions={panelOptions} panelFullHeight={panelFullHeight} />;
+    default: {
+      const _exhaustiveCheck: never = group;
+      throw new Error(`Unknown layout kind: ${(_exhaustiveCheck as { layoutKind: string }).layoutKind}`);
+    }
+  }
+}
 
 /**
  * Renders a Dashboard for the provided Dashboard spec.
@@ -50,7 +65,7 @@ export function Dashboard({ emptyDashboardProps, panelOptions, ...boxProps }: Da
         )}
         {!isEmpty &&
           panelGroupIds.map((panelGroupId) => (
-            <GridLayout
+            <PanelGroupRenderer
               key={panelGroupId}
               panelGroupId={panelGroupId}
               panelOptions={panelOptions}

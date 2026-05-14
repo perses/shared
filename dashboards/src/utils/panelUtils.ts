@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import { GRID_LAYOUT_SMALL_BREAKPOINT, GRID_LAYOUT_COLS } from '../constants';
-import { PanelGroupDefinition, PanelGroupItemLayout } from '../model';
+import { PanelGroupItemLayout } from '../model';
 
-// Given a PanelGroup, will find the Y coordinate for adding a new row to the grid, taking into account the items present
-export function getYForNewRow(group: PanelGroupDefinition): number {
+// Given a group or tab with itemLayouts, will find the Y coordinate for adding a new row to the grid
+export function getYForNewRow(group: { itemLayouts: PanelGroupItemLayout[] }): number {
   let newRowY = 0;
   for (const layout of group.itemLayouts) {
     const itemMaxY = layout.y + layout.h;

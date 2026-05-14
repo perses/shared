@@ -11,16 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export const GRID_LAYOUT_COLS = { sm: 24, xxs: 2 } as const;
-
-export const GRID_LAYOUT_SMALL_BREAKPOINT = 'sm' as const;
-
-export const GRID_LAYOUT_MARGIN = 10;
-
-export const GRID_LAYOUT_ROW_HEIGHT = 30;
-
-// 0 * Infinity === NaN, which causes problems with resize constraints
-export function calculateGridItemWidth(w: number, colWidth: number, margin = GRID_LAYOUT_MARGIN): number {
-  if (!Number.isFinite(w)) return w;
-  return Math.round(colWidth * w + Math.max(0, w - 1) * margin);
-}
+export * from './TabBar';
+export * from './TabEditorDialog';
+export * from './TabLayout';

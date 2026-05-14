@@ -13,7 +13,13 @@
 
 import { useCallback, useMemo } from 'react';
 import { DurationString, Link, PanelDefinition, PanelGroupId } from '@perses-dev/spec';
-import { DashboardResource, PanelGroupDefinition, PanelGroupItemId, PanelGroupItemLayout } from '../../model';
+import {
+  DashboardResource,
+  PanelGroupDefinition,
+  PanelGroupItemId,
+  PanelGroupItemLayout,
+  getGroupItemPanelKeys,
+} from '../../model';
 import { DashboardStoreState, useDashboardStore } from './DashboardProvider';
 import { DeletePanelGroupDialogState } from './delete-panel-group-slice';
 import { PanelGroupEditor } from './panel-group-editor-slice';
@@ -82,6 +88,41 @@ export function useDashboardLinksActions(): DashboardLinksActions {
   return useDashboardStore(selectDashboardLinksActions);
 }
 
+const selectTabActions = (state: DashboardStoreState) => ({
+  setActiveTab: state.setActiveTab,
+  updateTabLayouts: state.updateTabLayouts,
+  updateTabName: state.updateTabName,
+  setDefaultTab: state.setDefaultTab,
+  addTab: state.addTab,
+  removeTab: state.removeTab,
+  reorderTabs: state.reorderTabs,
+});
+
+export function useTabActions(panelGroupId: PanelGroupId): {
+  setActiveTab: (tabIndex: number) => void;
+  updateTabLayouts: (tabIndex: number, itemLayouts: PanelGroupItemLayout[]) => void;
+  updateTabName: (tabIndex: number, name: string) => void;
+  setDefaultTab: (tabIndex: number) => void;
+  addTab: (name: string) => void;
+  removeTab: (tabIndex: number) => void;
+  reorderTabs: (fromIndex: number, toIndex: number) => void;
+} {
+  const actions = useDashboardStore(selectTabActions);
+  return useMemo(
+    () => ({
+      setActiveTab: (tabIndex: number) => actions.setActiveTab(panelGroupId, tabIndex),
+      updateTabLayouts: (tabIndex: number, itemLayouts: PanelGroupItemLayout[]) =>
+        actions.updateTabLayouts(panelGroupId, tabIndex, itemLayouts),
+      updateTabName: (tabIndex: number, name: string) => actions.updateTabName(panelGroupId, tabIndex, name),
+      setDefaultTab: (tabIndex: number) => actions.setDefaultTab(panelGroupId, tabIndex),
+      addTab: (name: string) => actions.addTab(panelGroupId, name),
+      removeTab: (tabIndex: number) => actions.removeTab(panelGroupId, tabIndex),
+      reorderTabs: (fromIndex: number, toIndex: number) => actions.reorderTabs(panelGroupId, fromIndex, toIndex),
+    }),
+    [actions, panelGroupId]
+  );
+}
+
 const selectPanelGroupOrder = (state: DashboardStoreState): number[] => state.panelGroupOrder;
 /**
  * Returns an array of PanelGroupIds in the order they appear in the dashboard.
@@ -127,7 +168,7 @@ const selectPanelGroupActions: ({
   openAddPanel,
   updatePanelGroupLayouts,
 }: DashboardStoreState) => {
-  updatePanelGroupLayouts: (panelGroupId: PanelGroupId, itemLayouts: PanelGroupDefinition['itemLayouts']) => void;
+  updatePanelGroupLayouts: (panelGroupId: PanelGroupId, itemLayouts: PanelGroupItemLayout[]) => void;
   openEditPanelGroup: (panelGroupId: PanelGroupId) => void;
   openAddPanel: (panelGroupId?: PanelGroupId) => void;
   deletePanelGroup: (panelGroupId: PanelGroupId) => void;
@@ -252,7 +293,9 @@ export function usePanelKey(panelGroupItemId?: PanelGroupItemId): string | undef
           return undefined;
         }
 
-        return store.panelGroups[panelGroupItemId.panelGroupId]?.itemPanelKeys[panelGroupItemId.panelGroupItemLayoutId];
+        const group = store.panelGroups[panelGroupItemId.panelGroupId];
+        if (group === undefined) return undefined;
+        return getGroupItemPanelKeys(group)[panelGroupItemId.panelGroupItemLayoutId];
       },
       [panelGroupItemId]
     )
@@ -268,7 +311,9 @@ export function usePanel(panelGroupItemId: PanelGroupItemId): PanelDefinition {
   const panel = useDashboardStore(
     useCallback(
       (store) => {
-        const panelKey = store.panelGroups[panelGroupId]?.itemPanelKeys[panelGroupLayoutId];
+        const group = store.panelGroups[panelGroupId];
+        if (group === undefined) return;
+        const panelKey = getGroupItemPanelKeys(group)[panelGroupLayoutId];
         if (panelKey === undefined) return;
         return store.panels[panelKey];
       },

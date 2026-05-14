@@ -13,7 +13,7 @@
 
 import { StateCreator } from 'zustand';
 import { PanelGroupId } from '@perses-dev/spec';
-import { PanelGroupDefinition, PanelGroupItemId } from '../../model';
+import { PanelGroupDefinition, PanelGroupItemId, getGroupItemPanelKeys } from '../../model';
 import { Middleware } from './common';
 import { PanelGroupSlice } from './panel-group-slice';
 
@@ -94,7 +94,7 @@ function findPanelGroupItemIdOfPanelRef(
   panelRef: VirtualPanelRef
 ): PanelGroupItemId | undefined {
   for (const panelGroup of Object.values(panelGroups)) {
-    const itemPanel = Object.entries(panelGroup.itemPanelKeys ?? []).find(([_, value]) => value === panelRef.ref);
+    const itemPanel = Object.entries(getGroupItemPanelKeys(panelGroup)).find(([_, value]) => value === panelRef.ref);
     if (itemPanel) {
       const [key] = itemPanel;
       return {
@@ -117,7 +117,7 @@ function findPanelRefOfPanelGroupItemId(
   }
   const panelGroup = panelGroups[panelGroupItemId.panelGroupId];
   if (panelGroup) {
-    const panelRef = panelGroup.itemPanelKeys[panelGroupItemId.panelGroupItemLayoutId];
+    const panelRef = getGroupItemPanelKeys(panelGroup)[panelGroupItemId.panelGroupItemLayoutId];
     if (panelRef) {
       return { ref: panelRef, repeatVariable: panelGroupItemId.repeatVariable };
     }

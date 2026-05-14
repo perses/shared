@@ -27,14 +27,28 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
   const [title, setTitle] = useState(initialValues.title);
   const [isCollapsed, setIsCollapsed] = useState(initialValues.isCollapsed);
   const [repeatVariable, setRepeatVariable] = useState<string | undefined>(initialValues.repeatVariable);
+  const [layoutKind, setLayoutKind] = useState<'Grid' | 'Tabs'>(initialValues.layoutKind);
 
   const handleSubmit: FormEventHandler = (e) => {
     e.preventDefault();
-    onSubmit({ title, isCollapsed, repeatVariable });
+    onSubmit({ title, isCollapsed, repeatVariable, layoutKind });
   };
 
   return (
     <form id={panelGroupEditorFormId} onSubmit={handleSubmit}>
+      <FormControl fullWidth margin="normal">
+        <TextField
+          select
+          required
+          label="Layout Type"
+          value={layoutKind}
+          onChange={(e) => setLayoutKind(e.target.value as 'Grid' | 'Tabs')}
+          data-testid="panel-group-editor-layout-kind"
+        >
+          <MenuItem value="Grid">Grid</MenuItem>
+          <MenuItem value="Tabs">Tabs</MenuItem>
+        </TextField>
+      </FormControl>
       <FormControl fullWidth margin="normal">
         <TextField
           required
@@ -57,26 +71,28 @@ export function PanelGroupEditorForm(props: PanelGroupEditorFormProps): ReactEle
           <MenuItem value="Open">Open</MenuItem>
           <MenuItem value="Closed">Closed</MenuItem>
         </TextField>
-        <FormControl fullWidth margin="normal">
-          <TextField
-            select
-            label="Repeat Variable"
-            variant="outlined"
-            value={repeatVariable ?? ''}
-            onChange={(e) => setRepeatVariable(e.target.value === '' ? undefined : e.target.value)}
-          >
-            <MenuItem value="">
-              <Typography sx={{ fontStyle: 'italic' }}>None</Typography>
-            </MenuItem>
-            {variables
-              ?.sort((a, b) => a.localeCompare(b))
-              .map((variable) => (
-                <MenuItem key={variable} value={variable}>
-                  {variable}
-                </MenuItem>
-              ))}
-          </TextField>
-        </FormControl>
+        {layoutKind === 'Grid' && (
+          <FormControl fullWidth margin="normal">
+            <TextField
+              select
+              label="Repeat Variable"
+              variant="outlined"
+              value={repeatVariable ?? ''}
+              onChange={(e) => setRepeatVariable(e.target.value === '' ? undefined : e.target.value)}
+            >
+              <MenuItem value="">
+                <Typography sx={{ fontStyle: 'italic' }}>None</Typography>
+              </MenuItem>
+              {variables
+                ?.sort((a, b) => a.localeCompare(b))
+                .map((variable) => (
+                  <MenuItem key={variable} value={variable}>
+                    {variable}
+                  </MenuItem>
+                ))}
+            </TextField>
+          </FormControl>
+        )}
       </FormControl>
     </form>
   );

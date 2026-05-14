@@ -17,18 +17,21 @@ import { PanelOptions, useViewPanelGroup } from '@perses-dev/dashboards';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
-import { PanelGroupDefinition, PanelGroupItemLayout } from '../../model';
+import {
+  GRID_LAYOUT_COLS,
+  GRID_LAYOUT_MARGIN,
+  GRID_LAYOUT_ROW_HEIGHT,
+  GRID_LAYOUT_SMALL_BREAKPOINT,
+  calculateGridItemWidth,
+} from '../../constants';
+import { GridPanelGroup, PanelGroupItemLayout } from '../../model';
 import { GridContainer } from './GridContainer';
 import { GridItemContent } from './GridItemContent';
 import { GridTitle } from './GridTitle';
 
-const DEFAULT_MARGIN = 10;
-const ROW_HEIGHT = 30;
-
 export interface RowProps {
   panelGroupId: PanelGroupId;
-  groupDefinition: PanelGroupDefinition;
+  groupDefinition: GridPanelGroup;
   gridColWidth: number;
   panelFullHeight?: number;
   panelOptions?: PanelOptions;
@@ -84,7 +87,7 @@ export function Row({
         if (itemLayout.i === itemLayoutViewed) {
           const rowTitleHeight = 40 + 8; // 40 is the height of the row title and 8 is the margin height
           return {
-            h: Math.round(((panelFullHeight ?? window.innerHeight) - rowTitleHeight) / (ROW_HEIGHT + DEFAULT_MARGIN)), // Viewed panel should take the full height remaining
+            h: Math.round(((panelFullHeight ?? window.innerHeight) - rowTitleHeight) / (GRID_LAYOUT_ROW_HEIGHT + GRID_LAYOUT_MARGIN)), // Viewed panel should take the full height remaining
             i: itemLayoutViewed,
             w: 48,
             x: 0,
@@ -121,12 +124,12 @@ export function Row({
           className="layout"
           breakpoints={{ [GRID_LAYOUT_SMALL_BREAKPOINT]: theme.breakpoints.values.sm, xxs: 0 }}
           cols={GRID_LAYOUT_COLS}
-          rowHeight={ROW_HEIGHT}
+          rowHeight={GRID_LAYOUT_ROW_HEIGHT}
           draggableHandle=".drag-handle"
           resizeHandles={['se']}
           isDraggable={isEditMode && !hasViewPanel}
           isResizable={isEditMode && !hasViewPanel}
-          margin={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
+          margin={[GRID_LAYOUT_MARGIN, GRID_LAYOUT_MARGIN]}
           containerPadding={[0, 10]}
           layouts={{ sm: itemLayouts }}
           onLayoutChange={onLayoutChange}
@@ -154,9 +157,3 @@ export function Row({
     </GridContainer>
   );
 }
-
-const calculateGridItemWidth = (w: number, colWidth: number): number => {
-  // 0 * Infinity === NaN, which causes problems with resize contraints
-  if (!Number.isFinite(w)) return w;
-  return Math.round(colWidth * w + Math.max(0, w - 1) * DEFAULT_MARGIN);
-};
