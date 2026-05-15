@@ -35,6 +35,10 @@ export interface PluginMetadataWithModule extends PluginMetadata {
  */
 export interface PluginMetadata {
   kind: PluginType;
+  metadata?: {
+    version?: string;
+    registry?: string;
+  };
   spec: {
     name: string;
     display: {
@@ -50,6 +54,7 @@ export interface PluginMetadata {
 export interface PluginModuleMetadata {
   name: string;
   version: string;
+  registry?: string;
 }
 
 /**
@@ -95,3 +100,20 @@ export type PluginImplementation<Type extends PluginType> = SupportedPlugins[Typ
  */
 type PluginKinds = Partial<Record<PluginType, string>>;
 export type DefaultPluginKinds = Required<Pick<PluginKinds, 'TimeSeriesQuery'>> & Omit<PluginKinds, 'TimeSeriesQuery'>;
+
+export type PluginCompoundKey<T extends PluginType> = {
+  kind: T;
+  name: string;
+  registry?: string;
+  version?: string;
+};
+
+export function getPluginModuleCompoundKey(compoundKey: {
+  kind: string;
+  name: string;
+  registry?: string;
+  version?: string;
+}): string {
+  const { kind, name, registry, version } = compoundKey;
+  return `${kind}:${name}:${registry ?? ''}:${version ?? ''}`;
+}

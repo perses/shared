@@ -129,7 +129,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
       }
 
       try {
-        const plugin = await getPlugin('Panel', panelPluginKind);
+        const plugin = await getPlugin({ kind: 'Panel', name: panelPluginKind });
 
         // More defensive checking for plugin and actions
         if (

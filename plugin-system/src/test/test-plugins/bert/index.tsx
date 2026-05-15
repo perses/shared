@@ -29,7 +29,7 @@ function BertPanel1Editor({ value, onChange }: OptionsEditorProps<{ option1: str
 }
 
 // Dummy plugins to test loading
-export const BertPanel1: PanelPlugin<{ option1: string }> = {
+const BertPanel1: PanelPlugin<{ option1: string }> = {
   PanelComponent: () => null,
   panelOptionsEditorComponents: [
     {
@@ -54,7 +54,7 @@ function BertPanel2Editor({ value, onChange }: OptionsEditorProps<{ option2: str
   );
 }
 
-export const BertPanel2: PanelPlugin<{ option2: string }> = {
+const BertPanel2: PanelPlugin<{ option2: string }> = {
   PanelComponent: () => null,
   panelOptionsEditorComponents: [
     {
@@ -70,4 +70,9 @@ export const BertPanel2: PanelPlugin<{ option2: string }> = {
   ],
   createInitialOptions: () => ({ option2: '' }),
   hideQueryEditor: true,
+};
+
+export const plugins = {
+  'Panel:BertPanel1::1.0.0': BertPanel1,
+  'Panel:BertPanel2::1.0.0': BertPanel2,
 };

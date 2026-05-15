@@ -139,7 +139,7 @@ export function useTimeSeriesQueries(
         staleTime: Infinity,
         queryKey: queryKey,
         queryFn: async ({ signal }: { signal: AbortSignal }): Promise<TimeSeriesData> => {
-          const plugin = await getPlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
+          const plugin = await getPlugin({ kind: TIME_SERIES_QUERY_KEY, name: definition.spec.plugin.kind });
           const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, context, signal);
           return data;
         },

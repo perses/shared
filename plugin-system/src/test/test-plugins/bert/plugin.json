@@ -1,6 +1,6 @@
 {
   "kind": "PluginModule",
-  "metadata": { "name": "Bert" },
+  "metadata": { "name": "Bert", "version": "1.0.0" },
   "spec": {
     "plugins": [
       {
