@@ -24,7 +24,7 @@ import { DatasourceStoreProvider } from '@perses-dev/dashboards';
 import { PropsWithChildren, ReactElement } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DashboardSpec, DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
-import { Datasource, DatasourceResource, GlobalDatasourceResource } from '@perses-dev/core';
+import { Datasource, DatasourceResource, GlobalDatasourceResource } from '@perses-dev/client';
 import { DashboardResource } from '../model/DashboardResource';
 
 const PROJECT = 'perses';

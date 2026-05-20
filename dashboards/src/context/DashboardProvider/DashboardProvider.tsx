@@ -37,7 +37,8 @@ import { createViewPanelSlice, ViewPanelSlice, VirtualPanelRef } from './view-pa
 import { createLinksSlice, LinksSlice } from './links-slice';
 
 export interface DashboardStoreState
-  extends PanelGroupSlice,
+  extends
+    PanelGroupSlice,
     PanelSlice,
     PanelGroupEditorSlice,
     DeletePanelGroupSlice,

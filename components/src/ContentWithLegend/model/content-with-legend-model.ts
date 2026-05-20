@@ -71,8 +71,9 @@ export interface ContentWithLegendProps {
   minChildrenHeight?: number;
 }
 
-export interface ContentWithLegendLayoutOpts
-  extends Required<Omit<ContentWithLegendProps, 'children' | 'legendProps'>> {
+export interface ContentWithLegendLayoutOpts extends Required<
+  Omit<ContentWithLegendProps, 'children' | 'legendProps'>
+> {
   legendProps?: ContentWithLegendProps['legendProps'];
   theme: Theme;
 }

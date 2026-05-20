@@ -18,7 +18,7 @@ import {
   SelectionItem,
   VariableStateMap,
 } from '@perses-dev/components';
-import { fetch } from '@perses-dev/core'; // TODO should be part of an utils package
+import { fetch } from '@perses-dev/client';
 import { ItemAction, EventAction, WebhookAction } from '../components/ItemSelectionActionsOptionsEditor';
 
 const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH']);

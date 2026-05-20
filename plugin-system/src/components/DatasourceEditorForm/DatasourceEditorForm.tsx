@@ -22,9 +22,9 @@ import {
 } from '@perses-dev/components';
 import { DispatchWithoutAction, ReactElement, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
+import { DatasourceDefinition } from '@perses-dev/client';
 import { useValidationSchemas } from '../../context';
 import { PluginEditor } from '../PluginEditor';
-import { DatasourceDefinition } from '../../model';
 
 interface DatasourceEditorFormProps {
   initialDatasourceDefinition: DatasourceDefinition;

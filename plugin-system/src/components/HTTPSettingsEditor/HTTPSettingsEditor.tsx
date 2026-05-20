@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { RequestHeaders, HTTPDatasourceSpec } from '@perses-dev/core'; // TODO this is the proxy definition that should go to a different lib
 import { Grid, IconButton, MenuItem, TextField, Typography } from '@mui/material';
 import React, { Fragment, ReactElement, useState } from 'react';
 import { produce } from 'immer';
 import { Controller, useForm, useFieldArray } from 'react-hook-form';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
+import { HTTPDatasourceSpec, RequestHeaders } from '@perses-dev/client';
 import { OptionsEditorRadios } from '../OptionsEditorRadios';
 
 type HeaderEntry = {

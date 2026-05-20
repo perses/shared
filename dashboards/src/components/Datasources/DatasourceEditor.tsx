@@ -29,9 +29,10 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import { Action } from '@perses-dev/components';
 import { DatasourceSpec } from '@perses-dev/spec';
-import { DatasourceDefinition, DatasourceEditorForm, ValidationProvider } from '@perses-dev/plugin-system';
+import { DatasourceEditorForm, ValidationProvider } from '@perses-dev/plugin-system';
 import { ReactElement, useState } from 'react';
 import { useImmer } from 'use-immer';
+import { DatasourceDefinition } from '@perses-dev/client';
 import { useDiscardChangesConfirmationDialog } from '../../context';
 
 export function DatasourceEditor(props: {

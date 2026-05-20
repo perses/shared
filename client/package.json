@@ -1,7 +1,7 @@
 {
-  "name": "@perses-dev/explore",
-  "version": "0.54.0-beta.1",
-  "description": "The explore feature in Perses",
+  "name": "@perses-dev/client",
+  "version": "0.1.0",
+  "description": "Functions as an API client or Data fetching Layer for interacting with a backend service",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
   "repository": {
@@ -14,7 +14,10 @@
   "module": "dist/index.js",
   "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
-  "sideEffects": false,
+  "dependencies": {
+    "@perses-dev/spec": "0.2.0-beta.0",
+    "zod": "^3.21.4"
+  },
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
@@ -23,29 +26,10 @@
     "build:types": "tsc --project tsconfig.build.json",
     "type-check": "tsc --noEmit",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
+    "test": "cross-env TZ=UTC jest --passWithNoTests",
+    "test:watch": "cross-env TZ=UTC jest --watch",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint --fix src --ext .ts,.tsx"
-  },
-  "dependencies": {
-    "@nexucis/fuzzy": "^0.5.1",
-    "@perses-dev/components": "0.54.0-beta.1",
-    "@perses-dev/dashboards": "0.54.0-beta.1",
-    "@perses-dev/plugin-system": "0.54.0-beta.1",
-    "mdi-material-ui": "^7.9.2",
-    "qs": "^6.14.0",
-    "react-virtuoso": "^4.12.2",
-    "use-query-params": "^2.2.1",
-    "use-resize-observer": "^9.0.0"
-  },
-  "devDependencies": {
-    "@types/qs": "^6.14.0",
-    "react-router-dom": "^6.30.1"
-  },
-  "peerDependencies": {
-    "@mui/material": "^6.1.10",
-    "@tanstack/react-query": "^4.39.1",
-    "react": "^17.0.2 || ^18.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0"
   },
   "files": [
     "dist"

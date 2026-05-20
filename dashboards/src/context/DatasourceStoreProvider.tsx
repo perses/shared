@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
-import { BuildDatasourceProxyUrlParams, DatasourceApi } from '@perses-dev/core'; // TODO
 import { DashboardSpec, DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
 import {
   DatasourceStoreContext,
@@ -22,8 +21,8 @@ import {
   useEvent,
   DatasourceClient,
   DatasourceSelectItem,
-  DatasourceDefinition,
 } from '@perses-dev/plugin-system';
+import { BuildDatasourceProxyUrlParams, DatasourceApi, DatasourceDefinition } from '@perses-dev/client';
 import { DashboardResource } from '../model/DashboardResource';
 
 export interface DatasourceStoreProviderProps {

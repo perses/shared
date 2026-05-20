@@ -18,7 +18,8 @@
     "components",
     "dashboards",
     "plugin-system",
-    "explore"
+    "explore",
+    "client"
   ],
   "devDependencies": {
     "@emotion/react": "^11.14.0",

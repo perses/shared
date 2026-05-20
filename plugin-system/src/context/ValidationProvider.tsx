@@ -23,8 +23,7 @@ import {
 } from '@perses-dev/spec';
 
 import { z } from 'zod';
-import { buildDatasourceDefinitionSchema, datasourceDefinitionSchema } from '@perses-dev/core';
-import { DatasourceDefinition } from '../model';
+import { buildDatasourceDefinitionSchema, DatasourceDefinition, datasourceDefinitionSchema } from '@perses-dev/client';
 
 export interface ValidationSchemas {
   datasourceEditorSchema: z.Schema<DatasourceDefinition>;
