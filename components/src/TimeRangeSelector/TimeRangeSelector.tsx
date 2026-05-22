@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, MenuItem, Popover, Select, IconButton, TextField } from '@mui/material';
+import { Box, MenuItem, Popover, Select, IconButton, TextField, Stack } from '@mui/material';
 import Calendar from 'mdi-material-ui/Calendar';
 import EarthIcon from 'mdi-material-ui/Earth';
 import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/spec';
@@ -20,6 +20,7 @@ import { useTimeZone } from '../context';
 import { TimeZoneOption, getTimeZoneOptions } from '../model/timeZoneOption';
 import { TimeOption } from '../model';
 import { SettingsAutocomplete, SettingsAutocompleteOption } from '../SettingsAutocomplete';
+import { getGMTOffset } from '../utils/format';
 import { DateTimeRangePicker } from './DateTimeRangePicker';
 import { buildCustomTimeOption, formatTimeRange } from './utils';
 
@@ -88,6 +89,8 @@ export function TimeRangeSelector({
   const [tzAnchorEl, setTzAnchorEl] = useState<HTMLElement | null>(null);
   const tzOpen = Boolean(tzAnchorEl);
   const tzLabel = tzOptions.find((o) => o.value === timeZone)?.display ?? timeZone;
+  const tzOffset = getGMTOffset(timeZone);
+  const localOffset = getGMTOffset('local');
   const tzAutocompleteOptions = tzOptions.map((o) => ({ id: o.value, label: o.display }));
   let tzAutocompleteValue: SettingsAutocompleteOption | undefined = undefined;
   {
@@ -150,6 +153,17 @@ export function TimeRangeSelector({
           value={formatTimeRange(value, timeZone)}
           onClick={() => setOpen(!open)}
           IconComponent={Calendar}
+          renderValue={() => (
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <span>
+                {timeOptions.find((opt) => formatTimeRange(opt.value, timeZone) === formatTimeRange(value, timeZone))
+                  ?.display ?? formatTimeRange(value, timeZone)}
+              </span>
+              {tzOffset !== localOffset && (
+                <Box sx={{ typography: 'caption', color: 'text.secondary' }}>· {tzOffset}</Box>
+              )}
+            </Stack>
+          )}
           inputProps={{ 'aria-label': `Select time range. Currently set to ${value}` }}
           sx={{
             '.MuiSelect-icon': { marginTop: '1px', transform: 'none' },
