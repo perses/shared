@@ -23,7 +23,7 @@ import { ThemeOptions } from '@mui/material';
 const fontWeightLight = 300;
 const fontWeightRegular = 400;
 const fontWeightMedium = 600;
-const fontWeightBold = 900;
+const fontWeightBold = 700;
 
 /**
  * Theme typography options that are the same across both the dark and light themes.
