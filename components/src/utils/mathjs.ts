@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { roundDependencies, create } from 'mathjs';
+import { roundDependencies, gcdDependencies, create } from 'mathjs';
 
 // This ensures we get a minimal mathjs bundle for just what we need (see https://mathjs.org/docs/custom_bundling.html)
 const { round } = create({ roundDependencies });
-export { round };
+const { gcd } = create({ gcdDependencies });
+export { round, gcd };

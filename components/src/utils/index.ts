@@ -23,3 +23,7 @@ export * from './request-interpolation';
 export * from './selection-interpolation';
 export * from './theme-gen';
 export * from './variable-interpolation';
+export * from './value-mapping';
+export * from './regexp';
+export * from './transform-data';
+export * from './time-series-data';
