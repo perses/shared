@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Transform } from '@perses-dev/core';
+import { Transform } from '../model';
 
 /*
  * Join: Regroup rows with equal cell value in a column.
