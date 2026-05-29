@@ -18,7 +18,7 @@ import { ReactElement, useState } from 'react';
 import { useHotkeyRegistrations } from '@tanstack/react-hotkeys';
 // Import to enable declaration merging for HotkeyMeta.category
 import '../../../keyboard-shortcuts/types';
-import { DashboardProvider, DatasourceStoreProvider, VariableProvider } from '../../../context';
+import { AnnotationProvider, DashboardProvider, DatasourceStoreProvider, VariableProvider } from '../../../context';
 import { defaultDatasourceProps, getTestDashboard, renderWithContext } from '../../../test';
 import { DashboardApp } from '../DashboardApp';
 
@@ -48,15 +48,18 @@ function DashboardViewUnderTest(): ReactElement {
     <DatasourceStoreProvider {...defaultDatasourceProps}>
       <TimeRangeProviderBasic initialRefreshInterval="0s" initialTimeRange={{ pastDuration: '30m' }}>
         <VariableProvider>
-          <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: false }}>
-            <DashboardApp
-              dashboardResource={getTestDashboard()}
-              isReadonly={false}
-              isVariableEnabled={true}
-              isDatasourceEnabled={true}
-            />
-            <ShortcutRegistrationProbe />
-          </DashboardProvider>
+          <AnnotationProvider initialAnnotationSpecs={[]}>
+            <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: false }}>
+              <DashboardApp
+                dashboardResource={getTestDashboard()}
+                isReadonly={false}
+                isVariableEnabled={true}
+                isAnnotationEnabled={true}
+                isDatasourceEnabled={true}
+              />
+              <ShortcutRegistrationProbe />
+            </DashboardProvider>
+          </AnnotationProvider>
         </VariableProvider>
       </TimeRangeProviderBasic>
     </DatasourceStoreProvider>
@@ -83,20 +86,23 @@ describe('Dashboard shortcuts registration', () => {
         <DatasourceStoreProvider {...defaultDatasourceProps}>
           <TimeRangeProviderBasic initialRefreshInterval="0s" initialTimeRange={{ pastDuration: '30m' }}>
             <VariableProvider>
-              <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: false }}>
-                {isMounted && (
-                  <DashboardApp
-                    dashboardResource={getTestDashboard()}
-                    isReadonly={false}
-                    isVariableEnabled={true}
-                    isDatasourceEnabled={true}
-                  />
-                )}
-                <ShortcutRegistrationProbe />
-                <button onClick={() => setIsMounted(false)} type="button">
-                  Unmount Dashboard
-                </button>
-              </DashboardProvider>
+              <AnnotationProvider initialAnnotationSpecs={[]}>
+                <DashboardProvider initialState={{ dashboardResource: getTestDashboard(), isEditMode: false }}>
+                  {isMounted && (
+                    <DashboardApp
+                      dashboardResource={getTestDashboard()}
+                      isReadonly={false}
+                      isVariableEnabled={true}
+                      isAnnotationEnabled={true}
+                      isDatasourceEnabled={true}
+                    />
+                  )}
+                  <ShortcutRegistrationProbe />
+                  <button onClick={() => setIsMounted(false)} type="button">
+                    Unmount Dashboard
+                  </button>
+                </DashboardProvider>
+              </AnnotationProvider>
             </VariableProvider>
           </TimeRangeProviderBasic>
         </DatasourceStoreProvider>
