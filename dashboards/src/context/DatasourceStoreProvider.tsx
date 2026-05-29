@@ -311,7 +311,7 @@ function buildDatasourceSelectItemGroups(pluginDisplayName: string): {
     usedNames.add(selectorName);
 
     const isExplicitDefault = !isOverridden && spec.default && !explicitDefaultAdded;
-    if (results[0] && (isFirst || isExplicitDefault)) {
+    if (results[0] && isExplicitDefault) {
       // If we haven't added a default yet and this is a default, add default option to the beginning of the results
       results[0].items = [
         {
