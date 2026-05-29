@@ -1,6 +1,6 @@
-import { ReactNode, useEffect, useMemo } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { AnnotationData } from '@perses-dev/spec';
-import { AnnotationStateMap, useAnnotationActions, useAnnotationSpecs } from '@perses-dev/dashboards';
+import { useAnnotationActions, useAnnotationSpecs } from '@perses-dev/dashboards';
 import { useAnnotations } from '@perses-dev/plugin-system';
 import { UseQueryResult } from '@tanstack/react-query';
 

@@ -14,7 +14,6 @@
 import { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
 import { QueryKey, useQueries, useQuery, UseQueryResult } from '@tanstack/react-query';
 import { AnnotationContext, AnnotationPlugin } from '../model';
-import { filterVariableList } from '../components';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
 import { useAllVariableValues } from './variables';
@@ -52,8 +51,8 @@ function getQueryOptions({
   const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.plugin.spec, context) : {};
   const variableDependencies = dependencies?.variables;
 
-  const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
-  const variablesValueKey = getVariableValuesKey(filteredVariabledState);
+  const filteredVariableState = filterVariableStateMap(variableState, variableDependencies);
+  const variablesValueKey = getVariableValuesKey(filteredVariableState);
   const queryKey = [ANNOTATION_KEY, definition, absoluteTimeRange, variablesValueKey] as const;
 
   let waitToLoad = false;
@@ -77,7 +76,7 @@ export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryRes
     definitions.map((d) => ({ kind: d.plugin.kind }))
   );
 
-  // useQueries() handles data fetching from query plugins (e.g. traceQL queries, promQL queries)
+  // useQueries() handles data fetching from query plugins
   return useQueries({
     queries: definitions.map((definition, idx) => {
       const plugin = pluginLoaderResponse[idx]?.data;
@@ -91,7 +90,7 @@ export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryRes
         refetchOnReconnect: false,
         staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<AnnotationData[]> => {
-          const plugin = await getPlugin(ANNOTATION_KEY, annotationKind);
+          const plugin = await getPlugin({ kind: ANNOTATION_KEY, name: annotationKind });
           const data = await plugin.getAnnotationData(definition.plugin.spec, context, signal);
           return data;
         },

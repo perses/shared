@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
-import { Box, Typography, TextField, Grid, Divider, Stack, Switch, FormControlLabel, IconButton } from '@mui/material';
-import { Action } from '@perses-dev/core';
+import { Box, Typography, TextField, Grid, Divider, Stack, IconButton } from '@mui/material';
 import { AnnotationSpec } from '@perses-dev/spec';
 import {
   DiscardChangesConfirmationDialog,
@@ -21,12 +20,14 @@ import {
   ErrorBoundary,
   FormActions,
   OptionsColorPicker,
+  Action,
+  getSubmitText,
+  getTitleAction,
 } from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import InvertColorsIcon from 'mdi-material-ui/InvertColors';
-import { getSubmitText, getTitleAction } from '../../../utils';
 import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
 import { AnnotationPreview } from './AnnotationPreview';
@@ -133,10 +134,6 @@ export function AnnotationEditorForm({
     onSave(data);
   };
 
-  // When user click on cancel, several possibilities:
-  // - create action: ask for discard approval
-  // - update action: ask for discard approval if changed
-  // - read action: don´t ask for discard approval
   function handleCancel(): void {
     if (JSON.stringify(initialAnnotationSpec) !== JSON.stringify(form.getValues())) {
       setDiscardDialogOpened(true);

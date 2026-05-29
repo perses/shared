@@ -17,6 +17,11 @@ import { InfoTooltip, useTimeZone } from '@perses-dev/components';
 import AlertIcon from 'mdi-material-ui/Alert';
 
 const formatDate = (timeMs: number, format: (date: Date, format: string) => string): { date: string; time: string } => {
+  // Disallows NaN, Infinity, and -Infinity
+  if (!Number.isFinite(timeMs)) {
+    return { date: 'N/A', time: 'N/A' };
+  }
+
   const d = new Date(timeMs);
   return {
     date: format(d, 'MMM dd, yyyy'),

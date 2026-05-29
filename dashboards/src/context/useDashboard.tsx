@@ -67,7 +67,6 @@ export function useDashboard(): {
   );
   const { setVariableDefinitions } = useVariableDefinitionActions();
   const { setAnnotationSpecs } = useAnnotationActions();
-  // TODO: annotations
   const variables = useVariableDefinitions();
   const annotations = useAnnotationSpecs();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
@@ -107,7 +106,6 @@ export function useDashboard(): {
         };
 
   const setDashboard = (dashboardResource: DashboardResource): void => {
-    // TODO: annotations
     setVariableDefinitions(dashboardResource.spec.variables);
     if (dashboardResource.spec.annotations) {
       setAnnotationSpecs(dashboardResource.spec.annotations);

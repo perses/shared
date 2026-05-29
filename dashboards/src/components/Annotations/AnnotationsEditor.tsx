@@ -29,7 +29,6 @@ import {
   styled,
 } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
-import { Action } from '@perses-dev/core';
 import { AnnotationSpec, Definition, UnknownSpec } from '@perses-dev/spec';
 import { useImmer } from 'use-immer';
 import PencilIcon from 'mdi-material-ui/Pencil';
@@ -38,17 +37,22 @@ import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 
 import { ValidationProvider, AnnotationEditorForm } from '@perses-dev/plugin-system';
+import { Action } from '@perses-dev/components';
 import { useDiscardChangesConfirmationDialog } from '../../context';
 
-function getValidation(annotationSpecs: AnnotationSpec[]): { isValid: boolean; errors: string[] } {
+function validateAnnotationSpecs(annotationSpecs: AnnotationSpec[]): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
-  /**  Annotation names must be unique */
-  const annotationNames = annotationSpecs.map((annotationSpec) => annotationSpec.display.name);
-  const uniqueAnnotationNames = new Set(annotationNames);
-  if (annotationNames.length !== uniqueAnnotationNames.size) {
-    errors.push('Annotation names must be unique');
+  const annotationNames: string[] = [];
+
+  for (const annotationSpec of annotationSpecs) {
+    if (annotationNames.includes(annotationSpec.display.name)) {
+      errors.push(`Duplicate annotation name: ${annotationSpec.display.name}`);
+    } else {
+      annotationNames.push(annotationSpec.display.name);
+    }
   }
+
   return {
     errors: errors,
     isValid: errors.length === 0,
@@ -64,7 +68,7 @@ export function AnnotationEditor(props: {
   const [annotationEditIdx, setAnnotationEditIdx] = useState<number | null>(null);
   const [annotationFormAction, setAnnotationFormAction] = useState<Action>('update');
 
-  const validation = useMemo(() => getValidation(annotationSpecs), [annotationSpecs]);
+  const validation = useMemo(() => validateAnnotationSpecs(annotationSpecs), [annotationSpecs]);
   const currentEditingAnnotationSpec: AnnotationSpec | undefined =
     annotationEditIdx !== null ? annotationSpecs[annotationEditIdx] : undefined;
 
@@ -121,24 +125,18 @@ export function AnnotationEditor(props: {
   };
 
   const changeAnnotationOrder = (index: number, direction: 'up' | 'down'): void => {
+    const step = direction === 'up' ? -1 : 1;
+
     setAnnotationSpecs((draft) => {
-      if (direction === 'up') {
-        const prevElement = draft[index - 1];
-        const currentElement = draft[index];
-        if (index === 0 || !prevElement || !currentElement) {
-          return;
-        }
-        draft[index - 1] = currentElement;
-        draft[index] = prevElement;
-      } else {
-        const nextElement = draft[index + 1];
-        const currentElement = draft[index];
-        if (index === draft.length - 1 || !nextElement || !currentElement) {
-          return;
-        }
-        draft[index + 1] = currentElement;
-        draft[index] = nextElement;
+      const current = draft[index];
+      const adjacent = draft[index + step];
+
+      if (!current || !adjacent) {
+        return;
       }
+
+      draft[index + step] = current;
+      draft[index] = adjacent;
     });
   };
 
