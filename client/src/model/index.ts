@@ -12,8 +12,7 @@
 // limitations under the License.
 
 export * from './datasource';
-export * from './http';
-export * from './http-proxy';
 export * from './kind';
 export * from './resource';
 export * from './datasource-api';
+export * from './http';

@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { HTTPProxy } from './http-proxy';
+import { HTTPProxy } from '@perses-dev/spec';
 
 export type RequestHeaders = Record<string, string>;
-
 export interface HTTPDatasourceSpec {
   directUrl?: string;
   proxy?: HTTPProxy;

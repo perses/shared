@@ -15,7 +15,7 @@
   "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@perses-dev/spec": "0.2.0-beta.0",
+    "@perses-dev/spec": "0.2.0-beta.2",
     "zod": "^3.21.4"
   },
   "scripts": {
