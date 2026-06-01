@@ -35,6 +35,7 @@ export interface PanelProps extends CardProps<'section'> {
   panelOptions?: PanelOptions;
   panelGroupItemId?: PanelGroupItemId;
   viewQueriesHandler?: PanelHeaderProps['viewQueriesHandler'];
+  informationTooltip?: string;
 }
 
 export type PanelOptions = {
@@ -85,6 +86,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
     panelOptions,
     panelGroupItemId,
     viewQueriesHandler,
+    informationTooltip,
     ...others
   } = props;
 
@@ -213,6 +215,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
               id={headerId}
               title={definition.spec.display?.name ?? ''}
               description={definition.spec.display?.description}
+              informationTooltip={informationTooltip}
               queryResults={queryResults}
               readHandlers={readHandlers}
               editHandlers={editHandlers}
