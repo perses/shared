@@ -110,14 +110,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
           {
             editLink: undefined,
             group: `Default Datasource Plugin for ${FAKE_PLUGIN_NAME}`,
-            items: [
-              {
-                name: 'Default (localDatasourceA from dashboard)',
-                selector: {
-                  kind: FAKE_PLUGIN_NAME,
-                },
-              },
-            ],
+            items: [],
           },
           {
             editLink: undefined,
@@ -297,15 +290,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
           {
             editLink: undefined,
             group: `Default Datasource Plugin for ${FAKE_PLUGIN_NAME}`,
-            items: [
-              {
-                // This is the default datasource because first of the list
-                name: 'Default (datasourceA from project)',
-                selector: {
-                  kind: FAKE_PLUGIN_NAME,
-                },
-              },
-            ],
+            items: [],
           },
           {
             editLink: '/projects/perses/datasources',
@@ -458,14 +443,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
           {
             editLink: undefined,
             group: `Default Datasource Plugin for ${FAKE_PLUGIN_NAME}`,
-            items: [
-              {
-                name: 'Default (localDatasourceA from dashboard)',
-                selector: {
-                  kind: FAKE_PLUGIN_NAME,
-                },
-              },
-            ],
+            items: [],
           },
           {
             editLink: undefined,
