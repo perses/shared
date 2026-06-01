@@ -49,6 +49,7 @@ export interface PanelActionsProps {
   title?: string;
   description?: string;
   descriptionTooltipId: string;
+  informationTooltip?: string;
   links?: Link[];
   extra?: React.ReactNode;
   editHandlers?: {
@@ -85,6 +86,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   title,
   description,
   descriptionTooltipId,
+  informationTooltip,
   links,
   queryResults,
   pluginActions = [],
@@ -179,6 +181,18 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [readHandlers, title]);
 
+  const informationTooltipIcon = useMemo((): ReactNode | undefined => {
+    return (
+      informationTooltip && (
+        <InfoTooltip description={informationTooltip}>
+          <HeaderIconButton aria-label="information tooltip" size="small">
+            <InformationOutlineIcon fontSize="inherit" color="info" />
+          </HeaderIconButton>
+        </InfoTooltip>
+      )
+    );
+  }, [informationTooltip]);
+
   const viewQueryAction = useMemo(() => {
     if (!viewQueriesHandler?.onClick) return null;
     return (
@@ -271,7 +285,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider}
         <OnHover>
           <OverflowMenu title={title}>
-            {descriptionAction} {linksAction} {queryStateIndicator} {noticesIndicator} {extraActions} {viewQueryAction}
+            {descriptionAction} {linksAction} {queryStateIndicator} {noticesIndicator}
+            {informationTooltipIcon} {extraActions} {viewQueryAction}
             {readActions} {pluginActions} {itemActions}
             {editActions}
           </OverflowMenu>
@@ -295,6 +310,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         <OnHover>
           {extraActions}
           {readActions}
+          {informationTooltipIcon}
           <OverflowMenu title={title}>
             {editActions} {viewQueryAction} {pluginActions} {itemActions}
           </OverflowMenu>
@@ -318,7 +334,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         <OnHover>
           {extraActions}
           {viewQueryAction}
-          {readActions} {editActions}
+          {readActions} {informationTooltipIcon} {editActions}
           {/* Show plugin actions inside a menu if it gets crowded */}
           {pluginActions.length <= 1 ? pluginActions : <OverflowMenu title={title}>{pluginActions}</OverflowMenu>}
           {itemActions.length <= 1 ? (
