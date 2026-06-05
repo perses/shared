@@ -27,6 +27,9 @@ import PlusIcon from 'mdi-material-ui/Plus';
 import { ValueMapping } from '@perses-dev/core';
 import { FC } from 'react';
 import { OptionsColorPicker } from '../ColorPicker/OptionsColorPicker';
+// LOGZ.IO CHANGE START:: Use NumberInput for range bounds so partial decimals / "-" are not clobbered [APPZ-1996]
+import { NumberInput } from '../NumberInput';
+// LOGZ.IO CHANGE END:: Use NumberInput for range bounds so partial decimals / "-" are not clobbered [APPZ-1996]
 
 interface ValueMappingConditionEditorProps extends Omit<StackProps, 'onChange'> {
   mapping: ValueMapping;
@@ -55,30 +58,32 @@ const ConditionEditor: FC<ValueMappingConditionEditorProps> = ({ mapping, onChan
     case 'Range':
       return (
         <Stack gap={1} direction="row" {...props}>
-          <TextField
+          {/* LOGZ.IO CHANGE START:: NumberInput keeps in-progress decimals/negatives instead of coercing to 0/NaN [APPZ-1996] */}
+          <NumberInput
             label="From"
             placeholder="Start of range"
-            value={mapping.spec?.from ?? ''}
-            onChange={(e) =>
+            value={mapping.spec?.from}
+            onChange={(from) =>
               onChange({
                 ...mapping,
-                spec: { ...mapping.spec, from: e.target.value === '' ? undefined : +e.target.value },
+                spec: { ...mapping.spec, from },
               })
             }
             fullWidth
           />
-          <TextField
+          <NumberInput
             label="To"
             placeholder="End of range (inclusive)"
-            value={mapping.spec?.to ?? ''}
-            onChange={(e) =>
+            value={mapping.spec?.to}
+            onChange={(to) =>
               onChange({
                 ...mapping,
-                spec: { ...mapping.spec, to: e.target.value === '' ? undefined : +e.target.value },
+                spec: { ...mapping.spec, to },
               })
             }
             fullWidth
           />
+          {/* LOGZ.IO CHANGE END:: NumberInput keeps in-progress decimals/negatives instead of coercing to 0/NaN [APPZ-1996] */}
         </Stack>
       );
     case 'Regex':

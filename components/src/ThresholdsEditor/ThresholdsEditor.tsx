@@ -58,16 +58,18 @@ export function ThresholdsEditor({
     focusRef.current = false;
   }, [steps?.length]);
 
-  const handleThresholdValueChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
+  // LOGZ.IO CHANGE START:: Receive the parsed number from NumberInput (empty -> 0) [APPZ-1996]
+  const handleThresholdValueChange = (value: number | undefined, i: number): void => {
     setSteps(
       produce(steps, (draft) => {
         const step = draft?.[i];
         if (step) {
-          step.value = Number(e.target.value);
+          step.value = value ?? 0;
         }
       })
     );
   };
+  // LOGZ.IO CHANGE END:: Receive the parsed number from NumberInput (empty -> 0) [APPZ-1996]
 
   const handleThresholdColorChange = (color: string, i: number): void => {
     if (thresholds !== undefined) {
@@ -207,8 +209,8 @@ export function ThresholdsEditor({
               value={step.value}
               mode={thresholds?.mode}
               onColorChange={(color) => handleThresholdColorChange(color, i)}
-              onChange={(e) => {
-                handleThresholdValueChange(e, i);
+              onChange={(value) => {
+                handleThresholdValueChange(value, i);
               }}
               onDelete={() => {
                 deleteThreshold(i);

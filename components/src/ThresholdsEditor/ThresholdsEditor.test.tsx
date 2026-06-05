@@ -98,6 +98,25 @@ describe('ThresholdsEditor', () => {
     });
   });
 
+  // LOGZ.IO ADDITION:: regression for the reported ".0X" blanking bug [APPZ-1996]
+  it('should let the user type a sub-1 decimal like ".05" without the field blanking', async () => {
+    renderThresholdEditor(thresholds, onChange);
+    const input = await screen.findByLabelText('T1');
+    userEvent.clear(input);
+    userEvent.type(input, '.05');
+    expect(input).toHaveValue('.05');
+    await waitFor(() => {
+      input.blur();
+      expect(onChange).toHaveBeenCalledWith(
+        produce(thresholds, (draft) => {
+          if (draft.steps && draft.steps[0]) {
+            draft.steps[0].value = 0.05;
+          }
+        })
+      );
+    });
+  });
+
   it('should update threshold T1 color', async () => {
     renderThresholdEditor(thresholds, onChange);
     const openColorPickerButton = screen.getByLabelText('change T1 color');

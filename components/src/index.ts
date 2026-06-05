@@ -29,6 +29,8 @@ export * from './JSONEditor';
 export * from './Legend';
 export * from './LinksEditor';
 export * from './ModeSelector';
+// LOGZ.IO ADDITION:: General numeric text field that preserves partial input [APPZ-1996]
+export * from './NumberInput';
 export * from './OptionsEditorLayout';
 export * from './Overlay';
 export * from './SettingsAutocomplete';

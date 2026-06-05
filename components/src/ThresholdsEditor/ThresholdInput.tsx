@@ -12,16 +12,19 @@
 // limitations under the License.
 
 import { ReactElement, RefObject, useState } from 'react';
-import { Stack, FormLabel, TextField, IconButton, Box } from '@mui/material';
+import { Stack, FormLabel, IconButton, Box } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { ThresholdOptions } from '@perses-dev/core';
 import { OptionsColorPicker } from '../ColorPicker/OptionsColorPicker';
+// LOGZ.IO CHANGE START:: Use NumberInput so partial decimals (".05") are not blanked [APPZ-1996]
+import { NumberInput } from '../NumberInput';
+// LOGZ.IO CHANGE END:: Use NumberInput so partial decimals (".05") are not blanked [APPZ-1996]
 
 export interface ThresholdInputProps {
   label: string;
   color: string;
   value: number;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange: (value: number | undefined) => void;
   onColorChange: (color: string) => void;
   onBlur: () => void;
   onDelete: () => void;
@@ -45,12 +48,13 @@ export function ThresholdInput({
     <Stack flex={1} direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
       <OptionsColorPicker label={label} color={color} onColorChange={onColorChange} />
       <FormLabel htmlFor={label}>{label}</FormLabel>
-      <TextField
+      {/* LOGZ.IO CHANGE START:: NumberInput buffers raw text so ".05"/"0.0"/"-5" survive typing [APPZ-1996] */}
+      <NumberInput
         id={label}
         key={key}
         inputRef={inputRef}
-        type="number"
-        value={value === 0 ? '' : value}
+        value={value}
+        emptyValue={0}
         placeholder="0"
         onChange={onChange}
         onBlur={onBlur}
@@ -64,6 +68,7 @@ export function ThresholdInput({
           endAdornment: mode === 'percent' ? <Box paddingX={1}>%</Box> : undefined,
         }}
       />
+      {/* LOGZ.IO CHANGE END:: NumberInput buffers raw text so ".05"/"0.0"/"-5" survive typing [APPZ-1996] */}
       <IconButton aria-label={`delete threshold ${label}`} size="small" onClick={onDelete}>
         <DeleteIcon />
       </IconButton>
