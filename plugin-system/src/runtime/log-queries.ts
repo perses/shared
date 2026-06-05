@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryDefinition, UnknownSpec } from '@perses-dev/core';
+import { QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { useQueries, UseQueryResult } from '@tanstack/react-query';
 import { LogQueryResult } from '../model/log-queries';
 import { useDatasourceStore } from './datasources';
@@ -46,7 +46,7 @@ export function useLogQueries(definitions: LogQueryDefinition[]): Array<UseQuery
         refetchOnReconnect: false,
         staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<LogQueryResult> => {
-          const plugin = await getPlugin(LOG_QUERY_KEY, logQueryKind);
+          const plugin = await getPlugin({ kind: LOG_QUERY_KEY, name: logQueryKind });
           const data = await plugin.getLogData(definition.spec.plugin.spec, context, signal);
           return data;
         },

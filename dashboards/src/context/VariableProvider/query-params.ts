@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableValue, VariableDefinition } from '@perses-dev/core';
+import { VariableValue, VariableDefinition } from '@perses-dev/spec';
 import { QueryParamConfig, useQueryParams } from 'use-query-params';
 
 const variableQueryParameterPrefix = 'var-';

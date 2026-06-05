@@ -90,44 +90,53 @@ const getPluginRuntime = (): ModuleFederation => {
             requiredVersion: '^5.5.0',
           },
         },
+        // TODO should we add @perses-dev/spec here ?
         '@perses-dev/core': {
-          version: '0.53.0-beta.3',
+          version: '0.53.1',
           lib: () => require('@perses-dev/core'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.53.0-beta.3',
+            requiredVersion: '^0.53.1',
+          },
+        },
+        '@perses-dev/client': {
+          version: '0.54.0-beta.1',
+          lib: () => require('@perses-dev/client'),
+          shareConfig: {
+            singleton: true,
+            requiredVersion: '^0.54.0-beta.1',
           },
         },
         '@perses-dev/components': {
-          version: '0.53.0-beta.3',
+          version: '0.53.1',
           lib: () => require('@perses-dev/components'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.53.0-beta.3',
+            requiredVersion: '^0.53.1',
           },
         },
         '@perses-dev/plugin-system': {
-          version: '0.53.0-beta.3',
+          version: '0.53.1',
           lib: () => require('@perses-dev/plugin-system'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.53.0-beta.3',
+            requiredVersion: '^0.53.1',
           },
         },
         '@perses-dev/explore': {
-          version: '0.53.0-beta.3',
+          version: '0.53.1',
           lib: () => require('@perses-dev/explore'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^^0.53.0-beta.3',
+            requiredVersion: '^0.53.1',
           },
         },
         '@perses-dev/dashboards': {
-          version: '0.53.0-beta.3',
+          version: '0.53.1',
           lib: () => require('@perses-dev/dashboards'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^^0.53.0-beta.3',
+            requiredVersion: '^0.53.1',
           },
         },
         // Below are the shared modules that are used by the plugins, this can be part of the SDK
@@ -213,31 +222,43 @@ const getPluginRuntime = (): ModuleFederation => {
   return instance;
 };
 
-const registerRemote = (name: string, baseURL?: string): void => {
+function getModuleFederationRemoteName(name: string, registry?: string, version?: string): string {
+  return `${name}:${registry ?? ''}:${version ?? ''}`;
+}
+
+const registerRemote = (name: string, registry?: string, version?: string, baseURL?: string): void => {
   const pluginRuntime = getPluginRuntime();
-  const existingRemote = pluginRuntime.options.remotes.find((remote) => remote.name === name);
+  const registryName = getModuleFederationRemoteName(name, registry, version);
+
+  const existingRemote = pluginRuntime.options.remotes.find((remote) => remote.name === registryName);
   if (!existingRemote) {
-    const remoteEntryURL = baseURL ? `${baseURL}/${name}/mf-manifest.json` : `/plugins/${name}/mf-manifest.json`;
+    const nameVersionRegistry = [name, version, registry].filter(Boolean).join('~');
+    const prefix = baseURL || '/plugins';
+    const remoteEntryURL = `${prefix}/${nameVersionRegistry}/mf-manifest.json`;
+
     pluginRuntime.registerRemotes([
       {
-        name,
+        name: registryName,
         entry: remoteEntryURL,
-        alias: name,
+        alias: registryName,
       },
     ]);
   }
 };
 
-export const loadPlugin = async (
-  moduleName: string,
-  pluginName: string,
-  baseURL?: string
-): Promise<RemotePluginModule | null> => {
-  registerRemote(moduleName, baseURL);
+export const loadPlugin = async (target: {
+  moduleName: string;
+  pluginName: string;
+  registry?: string;
+  version?: string;
+  baseURL?: string;
+}): Promise<RemotePluginModule | null> => {
+  const { moduleName, pluginName, registry, version, baseURL } = target;
+  registerRemote(moduleName, registry, version, baseURL);
 
   const pluginRuntime = getPluginRuntime();
-
-  return pluginRuntime.loadRemote<RemotePluginModule>(`${moduleName}/${pluginName}`);
+  const registryName = getModuleFederationRemoteName(moduleName, registry, version);
+  return pluginRuntime.loadRemote<RemotePluginModule>(`${registryName}/${pluginName}`);
 };
 
 export function usePluginRuntime({ plugin }: { plugin: PersesPlugin }): {
@@ -246,6 +267,9 @@ export function usePluginRuntime({ plugin }: { plugin: PersesPlugin }): {
 } {
   return {
     pluginRuntime: getPluginRuntime(),
-    loadPlugin: () => loadPlugin(plugin.moduleName, plugin.name, plugin.baseURL),
+    loadPlugin: (): Promise<RemotePluginModule | null> => {
+      const { moduleName, name: pluginName, registry, version, baseURL } = plugin;
+      return loadPlugin({ moduleName, pluginName, registry, version, baseURL });
+    },
   };
 }

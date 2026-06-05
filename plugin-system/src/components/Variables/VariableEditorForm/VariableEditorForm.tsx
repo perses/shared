@@ -13,12 +13,19 @@
 
 import { DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
 import { Box, Typography, Switch, TextField, Grid, FormControlLabel, MenuItem, Stack, Divider } from '@mui/material';
-import { VariableDefinition, ListVariableDefinition, Action, pluginSchema } from '@perses-dev/core';
-import { DiscardChangesConfirmationDialog, ErrorAlert, ErrorBoundary, FormActions } from '@perses-dev/components';
+import { VariableDefinition, ListVariableDefinition, pluginSchema } from '@perses-dev/spec';
+import {
+  DiscardChangesConfirmationDialog,
+  ErrorAlert,
+  ErrorBoundary,
+  FormActions,
+  Action,
+  getSubmitText,
+  getTitleAction,
+} from '@perses-dev/components';
 import { Control, Controller, FormProvider, SubmitHandler, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
-import { getSubmitText, getTitleAction } from '../../../utils';
 import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
 import { VARIABLE_TYPES } from '../variable-model';
@@ -128,6 +135,11 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
   const _allowAllValue = useWatch<VariableDefinition, 'spec.allowAllValue'>({
     control: control,
     name: 'spec.allowAllValue',
+  });
+
+  const _customAllValue = useWatch<VariableDefinition, 'spec.customAllValue'>({
+    control: control,
+    name: 'spec.customAllValue',
   });
 
   const sortMethod = useWatch<VariableDefinition, 'spec.sort'>({
@@ -316,33 +328,57 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
             Enables an option to include all variable values
           </Typography>
           {_allowAllValue && (
-            <Controller
-              control={control}
-              name="spec.customAllValue"
-              render={({ field, fieldState }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  label="Custom All Value"
-                  InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
-                  InputProps={{
-                    readOnly: action === 'read',
-                  }}
-                  error={!!fieldState.error}
-                  helperText={
-                    fieldState.error?.message
-                      ? fieldState.error.message
-                      : 'When All is selected, this value will be used'
-                  }
-                  value={field.value ?? ''}
-                  // LOGZ.IO CHANGE START:: Fix clearing customAllValue field [APPZ-1996]
-                  onChange={(event) => {
-                    field.onChange(event);
-                  }}
-                  // LOGZ.IO CHANGE END:: Fix clearing customAllValue field [APPZ-1996]
+            <Stack spacing={1}>
+              <FormControlLabel
+                label="Use Custom All Value"
+                control={
+                  <Switch
+                    checked={_customAllValue !== undefined}
+                    readOnly={action === 'read'}
+                    onChange={(event) => {
+                      if (action === 'read') return;
+                      const isEnabled = event.target.checked;
+                      if (isEnabled) {
+                        form.setValue('spec.customAllValue', '');
+                      } else {
+                        form.setValue('spec.customAllValue', undefined);
+                      }
+                    }}
+                  />
+                }
+              />
+              <Typography variant="caption" sx={{ mt: -0.5 }}>
+                Enable to set a custom value when &quot;All&quot; is selected
+              </Typography>
+              {_customAllValue !== undefined && (
+                <Controller
+                  control={control}
+                  name="spec.customAllValue"
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      label="Custom All Value"
+                      InputLabelProps={{ shrink: action === 'read' ? true : undefined }}
+                      InputProps={{
+                        readOnly: action === 'read',
+                      }}
+                      error={!!fieldState.error}
+                      // LOGZ.IO CHANGE:: keep descriptive helper text [APPZ-1996] within upstream's custom-all-value toggle
+                      helperText={
+                        fieldState.error?.message
+                          ? fieldState.error.message
+                          : 'When All is selected, this value will be used'
+                      }
+                      value={field.value ?? ''}
+                      onChange={(event) => {
+                        field.onChange(event.target.value || '');
+                      }}
+                    />
+                  )}
                 />
               )}
-            />
+            </Stack>
           )}
         </Stack>
       </Stack>

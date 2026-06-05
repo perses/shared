@@ -13,7 +13,7 @@
 
 // LOGZ.IO FILE:: APPZ-955-math-on-queries-formulas
 
-import { TimeSeriesData, TimeSeriesQueryDefinition } from '@perses-dev/core';
+import { TimeSeriesData, TimeSeriesQueryDefinition } from '@perses-dev/spec';
 import { QueryKey, QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { TimeSeriesQueryContext, TimeSeriesQueryPlugin, TimeSeriesQueryPluginDependencies } from '../model';
 import { usePluginRegistry } from './plugin-registry';
@@ -225,7 +225,7 @@ export function createQueryConfig({
         throw new Error(`Circular dependency detected: ${cyclePath}. Queries cannot depend on each other in a cycle.`);
       }
 
-      const loadedPlugin = await getPlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
+      const loadedPlugin = await getPlugin({ kind: TIME_SERIES_QUERY_KEY, name: definition.spec.plugin.kind });
       const ctx: TimeSeriesQueryContext = {
         ...context,
         queryIndex,

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryDefinition, UnknownSpec, TraceData } from '@perses-dev/core';
+import { QueryDefinition, UnknownSpec, TraceData } from '@perses-dev/spec';
 import { QueryKey, useQueries, UseQueryResult } from '@tanstack/react-query';
 import { TraceQueryContext, TraceQueryPlugin } from '../model';
 import { useDatasourceStore } from './datasources';
@@ -51,7 +51,7 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQ
         refetchOnReconnect: false,
         staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<TraceData> => {
-          const plugin = await getPlugin(TRACE_QUERY_KEY, traceQueryKind);
+          const plugin = await getPlugin({ kind: TRACE_QUERY_KEY, name: traceQueryKind });
           const data = await plugin.getTraceData(definition.spec.plugin.spec, context, signal);
           return data;
         },

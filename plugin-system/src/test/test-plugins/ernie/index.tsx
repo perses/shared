@@ -19,7 +19,7 @@ const data: VariableOption[] = [
 ];
 
 // Dummy plugin to test loading
-export const ErnieVariable1: VariablePlugin<{ variableOption: string }> = {
+const ErnieVariable1: VariablePlugin<{ variableOption: string }> = {
   getVariableOptions: async () => ({ data }),
   OptionsEditorComponent: function ErnieVariableEditor({ value, onChange }) {
     return (
@@ -37,7 +37,7 @@ export const ErnieVariable1: VariablePlugin<{ variableOption: string }> = {
   createInitialOptions: () => ({ variableOption: '' }),
 };
 
-export const ErnieVariable2: VariablePlugin<{ variableOption2: string }> = {
+const ErnieVariable2: VariablePlugin<{ variableOption2: string }> = {
   getVariableOptions: async () => ({ data }),
   OptionsEditorComponent: function ErnieVariableEditor({ value, onChange }) {
     return (
@@ -53,4 +53,9 @@ export const ErnieVariable2: VariablePlugin<{ variableOption2: string }> = {
     );
   },
   createInitialOptions: () => ({ variableOption2: '' }),
+};
+
+export const plugins = {
+  'Variable:ErnieVariable1::1.0.0': ErnieVariable1,
+  'Variable:ErnieVariable2::1.0.0': ErnieVariable2,
 };

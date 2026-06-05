@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { QueryDefinition, UnknownSpec, ProfileData } from '@perses-dev/core';
+import { QueryDefinition, UnknownSpec, ProfileData } from '@perses-dev/spec';
 import { useQueries, UseQueryResult } from '@tanstack/react-query';
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry } from './plugin-registry';
@@ -46,7 +46,7 @@ export function useProfileQueries(definitions: ProfileQueryDefinition[]): Array<
         refetchOnReconnect: false,
         staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<ProfileData> => {
-          const plugin = await getPlugin(PROFILE_QUERY_KEY, profileQueryKind);
+          const plugin = await getPlugin({ kind: PROFILE_QUERY_KEY, name: profileQueryKind });
           const data = await plugin.getProfileData(definition.spec.plugin.spec, context, signal);
           return data;
         },

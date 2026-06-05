@@ -24,6 +24,7 @@ package migrate
 		d:            "days"
 		dtdurations:  "seconds"
 		dtdurationms: "milliseconds"
+		dateTimeAsIso: "datetime-iso"
 		// percent units
 		percent:     "percent"
 		percentunit: "percent-decimal"

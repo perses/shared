@@ -15,7 +15,7 @@ import { forwardRef, ReactElement, useCallback, useEffect, useMemo, useState } f
 import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
 import AddIcon from 'mdi-material-ui/Plus';
-import { QueryDefinition, QueryPluginType } from '@perses-dev/core';
+import { QueryDefinition, QueryPluginType } from '@perses-dev/spec';
 import { OnChangeOptions } from '../../model';
 import { QueryData, useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
 import { PluginEditorRef } from '../PluginEditor';
@@ -166,7 +166,8 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
       const updatedQueries = produce(queries, (draft) => {
         const entry = draft?.[index];
         if (entry) {
-          entry.spec.hidden = !isHidden;
+          // LOGZ.IO CHANGE:: `hidden` lives on the query spec via patched @perses-dev/core; spec types omit it [APPZ-955]
+          (entry.spec as { hidden?: boolean }).hidden = !isHidden;
         }
       });
 
@@ -203,7 +204,7 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
             queryResult={queryResults?.[i]}
             filteredQueryPlugins={filteredQueryPlugins}
             isCollapsed={!!queriesCollapsed[i]}
-            isHidden={query.spec.hidden ?? false}
+            isHidden={(query.spec as { hidden?: boolean }).hidden ?? false}
             onChange={handleQueryChange}
             onQueryRun={handleQueryRun}
             onDelete={queries.length > 1 ? handleQueryDelete : undefined}

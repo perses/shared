@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DurationString, TimeRangeValue } from '@perses-dev/core';
+import { DurationString, TimeRangeValue } from '@perses-dev/spec';
 import React, { ReactElement } from 'react';
 import { TimeZoneProvider } from '@perses-dev/components';
 import { TimeRangeProvider } from './TimeRangeProvider';

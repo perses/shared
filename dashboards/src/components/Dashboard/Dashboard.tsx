@@ -18,6 +18,7 @@ import { usePanelGroupIds } from '../../context';
 import { GridLayout } from '../GridLayout';
 import { EmptyDashboard, EmptyDashboardProps } from '../EmptyDashboard';
 import { PanelOptions } from '../Panel';
+
 export type DashboardProps = BoxProps & {
   /**
    * Props for `EmptyDashboard` component that will be rendered when the dashboard

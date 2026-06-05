@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition, QueryDefinition, UnknownSpec, QueryDataType } from '@perses-dev/core';
+import { Definition, QueryDefinition, UnknownSpec, QueryDataType } from '@perses-dev/spec';
 import { QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { ReactNode, useCallback, useMemo } from 'react';
 import { useListPluginMetadata } from '../plugin-registry';
@@ -65,6 +65,10 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
   const { data: traceQueryPlugins, isLoading: isTraceQueryPluginLoading } = useListPluginMetadata(['TraceQuery']);
   const { data: profileQueryPlugins, isLoading: isProfileQueryPluginLoading } = useListPluginMetadata(['ProfileQuery']);
   const { data: logQueries, isLoading: isLogQueryPluginLoading } = useListPluginMetadata(['LogQuery']);
+  const { data: alertsQueryPlugins, isLoading: isAlertsQueryPluginLoading } = useListPluginMetadata(['AlertsQuery']);
+  const { data: silencesQueryPlugins, isLoading: isSilencesQueryPluginLoading } = useListPluginMetadata([
+    'SilencesQuery',
+  ]);
 
   // For example, `map: {"TimeSeriesQuery":["PrometheusTimeSeriesQuery"],"TraceQuery":["TempoTraceQuery"]}`
   const queryTypeMap = useMemo(() => {
@@ -73,6 +77,8 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
       TraceQuery: [],
       ProfileQuery: [],
       LogQuery: [],
+      AlertsQuery: [],
+      SilencesQuery: [],
     };
 
     if (timeSeriesQueryPlugins) {
@@ -99,8 +105,27 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
       });
     }
 
+    if (alertsQueryPlugins) {
+      alertsQueryPlugins.forEach((plugin) => {
+        map[plugin.kind]?.push(plugin.spec.name);
+      });
+    }
+
+    if (silencesQueryPlugins) {
+      silencesQueryPlugins.forEach((plugin) => {
+        map[plugin.kind]?.push(plugin.spec.name);
+      });
+    }
+
     return map;
-  }, [timeSeriesQueryPlugins, traceQueryPlugins, profileQueryPlugins, logQueries]);
+  }, [
+    timeSeriesQueryPlugins,
+    traceQueryPlugins,
+    profileQueryPlugins,
+    logQueries,
+    alertsQueryPlugins,
+    silencesQueryPlugins,
+  ]);
 
   const getQueryType = useCallback(
     (pluginKind: string) => {
@@ -118,13 +143,19 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
           case 'LuceneLogQuery':
             return isLogQueryPluginLoading;
           // LOGZ.IO CHANGE END:: Handle LuceneLogQuery loading state [APPZ-1695]
+          case 'AlertmanagerAlertsQuery':
+            return isAlertsQueryPluginLoading;
+          case 'AlertmanagerSilencesQuery':
+            return isSilencesQueryPluginLoading;
         }
 
         return (
           isTraceQueryPluginLoading ||
           isTimeSeriesQueryLoading ||
           isProfileQueryPluginLoading ||
-          isLogQueryPluginLoading
+          isLogQueryPluginLoading ||
+          isAlertsQueryPluginLoading ||
+          isSilencesQueryPluginLoading
         );
       };
 
@@ -146,6 +177,8 @@ export function useQueryType(): (pluginKind: string) => string | undefined {
       isTraceQueryPluginLoading,
       isProfileQueryPluginLoading,
       isLogQueryPluginLoading,
+      isAlertsQueryPluginLoading,
+      isSilencesQueryPluginLoading,
     ]
   );
 

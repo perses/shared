@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { TimeSeries, TimeSeriesValueTuple } from '@perses-dev/core';
+import { TimeSeries, TimeSeriesValueTuple } from '@perses-dev/spec';
 import { DatapointInfo, PINNED_CROSSHAIR_SERIES_NAME, TimeChartSeriesMapping } from '../model';
 
 export interface ZoomEventData {

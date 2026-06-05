@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { OptionsEditorControl, SettingsAutocomplete } from '@perses-dev/components';
-import { CALCULATIONS_CONFIG, CalculationConfig, CalculationType } from '@perses-dev/core';
 import { ReactElement } from 'react';
+import { CALCULATIONS_CONFIG, CalculationConfig, CalculationType } from '../../model'; // TODO weird this is part of the model from the core package ...
 
 type AutocompleteCalculationOption = CalculationConfig & { id: CalculationType };
 const CALC_OPTIONS: AutocompleteCalculationOption[] = Object.entries(CALCULATIONS_CONFIG).map(([id, config]) => {

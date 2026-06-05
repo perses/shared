@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Box, Popover, CircularProgress, styled, PopoverPosition } from '@mui/material';
-import { isValidElement, PropsWithChildren, ReactElement, ReactNode, useMemo, useState } from 'react';
+import { Stack, Box, CircularProgress, styled, Popper, ClickAwayListener } from '@mui/material';
+import { isValidElement, PropsWithChildren, ReactElement, ReactNode, useMemo, useState, MouseEvent } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import { QueryData } from '@perses-dev/plugin-system';
 import DatabaseSearch from 'mdi-material-ui/DatabaseSearch';
@@ -27,7 +27,7 @@ import AlertIcon from 'mdi-material-ui/Alert';
 import AlertCircleIcon from 'mdi-material-ui/AlertCircle';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import LightningBoltIcon from 'mdi-material-ui/LightningBolt';
-import { Link, Notice } from '@perses-dev/core';
+import { Link, Notice } from '@perses-dev/spec';
 import {
   ARIA_LABEL_TEXT,
   HEADER_ACTIONS_CONTAINER_NAME,
@@ -35,8 +35,8 @@ import {
   HEADER_SMALL_WIDTH,
   TOOLTIP_TEXT,
 } from '../../constants';
+import { LinksDisplay } from '../LinksDisplay';
 import { HeaderIconButton } from './HeaderIconButton';
-import { PanelLinks } from './PanelLinks';
 import { PanelOptions } from './Panel';
 
 const noticeTypeToIcon: Record<Notice['type'], ReactNode> = {
@@ -109,7 +109,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [descriptionTooltipId, description]);
 
-  const linksAction = links && links.length > 0 && <PanelLinks links={links} />;
+  const linksAction = links && links.length > 0 && <LinksDisplay links={links} variant="panel" />;
   const extraActions = editHandlers === undefined && extra;
 
   const queryStateIndicator = useMemo((): ReactNode | undefined => {
@@ -242,11 +242,13 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   const moveAction = useMemo((): ReactNode | undefined => {
     if (editActions && !readHandlers?.isPanelViewed) {
       return (
-        <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
-          <HeaderIconButton aria-label={ARIA_LABEL_TEXT.movePanel(title)} size="small">
-            <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
-          </HeaderIconButton>
-        </InfoTooltip>
+        <Box sx={{ background: (theme) => theme.palette.background.default }}>
+          <InfoTooltip description={TOOLTIP_TEXT.movePanel}>
+            <HeaderIconButton aria-label={ARIA_LABEL_TEXT.movePanel(title)} size="small">
+              <DragIcon className="drag-handle" sx={{ cursor: 'grab' }} fontSize="inherit" />
+            </HeaderIconButton>
+          </InfoTooltip>
+        </Box>
       );
     }
     return undefined;
@@ -336,9 +338,28 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 };
 
 const OverflowMenu: React.FC<
-  PropsWithChildren<{ title?: string; icon?: ReactElement; direction?: 'row' | 'column' }>
-> = ({ children, title, icon, direction = 'row' }) => {
-  const [anchorPosition, setAnchorPosition] = useState<PopoverPosition>();
+  PropsWithChildren<{
+    title?: string;
+    icon?: ReactElement;
+    direction?: 'row' | 'column';
+    placement?:
+      | 'bottom'
+      | 'top'
+      | 'left'
+      | 'right'
+      | 'bottom-start'
+      | 'bottom-end'
+      | 'top-start'
+      | 'top-end'
+      | 'left-start'
+      | 'left-end'
+      | 'right-start'
+      | 'right-end';
+    offsetX?: number;
+    offsetY?: number;
+  }>
+> = ({ children, title, icon, direction = 'row', placement = 'bottom', offsetX = -2, offsetY = -25 }) => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   // do not show overflow menu if there is no content (for example, edit actions are hidden)
   const hasContent = isValidElement(children) || (Array.isArray(children) && children.some(isValidElement));
@@ -346,19 +367,19 @@ const OverflowMenu: React.FC<
     return null;
   }
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>): void => {
-    setAnchorPosition(event.currentTarget.getBoundingClientRect());
+  const handleClick = (event: MouseEvent<HTMLElement>): void => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
   };
 
   const handleClose = (): void => {
-    setAnchorPosition(undefined);
+    setAnchorEl(null);
   };
 
-  const open = Boolean(anchorPosition);
+  const open = Boolean(anchorEl);
   const id = open ? 'actions-menu' : undefined;
 
   return (
-    <>
+    <Box sx={{ background: (theme) => theme.palette.background.default }}>
       <HeaderIconButton
         className="show-actions"
         aria-describedby={id}
@@ -368,21 +389,31 @@ const OverflowMenu: React.FC<
       >
         {icon ?? <MenuIcon fontSize="inherit" />}
       </HeaderIconButton>
-      <Popover
+      <Popper
         id={id}
         open={open}
-        anchorReference="anchorPosition"
-        anchorPosition={anchorPosition}
-        onClose={handleClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left',
+        anchorEl={anchorEl}
+        placement={placement}
+        modifiers={[
+          {
+            name: 'offset',
+            options: {
+              offset: [offsetX, offsetY],
+            },
+          },
+        ]}
+        sx={{
+          backgroundColor: (theme) => theme.palette.background.paper,
+          borderRadius: 1,
+          boxShadow: (theme) => theme.shadows[4],
         }}
       >
-        <Stack direction={direction} alignItems="center" sx={{ padding: 1 }} onClick={handleClose}>
-          {children}
-        </Stack>
-      </Popover>
-    </>
+        <ClickAwayListener onClickAway={handleClose}>
+          <Stack direction={direction} alignItems="center" sx={{ padding: 1 }} onClick={handleClose}>
+            {children}
+          </Stack>
+        </ClickAwayListener>
+      </Popper>
+    </Box>
   );
 };

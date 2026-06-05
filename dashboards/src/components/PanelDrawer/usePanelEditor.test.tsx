@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { act, renderHook } from '@testing-library/react';
-import { PanelDefinition, QueryDefinition, TimeSeriesQueryDefinition } from '@perses-dev/core';
+import { PanelDefinition, QueryDefinition, TimeSeriesQueryDefinition } from '@perses-dev/spec';
 import { usePanelEditor } from './usePanelEditor';
 
 describe('usePanelEditor', () => {

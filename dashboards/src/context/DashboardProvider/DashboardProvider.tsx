@@ -18,16 +18,10 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { createContext, ReactElement, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import {
-  DashboardResource,
-  Display,
-  ProjectMetadata,
-  DurationString,
-  DEFAULT_REFRESH_INTERVAL,
-  DatasourceSpec,
-  EphemeralDashboardResource,
-} from '@perses-dev/core';
+import { Display, DurationString, DatasourceSpec } from '@perses-dev/spec';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
+import { DashboardMetaData, DashboardKind, DashboardResource } from '../../model/DashboardResource';
+import { DEFAULT_REFRESH_INTERVAL } from '../../constants';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
 import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
@@ -41,9 +35,11 @@ import { createEditJsonDialogSlice, EditJsonDialogSlice } from './edit-json-dial
 import { createPanelDefinition } from './common';
 import { createViewPanelSlice, ViewPanelSlice, VirtualPanelRef } from './view-panel-slice';
 import { assignRef, MutableRef } from './assign-ref';
+import { createLinksSlice, LinksSlice } from './links-slice';
 
 export interface DashboardStoreState
-  extends PanelGroupSlice,
+  extends
+    PanelGroupSlice,
     PanelSlice,
     PanelGroupEditorSlice,
     DeletePanelGroupSlice,
@@ -53,12 +49,13 @@ export interface DashboardStoreState
     DuplicatePanelSlice,
     EditJsonDialogSlice,
     SaveChangesConfirmationDialogSlice,
-    ViewPanelSlice {
+    ViewPanelSlice,
+    LinksSlice {
   isEditMode: boolean;
   setEditMode: (isEditMode: boolean) => void;
-  setDashboard: (dashboard: DashboardResource | EphemeralDashboardResource) => void;
-  kind: DashboardResource['kind'] | EphemeralDashboardResource['kind'];
-  metadata: ProjectMetadata;
+  setDashboard: (dashboard: DashboardResource) => void;
+  kind: DashboardKind;
+  metadata: DashboardMetaData;
   duration: DurationString;
   refreshInterval: DurationString;
   display?: Display;
@@ -77,7 +74,7 @@ export function useDashboardStore<T>(selector: (state: DashboardStoreState) => T
 }
 
 export interface DashboardStoreProps {
-  dashboardResource: DashboardResource | EphemeralDashboardResource;
+  dashboardResource: DashboardResource;
   isEditMode?: boolean;
   viewPanelRef?: VirtualPanelRef;
   setViewPanelRef?: (viewPanelRef: VirtualPanelRef | undefined) => void;
@@ -136,7 +133,9 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
     spec: { display, duration, refreshInterval = DEFAULT_REFRESH_INTERVAL, datasources, layouts = [], panels = {} },
   } = dashboardResource;
 
-  const ttl = 'ttl' in dashboardResource.spec ? dashboardResource.spec.ttl : undefined;
+  const links = dashboardResource.spec.links ?? [];
+
+  const ttl = 'ttl' in dashboardResource.spec ? (dashboardResource.spec.ttl as DurationString) : undefined;
 
   const store = createStore<DashboardStoreState>()(
     immer(
@@ -153,6 +152,8 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           ...createDeletePanelSlice()(...args),
           ...createDuplicatePanelSlice()(...args),
           ...createViewPanelSlice(viewPanelRef, setViewPanelRef)(...args),
+          /* Links */
+          ...createLinksSlice(links)(...args),
           /* General */
           ...createDiscardChangesDialogSlice(...args),
           ...createEditJsonDialogSlice(...args),
@@ -171,7 +172,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           setDashboard: ({
             kind,
             metadata,
-            spec: { display, panels = {}, layouts = [], duration, refreshInterval, datasources = {} },
+            spec: { display, panels = {}, layouts = [], duration, refreshInterval, datasources = {}, links = [] },
           }): void => {
             set((state) => {
               state.kind = kind;
@@ -184,6 +185,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
               state.duration = duration;
               state.refreshInterval = refreshInterval ?? DEFAULT_REFRESH_INTERVAL;
               state.datasources = datasources;
+              state.links = links;
               // TODO: add ttl here to e.g allow edition from JSON view, but probably requires quite some refactoring
             });
           },

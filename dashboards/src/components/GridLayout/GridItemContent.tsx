@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
+import { Box, useForkRef } from '@mui/material';
 import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo, useState } from 'react';
-import { isPanelGroupItemIdEqual, PanelDefinition, PanelGroupItemId } from '@perses-dev/core';
+import { PanelDefinition } from '@perses-dev/spec';
+import { isPanelGroupItemIdEqual, PanelGroupItemId } from '../../model'; // TODO
 import { useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
+import { usePanelFocusHandlers } from '../../keyboard-shortcuts';
 // LOGZ.IO CHANGE START:: Panel-level time range override [APPZ-2474]
 import { PanelTimeRangeOverrideProvider } from '../../context/PanelTimeRangeOverride';
 // LOGZ.IO CHANGE END:: Panel-level time range override [APPZ-2474]
@@ -43,11 +45,25 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   const { isEditMode } = useEditMode();
   const { openEditPanel, openDeletePanelDialog, duplicatePanel, viewPanel } = usePanelActions(panelGroupItemId);
   const viewPanelGroupItemId = useViewPanelGroup();
-  const { ref, inView } = useInView({
-    threshold: 0.2, // we have the flexibility to adjust this threshold to trigger queries slightly earlier or later based on performance
+
+  // Panel focus tracking for keyboard shortcuts
+  const { onMouseEnter, onMouseLeave } = usePanelFocusHandlers(
+    `${panelGroupItemId.panelGroupId}-${panelGroupItemId.panelGroupItemLayoutId}`
+  );
+
+  const { ref: queryRef, inView: shouldQuery } = useInView({
+    threshold: 0,
     initialInView: false,
     triggerOnce: true,
   });
+
+  const { ref: renderRef, inView: shouldRender } = useInView({
+    threshold: 0.2,
+    initialInView: false,
+    triggerOnce: false,
+  });
+
+  const mergedRef = useForkRef(renderRef, queryRef);
 
   const [openQueryViewer, setOpenQueryViewer] = useState(false);
 
@@ -84,25 +100,31 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
 
   return (
     <Box
-      ref={ref}
+      ref={mergedRef}
+      tabIndex={-1}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       sx={{
         width: '100%',
         height: '100%',
+        outline: 'none',
       }}
     >
       {/* LOGZ.IO CHANGE START:: Panel-level time range override (Grafana timeFrom/timeShift) [APPZ-2474]
           The override needs to wrap useSuggestedStepMs + DataQueriesProvider + Panel so that
           the panel's queries pick up the overridden range. We extract the time-dependent body
           into GridItemContentBody so it sits inside the override-aware TimeRangeProvider. Read via
-          local cast to avoid declaration-merging on `@perses-dev/core` PanelSpec — module-level
+          local cast to avoid declaration-merging on `@perses-dev/spec` PanelSpec — module-level
           augmentation triggered TS to re-derive types globally and broke pre-existing borderline
           inferences in unrelated app-ui test fixtures (e.g. `kind: string` not narrowing to
-          `kind: 'Panel'`). Keep the new fields scoped to consumers. */}
+          `kind: 'Panel'`). Keep the new fields scoped to consumers.
+          shouldQuery/shouldRender forwarded from upstream's split lazy-load (#132/#90). */}
       <PanelTimeRangeOverrideProvider spec={panelDefinition.spec as { timeFrom?: string; timeShift?: string }}>
         <GridItemContentBody
           panelDefinition={panelDefinition}
           width={width}
-          inView={inView}
+          shouldQuery={shouldQuery}
+          shouldRender={shouldRender}
           panelGroupItemId={panelGroupItemId}
           readHandlers={readHandlers}
           editHandlers={editHandlers}
@@ -120,7 +142,8 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
 interface GridItemContentBodyProps {
   panelDefinition: PanelDefinition;
   width: number;
-  inView: boolean;
+  shouldQuery: boolean;
+  shouldRender: boolean;
   panelGroupItemId: PanelGroupItemId;
   readHandlers: PanelProps['readHandlers'];
   editHandlers: PanelProps['editHandlers'];
@@ -131,7 +154,8 @@ interface GridItemContentBodyProps {
 function GridItemContentBody({
   panelDefinition,
   width,
-  inView,
+  shouldQuery,
+  shouldRender,
   panelGroupItemId,
   readHandlers,
   editHandlers,
@@ -149,7 +173,7 @@ function GridItemContentBody({
         return {
           kind: query.spec.plugin.kind,
           spec: query.spec.plugin.spec,
-          hidden: query.spec.hidden ?? false, // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
+          hidden: (query.spec as { hidden?: boolean }).hidden ?? false, // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
         };
       }),
     [panelDefinition.spec.queries]
@@ -167,9 +191,9 @@ function GridItemContentBody({
     <DataQueriesProvider
       definitions={definitions}
       options={{ suggestedStepMs, ...pluginQueryOptions }}
-      queryOptions={{ enabled: inView }}
+      queryOptions={{ enabled: shouldQuery }}
     >
-      {inView && (
+      {shouldRender && (
         <Panel
           definition={panelDefinition}
           readHandlers={readHandlers}

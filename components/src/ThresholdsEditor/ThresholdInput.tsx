@@ -14,11 +14,11 @@
 import { ReactElement, RefObject, useState } from 'react';
 import { Stack, FormLabel, IconButton, Box } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import { ThresholdOptions } from '@perses-dev/core';
 import { OptionsColorPicker } from '../ColorPicker/OptionsColorPicker';
 // LOGZ.IO CHANGE START:: Use NumberInput so partial decimals (".05") are not blanked [APPZ-1996]
 import { NumberInput } from '../NumberInput';
 // LOGZ.IO CHANGE END:: Use NumberInput so partial decimals (".05") are not blanked [APPZ-1996]
+import { ThresholdOptions } from '../model';
 
 export interface ThresholdInputProps {
   label: string;

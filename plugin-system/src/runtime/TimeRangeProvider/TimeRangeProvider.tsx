@@ -19,7 +19,7 @@ import {
   isRelativeTimeRange,
   toAbsoluteTimeRange,
   getSuggestedStepMs,
-} from '@perses-dev/core';
+} from '@perses-dev/spec';
 import { useQueryClient } from '@tanstack/react-query';
 import { getRefreshIntervalInMs } from './refresh-interval';
 

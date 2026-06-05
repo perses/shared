@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Column, HeaderGroup, Row, flexRender } from '@tanstack/react-table';
+import { Column, ColumnSizingInfoState, ColumnSizingState, flexRender, HeaderGroup, Row } from '@tanstack/react-table';
 import { Box, TablePagination, TableRow as MuiTableRow } from '@mui/material';
-import { TableVirtuoso, TableComponents, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
-import { useRef, useMemo, ReactElement } from 'react';
+import { TableComponents, TableVirtuoso, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
+import { ReactElement, useMemo, useRef } from 'react';
+import { TableToolbar, TableToolbarProps } from './TableToolbar';
 import { TableRow } from './TableRow';
 import { TableBody } from './TableBody';
 import { InnerTable } from './InnerTable';
@@ -33,15 +34,29 @@ type TableCellPosition = {
 };
 
 export type VirtualizedTableProps<TableData> = Required<
-  Pick<TableProps<TableData>, 'height' | 'width' | 'density' | 'defaultColumnWidth' | 'defaultColumnHeight'>
+  Pick<TableProps<TableData>, 'height' | 'width' | 'density' | 'defaultColumnHeight' | 'defaultColumnWidth'>
 > &
   Pick<TableProps<TableData>, 'onRowMouseOver' | 'onRowMouseOut' | 'pagination' | 'onPaginationChange'> & {
     onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
     rows: Array<Row<TableData>>;
     columns: Array<Column<TableData, unknown>>;
     headers: Array<HeaderGroup<TableData>>;
+    columnSizing: ColumnSizingState;
+    columnSizingInfo: ColumnSizingInfoState;
     cellConfigs?: TableCellConfigs;
     rowCount: number;
+    toolbarConfig: Pick<
+      TableToolbarProps<TableData>,
+      | 'isSearchEnabled'
+      | 'globalFilter'
+      | 'onGlobalFilterChange'
+      | 'isColumnFilterEnabled'
+      | 'columns'
+      | 'columnFilterMenuMaxHeight'
+      | 'isExpandAllEnabled'
+      | 'isAllExpanded'
+      | 'onExpandAllChange'
+    >;
   };
 
 // Separating out the virtualized table because we may want a paginated table
@@ -59,10 +74,13 @@ export function VirtualizedTable<TableData>({
   rows,
   columns,
   headers,
+  columnSizing,
+  columnSizingInfo,
   cellConfigs,
   pagination,
   onPaginationChange,
   rowCount,
+  toolbarConfig,
 }: VirtualizedTableProps<TableData>): ReactElement {
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
 
@@ -157,8 +175,30 @@ export function VirtualizedTable<TableData>({
     onPaginationChange({ pageIndex: 0, pageSize: parseInt(event.target.value, 10) });
   };
 
+  /**
+   * Instead of calling `column.getSize()` on every render for every header
+   * and especially every data cell (very expensive),
+   * we will calculate all column sizes at once at the root table level in a useMemo
+   * and pass the column sizes down as CSS variables to the <table> element.
+   */
+  const columnSizeVars = useMemo(() => {
+    const colSizes: { [key: string]: number } = {};
+    headers.forEach((headerGroup) => {
+      headerGroup.headers
+        .filter((header) => header.column.getCanResize())
+        .forEach((header) => {
+          colSizes[`--header-${header.id}-size`] = header.getSize();
+          colSizes[`--col-${header.column.id}-size`] = header.column.getSize();
+        });
+    });
+    return colSizes;
+    // We want to recalculate column sizes whenever column sizes or column resizing info changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnSizingInfo, columnSizing, headers]);
+
   return (
-    <Box style={{ width, height }}>
+    <Box style={{ width, height, ...columnSizeVars }}>
+      <TableToolbar {...toolbarConfig} width={width} />
       <TableVirtuoso
         ref={virtuosoRef}
         totalCount={rows.length}
@@ -189,7 +229,11 @@ export function VirtualizedTable<TableData>({
                           onSort={column.getCanSort() ? column.getToggleSortingHandler() : undefined}
                           sortDirection={typeof isSorted === 'string' ? isSorted : undefined}
                           nextSortDirection={typeof nextSorting === 'string' ? nextSorting : undefined}
-                          width={column.getSize() || defaultColumnWidth}
+                          width={
+                            header.column.getCanResize()
+                              ? `calc(var(--header-${header?.id}-size) * 1px)`
+                              : column.getSize() || defaultColumnWidth
+                          }
                           defaultColumnHeight={defaultColumnHeight}
                           align={column.columnDef.meta?.align}
                           variant="head"
@@ -199,6 +243,15 @@ export function VirtualizedTable<TableData>({
                           onFocusTrigger={() => keyboardNav.onCellFocus(position)}
                           isFirstColumn={i === 0}
                           isLastColumn={i === headers.length - 1}
+                          resizeConfig={
+                            header.column.getCanResize()
+                              ? {
+                                  resizeHandler: header.getResizeHandler(),
+                                  resetSizeHandler: header.column.resetSize,
+                                  isResizing: header.column.getIsResizing(),
+                                }
+                              : undefined
+                          }
                         >
                           {flexRender(column.columnDef.header, header.getContext())}
                         </TableHeaderCell>
@@ -247,13 +300,13 @@ export function VirtualizedTable<TableData>({
                 const cellRenderFn = cell.column.columnDef.cell;
                 const cellContent = typeof cellRenderFn === 'function' ? cellRenderFn(cellContext) : null;
 
-                /* 
-                   IMPORTANT:
-                   If Variables exist in the link, they should have been translated by the plugin already. (Being developed at the moment)
-                   Components have no access to any context (Which is intentional and correct)
-                   We may want to add parameters to a link from neighboring cells in the future as well.
-                   If this is the case, the value of the neighboring cells should be read from here and be replaced. (Bing discussed at the moment, not decided yet)
-                */
+                /*
+                     IMPORTANT:
+                     If Variables exist in the link, they should have been translated by the plugin already. (Being developed at the moment)
+                     Components have no access to any context (Which is intentional and correct)
+                     We may want to add parameters to a link from neighboring cells in the future as well.
+                     If this is the case, the value of the neighboring cells should be read from here and be replaced. (Bing discussed at the moment, not decided yet)
+                  */
 
                 // LOGZ.IO CHANGE START
                 const cellURLTemplate = cell.column.columnDef.meta?.linkConfig?.urlTemplate;
@@ -275,9 +328,9 @@ export function VirtualizedTable<TableData>({
                   description = cellContent;
                 }
 
-                /* this has been specifically added for the data link, 
-                   therefore, non string and numeric values should be excluded
-                */
+                /* this has been specifically added for the data link,
+                     therefore, non string and numeric values should be excluded
+                  */
                 const adjacentCellsValuesMap = Object.entries(row.original as Record<string, unknown>)
                   ?.filter(([_, value]) => ['string', 'number'].includes(typeof value))
                   .reduce(
@@ -293,7 +346,11 @@ export function VirtualizedTable<TableData>({
                     key={cell.id}
                     data-testid={cell.id}
                     title={description || cellConfig?.text || cellContent}
-                    width={cell.column.getSize() || defaultColumnWidth}
+                    width={
+                      cell.column.getCanResize()
+                        ? `calc(var(--col-${cell.column.id}-size) * 1px)`
+                        : cell.column.getSize() || defaultColumnWidth
+                    }
                     defaultColumnHeight={defaultColumnHeight}
                     align={cell.column.columnDef.meta?.align}
                     density={density}

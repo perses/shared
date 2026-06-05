@@ -43,44 +43,67 @@ const getModalBackgroundStyle = ({
  *
  * Need to reinstantiate the theme everytime to support switching between light and dark themes
  * https://github.com/mui-org/material-ui/issues/18831
+ *
+ * Enable disableBodyOverride to prevent the theme from applying color scheme to the body element.
  */
-export function getTheme(mode: PaletteMode, options: Parameters<typeof createTheme>[0] = {}): Theme {
+export function getTheme(
+  mode: PaletteMode,
+  options: Parameters<typeof createTheme>[0] = {},
+  disableBodyOverride: boolean = false
+): Theme {
   return createTheme({
     palette: getPaletteOptions(mode),
     typography,
     mixins: {},
-    components,
+    components: getComponents(mode, disableBodyOverride),
     ...options,
   });
 }
 
 // Overrides for component default prop values and styles go here
-const components: ThemeOptions['components'] = {
-  MuiAlert,
-  MuiFormControl: {
-    defaultProps: {
-      size: 'small',
+function getComponents(mode: PaletteMode, disableBodyOverride: boolean): ThemeOptions['components'] {
+  const components: ThemeOptions['components'] = {
+    MuiAlert,
+    MuiFormControl: {
+      defaultProps: {
+        size: 'small',
+      },
     },
-  },
-  MuiPaper,
-  MuiTextField: {
-    defaultProps: {
-      size: 'small',
+    MuiPaper,
+    MuiTextField: {
+      defaultProps: {
+        size: 'small',
+      },
     },
-  },
-  MuiDrawer: {
-    styleOverrides: {
-      paper: getModalBackgroundStyle,
+    MuiDrawer: {
+      styleOverrides: {
+        paper: getModalBackgroundStyle,
+      },
     },
-  },
-  MuiDialog: {
-    styleOverrides: {
-      paper: getModalBackgroundStyle,
+    MuiDialog: {
+      styleOverrides: {
+        paper: getModalBackgroundStyle,
+      },
     },
-  },
-  MuiPopover: {
-    styleOverrides: {
-      paper: getModalBackgroundStyle,
+    MuiPopover: {
+      styleOverrides: {
+        paper: getModalBackgroundStyle,
+      },
     },
-  },
-};
+  };
+
+  if (disableBodyOverride) {
+    return components;
+  }
+
+  return {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          colorScheme: mode,
+        },
+      },
+    },
+    ...components,
+  };
+}

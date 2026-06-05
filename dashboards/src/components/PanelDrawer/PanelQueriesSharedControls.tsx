@@ -23,7 +23,7 @@ import {
   useSuggestedStepMs,
 } from '@perses-dev/plugin-system';
 // LOGZ.IO CHANGE END:: Import PanelSpecChangeProvider for bidirectional panel-settings sync [APPZ-1695]
-import { Definition, PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/core';
+import { Definition, PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { Control, FieldPath, useWatch } from 'react-hook-form';
 import { ReactElement, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 // LOGZ.IO CHANGE START:: Wrap editor preview in panel time range override [APPZ-2474]
@@ -107,7 +107,7 @@ function PanelQueriesSharedControlsBody({
         return {
           kind: query.spec.plugin.kind,
           spec: query.spec.plugin.spec,
-          hidden: query.spec.hidden ?? false, // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
+          hidden: (query.spec as { hidden?: boolean }).hidden ?? false, // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
         };
       }) ?? []
   );
@@ -122,7 +122,7 @@ function PanelQueriesSharedControlsBody({
         panelDefinition.spec.queries?.map((query) => ({
           kind: query.spec.plugin.kind,
           spec: query.spec.plugin.spec,
-          hidden: query.spec.hidden ?? false,
+          hidden: (query.spec as { hidden?: boolean }).hidden ?? false,
         })) ?? []
       );
     }
@@ -136,7 +136,7 @@ function PanelQueriesSharedControlsBody({
       newDefinitions[index] = {
         kind: newDef.spec.plugin.kind,
         spec: newDef.spec.plugin.spec,
-        hidden: newDef.spec.hidden ?? false, // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
+        hidden: (newDef.spec as { hidden?: boolean }).hidden ?? false, // LOGZ.IO CHANGE:: APPZ-955-math-on-queries-formulas
       };
       return newDefinitions;
     });

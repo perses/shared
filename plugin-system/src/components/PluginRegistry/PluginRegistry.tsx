@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec } from '@perses-dev/core';
+import { UnknownSpec } from '@perses-dev/spec';
 import { useRef, useCallback, useMemo, ReactNode, ReactElement } from 'react';
 import {
   PluginModuleResource,
@@ -23,7 +23,8 @@ import {
 } from '../../model';
 import { PluginRegistryContext } from '../../runtime';
 import { useEvent } from '../../utils';
-import { usePluginIndexes, getTypeAndKindKey } from './plugin-indexes';
+import { usePluginIndexes, PluginCompoundKey } from './plugin-indexes';
+import { resolvePluginKeys } from './getPluginSearchHelper';
 
 export interface PluginRegistryProps {
   pluginLoader: PluginLoader;
@@ -62,29 +63,25 @@ export function PluginRegistry(props: PluginRegistryProps): ReactElement {
   });
 
   const getPlugin = useCallback(
-    async <T extends PluginType>(kind: T, name: string): Promise<PluginImplementation<T>> => {
-      // Get the indexes of the installed plugins
+    async <T extends PluginType>(compoundKeyObj: PluginCompoundKey<T>): Promise<PluginImplementation<T>> => {
       const pluginIndexes = await getPluginIndexes();
+      const { kind, name } = compoundKeyObj;
 
-      // Figure out what module the plugin is in by looking in the index
-      const typeAndKindKey = getTypeAndKindKey(kind, name);
-      const resource = pluginIndexes.pluginResourcesByNameAndKind.get(typeAndKindKey);
-      if (resource === undefined) {
-        throw new Error(`A ${name} plugin for kind '${kind}' is not installed`);
+      const candidateKeys = resolvePluginKeys(
+        pluginIndexes.pluginResourcesByNameKindRegistryVersion.keys(),
+        compoundKeyObj
+      );
+
+      for (const resourceKey of candidateKeys) {
+        const resource = pluginIndexes.pluginResourcesByNameKindRegistryVersion.get(resourceKey);
+        if (!resource) continue;
+
+        const pluginModule = (await loadPluginModule(resource)) as Record<string, Plugin<UnknownSpec>>;
+        const plugin = pluginModule?.[resourceKey];
+        if (plugin) return plugin as PluginImplementation<T>;
       }
 
-      // Treat the plugin module as a bunch of named exports that have plugins
-      const pluginModule = (await loadPluginModule(resource)) as Record<string, Plugin<UnknownSpec>>;
-
-      // We currently assume that plugin modules will have named exports that match the kinds they handle
-      const plugin = pluginModule[name];
-      if (plugin === undefined) {
-        throw new Error(
-          `The ${name} plugin for kind '${kind}' is missing from the ${resource.metadata.name} plugin module`
-        );
-      }
-
-      return plugin as PluginImplementation<T>;
+      throw new Error(`A ${name} plugin for kind '${kind}' is not installed`);
     },
     [getPluginIndexes, loadPluginModule]
   );

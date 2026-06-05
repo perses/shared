@@ -128,8 +128,17 @@ describe('remotePluginLoader', () => {
       const loader = remotePluginLoader();
       const result = await loader.importPluginModule(MOCK_VALID_PLUGIN_MODULE_RESOURCE);
 
-      expect(mockLoadPlugin).toHaveBeenCalledWith('test-module', 'testPlugin', '/plugins');
-      expect(result).toEqual(MOCK_REMOTE_PLUGIN_MODULE);
+      expect(mockLoadPlugin).toHaveBeenCalledWith({
+        moduleName: 'test-module',
+        pluginName: 'testPlugin',
+        baseURL: '/plugins',
+        version: '1.0.0',
+      });
+      expect(result).toEqual({
+        'Panel:testPlugin::1.0.0': {
+          ...MOCK_REMOTE_PLUGIN_MODULE.testPlugin,
+        },
+      });
       expect(mockConsoleError).not.toHaveBeenCalled();
     });
 
@@ -154,8 +163,17 @@ describe('remotePluginLoader', () => {
         const loader = remotePluginLoader(testCase.options);
         const result = await loader.importPluginModule(MOCK_VALID_PLUGIN_MODULE_RESOURCE);
 
-        expect(mockLoadPlugin).toHaveBeenCalledWith('test-module', 'testPlugin', testCase.expected);
-        expect(result).toEqual(MOCK_REMOTE_PLUGIN_MODULE);
+        expect(mockLoadPlugin).toHaveBeenCalledWith({
+          moduleName: 'test-module',
+          pluginName: 'testPlugin',
+          baseURL: testCase.expected,
+          version: '1.0.0',
+        });
+        expect(result).toEqual({
+          'Panel:testPlugin::1.0.0': {
+            ...MOCK_REMOTE_PLUGIN_MODULE.testPlugin,
+          },
+        });
         expect(mockConsoleError).not.toHaveBeenCalled();
       }
 
@@ -174,11 +192,22 @@ describe('remotePluginLoader', () => {
       const result = await loader.importPluginModule(multiPluginModule);
 
       expect(mockLoadPlugin).toHaveBeenCalledTimes(2);
-      expect(mockLoadPlugin).toHaveBeenNthCalledWith(1, 'multi-plugin-module', 'plugin1', '/plugins');
-      expect(mockLoadPlugin).toHaveBeenNthCalledWith(2, 'multi-plugin-module', 'plugin2', '/plugins');
+      expect(mockLoadPlugin).toHaveBeenNthCalledWith(1, {
+        moduleName: 'multi-plugin-module',
+        pluginName: 'plugin1',
+        baseURL: '/plugins',
+        version: '1.0.0',
+      });
+      expect(mockLoadPlugin).toHaveBeenNthCalledWith(2, {
+        moduleName: 'multi-plugin-module',
+        pluginName: 'plugin2',
+        baseURL: '/plugins',
+        version: '1.0.0',
+      });
+
       expect(result).toEqual({
-        plugin1: { component: expect.any(Function) },
-        plugin2: { component: expect.any(Function) },
+        'Panel:plugin1::1.0.0': { component: expect.any(Function) },
+        'Variable:plugin2::1.0.0': { component: expect.any(Function) },
       });
     });
 
@@ -193,7 +222,7 @@ describe('remotePluginLoader', () => {
       const result = await loader.importPluginModule(multiPluginModule);
 
       expect(result).toEqual({
-        workingPlugin: { component: expect.any(Function) },
+        'Panel:workingPlugin::1.0.0': { component: expect.any(Function) },
       });
       expect(mockConsoleError).toHaveBeenCalledWith('RemotePluginLoader: Error loading plugin failingPlugin');
     });
@@ -285,6 +314,35 @@ describe('remotePluginLoader', () => {
       // Should get only the valid module (partial-module gets filtered out due to invalid plugin)
       expect(result).toHaveLength(1);
       expect(result[0]).toEqual(MOCK_VALID_PLUGIN_MODULE_RESOURCE);
+    });
+
+    it('should call loadPlugin with specific version and registry', async () => {
+      mockLoadPlugin.mockResolvedValue({});
+      const loader = remotePluginLoader();
+      await loader.importPluginModule({
+        kind: 'PluginModule',
+        metadata: {
+          name: 'custom-module',
+          version: '0.1.0',
+        },
+        spec: {
+          plugins: [
+            {
+              kind: 'Panel',
+              spec: {
+                display: { name: 'p1', description: 'p1 plugin' },
+                name: 'p1',
+              },
+            },
+          ],
+        },
+      });
+      expect(mockLoadPlugin).toHaveBeenCalledWith({
+        moduleName: 'custom-module',
+        pluginName: 'p1',
+        version: '0.1.0',
+        baseURL: '/plugins',
+      });
     });
   });
 });

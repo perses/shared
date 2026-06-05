@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BuiltinVariableDefinition, UnknownSpec } from '@perses-dev/core';
+import { BuiltinVariableDefinition, UnknownSpec } from '@perses-dev/spec';
 import { Plugin } from './plugin-base';
 
 /**

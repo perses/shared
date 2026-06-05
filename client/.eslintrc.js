@@ -11,19 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action } from '@perses-dev/core';
-
-export function getTitleAction(action: Action, isDraft: boolean): string {
-  if (action === 'read') return 'View';
-  if (isDraft && action === 'create') return 'Add';
-  if (!isDraft && action === 'create') return 'Create';
-  if (action === 'update') return 'Edit';
-  return '';
-}
-
-export function getSubmitText(action: Action, isDraft: boolean): string {
-  if (isDraft && action === 'create') return 'Add';
-  if (isDraft && action === 'update') return 'Apply';
-  if (!isDraft) return 'Save';
-  return '';
-}
+module.exports = require('../.eslintrc.base.js');

@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BuiltinVariableDefinition } from '@perses-dev/core';
+import { BuiltinVariableDefinition } from '@perses-dev/spec';
 import { useQueries, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 import { DefaultPluginKinds, PluginImplementation, PluginMetadataWithModule, PluginType } from '../model';
+import { PluginCompoundKey } from '../components/PluginRegistry/plugin-indexes';
 
 export interface PluginRegistryContextType {
-  getPlugin<T extends PluginType>(kind: T, name: string): Promise<PluginImplementation<T>>;
+  getPlugin<T extends PluginType>(compoundKey: PluginCompoundKey<T>): Promise<PluginImplementation<T>>;
   listPluginMetadata(pluginTypes: PluginType[]): Promise<PluginMetadataWithModule[]>;
   defaultPluginKinds?: DefaultPluginKinds;
 }
@@ -58,7 +59,7 @@ export function usePlugin<T extends PluginType>(
   const { getPlugin } = usePluginRegistry();
   return useQuery({
     queryKey: ['getPlugin', pluginType, kind],
-    queryFn: () => getPlugin(pluginType!, kind),
+    queryFn: () => getPlugin({ kind: pluginType!, name: kind }),
     ...options,
   }) as UseQueryResult<PluginImplementation<T>, Error>;
 }
@@ -82,7 +83,7 @@ export function usePlugins<T extends PluginType>(
     queries: kinds.map((kind) => {
       return {
         queryKey: ['getPlugin', pluginType, kind],
-        queryFn: () => getPlugin(pluginType, kind),
+        queryFn: () => getPlugin({ kind: pluginType, name: kind }),
       };
     }),
   });
@@ -122,7 +123,7 @@ export function usePluginBuiltinVariableDefinitions(): UseQueryResult<BuiltinVar
       const datasourceNames = new Set(datasources.map((datasource) => datasource.spec.name));
       const result: BuiltinVariableDefinition[] = [];
       for (const name of datasourceNames) {
-        const plugin = await getPlugin('Datasource', name);
+        const plugin = await getPlugin({ kind: 'Datasource', name });
         if (plugin.getBuiltinVariableDefinitions) {
           plugin.getBuiltinVariableDefinitions().forEach((definition) => result.push(definition));
         }

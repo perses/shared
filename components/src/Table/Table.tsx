@@ -14,20 +14,24 @@
 import { Stack, useTheme } from '@mui/material';
 import {
   ColumnDef,
+  ExpandedState,
+  getCoreRowModel,
+  getExpandedRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
   OnChangeFn,
   Row,
   RowSelectionState,
   SortingState,
   Table as TanstackTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
+  VisibilityState,
 } from '@tanstack/react-table';
-import { ReactElement, useCallback, useMemo } from 'react';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
+import { useFuzzySearch } from './hooks/useFuzzySearch';
 import { TableCheckbox } from './TableCheckbox';
 import { VirtualizedTable } from './VirtualizedTable';
-import { DEFAULT_COLUMN_WIDTH, TableProps, persesColumnsToTanstackColumns } from './model/table-model';
+import { DEFAULT_COLUMN_WIDTH, persesColumnsToTanstackColumns, TableProps } from './model/table-model';
 
 const DEFAULT_GET_ROW_ID = (data: unknown, index: number): string => {
   return `${index}`;
@@ -64,9 +68,29 @@ export function Table<TableData>({
   pagination,
   onPaginationChange,
   rowSelectionVariant = 'standard',
+  getSubRows,
+  hiddenColumns,
+  tableToolbarConfig,
+  columnResizeMode = 'onChange',
+  defaultColumnConfig,
   ...otherProps
 }: TableProps<TableData>): ReactElement {
   const theme = useTheme();
+
+  const hasSubRows = !!getSubRows;
+
+  const [expanded, setExpanded] = useState<ExpandedState>({});
+
+  const { globalFilter, setGlobalFilter, fuzzySearchOptions } = useFuzzySearch<TableData>(
+    tableToolbarConfig?.isSearchEnabled,
+    tableToolbarConfig?.fuzzyMatchThreshold ?? 'CONTAINS',
+    expanded,
+    setExpanded
+  );
+
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+    hiddenColumns?.reduce((acc, columnId) => ({ ...acc, [columnId]: false }), {}) ?? {}
+  );
 
   const handleRowSelectionChange: OnChangeFn<RowSelectionState> = (rowSelectionUpdater) => {
     const newRowSelection =
@@ -125,6 +149,7 @@ export function Table<TableData>({
         );
       },
       enableSorting: false,
+      enableResizing: false,
     };
   }, [getItemActions]);
 
@@ -157,11 +182,12 @@ export function Table<TableData>({
         );
       },
       enableSorting: false,
+      enableResizing: false,
     };
   }, [theme.palette.text.primary, density, getCheckboxColor, handleCheckboxChange]);
 
   const tableColumns: Array<ColumnDef<TableData>> = useMemo(() => {
-    const initTableColumns = persesColumnsToTanstackColumns(columns);
+    const initTableColumns = persesColumnsToTanstackColumns(columns, defaultColumnConfig);
 
     if (hasItemActions) {
       initTableColumns.unshift(actionsColumn);
@@ -172,12 +198,12 @@ export function Table<TableData>({
     }
 
     return initTableColumns;
-  }, [checkboxColumn, checkboxSelection, columns, hasItemActions, actionsColumn]);
+  }, [columns, defaultColumnConfig, hasItemActions, checkboxSelection, actionsColumn, checkboxColumn]);
 
   const table = useReactTable({
     data,
     columns: tableColumns,
-    getRowId,
+    getRowId: getRowId,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: pagination ? getPaginationRowModel() : undefined,
@@ -187,13 +213,22 @@ export function Table<TableData>({
     enableRowSelection: !!checkboxSelection,
     onRowSelectionChange: handleRowSelectionChange,
     onSortingChange: handleSortingChange,
+    onColumnVisibilityChange: setColumnVisibility,
+    getSubRows: getSubRows,
+    getExpandedRowModel: hasSubRows ? getExpandedRowModel() : undefined,
+    ...fuzzySearchOptions,
     // For now, defaulting to sort by descending first. We can expose the ability
     // to customize it if/when we have use cases for it.
     sortDescFirst: true,
+    columnResizeMode,
+    onExpandedChange: setExpanded,
     state: {
       rowSelection,
       sorting,
+      globalFilter: tableToolbarConfig?.isSearchEnabled ? globalFilter : undefined,
+      columnVisibility,
       ...(pagination ? { pagination } : {}),
+      expanded,
     },
   });
 
@@ -214,12 +249,25 @@ export function Table<TableData>({
       defaultColumnHeight={defaultColumnHeight}
       onRowClick={handleRowClick}
       rows={table.getRowModel().rows}
-      columns={table.getAllFlatColumns()}
+      columns={table.getVisibleFlatColumns()}
+      columnSizing={table.getState().columnSizing}
+      columnSizingInfo={table.getState().columnSizingInfo}
       headers={table.getHeaderGroups()}
       cellConfigs={cellConfigs}
       pagination={pagination}
       onPaginationChange={onPaginationChange}
       rowCount={table.getRowCount()}
+      toolbarConfig={{
+        isSearchEnabled: tableToolbarConfig?.isSearchEnabled,
+        globalFilter,
+        onGlobalFilterChange: setGlobalFilter,
+        isColumnFilterEnabled: tableToolbarConfig?.isColumnFilterEnabled,
+        columns: table.getAllColumns(),
+        columnFilterMenuMaxHeight: tableToolbarConfig?.columnFilterMenuMaxHeight,
+        isExpandAllEnabled: hasSubRows,
+        isAllExpanded: table.getIsAllRowsExpanded(),
+        onExpandAllChange: table.getToggleAllRowsExpandedHandler(),
+      }}
     />
   );
 }

@@ -19,6 +19,6 @@ import ernieResource from './ernie/plugin.json';
  * A PluginLoader for tests that will dynamically load the plugins in this folder.
  */
 export const testPluginLoader: PluginLoader = dynamicImportPluginLoader([
-  { resource: bertResource as PluginModuleResource, importPlugin: () => import('./bert') },
-  { resource: ernieResource as PluginModuleResource, importPlugin: () => import('./ernie') },
+  { resource: bertResource as PluginModuleResource, importPlugin: () => import('./bert').then((m) => m.plugins) },
+  { resource: ernieResource as PluginModuleResource, importPlugin: () => import('./ernie').then((m) => m.plugins) },
 ]);

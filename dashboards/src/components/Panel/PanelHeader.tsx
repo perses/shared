@@ -13,7 +13,7 @@
 
 import { CardHeader, CardHeaderProps, Stack, Typography, Tooltip } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
-import { Link } from '@perses-dev/core';
+import { Link } from '@perses-dev/spec';
 import { ItemAction, QueryData, useAllVariableValues, useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { ReactElement, ReactNode, useRef } from 'react';
 import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants';

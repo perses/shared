@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React from 'react';
-import { UnknownSpec, PanelDefinition, QueryPluginType, QueryDataType, QueryDefinition } from '@perses-dev/core';
+import { UnknownSpec, PanelDefinition, QueryPluginType, QueryDataType, QueryDefinition } from '@perses-dev/spec';
 import { OptionsEditorTab } from '../components';
 import { QueryOptions } from '../runtime';
 import { OptionsEditorProps, Plugin } from './plugin-base';

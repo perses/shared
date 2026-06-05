@@ -14,3 +14,4 @@
 export * from './grid-layout-config';
 export * from './styles';
 export * from './user-interface-text';
+export * from './defaults';

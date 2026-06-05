@@ -12,8 +12,14 @@
 // limitations under the License.
 
 import { ECharts as EChartsInstance } from 'echarts/core';
-import { formatValue, FormatOptions, TimeSeries, TimeSeriesMetadata } from '@perses-dev/core';
-import { EChartsDataFormat, OPTIMIZED_MODE_SERIES_LIMIT, TimeChartSeriesMapping } from '../model';
+import { TimeSeries, TimeSeriesMetadata } from '@perses-dev/spec';
+import {
+  EChartsDataFormat,
+  OPTIMIZED_MODE_SERIES_LIMIT,
+  TimeChartSeriesMapping,
+  FormatOptions,
+  formatValue,
+} from '../model';
 import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp } from '../utils';
 import { CursorCoordinates, CursorData, EMPTY_TOOLTIP_DATA } from './tooltip-model';
 import { gatherCandidates, findClosestCandidate, processCandidates } from './utils';

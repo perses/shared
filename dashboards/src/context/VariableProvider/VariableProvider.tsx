@@ -33,12 +33,12 @@ import {
   VariableValue,
   VariableDefinition,
   formatDuration,
-  intervalToPrometheusDuration,
   BuiltinVariableDefinition,
   TextVariableDefinition,
   ListVariableDefinition,
-  ExternalVariableDefinition,
-} from '@perses-dev/core';
+  intervalToDuration,
+} from '@perses-dev/spec';
+import { ExternalVariableDefinition } from '../../model/VariableDefinition';
 import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 import { hydrateVariableDefinitionStates as hydrateVariableDefinitionStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
@@ -280,7 +280,7 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps): Re
         kind: 'BuiltinVariable',
         spec: {
           name: '__range',
-          value: () => formatDuration(intervalToPrometheusDuration(absoluteTimeRange)),
+          value: () => formatDuration(intervalToDuration(absoluteTimeRange)),
           source: 'Dashboard',
           display: {
             name: '__range',
@@ -331,14 +331,17 @@ interface VariableDefinitionStoreArgs {
   initialVariableDefinitions?: VariableDefinition[];
   externalVariableDefinitions?: ExternalVariableDefinition[];
   queryParams?: ReturnType<typeof useVariableQueryParams>;
+  initialVariableValues?: Record<string, VariableValue>;
 }
 
 function createVariableDefinitionStore({
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   queryParams,
+  initialVariableValues,
 }: VariableDefinitionStoreArgs): StoreApi<VariableDefinitionStore> {
-  const initialParams = getInitalValuesFromQueryParameters(queryParams ? queryParams[0] : {});
+  const queryParamValues = getInitalValuesFromQueryParameters(queryParams ? queryParams[0] : {});
+  const initialParams = { ...queryParamValues, ...initialVariableValues };
   const store = createStore<VariableDefinitionStore>()(
     devtools(
       immer((set, get) => ({
@@ -475,13 +478,13 @@ function createVariableDefinitionStore({
  * You can define one list of variable definition by source and as many source as you want.
  * The order of the sources is important as first one will take precedence on the following ones, in case they have same names.
  */
-// ExternalVariableDefinition is now imported from @perses-dev/core
 
 export interface VariableProviderProps {
   children: ReactNode;
   initialVariableDefinitions?: VariableDefinition[];
   externalVariableDefinitions?: ExternalVariableDefinition[];
   builtinVariableDefinitions?: BuiltinVariableDefinition[];
+  initialVariableValues?: Record<string, VariableValue>;
 }
 
 // TODO: merge the different providers related to Variables under a single one (and keep "VariableProvider" as a name)
@@ -490,9 +493,10 @@ export function VariableProvider({
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
   builtinVariableDefinitions = [],
+  initialVariableValues,
 }: VariableProviderProps): ReactElement {
   const [store] = useState(() =>
-    createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions })
+    createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions, initialVariableValues })
   );
 
   return (

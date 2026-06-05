@@ -27,7 +27,7 @@ import {
   getTimeZoneOptions,
   buildRelativeTimeOption,
 } from '@perses-dev/components';
-import { AbsoluteTimeRange, DurationString, parseDurationString, RelativeTimeRange } from '@perses-dev/core';
+import { AbsoluteTimeRange, DurationString, parseDurationString, RelativeTimeRange } from '@perses-dev/spec';
 import { ReactElement, useCallback } from 'react';
 import { TOOLTIP_TEXT } from '../../constants';
 import {

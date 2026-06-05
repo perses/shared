@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { createContext, useContext, useMemo } from 'react';
-import { BuiltinVariableDefinition } from '@perses-dev/core';
+import { BuiltinVariableDefinition } from '@perses-dev/spec';
 import { VariableStateMap } from './variables';
 
 export type BuiltinVariableSrv = {

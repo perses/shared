@@ -14,7 +14,7 @@
 import React, { ForwardedRef, HTMLAttributes, ReactNode, forwardRef, useContext, useMemo } from 'react';
 import { Checkbox, Divider } from '@mui/material';
 import { VariableOption } from '@perses-dev/plugin-system';
-import { DEFAULT_ALL_VALUE } from '@perses-dev/core';
+import { DEFAULT_ALL_VALUE } from '@perses-dev/spec';
 
 export interface ListVariableListBoxContextValue {
   options: VariableOption[];

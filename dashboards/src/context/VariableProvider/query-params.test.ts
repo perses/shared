@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableValue } from '@perses-dev/core';
+import { VariableValue } from '@perses-dev/spec';
 import { getInitalValuesFromQueryParameters, decodeVariableValue, encodeVariableValue } from './query-params';
 
 describe('getInitalValuesFromQueryParameters', () => {

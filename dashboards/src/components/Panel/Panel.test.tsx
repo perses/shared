@@ -13,7 +13,7 @@
 
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { PanelDefinition } from '@perses-dev/core';
+import { PanelDefinition } from '@perses-dev/spec';
 import { DataQueriesProvider, TimeRangeProviderBasic, useDataQueriesContext } from '@perses-dev/plugin-system';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { renderWithContext } from '../../test';

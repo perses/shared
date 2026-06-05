@@ -20,7 +20,7 @@ import {
   isDurationString,
   DurationString,
   AbsoluteTimeRange,
-} from '@perses-dev/core';
+} from '@perses-dev/spec';
 import { TimeRange } from './TimeRangeProvider';
 
 export type TimeOptionValue = Date | DurationString | null | undefined;

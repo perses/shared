@@ -13,9 +13,9 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { HTTPDatasourceSpec } from '@perses-dev/core';
 import { FormProvider, useForm } from 'react-hook-form';
 import { ReactElement } from 'react';
+import { HTTPDatasourceSpec } from '@perses-dev/client';
 import { HTTPSettingsEditor } from './HTTPSettingsEditor';
 
 describe('HTTPSettingsEditor - Request Headers', () => {

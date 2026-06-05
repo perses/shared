@@ -13,18 +13,17 @@
 
 import { createContext, ReactElement, ReactNode, useContext, useState } from 'react';
 import {
-  DatasourceDefinition,
   PanelEditorValues,
   VariableDefinition,
   PluginSchema,
-  datasourceDefinitionSchema,
   panelEditorSchema as defaultPanelEditorSchema,
   variableDefinitionSchema,
-  buildDatasourceDefinitionSchema,
   buildPanelEditorSchema,
   buildVariableDefinitionSchema,
-} from '@perses-dev/core';
+} from '@perses-dev/spec';
+
 import { z } from 'zod';
+import { buildDatasourceDefinitionSchema, DatasourceDefinition, datasourceDefinitionSchema } from '@perses-dev/client';
 
 export interface ValidationSchemas {
   datasourceEditorSchema: z.Schema<DatasourceDefinition>;
@@ -55,7 +54,7 @@ interface ValidationProviderProps {
 export function ValidationProvider({ children }: ValidationProviderProps): ReactElement {
   const [datasourceEditorSchema, setDatasourceEditorSchema] =
     useState<z.Schema<DatasourceDefinition>>(datasourceDefinitionSchema);
-  const [panelEditorSchema, setPanelEditorSchema] = useState<z.Schema<PanelEditorValues>>(defaultPanelEditorSchema);
+  const [panelEditorSchema, setPanelEditorSchema] = useState<z.Schema<PanelEditorValues>>(defaultPanelEditorSchema); // TODO I don't get why this does not compile
   const [variableEditorSchema, setVariableEditorSchema] =
     useState<z.Schema<VariableDefinition>>(variableDefinitionSchema);
 

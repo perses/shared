@@ -16,11 +16,11 @@ import { produce } from 'immer';
 import { IconButton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { Stack } from '@mui/system';
-import { ThresholdOptions } from '@perses-dev/core';
 import { useChartsTheme } from '../context/ChartsProvider';
 import { OptionsEditorControl, OptionsEditorGroup } from '../OptionsEditorLayout';
 import { InfoTooltip } from '../InfoTooltip';
 import { OptionsColorPicker } from '../ColorPicker/OptionsColorPicker';
+import { ThresholdOptions } from '../model';
 import { ThresholdInput } from './ThresholdInput';
 
 export interface ThresholdsEditorProps {
@@ -44,6 +44,7 @@ export function ThresholdsEditor({
   } = chartsTheme;
   const defaultThresholdColor = thresholds?.defaultColor ?? defaultColor;
 
+  // LOGZ.IO CHANGE:: buffer steps locally so NumberInput edits (incl. partial decimals) commit on blur [APPZ-1996]
   const [steps, setSteps] = useState(thresholds?.steps);
   useEffect(() => {
     setSteps(thresholds?.steps);
@@ -58,7 +59,7 @@ export function ThresholdsEditor({
     focusRef.current = false;
   }, [steps?.length]);
 
-  // LOGZ.IO CHANGE START:: Receive the parsed number from NumberInput (empty -> 0) [APPZ-1996]
+  // LOGZ.IO CHANGE START:: Receive the parsed number from NumberInput (empty -> 0); buffer to local state, commit on blur [APPZ-1996]
   const handleThresholdValueChange = (value: number | undefined, i: number): void => {
     setSteps(
       produce(steps, (draft) => {

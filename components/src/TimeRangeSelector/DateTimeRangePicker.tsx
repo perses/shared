@@ -11,26 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo, useState } from 'react';
+import { ReactElement, useState } from 'react';
 import { Box, Stack, Typography, Button } from '@mui/material';
 import { DateTimeField, LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
-import { AbsoluteTimeRange } from '@perses-dev/core';
+import { AbsoluteTimeRange } from '@perses-dev/spec';
+import { TZDate } from '@date-fns/tz';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { ErrorAlert } from '../ErrorAlert';
-import { formatWithTimeZone } from '../utils/format';
 import { DATE_TIME_FORMAT, validateDateRange } from './utils';
 
-interface AbsoluteTimeFormProps {
+export interface AbsoluteTimeFormProps {
   initialTimeRange: AbsoluteTimeRange;
   onChange: (timeRange: AbsoluteTimeRange) => void;
   onCancel: () => void;
   timeZone: string;
 }
-
-type AbsoluteTimeRangeInputValue = {
-  [Property in keyof AbsoluteTimeRange]: string;
-};
 
 /**
  * Start and End datetime picker, allowing use to select a specific time range selecting two absolute dates and times.
@@ -47,15 +43,10 @@ export const DateTimeRangePicker = ({
   onCancel,
   timeZone,
 }: AbsoluteTimeFormProps): ReactElement => {
-  // Time range values as dates that can be used as a time range.
+  const stdTimeZone = ['local', 'browser'].includes(timeZone.toLowerCase())
+    ? Intl.DateTimeFormat().resolvedOptions().timeZone
+    : timeZone;
   const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
-  const timeRangeInputs = useMemo<AbsoluteTimeRangeInputValue>(() => {
-    return {
-      start: formatWithTimeZone(timeRange.start, DATE_TIME_FORMAT, timeZone),
-      end: formatWithTimeZone(timeRange.end, DATE_TIME_FORMAT, timeZone),
-    };
-  }, [timeRange.start, timeRange.end, timeZone]);
-
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);
 
   const changeTimeRange = (newTime: Date, segment: keyof AbsoluteTimeRange): void => {
@@ -114,10 +105,11 @@ export const DateTimeRangePicker = ({
               Select Start Time
             </Typography>
             <StaticDateTimePicker
+              timezone={stdTimeZone}
               displayStaticWrapperAs="desktop"
               openTo="day"
               disableHighlightToday={true}
-              value={timeRange.start}
+              value={new TZDate(timeRange.start, stdTimeZone)}
               onChange={(newValue) => {
                 if (newValue === null) return;
                 onChangeStartTime(newValue);
@@ -140,11 +132,12 @@ export const DateTimeRangePicker = ({
               Select End Time
             </Typography>
             <StaticDateTimePicker
+              timezone={stdTimeZone}
               displayStaticWrapperAs="desktop"
               openTo="day"
               disableHighlightToday={true}
-              value={timeRange.end}
-              minDateTime={timeRange.start}
+              value={new TZDate(timeRange.end, stdTimeZone)}
+              minDateTime={new TZDate(timeRange.start, stdTimeZone)}
               onChange={(newValue) => {
                 if (newValue === null) return;
                 onChangeEndTime(newValue);
@@ -160,8 +153,10 @@ export const DateTimeRangePicker = ({
         <Stack direction="row" alignItems="center" gap={1} pl={1} pr={1}>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <DateTimeField
+              data-testid="start_time_input"
+              timezone={stdTimeZone}
               label="Start Time"
-              value={new Date(timeRangeInputs.start)}
+              value={new TZDate(timeRange.start, stdTimeZone)}
               onChange={(event: Date | null) => {
                 if (event) {
                   onChangeStartTime(event);
@@ -173,8 +168,10 @@ export const DateTimeRangePicker = ({
           </ErrorBoundary>
           <ErrorBoundary FallbackComponent={ErrorAlert}>
             <DateTimeField
+              data-testid="end_time_input"
+              timezone={stdTimeZone}
               label="End Time"
-              value={new Date(timeRangeInputs.end)}
+              value={new TZDate(timeRange.end, stdTimeZone)}
               onChange={(event: Date | null) => {
                 if (event) {
                   onChangeEndTime(event);

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSelector, DatasourceSpec, UnknownSpec } from '@perses-dev/core';
+import { DatasourceSelector, DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
 import { useQuery, UseQueryResult } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 

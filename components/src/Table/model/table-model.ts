@@ -12,21 +12,25 @@
 // limitations under the License.
 
 import { Theme } from '@mui/material';
-import { Link } from '@perses-dev/core';
+import { Link } from '@perses-dev/spec';
 import {
   AccessorFn,
   AccessorKeyColumnDef,
   CellContext,
   ColumnDef,
   CoreOptions,
+  FilterFn,
   PaginationState,
   RowData,
   RowSelectionState,
   SortingState,
 } from '@tanstack/react-table';
 import { CSSProperties, ReactNode } from 'react';
+import { rankings } from '@tanstack/match-sorter-utils';
 
 export const DEFAULT_COLUMN_WIDTH = 150;
+export const DEFAULT_COLUMN_MIN_WIDTH = 60;
+export const DEFAULT_COLUMN_MAX_WIDTH = 1000;
 export const DEFAULT_COLUMN_HEIGHT = 40;
 
 export type TableDensity = 'compact' | 'standard' | 'comfortable';
@@ -53,7 +57,7 @@ export interface TableProps<TableData> {
   /**
    * Width of the table.
    */
-  width: number;
+  width: number | string;
 
   /**
    * Array of data to render in the table. Each entry in the array will be
@@ -179,7 +183,86 @@ export interface TableProps<TableData> {
    * Item actions should be created
    */
   hasItemActions?: boolean;
+
+  /**
+   * Returns the sub rows for a given row, or `undefined` if there are none.
+   */
+  getSubRows?: (originalRow: TableData, index: number) => undefined | TableData[];
+
+  /**
+   * List of column ids that should be hidden when the table is initially rendered.
+   */
+  hiddenColumns?: string[];
+
+  /**
+   * Configuration for the table toolbar at the top of table, which includes the search input and column filter button.
+   * If not provided, the toolbar will not be rendered.
+   */
+  tableToolbarConfig?: TableToolbarConfig;
+
+  /**
+   * Determines when column resizing updates the column width.
+   * When set to `onChange`, the column width will update as the user drags the resize handle.
+   * When set to `onEnd`, the column width will only update when the user releases the resize handle.
+   * @default 'onChange'
+   */
+  columnResizeMode?: 'onChange' | 'onEnd';
+
+  /**
+   * Default configuration applied to all columns in the table. Individual
+   * column configurations can override these values. Useful for setting
+   * consistent constraints (e.g. min/max width) or enabling resizing across
+   * all columns without repeating the configuration per column.
+   */
+  defaultColumnConfig?: DefaultColumnConfig;
 }
+
+export interface DefaultColumnConfig {
+  /**
+   * Minimum width of a column in pixels.
+   * @default 60
+   */
+  minWidth?: number;
+
+  /**
+   * Maximum width of a column in pixels.
+   * @default 1000
+   */
+  maxWidth?: number;
+
+  /**
+   * When `true`, columns will be resizable by dragging the column header border.
+   * @default false
+   */
+  enableResizing?: boolean;
+}
+
+export type FuzzyMatchThreshold = keyof typeof rankings;
+
+export type TableToolbarConfig = {
+  /**
+   * When `true`, a search bar will be rendered above the table that allows
+   * the user to filter rows using a fuzzy global filter.
+   */
+  isSearchEnabled?: boolean;
+
+  /**
+   * When `isSearchEnabled` is `true`, this determines how fuzzy the matching should be when filtering results.
+   * @default 'CONTAINS'
+   */
+  fuzzyMatchThreshold?: FuzzyMatchThreshold;
+
+  /**
+   * When `true`, a "Columns" button will be rendered above the table that
+   * opens a dropdown allowing the user to toggle column visibility.
+   */
+  isColumnFilterEnabled?: boolean;
+
+  /**
+   * Max height for the column filter menu.
+   */
+  columnFilterMenuMaxHeight?: number | string;
+};
 
 function calculateTableCellHeight(lineHeight: CSSProperties['lineHeight'], paddingY: string): number {
   // Doing a bunch of math to enforce height to avoid weirdness with mismatched
@@ -297,6 +380,13 @@ interface LinkConfig {
   openInNewTab?: boolean;
 }
 
+declare module '@tanstack/react-table' {
+  //add fuzzy filter to the filterFns. Allows us to use "fuzzy" as a value for `globalFilterFn` in our table options.
+  interface FilterFns {
+    fuzzy: FilterFn<unknown>;
+  }
+}
+
 // Column link settings
 // The URL could be set to a static link or could be constructed dynamically
 // The URL may include reference to the variables or neighboring cells in the row
@@ -310,9 +400,9 @@ export interface TableColumnConfig<TableData>
   // https://github.com/TanStack/table/issues/4241
   // TODO: revisit issue thread and see if there are any workarounds we can
   // use.
-  // LOGZ.IO CHANGE:: group by array field [APPZ-994] (changed to ColumnDef instead of AccessorKeyColumnDef)
+  // LOGZ.IO CHANGE:: keep ColumnDef base for group-by-array [APPZ-994] (not AccessorKeyColumnDef); add enableResizing for upstream column resizing
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  extends Pick<ColumnDef<TableData, any>, 'cell' | 'sortingFn' | 'id'> {
+  extends Pick<ColumnDef<TableData, any>, 'cell' | 'sortingFn' | 'id' | 'enableResizing'> {
   /**
    * Text to display in the header for the column.
    */
@@ -389,34 +479,39 @@ export interface TableColumnConfig<TableData>
  * Takes in a perses table column and transforms it into a tanstack column.
  */
 export function persesColumnsToTanstackColumns<TableData>(
-  columns: Array<TableColumnConfig<TableData>>
+  columns: Array<TableColumnConfig<TableData>>,
+  defaultColumnConfig?: DefaultColumnConfig
 ): Array<ColumnDef<TableData>> {
-  const tableCols: Array<ColumnDef<TableData>> = columns.map(
-    ({ width, align, headerDescription, cellDescription, enableSorting, dataLink, linkConfig, ...otherProps }) => {
-      // Tanstack Table does not support an "auto" value to naturally size to fit
-      // the space in a table. We translate our custom "auto" setting to 0 size
-      // for these columns, so it is easy to fall back to auto when rendering.
-      // Taking from a recommendation in this github discussion:
-      // https://github.com/TanStack/table/discussions/4179#discussioncomment-3631326
+  return columns.map(
+    ({
+      width,
+      align,
+      headerDescription,
+      cellDescription,
+      enableSorting,
+      dataLink,
+      linkConfig, // LOGZ.IO CHANGE:: URL template link config
+      enableResizing,
+      ...otherProps
+    }) => {
+      const isResizingEnabled = enableResizing ?? defaultColumnConfig?.enableResizing ?? false;
       const sizeProps =
         width === 'auto' || width === undefined
-          ? {
-              // All zero values are used as shorthand for "auto" when rendering
-              // because it makes it easy to fall back. (e.g. `row.size || "auto"`)
-              size: 0,
-              minSize: 0,
-              maxSize: 0,
-            }
-          : {
-              size: width,
-            };
+          ? getDefaultSizeProps(isResizingEnabled, defaultColumnConfig?.minWidth, defaultColumnConfig?.maxWidth)
+          : getUserProvidedSizeProps(
+              isResizingEnabled,
+              width,
+              defaultColumnConfig?.minWidth,
+              defaultColumnConfig?.maxWidth
+            );
 
-      const result = {
+      return {
         ...otherProps,
         ...sizeProps,
 
         // Default sorting to false, so it is very explicitly set per column.
         enableSorting: !!enableSorting,
+        enableResizing: isResizingEnabled,
 
         // Open-ended store for extra metadata in TanStack Table, so you can bake
         // in your own features.
@@ -428,10 +523,51 @@ export function persesColumnsToTanstackColumns<TableData>(
           linkConfig,
         },
       };
-
-      return result;
     }
   );
+}
 
-  return tableCols;
+function getUserProvidedSizeProps<TableData>(
+  isResizingEnabled: boolean,
+  width: number,
+  minWidth?: number,
+  maxWidth?: number
+): Pick<ColumnDef<TableData>, 'size' | 'minSize' | 'maxSize'> {
+  // When resizing is enabled, we need to set min and max size to ensure the column can be resized within a reasonable range.
+  return isResizingEnabled
+    ? {
+        size: width,
+        minSize: minWidth ?? DEFAULT_COLUMN_MIN_WIDTH,
+        maxSize: maxWidth ?? DEFAULT_COLUMN_MAX_WIDTH,
+      }
+    : {
+        size: width,
+      };
+}
+
+function getDefaultSizeProps<TableData>(
+  isResizingEnabled: boolean,
+  minWidth?: number,
+  maxWidth?: number
+): Pick<ColumnDef<TableData>, 'size' | 'minSize' | 'maxSize'> {
+  return isResizingEnabled
+    ? {
+        // When resizing is enabled, we need to set a default size for the column
+        // so that relative value can be calculated when resizing and column is visible.
+        size: DEFAULT_COLUMN_WIDTH,
+        minSize: minWidth ?? DEFAULT_COLUMN_MIN_WIDTH,
+        maxSize: maxWidth ?? DEFAULT_COLUMN_MAX_WIDTH,
+      }
+    : // Tanstack Table does not support an "auto" value to naturally size to fit
+      // the space in a table. We translate our custom "auto" setting to 0 size
+      // for these columns, so it is easy to fall back to auto when rendering.
+      // Taking from a recommendation in this github discussion:
+      // https://github.com/TanStack/table/discussions/4179#discussioncomment-3631326
+      {
+        // All zero values are used as shorthand for "auto" when rendering
+        // because it makes it easy to fall back. (e.g. `row.size || "auto"`)
+        size: 0,
+        minSize: 0,
+        maxSize: 0,
+      };
 }

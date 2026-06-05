@@ -25,7 +25,7 @@ import {
   Stack,
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
-import { TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/core';
+import { TimeSeriesQueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { useActiveTimeSeriesQueries, useDatasourceClient, useTimeRange } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
 

@@ -13,6 +13,8 @@
 
 export * from './datasource';
 export * from './legend';
+export * from './log-queries';
+export * from './log-volume-utils';
 export * from './panels';
 export * from './plugins';
 export * from './plugin-base';
@@ -21,6 +23,6 @@ export * from './time-series-queries';
 export * from './trace-queries';
 export * from './profile-queries';
 export * from './variables';
-// LOGZ.IO CHANGE START:: Export log query types [APPZ-1695]
-export * from './log-queries';
-// LOGZ.IO CHANGE END:: Export log query types [APPZ-1695]
+export * from './calculations';
+export * from './alerts-queries';
+export * from './silences-queries';

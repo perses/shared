@@ -11,20 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {
-  createPanelRef,
-  DashboardResource,
-  EphemeralDashboardResource,
-  GridDefinition,
-  PanelGroupDefinition,
-  PanelGroupId,
-} from '@perses-dev/core';
+import { createPanelRef, DashboardSpec, DurationString, GridDefinition, PanelGroupId } from '@perses-dev/spec';
+import { DashboardResource, PanelGroupDefinition } from '../model';
+
 import { useDashboardStore } from './DashboardProvider';
 import { useVariableDefinitionActions, useVariableDefinitions } from './VariableProvider';
 
+type DashboardType = Omit<DashboardResource, 'spec'> & { spec: DashboardSpec & { ttl?: DurationString } };
 export function useDashboard(): {
-  dashboard: DashboardResource | EphemeralDashboardResource;
-  setDashboard: (dashboardResource: DashboardResource | EphemeralDashboardResource) => void;
+  dashboard: DashboardType;
+  setDashboard: (dashboardResource: DashboardResource) => void;
 } {
   const {
     panels,
@@ -37,6 +33,7 @@ export function useDashboard(): {
     duration,
     refreshInterval,
     datasources,
+    links,
     ttl,
   } = useDashboardStore(
     ({
@@ -50,6 +47,7 @@ export function useDashboard(): {
       duration,
       refreshInterval,
       datasources,
+      links,
       ttl,
     }) => ({
       panels,
@@ -62,6 +60,7 @@ export function useDashboard(): {
       duration,
       refreshInterval,
       datasources,
+      links,
       ttl,
     })
   );
@@ -69,9 +68,9 @@ export function useDashboard(): {
   const variables = useVariableDefinitions();
   const layouts = convertPanelGroupsToLayouts(panelGroups, panelGroupOrder);
 
-  const dashboard =
+  const dashboard: DashboardType =
     kind === 'Dashboard'
-      ? ({
+      ? {
           kind,
           metadata,
           spec: {
@@ -82,9 +81,10 @@ export function useDashboard(): {
             duration,
             refreshInterval,
             datasources,
+            links,
           },
-        } as DashboardResource)
-      : ({
+        }
+      : {
           kind,
           metadata,
           spec: {
@@ -95,11 +95,12 @@ export function useDashboard(): {
             duration,
             refreshInterval,
             datasources,
+            links,
             ttl,
           },
-        } as EphemeralDashboardResource);
+        };
 
-  const setDashboard = (dashboardResource: DashboardResource | EphemeralDashboardResource): void => {
+  const setDashboard = (dashboardResource: DashboardResource): void => {
     setVariableDefinitions(dashboardResource.spec.variables);
     setDashboardResource(dashboardResource);
   };

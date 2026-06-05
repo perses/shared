@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BuiltinVariableDefinition } from '@perses-dev/core';
+import { BuiltinVariableDefinition } from '@perses-dev/spec';
 import {
   Accordion,
   AccordionDetails,
@@ -54,8 +54,10 @@ export function BuiltinVariableAccordions({
     for (const definition of builtinVariableDefinitions) {
       const source = definition.spec.source;
       // Only set if we haven't found a sourceDescription for this source yet and this definition has a sourceDescription
-      if (!result[source] && definition.spec.sourceDescription) {
-        result[source] = definition.spec.sourceDescription;
+      // LOGZ.IO CHANGE:: sourceDescription is a fork field (patched into @perses-dev/core); spec types omit it [APPZ-348]
+      const sourceDescription = (definition.spec as { sourceDescription?: string }).sourceDescription;
+      if (!result[source] && sourceDescription) {
+        result[source] = sourceDescription;
       }
     }
     return result;

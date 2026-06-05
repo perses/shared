@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeSeries, TimeSeriesValueTuple } from '@perses-dev/core';
+import { TimeSeries, TimeSeriesValueTuple } from '@perses-dev/spec';
 import { getClosestTimestamp, getClosestTimestampInFullDataset } from './chart-actions';
 
 const TEST_TIME_SERIES_VALUES: TimeSeriesValueTuple[] = [

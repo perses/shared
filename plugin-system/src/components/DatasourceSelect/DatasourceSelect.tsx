@@ -23,7 +23,7 @@ import {
   Autocomplete,
   TextField,
 } from '@mui/material';
-import { DatasourceSelector, VariableName } from '@perses-dev/core';
+import { DatasourceSelector, VariableName } from '@perses-dev/spec';
 import { ReactElement, useMemo } from 'react';
 import {
   DatasourceSelectItem,

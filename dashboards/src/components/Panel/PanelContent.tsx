@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { usePlugin, PanelProps, QueryData, PanelPlugin } from '@perses-dev/plugin-system';
-import { UnknownSpec, PanelDefinition, QueryDataType } from '@perses-dev/core';
+import { UnknownSpec, PanelDefinition, QueryDataType } from '@perses-dev/spec';
 import { ReactElement, useMemo } from 'react';
 import { LoadingOverlay } from '@perses-dev/components';
 import { Skeleton } from '@mui/material';
@@ -35,13 +35,15 @@ export function PanelContent(props: PanelContentProps): ReactElement {
   const queryResultsWithData = useMemo(
     () =>
       queryResults.flatMap((q) =>
-        q.data && !q.definition?.spec.hidden ? [{ data: q.data, definition: q.definition }] : []
+        q.data && !(q.definition?.spec as { hidden?: boolean } | undefined)?.hidden
+          ? [{ data: q.data, definition: q.definition }]
+          : []
       ),
     [queryResults]
   );
 
   const areAllQueriesHidden = useMemo(
-    () => queryResults.every((q) => q.definition?.spec.hidden ?? false),
+    () => queryResults.every((q) => (q.definition?.spec as { hidden?: boolean } | undefined)?.hidden ?? false),
     [queryResults]
   );
 

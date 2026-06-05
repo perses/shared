@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v6
-      - uses: perses/github-actions@v0.11.0
+      - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
@@ -28,7 +28,7 @@ jobs:
       - name: build libraries
         run: 'npm run build'
       - name: store libraries archives
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: archives
           path: |
@@ -41,7 +41,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v6
-      - uses: perses/github-actions@v0.11.0
+      - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
@@ -54,7 +54,7 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v6
-      - uses: perses/github-actions@v0.11.0
+      - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
@@ -67,14 +67,14 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v6
-      - uses: perses/github-actions@v0.11.0
+      - uses: perses/github-actions@v0.12.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
       - run: npm ci
       - run: npm run type-check
 
-  # LOGZ.IO CHANGE:: No need for publishing
+  # LOGZ.IO CHANGE:: No need for publishing (release job kept disabled on the fork)
   # release:
   #   name: 'release'
   #   needs: 'build'
@@ -87,14 +87,14 @@ jobs:
   #   steps:
   #     - name: checkout
   #       uses: actions/checkout@v6
-  #     - uses: perses/github-actions@v0.11.0
+  #     - uses: perses/github-actions@v0.12.0
   #     - uses: ./.github/perses-ci/actions/setup_environment
   #       with:
   #         enable_npm: true
   #         enable_go: true
   #         nvmrc_path: './.nvmrc'
   #     - name: Download archive
-  #       uses: actions/download-artifact@v7
+  #       uses: actions/download-artifact@v8
   #       with:
   #         name: archives
   #     - name: Publish npm package

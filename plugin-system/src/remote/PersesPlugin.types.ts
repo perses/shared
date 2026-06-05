@@ -13,6 +13,8 @@
 
 export interface PersesPlugin {
   name: string;
+  version?: string;
+  registry?: string;
   moduleName: string;
   baseURL?: string;
 }
