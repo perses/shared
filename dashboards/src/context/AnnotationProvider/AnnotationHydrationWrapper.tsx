@@ -13,9 +13,9 @@
 
 import { ReactNode, useEffect } from 'react';
 import { AnnotationData } from '@perses-dev/spec';
-import { useAnnotationActions, useAnnotationSpecs } from '@perses-dev/dashboards';
 import { useAnnotations } from '@perses-dev/plugin-system';
 import { UseQueryResult } from '@tanstack/react-query';
+import { useAnnotationActions, useAnnotationSpecs } from './AnnotationProvider';
 
 interface AnnotationHydrationWrapperProps {
   children: ReactNode;
