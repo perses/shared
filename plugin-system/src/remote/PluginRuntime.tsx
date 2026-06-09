@@ -90,7 +90,14 @@ const getPluginRuntime = (): ModuleFederation => {
             requiredVersion: '^5.5.0',
           },
         },
-        // TODO should we add @perses-dev/spec here ?
+        '@perses-dev/spec': {
+          version: '0.2.0-beta.2',
+          lib: () => require('@perses-dev/spec'),
+          shareConfig: {
+            singleton: true,
+            requiredVersion: '^0.2.0-beta.2',
+          },
+        },
         '@perses-dev/core': {
           version: '0.53.1',
           lib: () => require('@perses-dev/core'),
