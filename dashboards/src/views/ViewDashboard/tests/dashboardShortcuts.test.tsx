@@ -16,6 +16,8 @@ import userEvent from '@testing-library/user-event';
 import { TimeRangeProviderBasic } from '@perses-dev/plugin-system';
 import { ReactElement, useState } from 'react';
 import { useHotkeyRegistrations } from '@tanstack/react-hotkeys';
+// Import to enable declaration merging for HotkeyMeta.category
+import '../../../keyboard-shortcuts/types';
 import { DashboardProvider, DatasourceStoreProvider, VariableProvider } from '../../../context';
 import { defaultDatasourceProps, getTestDashboard, renderWithContext } from '../../../test';
 import { DashboardApp } from '../DashboardApp';
@@ -25,14 +27,14 @@ function ShortcutRegistrationProbe(): ReactElement {
   const categories = new Set<string>();
 
   hotkeys.forEach((registration) => {
-    const category = registration.options.meta?.category;
+    const category = (registration.options.meta as { category?: string })?.category;
     if (typeof category === 'string') {
       categories.add(category);
     }
   });
 
   sequences.forEach((registration) => {
-    const category = registration.options.meta?.category;
+    const category = (registration.options.meta as { category?: string })?.category;
     if (typeof category === 'string') {
       categories.add(category);
     }

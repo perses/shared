@@ -135,4 +135,60 @@ describe('interpolateQueryParams()', () => {
       tags: ['prod', 'static'],
     });
   });
+
+  it('returns string array for multi-value variable with pure variable reference', () => {
+    const result = interpolateQueryParams({ namespace: '$multi' }, variableState);
+    expect(result).toEqual({ namespace: ['ns1', 'ns2'] });
+  });
+
+  it('returns string array for multi-value variable with curly brace syntax', () => {
+    const result = interpolateQueryParams({ namespace: '${multi}' }, variableState);
+    expect(result).toEqual({ namespace: ['ns1', 'ns2'] });
+  });
+
+  it('returns single string for single-value variable with pure variable reference', () => {
+    const result = interpolateQueryParams({ ns: '$namespace' }, variableState);
+    expect(result).toEqual({ ns: 'default' });
+  });
+
+  it('returns string array for multi-value variable with queryparam formatter to avoid double-encoding', () => {
+    const result = interpolateQueryParams({ namespace: '${multi:queryparam}' }, variableState);
+    expect(result).toEqual({ namespace: ['ns1', 'ns2'] });
+  });
+
+  it('returns formatted string for complex template (not pure variable reference)', () => {
+    const result = interpolateQueryParams({ filter: 'tenant=${multi:csv}' }, variableState);
+    expect(result).toEqual({ filter: 'tenant=ns1,ns2' });
+  });
+
+  it('handles undefined variable gracefully', () => {
+    const result = interpolateQueryParams({ namespace: '$undefined' }, variableState);
+    expect(result).toEqual({ namespace: '$undefined' });
+  });
+
+  it('expands multi-value variable embedded with other text', () => {
+    const result = interpolateQueryParams({ filter: 'ns=$multi' }, variableState);
+    expect(result).toEqual({ filter: ['ns=ns1', 'ns=ns2'] });
+  });
+
+  it('preserves existing array handling', () => {
+    const result = interpolateQueryParams(
+      {
+        namespaces: ['$namespace', '${multi:csv}'],
+      },
+      variableState
+    );
+    expect(result).toEqual({
+      namespaces: ['default', 'ns1,ns2'],
+    });
+  });
+
+  it('expands multi-value variable in mixed params', () => {
+    const result = interpolateQueryParams({ namespace: '$multi', cluster: '$cluster', dedup: 'false' }, variableState);
+    expect(result).toEqual({
+      namespace: ['ns1', 'ns2'],
+      cluster: 'prod',
+      dedup: 'false',
+    });
+  });
 });
