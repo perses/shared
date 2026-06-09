@@ -27,3 +27,6 @@ export * from './value-mapping';
 export * from './regexp';
 export * from './transform-data';
 export * from './time-series-data';
+export * from './trace-data';
+export * from './types';
+export * from './text';

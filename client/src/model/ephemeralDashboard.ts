@@ -11,8 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasource';
-export * from './metadata';
-export * from './user';
-export * from './secret';
-export * from './role';
+import { ProjectMetadata } from '@perses-dev/client';
+import { DashboardSelector, DashboardSpec, DurationString } from '@perses-dev/spec';
+
+export interface EphemeralDashboardResource {
+  kind: 'EphemeralDashboard';
+  metadata: ProjectMetadata;
+  spec: EphemeralDashboardSpec;
+}
+
+export interface EphemeralDashboardSpec extends DashboardSpec {
+  ttl: DurationString;
+}
+
+export interface EphemeralDashboardInfo extends DashboardSelector {
+  ttl: DurationString;
+}

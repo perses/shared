@@ -11,8 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasource';
-export * from './metadata';
-export * from './user';
-export * from './secret';
-export * from './role';
+export type DispatchWithPromise<A> = (value: A) => Promise<void>;

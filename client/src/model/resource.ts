@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Display } from '@perses-dev/spec';
 import { Kind } from './kind';
 
 export function isProjectMetadata(metadata: Metadata | ProjectMetadata): metadata is ProjectMetadata {
@@ -34,6 +35,16 @@ export interface Resource {
   metadata: Metadata | ProjectMetadata;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   spec?: any;
+}
+
+export interface ProjectResource {
+  kind: 'Project';
+  metadata: Metadata;
+  spec?: ProjectSpec;
+}
+
+export interface ProjectSpec {
+  display?: Display;
 }
 
 export function getMetadataProject(metadata: ProjectMetadata | Metadata): string | undefined {
