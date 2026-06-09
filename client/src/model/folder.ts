@@ -11,9 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './datasource';
-export * from './folder';
-export * from './kind';
-export * from './resource';
-export * from './datasource-api';
-export * from './http';
+import { ProjectMetadata } from './resource';
+
+export interface FolderDisplay {
+  name?: string;
+}
+
+export interface FolderSpec {
+  display?: FolderDisplay;
+  items?: FolderItem[];
+}
+
+export interface FolderItem {
+  kind: 'Folder' | 'Dashboard';
+  name: string;
+  items?: FolderItem[];
+}
+
+export interface FolderResource {
+  kind: 'Folder';
+  metadata: ProjectMetadata;
+  spec: FolderSpec;
+}
