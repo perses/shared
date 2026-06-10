@@ -31,7 +31,7 @@
     "@perses-dev/components": "0.54.0-beta.4",
     "@perses-dev/dashboards": "0.54.0-beta.4",
     "@perses-dev/plugin-system": "0.54.0-beta.4",
-    "mdi-material-ui": "^7.9.2",
+    "mdi-material-ui": "^8.0.0",
     "qs": "^6.14.0",
     "react-virtuoso": "^4.12.2",
     "use-query-params": "^2.2.1",
@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@types/qs": "^6.14.0",
-    "react-router-dom": "^6.30.1"
+    "react-router-dom": "^7.17.0"
   },
   "peerDependencies": {
     "@mui/material": "^6.1.10",
