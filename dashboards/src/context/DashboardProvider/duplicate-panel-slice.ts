@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { PanelGroupItemId } from '../../model';
+import { PanelGroupItemId, getGroupItemPanelKeys, getGroupItemLayouts, findTabContainingItem } from '../../model';
 import { generatePanelKey, insertPanelInLayout, UnpositionedPanelGroupItemLayout } from '../../utils/panelUtils';
 import { generateId, Middleware } from './common';
 import { PanelGroupSlice } from './panel-group-slice';
@@ -49,19 +49,19 @@ export function createDuplicatePanelSlice(): StateCreator<
         if (group === undefined) {
           throw new Error(`Missing panel group ${panelGroupId}`);
         }
-        const panelKey = group.itemPanelKeys[panelGroupLayoutId];
+        const panelKey = getGroupItemPanelKeys(group)[panelGroupLayoutId];
         if (panelKey === undefined) {
           throw new Error(`Could not find Panel Group item ${panelGroupItemId}`);
         }
 
-        // Find the panel to edit
+        // Find the panel to duplicate
         const panelToDupe = panels[panelKey];
         if (panelToDupe === undefined) {
           throw new Error(`Cannot find Panel with key '${panelKey}'`);
         }
 
         // Find the layout for the item being duped
-        const matchingLayout = group.itemLayouts.find((itemLayout) => {
+        const matchingLayout = getGroupItemLayouts(group).find((itemLayout) => {
           return itemLayout.i === panelGroupLayoutId;
         });
 
@@ -79,9 +79,17 @@ export function createDuplicatePanelSlice(): StateCreator<
           h: matchingLayout.h,
         };
 
-        group.itemLayouts = insertPanelInLayout(duplicateLayout, matchingLayout, group.itemLayouts);
-
-        group.itemPanelKeys[duplicateLayout.i] = dupePanelKey;
+        if (group.layoutKind === 'Grid') {
+          group.itemLayouts = insertPanelInLayout(duplicateLayout, matchingLayout, group.itemLayouts);
+          group.itemPanelKeys[duplicateLayout.i] = dupePanelKey;
+        } else {
+          const tab = findTabContainingItem(group, panelGroupLayoutId);
+          if (tab === undefined) {
+            throw new Error(`Cannot find tab containing item ${panelGroupLayoutId}`);
+          }
+          tab.itemLayouts = insertPanelInLayout(duplicateLayout, matchingLayout, tab.itemLayouts);
+          tab.itemPanelKeys[duplicateLayout.i] = dupePanelKey;
+        }
       });
     },
   });

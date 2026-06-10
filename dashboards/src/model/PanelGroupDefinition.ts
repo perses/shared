@@ -59,21 +59,78 @@ export interface PanelGroupItemLayout extends BaseLayout {
 }
 
 /**
- * Definition of a panel group, containing layout and panel information.
+ * State for a single tab within a TabPanelGroup.
  */
-export interface PanelGroupDefinition {
-  id: PanelGroupId;
-  isCollapsed: boolean;
-  title?: string;
-  repeatedOriginId?: PanelGroupId; // ID of the original panel group from which this repeated group is derived
-  repeatVariable?: string; // Optional, used for repeated panel groups
+export interface TabState {
+  name: string;
   itemLayouts: PanelGroupItemLayout[];
   itemPanelKeys: Record<PanelGroupItemLayoutId, string>;
 }
+
+/**
+ * Base properties shared by all panel group types.
+ */
+interface PanelGroupBase {
+  id: PanelGroupId;
+  isCollapsed: boolean;
+  title?: string;
+  repeatedOriginId?: PanelGroupId;
+}
+
+/**
+ * A panel group that uses a grid layout for its items.
+ */
+export interface GridPanelGroup extends PanelGroupBase {
+  layoutKind: 'Grid';
+  itemLayouts: PanelGroupItemLayout[];
+  itemPanelKeys: Record<PanelGroupItemLayoutId, string>;
+  repeatVariable?: string;
+}
+
+/**
+ * A panel group that uses a tabbed layout for its items.
+ */
+export interface TabPanelGroup extends PanelGroupBase {
+  layoutKind: 'Tabs';
+  tabs: TabState[];
+  defaultTab: number;
+  activeTab: number;
+}
+
+/**
+ * Definition of a panel group, containing layout and panel information.
+ * Discriminated union on the `layoutKind` field.
+ */
+export type PanelGroupDefinition = GridPanelGroup | TabPanelGroup;
 
 /**
  * Check if two PanelGroupItemId are equal
  */
 export function isPanelGroupItemIdEqual(a?: PanelGroupItemId, b?: PanelGroupItemId): boolean {
   return a?.panelGroupId === b?.panelGroupId && a?.panelGroupItemLayoutId === b?.panelGroupItemLayoutId;
+}
+
+/**
+ * Returns a unified record of all item panel keys across all tabs (for TabPanelGroup)
+ * or the direct itemPanelKeys (for GridPanelGroup).
+ */
+export function getGroupItemPanelKeys(group: PanelGroupDefinition): Record<PanelGroupItemLayoutId, string> {
+  if (group.layoutKind === 'Grid') return group.itemPanelKeys;
+  return Object.assign({}, ...group.tabs.map((tab) => tab.itemPanelKeys));
+}
+
+/**
+ * Returns a unified array of all item layouts across all tabs (for TabPanelGroup)
+ * or the direct itemLayouts (for GridPanelGroup).
+ */
+export function getGroupItemLayouts(group: PanelGroupDefinition): PanelGroupItemLayout[] {
+  if (group.layoutKind === 'Grid') return group.itemLayouts;
+  return group.tabs.flatMap((tab) => tab.itemLayouts);
+}
+
+/**
+ * For a TabPanelGroup, find the tab that contains a given layout item ID.
+ */
+export function findTabContainingItem(group: TabPanelGroup, layoutId: PanelGroupItemLayoutId): TabState | undefined {
+  return group.tabs.find((tab) => tab.itemPanelKeys[layoutId] !== undefined);
 }

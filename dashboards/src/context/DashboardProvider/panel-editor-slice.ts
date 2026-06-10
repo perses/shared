@@ -15,7 +15,13 @@ import { Action } from '@perses-dev/components';
 import { PanelEditorValues, PanelGroupId } from '@perses-dev/spec';
 import { StateCreator } from 'zustand';
 import { generatePanelKey, getYForNewRow } from '../../utils';
-import { PanelGroupDefinition, PanelGroupItemId, PanelGroupItemLayout } from '../../model';
+import {
+  PanelGroupDefinition,
+  PanelGroupItemId,
+  PanelGroupItemLayout,
+  getGroupItemPanelKeys,
+  findTabContainingItem,
+} from '../../model';
 import { generateId, Middleware, createPanelDefinition } from './common';
 import { PanelGroupSlice, addPanelGroup, createEmptyPanelGroup } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
@@ -91,7 +97,8 @@ export function createPanelEditorSlice(): StateCreator<
 
       // Figure out the panel key at that location
       const { panelGroupId, panelGroupItemLayoutId: panelGroupLayoutId } = panelGroupItemId;
-      const panelKey = panelGroups[panelGroupId]?.itemPanelKeys[panelGroupLayoutId];
+      const group = panelGroups[panelGroupId];
+      const panelKey = group !== undefined ? getGroupItemPanelKeys(group)[panelGroupLayoutId] : undefined;
       if (panelKey === undefined) {
         throw new Error(`Could not find Panel Group item ${panelGroupItemId}`);
       }
@@ -124,16 +131,35 @@ export function createPanelEditorSlice(): StateCreator<
               throw new Error(`Missing panel group ${panelGroupId}`);
             }
 
-            const existingLayoutIdx = existingGroup.itemLayouts.findIndex((layout) => layout.i === panelGroupLayoutId);
-            const existingLayout = existingGroup.itemLayouts[existingLayoutIdx];
-            const existingPanelKey = existingGroup.itemPanelKeys[panelGroupLayoutId];
-            if (existingLayoutIdx === -1 || existingLayout === undefined || existingPanelKey === undefined) {
-              throw new Error(`Missing panel group item ${panelGroupLayoutId}`);
-            }
+            // Find and remove the item from the old group
+            let existingLayout: PanelGroupItemLayout | undefined;
+            let existingPanelKey: string | undefined;
 
-            // Remove item from the old group
-            existingGroup.itemLayouts.splice(existingLayoutIdx, 1);
-            delete existingGroup.itemPanelKeys[panelGroupLayoutId];
+            if (existingGroup.layoutKind === 'Grid') {
+              const existingLayoutIdx = existingGroup.itemLayouts.findIndex(
+                (layout) => layout.i === panelGroupLayoutId
+              );
+              existingLayout = existingGroup.itemLayouts[existingLayoutIdx];
+              existingPanelKey = existingGroup.itemPanelKeys[panelGroupLayoutId];
+              if (existingLayoutIdx === -1 || existingLayout === undefined || existingPanelKey === undefined) {
+                throw new Error(`Missing panel group item ${panelGroupLayoutId}`);
+              }
+              existingGroup.itemLayouts.splice(existingLayoutIdx, 1);
+              delete existingGroup.itemPanelKeys[panelGroupLayoutId];
+            } else {
+              const tab = findTabContainingItem(existingGroup, panelGroupLayoutId);
+              if (tab === undefined) {
+                throw new Error(`Missing panel group item ${panelGroupLayoutId}`);
+              }
+              const existingLayoutIdx = tab.itemLayouts.findIndex((layout) => layout.i === panelGroupLayoutId);
+              existingLayout = tab.itemLayouts[existingLayoutIdx];
+              existingPanelKey = tab.itemPanelKeys[panelGroupLayoutId];
+              if (existingLayoutIdx === -1 || existingLayout === undefined || existingPanelKey === undefined) {
+                throw new Error(`Missing panel group item ${panelGroupLayoutId}`);
+              }
+              tab.itemLayouts.splice(existingLayoutIdx, 1);
+              delete tab.itemPanelKeys[panelGroupLayoutId];
+            }
 
             // Add item to the end of the new group
             const newGroup = state.panelGroups[next.groupId];
@@ -141,14 +167,30 @@ export function createPanelEditorSlice(): StateCreator<
               throw new Error(`Could not find new group ${next.groupId}`);
             }
 
-            newGroup.itemLayouts.push({
-              i: existingLayout.i,
-              x: 0,
-              y: getYForNewRow(newGroup),
-              w: existingLayout.w,
-              h: existingLayout.h,
-            });
-            newGroup.itemPanelKeys[existingLayout.i] = existingPanelKey;
+            if (newGroup.layoutKind === 'Grid') {
+              newGroup.itemLayouts.push({
+                i: existingLayout.i,
+                x: 0,
+                y: getYForNewRow({ itemLayouts: newGroup.itemLayouts }),
+                w: existingLayout.w,
+                h: existingLayout.h,
+              });
+              newGroup.itemPanelKeys[existingLayout.i] = existingPanelKey;
+            } else {
+              // Add to the active tab
+              const targetTab = newGroup.tabs[newGroup.activeTab] ?? newGroup.tabs[0];
+              if (targetTab === undefined) {
+                throw new Error(`No tabs in target group ${next.groupId}`);
+              }
+              targetTab.itemLayouts.push({
+                i: existingLayout.i,
+                x: 0,
+                y: getYForNewRow({ itemLayouts: targetTab.itemLayouts }),
+                w: existingLayout.w,
+                h: existingLayout.h,
+              });
+              targetTab.itemPanelKeys[existingLayout.i] = existingPanelKey;
+            }
           });
         },
         close: () => {
@@ -191,15 +233,33 @@ export function createPanelEditorSlice(): StateCreator<
             if (group === undefined) {
               throw new Error(`Missing panel group ${next.groupId}`);
             }
-            const layout: PanelGroupItemLayout = {
-              i: generateId().toString(),
-              x: 0,
-              y: getYForNewRow(group),
-              w: 12,
-              h: 6,
-            };
-            group.itemLayouts.push(layout);
-            group.itemPanelKeys[layout.i] = panelKey;
+
+            if (group.layoutKind === 'Grid') {
+              const layout: PanelGroupItemLayout = {
+                i: generateId().toString(),
+                x: 0,
+                y: getYForNewRow({ itemLayouts: group.itemLayouts }),
+                w: 12,
+                h: 6,
+              };
+              group.itemLayouts.push(layout);
+              group.itemPanelKeys[layout.i] = panelKey;
+            } else {
+              // Add to the active tab
+              const targetTab = group.tabs[group.activeTab] ?? group.tabs[0];
+              if (targetTab === undefined) {
+                throw new Error(`No tabs in target group ${next.groupId}`);
+              }
+              const layout: PanelGroupItemLayout = {
+                i: generateId().toString(),
+                x: 0,
+                y: getYForNewRow({ itemLayouts: targetTab.itemLayouts }),
+                w: 12,
+                h: 6,
+              };
+              targetTab.itemLayouts.push(layout);
+              targetTab.itemPanelKeys[layout.i] = panelKey;
+            }
           });
         },
         close: () => {

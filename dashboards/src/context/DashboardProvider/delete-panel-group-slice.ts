@@ -13,6 +13,7 @@
 
 import { StateCreator } from 'zustand';
 import { PanelGroupId } from '@perses-dev/spec';
+import { getGroupItemPanelKeys } from '../../model';
 import { Middleware } from './common';
 import { PanelGroupSlice } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
@@ -53,7 +54,7 @@ export const createDeletePanelGroupSlice: StateCreator<
     }
 
     // Get the panel keys for all the panel items in the group we're going to delete
-    const panelKeys = Object.values(group.itemPanelKeys);
+    const panelKeys = Object.values(getGroupItemPanelKeys(group));
 
     set((draft) => {
       // Delete the panel group which also deletes all its items
@@ -93,7 +94,7 @@ export const createDeletePanelGroupSlice: StateCreator<
 function getUsedPanelKeys(panelGroups: PanelGroupSlice['panelGroups']): Set<string> {
   const usedPanelKeys = new Set<string>();
   for (const group of Object.values(panelGroups)) {
-    for (const panelKey of Object.values(group.itemPanelKeys)) {
+    for (const panelKey of Object.values(getGroupItemPanelKeys(group))) {
       usedPanelKeys.add(panelKey);
     }
   }

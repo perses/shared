@@ -11,7 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createPanelRef, DashboardSpec, DurationString, GridDefinition, PanelGroupId } from '@perses-dev/spec';
+import {
+  createPanelRef,
+  DashboardSpec,
+  DurationString,
+  GridDefinition,
+  LayoutDefinition,
+  PanelGroupId,
+  TabDefinition,
+} from '@perses-dev/spec';
 import { DashboardResource, PanelGroupDefinition } from '../model';
 
 import { useDashboardStore } from './DashboardProvider';
@@ -111,17 +119,17 @@ export function useDashboard(): {
   };
 }
 
-function convertPanelGroupsToLayouts(
+export function convertPanelGroupsToLayouts(
   panelGroups: Record<number, PanelGroupDefinition>,
   panelGroupOrder: PanelGroupId[]
-): GridDefinition[] {
-  const layouts: GridDefinition[] = [];
-  panelGroupOrder.map((groupOrderId) => {
+): LayoutDefinition[] {
+  const layouts: LayoutDefinition[] = [];
+  panelGroupOrder.forEach((groupOrderId) => {
     const group = panelGroups[groupOrderId];
     if (group === undefined) {
       throw new Error('panel group not found');
     }
-    const { title, isCollapsed, repeatVariable, itemLayouts, itemPanelKeys } = group;
+    const { title, isCollapsed } = group;
     let display = undefined;
     if (title || isCollapsed !== undefined) {
       display = {
@@ -131,27 +139,68 @@ function convertPanelGroupsToLayouts(
         },
       };
     }
-    const layout: GridDefinition = {
-      kind: 'Grid',
-      spec: {
-        display,
-        items: itemLayouts.map((layout) => {
-          const panelKey = itemPanelKeys[layout.i];
-          if (panelKey === undefined) {
-            throw new Error(`Missing panel key of layout ${layout.i}`);
-          }
-          return {
-            x: layout.x,
-            y: layout.y,
-            width: layout.w,
-            height: layout.h,
-            content: createPanelRef(panelKey),
-          };
-        }),
-        repeatVariable: repeatVariable,
-      },
-    };
-    layouts.push(layout);
+
+    switch (group.layoutKind) {
+      case 'Grid': {
+        const { repeatVariable, itemLayouts, itemPanelKeys } = group;
+        const layout: GridDefinition = {
+          kind: 'Grid',
+          spec: {
+            display,
+            items: itemLayouts.map((layout) => {
+              const panelKey = itemPanelKeys[layout.i];
+              if (panelKey === undefined) {
+                throw new Error(`Missing panel key of layout ${layout.i}`);
+              }
+              return {
+                x: layout.x,
+                y: layout.y,
+                width: layout.w,
+                height: layout.h,
+                content: createPanelRef(panelKey),
+              };
+            }),
+            repeatVariable: repeatVariable,
+          },
+        };
+        layouts.push(layout);
+        break;
+      }
+
+      case 'Tabs': {
+        const layout: TabDefinition = {
+          kind: 'Tabs',
+          spec: {
+            display,
+            tabs: group.tabs.map((tab) => ({
+              name: tab.name,
+              items: tab.itemLayouts.map((tabLayout) => {
+                const panelKey = tab.itemPanelKeys[tabLayout.i];
+                if (panelKey === undefined) {
+                  throw new Error(`Missing panel key of tab layout ${tabLayout.i}`);
+                }
+                return {
+                  x: tabLayout.x,
+                  y: tabLayout.y,
+                  width: tabLayout.w,
+                  height: tabLayout.h,
+                  content: createPanelRef(panelKey),
+                };
+              }),
+            })),
+            defaultTab: group.defaultTab,
+          },
+        };
+        layouts.push(layout);
+        break;
+      }
+
+      default: {
+        // Exhaustive check
+        const _exhaustiveCheck: never = group;
+        throw new Error(`Unknown layout kind: ${(_exhaustiveCheck as PanelGroupDefinition).layoutKind}`);
+      }
+    }
   });
 
   return layouts;

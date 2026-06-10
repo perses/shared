@@ -18,7 +18,7 @@ import { useVariableValues, VariableContext } from '@perses-dev/plugin-system';
 import { useEditMode, usePanelGroup, usePanelGroupActions, useViewPanelGroup } from '../../context';
 import { GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
 import { PanelOptions } from '../Panel';
-import { PanelGroupDefinition } from '../../model';
+import { GridPanelGroup } from '../../model';
 import { Row, RowProps } from './Row';
 
 export interface GridLayoutProps {
@@ -27,12 +27,13 @@ export interface GridLayoutProps {
   panelFullHeight?: number;
 }
 
-/**
- * Layout component that arranges children in a Grid based on the definition.
- */
 export function GridLayout(props: GridLayoutProps): ReactElement {
   const { panelGroupId, panelOptions, panelFullHeight } = props;
-  const groupDefinition: PanelGroupDefinition = usePanelGroup(panelGroupId);
+  const panelGroup = usePanelGroup(panelGroupId);
+  if (panelGroup.layoutKind !== 'Grid') {
+    throw new Error(`GridLayout expects a Grid panel group, got ${panelGroup.layoutKind}`);
+  }
+  const groupDefinition: GridPanelGroup = panelGroup;
   const { updatePanelGroupLayouts } = usePanelGroupActions(panelGroupId);
   const viewPanelItemId = useViewPanelGroup();
   const { isEditMode } = useEditMode();
