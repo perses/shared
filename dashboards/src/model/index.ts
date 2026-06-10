@@ -13,3 +13,4 @@
 
 export * from './DashboardResource';
 export * from './PanelGroupDefinition';
+export * from './VariableDefinition';

@@ -11,25 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { ProjectMetadata } from '@perses-dev/client';
 import { DashboardSpec } from '@perses-dev/spec';
 
 export type DashboardKind = 'Dashboard' | 'EphemeralDashboard';
 
-/* TODO: As discussed we can keep this intermediary type until we decide on a new location for it. */
-export type DashboardMetaData = {
-  name: string;
-  project: string;
-  createdAt?: string;
-  updatedAt?: string;
-  version?: number;
-};
-
-/* TODO: There is an open and ongoing issue whether the meta-data should be removed or not.
-   Such a decision would affect DashbaordProvider and buildDatasourceProxyUrl
-   https://github.com/perses/perses/issues/4016
-*/
 export interface DashboardResource {
   kind: DashboardKind;
   spec: DashboardSpec;
-  metadata: DashboardMetaData;
+  metadata: ProjectMetadata;
 }

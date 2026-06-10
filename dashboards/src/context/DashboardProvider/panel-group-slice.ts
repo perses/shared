@@ -94,24 +94,27 @@ export function convertLayoutsToPanelGroups(
     const itemPanelKeys: PanelGroupDefinition['itemPanelKeys'] = {};
 
     // Split layout information from panel keys to make it easier to update just layouts on move/resize of panels
-    for (const item of layout.spec.items) {
-      const panelGroupLayoutId = generateId().toString();
-      itemLayouts.push({
-        i: panelGroupLayoutId,
-        w: item.width,
-        h: item.height,
-        x: item.x,
-        y: item.y,
-      });
-      itemPanelKeys[panelGroupLayoutId] = getPanelKeyFromRef(item.content);
+    if ('items' in layout.spec) {
+      for (const item of layout.spec.items) {
+        const panelGroupLayoutId = generateId().toString();
+        itemLayouts.push({
+          i: panelGroupLayoutId,
+          w: item.width,
+          h: item.height,
+          x: item.x,
+          y: item.y,
+        });
+        itemPanelKeys[panelGroupLayoutId] = getPanelKeyFromRef(item.content);
+      }
     }
 
     // Create the panel group and keep track of the ID order
+    const repeatVariable = 'repeatVariable' in layout.spec ? layout.spec.repeatVariable : undefined;
     const panelGroupId = generateId();
     panelGroups[panelGroupId] = {
       id: panelGroupId,
       isCollapsed: layout.spec.display?.collapse?.open === false,
-      repeatVariable: layout.spec.repeatVariable,
+      repeatVariable,
       title: layout.spec.display?.title,
       itemLayouts,
       itemPanelKeys,
