@@ -102,6 +102,7 @@ export function convertLayoutsToPanelGroups(
         h: item.height,
         x: item.x,
         y: item.y,
+        repeatVariable: item.repeatVariable,
       });
       itemPanelKeys[panelGroupLayoutId] = getPanelKeyFromRef(item.content);
     }

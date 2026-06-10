@@ -22,7 +22,10 @@ import { PanelGroupSlice } from './panel-group-slice';
  */
 export interface VirtualPanelRef {
   ref: string;
-  repeatVariable?: [string, string];
+  repeatVariable?: {
+    group?: [string, string];
+    panel?: [string, string];
+  };
 }
 
 /**

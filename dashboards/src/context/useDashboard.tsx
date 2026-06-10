@@ -146,6 +146,7 @@ function convertPanelGroupsToLayouts(
             width: layout.w,
             height: layout.h,
             content: createPanelRef(panelKey),
+            repeatVariable: layout.repeatVariable,
           };
         }),
         repeatVariable: repeatVariable,

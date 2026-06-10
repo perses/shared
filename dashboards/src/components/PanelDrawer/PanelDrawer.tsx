@@ -98,9 +98,9 @@ export const PanelDrawer = (): ReactElement => {
   }, [handleExited, handleSave, isOpen, panelEditor, panelKey]);
 
   // If the panel editor is using a repeat variable, we need to wrap the drawer in a VariableContext.Provider
-  if (panelEditor?.panelGroupItemId?.repeatVariable) {
+  if (panelEditor?.panelGroupItemId?.repeatVariable?.group) {
     return (
-      <RepeatVariableWrapper repeatVariable={panelEditor.panelGroupItemId.repeatVariable}>
+      <RepeatVariableWrapper repeatVariable={panelEditor.panelGroupItemId.repeatVariable.group}>
         {drawer}
       </RepeatVariableWrapper>
     );
