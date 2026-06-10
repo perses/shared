@@ -20,7 +20,8 @@ import { shallow } from 'zustand/shallow';
 import { createContext, ReactElement, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { Display, DurationString, DatasourceSpec } from '@perses-dev/spec';
 import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
-import { DashboardMetaData, DashboardKind, DashboardResource } from '../../model/DashboardResource';
+import { ProjectMetadata } from '@perses-dev/client';
+import { DashboardKind, DashboardResource } from '../../model/DashboardResource';
 import { DEFAULT_REFRESH_INTERVAL } from '../../constants';
 import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
 import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
@@ -54,7 +55,7 @@ export interface DashboardStoreState
   setEditMode: (isEditMode: boolean) => void;
   setDashboard: (dashboard: DashboardResource) => void;
   kind: DashboardKind;
-  metadata: DashboardMetaData;
+  metadata: ProjectMetadata;
   duration: DurationString;
   refreshInterval: DurationString;
   display?: Display;
