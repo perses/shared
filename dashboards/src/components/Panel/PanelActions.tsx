@@ -109,8 +109,11 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [descriptionTooltipId, description]);
 
-  const linksAction = links && links.length > 0 && <LinksDisplay links={links} variant="panel" />;
   const extraActions = editHandlers === undefined && extra;
+
+  // Return a new LinksDisplay element on each call. A shared JSX variable reused across
+  // responsive header branches can bind the menu anchor to a hidden breakpoint layout.
+  const renderPanelLinks = (): ReactNode => (links?.length ? <LinksDisplay links={links} variant="panel" /> : null);
 
   const queryStateIndicator = useMemo((): ReactNode | undefined => {
     const hasData = queryResults.some((q) => q.data);
@@ -271,7 +274,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider}
         <OnHover>
           <OverflowMenu title={title}>
-            {descriptionAction} {linksAction} {queryStateIndicator} {noticesIndicator} {extraActions} {viewQueryAction}
+            {descriptionAction} {renderPanelLinks()} {queryStateIndicator} {noticesIndicator} {extraActions}{' '}
+            {viewQueryAction}
             {readActions} {pluginActions} {itemActions}
             {editActions}
           </OverflowMenu>
@@ -288,7 +292,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         })}
       >
         <OnHover>
-          {descriptionAction} {linksAction}
+          {descriptionAction} {renderPanelLinks()}
         </OnHover>
         {divider} {queryStateIndicator}
         {noticesIndicator}
@@ -311,7 +315,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         })}
       >
         <OnHover>
-          {descriptionAction} {linksAction}
+          {descriptionAction} {renderPanelLinks()}
         </OnHover>
         {divider} {queryStateIndicator}
         {noticesIndicator}
