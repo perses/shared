@@ -13,8 +13,8 @@
 
 import { useContext } from 'react';
 import { StoreApi } from 'zustand';
+import { DashboardResource } from '@perses-dev/client';
 import { DashboardContext, DashboardStoreState } from '../context';
-import { DashboardResource } from '../model';
 import testDashboard from './testDashboard';
 
 /**

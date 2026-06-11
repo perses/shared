@@ -37,7 +37,7 @@ import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 
 import { ValidationProvider, AnnotationEditorForm } from '@perses-dev/plugin-system';
-import { Action } from '@perses-dev/components';
+import { Action } from '@perses-dev/client';
 import { useDiscardChangesConfirmationDialog } from '../../context';
 
 function validateAnnotationSpecs(annotationSpecs: AnnotationSpec[]): { isValid: boolean; errors: string[] } {

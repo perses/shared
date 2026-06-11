@@ -13,7 +13,8 @@
 
 import { useCallback, useMemo } from 'react';
 import { DurationString, Link, PanelDefinition, PanelGroupId } from '@perses-dev/spec';
-import { DashboardResource, PanelGroupDefinition, PanelGroupItemId, PanelGroupItemLayout } from '../../model';
+import { DashboardResource } from '@perses-dev/client';
+import { PanelGroupDefinition, PanelGroupItemId, PanelGroupItemLayout } from '../../model';
 import { DashboardStoreState, useDashboardStore } from './DashboardProvider';
 import { DeletePanelGroupDialogState } from './delete-panel-group-slice';
 import { PanelGroupEditor } from './panel-group-editor-slice';

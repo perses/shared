@@ -13,16 +13,10 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
-import {
-  DiscardChangesConfirmationDialog,
-  FormActions,
-  Action,
-  getSubmitText,
-  getTitleAction,
-} from '@perses-dev/components';
+import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
 import { DispatchWithoutAction, ReactElement, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
-import { DatasourceDefinition } from '@perses-dev/client';
+import { Action, DatasourceDefinition } from '@perses-dev/client';
 import { useValidationSchemas } from '../../context';
 import { PluginEditor } from '../PluginEditor';
 

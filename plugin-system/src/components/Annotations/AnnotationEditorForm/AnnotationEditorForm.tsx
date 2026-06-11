@@ -20,7 +20,6 @@ import {
   ErrorBoundary,
   FormActions,
   OptionsColorPicker,
-  Action,
   getSubmitText,
   getTitleAction,
 } from '@perses-dev/components';
@@ -28,6 +27,7 @@ import { Control, Controller, FormProvider, SubmitHandler, useForm, useWatch } f
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQueryClient } from '@tanstack/react-query';
 import InvertColorsIcon from 'mdi-material-ui/InvertColors';
+import { Action } from '@perses-dev/client';
 import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
 import { AnnotationPreview } from './AnnotationPreview';

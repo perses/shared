@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { Button, Divider, Stack, StackProps } from '@mui/material';
+import { Action } from '@perses-dev/client';
 import { ReactElement } from 'react';
-import { Action } from '@perses-dev/components'; // TODO the internal permission system of Perses should not be in a shared library
 
 export interface FormActionsProps extends StackProps {
   action: Action;

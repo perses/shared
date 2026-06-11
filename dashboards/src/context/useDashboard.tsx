@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { createPanelRef, DashboardSpec, DurationString, GridDefinition, PanelGroupId } from '@perses-dev/spec';
-import { DashboardResource, PanelGroupDefinition } from '../model';
+import { DashboardResource } from '@perses-dev/client';
+import { PanelGroupDefinition } from '../model';
 
 import { useDashboardStore } from './DashboardProvider';
 import { useVariableDefinitionActions, useVariableDefinitions } from './VariableProvider';

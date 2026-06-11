@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DashboardResource } from '@perses-dev/client';
 import { PanelDefinition, UnknownSpec } from '@perses-dev/spec';
-import { DashboardResource } from '../../model';
 
 export type OnSaveDashboard = (dashboard: DashboardResource) => Promise<unknown>;
 

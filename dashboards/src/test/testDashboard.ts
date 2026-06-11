@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DashboardResource } from '../model';
+import { DashboardResource } from '@perses-dev/client';
 
 type DashboardResourceTest = Omit<DashboardResource, 'metadata'> & {
   metadata: {

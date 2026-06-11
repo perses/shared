@@ -22,8 +22,12 @@ import {
   DatasourceClient,
   DatasourceSelectItem,
 } from '@perses-dev/plugin-system';
-import { BuildDatasourceProxyUrlParams, DatasourceApi, DatasourceDefinition } from '@perses-dev/client';
-import { DashboardResource } from '../model/DashboardResource';
+import {
+  BuildDatasourceProxyUrlParams,
+  DashboardResource,
+  DatasourceApi,
+  DatasourceDefinition,
+} from '@perses-dev/client';
 
 export interface DatasourceStoreProviderProps {
   dashboardResource?: DashboardResource;

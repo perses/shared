@@ -16,6 +16,7 @@ import { Box } from '@mui/material';
 import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
 import { DashboardSpec } from '@perses-dev/spec';
+import { DashboardResource } from '@perses-dev/client';
 import {
   PanelDrawer,
   Dashboard,
@@ -32,7 +33,6 @@ import {
 } from '../../components';
 import { OnSaveDashboard, useDashboard, useDiscardChangesConfirmationDialog, useEditMode } from '../../context';
 import { PanelFocusProvider } from '../../keyboard-shortcuts';
-import { DashboardResource } from '../../model';
 
 export interface DashboardAppProps {
   dashboardResource: DashboardResource;

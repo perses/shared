@@ -18,13 +18,13 @@ import {
   DiscardChangesConfirmationDialog,
   ErrorAlert,
   ErrorBoundary,
-  Action,
   getTitleAction,
   getSubmitText,
 } from '@perses-dev/components';
 import { PluginKindSelect, usePluginEditor, useValidationSchemas } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Action } from '@perses-dev/client';
 import { useListPanelGroups } from '../../context';
 import { PanelEditorProvider } from '../../context/PanelEditorProvider/PanelEditorProvider';
 import { usePanelEditor } from './usePanelEditor';

@@ -53,7 +53,8 @@ import {
   VariableState,
   useResolveListVariableValues,
 } from '@perses-dev/plugin-system';
-import { InfoTooltip, Action } from '@perses-dev/components';
+import { InfoTooltip } from '@perses-dev/components';
+import { Action } from '@perses-dev/client';
 import { ExternalVariableDefinition } from '../../model/VariableDefinition';
 import { useDiscardChangesConfirmationDialog, VariableProvider } from '../../context';
 import { hydrateVariableDefinitionStates } from '../../context/VariableProvider/hydrationUtils';

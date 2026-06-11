@@ -23,3 +23,4 @@ export * from './roleBindings';
 export * from './user';
 export * from './ephemeralDashboard';
 export * from './variable';
+export * from './dashboard';

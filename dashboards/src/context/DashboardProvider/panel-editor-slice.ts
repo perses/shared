@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Action } from '@perses-dev/components';
 import { PanelEditorValues, PanelGroupId } from '@perses-dev/spec';
 import { StateCreator } from 'zustand';
+import { Action } from '@perses-dev/client';
 import { generatePanelKey, getYForNewRow } from '../../utils';
 import { PanelGroupDefinition, PanelGroupItemId, PanelGroupItemLayout } from '../../model';
 import { generateId, Middleware, createPanelDefinition } from './common';
