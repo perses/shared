@@ -95,7 +95,8 @@ export function VariableEditor(props: {
   const [variableState] = useMemo(() => {
     return [hydrateVariableDefinitionStates(variableDefinitions, {}, externalVariableDefinitions)];
   }, [externalVariableDefinitions, variableDefinitions]);
-  const currentEditingVariableDefinition = typeof variableEditIdx === 'number' && variableDefinitions[variableEditIdx];
+  const currentEditingVariableDefinition: VariableDefinition | undefined =
+    variableEditIdx !== null ? variableDefinitions[variableEditIdx] : undefined;
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
@@ -188,7 +189,7 @@ export function VariableEditor(props: {
 
   return (
     <>
-      {currentEditingVariableDefinition && (
+      {variableEditIdx !== null && currentEditingVariableDefinition && (
         <VariableEditorFormWithContext
           variableDefinitions={variableDefinitions}
           externalVariableDefinitions={externalVariableDefinitions}

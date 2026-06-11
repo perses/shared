@@ -20,6 +20,9 @@ import {
   variableDefinitionSchema,
   buildPanelEditorSchema,
   buildVariableDefinitionSchema,
+  AnnotationSpec,
+  annotationSpecSchema,
+  buildAnnotationSpecSchema,
 } from '@perses-dev/spec';
 
 import { z } from 'zod';
@@ -29,9 +32,11 @@ export interface ValidationSchemas {
   datasourceEditorSchema: z.Schema<DatasourceDefinition>;
   panelEditorSchema: z.Schema<PanelEditorValues>;
   variableEditorSchema: z.Schema<VariableDefinition>;
+  annotationEditorSchema: z.Schema<AnnotationSpec>;
   setDatasourceEditorSchemaPlugin: (pluginSchema: PluginSchema) => void;
   setPanelEditorSchemaPlugin: (pluginSchema: PluginSchema) => void;
   setVariableEditorSchemaPlugin: (pluginSchema: PluginSchema) => void;
+  setAnnotationEditorSchemaPlugin?: (pluginSchema: PluginSchema) => void;
 }
 
 export const ValidationSchemasContext = createContext<ValidationSchemas | undefined>(undefined);
@@ -57,6 +62,7 @@ export function ValidationProvider({ children }: ValidationProviderProps): React
   const [panelEditorSchema, setPanelEditorSchema] = useState<z.Schema<PanelEditorValues>>(defaultPanelEditorSchema); // TODO I don't get why this does not compile
   const [variableEditorSchema, setVariableEditorSchema] =
     useState<z.Schema<VariableDefinition>>(variableDefinitionSchema);
+  const [annotationEditorSchema, setAnnotationEditorSchema] = useState<z.Schema<AnnotationSpec>>(annotationSpecSchema);
 
   function setDatasourceEditorSchemaPlugin(pluginSchema: PluginSchema): void {
     setDatasourceEditorSchema(buildDatasourceDefinitionSchema(pluginSchema));
@@ -70,15 +76,21 @@ export function ValidationProvider({ children }: ValidationProviderProps): React
     setVariableEditorSchema(buildVariableDefinitionSchema(pluginSchema));
   }
 
+  function setAnnotationEditorSchemaPlugin(pluginSchema: PluginSchema): void {
+    setAnnotationEditorSchema(buildAnnotationSpecSchema(pluginSchema));
+  }
+
   return (
     <ValidationSchemasContext.Provider
       value={{
         datasourceEditorSchema,
         panelEditorSchema,
         variableEditorSchema,
+        annotationEditorSchema,
         setDatasourceEditorSchemaPlugin,
         setPanelEditorSchemaPlugin,
         setVariableEditorSchemaPlugin,
+        setAnnotationEditorSchemaPlugin,
       }}
     >
       {children}
