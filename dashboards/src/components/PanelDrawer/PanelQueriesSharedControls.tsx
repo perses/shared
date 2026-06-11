@@ -51,7 +51,7 @@ export function PanelQueriesSharedControls({
     [panelDefinition.spec.plugin.spec, pluginPreview]
   );
 
-  const [previewDefinition, setPreviewDefinition] = useState(panelDefinition.spec.queries ?? []);
+  const [previewDefinition, setPreviewDefinition] = useState<QueryDefinition[]>(panelDefinition.spec.queries ?? []);
 
   const handleOnQueriesChange = useCallback(
     (queries: QueryDefinition[]) => {
@@ -59,14 +59,7 @@ export function PanelQueriesSharedControls({
 
       // If the number of queries has changed, force preview definition update to remove results of deleted queries.
       if (queries.length !== previewDefinition.length) {
-        setPreviewDefinition(
-          queries.map((query) => {
-            return {
-              kind: query.spec.plugin.kind,
-              spec: query.spec.plugin.spec,
-            };
-          })
-        );
+        setPreviewDefinition(queries);
       }
     },
     [onQueriesChange, previewDefinition.length]
@@ -76,7 +69,6 @@ export function PanelQueriesSharedControls({
     setPreviewDefinition((prev) => {
       const newDefinitions = [...prev];
       newDefinitions[index] = newDef;
-
       return newDefinitions;
     });
   }, []);
