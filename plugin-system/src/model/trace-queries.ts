@@ -19,7 +19,7 @@ import { Plugin } from './plugin-base';
 /**
  * An object containing all the dependencies of a TraceQuery.
  */
-type TraceQueryQueryPluginDependencies = {
+export type TraceQueryPluginDependencies = {
   /**
    * Returns a list of variables name this trace query depends on.
    */
@@ -31,7 +31,7 @@ type TraceQueryQueryPluginDependencies = {
  */
 export interface TraceQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   getTraceData: (spec: Spec, ctx: TraceQueryContext, abortSignal?: AbortSignal) => Promise<TraceData>;
-  dependsOn?: (spec: Spec, ctx: TraceQueryContext) => TraceQueryQueryPluginDependencies;
+  dependsOn?: (spec: Spec, ctx: TraceQueryContext) => TraceQueryPluginDependencies;
 }
 
 /**
