@@ -18,7 +18,7 @@ import { Plugin } from './plugin-base';
 /**
  * An object containing all the dependencies of a AnnotationQuery.
  */
-export type AnnotationQueryQueryPluginDependencies = {
+export type AnnotationQueryPluginDependencies = {
   /**
    * Returns a list of variables name this annotation query depends on.
    */
@@ -30,7 +30,7 @@ export type AnnotationQueryQueryPluginDependencies = {
  */
 export interface AnnotationPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   getAnnotationData: (spec: Spec, ctx: AnnotationContext, abortSignal?: AbortSignal) => Promise<AnnotationData[]>;
-  dependsOn?: (spec: Spec, ctx: AnnotationContext) => AnnotationQueryQueryPluginDependencies;
+  dependsOn?: (spec: Spec, ctx: AnnotationContext) => AnnotationQueryPluginDependencies;
 }
 
 /**
