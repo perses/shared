@@ -24,6 +24,5 @@ export * from './alerts-queries';
 export * from './silences-queries';
 export * from './item-actions';
 export * from './DataQueriesProvider';
-export * from './QueryCountProvider';
 export * from './RouterProvider';
 export * from './UsageMetricsProvider';
