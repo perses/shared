@@ -11,10 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { IconButton, Link as LinkComponent, Menu, MenuItem, Theme, Chip, capitalize, Stack } from '@mui/material';
+import {
+  Box,
+  ClickAwayListener,
+  IconButton,
+  Link as LinkComponent,
+  Menu,
+  MenuItem,
+  MenuList,
+  Paper,
+  Popper,
+  Theme,
+  Chip,
+  capitalize,
+  Stack,
+} from '@mui/material';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import { Link } from '@perses-dev/spec';
-import { MouseEvent, ReactElement, useState } from 'react';
+import { MouseEvent, ReactElement, useId, useState } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import { useReplaceVariablesInString } from '@perses-dev/plugin-system';
 
@@ -73,13 +87,19 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
     }
   }
 
-  // Default: show dropdown menu for multiple links
+  if (variant === 'panel') {
+    return <PanelLinksDropdown links={links} />;
+  }
+
+  // Dashboard variant: show dropdown menu for multiple links
+  const menuButtonId = `${variant}-links-button`;
+
   return (
-    <>
+    <Box sx={{ display: 'inline-flex' }}>
       <InfoTooltip description={`${links.length} links`} enterDelay={100}>
         <IconButton
           aria-label={`${capitalize(variant)}-links`}
-          id={`${variant}-links-button`}
+          id={menuButtonId}
           size="small"
           onClick={handleOpenMenu}
           sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
@@ -96,15 +116,75 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
         anchorEl={anchorEl}
         open={isMenuOpened}
         onClose={handleClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         MenuListProps={{
-          'aria-labelledby': `${variant}-links-button`,
+          'aria-labelledby': menuButtonId,
         }}
       >
         {links.map((link: Link) => (
           <LinkMenuItem key={link.url} link={link} />
         ))}
       </Menu>
-    </>
+    </Box>
+  );
+}
+
+function PanelLinksDropdown({ links }: { links: Link[] }): ReactElement {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const menuId = useId();
+  const open = Boolean(anchorEl);
+
+  const handleToggle = (event: MouseEvent<HTMLButtonElement>): void => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
+  };
+
+  const handleClose = (): void => {
+    setAnchorEl(null);
+  };
+
+  return (
+    <Box sx={{ display: 'inline-flex', background: (theme) => theme.palette.background.default }}>
+      <InfoTooltip description={`${links.length} links`} enterDelay={100}>
+        <IconButton
+          aria-label="Panel-links"
+          aria-describedby={open ? menuId : undefined}
+          size="small"
+          onClick={handleToggle}
+          sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
+        >
+          <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
+        </IconButton>
+      </InfoTooltip>
+      <Popper
+        id={menuId}
+        open={open}
+        anchorEl={anchorEl}
+        placement="bottom-end"
+        // react-grid-layout applies CSS transforms to panels; fixed positioning keeps the menu
+        // anchored to the link icon instead of using incorrect offset coordinates.
+        popperOptions={{ strategy: 'fixed' }}
+        modifiers={[
+          {
+            name: 'offset',
+            options: {
+              offset: [0, 4],
+            },
+          },
+        ]}
+        sx={{ zIndex: (theme) => theme.zIndex.modal }}
+      >
+        <ClickAwayListener onClickAway={handleClose}>
+          <Paper elevation={8}>
+            <MenuList autoFocusItem={open}>
+              {links.map((link: Link) => (
+                <LinkMenuItem key={link.url} link={link} onNavigate={handleClose} />
+              ))}
+            </MenuList>
+          </Paper>
+        </ClickAwayListener>
+      </Popper>
+    </Box>
   );
 }
 
@@ -145,12 +225,12 @@ function LinkButton({ link }: { link: Link }): ReactElement {
   );
 }
 
-function LinkMenuItem({ link }: { link: Link }): ReactElement {
+function LinkMenuItem({ link, onNavigate }: { link: Link; onNavigate?: () => void }): ReactElement {
   const { url, name, tooltip, targetBlank } = useLink(link);
 
   return (
     <InfoTooltip description={tooltip ?? url} enterDelay={100}>
-      <MenuItem component={LinkComponent} href={url} target={targetBlank ? '_blank' : '_self'}>
+      <MenuItem component={LinkComponent} href={url} target={targetBlank ? '_blank' : '_self'} onClick={onNavigate}>
         {name ?? url}
       </MenuItem>
     </InfoTooltip>
