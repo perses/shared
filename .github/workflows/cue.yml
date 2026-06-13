@@ -25,7 +25,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.15.1"
+          cue_version: "v0.15.4"
       - name: check that CUE schemas evaluate correctly
         run: make cue-eval
       - name: run the unit tests for CUE schemas
@@ -44,7 +44,7 @@ jobs:
         with:
           enable_go: true
           enable_cue: true
-          cue_version: "v0.15.1"
+          cue_version: "v0.15.4"
       - name: Login to Central Registry # to allow publishing the module
         run: cue login --token=${{ secrets.CUE_REG_TOKEN }}
       - name: Publish the module
