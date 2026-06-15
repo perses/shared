@@ -21,7 +21,6 @@ import {
   Box,
   CircularProgress,
   TextField,
-  Button,
   InputAdornment,
 } from '@mui/material';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
@@ -32,6 +31,7 @@ import AlertIcon from 'mdi-material-ui/Alert';
 import { InfoTooltip } from '@perses-dev/components';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import CheckIcon from 'mdi-material-ui/Check';
+import CloseIcon from 'mdi-material-ui/Close';
 import { QueryData } from '../../runtime';
 import { PluginEditor, PluginEditorProps, PluginEditorRef } from '../PluginEditor';
 import { defaultQueryName } from './utils';
@@ -93,6 +93,11 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
       );
     }
 
+    function handleNameCancel(): void {
+      setName(query.spec.name ?? defaultQueryName(index));
+      setIsEditingName(false);
+    }
+
     return (
       <Stack key={index} spacing={1}>
         <Stack
@@ -102,7 +107,7 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
           borderBottom={1}
           borderColor={(theme) => theme.palette.divider}
         >
-          <Stack direction="row" gap={1}>
+          <Stack direction="row" gap={1} sx={{ width: '100%' }}>
             <IconButton
               size="small"
               sx={{ width: 'fit-content', height: 'fit-content' }}
@@ -116,6 +121,7 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
               alignItems="center"
               alignContent="center"
               sx={{
+                width: '100%',
                 '&:hover button': {
                   visibility: 'visible',
                 },
@@ -127,9 +133,13 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
                   variant="outlined"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  fullWidth={true}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
+                        <IconButton size="small" aria-label="cancel edit" onClick={handleNameCancel} edge="end">
+                          <CloseIcon />
+                        </IconButton>
                         <IconButton size="small" aria-label="save query name" onClick={handleNameChange} edge="end">
                           <CheckIcon />
                         </IconButton>
@@ -138,19 +148,9 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
                   }}
                 />
               ) : (
-                <>
-                  <Typography variant="overline" component="h4">
-                    {name}
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => setIsEditingName(true)}
-                    sx={{ visibility: isCollapsed ? 'hidden' : 'visible' }}
-                  >
-                    <PencilIcon fontSize="small" />
-                  </Button>
-                </>
+                <Typography variant="overline" component="h4">
+                  {name}
+                </Typography>
               )}
             </Stack>
           </Stack>
@@ -188,11 +188,18 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
                 </Stack>
               </InfoTooltip>
             )}
-            {onDelete && (
-              <IconButton aria-label="delete query" size="small" onClick={() => onDelete && onDelete(index)}>
-                <DeleteIcon />
-              </IconButton>
-            )}
+            <Stack>
+              {!isEditingName && (
+                <IconButton aria-label="edit query name" size="small" onClick={() => setIsEditingName(true)}>
+                  <PencilIcon fontSize="small" />
+                </IconButton>
+              )}
+              {onDelete && (
+                <IconButton aria-label="delete query" size="small" onClick={() => onDelete && onDelete(index)}>
+                  <DeleteIcon />
+                </IconButton>
+              )}
+            </Stack>
           </Stack>
         </Stack>
         {!isCollapsed && (
