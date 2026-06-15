@@ -54,7 +54,8 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
 
   // Helper to create cache key from DatasourceSelector
-  const createCacheKey = useCallback((selector: DatasourceSelector): string => {
+  const createCacheKey = useCallback(
+    (selector: DatasourceSelector): string => {
       return `${selector.kind}:${selector.name ?? 'default'}:${project ?? 'global'}`;
     },
     [project]
@@ -76,7 +77,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
         };
         // Cache the spec for synchronous access
         const cacheKey = createCacheKey(selector);
-        setDatasourceSpecCache(prev => new Map(prev).set(cacheKey, result.spec));
+        setDatasourceSpecCache((prev) => new Map(prev).set(cacheKey, result.spec));
         return result;
       }
     }
