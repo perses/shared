@@ -17,8 +17,8 @@ mySQLProxySpec: #baseSQLDatasourceSpec & {
 	proxy: #SQLProxy & {
 		kind: "SQLProxy"
 		spec: {
-			driver: "postgres"
-			host: "localhost:5432"
+			driver:   "postgres"
+			host:     "localhost:5432"
 			database: "mydb"
 		}
 	}
