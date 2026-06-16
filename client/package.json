@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/client",
-  "version": "0.54.0-beta.6",
+  "version": "0.54.0-beta.7",
   "description": "Functions as an API client or Data fetching Layer for interacting with a backend service",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
