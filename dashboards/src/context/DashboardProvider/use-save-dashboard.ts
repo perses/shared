@@ -13,11 +13,12 @@
 
 import { useCallback, useState } from 'react';
 import { isRelativeTimeRange } from '@perses-dev/spec';
-import { useTimeRange } from '@perses-dev/plugin-system';
+import { useTimeRange, useTimeZoneParams } from '@perses-dev/plugin-system';
 import { useVariableDefinitionActions } from '../VariableProvider/VariableProvider';
 import { useDashboard } from '../useDashboard';
 import { OnSaveDashboard } from './common';
 import { useEditMode, useSaveChangesConfirmationDialog } from './dashboard-provider-api';
+import { SaveChangesConfirmationDialogOptions } from './save-changes-dialog-slice';
 
 export interface SaveDashboardResult {
   /**
@@ -48,9 +49,9 @@ export function useSaveDashboard(onSave?: OnSaveDashboard): SaveDashboardResult 
   const { dashboard, setDashboard } = useDashboard();
   const { setEditMode } = useEditMode();
   const { timeRange, refreshInterval } = useTimeRange();
+  const { timeZone } = useTimeZoneParams();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useVariableDefinitionActions();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
-
   const performSave = useCallback(async (): Promise<void> => {
     if (!onSave) {
       setEditMode(false);
@@ -76,16 +77,19 @@ export function useSaveDashboard(onSave?: OnSaveDashboard): SaveDashboardResult 
     const isSavedDurationModified =
       isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
     const isSavedRefreshIntervalModified = dashboard.spec.refreshInterval !== refreshInterval;
+    const isTimeZoneModified =
+      timeZone === 'local' && !dashboard.spec.timezone ? false : dashboard.spec.timezone !== timeZone;
 
-    if (isSavedDurationModified || isSavedVariableModified || isSavedRefreshIntervalModified) {
+    if (isSavedDurationModified || isSavedVariableModified || isSavedRefreshIntervalModified || isTimeZoneModified) {
       openSaveChangesConfirmationDialog({
-        onSaveChanges: (
-          saveDefaultTimeRange: boolean,
-          saveDefaultRefreshInterval: boolean,
-          saveDefaultVariables: boolean
-        ) => {
+        onSaveChanges: (options: SaveChangesConfirmationDialogOptions) => {
+          const { saveDefaultRefreshInterval, saveDefaultTimeRange, saveDefaultTimeZone, saveDefaultVariables } =
+            options;
           if (isRelativeTimeRange(timeRange) && saveDefaultTimeRange) {
             dashboard.spec.duration = timeRange.pastDuration;
+          }
+          if (saveDefaultTimeZone) {
+            dashboard.spec.timezone = timeZone;
           }
           if (saveDefaultVariables) {
             const variables = setVariableDefaultValues();
@@ -103,16 +107,18 @@ export function useSaveDashboard(onSave?: OnSaveDashboard): SaveDashboardResult 
         isSavedDurationModified,
         isSavedVariableModified,
         isSavedRefreshIntervalModified,
+        isTimeZoneModified,
       });
     } else {
       performSave();
     }
   }, [
     isSaving,
-    getSavedVariablesStatus,
     timeRange,
     dashboard,
     refreshInterval,
+    timeZone,
+    getSavedVariablesStatus,
     openSaveChangesConfirmationDialog,
     setVariableDefaultValues,
     setDashboard,

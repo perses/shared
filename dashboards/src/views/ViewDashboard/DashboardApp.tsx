@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, ReactNode, useState } from 'react';
+import { ReactElement, ReactNode, useMemo, useState } from 'react';
 import { Box } from '@mui/material';
 import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
@@ -47,6 +47,7 @@ export interface DashboardAppProps {
   // If true, browser confirmation dialog will be shown when navigating away with unsaved changes (closing tab, ...).
   isLeavingConfirmDialogEnabled?: boolean;
   dashboardTitleComponent?: ReactNode;
+  userPreferenceTimezone?: DashboardSpec['timezone'];
   onSave?: OnSaveDashboard;
   onDiscard?: (name: string, spec: DashboardSpec) => void;
 }
@@ -72,6 +73,7 @@ const DashboardAppContent = (props: DashboardAppProps): ReactElement => {
     isInitialVariableSticky,
     isLeavingConfirmDialogEnabled,
     dashboardTitleComponent,
+    userPreferenceTimezone,
     onSave,
     onDiscard,
   } = props;
@@ -130,6 +132,10 @@ const DashboardAppContent = (props: DashboardAppProps): ReactElement => {
     disabled: disableShortcuts,
   });
 
+  const toolBarTimezone = useMemo((): string => {
+    return dashboardResource.spec.timezone || userPreferenceTimezone || 'local';
+  }, [dashboardResource.spec, userPreferenceTimezone]);
+
   return (
     <Box
       sx={{
@@ -142,6 +148,7 @@ const DashboardAppContent = (props: DashboardAppProps): ReactElement => {
     >
       <DashboardToolbar
         dashboardName={dashboardResource.metadata.name}
+        timezone={toolBarTimezone}
         dashboardTitleComponent={dashboardTitleComponent}
         initialVariableIsSticky={isInitialVariableSticky}
         onSave={onSave}

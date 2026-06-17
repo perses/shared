@@ -38,6 +38,7 @@ export interface DashboardToolbarProps {
   isAnnotationEnabled: boolean;
   isDatasourceEnabled: boolean;
   isLinksEnabled?: boolean;
+  timezone: string;
   onEditButtonClick: () => void;
   onCancelButtonClick: () => void;
   onSave?: OnSaveDashboard;
@@ -53,13 +54,14 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
     isAnnotationEnabled,
     isDatasourceEnabled,
     isLinksEnabled = true,
+    timezone: toolbarTimezone,
     onEditButtonClick,
     onCancelButtonClick,
     onSave,
   } = props;
 
   const { isEditMode } = useEditMode();
-  const { timeZone, setTimeZone } = useTimeZoneParams('local');
+  const { timeZone, setTimeZone } = useTimeZoneParams(toolbarTimezone);
   const dashboardLinks = useDashboardLinks();
 
   const isBiggerThanSm = useMediaQuery(useTheme().breakpoints.up('sm'));

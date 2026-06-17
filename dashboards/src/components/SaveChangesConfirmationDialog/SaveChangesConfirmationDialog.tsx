@@ -13,7 +13,7 @@
 
 import { ReactElement, useState } from 'react';
 import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material';
-import { DEFAULT_REFRESH_INTERVAL_OPTIONS, useTimeRange } from '@perses-dev/plugin-system';
+import { DEFAULT_REFRESH_INTERVAL_OPTIONS, useTimeRange, useTimeZoneParams } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange } from '@perses-dev/spec';
 import { Dialog } from '@perses-dev/components';
 import { useSaveChangesConfirmationDialog, useVariableDefinitionActions } from '../../context';
@@ -26,10 +26,12 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
   const isSavedDurationModified = dialog?.isSavedDurationModified ?? true;
   const isSavedVariableModified = dialog?.isSavedVariableModified ?? true;
   const isSavedRefreshIntervalModified = dialog?.isSavedRefreshIntervalModified ?? true;
+  const isSavedTimeZoneModified = dialog?.isTimeZoneModified ?? true;
 
   const [saveDefaultTimeRange, setSaveDefaultTimeRange] = useState(isSavedDurationModified);
   const [saveDefaultVariables, setSaveDefaultVariables] = useState(isSavedVariableModified);
   const [saveDefaultRefreshInterval, setDefaultRefreshInterval] = useState(isSavedRefreshIntervalModified);
+  const [saveDefaultTimeZone, setSaveDefaultTimeZone] = useState(isSavedTimeZoneModified);
 
   const { getSavedVariablesStatus } = useVariableDefinitionActions();
   const { modifiedVariableNames } = getSavedVariablesStatus();
@@ -37,14 +39,17 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
   const isOpen = dialog !== undefined;
 
   const { timeRange, refreshInterval } = useTimeRange();
+  const { timeZone } = useTimeZoneParams();
 
   const currentTimeRangeText = isRelativeTimeRange(timeRange)
     ? `(Last ${timeRange.pastDuration})`
     : '(Absolute time ranges can not be saved)';
 
-  const saveTimeRangeMessage = `Save current time range as new default ${currentTimeRangeText}`;
+  const saveTimeRangeMessage = `Save current time range as the new default ${currentTimeRangeText}`;
 
-  const saveVariableMessage = `Save current variable values as new default (${
+  const saveTimeZoneMessage = `Save the current timezone as the new default (${timeZone})`;
+
+  const saveVariableMessage = `Save current variable values as the new default (${
     modifiedVariableNames.length > 0 ? modifiedVariableNames.join(', ') : 'No modified variables'
   })`;
 
@@ -93,13 +98,28 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
                 }
                 label={saveVariableMessage}
               />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    disabled={!isSavedTimeZoneModified}
+                    checked={saveDefaultTimeZone && isSavedTimeZoneModified}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSaveDefaultTimeZone(e.target.checked)}
+                  />
+                }
+                label={saveTimeZoneMessage}
+              />
             </FormGroup>
           </Dialog.Content>
 
           <Dialog.Actions>
             <Dialog.PrimaryButton
               onClick={() => {
-                return dialog.onSaveChanges(saveDefaultTimeRange, saveDefaultRefreshInterval, saveDefaultVariables);
+                return dialog.onSaveChanges({
+                  saveDefaultTimeRange,
+                  saveDefaultRefreshInterval,
+                  saveDefaultVariables,
+                  saveDefaultTimeZone,
+                });
               }}
             >
               Save Changes
