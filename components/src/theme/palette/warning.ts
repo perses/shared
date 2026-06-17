@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PaletteMode, SimplePaletteColorOptions } from '@mui/material';
+
 import { orange } from './colors';
 
 export const warning = (mode: PaletteMode): SimplePaletteColorOptions => {

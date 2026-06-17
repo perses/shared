@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PersesShortcutDef } from '../types';
 import {
   TIME_ZOOM_OUT_EVENT,
   TIME_ZOOM_IN_EVENT,
@@ -21,6 +20,7 @@ import {
   TIME_COPY_EVENT,
   TIME_PASTE_EVENT,
 } from '../events';
+import { PersesShortcutDef } from '../types';
 
 export const TIME_ZOOM_OUT_SHORTCUT: PersesShortcutDef = {
   id: 'time-zoom-out',

@@ -11,10 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ForwardedRef, HTMLAttributes, ReactNode, forwardRef, useContext, useMemo } from 'react';
+// The MUI Autocomplete listbox requires role="listbox" on its container <ul>;
+// jsx-a11y/prefer-tag-over-role and no-noninteractive-element-to-interactive-role
+// do not apply to this intentional pattern.
+/* oxlint-disable jsx-a11y/prefer-tag-over-role */
+/* oxlint-disable jsx-a11y/no-noninteractive-element-to-interactive-role */
+
 import { Checkbox, Divider } from '@mui/material';
 import { VariableOption } from '@perses-dev/plugin-system';
 import { DEFAULT_ALL_VALUE } from '@perses-dev/spec';
+import React, { ForwardedRef, HTMLAttributes, ReactNode, forwardRef, useContext, useMemo } from 'react';
 
 export interface ListVariableListBoxContextValue {
   options: VariableOption[];

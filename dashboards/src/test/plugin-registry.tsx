@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { UnknownSpec } from '@perses-dev/spec';
 import { PanelPlugin, MockPlugin } from '@perses-dev/plugin-system';
+import { UnknownSpec } from '@perses-dev/spec';
 import { ReactElement } from 'react';
 
 const FakeTimeSeriesChartOptionEditor = (): ReactElement => {

@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
-import { SettingsAutocomplete } from '../SettingsAutocomplete';
+
 import { FormatOptions, UNIT_CONFIG, UnitConfig } from '../model';
+import { SettingsAutocomplete } from '../SettingsAutocomplete';
 
 export interface UnitSelectorProps {
   value?: FormatOptions;

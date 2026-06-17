@@ -18,6 +18,7 @@ import {
   PluginType,
   getPluginModuleCompoundKey,
 } from '@perses-dev/plugin-system';
+
 import { RemotePluginModule } from './PersesPlugin.types';
 import { loadPlugin } from './PluginRuntime';
 

@@ -13,6 +13,7 @@
 
 import { Theme } from '@mui/material';
 import merge from 'lodash/merge';
+
 import { EChartsTheme, PersesChartsTheme } from '../model';
 
 const DEFAULT_TEXT_COLOR = '#222';

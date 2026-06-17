@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { Box, Button, Card, Stack, Tab, Tabs, useMediaQuery } from '@mui/material';
-import { PluginLoaderComponent, useListPluginMetadata } from '@perses-dev/plugin-system';
-import { ReactElement, ReactNode, useEffect, useMemo } from 'react';
-import ChevronRight from 'mdi-material-ui/ChevronRight';
-import ChevronLeft from 'mdi-material-ui/ChevronLeft';
 import { useLocalStorage } from '@perses-dev/components';
+import { PluginLoaderComponent, useListPluginMetadata } from '@perses-dev/plugin-system';
+import ChevronLeft from 'mdi-material-ui/ChevronLeft';
+import ChevronRight from 'mdi-material-ui/ChevronRight';
+import { ReactElement, ReactNode, useEffect, useMemo } from 'react';
+
 import { ExploreToolbar } from '../ExploreToolbar';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
 

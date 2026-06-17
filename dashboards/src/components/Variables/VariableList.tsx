@@ -14,9 +14,10 @@
 import { Box } from '@mui/material';
 import { VariableDefinition, VariableSpec } from '@perses-dev/spec';
 import { ReactElement } from 'react';
-import { ExternalVariableDefinition } from '../../model/VariableDefinition';
-import { useExternalVariableDefinitions, useVariableDefinitionAndState, useVariableDefinitions } from '../../context';
+
 import { MAX_VARIABLE_WIDTH, MIN_VARIABLE_WIDTH } from '../../constants';
+import { useExternalVariableDefinitions, useVariableDefinitionAndState, useVariableDefinitions } from '../../context';
+import { ExternalVariableDefinition } from '../../model/VariableDefinition';
 import { Variable } from './Variable';
 
 export function VariableList(): ReactElement {

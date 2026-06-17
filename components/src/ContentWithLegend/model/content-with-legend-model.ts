@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { Theme } from '@mui/material';
-import { LegendPositions, getLegendMode, LegendSize } from '../../model';
+
 import { LegendProps } from '../../Legend';
+import { LegendPositions, getLegendMode, LegendSize } from '../../model';
 import { getTableCellLayout } from '../../Table';
 
 type Dimensions = {

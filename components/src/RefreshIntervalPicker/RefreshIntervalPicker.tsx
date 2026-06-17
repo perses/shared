@@ -14,6 +14,7 @@
 import { Box, FormControl, MenuItem, Select } from '@mui/material';
 import { DurationString } from '@perses-dev/spec';
 import { ReactElement, useMemo } from 'react';
+
 import { TimeOption } from '../model';
 
 interface RefreshIntervalPickerProps {

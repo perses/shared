@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StateCreator } from 'zustand';
 import { PanelGroupId } from '@perses-dev/spec';
+import { StateCreator } from 'zustand';
+
 import { PanelGroupDefinition, PanelGroupItemId } from '../../model';
 import { Middleware } from './common';
 import { PanelGroupSlice } from './panel-group-slice';

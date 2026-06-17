@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactNode, useMemo, useState } from 'react';
-import { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
 import {
   Card,
   CardContent,
@@ -25,9 +23,11 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { useAnnotationData } from '@perses-dev/plugin-system';
 import { InfoTooltip, useTimeZone } from '@perses-dev/components';
+import { useAnnotationData } from '@perses-dev/plugin-system';
+import { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
 import AlertIcon from 'mdi-material-ui/Alert';
+import { ReactNode, useMemo, useState } from 'react';
 
 const formatDate = (timeMs: number, format: (date: Date, format: string) => string): { date: string; time: string } => {
   // Disallows NaN, Infinity, and -Infinity

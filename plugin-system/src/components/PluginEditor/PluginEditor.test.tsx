@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ReactElement, useState } from 'react';
-import { renderWithContext } from '../../test';
+
 import { DefaultPluginKinds, PluginType } from '../../model';
-import { PluginEditor } from './PluginEditor';
+import { renderWithContext } from '../../test';
 import { PluginEditorProps } from './plugin-editor-api';
+import { PluginEditor } from './PluginEditor';
 
 type RenderComponentOptions = {
   pluginTypes?: PluginEditorProps['pluginTypes'];

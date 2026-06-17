@@ -13,12 +13,13 @@
 
 import { Checkbox, IconButton, InputAdornment, ListItemText, Menu, MenuItem, Stack, Tooltip } from '@mui/material';
 import { Column } from '@tanstack/react-table';
-import { ReactElement, useCallback, useState } from 'react';
-import Magnify from 'mdi-material-ui/Magnify';
 import Close from 'mdi-material-ui/Close';
-import ViewColumn from 'mdi-material-ui/ViewColumn';
-import UnfoldMore from 'mdi-material-ui/UnfoldMoreHorizontal';
+import Magnify from 'mdi-material-ui/Magnify';
 import UnfoldLess from 'mdi-material-ui/UnfoldLessHorizontal';
+import UnfoldMore from 'mdi-material-ui/UnfoldMoreHorizontal';
+import ViewColumn from 'mdi-material-ui/ViewColumn';
+import { ReactElement, useCallback, useState } from 'react';
+
 import { TextField } from '../controls';
 
 export interface TableToolbarProps<TableData> {

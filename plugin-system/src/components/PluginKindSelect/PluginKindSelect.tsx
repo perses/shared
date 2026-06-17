@@ -13,6 +13,7 @@
 
 import { MenuItem, TextField, TextFieldProps } from '@mui/material';
 import { forwardRef, ReactElement, useCallback, useMemo } from 'react';
+
 import { PluginType } from '../../model';
 import { useListPluginMetadata } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';

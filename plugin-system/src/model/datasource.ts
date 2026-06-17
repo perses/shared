@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { BuiltinVariableDefinition, UnknownSpec } from '@perses-dev/spec';
+
 import { Plugin } from './plugin-base';
 
 /**

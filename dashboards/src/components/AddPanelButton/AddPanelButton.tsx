@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Button, ButtonProps } from '@mui/material';
-import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { InfoTooltip } from '@perses-dev/components';
+import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import { ReactElement } from 'react';
+
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useDashboardActions } from '../../context';
 

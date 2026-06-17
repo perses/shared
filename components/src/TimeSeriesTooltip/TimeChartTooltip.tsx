@@ -11,17 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { memo, MutableRefObject, useRef, useState } from 'react';
 import { Box, Portal, Stack } from '@mui/material';
-import { ECharts as EChartsInstance } from 'echarts/core';
 import { TimeSeries } from '@perses-dev/spec';
+import { ECharts as EChartsInstance } from 'echarts/core';
+import { memo, MutableRefObject, useRef, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
+
 import { FormatOptions, TimeChartSeriesMapping } from '../model';
-import { CursorCoordinates, useMousePosition } from './tooltip-model';
-import { assembleTransform, getTooltipStyles } from './utils';
 import { getNearbySeriesData } from './nearby-series';
-import { TooltipHeader } from './TooltipHeader';
+import { CursorCoordinates, useMousePosition } from './tooltip-model';
 import { TooltipContent } from './TooltipContent';
+import { TooltipHeader } from './TooltipHeader';
+import { assembleTransform, getTooltipStyles } from './utils';
 
 export interface TimeChartTooltipProps {
   chartRef: MutableRefObject<EChartsInstance | undefined>;

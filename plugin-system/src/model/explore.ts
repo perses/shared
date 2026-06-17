@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { UnknownSpec } from '@perses-dev/spec';
+
 import { Plugin } from './plugin-base';
 
 export interface ExploreComponentProps<Spec> {

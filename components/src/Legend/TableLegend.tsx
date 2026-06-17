@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
+
 import { Table, TableProps, TableColumnConfig, DEFAULT_COLUMN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../Table';
 import { LegendItem } from './legend-model';
 

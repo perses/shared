@@ -13,6 +13,7 @@
 
 import { UnknownSpec } from '@perses-dev/spec';
 import { useRef, useCallback, useMemo, ReactNode, ReactElement } from 'react';
+
 import {
   PluginModuleResource,
   PluginType,
@@ -23,8 +24,8 @@ import {
 } from '../../model';
 import { PluginRegistryContext } from '../../runtime';
 import { useEvent } from '../../utils';
-import { usePluginIndexes, PluginCompoundKey } from './plugin-indexes';
 import { resolvePluginKeys } from './getPluginSearchHelper';
+import { usePluginIndexes, PluginCompoundKey } from './plugin-indexes';
 
 export interface PluginRegistryProps {
   pluginLoader: PluginLoader;

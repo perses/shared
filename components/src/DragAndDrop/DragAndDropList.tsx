@@ -11,18 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
+import { attachClosestEdge, extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import { reorderWithEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/util/reorder-with-edge';
+import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
 import {
   monitorForElements,
   draggable,
   dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
-import { combine } from '@atlaskit/pragmatic-drag-and-drop/combine';
-import { attachClosestEdge, extractClosestEdge } from '@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge';
 import { Stack } from '@mui/material';
-import { idle, State } from './model';
+import { ReactElement, ReactNode, useEffect, useRef, useState } from 'react';
+
 import { DropIndicator } from './DropIndicator';
+import { idle, State } from './model';
 
 interface MonitorElementsProps {
   elements: Array<Record<string, unknown>>;

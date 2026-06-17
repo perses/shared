@@ -13,6 +13,7 @@
 
 import { ReactElement } from 'react';
 import { JsonParam, useQueryParam } from 'use-query-params';
+
 import { DashboardProvider, DashboardProviderProps } from './DashboardProvider';
 
 export function DashboardProviderWithQueryParams({ children, initialState }: DashboardProviderProps): ReactElement {

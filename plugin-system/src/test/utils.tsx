@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DurationString } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode } from 'react';
-import { DurationString } from '@perses-dev/spec';
+
 import { PluginRegistry } from '../components';
 import { DefaultPluginKinds } from '../model';
 import { TimeRangeProviderBasic } from '../runtime';

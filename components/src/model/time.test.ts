@@ -11,12 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { AbsoluteTimeRange, formatDuration, intervalToDuration } from '@perses-dev/spec';
 import { Duration } from 'date-fns';
 
-import { AbsoluteTimeRange, formatDuration, intervalToDuration } from '@perses-dev/spec';
-import { formatValue } from './units';
-import { FormatTestCase, IntervalTestCase, UnitTestCase } from './types';
 import { getFormatterStats } from './formatterCache';
+import { FormatTestCase, IntervalTestCase, UnitTestCase } from './types';
+import { formatValue } from './units';
 
 const TIME_TESTS: UnitTestCase[] = [
   {
@@ -222,7 +222,7 @@ const TIME_TESTS: UnitTestCase[] = [
 ];
 describe('formatValue', () => {
   it.each(TIME_TESTS)('returns $expected when $value formatted as $format', (args: UnitTestCase) => {
-    const { value, format: format, expected } = args;
+    const { value, format, expected } = args;
     expect(formatValue(value, format)).toEqual(expected);
   });
 });

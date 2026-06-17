@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
-import { TooltipContent, TooltipContentProps } from './TooltipContent';
+import { render } from '@testing-library/react';
+
 import { EMPHASIZED_SERIES_DESCRIPTION, NEARBY_SERIES_DESCRIPTION } from './tooltip-model';
+import { TooltipContent, TooltipContentProps } from './TooltipContent';
 
 describe('TooltipContent', () => {
   const renderComponent = (props: TooltipContentProps): void => {

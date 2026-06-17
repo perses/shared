@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import {
   Stack,
   ListItemText,
@@ -24,7 +23,9 @@ import {
   TextField,
 } from '@mui/material';
 import { DatasourceSelector, VariableName } from '@perses-dev/spec';
+import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import { ReactElement, useMemo } from 'react';
+
 import {
   DatasourceSelectItem,
   DatasourceSelectItemGroup,

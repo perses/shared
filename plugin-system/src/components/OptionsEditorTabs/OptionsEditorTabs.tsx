@@ -13,6 +13,7 @@
 
 import { Tab, Tabs, TabsProps, Box } from '@mui/material';
 import { ReactElement, ReactNode, useState } from 'react';
+
 import { OptionsEditorTabPanel } from '../OptionsEditorTabPanel';
 
 export type OptionsEditorTab = {

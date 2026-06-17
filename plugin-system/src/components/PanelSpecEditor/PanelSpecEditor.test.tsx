@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { screen } from '@testing-library/react';
-import { useForm } from 'react-hook-form';
 import { PanelEditorValues } from '@perses-dev/spec';
+import { screen } from '@testing-library/react';
 import { ReactElement } from 'react';
-import { renderWithContext } from '../../test';
+import { useForm } from 'react-hook-form';
+
 import { DataQueriesContext } from '../../runtime';
+import { renderWithContext } from '../../test';
 import { PanelSpecEditor, PanelSpecEditorProps } from './PanelSpecEditor';
 
 describe('PanelSpecEditor', () => {

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { MouseEventHandler } from 'react';
+
 import { LegendOptionsBase } from '../model';
 
 // This file contains legend-related model code specific to the legend component.

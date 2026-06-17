@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Box, Button } from '@mui/material';
-import Reload from 'mdi-material-ui/Reload';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { ReactElement, useCallback } from 'react';
 import { UnknownSpec } from '@perses-dev/spec';
+import Reload from 'mdi-material-ui/Reload';
+import { ReactElement, useCallback } from 'react';
+
 import { PluginKindSelect } from '../PluginKindSelect';
 import { PluginSpecEditor } from '../PluginSpecEditor';
 import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';

@@ -11,10 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Typography, Switch, TextField, Grid, FormControlLabel, MenuItem, Stack, Divider } from '@mui/material';
-import { VariableDefinition, ListVariableDefinition } from '@perses-dev/spec';
-
+import { Action } from '@perses-dev/client';
 import {
   DiscardChangesConfirmationDialog,
   ErrorAlert,
@@ -23,15 +22,16 @@ import {
   getSubmitText,
   getTitleAction,
 } from '@perses-dev/components';
-import { Control, Controller, FormProvider, SubmitHandler, useForm, useFormContext, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { VariableDefinition, ListVariableDefinition } from '@perses-dev/spec';
 import { useQueryClient } from '@tanstack/react-query';
-import { Action } from '@perses-dev/client';
-import { PluginEditor } from '../../PluginEditor';
+import { DispatchWithoutAction, ReactElement, useCallback, useState } from 'react';
+import { Control, Controller, FormProvider, SubmitHandler, useForm, useFormContext, useWatch } from 'react-hook-form';
+
 import { useValidationSchemas } from '../../../context';
+import { PluginEditor } from '../../PluginEditor';
 import { VARIABLE_TYPES } from '../variable-model';
-import { VariableListPreview, VariablePreview } from './VariablePreview';
 import { SORT_METHODS, SortMethodName } from './variable-editor-form-model';
+import { VariableListPreview, VariablePreview } from './VariablePreview';
 
 function FallbackPreview(): ReactElement {
   return <div>Error previewing values</div>;

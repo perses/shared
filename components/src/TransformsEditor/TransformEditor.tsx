@@ -21,7 +21,6 @@ import {
   Typography,
   TextField as MuiTextField,
 } from '@mui/material';
-
 import { ReactElement } from 'react';
 
 import { TextField } from '../controls';

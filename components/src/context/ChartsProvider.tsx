@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import React, { createContext, ReactElement, useContext, useMemo, useState } from 'react';
+
 import { PersesChartsTheme } from '../model';
 import { CursorCoordinates } from '../TimeSeriesTooltip';
 

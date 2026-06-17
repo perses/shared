@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
 import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material';
+import { Dialog } from '@perses-dev/components';
 import { DEFAULT_REFRESH_INTERVAL_OPTIONS, useTimeRange } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange } from '@perses-dev/spec';
-import { Dialog } from '@perses-dev/components';
+import { ReactElement, useState } from 'react';
+
 import { useSaveChangesConfirmationDialog, useVariableDefinitionActions } from '../../context';
 
 const SAVE_DEFAULTS_DIALOG_TEXT =

@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Duration } from 'date-fns';
 import { AbsoluteTimeRange, DurationString } from '@perses-dev/spec';
+import { Duration } from 'date-fns';
+
 import { FormatOptions } from './units';
 
 export type UnitGroup =

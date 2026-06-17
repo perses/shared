@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
-import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { linter, lintGutter } from '@codemirror/lint';
 import { useTheme } from '@mui/material';
+import CodeMirror, { ReactCodeMirrorProps } from '@uiw/react-codemirror';
+import { ReactElement, useState } from 'react';
 
 type JSONEditorProps<T> = Omit<ReactCodeMirrorProps, 'onBlur' | 'theme' | 'extensions' | 'onChange' | 'value'> & {
   value: T;

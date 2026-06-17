@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {} from './types/ThemeExtension';
 import { PersesColor } from './palette';
+import type {} from './types/ThemeExtension';
 
 export * from './theme';
 export * from './typography';

@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { defaultFallbackInView } from 'react-intersection-observer';
-
 // Add testing library assertions
 import '@testing-library/jest-dom/extend-expect';
 

@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Fragment, HTMLAttributes, ReactElement } from 'react';
 import { Divider, IconButton, Stack, Typography } from '@mui/material';
-import { Controller, useFieldArray, Control } from 'react-hook-form';
-import PlusIcon from 'mdi-material-ui/Plus';
-import MinusIcon from 'mdi-material-ui/Minus';
 import { PanelEditorValues } from '@perses-dev/spec';
+import MinusIcon from 'mdi-material-ui/Minus';
+import PlusIcon from 'mdi-material-ui/Plus';
+import { Fragment, HTMLAttributes, ReactElement } from 'react';
+import { Controller, useFieldArray, Control } from 'react-hook-form';
+
 import { LinkEditorForm } from './LinkEditorForm';
 
 export interface LinksEditorProps extends HTMLAttributes<HTMLDivElement> {

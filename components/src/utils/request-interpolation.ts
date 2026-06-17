@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { RequestHeaders } from '@perses-dev/client';
+
 import {
   replaceVariables,
   VariableStateMap,

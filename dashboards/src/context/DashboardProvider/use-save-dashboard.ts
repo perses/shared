@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback, useState } from 'react';
-import { isRelativeTimeRange } from '@perses-dev/spec';
 import { useTimeRange } from '@perses-dev/plugin-system';
-import { useVariableDefinitionActions } from '../VariableProvider/VariableProvider';
+import { isRelativeTimeRange } from '@perses-dev/spec';
+import { useCallback, useState } from 'react';
+
 import { useDashboard } from '../useDashboard';
+import { useVariableDefinitionActions } from '../VariableProvider/VariableProvider';
 import { OnSaveDashboard } from './common';
 import { useEditMode, useSaveChangesConfirmationDialog } from './dashboard-provider-api';
 

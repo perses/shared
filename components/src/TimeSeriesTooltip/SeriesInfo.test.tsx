@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
+import { render } from '@testing-library/react';
+
 import { SeriesInfo, SeriesInfoProps } from './SeriesInfo';
 
 describe('SeriesInfo', () => {

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
+
 import { OptionsEditorProps, PanelPlugin } from '../../../model';
 
 function BertPanel1Editor({ value, onChange }: OptionsEditorProps<{ option1: string }>): ReactElement {

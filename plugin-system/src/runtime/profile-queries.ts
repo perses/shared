@@ -13,9 +13,11 @@
 
 import { QueryDefinition, UnknownSpec, ProfileData } from '@perses-dev/spec';
 import { useQueries, UseQueryResult } from '@tanstack/react-query';
+
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
+
 export type ProfileQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'ProfileQuery', PluginSpec>;
 export const PROFILE_QUERY_KEY = 'ProfileQuery';
 

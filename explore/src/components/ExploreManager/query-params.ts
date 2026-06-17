@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { encodeQueryParams, JsonParam, StringParam, useQueryParams } from 'use-query-params';
 import { TimeRangeParam } from '@perses-dev/plugin-system';
 import { stringify } from 'qs';
+import { encodeQueryParams, JsonParam, StringParam, useQueryParams } from 'use-query-params';
 
 export const explorerQueryConfig = {
   refresh: TimeRangeParam,

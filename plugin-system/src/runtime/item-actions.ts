@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { fetch } from '@perses-dev/client';
 import {
   ActionStatus,
   interpolateSelectionBatch,
@@ -18,7 +19,7 @@ import {
   SelectionItem,
   VariableStateMap,
 } from '@perses-dev/components';
-import { fetch } from '@perses-dev/client';
+
 import { ItemAction, EventAction, WebhookAction } from '../components/ItemSelectionActionsOptionsEditor';
 
 const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH']);

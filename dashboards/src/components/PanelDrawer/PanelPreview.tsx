@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useContext, useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
 import { PanelEditorValues } from '@perses-dev/spec';
-import { Panel } from '../Panel';
+import { ReactElement, useContext, useEffect, useRef } from 'react';
+
 import { PanelEditorContext } from '../../context';
+import { Panel } from '../Panel';
 
 const PANEL_PREVIEW_HEIGHT = 300;
 const PANEL_PREVIEW_DEFAULT_WIDTH = 840;

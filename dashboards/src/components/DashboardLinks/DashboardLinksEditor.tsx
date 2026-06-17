@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState, ReactElement } from 'react';
 import {
   Button,
   Stack,
@@ -26,15 +25,17 @@ import {
   TableRow,
   Collapse,
 } from '@mui/material';
+import { InfoTooltip, LinkEditorForm } from '@perses-dev/components';
+import { Link } from '@perses-dev/spec';
+import ArrowDown from 'mdi-material-ui/ArrowDown';
+import ArrowUp from 'mdi-material-ui/ArrowUp';
+import ChevronUp from 'mdi-material-ui/ChevronUp';
+import PencilIcon from 'mdi-material-ui/Pencil';
 import AddIcon from 'mdi-material-ui/Plus';
 import TrashIcon from 'mdi-material-ui/TrashCan';
-import ArrowUp from 'mdi-material-ui/ArrowUp';
-import ArrowDown from 'mdi-material-ui/ArrowDown';
-import PencilIcon from 'mdi-material-ui/Pencil';
-import ChevronUp from 'mdi-material-ui/ChevronUp';
-import { Link } from '@perses-dev/spec';
+import { useState, ReactElement } from 'react';
 import { useImmer } from 'use-immer';
-import { InfoTooltip, LinkEditorForm } from '@perses-dev/components';
+
 import { useDiscardChangesConfirmationDialog } from '../../context';
 
 export interface DashboardLinksEditorProps {

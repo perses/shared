@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert } from '@perses-dev/components';
 import { UnknownSpec } from '@perses-dev/spec';
 import { ReactElement } from 'react';
-import { CircularProgress, Stack } from '@mui/material';
+
 import { OptionsEditorProps } from '../../model';
 import { usePlugin } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';

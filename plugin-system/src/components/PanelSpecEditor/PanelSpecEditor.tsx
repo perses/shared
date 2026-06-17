@@ -13,12 +13,13 @@
 
 import { ErrorAlert, JSONEditor, LinksEditor } from '@perses-dev/components';
 import { PanelDefinition, PanelEditorValues, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
-import { Control, Controller } from 'react-hook-form';
 import { forwardRef, ReactElement } from 'react';
-import { QueryCountProvider, useDataQueriesContext, usePlugin } from '../../runtime';
+import { Control, Controller } from 'react-hook-form';
+
 import { PanelPlugin } from '../../model';
-import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
+import { QueryCountProvider, useDataQueriesContext, usePlugin } from '../../runtime';
 import { MultiQueryEditor } from '../MultiQueryEditor';
+import { OptionsEditorTabsProps, OptionsEditorTabs } from '../OptionsEditorTabs';
 import { PluginEditorRef } from '../PluginEditor';
 
 export interface PanelSpecEditorProps {

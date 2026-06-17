@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
 import { HotkeyMeta, HotkeySequence, RegisterableHotkey } from '@tanstack/hotkeys';
+import React from 'react';
+
 import { PersesShortcutDef } from './types';
 
 export function buildShortcutOptions(

@@ -13,6 +13,7 @@
 
 import { Drawer as MuiDrawer, DrawerProps as MuiDrawerProps, useMediaQuery } from '@mui/material';
 import { ReactElement } from 'react';
+
 import { combineSx } from '../utils';
 
 export interface DrawerProps extends MuiDrawerProps {

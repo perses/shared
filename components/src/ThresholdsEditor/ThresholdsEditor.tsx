@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement, useEffect, useRef } from 'react';
-import { produce } from 'immer';
 import { IconButton, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import PlusIcon from 'mdi-material-ui/Plus';
 import { Stack } from '@mui/system';
-import { useChartsTheme } from '../context/ChartsProvider';
-import { OptionsEditorControl, OptionsEditorGroup } from '../OptionsEditorLayout';
-import { InfoTooltip } from '../InfoTooltip';
+import { produce } from 'immer';
+import PlusIcon from 'mdi-material-ui/Plus';
+import React, { ReactElement, useEffect, useRef } from 'react';
+
 import { OptionsColorPicker } from '../ColorPicker/OptionsColorPicker';
+import { useChartsTheme } from '../context/ChartsProvider';
+import { InfoTooltip } from '../InfoTooltip';
 import { ThresholdOptions } from '../model';
+import { OptionsEditorControl, OptionsEditorGroup } from '../OptionsEditorLayout';
 import { ThresholdInput } from './ThresholdInput';
 
 export interface ThresholdsEditorProps {

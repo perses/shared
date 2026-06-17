@@ -13,12 +13,13 @@
 
 import { CardHeader, CardHeaderProps, Stack, Typography, Tooltip } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
-import { Link } from '@perses-dev/spec';
 import { ItemAction, QueryData, useAllVariableValues, useReplaceVariablesInString } from '@perses-dev/plugin-system';
+import { Link } from '@perses-dev/spec';
 import { ReactElement, ReactNode, useRef } from 'react';
+
 import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants';
-import { PanelActions, PanelActionsProps } from './PanelActions';
 import { PanelOptions } from './Panel';
+import { PanelActions, PanelActionsProps } from './PanelActions';
 import { useSelectionItemActions } from './useSelectionItemActions';
 
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';

@@ -13,6 +13,7 @@
 
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
 import { ReactElement } from 'react';
+
 import { useDiscardChangesConfirmationDialog } from '../../context';
 
 export const DashboardDiscardChangesConfirmationDialog = (): ReactElement | null => {

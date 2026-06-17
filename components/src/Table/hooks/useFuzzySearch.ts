@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ExpandedState, FilterFn, getFilteredRowModel, TableOptions } from '@tanstack/react-table';
-import { rankings, rankItem } from '@tanstack/match-sorter-utils';
-import { SetStateAction, useCallback, useState } from 'react';
 import { FuzzyMatchThreshold } from '@perses-dev/components';
+import { rankings, rankItem } from '@tanstack/match-sorter-utils';
+import { ExpandedState, FilterFn, getFilteredRowModel, TableOptions } from '@tanstack/react-table';
+import { SetStateAction, useCallback, useState } from 'react';
 
 const getFuzzyFilterFunction =
   (threshold: FuzzyMatchThreshold): FilterFn<unknown> =>

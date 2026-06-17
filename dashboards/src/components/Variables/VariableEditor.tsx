@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo, useState } from 'react';
 import {
   Accordion,
   AccordionDetails,
@@ -34,18 +33,8 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import AddIcon from 'mdi-material-ui/Plus';
-import { BuiltinVariableDefinition, VariableDefinition } from '@perses-dev/spec';
-import { useImmer } from 'use-immer';
-import PencilIcon from 'mdi-material-ui/Pencil';
-import CloneIcon from 'mdi-material-ui/ContentCopy';
-import TrashIcon from 'mdi-material-ui/TrashCan';
-import ArrowUp from 'mdi-material-ui/ArrowUp';
-import ArrowDown from 'mdi-material-ui/ArrowDown';
-import ContentDuplicate from 'mdi-material-ui/ContentDuplicate';
-import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
-import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
-
+import { Action } from '@perses-dev/client';
+import { InfoTooltip } from '@perses-dev/components';
 import {
   ValidationProvider,
   VARIABLE_TYPES,
@@ -53,11 +42,22 @@ import {
   VariableState,
   useResolveListVariableValues,
 } from '@perses-dev/plugin-system';
-import { InfoTooltip } from '@perses-dev/components';
-import { Action } from '@perses-dev/client';
-import { ExternalVariableDefinition } from '../../model/VariableDefinition';
+import { BuiltinVariableDefinition, VariableDefinition } from '@perses-dev/spec';
+import ArrowDown from 'mdi-material-ui/ArrowDown';
+import ArrowUp from 'mdi-material-ui/ArrowUp';
+import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
+import CloneIcon from 'mdi-material-ui/ContentCopy';
+import ContentDuplicate from 'mdi-material-ui/ContentDuplicate';
+import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import AddIcon from 'mdi-material-ui/Plus';
+import TrashIcon from 'mdi-material-ui/TrashCan';
+import { ReactElement, useMemo, useState } from 'react';
+import { useImmer } from 'use-immer';
+
 import { useDiscardChangesConfirmationDialog, VariableProvider } from '../../context';
 import { hydrateVariableDefinitionStates } from '../../context/VariableProvider/hydrationUtils';
+import { ExternalVariableDefinition } from '../../model/VariableDefinition';
 import { BuiltinVariableAccordions } from './BuiltinVariableAccordions';
 
 function getVariableLabelByKind(kind: string): 'List' | 'Text' | undefined {

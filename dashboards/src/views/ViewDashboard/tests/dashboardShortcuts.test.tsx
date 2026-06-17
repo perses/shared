@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TimeRangeProviderBasic } from '@perses-dev/plugin-system';
+import { useHotkeyRegistrations } from '@tanstack/react-hotkeys';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { TimeRangeProviderBasic } from '@perses-dev/plugin-system';
 import { ReactElement, useState } from 'react';
-import { useHotkeyRegistrations } from '@tanstack/react-hotkeys';
+
 // Import to enable declaration merging for HotkeyMeta.category
 import '../../../keyboard-shortcuts/types';
 import { AnnotationProvider, DashboardProvider, DatasourceStoreProvider, VariableProvider } from '../../../context';

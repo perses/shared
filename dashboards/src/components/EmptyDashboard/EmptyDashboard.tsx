@@ -13,10 +13,11 @@
 
 import { Typography, Box } from '@mui/material';
 import { ReactElement, ReactNode } from 'react';
+
 import { useEditMode } from '../../context';
 import { AddPanelButton } from '../AddPanelButton';
-import { EditVariablesButton } from '../Variables';
 import { EditButton } from '../EditButton';
+import { EditVariablesButton } from '../Variables';
 
 export interface EmptyDashboardProps {
   /**

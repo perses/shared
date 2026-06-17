@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { Box, MenuItem, Popover, Select, IconButton, TextField, Stack } from '@mui/material';
+import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/spec';
 import Calendar from 'mdi-material-ui/Calendar';
 import EarthIcon from 'mdi-material-ui/Earth';
-import { TimeRangeValue, isRelativeTimeRange, AbsoluteTimeRange, toAbsoluteTimeRange } from '@perses-dev/spec';
 import { ReactElement, useMemo, useRef, useState } from 'react';
+
 import { useTimeZone } from '../context';
-import { TimeZoneOption, getTimeZoneOptions } from '../model/timeZoneOption';
 import { TimeOption } from '../model';
+import { TimeZoneOption, getTimeZoneOptions } from '../model/timeZoneOption';
 import { SettingsAutocomplete, SettingsAutocompleteOption } from '../SettingsAutocomplete';
 import { getGMTOffset } from '../utils/format';
 import { DateTimeRangePicker } from './DateTimeRangePicker';

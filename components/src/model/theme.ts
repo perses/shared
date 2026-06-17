@@ -21,6 +21,7 @@ import type {
   XAXisComponentOption,
   YAXisComponentOption,
 } from 'echarts';
+
 import { ThresholdColorPalette } from './thresholds';
 
 export interface PersesChartsTheme {

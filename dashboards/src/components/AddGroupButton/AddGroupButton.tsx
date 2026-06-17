@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Button } from '@mui/material';
-import AddGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import { InfoTooltip } from '@perses-dev/components';
+import AddGroupIcon from 'mdi-material-ui/PlusBoxOutline';
 import { ReactElement } from 'react';
+
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useDashboardActions } from '../../context';
 

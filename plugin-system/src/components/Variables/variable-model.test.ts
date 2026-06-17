@@ -20,6 +20,7 @@ import {
 } from '@perses-dev/plugin-system';
 import { ListVariableDefinition, VariableDefinition } from '@perses-dev/spec';
 import { waitFor } from '@testing-library/react';
+
 import { renderHookWithContext } from '../../test/render-hook';
 import { filterVariableList, useListVariablePluginValues, useResolveListVariableValues } from './variable-model';
 

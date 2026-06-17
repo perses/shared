@@ -15,6 +15,7 @@ import { Box, Divider, Typography, Stack, Switch } from '@mui/material';
 import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import { memo, ReactElement } from 'react';
+
 import { useTimeZone } from '../context/TimeZoneProvider';
 import { NearbySeriesArray } from './nearby-series';
 import {
