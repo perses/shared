@@ -14,9 +14,10 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { produce } from 'immer';
+
 import { ChartsProvider } from '../context/ChartsProvider';
-import { testChartsTheme } from '../test-utils';
 import { ThresholdOptions } from '../model';
+import { testChartsTheme } from '../test-utils';
 import { ThresholdsEditor } from './ThresholdsEditor';
 
 describe('ThresholdsEditor', () => {

@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ECharts as EChartsInstance } from 'echarts/core';
-import { LineSeriesOption } from 'echarts/charts';
 import { TimeSeries, TimeSeriesValueTuple } from '@perses-dev/spec';
+import { LineSeriesOption } from 'echarts/charts';
+import { ECharts as EChartsInstance } from 'echarts/core';
+
 import {
   EChartsDataFormat,
   OPTIMIZED_MODE_SERIES_LIMIT,

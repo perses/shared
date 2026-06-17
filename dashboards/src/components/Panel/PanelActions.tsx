@@ -12,22 +12,23 @@
 // limitations under the License.
 
 import { Stack, Box, CircularProgress, styled, Popper, ClickAwayListener } from '@mui/material';
-import { isValidElement, PropsWithChildren, ReactElement, ReactNode, useMemo, useState, MouseEvent } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import { QueryData } from '@perses-dev/plugin-system';
-import DatabaseSearch from 'mdi-material-ui/DatabaseSearch';
-import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
-import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
-import PencilIcon from 'mdi-material-ui/PencilOutline';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import DragIcon from 'mdi-material-ui/DragVertical';
-import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
-import MenuIcon from 'mdi-material-ui/Menu';
+import { Link, Notice } from '@perses-dev/spec';
 import AlertIcon from 'mdi-material-ui/Alert';
 import AlertCircleIcon from 'mdi-material-ui/AlertCircle';
+import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
+import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import DatabaseSearch from 'mdi-material-ui/DatabaseSearch';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import DragIcon from 'mdi-material-ui/DragVertical';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import LightningBoltIcon from 'mdi-material-ui/LightningBolt';
-import { Link, Notice } from '@perses-dev/spec';
+import MenuIcon from 'mdi-material-ui/Menu';
+import PencilIcon from 'mdi-material-ui/PencilOutline';
+import { isValidElement, PropsWithChildren, ReactElement, ReactNode, useMemo, useState, MouseEvent } from 'react';
+
 import {
   ARIA_LABEL_TEXT,
   HEADER_ACTIONS_CONTAINER_NAME,

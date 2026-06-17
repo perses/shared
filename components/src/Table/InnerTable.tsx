@@ -13,6 +13,7 @@
 
 import { Table as MuiTable, styled, TableProps as MuiTableProps } from '@mui/material';
 import { forwardRef } from 'react';
+
 import { TableDensity } from './model/table-model';
 
 const StyledMuiTable = styled(MuiTable)(({ theme }) => ({

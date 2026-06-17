@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { produce } from 'immer';
-import { QueryDefinition, QueryPluginType } from '@perses-dev/spec';
 import { Stack, IconButton, Typography, BoxProps, Box, CircularProgress } from '@mui/material';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import { InfoTooltip } from '@perses-dev/components';
+import { QueryDefinition, QueryPluginType } from '@perses-dev/spec';
+import { produce } from 'immer';
+import AlertIcon from 'mdi-material-ui/Alert';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import { forwardRef, ReactElement } from 'react';
-import AlertIcon from 'mdi-material-ui/Alert';
-import { InfoTooltip } from '@perses-dev/components';
+
 import { QueryData } from '../../runtime';
 import { PluginEditor, PluginEditorProps, PluginEditorRef } from '../PluginEditor';
 

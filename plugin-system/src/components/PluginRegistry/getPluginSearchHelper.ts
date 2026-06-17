@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { gt } from 'semver';
+
 import { PluginType, getPluginModuleCompoundKey } from '../../model';
 import { PluginCompoundKey } from './plugin-indexes';
 

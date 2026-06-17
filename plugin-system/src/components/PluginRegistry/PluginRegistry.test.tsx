@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement } from 'react';
 import { screen } from '@testing-library/react';
+import React, { ReactElement } from 'react';
+
 import { PluginType } from '../../model';
 import { useListPluginMetadata, usePlugin } from '../../runtime';
 import { renderWithContext } from '../../test';

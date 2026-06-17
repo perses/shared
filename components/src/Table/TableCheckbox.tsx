@@ -13,6 +13,7 @@
 
 import { Checkbox, CheckboxProps, alpha } from '@mui/material';
 import { ReactElement } from 'react';
+
 import { TableDensity } from './model/table-model';
 
 export interface TableCheckboxProps extends Pick<CheckboxProps, 'checked' | 'indeterminate' | 'onChange'> {

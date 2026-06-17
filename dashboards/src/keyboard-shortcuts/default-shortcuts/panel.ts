@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PersesShortcutDef } from '../types';
 import { PANEL_EDIT_EVENT, PANEL_FULLSCREEN_EVENT, PANEL_DUPLICATE_EVENT, PANEL_DELETE_EVENT } from '../events';
+import { PersesShortcutDef } from '../types';
 
 export const PANEL_EDIT_SHORTCUT: PersesShortcutDef = {
   id: 'panel-edit',

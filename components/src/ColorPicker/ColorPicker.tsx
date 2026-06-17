@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import { IconButton, Stack, TextField } from '@mui/material';
-import { ChangeEvent, ReactElement, useState } from 'react';
-import { HexColorPicker } from 'react-colorful';
 import CircleIcon from 'mdi-material-ui/Circle';
 import DeleteIcon from 'mdi-material-ui/Delete';
+import { ChangeEvent, ReactElement, useState } from 'react';
+import { HexColorPicker } from 'react-colorful';
 
 interface ColorPickerProps {
   color: string;

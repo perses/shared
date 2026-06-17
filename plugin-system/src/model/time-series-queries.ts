@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Query, QueryKey } from '@tanstack/react-query';
 import { AbsoluteTimeRange, UnknownSpec, TimeSeriesData, UnixTimeMs } from '@perses-dev/spec';
+import { Query, QueryKey } from '@tanstack/react-query';
+
 import { DatasourceStore, VariableStateMap } from '../runtime';
 import { Plugin } from './plugin-base';
 

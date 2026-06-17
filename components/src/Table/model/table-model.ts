@@ -13,6 +13,7 @@
 
 import { Theme } from '@mui/material';
 import { Link } from '@perses-dev/spec';
+import { rankings } from '@tanstack/match-sorter-utils';
 import {
   AccessorKeyColumnDef,
   CellContext,
@@ -25,7 +26,6 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import { CSSProperties, ReactNode } from 'react';
-import { rankings } from '@tanstack/match-sorter-utils';
 
 export const DEFAULT_COLUMN_WIDTH = 150;
 export const DEFAULT_COLUMN_MIN_WIDTH = 60;

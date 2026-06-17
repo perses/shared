@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { createTheme, PaletteMode, ThemeOptions, Theme } from '@mui/material';
+
 import { MuiAlert } from './component-overrides/alert';
 import { MuiPaper } from './component-overrides/paper';
 import { getPaletteOptions } from './palette';

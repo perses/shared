@@ -12,18 +12,19 @@
 // limitations under the License.
 
 import { UnknownSpec } from '@perses-dev/spec';
+
+import { AlertsQueryPlugin } from './alerts-queries';
+import { AnnotationPlugin } from './annotations';
 import { DatasourcePlugin } from './datasource';
-import { PanelPlugin } from './panels';
-import { Plugin } from './plugin-base';
-import { TimeSeriesQueryPlugin } from './time-series-queries';
-import { TraceQueryPlugin } from './trace-queries';
-import { ProfileQueryPlugin } from './profile-queries';
-import { VariablePlugin } from './variables';
 import { ExplorePlugin } from './explore';
 import { LogQueryPlugin } from './log-queries';
-import { AnnotationPlugin } from './annotations';
-import { AlertsQueryPlugin } from './alerts-queries';
+import { PanelPlugin } from './panels';
+import { Plugin } from './plugin-base';
+import { ProfileQueryPlugin } from './profile-queries';
 import { SilencesQueryPlugin } from './silences-queries';
+import { TimeSeriesQueryPlugin } from './time-series-queries';
+import { TraceQueryPlugin } from './trace-queries';
+import { VariablePlugin } from './variables';
 
 export interface PluginModuleSpec {
   plugins: PluginMetadata[];

@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import userEvent from '@testing-library/user-event';
 import { render, screen, getAllByRole, within, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { VirtuosoMockContext } from 'react-virtuoso';
-import { Table } from './Table';
+
 import { TableCellConfigs, TableColumnConfig, TableProps } from './model/table-model';
+import { Table } from './Table';
 
 type MockTableData = {
   id: string;

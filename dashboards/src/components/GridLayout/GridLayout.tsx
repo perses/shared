@@ -10,15 +10,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+import { useVariableValues, VariableContext } from '@perses-dev/plugin-system';
+import { PanelGroupId } from '@perses-dev/spec';
 import { ReactElement, useState } from 'react';
 import { Layouts, Layout } from 'react-grid-layout';
 
-import { PanelGroupId } from '@perses-dev/spec';
-import { useVariableValues, VariableContext } from '@perses-dev/plugin-system';
-import { useEditMode, usePanelGroup, usePanelGroupActions, useViewPanelGroup } from '../../context';
 import { GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
-import { PanelOptions } from '../Panel';
+import { useEditMode, usePanelGroup, usePanelGroupActions, useViewPanelGroup } from '../../context';
 import { PanelGroupDefinition } from '../../model';
+import { PanelOptions } from '../Panel';
 import { Row, RowProps } from './Row';
 
 export interface GridLayoutProps {

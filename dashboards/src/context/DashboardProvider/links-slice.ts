@@ -13,6 +13,7 @@
 
 import { Link } from '@perses-dev/spec';
 import { StateCreator } from 'zustand';
+
 import { Middleware } from './common';
 
 /**

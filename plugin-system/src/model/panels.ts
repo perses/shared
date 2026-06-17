@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
 import { UnknownSpec, PanelDefinition, QueryPluginType, QueryDataType, QueryDefinition } from '@perses-dev/spec';
+import React from 'react';
+
 import { OptionsEditorTab } from '../components';
 import { QueryOptions } from '../runtime';
 import { OptionsEditorProps, Plugin } from './plugin-base';

@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
 import {
   AppBar,
   Box,
@@ -23,9 +22,11 @@ import {
   useScrollTrigger,
   useTheme,
 } from '@mui/material';
-import PinOutline from 'mdi-material-ui/PinOutline';
-import PinOffOutline from 'mdi-material-ui/PinOffOutline';
 import { TimeRangeControls, useTimeZoneParams } from '@perses-dev/plugin-system';
+import PinOffOutline from 'mdi-material-ui/PinOffOutline';
+import PinOutline from 'mdi-material-ui/PinOutline';
+import { ReactElement, useState } from 'react';
+
 import { VariableList } from '../Variables';
 
 interface DashboardStickyToolbarProps {

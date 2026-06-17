@@ -30,7 +30,7 @@ jobs:
           version: v2.12.2
           args: --timeout 5m
   checklicense:
-    name: "check license headers"
+    name: 'check license headers'
     runs-on: ubuntu-latest
     steps:
       - name: checkout

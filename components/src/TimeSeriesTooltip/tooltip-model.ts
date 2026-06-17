@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { useEffect, useState } from 'react';
+
 import { NearbySeriesArray } from './nearby-series';
 
 export const TOOLTIP_MIN_WIDTH = 375;

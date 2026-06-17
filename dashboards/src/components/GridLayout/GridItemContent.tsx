@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { Box, useForkRef } from '@mui/material';
-import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo, useState } from 'react';
-import { isPanelGroupItemIdEqual, PanelGroupItemId } from '../../model'; // TODO
+import { useInView } from 'react-intersection-observer';
+
 import { useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
 import { usePanelFocusHandlers } from '../../keyboard-shortcuts';
+import { isPanelGroupItemIdEqual, PanelGroupItemId } from '../../model'; // TODO
 import { Panel, PanelProps, PanelOptions } from '../Panel';
 import { QueryViewerDialog } from '../QueryViewerDialog';
 

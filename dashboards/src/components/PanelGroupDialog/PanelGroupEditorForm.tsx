@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormEventHandler, ReactElement, useState } from 'react';
 import { FormControl, TextField, MenuItem, Typography } from '@mui/material';
+import { FormEventHandler, ReactElement, useState } from 'react';
+
 import { PanelGroupEditorValues } from '../../context';
 
 export interface PanelGroupEditorFormProps {

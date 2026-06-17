@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ProjectResource } from '@perses-dev/client';
+
 import { getResourceDisplayName, getResourceExtendedDisplayName } from './text';
 
 const projectWithDisplayName: ProjectResource = {

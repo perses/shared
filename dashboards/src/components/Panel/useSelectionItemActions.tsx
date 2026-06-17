@@ -15,6 +15,7 @@ import { Box, CircularProgress } from '@mui/material';
 import { Dialog, InfoTooltip, useItemActions, useSelection } from '@perses-dev/components';
 import { ACTION_ICONS, executeAction, ItemAction, VariableStateMap } from '@perses-dev/plugin-system';
 import { ReactNode, useCallback, useMemo, useState } from 'react';
+
 import { HeaderIconButton } from './HeaderIconButton';
 
 export interface UseItemActionsOptions {

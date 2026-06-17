@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { AbsoluteTimeRange, TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
+
 import { gcd } from './mathjs';
 
 export const MIN_STEP_INTERVAL_MS = 10;

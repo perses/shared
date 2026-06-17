@@ -11,30 +11,31 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DashboardKind, DashboardResource, ProjectMetadata } from '@perses-dev/client';
+import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
+import { Display, DurationString, DatasourceSpec } from '@perses-dev/spec';
+import { createContext, ReactElement, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { createStore } from 'zustand';
-import { useStoreWithEqualityFn } from 'zustand/traditional';
 import type { StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
-import { createContext, ReactElement, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
-import { Display, DurationString, DatasourceSpec } from '@perses-dev/spec';
-import { usePlugin, usePluginRegistry } from '@perses-dev/plugin-system';
-import { DashboardKind, DashboardResource, ProjectMetadata } from '@perses-dev/client';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
+
 import { DEFAULT_REFRESH_INTERVAL } from '../../constants';
-import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
-import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
-import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
-import { createPanelSlice, PanelSlice } from './panel-slice';
+import { createPanelDefinition } from './common';
 import { createDeletePanelGroupSlice, DeletePanelGroupSlice } from './delete-panel-group-slice';
 import { createDeletePanelSlice, DeletePanelSlice } from './delete-panel-slice';
 import { createDiscardChangesDialogSlice, DiscardChangesConfirmationDialogSlice } from './discard-changes-dialog-slice';
-import { createSaveChangesDialogSlice, SaveChangesConfirmationDialogSlice } from './save-changes-dialog-slice';
 import { createDuplicatePanelSlice, DuplicatePanelSlice } from './duplicate-panel-slice';
 import { createEditJsonDialogSlice, EditJsonDialogSlice } from './edit-json-dialog-slice';
-import { createPanelDefinition } from './common';
-import { createViewPanelSlice, ViewPanelSlice, VirtualPanelRef } from './view-panel-slice';
 import { createLinksSlice, LinksSlice } from './links-slice';
+import { createPanelEditorSlice, PanelEditorSlice } from './panel-editor-slice';
+import { createPanelGroupEditorSlice, PanelGroupEditorSlice } from './panel-group-editor-slice';
+import { convertLayoutsToPanelGroups, createPanelGroupSlice, PanelGroupSlice } from './panel-group-slice';
+import { createPanelSlice, PanelSlice } from './panel-slice';
+import { createSaveChangesDialogSlice, SaveChangesConfirmationDialogSlice } from './save-changes-dialog-slice';
+import { createViewPanelSlice, ViewPanelSlice, VirtualPanelRef } from './view-panel-slice';
 
 export interface DashboardStoreState
   extends

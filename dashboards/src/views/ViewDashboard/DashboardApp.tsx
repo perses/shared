@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, ReactNode, useState } from 'react';
 import { Box } from '@mui/material';
+import { DashboardResource } from '@perses-dev/client';
 import { ChartsProvider, ErrorAlert, ErrorBoundary, useChartsTheme } from '@perses-dev/components';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
 import { DashboardSpec } from '@perses-dev/spec';
-import { DashboardResource } from '@perses-dev/client';
+import { ReactElement, ReactNode, useState } from 'react';
+
 import {
   PanelDrawer,
   Dashboard,

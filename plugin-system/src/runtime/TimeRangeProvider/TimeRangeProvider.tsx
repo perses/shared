@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   AbsoluteTimeRange,
   DurationString,
@@ -21,6 +20,8 @@ import {
   getSuggestedStepMs,
 } from '@perses-dev/spec';
 import { useQueryClient } from '@tanstack/react-query';
+import React, { createContext, ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+
 import { getRefreshIntervalInMs } from './refresh-interval';
 
 export interface TimeRangeProviderProps {

@@ -13,6 +13,7 @@
 
 import type { VariableOption } from '@perses-dev/components';
 import { AbsoluteTimeRange, UnknownSpec } from '@perses-dev/spec';
+
 import { DatasourceStore, VariableStateMap } from '../runtime';
 import { Plugin } from './plugin-base';
 

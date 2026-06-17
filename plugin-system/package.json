@@ -2,19 +2,22 @@
   "name": "@perses-dev/plugin-system",
   "version": "0.54.0-beta.7",
   "description": "The plugin feature in Pereses",
-  "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
+  "bugs": {
+    "url": "https://github.com/perses/perses/issues"
+  },
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/perses/perses.git"
   },
-  "bugs": {
-    "url": "https://github.com/perses/perses/issues"
-  },
-  "module": "dist/index.js",
-  "main": "dist//cjs/index.js",
-  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
+  "main": "dist//cjs/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
@@ -24,22 +27,22 @@
     "type-check": "tsc --noEmit",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
     "test": "cross-env TZ=UTC jest",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint --fix src --ext .ts,.tsx"
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src"
   },
   "dependencies": {
     "@module-federation/enhanced": "^2.3.3",
+    "@perses-dev/client": "0.54.0-beta.7",
     "@perses-dev/components": "0.54.0-beta.7",
     "@perses-dev/core": "0.53.0",
     "@perses-dev/spec": "0.2.0-beta.3",
-    "@perses-dev/client": "0.54.0-beta.7",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "immer": "^10.1.1",
     "react-hook-form": "^7.46.1",
+    "semver": "^7.8.0",
     "use-query-params": "^2.2.1",
-    "zod": "^3.25.76",
-    "semver": "^7.8.0"
+    "zod": "^3.25.76"
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",
@@ -49,8 +52,5 @@
     "@tanstack/react-query": "^4.39.1",
     "react": "^17.0.2 || ^18.0.0",
     "react-dom": "^17.0.2 || ^18.0.0"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }

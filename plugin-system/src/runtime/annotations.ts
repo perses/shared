@@ -13,12 +13,13 @@
 
 import { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
 import { QueryKey, useQueries, useQuery, UseQueryResult } from '@tanstack/react-query';
+
 import { AnnotationContext, AnnotationPlugin } from '../model';
+import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
-import { useAllVariableValues } from './variables';
-import { useDatasourceStore } from './datasources';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
+import { useAllVariableValues } from './variables';
 
 export const ANNOTATION_KEY = 'Annotation';
 

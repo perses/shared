@@ -2,19 +2,22 @@
   "name": "@perses-dev/dashboards",
   "version": "0.54.0-beta.7",
   "description": "The dashboards feature in Perses",
-  "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
+  "bugs": {
+    "url": "https://github.com/perses/perses/issues"
+  },
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/perses/perses.git"
   },
-  "bugs": {
-    "url": "https://github.com/perses/perses/issues"
-  },
-  "module": "dist/index.js",
-  "main": "dist/cjs/index.js",
-  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
+  "main": "dist/cjs/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
@@ -25,14 +28,14 @@
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
     "test": "cross-env TZ=UTC jest",
     "test:watch": "npm run test -- --watch",
-    "lint": "eslint src --ext .ts,.tsx",
-    "lint:fix": "eslint --fix src --ext .ts,.tsx"
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src"
   },
   "dependencies": {
+    "@perses-dev/client": "0.54.0-beta.7",
     "@perses-dev/components": "0.54.0-beta.7",
     "@perses-dev/plugin-system": "0.54.0-beta.7",
     "@perses-dev/spec": "0.2.0-beta.3",
-    "@perses-dev/client": "0.54.0-beta.7",
     "@tanstack/hotkeys": "^0.8.0",
     "@tanstack/react-hotkeys": "^0.9.1",
     "immer": "^10.1.1",
@@ -55,8 +58,5 @@
     "@tanstack/react-query": "^4.39.1",
     "react": "^17.0.2 || ^18.0.0",
     "react-dom": "^17.0.2 || ^18.0.0"
-  },
-  "files": [
-    "dist"
-  ]
+  }
 }

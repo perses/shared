@@ -13,6 +13,7 @@
 
 import { Box, BoxProps } from '@mui/material';
 import { ReactElement } from 'react';
+
 import { combineSx } from '../utils';
 
 interface SeriesMarkerProps extends BoxProps<'div'> {

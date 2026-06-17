@@ -12,12 +12,6 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
-import {
-  TimeRangeProviderWithQueryParams,
-  useInitialRefreshInterval,
-  useInitialTimeRange,
-} from '@perses-dev/plugin-system';
-
 import { ErrorAlert, ErrorBoundary, combineSx } from '@perses-dev/components';
 import {
   DatasourceStoreProviderProps,
@@ -27,7 +21,13 @@ import {
   DEFAULT_DASHBOARD_DURATION,
   DEFAULT_REFRESH_INTERVAL,
 } from '@perses-dev/dashboards';
+import {
+  TimeRangeProviderWithQueryParams,
+  useInitialRefreshInterval,
+  useInitialTimeRange,
+} from '@perses-dev/plugin-system';
 import React, { ReactElement } from 'react';
+
 import { ViewExploreApp } from './ViewExploreApp';
 
 export interface ViewExploreProps extends Omit<BoxProps, 'children'> {

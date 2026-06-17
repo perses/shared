@@ -28,10 +28,11 @@ import {
   VisibilityState,
 } from '@tanstack/react-table';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
+
 import { useFuzzySearch } from './hooks/useFuzzySearch';
+import { DEFAULT_COLUMN_WIDTH, persesColumnsToTanstackColumns, TableProps } from './model/table-model';
 import { TableCheckbox } from './TableCheckbox';
 import { VirtualizedTable } from './VirtualizedTable';
-import { DEFAULT_COLUMN_WIDTH, persesColumnsToTanstackColumns, TableProps } from './model/table-model';
 
 const DEFAULT_GET_ROW_ID = (data: unknown, index: number): string => {
   return `${index}`;

@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { AbsoluteTimeRange } from '@perses-dev/spec';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AbsoluteTimeRange } from '@perses-dev/spec';
+
 import { AbsoluteTimeFormProps, DateTimeRangePicker } from './DateTimeRangePicker';
 
 type ExpectedType = {

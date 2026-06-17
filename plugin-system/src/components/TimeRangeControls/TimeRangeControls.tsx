@@ -11,11 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import RefreshIcon from 'mdi-material-ui/Refresh';
-// eslint-disable-next-line import/no-duplicates
-import ZoomIn from 'mdi-material-ui/PlusCircleOutline';
-// eslint-disable-next-line import/no-duplicates
-import ZoomOut from 'mdi-material-ui/MinusCircleOutline';
 import { Stack } from '@mui/material';
 import {
   RefreshIntervalPicker,
@@ -28,7 +23,13 @@ import {
   buildRelativeTimeOption,
 } from '@perses-dev/components';
 import { AbsoluteTimeRange, DurationString, parseDurationString, RelativeTimeRange } from '@perses-dev/spec';
+// eslint-disable-next-line import/no-duplicates
+import ZoomOut from 'mdi-material-ui/MinusCircleOutline';
+// eslint-disable-next-line import/no-duplicates
+import ZoomIn from 'mdi-material-ui/PlusCircleOutline';
+import RefreshIcon from 'mdi-material-ui/Refresh';
 import { ReactElement, useCallback } from 'react';
+
 import { TOOLTIP_TEXT } from '../../constants';
 import {
   useTimeRange,

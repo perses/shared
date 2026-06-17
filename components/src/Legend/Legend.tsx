@@ -14,12 +14,13 @@
 import { Box } from '@mui/material';
 import { produce } from 'immer';
 import { ReactElement, ReactNode } from 'react';
+
 import { getLegendMode } from '../model';
-import { ListLegend } from './ListLegend';
 import { CompactLegend } from './CompactLegend';
-import { TableLegend, TableLegendProps } from './TableLegend';
 import { LegendItem, LegendComponentOptions, SelectedLegendItemState } from './legend-model';
+import { ListLegend } from './ListLegend';
 import { ListLegendItemProps } from './ListLegendItem';
+import { TableLegend, TableLegendProps } from './TableLegend';
 
 export interface LegendProps {
   width: number;

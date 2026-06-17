@@ -11,10 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Virtuoso } from 'react-virtuoso';
+// The legend is virtualized and cannot use real <ul>/<li> elements, so it
+// uses role="list" for accessibility; jsx-a11y/prefer-tag-over-role does not apply.
+/* oxlint-disable jsx-a11y/prefer-tag-over-role */
+
 import { ReactElement } from 'react';
-import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
+import { Virtuoso } from 'react-virtuoso';
+
 import { LegendItem, SelectedLegendItemState, isLegendItemVisuallySelected } from './legend-model';
+import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
 
 export interface ListLegendProps {
   items: LegendItem[];

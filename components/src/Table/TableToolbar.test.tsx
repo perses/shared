@@ -14,6 +14,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactElement, useState } from 'react';
+
 import { TableToolbar, TableToolbarProps } from './TableToolbar';
 
 function TableToolbarWrapper(props: Partial<TableToolbarProps<unknown>> = {}): ReactElement {

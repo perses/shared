@@ -14,6 +14,7 @@
 import { ListVariableDefinition, VariableDefinition, VariableValue } from '@perses-dev/spec';
 import { useQueries, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
+
 import { GetVariableOptionsContext, VariableOption, VariablePlugin } from '../../model';
 import {
   useAllVariableValues,

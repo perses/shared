@@ -11,11 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { forwardRef, memo, MouseEvent, MouseEventHandler, ReactElement, useState } from 'react';
+// Pairs with the virtualized role="list" legend container, so it uses
+// role="listitem"; jsx-a11y/prefer-tag-over-role does not apply.
+/* oxlint-disable jsx-a11y/prefer-tag-over-role */
+
 import { Box, ListItemText, ListItemProps, ListItemButton } from '@mui/material';
+import { forwardRef, memo, MouseEvent, MouseEventHandler, ReactElement, useState } from 'react';
+
 import { combineSx } from '../utils';
-import { LegendColorBadge } from './LegendColorBadge';
 import { LegendItem } from './legend-model';
+import { LegendColorBadge } from './LegendColorBadge';
 
 export type LegendItemEventOpts = {
   /**

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
+
 import { Middleware } from './common';
 
 export interface SaveChangesConfirmationDialogSlice {

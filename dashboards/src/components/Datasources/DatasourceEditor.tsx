@@ -24,14 +24,15 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import AddIcon from 'mdi-material-ui/Plus';
-import PencilIcon from 'mdi-material-ui/Pencil';
-import TrashIcon from 'mdi-material-ui/TrashCan';
-import { DatasourceSpec } from '@perses-dev/spec';
+import { Action, DatasourceDefinition } from '@perses-dev/client';
 import { DatasourceEditorForm, ValidationProvider } from '@perses-dev/plugin-system';
+import { DatasourceSpec } from '@perses-dev/spec';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import AddIcon from 'mdi-material-ui/Plus';
+import TrashIcon from 'mdi-material-ui/TrashCan';
 import { ReactElement, useState } from 'react';
 import { useImmer } from 'use-immer';
-import { Action, DatasourceDefinition } from '@perses-dev/client';
+
 import { useDiscardChangesConfirmationDialog } from '../../context';
 
 export function DatasourceEditor(props: {

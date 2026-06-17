@@ -11,21 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Column, ColumnSizingInfoState, ColumnSizingState, flexRender, HeaderGroup, Row } from '@tanstack/react-table';
 import { Box, TablePagination, TableRow as MuiTableRow } from '@mui/material';
-import { TableComponents, TableVirtuoso, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
+import { Column, ColumnSizingInfoState, ColumnSizingState, flexRender, HeaderGroup, Row } from '@tanstack/react-table';
 import { ReactElement, useMemo, useRef } from 'react';
-import { TableToolbar, TableToolbarProps } from './TableToolbar';
-import { TableRow } from './TableRow';
-import { TableBody } from './TableBody';
+import { TableComponents, TableVirtuoso, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
+
+import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
 import { InnerTable } from './InnerTable';
+import { TableCellConfigs, TableProps, TableRowEventOpts } from './model/table-model';
+import { TableBody } from './TableBody';
+import { TableCell, TableCellProps } from './TableCell';
+import { TableFoot } from './TableFoot';
 import { TableHead } from './TableHead';
 import { TableHeaderCell } from './TableHeaderCell';
-import { TableCell, TableCellProps } from './TableCell';
+import { TableRow } from './TableRow';
+import { TableToolbar, TableToolbarProps } from './TableToolbar';
 import { VirtualizedTableContainer } from './VirtualizedTableContainer';
-import { TableCellConfigs, TableProps, TableRowEventOpts } from './model/table-model';
-import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
-import { TableFoot } from './TableFoot';
 
 type TableCellPosition = {
   row: number;

@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import { TextFieldProps as MuiTextFieldProps, TextField as MuiTextField } from '@mui/material';
-import { ChangeEvent, ForwardedRef, forwardRef, useCallback, useMemo, useState } from 'react';
 import debounce from 'lodash/debounce';
+import { ChangeEvent, ForwardedRef, forwardRef, useCallback, useMemo, useState } from 'react';
 
 type TextFieldProps = Omit<MuiTextFieldProps, 'onChange'> & { debounceMs?: number; onChange?: (value: string) => void };
 

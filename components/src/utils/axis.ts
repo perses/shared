@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import merge from 'lodash/merge';
 import type { XAXisComponentOption, YAXisComponentOption } from 'echarts';
+import merge from 'lodash/merge';
+
 import { FormatOptions, formatValue } from '../model';
 
 export interface YAxisConfig {

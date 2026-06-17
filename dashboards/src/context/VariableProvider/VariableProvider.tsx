@@ -11,13 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactElement, ReactNode, useContext, useMemo, useState } from 'react';
-import { createStore, StoreApi, useStore } from 'zustand';
-import { useStoreWithEqualityFn } from 'zustand/traditional';
-import { immer } from 'zustand/middleware/immer';
-import { devtools } from 'zustand/middleware';
-import { shallow } from 'zustand/shallow';
-import { produce } from 'immer';
 import {
   VariableContext,
   VariableStateMap,
@@ -38,10 +31,18 @@ import {
   ListVariableDefinition,
   intervalToDuration,
 } from '@perses-dev/spec';
+import { produce } from 'immer';
+import { createContext, ReactElement, ReactNode, useContext, useMemo, useState } from 'react';
+import { createStore, StoreApi, useStore } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+import { shallow } from 'zustand/shallow';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
+
 import { ExternalVariableDefinition } from '../../model/VariableDefinition';
-import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
-import { hydrateVariableDefinitionStates as hydrateVariableDefinitionStates } from './hydrationUtils';
+import { hydrateVariableDefinitionStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
+import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 
 /**
  * This store is used to manipulate and read the definition of the variables and their state.

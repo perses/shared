@@ -13,12 +13,13 @@
 
 import { QueryDefinition, UnknownSpec, TraceData } from '@perses-dev/spec';
 import { QueryKey, useQueries, UseQueryResult } from '@tanstack/react-query';
+
 import { TraceQueryContext, TraceQueryPlugin } from '../model';
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
-import { useAllVariableValues } from './variables';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
+import { useAllVariableValues } from './variables';
 export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TraceQuery', PluginSpec>;
 export const TRACE_QUERY_KEY = 'TraceQuery';
 
