@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { AbsoluteTimeRange, UnknownSpec, LogData, QueryDefinition } from '@perses-dev/spec';
-import { DatasourceStore, Plugin, VariableStateMap } from '@perses-dev/plugin-system';
+import { DatasourceStore, VariableStateMap } from '../runtime';
+import { Plugin } from './plugin-base';
 
 export interface LogQueryResult {
   logs: LogData;

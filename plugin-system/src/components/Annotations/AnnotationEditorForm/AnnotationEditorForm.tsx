@@ -31,8 +31,7 @@ import { Action } from '@perses-dev/client';
 import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
 import { AnnotationPreview } from './AnnotationPreview';
-
-const DEFAULT_ANNOTATION_COLOR = '#FF6B6B';
+import { DEFAULT_ANNOTATION_COLOR } from './utils';
 
 function FallbackPreview(): ReactElement {
   return <div>Error previewing annotations</div>;
