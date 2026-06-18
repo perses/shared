@@ -30,9 +30,8 @@ import InvertColorsIcon from 'mdi-material-ui/InvertColors';
 import { Action } from '@perses-dev/client';
 import { PluginEditor } from '../../PluginEditor';
 import { useValidationSchemas } from '../../../context';
+import { DEFAULT_ANNOTATION_COLOR } from '../constants';
 import { AnnotationPreview } from './AnnotationPreview';
-
-const DEFAULT_ANNOTATION_COLOR = '#FF6B6B';
 
 function FallbackPreview(): ReactElement {
   return <div>Error previewing annotations</div>;

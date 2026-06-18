@@ -11,5 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './AnnotationEditorForm';
-export * from './constants';
+export const DEFAULT_ANNOTATION_COLOR = '#FF6B6B';
