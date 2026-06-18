@@ -22,7 +22,7 @@
 package proxy
 
 import (
-	specCommon "github.com/perses/spec/cue/common"
+	"github.com/perses/spec/cue/datasource"
 	httpProxy "github.com/perses/spec/cue/datasource/proxy/http"
 	sqlProxy "github.com/perses/spec/cue/datasource/proxy/sql"
 )
@@ -31,7 +31,7 @@ import (
 
 #HTTPProxy: httpProxy.#Proxy
 
-#baseHTTPDatasourceSpec: { directUrl: specCommon.#URL } | { proxy: #HTTPProxy }
+#baseHTTPDatasourceSpec: datasource.#HTTPDatasourceSpec
 
 #MySQL: sqlProxy.#MySQLConfig
 
@@ -39,4 +39,4 @@ import (
 
 #SQLProxy: sqlProxy.#Proxy
 
-#baseSQLDatasourceSpec: { driver: "mysql" | "mariadb" | "postgres", host: string, database: string } | { proxy: #SQLProxy }
+#baseSQLDatasourceSpec: datasource.#SQLDatasourceSpec

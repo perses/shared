@@ -31,7 +31,7 @@
   "dependencies": {
     "@perses-dev/components": "0.54.0-beta.7",
     "@perses-dev/plugin-system": "0.54.0-beta.7",
-    "@perses-dev/spec": "0.2.0-beta.3",
+    "@perses-dev/spec": "0.2.0-beta.6",
     "@perses-dev/client": "0.54.0-beta.7",
     "@tanstack/hotkeys": "^0.8.0",
     "@tanstack/react-hotkeys": "^0.9.1",
