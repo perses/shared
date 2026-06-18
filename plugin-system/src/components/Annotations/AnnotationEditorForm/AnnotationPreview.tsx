@@ -25,10 +25,9 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import { InfoTooltip, useTimeZone } from '@perses-dev/components';
+import { getDateAndTime, InfoTooltip, useTimeZone } from '@perses-dev/components';
 import AlertIcon from 'mdi-material-ui/Alert';
 import { useAnnotationData } from '../../../runtime';
-import { formatDate } from './utils';
 
 interface AnnotationPreviewCardProps extends CardProps {
   value: AnnotationData;
@@ -36,8 +35,8 @@ interface AnnotationPreviewCardProps extends CardProps {
 }
 
 function AnnotationPreviewCard({ value, formatWithUserTimeZone, ...props }: AnnotationPreviewCardProps): ReactNode {
-  const start = formatDate(value.start, formatWithUserTimeZone);
-  const end = value.end !== undefined ? formatDate(value.start, formatWithUserTimeZone) : null;
+  const start = getDateAndTime(value.start, formatWithUserTimeZone);
+  const end = value.end !== undefined ? getDateAndTime(value.start, formatWithUserTimeZone) : null;
 
   const tags = useMemo(() => {
     return Object.entries(value.tags ?? []).map(([key, value]) => {
@@ -63,13 +62,13 @@ function AnnotationPreviewCard({ value, formatWithUserTimeZone, ...props }: Anno
 
         <Stack gap={0.5} direction="row">
           <Typography variant="caption">
-            {start.date} - <strong>{start.time}</strong>
+            {start.formattedDate} - <strong>{start.formattedTime}</strong>
           </Typography>
           {end && (
             <>
               <Typography variant="caption">{' → '}</Typography>
               <Typography variant="caption">
-                {end.date} - <strong>{end.time}</strong>
+                {end.formattedDate} - <strong>{end.formattedTime}</strong>
               </Typography>
             </>
           )}

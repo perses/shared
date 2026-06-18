@@ -12,19 +12,3 @@
 // limitations under the License.
 
 export const DEFAULT_ANNOTATION_COLOR = '#FF6B6B';
-
-export const formatDate = (
-  timeMs: number,
-  format: (date: Date, format: string) => string
-): { date: string; time: string } => {
-  // Disallows NaN, Infinity, and -Infinity
-  if (!Number.isFinite(timeMs)) {
-    return { date: 'N/A', time: 'N/A' };
-  }
-
-  const d = new Date(timeMs);
-  return {
-    date: format(d, 'MMM dd, yyyy'),
-    time: format(d, 'HH:mm:ss'),
-  };
-};

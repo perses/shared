@@ -121,15 +121,16 @@ interface FormattedDateTime {
   formattedTime: string;
 }
 
-export const getDateAndTime = (timeMs?: number): FormattedDateTime => {
+export const getDateAndTime = (
+  timeMs?: number,
+  customFormat?: (date: Date, format: string) => string
+): FormattedDateTime => {
   if (!timeMs) {
     return { formattedDate: '', formattedTime: '' };
   }
   const date = new Date(timeMs);
-  const formattedDate = format(date, 'MMM dd, yyyy - ');
-  const formattedTime = format(date, 'HH:mm:ss');
   return {
-    formattedDate,
-    formattedTime,
+    formattedDate: customFormat ? customFormat(date, 'MMM dd, yyyy') : format(date, 'MMM dd, yyyy'),
+    formattedTime: customFormat ? customFormat(date, 'HH:mm:ss') : format(date, 'HH:mm:ss'),
   };
 };
