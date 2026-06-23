@@ -14,8 +14,13 @@
 import { BuiltinVariableDefinition } from '@perses-dev/spec';
 import { useQueries, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
-import { DefaultPluginKinds, PluginImplementation, PluginMetadataWithModule, PluginType } from '../model';
-import { PluginCompoundKey } from '../components/PluginRegistry/plugin-indexes';
+import {
+  DefaultPluginKinds,
+  PluginImplementation,
+  PluginMetadataWithModule,
+  PluginType,
+  PluginCompoundKey,
+} from '../model';
 
 export interface PluginRegistryContextType {
   getPlugin<T extends PluginType>(compoundKey: PluginCompoundKey<T>): Promise<PluginImplementation<T>>;

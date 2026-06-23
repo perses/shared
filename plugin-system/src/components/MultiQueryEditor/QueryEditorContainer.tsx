@@ -80,10 +80,13 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
       onCollapseExpand,
     } = props;
 
-    const [isEditingName, setIsEditingName] = useState(false);
-    const [name, setName] = useState(query.spec.name ?? defaultQueryName(index));
+    // The displayed name is always derived from props so it stays in sync with the
+    // current query/index, even when queries are added, removed or reordered.
+    const displayedName = query.spec.name ?? defaultQueryName(index);
 
-    function handleNameChange(): void {
+    const [isEditingName, setIsEditingName] = useState(false);
+
+    function handleNameSave(name: string): void {
       setIsEditingName(false);
       onChange(
         index,
@@ -91,11 +94,6 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
           draft.spec.name = name;
         })
       );
-    }
-
-    function handleNameCancel(): void {
-      setName(query.spec.name ?? defaultQueryName(index));
-      setIsEditingName(false);
     }
 
     return (
@@ -128,28 +126,17 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
               }}
             >
               {isEditingName ? (
-                <TextField
-                  size="small"
-                  variant="outlined"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  fullWidth={true}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton size="small" aria-label="cancel edit" onClick={handleNameCancel} edge="end">
-                          <CloseIcon />
-                        </IconButton>
-                        <IconButton size="small" aria-label="save query name" onClick={handleNameChange} edge="end">
-                          <CheckIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
+                <QueryNameInput
+                  // Remounting on identity change resets the draft so editing always
+                  // targets the currently displayed query.
+                  key={displayedName}
+                  initialName={displayedName}
+                  onSave={handleNameSave}
+                  onCancel={() => setIsEditingName(false)}
                 />
               ) : (
                 <Typography variant="overline" component="h4">
-                  {name}
+                  {displayedName}
                 </Typography>
               )}
             </Stack>
@@ -188,7 +175,7 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
                 </Stack>
               </InfoTooltip>
             )}
-            <Stack>
+            <Stack direction="row">
               {!isEditingName && (
                 <IconButton aria-label="edit query name" size="small" onClick={() => setIsEditingName(true)}>
                   <PencilIcon fontSize="small" />
@@ -218,6 +205,48 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
 );
 
 QueryEditorContainer.displayName = 'QueryEditorContainer';
+
+/**
+ * Properties for {@link QueryNameInput}
+ */
+interface QueryNameInputProps {
+  initialName: string;
+  onSave: (name: string) => void;
+  onCancel: () => void;
+}
+
+/**
+ * Self-contained input to edit a query name. The draft value is local state seeded from
+ * `initialName`; callers reset it by changing the `key` (remounting) rather than syncing
+ * with an useEffect.
+ */
+function QueryNameInput({ initialName, onSave, onCancel }: QueryNameInputProps): ReactElement {
+  const [draftName, setDraftName] = useState(initialName);
+
+  return (
+    <TextField
+      size="small"
+      variant="outlined"
+      label="Query name"
+      aria-label="query name"
+      value={draftName}
+      onChange={(e) => setDraftName(e.target.value)}
+      fullWidth={true}
+      InputProps={{
+        endAdornment: (
+          <InputAdornment position="end">
+            <IconButton size="small" aria-label="cancel edit" onClick={onCancel} edge="end">
+              <CloseIcon />
+            </IconButton>
+            <IconButton size="small" aria-label="save query name" onClick={() => onSave(draftName)} edge="end">
+              <CheckIcon />
+            </IconButton>
+          </InputAdornment>
+        ),
+      }}
+    />
+  );
+}
 
 // Props on MUI Box that we don't want people to pass because we're either redefining them or providing them in
 // this component

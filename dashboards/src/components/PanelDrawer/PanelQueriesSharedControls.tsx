@@ -29,7 +29,7 @@ export interface PanelQueriesSharedControlsProps {
 }
 
 // Component of PanelEditor, it will share queries results to its children with DataQueriesProvider.
-// TODO: consider merging PanelEditorProvider, QueryCountProvider and DataQueriesProvider into a single provider to avoid multiple nested providers.
+// TODO: consider merging PanelEditorProvider and DataQueriesProvider into a single provider to avoid multiple nested providers.
 export function PanelQueriesSharedControls({
   plugin,
   control,
