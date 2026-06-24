@@ -118,8 +118,10 @@ export function interpolate(values: string[], name: string, format: Interpolatio
     case InterpolationFormat.QUERYPARAM:
       return values.map((v) => `${name}=${encodeURIComponent(v)}`).join('&');
     case InterpolationFormat.PROMETHEUS:
-    default:
-      return `(${values.join('|')})`;
+    default: {
+      const escapedValues = values.map((v) => v.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'));
+      return `(${escapedValues.join('|')})`;
+    }
   }
 }
 

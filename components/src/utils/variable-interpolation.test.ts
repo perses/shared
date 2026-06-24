@@ -198,6 +198,21 @@ describe('replaceVariables() with custom formats', () => {
       },
       expected: 'hello perses,prometheus world',
     },
+    // prometheus with special characters (issue #4165)
+    {
+      text: '{site=~ "$site"}',
+      state: {
+        site: { value: ['xx-1 (abc1)', 'zz-1 (def2)'], loading: false },
+      },
+      expected: '{site=~ "(xx\\-1 \\(abc1\\)|zz\\-1 \\(def2\\))"}',
+    },
+    {
+      text: 'hello ${var1:prometheus}',
+      state: {
+        var1: { value: ['per.ses', 'pro(metheus)'], loading: false },
+      },
+      expected: 'hello (per\\.ses|pro\\(metheus\\))',
+    },
     // regex
     {
       text: 'hello ${var1:regex} ${var2:regex}',
