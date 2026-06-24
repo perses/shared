@@ -191,4 +191,104 @@ describe('interpolateQueryParams()', () => {
       dedup: 'false',
     });
   });
+
+  describe('customAllValue ($__all with string value)', () => {
+    const customAllValueState: VariableStateMap = {
+      namespace: {
+        value: '(project-alpha|project-beta|project-gamma)',
+        options: [
+          { label: 'project-alpha', value: 'project-alpha' },
+          { label: 'project-beta', value: 'project-beta' },
+          { label: 'project-gamma', value: 'project-gamma' },
+        ],
+        loading: false,
+      },
+      cluster: { value: 'prod', loading: false },
+    };
+
+    it('expands customAllValue to individual options with queryparam format', () => {
+      const result = interpolateQueryParams({ namespace: '${namespace:queryparam}' }, customAllValueState);
+      expect(result).toEqual({ namespace: ['project-alpha', 'project-beta', 'project-gamma'] });
+    });
+
+    it('expands customAllValue to individual options with no format', () => {
+      const result = interpolateQueryParams({ namespace: '$namespace' }, customAllValueState);
+      expect(result).toEqual({ namespace: ['project-alpha', 'project-beta', 'project-gamma'] });
+    });
+
+    it('expands wildcard customAllValue to individual options', () => {
+      const wildcardState: VariableStateMap = {
+        namespace: {
+          value: '.*',
+          options: [
+            { label: 'ns1', value: 'ns1' },
+            { label: 'ns2', value: 'ns2' },
+          ],
+          loading: false,
+        },
+      };
+      const result = interpolateQueryParams({ namespace: '${namespace:queryparam}' }, wildcardState);
+      expect(result).toEqual({ namespace: ['ns1', 'ns2'] });
+    });
+
+    it('does not expand single-value selection that matches an option', () => {
+      const singleSelectState: VariableStateMap = {
+        namespace: {
+          value: 'project-alpha',
+          options: [
+            { label: 'project-alpha', value: 'project-alpha' },
+            { label: 'project-beta', value: 'project-beta' },
+          ],
+          loading: false,
+        },
+      };
+      const result = interpolateQueryParams({ namespace: '$namespace' }, singleSelectState);
+      expect(result).toEqual({ namespace: 'project-alpha' });
+    });
+
+    it('expands customAllValue alongside other params', () => {
+      const result = interpolateQueryParams(
+        { namespace: '${namespace:queryparam}', cluster: '$cluster' },
+        customAllValueState
+      );
+      expect(result).toEqual({
+        namespace: ['project-alpha', 'project-beta', 'project-gamma'],
+        cluster: 'prod',
+      });
+    });
+
+    it('expands only options matching customAllValue regex when it references a subset', () => {
+      const mismatchedState: VariableStateMap = {
+        namespace: {
+          value: '(project-alpha|project-beta|project-gamma)',
+          options: [
+            { label: 'project-alpha', value: 'project-alpha' },
+            { label: 'project-beta', value: 'project-beta' },
+            { label: 'project-gamma', value: 'project-gamma' },
+            { label: 'project-delta', value: 'project-delta' },
+          ],
+          loading: false,
+        },
+      };
+      const result = interpolateQueryParams({ namespace: '${namespace:queryparam}' }, mismatchedState);
+      expect(result).toEqual({
+        namespace: ['project-alpha', 'project-beta', 'project-gamma'],
+      });
+    });
+
+    it('falls back to all options when customAllValue is not a valid regex', () => {
+      const invalidRegexState: VariableStateMap = {
+        namespace: {
+          value: '(unclosed-group',
+          options: [
+            { label: 'ns1', value: 'ns1' },
+            { label: 'ns2', value: 'ns2' },
+          ],
+          loading: false,
+        },
+      };
+      const result = interpolateQueryParams({ namespace: '$namespace' }, invalidRegexState);
+      expect(result).toEqual({ namespace: ['ns1', 'ns2'] });
+    });
+  });
 });
