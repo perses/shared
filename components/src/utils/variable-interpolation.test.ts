@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parseVariables, replaceVariable, replaceVariables } from './variable-interpolation';
+import { parseVariables, replaceVariable, replaceVariables, VariableStateMap } from './variable-interpolation';
 
 describe('parseVariables()', () => {
   const tests = [
@@ -99,7 +99,7 @@ describe('replaceVariables()', () => {
 });
 
 describe('replaceVariables() with custom formats', () => {
-  const tests = [
+  const tests: Array<{ text: string; state: VariableStateMap; expected: string }> = [
     // csv
     {
       text: 'hello ${var1:csv} ${var2:csv}',
