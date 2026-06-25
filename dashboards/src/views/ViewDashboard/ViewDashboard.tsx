@@ -61,6 +61,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     onSave,
     onDiscard,
     sx,
+    userPreferenceTimezone,
     ...others
   } = props;
   const { spec } = dashboardResource;
@@ -151,6 +152,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
                     dashboardTitleComponent={dashboardTitleComponent}
                     onSave={onSave}
                     onDiscard={onDiscard}
+                    userPreferenceTimezone={userPreferenceTimezone}
                   />
                 </ErrorBoundary>
               </Box>
