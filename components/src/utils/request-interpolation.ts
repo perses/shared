@@ -18,6 +18,7 @@ import {
   parseVariablesAndFormat,
   InterpolationFormat,
 } from './variable-interpolation';
+import { createRegexFromString } from './regexp';
 
 export type QueryParamValues = Record<string, string | string[]>;
 
@@ -40,15 +41,14 @@ function expandQueryParamValue(value: string | string[], variableState: Variable
     const allOptionValues = options.map((o) => o.value);
 
     const isArray = Array.isArray(varState.value);
-    const isCustomAllValue =
-      typeof varState.value === 'string' && options.length > 0 && !options.some((o) => o.value === varState.value);
+    const isCustomAllValue = varState.customAllValue !== undefined;
 
     let expandValues: string[] | undefined;
     if (isArray) {
       expandValues = varState.value as string[];
     } else if (isCustomAllValue) {
       try {
-        const regex = new RegExp(`^${varState.value}$`);
+        const regex = createRegexFromString(varState.customAllValue as string);
         const matched = options.filter((o) => regex.test(o.value)).map((o) => o.value);
         expandValues = matched.length > 0 ? matched : allOptionValues;
       } catch {
