@@ -34,17 +34,17 @@
     "@perses-dev/spec": "0.2.0-beta.6",
     "@perses-dev/client": "0.54.0-beta.9",
     "@tanstack/hotkeys": "^0.8.0",
-    "@tanstack/react-hotkeys": "^0.9.1",
-    "immer": "^10.1.1",
-    "mdi-material-ui": "^7.9.2",
-    "react-grid-layout": "^1.3.4",
+    "@tanstack/react-hotkeys": "^0.10.0",
+    "immer": "^11.1.8",
+    "mdi-material-ui": "^8.0.0",
+    "react-grid-layout": "^2.2.3",
     "react-hook-form": "^7.46.1",
-    "react-intersection-observer": "^9.4.0",
+    "react-intersection-observer": "^10.0.3",
     "use-immer": "^0.11.0",
     "use-query-params": "^2.2.1",
     "use-resize-observer": "^9.0.0",
     "yaml": "^2.7.0",
-    "zustand": "^4.3.3"
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@types/react-grid-layout": "^1.3.6",
