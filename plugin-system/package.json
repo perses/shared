@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/plugin-system",
-  "version": "0.54.0-beta.8",
+  "version": "0.54.0-beta.9",
   "description": "The plugin feature in Pereses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -29,10 +29,10 @@
   },
   "dependencies": {
     "@module-federation/enhanced": "^2.6.0",
-    "@perses-dev/components": "0.54.0-beta.8",
+    "@perses-dev/components": "0.54.0-beta.9",
     "@perses-dev/core": "0.53.0",
     "@perses-dev/spec": "0.2.0-beta.6",
-    "@perses-dev/client": "0.54.0-beta.8",
+    "@perses-dev/client": "0.54.0-beta.9",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
     "immer": "^10.1.1",
