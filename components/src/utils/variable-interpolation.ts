@@ -35,6 +35,7 @@ export type VariableState = {
    */
   overridden?: boolean;
   defaultValue?: VariableValue;
+  customAllValue?: string;
 };
 
 /**

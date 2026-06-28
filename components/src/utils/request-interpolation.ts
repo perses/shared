@@ -18,6 +18,7 @@ import {
   parseVariablesAndFormat,
   InterpolationFormat,
 } from './variable-interpolation';
+import { createRegexFromString } from './regexp';
 
 export type QueryParamValues = Record<string, string | string[]>;
 
@@ -34,7 +35,27 @@ function expandQueryParamValue(value: string | string[], variableState: Variable
   // Find the first multi-value variable that should expand to repeated keys
   for (const [varName, format] of variablesMap) {
     const varState = variableState[varName];
-    if (!varState || !Array.isArray(varState.value)) continue;
+    if (!varState) continue;
+
+    const options = varState.options ?? [];
+    const allOptionValues = options.map((o) => o.value);
+
+    const isArray = Array.isArray(varState.value);
+    const isCustomAllValue = varState.customAllValue !== undefined;
+
+    let expandValues: string[] | undefined;
+    if (isArray) {
+      expandValues = varState.value as string[];
+    } else if (isCustomAllValue) {
+      try {
+        const regex = createRegexFromString(varState.customAllValue as string);
+        const matched = options.filter((o) => regex.test(o.value)).map((o) => o.value);
+        expandValues = matched.length > 0 ? matched : allOptionValues;
+      } catch {
+        expandValues = allOptionValues;
+      }
+    }
+    if (!expandValues) continue;
 
     // If format is queryparam or not specified (default for query params), expand to array
     if (!format || format === InterpolationFormat.QUERYPARAM) {
@@ -42,7 +63,7 @@ function expandQueryParamValue(value: string | string[], variableState: Variable
       const simpleSyntax = '$' + varName;
       const bracketSyntax = format ? '${' + varName + ':' + format + '}' : '${' + varName + '}';
 
-      return varState.value.map((singleValue) => {
+      return expandValues.map((singleValue) => {
         let text = valueString;
         // Replace the variable reference with the raw value directly.
         // We cannot use replaceVariables here because it would apply QUERYPARAM format
