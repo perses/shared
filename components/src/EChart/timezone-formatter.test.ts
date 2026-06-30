@@ -31,7 +31,7 @@ describe('createTimezoneAwareAxisFormatter', () => {
     expect(result).toBe('yyyy[America/New_York]');
   });
 
-  it('should format for ranges > 2 years with month-year format', () => {
+  it('should format for ranges > 6 months with month-year format', () => {
     const formatter = createTimezoneAwareAxisFormatter(3 * 365 * 24 * 60 * 60 * 1000, timeZone);
     const result = formatter(testTimestamp);
     expect(result).toBe('MMM yyyy[America/New_York]');

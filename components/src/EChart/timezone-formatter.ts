@@ -13,8 +13,9 @@
 
 import { formatWithTimeZone } from '@perses-dev/components';
 
-const DAY_MS = 86400000;
-const YEAR_MS = 31536000000;
+const DAY_MS = 1000 * 60 * 60 * 24;
+const MONTH_MS = DAY_MS * 30;
+const YEAR_MS = DAY_MS * 365;
 
 /**
  * Creates a timezone-aware axis formatter function for different time ranges
@@ -29,7 +30,7 @@ export function createTimezoneAwareAxisFormatter(rangeMs: number, timeZone: stri
     }
 
     // more than 6 months
-    if (rangeMs > DAY_MS * 180) {
+    if (rangeMs > MONTH_MS * 6) {
       return formatWithTimeZone(timeStamp, 'MMM yyyy', timeZone);
     }
 
