@@ -12,3 +12,4 @@
 // limitations under the License.
 
 export * from './EChart';
+export * from './timezone-formatter';
