@@ -215,6 +215,14 @@ describe('replaceVariables() with custom formats', () => {
       },
       expected: 'hello (perses\\.|prometheus\\$) (world\\.)',
     },
+    {
+      text: 'hello ${var1:regexliteral} ${var2:regexliteral}',
+      state: {
+        var1: { value: ['perses.', 'prometheus$'], loading: false },
+        var2: { value: 'world.', loading: false },
+      },
+      expected: 'hello (perses\\\\.|prometheus\\\\$) (world\\\\.)',
+    },
     // singlequote
     {
       text: 'hello ${var1:singlequote} ${var2:singlequote}',

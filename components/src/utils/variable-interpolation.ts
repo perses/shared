@@ -62,6 +62,7 @@ export enum InterpolationFormat {
   SQLSTRING = 'sqlstring',
   TEXT = 'text',
   QUERYPARAM = 'queryparam',
+  REGEX_LITERAL = 'regexliteral',
 }
 
 function stringToFormat(val: string | undefined): InterpolationFormat | undefined {
@@ -110,6 +111,10 @@ export function interpolate(values: string[], name: string, format: Interpolatio
       const escapedRegex = values.map((v) => v.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&'));
       return `(${escapedRegex.join('|')})`;
     }
+    case InterpolationFormat.REGEX_LITERAL: {
+      const escapedRegex = values.map((v) => v.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\\\$&'));
+      return `(${escapedRegex.join('|')})`;
+    }
     case InterpolationFormat.SINGLEQUOTE:
       return values.map((v) => `'${v}'`).join(',');
     case InterpolationFormat.SQLSTRING:
@@ -143,7 +148,6 @@ export function replaceVariable(
   if (typeof variableValue === 'string') {
     replaceString = interpolate([variableValue], varName, varFormat || InterpolationFormat.RAW);
   }
-
   text = text.replaceAll(variableSyntax, replaceString);
   return text.replaceAll(alternativeVariableSyntax, replaceString);
 }
