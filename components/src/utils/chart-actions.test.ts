@@ -12,7 +12,13 @@
 // limitations under the License.
 
 import { TimeSeries, TimeSeriesValueTuple } from '@perses-dev/spec';
-import { getClosestTimestamp, getClosestTimestampInFullDataset } from './chart-actions';
+import { ECharts as EChartsInstance } from 'echarts/core';
+import { DatapointInfo } from '../model';
+import {
+  batchDispatchNearbySeriesActions,
+  getClosestTimestamp,
+  getClosestTimestampInFullDataset,
+} from './chart-actions';
 
 const TEST_TIME_SERIES_VALUES: TimeSeriesValueTuple[] = [
   [1690381125000, 0.12],
@@ -136,5 +142,72 @@ describe('getClosestTimestamp', () => {
 describe('getClosestTimestampInFullDataset', () => {
   it('should determine closest timestamp to current cursor xValue in full time series data', () => {
     expect(getClosestTimestampInFullDataset(TEST_TIME_SERIES_DATA, 1690386199722.634)).toEqual(1690386195000);
+  });
+});
+
+describe('batchDispatchNearbySeriesActions', () => {
+  function makeChartMock(): { chart: EChartsInstance; calls: Array<{ type: string; payload: unknown }> } {
+    const calls: Array<{ type: string; payload: unknown }> = [];
+    const chart = {
+      dispatchAction: (payload: { type: string; [k: string]: unknown }) => {
+        calls.push({ type: payload.type, payload: JSON.parse(JSON.stringify(payload)) });
+      },
+    } as unknown as EChartsInstance;
+    return { chart, calls };
+  }
+
+  it('dispatches a blanket downplay to clear ECharts axis-triggered emphasis before highlighting the winner', () => {
+    const { chart, calls } = makeChartMock();
+    const winnerDatapoint: DatapointInfo = { seriesIndex: 3, dataIndex: 5, seriesName: 's3', yValue: 42 };
+
+    batchDispatchNearbySeriesActions(chart, [1, 2, 3, 4], [3], [1, 2, 4], [winnerDatapoint], []);
+
+    const blanketDownplayIdx = calls.findIndex(
+      (c) => c.type === 'downplay' && (c.payload as { seriesIndex?: unknown }).seriesIndex === undefined
+    );
+    const targetedDownplayIdx = calls.findIndex(
+      (c) => c.type === 'downplay' && Array.isArray((c.payload as { seriesIndex?: unknown }).seriesIndex)
+    );
+    const highlightIdx = calls.findIndex((c) => c.type === 'highlight');
+
+    expect(blanketDownplayIdx).toBeGreaterThanOrEqual(0);
+    expect(targetedDownplayIdx).toBeGreaterThan(blanketDownplayIdx);
+    expect(highlightIdx).toBeGreaterThan(targetedDownplayIdx);
+    expect((calls[highlightIdx]!.payload as { seriesIndex: number[] }).seriesIndex).toEqual([3]);
+  });
+
+  it('dispatches a select action on the winning datapoint', () => {
+    const { chart, calls } = makeChartMock();
+    const winnerDatapoint: DatapointInfo = { seriesIndex: 7, dataIndex: 11, seriesName: 's7', yValue: 1.5 };
+
+    batchDispatchNearbySeriesActions(chart, [7], [7], [], [winnerDatapoint], []);
+
+    const selectCall = calls.find((c) => c.type === 'select');
+    expect(selectCall).toBeDefined();
+    expect((selectCall!.payload as { seriesIndex: number; dataIndex: number }).seriesIndex).toBe(7);
+    expect((selectCall!.payload as { seriesIndex: number; dataIndex: number }).dataIndex).toBe(11);
+  });
+
+  it('uses the last duplicate datapoint for select when duplicates exist (avoids color mismatch)', () => {
+    const { chart, calls } = makeChartMock();
+    const winner: DatapointInfo = { seriesIndex: 1, dataIndex: 0, seriesName: 's1', yValue: 100 };
+    const duplicate: DatapointInfo = { seriesIndex: 2, dataIndex: 0, seriesName: 's2', yValue: 100 };
+
+    batchDispatchNearbySeriesActions(chart, [1, 2], [1, 2], [], [winner, duplicate], [duplicate]);
+
+    const selectCall = calls.find((c) => c.type === 'select');
+    expect((selectCall!.payload as { seriesIndex: number }).seriesIndex).toBe(2);
+  });
+
+  it('falls back to highlighting all nearby series when no emphasized winner exists', () => {
+    const { chart, calls } = makeChartMock();
+
+    batchDispatchNearbySeriesActions(chart, [1, 2, 3], [], [1, 2, 3], [], []);
+
+    const highlight = calls.find((c) => c.type === 'highlight');
+    expect(highlight).toBeDefined();
+    expect((highlight!.payload as { seriesIndex: number[]; notBlur: boolean }).seriesIndex).toEqual([1, 2, 3]);
+    expect((highlight!.payload as { seriesIndex: number[]; notBlur: boolean }).notBlur).toBe(true);
+    expect(calls.some((c) => c.type === 'toggleSelect')).toBe(true);
   });
 });

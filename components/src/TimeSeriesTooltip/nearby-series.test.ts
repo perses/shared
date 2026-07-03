@@ -11,8 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { EChartsDataFormat, FormatOptions } from '../model';
-import { legacyCheckforNearbySeries, getYBuffer, isWithinPercentageRange } from './nearby-series';
+import { ECharts as EChartsInstance } from 'echarts/core';
+import { TimeSeries } from '@perses-dev/spec';
+import { EChartsDataFormat, FormatOptions, TimeChartSeriesMapping } from '../model';
+import {
+  checkforNearbyTimeSeries,
+  legacyCheckforNearbySeries,
+  getYBuffer,
+  isWithinPercentageRange,
+} from './nearby-series';
+import { calculateVisualYForSeries } from './utils';
 
 describe('legacyCheckforNearbySeries', () => {
   const chartData: EChartsDataFormat = {
@@ -120,5 +128,151 @@ describe('isWithinPercentageRange', () => {
     const yValue = 100;
     const result = isWithinPercentageRange({ valueToCheck: 200, baseValue: yValue, percentage: 5 });
     expect(result).toBe(false);
+  });
+});
+
+describe('calculateVisualYForSeries', () => {
+  it('returns the raw yValue for non-stacked series and does not touch the totals map', () => {
+    const seriesMapping = [{ type: 'line', name: 'a' }] as unknown as TimeChartSeriesMapping;
+    const totals = new Map<string, number>();
+
+    const result = calculateVisualYForSeries(0, 42, seriesMapping, totals);
+
+    expect(result).toBe(42);
+    expect(totals.size).toBe(0);
+  });
+
+  it('accumulates stacked totals per stack id across sequential calls', () => {
+    const seriesMapping = [
+      { type: 'line', name: 'a', stack: 'total' },
+      { type: 'line', name: 'b', stack: 'total' },
+      { type: 'line', name: 'c', stack: 'total' },
+    ] as unknown as TimeChartSeriesMapping;
+
+    const totals = new Map<string, number>();
+
+    expect(calculateVisualYForSeries(0, 10, seriesMapping, totals)).toBe(10);
+    expect(calculateVisualYForSeries(1, 20, seriesMapping, totals)).toBe(30);
+    expect(calculateVisualYForSeries(2, 5, seriesMapping, totals)).toBe(35);
+    expect(totals.get('total')).toBe(35);
+  });
+
+  it('keeps totals separate across different stack ids', () => {
+    const seriesMapping = [
+      { type: 'line', name: 'a', stack: 'left' },
+      { type: 'line', name: 'b', stack: 'right' },
+      { type: 'line', name: 'c', stack: 'left' },
+    ] as unknown as TimeChartSeriesMapping;
+
+    const totals = new Map<string, number>();
+
+    expect(calculateVisualYForSeries(0, 100, seriesMapping, totals)).toBe(100);
+    expect(calculateVisualYForSeries(1, 50, seriesMapping, totals)).toBe(50);
+    expect(calculateVisualYForSeries(2, 25, seriesMapping, totals)).toBe(125);
+    expect(totals.get('left')).toBe(125);
+    expect(totals.get('right')).toBe(50);
+  });
+});
+
+describe('checkforNearbyTimeSeries — stacked lines', () => {
+  const TIMESTAMP = 1_700_000_000_000;
+
+  function buildStackedFixture(): {
+    data: TimeSeries[];
+    seriesMapping: TimeChartSeriesMapping;
+  } {
+    const data: TimeSeries[] = [
+      { name: 'series-a', values: [[TIMESTAMP, 10]] },
+      { name: 'series-b', values: [[TIMESTAMP, 20]] },
+    ];
+    const seriesMapping = [
+      { type: 'line', name: 'series-a', color: '#111', stack: 'group', id: 'a' },
+      { type: 'line', name: 'series-b', color: '#222', stack: 'group', id: 'b' },
+    ] as unknown as TimeChartSeriesMapping;
+    return { data, seriesMapping };
+  }
+
+  function buildChartMock(): {
+    chart: EChartsInstance;
+    dispatched: Array<{ type: string; seriesIndex?: number | number[]; dataIndex?: number }>;
+  } {
+    const dispatched: Array<{ type: string; seriesIndex?: number | number[]; dataIndex?: number }> = [];
+    const chart = {
+      dispatchAction: (action: { type: string; seriesIndex?: number | number[]; dataIndex?: number }): void => {
+        dispatched.push(action);
+      },
+      // Simple identity-style mock: return the value passed in as pixel Y.
+      convertToPixel: (_finder: unknown, value: number[]): number[] => [value[0] ?? 0, value[1] ?? 0],      getDom: (): null => null,
+    } as unknown as EChartsInstance;
+    return { chart, dispatched };
+  }
+
+  it('emphasizes the visually-hovered stacked series (top of stack), not the one with the matching raw value', () => {
+    const { data, seriesMapping } = buildStackedFixture();
+    const { chart, dispatched } = buildChartMock();
+
+    const yBuffer = 5;
+    const result = checkforNearbyTimeSeries(data, seriesMapping, [TIMESTAMP, 30], yBuffer, chart);
+
+    const winner = result.find((series) => series.isClosestToCursor);
+    expect(winner).toBeDefined();
+    expect(winner?.seriesName).toBe('series-b');
+    expect(winner?.y).toBe(30);
+
+    const seriesA = result.find((series) => series.seriesName === 'series-a');
+    expect(seriesA).toBeUndefined();
+
+    // Non-candidate series (a) must be explicitly downplayed to clear stale emphasis.
+    const downplays = dispatched.filter((action) => action.type === 'downplay');
+    const downplayedSeriesIdxs = new Set<number>();
+    for (const action of downplays) {
+      if (Array.isArray(action.seriesIndex)) {
+        for (const idx of action.seriesIndex) downplayedSeriesIdxs.add(idx);
+      } else if (typeof action.seriesIndex === 'number') {
+        downplayedSeriesIdxs.add(action.seriesIndex);
+      }
+    }
+    expect(downplayedSeriesIdxs.has(0)).toBe(true);
+  });
+
+  it('emphasizes series-a when the cursor is near its visual position (bottom of stack)', () => {
+    const { data, seriesMapping } = buildStackedFixture();
+    const { chart } = buildChartMock();
+
+    const result = checkforNearbyTimeSeries(data, seriesMapping, [TIMESTAMP, 10], 5, chart);
+    const winner = result.find((series) => series.isClosestToCursor);
+    expect(winner?.seriesName).toBe('series-a');
+  });
+
+  it('downplays previously-hovered non-candidate series (fix for persistent emphasis)', () => {
+    const data: TimeSeries[] = [
+      { name: 'a', values: [[TIMESTAMP, 1]] },
+      { name: 'b', values: [[TIMESTAMP, 2]] },
+      { name: 'c', values: [[TIMESTAMP, 3]] },
+    ];
+    const seriesMapping = [
+      { type: 'line', name: 'a', color: '#111', id: 'a' },
+      { type: 'line', name: 'b', color: '#222', id: 'b' },
+      { type: 'line', name: 'c', color: '#333', id: 'c' },
+    ] as unknown as TimeChartSeriesMapping;
+
+    const { chart, dispatched } = buildChartMock();
+
+    const result = checkforNearbyTimeSeries(data, seriesMapping, [TIMESTAMP, 1000], 0.5, chart);
+
+    expect(result).toEqual([]);
+
+    const downplayed = new Set<number>();
+    for (const action of dispatched) {
+      if (action.type !== 'downplay') continue;
+      if (Array.isArray(action.seriesIndex)) {
+        for (const idx of action.seriesIndex) downplayed.add(idx);
+      } else if (typeof action.seriesIndex === 'number') {
+        downplayed.add(action.seriesIndex);
+      }
+    }
+    expect(downplayed.has(0)).toBe(true);
+    expect(downplayed.has(1)).toBe(true);
+    expect(downplayed.has(2)).toBe(true);
   });
 });

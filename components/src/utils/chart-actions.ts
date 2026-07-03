@@ -117,12 +117,21 @@ export function batchDispatchNearbySeriesActions(
     });
   }
 
-  // Clears emphasis state of all lines that are not emphasized.
-  // Emphasized is a subset of just the nearby series that are closest to cursor.
+  // Blanket downplay clears axis-triggered emphasis (enlarged "big point" markers) before
+  // re-applying emphasis to only the winner series.
+  // https://echarts.apache.org/en/api.html#action.downplay
   chart.dispatchAction({
     type: 'downplay',
-    seriesIndex: nonEmphasizedSeriesIndexes,
   });
+
+  // Clears emphasis state of all lines that are not emphasized.
+  // Emphasized is a subset of just the nearby series that are closest to cursor.
+  if (nonEmphasizedSeriesIndexes.length > 0) {
+    chart.dispatchAction({
+      type: 'downplay',
+      seriesIndex: nonEmphasizedSeriesIndexes,
+    });
+  }
 
   // https://echarts.apache.org/en/api.html#action.highlight
   if (emphasizedSeriesIndexes.length > 0) {

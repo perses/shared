@@ -12,6 +12,9 @@
 // limitations under the License.
 
 import { Theme } from '@mui/material';
+import { ECharts as EChartsInstance } from 'echarts/core';
+import { BarSeriesOption, LineSeriesOption } from 'echarts/charts';
+import { TimeChartSeriesMapping } from '../model';
 import {
   CursorCoordinates,
   CursorData,
@@ -23,7 +26,7 @@ import {
 } from './tooltip-model';
 
 /**
- * Determine position of tooltip depending on chart dimensions and the number of focused series
+ * Determine position of tooltip depending on chart dimensions and the number of focused series.
  */
 export function assembleTransform(
   mousePos: CursorData['coords'],
@@ -45,6 +48,11 @@ export function assembleTransform(
 
   if (mousePos.plotCanvas.x === undefined) return undefined;
 
+  // Fall back to max size when the resize observer has not yet reported a real measurement,
+  // to avoid positioning the tooltip past the viewport and causing scrollbar jitter.
+  const effectiveHeight = tooltipHeight > 0 ? tooltipHeight : TOOLTIP_MAX_HEIGHT;
+  const effectiveWidth = tooltipWidth > 0 ? tooltipWidth : TOOLTIP_MAX_WIDTH;
+
   let x = mousePos.page.x + cursorPaddingX; // Default to right side of the cursor
   let y = mousePos.page.y + cursorPaddingY;
 
@@ -56,19 +64,19 @@ export function assembleTransform(
 
     // Ensure tooltip does not go out of the container's bottom
     const containerBottom = containerRect.top + containerElement.scrollHeight;
-    if (y + tooltipHeight > containerBottom) {
-      y = Math.max(containerBottom - tooltipHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
+    if (y + effectiveHeight > containerBottom) {
+      y = Math.max(containerBottom - effectiveHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
     }
   } else {
     // Ensure tooltip does not go out of the screen on the bottom
-    if (y + tooltipHeight > window.innerHeight + window.scrollY) {
-      y = Math.max(window.innerHeight + window.scrollY - tooltipHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
+    if (y + effectiveHeight > window.innerHeight + window.scrollY) {
+      y = Math.max(window.innerHeight + window.scrollY - effectiveHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
     }
   }
 
   // Ensure tooltip does not go out of the screen on the right
-  if (x + tooltipWidth > window.innerWidth) {
-    x = mousePos.page.x - tooltipWidth - cursorPaddingX; // Move to the left of the cursor
+  if (x + effectiveWidth > window.innerWidth) {
+    x = mousePos.page.x - effectiveWidth - cursorPaddingX; // Move to the left of the cursor
   }
 
   // Ensure tooltip does not go out of the screen on the left
@@ -107,7 +115,9 @@ export function getTooltipStyles(
     fontSize: '11px',
     visibility: 'visible',
     opacity: 1,
-    transition: 'all 0.1s ease-out',
+    // Avoid animating `transform` — intermediate positions during animation can extend past the
+    // viewport and cause scrollbar jitter. Animating opacity/visibility is safe.
+    transition: 'opacity 0.1s ease-out, visibility 0.1s ease-out',
     // Ensure pinned tooltip shows behind edit panel drawer and sticky header
     zIndex: pinnedPos !== null ? 'auto' : theme.zIndex.tooltip,
     overflow: 'hidden',
@@ -115,4 +125,117 @@ export function getTooltipStyles(
       overflowY: 'auto',
     },
   };
+}
+
+export function getPixelXFromGrid(timestamp: number, chart: EChartsInstance): number | null {
+  try {
+    const pixelCoords = chart.convertToPixel('grid', [timestamp, 0]);
+    return pixelCoords?.[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Returns the cumulative (visual) Y for a series, accumulating stack totals in-place.
+ * For non-stacked series, returns the raw yValue unchanged.
+ * Mutates `stackTotals` — pass a fresh Map for each cursor evaluation.
+ */
+export function calculateVisualYForSeries(
+  seriesIdx: number,
+  yValue: number,
+  seriesMapping: TimeChartSeriesMapping,
+  stackTotals: Map<string, number>
+): number {
+  const currentSeries = seriesMapping[seriesIdx];
+  if (!currentSeries) return yValue;
+
+  const stackId = (currentSeries as LineSeriesOption | BarSeriesOption).stack;
+  if (!stackId) {
+    return yValue;
+  }
+
+  const stackIdStr = stackId.toString();
+  const currentTotal = stackTotals.get(stackIdStr) ?? 0;
+  const newTotal = currentTotal + yValue;
+  stackTotals.set(stackIdStr, newTotal);
+  return newTotal;
+}
+
+export function calculateBarBandwidth(timestamp: number, sortedTimestamps: number[], chart: EChartsInstance): number {
+  const currentIdx = sortedTimestamps.indexOf(timestamp);
+  if (currentIdx === -1) {
+    return 20;
+  }
+
+  const prevTimestamp = currentIdx > 0 ? (sortedTimestamps[currentIdx - 1] ?? null) : null;
+  const nextTimestamp = currentIdx < sortedTimestamps.length - 1 ? (sortedTimestamps[currentIdx + 1] ?? null) : null;
+
+  const currentPixelX = getPixelXFromGrid(timestamp, chart);
+  if (currentPixelX === null) return 20;
+
+  let leftBound: number;
+  let rightBound: number;
+
+  if (prevTimestamp !== null && nextTimestamp !== null) {
+    const prevPixelX = getPixelXFromGrid(prevTimestamp, chart) ?? currentPixelX;
+    const nextPixelX = getPixelXFromGrid(nextTimestamp, chart) ?? currentPixelX;
+    leftBound = (currentPixelX + prevPixelX) / 2;
+    rightBound = (currentPixelX + nextPixelX) / 2;
+  } else if (prevTimestamp !== null) {
+    const prevPixelX = getPixelXFromGrid(prevTimestamp, chart) ?? currentPixelX;
+    leftBound = (currentPixelX + prevPixelX) / 2;
+    rightBound = currentPixelX + (currentPixelX - leftBound);
+  } else if (nextTimestamp !== null) {
+    const nextPixelX = getPixelXFromGrid(nextTimestamp, chart) ?? currentPixelX;
+    rightBound = (currentPixelX + nextPixelX) / 2;
+    leftBound = currentPixelX - (rightBound - currentPixelX);
+  } else {
+    return 20;
+  }
+
+  return Math.max(1, rightBound - leftBound);
+}
+
+export function calculateBarSegmentBounds(
+  seriesIdx: number,
+  timestamp: number,
+  sortedTimestamps: number[],
+  totalSeries: number,
+  chart: EChartsInstance
+): { left: number; right: number } | null {
+  const bandwidth = calculateBarBandwidth(timestamp, sortedTimestamps, chart);
+  const centerPixelX = getPixelXFromGrid(timestamp, chart);
+  if (centerPixelX === null) return null;
+
+  const seriesCount = Math.max(1, totalSeries);
+  const segmentWidth = bandwidth / seriesCount;
+  const segmentLeft = centerPixelX - bandwidth / 2 + seriesIdx * segmentWidth;
+  const segmentRight = segmentLeft + segmentWidth;
+
+  return {
+    left: segmentLeft,
+    right: segmentRight,
+  };
+}
+
+export function calculateBarYBounds(
+  visualYBottom: number,
+  visualYTop: number,
+  chart: EChartsInstance
+): { top: number; bottom: number } | null {
+  try {
+    const bottomPixel = chart.convertToPixel('grid', [0, visualYBottom]);
+    const topPixel = chart.convertToPixel('grid', [0, visualYTop]);
+
+    if (!bottomPixel || !topPixel || bottomPixel[1] === undefined || topPixel[1] === undefined) return null;
+
+    // Y increases downward in pixel space, so bottom has a higher pixel Y value.
+    return {
+      top: topPixel[1],
+      bottom: bottomPixel[1],
+    };
+  } catch {
+    return null;
+  }
 }
