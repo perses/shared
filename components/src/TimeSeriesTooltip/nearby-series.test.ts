@@ -202,7 +202,8 @@ describe('checkforNearbyTimeSeries — stacked lines', () => {
         dispatched.push(action);
       },
       // Simple identity-style mock: return the value passed in as pixel Y.
-      convertToPixel: (_finder: unknown, value: number[]): number[] => [value[0] ?? 0, value[1] ?? 0],      getDom: (): null => null,
+      convertToPixel: (_finder: unknown, value: number[]): number[] => [value[0] ?? 0, value[1] ?? 0],
+      getDom: (): null => null,
     } as unknown as EChartsInstance;
     return { chart, dispatched };
   }

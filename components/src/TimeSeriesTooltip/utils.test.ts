@@ -134,7 +134,8 @@ describe('assembleTransform', () => {
       } as unknown as Element;
 
       // Cursor at page (500, 250) → relative (400, 50); tooltip 100 tall fits inside container.
-      const mousePos = makeMousePos(500, 250);      const result = parseTransform(assembleTransform(mousePos, null, 100, 200, container));
+      const mousePos = makeMousePos(500, 250);
+      const result = parseTransform(assembleTransform(mousePos, null, 100, 200, container));
       expect(result).not.toBeNull();
       expect(result).toEqual({ x: 432, y: 66 });
     });
