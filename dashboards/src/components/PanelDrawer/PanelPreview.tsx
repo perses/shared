@@ -13,7 +13,7 @@
 
 import { ReactElement, useContext, useEffect, useRef } from 'react';
 import { Box } from '@mui/material';
-import { PanelEditorValues } from '@perses-dev/spec';
+import { PanelEditorValues } from '@perses-dev/plugin-system';
 import { Panel } from '../Panel';
 import { PanelEditorContext } from '../../context';
 

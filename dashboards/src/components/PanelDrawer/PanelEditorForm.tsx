@@ -13,15 +13,15 @@
 
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
-import { PanelDefinition, PanelEditorValues } from '@perses-dev/spec';
+import { PanelDefinition } from '@perses-dev/spec';
+import { PanelEditorValues, PluginKindSelect, usePluginEditor, useValidationSchemas } from '@perses-dev/plugin-system';
 import {
   DiscardChangesConfirmationDialog,
   ErrorAlert,
   ErrorBoundary,
-  getTitleAction,
   getSubmitText,
+  getTitleAction,
 } from '@perses-dev/components';
-import { PluginKindSelect, usePluginEditor, useValidationSchemas } from '@perses-dev/plugin-system';
 import { Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Action } from '@perses-dev/client';

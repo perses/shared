@@ -13,8 +13,8 @@
 
 import { screen } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
-import { PanelEditorValues } from '@perses-dev/spec';
 import { ReactElement } from 'react';
+import { PanelEditorValues } from '../../model';
 import { renderWithContext } from '../../test';
 import { DataQueriesContext } from '../../runtime';
 import { PanelSpecEditor, PanelSpecEditorProps } from './PanelSpecEditor';

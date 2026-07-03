@@ -13,20 +13,19 @@
 
 import { createContext, ReactElement, ReactNode, useContext, useState } from 'react';
 import {
-  PanelEditorValues,
-  VariableDefinition,
-  PluginSchema,
-  panelEditorSchema as defaultPanelEditorSchema,
-  variableDefinitionSchema,
-  buildPanelEditorSchema,
-  buildVariableDefinitionSchema,
   AnnotationSpec,
   annotationSpecSchema,
   buildAnnotationSpecSchema,
+  buildVariableDefinitionSchema,
+  PluginSchema,
+  VariableDefinition,
+  variableDefinitionSchema,
 } from '@perses-dev/spec';
 
 import { z } from 'zod';
 import { buildDatasourceDefinitionSchema, DatasourceDefinition, datasourceDefinitionSchema } from '@perses-dev/client';
+import { buildPanelEditorSchema, panelEditorSchema as defaultPanelEditorSchema } from '../schema';
+import { PanelEditorValues } from '../model';
 
 export interface ValidationSchemas {
   datasourceEditorSchema: z.Schema<DatasourceDefinition>;

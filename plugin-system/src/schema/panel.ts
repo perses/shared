@@ -11,4 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './LinkEditorForm';
+import { z } from 'zod';
+import { PluginSchema, panelDefinitionSchema, buildPanelDefinitionSchema } from '@perses-dev/spec';
+import { PanelEditorValues } from '../model';
+
+export const panelEditorSchema: z.ZodSchema<PanelEditorValues> = z.object({
+  groupId: z.number(),
+  panelDefinition: panelDefinitionSchema,
+});
+
+export function buildPanelEditorSchema(pluginSchema: PluginSchema): z.ZodSchema<PanelEditorValues> {
+  return z.object({
+    groupId: z.number(),
+    panelDefinition: buildPanelDefinitionSchema(pluginSchema),
+  });
+}

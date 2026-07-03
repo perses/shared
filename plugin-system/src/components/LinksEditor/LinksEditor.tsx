@@ -16,8 +16,8 @@ import { Divider, IconButton, Stack, Typography } from '@mui/material';
 import { Controller, useFieldArray, Control } from 'react-hook-form';
 import PlusIcon from 'mdi-material-ui/Plus';
 import MinusIcon from 'mdi-material-ui/Minus';
-import { PanelEditorValues } from '@perses-dev/spec';
-import { LinkEditorForm } from './LinkEditorForm';
+import { LinkEditorForm } from '@perses-dev/components';
+import { PanelEditorValues } from '../../model';
 
 export interface LinksEditorProps extends HTMLAttributes<HTMLDivElement> {
   control: Control<PanelEditorValues>;
