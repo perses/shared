@@ -48,8 +48,7 @@ export function assembleTransform(
 
   if (mousePos.plotCanvas.x === undefined) return undefined;
 
-  // Fall back to max size when the resize observer has not yet reported a real measurement,
-  // to avoid positioning the tooltip past the viewport and causing scrollbar jitter.
+  // Fall back to max size before the resize observer reports a real measurement.
   const effectiveHeight = tooltipHeight > 0 ? tooltipHeight : TOOLTIP_MAX_HEIGHT;
   const effectiveWidth = tooltipWidth > 0 ? tooltipWidth : TOOLTIP_MAX_WIDTH;
 
@@ -115,10 +114,9 @@ export function getTooltipStyles(
     fontSize: '11px',
     visibility: 'visible',
     opacity: 1,
-    // Avoid animating `transform` — intermediate positions during animation can extend past the
-    // viewport and cause scrollbar jitter. Animating opacity/visibility is safe.
+    // Animating transform causes intermediate positions outside the viewport; animate opacity/visibility instead.
     transition: 'opacity 0.1s ease-out, visibility 0.1s ease-out',
-    // Ensure pinned tooltip shows behind edit panel drawer and sticky header
+    // Pinned tooltip should not float above the drawer/sticky header.
     zIndex: pinnedPos !== null ? 'auto' : theme.zIndex.tooltip,
     overflow: 'hidden',
     '&:hover': {
@@ -197,25 +195,25 @@ export function calculateBarBandwidth(timestamp: number, sortedTimestamps: numbe
   return Math.max(1, rightBound - leftBound);
 }
 
+/**
+ * Computes the pixel left/right bounds of one bar segment within a group.
+ * @param barRelativeIdx - zero-based index among bar-only series
+ * @param bandwidth      - total pixel width for the bar group
+ * @param centerPixelX   - pixel X of the bar group centre
+ * @param barCount       - total bar series count (lines excluded)
+ */
 export function calculateBarSegmentBounds(
-  seriesIdx: number,
-  timestamp: number,
-  sortedTimestamps: number[],
-  totalSeries: number,
-  chart: EChartsInstance
-): { left: number; right: number } | null {
-  const bandwidth = calculateBarBandwidth(timestamp, sortedTimestamps, chart);
-  const centerPixelX = getPixelXFromGrid(timestamp, chart);
-  if (centerPixelX === null) return null;
-
-  const seriesCount = Math.max(1, totalSeries);
-  const segmentWidth = bandwidth / seriesCount;
-  const segmentLeft = centerPixelX - bandwidth / 2 + seriesIdx * segmentWidth;
-  const segmentRight = segmentLeft + segmentWidth;
-
+  barRelativeIdx: number,
+  bandwidth: number,
+  centerPixelX: number,
+  barCount: number,
+): { left: number; right: number } {
+  const count = Math.max(1, barCount);
+  const segmentWidth = bandwidth / count;
+  const segmentLeft = centerPixelX - bandwidth / 2 + barRelativeIdx * segmentWidth;
   return {
     left: segmentLeft,
-    right: segmentRight,
+    right: segmentLeft + segmentWidth,
   };
 }
 
@@ -230,10 +228,10 @@ export function calculateBarYBounds(
 
     if (!bottomPixel || !topPixel || bottomPixel[1] === undefined || topPixel[1] === undefined) return null;
 
-    // Y increases downward in pixel space, so bottom has a higher pixel Y value.
+    // Y increases downward in pixels; min/max normalizes the mapping for negative bar values.
     return {
-      top: topPixel[1],
-      bottom: bottomPixel[1],
+      top: Math.min(topPixel[1], bottomPixel[1]),
+      bottom: Math.max(topPixel[1], bottomPixel[1]),
     };
   } catch {
     return null;

@@ -24,7 +24,7 @@ import {
 } from '../model';
 import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp } from '../utils';
 import { CursorCoordinates, CursorData, EMPTY_TOOLTIP_DATA } from './tooltip-model';
-import { calculateBarSegmentBounds, calculateBarYBounds, calculateVisualYForSeries, getPixelXFromGrid } from './utils';
+import { calculateBarBandwidth, calculateBarSegmentBounds, calculateBarYBounds, calculateVisualYForSeries, getPixelXFromGrid } from './utils';
 import { Candidate, GetYBufferParams, IsWithinPercentageRangeParams, NearbySeriesArray } from './types';
 
 export type { NearbySeriesArray, NearbySeriesInfo } from './types';
@@ -62,6 +62,20 @@ function gatherCandidates(
       }
     }
     sortedTimestamps = sortedTimestamps.sort((a, b) => a - b);
+  }
+
+  // Bar-only indexes: ECharts groups bars independently of lines, so bar-relative index and count must exclude line series.
+  const barSeriesIndexes: number[] = [];
+  for (let i = 0; i < totalSeries; i++) {
+    if ((seriesMapping[i]?.type ?? 'line') === 'bar') barSeriesIndexes.push(i);
+  }
+
+  // Computed once outside the loop — both depend only on the timestamp, not the series index.
+  let barBandwidth: number | null = null;
+  let barCenterPixelX: number | null = null;
+  if (barSeriesIndexes.length > 0 && cursorXPixel !== null) {
+    barBandwidth = calculateBarBandwidth(closestTimestamp, sortedTimestamps, chart);
+    barCenterPixelX = getPixelXFromGrid(closestTimestamp, chart);
   }
 
   for (let seriesIdx = 0; seriesIdx < totalSeries; seriesIdx++) {
@@ -126,16 +140,17 @@ function gatherCandidates(
         distance = verticalDistance;
       }
     } else if (seriesType === 'bar') {
-      if (cursorXPixel === null) continue;
+      if (cursorXPixel === null || barBandwidth === null || barCenterPixelX === null) continue;
+
+      const barRelativeIdx = barSeriesIndexes.indexOf(seriesIdx);
+      if (barRelativeIdx === -1) continue;
 
       const segmentBounds = calculateBarSegmentBounds(
-        seriesIdx,
-        closestTimestamp,
-        sortedTimestamps,
-        totalSeries,
-        chart
+        barRelativeIdx,
+        barBandwidth,
+        barCenterPixelX,
+        barSeriesIndexes.length
       );
-      if (!segmentBounds) continue;
 
       const isWithinXBounds = cursorXPixel >= segmentBounds.left && cursorXPixel <= segmentBounds.right;
       if (!isWithinXBounds) continue;
@@ -215,7 +230,8 @@ function processCandidates(
 
   for (const candidate of candidates) {
     const seriesFormat = seriesFormatMap?.get(candidate.seriesId) ?? format;
-    const displayY = candidate.visualY;
+    // Use raw y, not visualY — visualY is for proximity detection only.
+    const displayY = candidate.y;
     const formattedY = formatValue(displayY, seriesFormat);
     const isClosestToCursor = winner !== null && candidate.seriesIdx === winner.seriesIdx;
 
@@ -293,7 +309,7 @@ export function checkforNearbyTimeSeries(
   if (chart.dispatchAction === undefined) return EMPTY_TOOLTIP_DATA;
   if (!Array.isArray(data)) return EMPTY_TOOLTIP_DATA;
 
-  // Only need to loop through first dataset source since getCommonTimeScale ensures xAxis timestamps are consistent.
+  // All series share the same x-axis timestamps (enforced by getCommonTimeScale).
   const firstTimeSeriesValues = data[0]?.values;
   const closestTimestamp = getClosestTimestamp(firstTimeSeriesValues, cursorX);
   if (closestTimestamp === null) return EMPTY_TOOLTIP_DATA;
@@ -493,7 +509,6 @@ export function getNearbySeriesData({
 
   if (cursorTargetMatchesChart === false || data === null || chart['_model'] === undefined) return EMPTY_TOOLTIP_DATA;
 
-  // mousemove position undefined when not hovering over chart canvas
   if (mousePos.plotCanvas.x === undefined || mousePos.plotCanvas.y === undefined) return EMPTY_TOOLTIP_DATA;
 
   const cursorPixelY = mousePos.plotCanvas.y;
@@ -504,22 +519,19 @@ export function getNearbySeriesData({
     const yAxisScale = chartModel.getComponent('yAxis').axis.scale;
     const isLogScale = yAxisScale.type === 'log';
     let yInterval = yAxisScale._interval;
-    // For logarithmic scales, convert the log interval to actual data range
+    // For log scales, convert from log-space extent to actual data range and use 1% as the interval.
     if (isLogScale && yAxisScale.base) {
       const logBase = yAxisScale.base;
       const extent = yAxisScale._extent;
-      // Calculate actual data range from log extent
-      // extent is in log space (e.g., [0, 2] for 10^0 to 10^2)
+      // e.g. extent [0, 2] → 10^0..10^2
       const actualMin = logBase ** extent[0];
       const actualMax = logBase ** extent[1];
-      // Use a fraction of the actual range as the interval
       yInterval = (actualMax - actualMin) / 100;
     }
     const totalSeries = data.length;
     const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
 
-    // Detect if chart has multiple Y-axes by checking if any series uses yAxisIndex > 0
-    const hasMultipleYAxes = seriesMapping.some((series) => series.yAxisIndex !== undefined && series.yAxisIndex > 0);
+  const hasMultipleYAxes = seriesMapping.some((series) => series.yAxisIndex !== undefined && series.yAxisIndex > 0);
 
     return checkforNearbyTimeSeries(
       data,

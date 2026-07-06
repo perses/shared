@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { memo, MutableRefObject, useLayoutEffect, useRef, useState } from 'react';
+import { memo, MutableRefObject, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { Box, Portal, Stack } from '@mui/material';
 import { ECharts as EChartsInstance } from 'echarts/core';
 import { TimeSeries } from '@perses-dev/spec';
@@ -64,16 +64,18 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
 
   const isTooltipPinned = pinnedPos !== null && enablePinning;
 
-  // Combine the resize-observer ref with the local DOM ref.
-  const setTooltipRef = (node: HTMLDivElement | null): void => {
-    tooltipElementRef.current = node;
-    tooltipRef(node);
-  };
+  // Stable callback — prevents the ResizeObserver from disconnecting/reconnecting on every render.
+  const setTooltipRef = useCallback(
+    (node: HTMLDivElement | null): void => {
+      tooltipElementRef.current = node;
+      tooltipRef(node);
+    },
+    [tooltipRef]
+  );
 
   const containerElement = containerId ? document.querySelector(containerId) : undefined;
 
-  // Synchronously re-measure and reposition after every render to close the one-frame window
-  // where a stale size could place the tooltip past the viewport and cause scrollbar jitter.
+  // Synchronously reposition after every render to prevent one-frame viewport overflow.
   useLayoutEffect(() => {
     if (mousePos === null) return;
     const node = tooltipElementRef.current;
@@ -89,17 +91,15 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
 
   if (mousePos === null || mousePos.target === null || data === null) return null;
 
-  // Ensure user is hovering over a chart before checking for nearby series.
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
   const chart = chartRef.current;
 
-  // if tooltip is attached to a container, set max height to the height of the container so tooltip does not get cut off
+  // Cap height to container so the tooltip is not cut off.
   const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
 
   transform.current = assembleTransform(mousePos, pinnedPos, height ?? 0, width ?? 0, containerElement);
 
-  // Get series nearby the cursor and pass into tooltip content children.
   const nearbySeries = getNearbySeriesData({
     mousePos,
     data,

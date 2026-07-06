@@ -218,7 +218,8 @@ describe('checkforNearbyTimeSeries — stacked lines', () => {
     const winner = result.find((series) => series.isClosestToCursor);
     expect(winner).toBeDefined();
     expect(winner?.seriesName).toBe('series-b');
-    expect(winner?.y).toBe(30);
+    // y should be the raw per-series value (20), not the accumulated visual Y (30)
+    expect(winner?.y).toBe(20);
 
     const seriesA = result.find((series) => series.seriesName === 'series-a');
     expect(seriesA).toBeUndefined();
