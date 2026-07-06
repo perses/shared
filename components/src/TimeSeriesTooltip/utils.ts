@@ -206,7 +206,7 @@ export function calculateBarSegmentBounds(
   barRelativeIdx: number,
   bandwidth: number,
   centerPixelX: number,
-  barCount: number,
+  barCount: number
 ): { left: number; right: number } {
   const count = Math.max(1, barCount);
   const segmentWidth = bandwidth / count;

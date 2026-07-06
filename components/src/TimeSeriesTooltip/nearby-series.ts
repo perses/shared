@@ -24,7 +24,13 @@ import {
 } from '../model';
 import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp } from '../utils';
 import { CursorCoordinates, CursorData, EMPTY_TOOLTIP_DATA } from './tooltip-model';
-import { calculateBarBandwidth, calculateBarSegmentBounds, calculateBarYBounds, calculateVisualYForSeries, getPixelXFromGrid } from './utils';
+import {
+  calculateBarBandwidth,
+  calculateBarSegmentBounds,
+  calculateBarYBounds,
+  calculateVisualYForSeries,
+  getPixelXFromGrid,
+} from './utils';
 import { Candidate, GetYBufferParams, IsWithinPercentageRangeParams, NearbySeriesArray } from './types';
 
 export type { NearbySeriesArray, NearbySeriesInfo } from './types';
@@ -531,7 +537,7 @@ export function getNearbySeriesData({
     const totalSeries = data.length;
     const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
 
-  const hasMultipleYAxes = seriesMapping.some((series) => series.yAxisIndex !== undefined && series.yAxisIndex > 0);
+    const hasMultipleYAxes = seriesMapping.some((series) => series.yAxisIndex !== undefined && series.yAxisIndex > 0);
 
     return checkforNearbyTimeSeries(
       data,
