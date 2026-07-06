@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createPanelRef, DashboardSpec, DurationString, GridDefinition, PanelGroupId } from '@perses-dev/spec';
+import { createPanelRef, DashboardSpec, DurationString, GridDefinition } from '@perses-dev/spec';
 import { DashboardResource } from '@perses-dev/client';
+import { PanelGroupId } from '@perses-dev/plugin-system';
 import { PanelGroupDefinition } from '../model';
 
 import { useDashboardStore } from './DashboardProvider';

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
-import { PanelGroupId } from '@perses-dev/spec';
+import { PanelGroupId } from '@perses-dev/plugin-system';
 import { Middleware } from './common';
 import { PanelGroupSlice, addPanelGroup, createEmptyPanelGroup } from './panel-group-slice';
 
