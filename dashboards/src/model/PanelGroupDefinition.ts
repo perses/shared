@@ -11,8 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export type PanelGroupId = number;
-
+import { PanelGroupId } from '@perses-dev/plugin-system';
 /**
  * Panel Group Item Layout ID type. String identifier for items within a panel group.
  */

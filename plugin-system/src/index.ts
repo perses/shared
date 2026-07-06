@@ -15,6 +15,7 @@ export * from './components';
 export * from './constants';
 export * from './model';
 export * from './runtime';
+export * from './schema';
 export * from './test-utils';
 export * from './utils';
 export * from './context';

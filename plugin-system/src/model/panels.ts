@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import React from 'react';
-import { UnknownSpec, PanelDefinition, QueryPluginType, QueryDataType, QueryDefinition } from '@perses-dev/spec';
+import { PanelDefinition, QueryDataType, QueryDefinition, QueryPluginType, UnknownSpec } from '@perses-dev/spec';
 import { OptionsEditorTab } from '../components';
 import { QueryOptions } from '../runtime';
 import { OptionsEditorProps, Plugin } from './plugin-base';
@@ -78,4 +78,14 @@ export interface PanelProps<Spec, SupportedQueryTypes = QueryDataType> {
 export interface PanelData<SupportedQueryTypes = QueryDataType> {
   definition: QueryDefinition;
   data: SupportedQueryTypes;
+}
+
+export type PanelGroupId = number;
+
+/**
+ * Panel values that can be edited in the panel editor.
+ */
+export interface PanelEditorValues {
+  groupId: PanelGroupId;
+  panelDefinition: PanelDefinition;
 }
