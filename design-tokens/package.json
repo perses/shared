@@ -16,9 +16,9 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/cjs/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/cjs/index.js"
     },
     "./css": "./dist/css/index.css",
     "./css/reset": "./dist/css/reset.css",

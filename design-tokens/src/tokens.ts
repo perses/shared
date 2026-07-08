@@ -84,7 +84,7 @@ export const tokens = {
   },
 
   spacing: {
-    0: 'var(--perses-spacing-0)',
+    '0': 'var(--perses-spacing-0)',
     xs: 'var(--perses-spacing-xs)',
     sm: 'var(--perses-spacing-sm)',
     md: 'var(--perses-spacing-md)',
