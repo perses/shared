@@ -54,7 +54,7 @@ function useDefaultQueryDefinition(
     defaultQueryKind = defaultPluginKinds?.[defaultQueryType] ?? queryPlugins?.[0]?.spec.name ?? '';
   }
 
-  const { data: defaultQueryPlugin } = usePlugin(defaultQueryType, defaultQueryKind, {
+  const { data: defaultQueryPlugin, isLoading: isPluginLoading } = usePlugin(defaultQueryType, defaultQueryKind, {
     useErrorBoundary: true,
     enabled: true,
   });
@@ -67,7 +67,7 @@ function useDefaultQueryDefinition(
         plugin: { kind: defaultQueryKind, spec: defaultQueryPlugin?.createInitialOptions() || {} },
       },
     },
-    isLoading,
+    isLoading: isLoading || isPluginLoading,
   };
 }
 
