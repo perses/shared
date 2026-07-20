@@ -16,14 +16,30 @@ import { z } from 'zod';
 
 import { PanelEditorValues } from '../model';
 
+const layoutDefinitionSchema = z
+  .object({
+    width: z.number(),
+    height: z.number(),
+    repeatVariable: z
+      .object({
+        value: z.string(),
+        maxPer: z.number().optional(),
+        alignment: z.enum(['horizontal', 'vertical']).optional(),
+      })
+      .optional(),
+  })
+  .optional();
+
 export const panelEditorSchema: z.ZodSchema<PanelEditorValues> = z.object({
   groupId: z.number(),
   panelDefinition: panelDefinitionSchema,
+  layoutDefinition: layoutDefinitionSchema,
 });
 
 export function buildPanelEditorSchema(pluginSchema: PluginSchema): z.ZodSchema<PanelEditorValues> {
   return z.object({
     groupId: z.number(),
     panelDefinition: buildPanelDefinitionSchema(pluginSchema),
+    layoutDefinition: layoutDefinitionSchema,
   });
 }

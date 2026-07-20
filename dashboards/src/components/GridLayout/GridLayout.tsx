@@ -141,7 +141,16 @@ export function RepeatGridLayout({
       {variable.value.map((value) => (
         <VariableContext.Provider
           key={`${repeatVariableName}-${value}`}
-          value={{ state: { ...variables, [repeatVariableName]: { value, loading: false } } }}
+          value={{
+            state: {
+              ...variables,
+              [repeatVariableName]: {
+                ...variables[repeatVariableName],
+                value: value,
+                loading: false,
+              },
+            },
+          }}
         >
           <Row
             panelGroupId={panelGroupId}

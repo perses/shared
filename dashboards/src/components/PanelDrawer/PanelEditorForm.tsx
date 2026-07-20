@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Grid, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Grid, Stack, TextField, Typography } from '@mui/material';
 import { Action } from '@perses-dev/client';
 import {
   DiscardChangesConfirmationDialog,
@@ -26,7 +26,6 @@ import { PanelDefinition } from '@perses-dev/spec';
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 
-import { useListPanelGroups } from '../../context';
 import { PanelEditorProvider } from '../../context/PanelEditorProvider/PanelEditorProvider';
 import { PanelQueriesSharedControls } from './PanelQueriesSharedControls';
 import { usePanelEditor } from './usePanelEditor';
@@ -41,7 +40,6 @@ export interface PanelEditorFormProps {
 
 export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   const { initialValues, initialAction, panelKey, onSave, onClose } = props;
-  const panelGroups = useListPanelGroups();
   const {
     panelDefinition,
     setName,
@@ -168,7 +166,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
         </Box>
         <Box id={panelEditorFormId} sx={{ flex: 1, overflowY: 'scroll', padding: (theme) => theme.spacing(2) }}>
           <Grid container spacing={2}>
-            <Grid item xs={8}>
+            <Grid item xs={12}>
               <Controller
                 control={form.control}
                 name="panelDefinition.spec.display.name"
@@ -185,32 +183,6 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                       setName(event.target.value);
                     }}
                   />
-                )}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <Controller
-                control={form.control}
-                name="groupId"
-                render={({ field, fieldState }) => (
-                  <TextField
-                    select
-                    {...field}
-                    required
-                    fullWidth
-                    label="Group"
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
-                    onChange={(event) => {
-                      field.onChange(event);
-                    }}
-                  >
-                    {panelGroups.map((panelGroup, index) => (
-                      <MenuItem key={panelGroup.id} value={panelGroup.id}>
-                        {panelGroup.title ?? `Group ${index + 1}`}
-                      </MenuItem>
-                    ))}
-                  </TextField>
                 )}
               />
             </Grid>
@@ -257,7 +229,6 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                 )}
               />
             </Grid>
-
             <ErrorBoundary FallbackComponent={ErrorAlert}>
               <PanelQueriesSharedControls
                 control={form.control}

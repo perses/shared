@@ -95,4 +95,13 @@ export type PanelGroupId = number;
 export interface PanelEditorValues {
   groupId: PanelGroupId;
   panelDefinition: PanelDefinition;
+  layoutDefinition?: {
+    width: number;
+    height: number;
+    repeatVariable?: {
+      value: string;
+      maxPer?: number;
+      alignment?: 'horizontal' | 'vertical';
+    };
+  };
 }

@@ -11,5 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './repeat';
-export * from './user-interface-text';
+export const DEFAULT_REPEAT_ALIGNMENT = 'horizontal' as const;
+export const DEFAULT_MAX_PER_ROW = 4;

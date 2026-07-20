@@ -38,6 +38,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   itemActionsListConfig?: ItemAction[];
   showIcons: PanelOptions['showIcons'];
   dimension?: { width: number };
+  informationTooltip?: string;
 }
 
 export function PanelHeader({
@@ -55,6 +56,7 @@ export function PanelHeader({
   showIcons,
   viewQueriesHandler,
   dimension,
+  informationTooltip,
   ...rest
 }: PanelHeaderProps): ReactElement {
   const titleElementId = `${id}-title`;
@@ -108,6 +110,7 @@ export function PanelHeader({
                 title={title}
                 description={description}
                 descriptionTooltipId={descriptionTooltipId}
+                informationTooltip={informationTooltip}
                 links={links}
                 readHandlers={readHandlers}
                 editHandlers={editHandlers}
@@ -156,6 +159,7 @@ export function PanelHeader({
             title={title}
             description={description}
             descriptionTooltipId={descriptionTooltipId}
+            informationTooltip={informationTooltip}
             links={links}
             readHandlers={readHandlers}
             editHandlers={editHandlers}

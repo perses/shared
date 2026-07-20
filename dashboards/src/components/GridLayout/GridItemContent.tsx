@@ -26,13 +26,15 @@ export interface GridItemContentProps {
   panelGroupItemId: PanelGroupItemId;
   width: number; // necessary for determining the suggested step ms
   panelOptions?: PanelOptions;
+  readonly?: boolean;
+  informationTooltip?: string;
 }
 
 /**
  * Resolves the reference to panel content in a GridItemDefinition and renders the panel.
  */
 export function GridItemContent(props: GridItemContentProps): ReactElement {
-  const { panelGroupItemId, width } = props;
+  const { readonly, panelGroupItemId, width, informationTooltip } = props;
   const panelDefinition = usePanel(panelGroupItemId);
 
   const {
@@ -40,6 +42,9 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   } = panelDefinition;
 
   const { isEditMode } = useEditMode();
+  const canModify = useMemo(() => {
+    return isEditMode && !readonly;
+  }, [isEditMode, readonly]);
   const { openEditPanel, openDeletePanelDialog, duplicatePanel, viewPanel } = usePanelActions(panelGroupItemId);
   const viewPanelGroupItemId = useViewPanelGroup();
 
@@ -65,14 +70,14 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   const [openQueryViewer, setOpenQueryViewer] = useState(false);
 
   const viewQueriesHandler = useMemo(() => {
-    return isEditMode || !queries?.length
+    return canModify || !queries?.length
       ? undefined
       : {
           onClick: (): void => {
             setOpenQueryViewer(true);
           },
         };
-  }, [isEditMode, queries]);
+  }, [canModify, queries]);
 
   const readHandlers = {
     isPanelViewed: isPanelGroupItemIdEqual(viewPanelGroupItemId, panelGroupItemId),
@@ -87,7 +92,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
 
   // Provide actions to the panel when in edit mode
   let editHandlers: PanelProps['editHandlers'] = undefined;
-  if (isEditMode) {
+  if (canModify && !readonly) {
     editHandlers = {
       onEditPanelClick: openEditPanel,
       onDuplicatePanelClick: duplicatePanel,
@@ -130,6 +135,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
             viewQueriesHandler={viewQueriesHandler}
             panelOptions={props.panelOptions}
             panelGroupItemId={panelGroupItemId}
+            informationTooltip={informationTooltip}
           />
         )}
       </DataQueriesProvider>

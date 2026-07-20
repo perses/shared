@@ -20,10 +20,15 @@ import {
   PanelSpecEditor,
   usePlugin,
   useSuggestedStepMs,
+  useVariableValues,
+  VariableContext,
 } from '@perses-dev/plugin-system';
 import { AnnotationSpec, Definition, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { ReactElement, useCallback, useContext, useMemo, useState } from 'react';
-import { Control } from 'react-hook-form';
+import { Control, useWatch } from 'react-hook-form';
+
+import { useAllVariableDefinitions } from '../../context/VariableProvider';
+import { useListPanelGroups } from '../../context';
 
 export interface PanelQueriesSharedControlsProps {
   control: Control<PanelEditorValues>;
@@ -48,6 +53,10 @@ export function PanelQueriesSharedControls({
 }: PanelQueriesSharedControlsProps): ReactElement {
   const { data: pluginPreview } = usePlugin('Panel', plugin.kind);
   const panelEditorContext = useContext(PanelEditorContext);
+  const variableValues = useVariableValues();
+  const variableDefinitionGroups = useAllVariableDefinitions();
+  const panelGroups = useListPanelGroups();
+  const watchedRepeatVariable = useWatch({ control, name: 'layoutDefinition.repeatVariable' });
 
   const suggestedStepMs = useSuggestedStepMs(panelEditorContext?.preview.previewPanelWidth);
 
@@ -58,6 +67,16 @@ export function PanelQueriesSharedControls({
         : pluginPreview?.queryOptions,
     [panelDefinition.spec.plugin.spec, pluginPreview],
   );
+
+  const repeatVariableValue = useMemo(() => {
+    if (watchedRepeatVariable && variableValues[watchedRepeatVariable.value]) {
+      return (
+        variableValues[watchedRepeatVariable.value]?.options?.[0]?.value ??
+        variableValues[watchedRepeatVariable.value]?.value
+      );
+    }
+    return undefined;
+  }, [variableValues, watchedRepeatVariable]);
 
   const [previewDefinition, setPreviewDefinition] = useState<QueryDefinition[]>(panelDefinition.spec.queries ?? []);
 
@@ -81,21 +100,41 @@ export function PanelQueriesSharedControls({
     });
   }, []);
 
+  const preview =
+    watchedRepeatVariable && repeatVariableValue ? (
+      <VariableContext.Provider
+        value={{
+          state: {
+            ...variableValues,
+            [watchedRepeatVariable.value]: {
+              ...variableValues[watchedRepeatVariable.value],
+              value: repeatVariableValue,
+              loading: false,
+            },
+          },
+        }}
+      >
+        <PanelPreview panelDefinition={panelDefinition} />
+      </VariableContext.Provider>
+    ) : (
+      <PanelPreview panelDefinition={panelDefinition} />
+    );
+
   return (
     <DataQueriesProvider definitions={previewDefinition} options={{ suggestedStepMs, ...pluginQueryOptions }}>
       <Grid item xs={12}>
         <Typography variant="h4" marginBottom={1}>
           Preview
         </Typography>
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <PanelPreview panelDefinition={panelDefinition} />
-        </ErrorBoundary>
+        <ErrorBoundary FallbackComponent={ErrorAlert}>{preview}</ErrorBoundary>
       </Grid>
       <Grid item xs={12}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <PanelSpecEditor
             control={control}
             panelDefinition={panelDefinition}
+            variableDefinitionGroups={variableDefinitionGroups}
+            panelGroups={panelGroups}
             onJSONChange={onJSONChange}
             onQueriesChange={handleOnQueriesChange}
             onQueryRun={handleRunQuery}

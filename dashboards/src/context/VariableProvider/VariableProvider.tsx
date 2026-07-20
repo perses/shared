@@ -157,6 +157,47 @@ export function useVariableDefinitionStates(variableNames?: string[]): VariableS
 }
 
 /**
+ * A group of non-overridden variable definitions sharing a common source/scope.
+ * `source` is undefined for dashboard-scoped variables.
+ */
+export interface VariableDefinitionGroup {
+  source?: string;
+  definitions: VariableDefinition[];
+}
+
+/**
+ * Returns all non-overridden variable definitions grouped by source.
+ */
+export function useAllVariableDefinitions(): VariableDefinitionGroup[] {
+  const store = useVariableDefinitionStoreCtx();
+  return useStoreWithEqualityFn(
+    store,
+    (s) => {
+      const groups: VariableDefinitionGroup[] = [];
+
+      const dashboardDefinitions = s.variableDefinitions.filter(
+        (v) => !s.variableState.get({ name: v.spec.name })?.overridden
+      );
+      if (dashboardDefinitions.length > 0) {
+        groups.push({ source: undefined, definitions: dashboardDefinitions });
+      }
+
+      [...s.externalVariableDefinitions].forEach((def) => {
+        const definitions = def.definitions.filter(
+          (v) => !s.variableState.get({ name: v.spec.name, source: def.source })?.overridden
+        );
+        if (definitions.length > 0) {
+          groups.push({ source: def.source, definitions });
+        }
+      });
+
+      return groups;
+    },
+    shallow
+  );
+}
+
+/**
  * Get the state and definition of a variable from the variables context.
  * @param name name of the variable
  * @param source if given, it searches in the external variables

@@ -12,20 +12,21 @@
 // limitations under the License.
 
 import { Collapse, useTheme } from '@mui/material';
-import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PanelOptions, useViewPanelGroup } from '@perses-dev/dashboards';
-import { PanelGroupId } from '@perses-dev/plugin-system';
+import { useVariableValues, PanelGroupId } from '@perses-dev/plugin-system';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 
 import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
 import { PanelGroupDefinition, PanelGroupItemLayout } from '../../model';
+import { buildRepeatMeta, restoreRepeatLayouts } from '../../utils';
+import { useViewPanelGroup } from '../../context';
+import { PanelOptions } from '../Panel/Panel';
 import { GridContainer } from './GridContainer';
-import { GridItemContent } from './GridItemContent';
+import { GridItemRenderer } from './GridItemRenderer';
 import { GridTitle } from './GridTitle';
 
-const DEFAULT_MARGIN = 10;
-const ROW_HEIGHT = 30;
+export const DEFAULT_MARGIN = 10;
+export const ROW_HEIGHT = 30;
 
 export interface RowProps {
   panelGroupId: PanelGroupId;
@@ -58,14 +59,20 @@ export function Row({
   const ResponsiveGridLayout = useMemo(() => WidthProvider(Responsive), []);
   const theme = useTheme();
   const viewPanelItemId = useViewPanelGroup();
+  const variableValues = useVariableValues();
 
   const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed);
+
+  const { expandedItemLayouts, repeatMeta } = useMemo(
+    () => buildRepeatMeta(groupDefinition.itemLayouts, variableValues, repeatVariable),
+    [groupDefinition.itemLayouts, repeatVariable, variableValues]
+  );
 
   const hasViewPanel =
     viewPanelItemId?.panelGroupId === panelGroupId &&
     // Check for repeatVariable panels
-    viewPanelItemId.repeatVariable?.[0] === repeatVariable?.[0] &&
-    viewPanelItemId.repeatVariable?.[1] === repeatVariable?.[1];
+    viewPanelItemId.repeatVariable?.group?.[0] === repeatVariable?.[0] &&
+    viewPanelItemId.repeatVariable?.group?.[1] === repeatVariable?.[1];
   const itemLayoutViewed = viewPanelItemId?.panelGroupItemLayoutId;
 
   // If there is a panel in view mode, we should hide the grid if the panel is not in the current group.
@@ -81,10 +88,11 @@ export function Row({
   // Item layout is override if there is a panel in view mode
   const itemLayouts: PanelGroupItemLayout[] = useMemo(() => {
     if (itemLayoutViewed) {
-      return groupDefinition.itemLayouts.map((itemLayout) => {
+      return expandedItemLayouts.map((itemLayout) => {
         if (itemLayout.i === itemLayoutViewed) {
           const rowTitleHeight = 40 + 8; // 40 is the height of the row title and 8 is the margin height
           return {
+            ...itemLayout,
             h: Math.round(((panelFullHeight ?? window.innerHeight) - rowTitleHeight) / (ROW_HEIGHT + DEFAULT_MARGIN)), // Viewed panel should take the full height remaining
             i: itemLayoutViewed,
             w: 48,
@@ -95,8 +103,18 @@ export function Row({
         return itemLayout;
       });
     }
-    return groupDefinition.itemLayouts;
-  }, [groupDefinition.itemLayouts, itemLayoutViewed, panelFullHeight]);
+    return expandedItemLayouts;
+  }, [expandedItemLayouts, itemLayoutViewed, panelFullHeight]);
+
+  const handleLayoutChange = useMemo(() => {
+    if (!onLayoutChange) {
+      return undefined;
+    }
+    return (currentLayout: Layout[], allLayouts: Layouts): void => {
+      const restored = restoreRepeatLayouts(currentLayout, allLayouts, repeatMeta);
+      onLayoutChange(restored.currentLayout, restored.allLayouts);
+    };
+  }, [onLayoutChange, repeatMeta]);
 
   return (
     <GridContainer
@@ -130,8 +148,8 @@ export function Row({
           margin={[DEFAULT_MARGIN, DEFAULT_MARGIN]}
           containerPadding={[0, 10]}
           layouts={{ sm: itemLayouts }}
-          onLayoutChange={onLayoutChange}
-          onWidthChange={onWidthChange}
+          onLayoutChange={handleLayoutChange}
+          onWidthChange={isGridDisplayed ? onWidthChange : undefined}
           allowOverlap={hasViewPanel} // Enabling overlap when viewing a specific panel because panel in front of the viewed panel will add empty spaces (empty row height)
         >
           {itemLayouts.map(({ i, w }) => (
@@ -141,13 +159,15 @@ export function Row({
                 display: !itemLayoutViewed || itemLayoutViewed === i ? 'unset' : 'none',
               }}
             >
-              <ErrorBoundary FallbackComponent={ErrorAlert}>
-                <GridItemContent
-                  panelOptions={panelOptions}
-                  panelGroupItemId={{ panelGroupId, panelGroupItemLayoutId: i, repeatVariable }}
-                  width={calculateGridItemWidth(w, gridColWidth)}
-                />
-              </ErrorBoundary>
+              <GridItemRenderer
+                panelGroupId={panelGroupId}
+                panelGroupItemLayoutId={i}
+                width={calculateGridItemWidth(w, gridColWidth)}
+                repeatItemMeta={repeatMeta.get(i)}
+                groupRepeatVariable={repeatVariable}
+                panelOptions={panelOptions}
+                isEditMode={isEditMode}
+              />
             </div>
           ))}
         </ResponsiveGridLayout>
@@ -157,7 +177,7 @@ export function Row({
 }
 
 const calculateGridItemWidth = (w: number, colWidth: number): number => {
-  // 0 * Infinity === NaN, which causes problems with resize contraints
+  // 0 * Infinity === NaN, which causes problems with resize constraints
   if (!Number.isFinite(w)) return w;
   return Math.round(colWidth * w + Math.max(0, w - 1) * DEFAULT_MARGIN);
 };
