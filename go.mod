@@ -1,6 +1,6 @@
 module github.com/perses/shared
 
-go 1.26.0
+go 1.26.5
 
 require (
 	github.com/perses/perses v0.53.1
@@ -9,5 +9,5 @@ require (
 
 require (
 	github.com/perses/common v0.30.2 // indirect
-	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/sys v0.44.0 // indirect
 )
