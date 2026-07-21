@@ -91,11 +91,11 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         '@perses-dev/spec': {
-          version: '0.2.0-beta.9',
+          version: '0.2.0-rc.0',
           lib: () => require('@perses-dev/spec'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.2.0-beta.9',
+            requiredVersion: '^0.2.0-rc.0',
           },
         },
         '@perses-dev/core': {
@@ -107,43 +107,43 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         '@perses-dev/client': {
-          version: '0.54.0-rc.0',
+          version: '0.54.0-rc.1',
           lib: () => require('@perses-dev/client'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.54.0-rc.0',
+            requiredVersion: '^0.54.0-rc.1',
           },
         },
         '@perses-dev/components': {
-          version: '0.54.0-rc.0',
+          version: '0.54.0-rc.1',
           lib: () => require('@perses-dev/components'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.54.0-rc.0',
+            requiredVersion: '^0.54.0-rc.1',
           },
         },
         '@perses-dev/plugin-system': {
-          version: '0.54.0-rc.0',
+          version: '0.54.0-rc.1',
           lib: () => require('@perses-dev/plugin-system'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.54.0-rc.0',
+            requiredVersion: '^0.54.0-rc.1',
           },
         },
         '@perses-dev/explore': {
-          version: '0.54.0-rc.0',
+          version: '0.54.0-rc.1',
           lib: () => require('@perses-dev/explore'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.54.0-rc.0',
+            requiredVersion: '^0.54.0-rc.1',
           },
         },
         '@perses-dev/dashboards': {
-          version: '0.54.0-rc.0',
+          version: '0.54.0-rc.1',
           lib: () => require('@perses-dev/dashboards'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.54.0-rc.0',
+            requiredVersion: '^0.54.0-rc.1',
           },
         },
         // Below are the shared modules that are used by the plugins, this can be part of the SDK
