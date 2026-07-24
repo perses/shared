@@ -12,3 +12,4 @@
 // limitations under the License.
 
 export * from './AnnotationProvider';
+export * from './usePanelAnnotationsWithData';
