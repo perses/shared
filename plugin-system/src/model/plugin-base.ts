@@ -38,6 +38,7 @@ export interface OptionsEditorProps<Spec> {
   value: Spec;
   onChange: (next: Spec) => void;
   isReadonly?: boolean;
+  testConnection?: () => Promise<void>;
 }
 
 /**

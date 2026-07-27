@@ -22,6 +22,7 @@ export interface DatasourcePlugin<Spec = UnknownSpec, Client = unknown> extends 
   createClient: (spec: Spec, options: DatasourceClientOptions) => Client;
   // Provide builtin variable definitions available on the datasource. Optional
   getBuiltinVariableDefinitions?: () => BuiltinVariableDefinition[];
+  healthCheckPath?: string;
 }
 
 export interface DatasourceClientOptions {

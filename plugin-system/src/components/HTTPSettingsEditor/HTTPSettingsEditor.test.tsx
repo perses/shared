@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { SnackbarContext } from '@perses-dev/components';
 import { HTTPDatasourceSpec } from '@perses-dev/spec';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -18,6 +19,17 @@ import { ReactElement } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { HTTPSettingsEditor } from './HTTPSettingsEditor';
+
+const mockSuccessSnackbar = jest.fn();
+const mockExceptionSnackbar = jest.fn();
+
+jest.mock('@perses-dev/components', () => ({
+  ...jest.requireActual('@perses-dev/components'),
+  useSnackbar: (): Partial<SnackbarContext> => ({
+    successSnackbar: mockSuccessSnackbar,
+    exceptionSnackbar: mockExceptionSnackbar,
+  }),
+}));
 
 describe('HTTPSettingsEditor - Request Headers', () => {
   const initialSpecDirect: HTTPDatasourceSpec = {
@@ -486,6 +498,116 @@ describe('HTTPSettingsEditor - Request Headers', () => {
       iconButtons.forEach((btn) => {
         expect(btn).toBeDisabled();
       });
+    });
+  });
+});
+
+describe('HTTPSettingsEditor - Test Connection', () => {
+  const initialSpecDirect: HTTPDatasourceSpec = {
+    directUrl: '',
+  };
+
+  const initialSpecProxy: HTTPDatasourceSpec = {
+    proxy: {
+      kind: 'HTTPProxy',
+      spec: {
+        url: '',
+      },
+    },
+  };
+
+  const renderWithTestConnection = (
+    value: HTTPDatasourceSpec,
+    testConnection?: () => Promise<void>,
+    onChange = jest.fn()
+  ): ReturnType<typeof render> => {
+    const Wrapper = (): ReactElement => {
+      const methods = useForm();
+      return (
+        <FormProvider {...methods}>
+          <HTTPSettingsEditor
+            value={value}
+            onChange={onChange}
+            initialSpecDirect={initialSpecDirect}
+            initialSpecProxy={initialSpecProxy}
+            testConnection={testConnection}
+          />
+        </FormProvider>
+      );
+    };
+    return render(<Wrapper />);
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should not show "Test Connection" button when testConnection is not provided', () => {
+    const value: HTTPDatasourceSpec = {
+      proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090' } },
+    };
+
+    renderWithTestConnection(value, undefined);
+
+    expect(screen.queryByRole('button', { name: /test connection/i })).not.toBeInTheDocument();
+  });
+
+  it('should show "Test Connection" button when testConnection is provided', () => {
+    const value: HTTPDatasourceSpec = {
+      proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090' } },
+    };
+
+    renderWithTestConnection(value, jest.fn().mockResolvedValue(undefined));
+
+    expect(screen.getByRole('button', { name: /test connection/i })).toBeInTheDocument();
+  });
+
+  it('should disable "Test Connection" button when proxy URL is empty', () => {
+    const value: HTTPDatasourceSpec = {
+      proxy: { kind: 'HTTPProxy', spec: { url: '' } },
+    };
+
+    renderWithTestConnection(value, jest.fn().mockResolvedValue(undefined));
+
+    expect(screen.getByRole('button', { name: /test connection/i })).toBeDisabled();
+  });
+
+  it('should disable "Test Connection" button when direct URL is empty', () => {
+    const value: HTTPDatasourceSpec = { directUrl: '' };
+
+    renderWithTestConnection(value, jest.fn().mockResolvedValue(undefined));
+
+    expect(screen.getByRole('button', { name: /test connection/i })).toBeDisabled();
+  });
+
+  it('should show success snackbar when testConnection resolves', async () => {
+    const mockTestConnection = jest.fn().mockResolvedValue(undefined);
+    const value: HTTPDatasourceSpec = {
+      proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090' } },
+    };
+
+    renderWithTestConnection(value, mockTestConnection);
+
+    await userEvent.click(screen.getByRole('button', { name: /test connection/i }));
+
+    await waitFor(() => {
+      expect(mockTestConnection).toHaveBeenCalledTimes(1);
+      expect(mockSuccessSnackbar).toHaveBeenCalledWith('Datasource is healthy');
+    });
+  });
+
+  it('should show error snackbar when testConnection rejects', async () => {
+    const mockTestConnection = jest.fn().mockRejectedValue(new Error('connection refused'));
+    const value: HTTPDatasourceSpec = {
+      proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090' } },
+    };
+
+    renderWithTestConnection(value, mockTestConnection);
+
+    await userEvent.click(screen.getByRole('button', { name: /test connection/i }));
+
+    await waitFor(() => {
+      expect(mockExceptionSnackbar).toHaveBeenCalledWith(expect.any(Error));
     });
   });
 });

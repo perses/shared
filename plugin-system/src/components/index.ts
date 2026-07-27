@@ -30,3 +30,4 @@ export * from './PluginSpecEditor';
 export * from './TimeRangeControls';
 export * from './Variables';
 export * from './MetricLabelInput';
+export * from './DatasourceTestConnectionButton';
