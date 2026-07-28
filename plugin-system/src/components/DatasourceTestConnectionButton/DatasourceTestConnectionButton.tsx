@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback } from 'react';
+import { ReactElement, useCallback, useState } from 'react';
 import { Button, ButtonProps } from '@mui/material';
 import { useSnackbar } from '@perses-dev/components';
 
@@ -21,21 +21,26 @@ type DatasourceTestConnectionButtonProps = {
 
 export const DatasourceTestConnectionButton = ({
   testConnection,
+  disabled,
   ...buttonProps
 }: DatasourceTestConnectionButtonProps): ReactElement => {
   const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const [isTesting, setIsTesting] = useState(false);
 
   const handleClick = useCallback(async (): Promise<void> => {
+    setIsTesting(true);
     try {
       await testConnection();
       successSnackbar('Datasource is healthy');
     } catch (e) {
       exceptionSnackbar(e instanceof Error ? e : new Error('Datasource is not healthy'));
+    } finally {
+      setIsTesting(false);
     }
   }, [testConnection, successSnackbar, exceptionSnackbar]);
 
   return (
-    <Button onClick={handleClick} color="info" variant="outlined" {...buttonProps}>
+    <Button onClick={handleClick} color="info" variant="outlined" disabled={disabled || isTesting} {...buttonProps}>
       Test Connection
     </Button>
   );

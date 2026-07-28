@@ -84,13 +84,21 @@ describe('DatasourceTestConnectionButton', () => {
     expect(screen.getByRole('button', { name: /test connection/i })).toBeDisabled();
   });
 
-  it('does not call testConnection when disabled', async () => {
-    const mockTestConnection = jest.fn();
-    render(<DatasourceTestConnectionButton testConnection={mockTestConnection} disabled />);
+  it('disables the button while testConnection is in flight and re-enables after', async () => {
+    let resolve!: () => void;
+    const mockTestConnection = jest.fn(
+      () => new Promise<void>((res) => { resolve = res; })
+    );
+    render(<DatasourceTestConnectionButton testConnection={mockTestConnection} />);
 
     const button = screen.getByRole('button', { name: /test connection/i });
+    await userEvent.click(button);
+
+    // button is disabled while in flight — a second request cannot be triggered
     expect(button).toBeDisabled();
-    // disabled buttons do not fire click handlers; confirm testConnection is untouched
-    expect(mockTestConnection).not.toHaveBeenCalled();
+    expect(mockTestConnection).toHaveBeenCalledTimes(1);
+
+    resolve();
+    await waitFor(() => expect(button).not.toBeDisabled());
   });
 });
