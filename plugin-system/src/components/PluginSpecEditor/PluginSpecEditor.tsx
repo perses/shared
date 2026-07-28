@@ -17,26 +17,22 @@ import { DatasourceSpec, UnknownSpec, HTTPProxy } from '@perses-dev/spec';
 import { ReactElement, useMemo } from 'react';
 import { produce } from 'immer';
 
-import { DatasourcePlugin, OptionsEditorProps, Plugin } from '../../model';
+import { DatasourcePlugin, OptionsEditorProps, Plugin, PluginType } from '../../model';
 import { usePlugin } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';
+import { DatasourceSpecEditor } from './DatasourceSpecEditor';
 
-export interface PluginSpecEditorProps extends Omit<OptionsEditorProps<UnknownSpec>, 'testConnection'> {
+export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
   pluginSelection: PluginEditorSelection;
   isEditor?: boolean;
   testConnection?: (spec: DatasourceSpec, healthCheckPath: string) => Promise<void>;
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function hasHTTPProxy(spec: UnknownSpec): spec is { proxy: HTTPProxy } {
-  return isRecord(spec) && isRecord(spec['proxy']) && spec['proxy']['kind'] === 'HTTPProxy';
-}
-
-function isDatasourcePlugin(plugin: Plugin<UnknownSpec>): plugin is DatasourcePlugin<UnknownSpec> {
-  return 'createClient' in plugin;
+function isDatasourcePlugin(
+  pluginType: PluginType,
+  plugin: Plugin<UnknownSpec>
+): plugin is DatasourcePlugin<UnknownSpec> {
+  return pluginType === 'Datasource' && 'createClient' in plugin;
 }
 
 export function PluginSpecEditor(props: PluginSpecEditorProps): ReactElement | null {
@@ -47,25 +43,6 @@ export function PluginSpecEditor(props: PluginSpecEditorProps): ReactElement | n
     ...others
   } = props;
   const { data: plugin, isLoading, error } = usePlugin(pluginType, pluginKind);
-
-  const healthCheckPath = plugin && isDatasourcePlugin(plugin) ? plugin.healthCheckPath : undefined;
-
-  const boundTestConnection = useMemo((): (() => Promise<void>) | undefined => {
-    if (!testConnection || !healthCheckPath) return undefined;
-    return () => {
-      const augmentedPluginSpec = hasHTTPProxy(value)
-        ? produce(value, (draft) => {
-            const existing = draft.proxy.spec.allowedEndpoints ?? [];
-            const alreadyAllowed = existing.some((e) => e.endpointPattern === healthCheckPath && e.method === 'GET');
-            if (!alreadyAllowed) {
-              draft.proxy.spec.allowedEndpoints = [...existing, { endpointPattern: healthCheckPath, method: 'GET' }];
-            }
-          })
-        : value;
-      const spec: DatasourceSpec = { default: false, plugin: { kind: pluginKind, spec: augmentedPluginSpec } };
-      return testConnection(spec, healthCheckPath);
-    };
-  }, [testConnection, healthCheckPath, pluginKind, value]);
 
   if (error) {
     return <ErrorAlert error={error} />;
@@ -86,9 +63,19 @@ export function PluginSpecEditor(props: PluginSpecEditorProps): ReactElement | n
   if (pluginType === 'Panel') {
     throw new Error('This editor should not be used for panel type. Please use Panel Spec Editor instead.');
   }
-  const { OptionsEditorComponent } = plugin;
 
-  return OptionsEditorComponent ? (
-    <OptionsEditorComponent {...others} value={value} testConnection={boundTestConnection} />
-  ) : null;
+  if (isDatasourcePlugin(pluginType, plugin)) {
+    return (
+      <DatasourceSpecEditor
+        plugin={plugin}
+        pluginKind={pluginKind}
+        value={value}
+        testConnection={testConnection}
+        {...others}
+      />
+    );
+  }
+
+  const { OptionsEditorComponent } = plugin;
+  return OptionsEditorComponent ? <OptionsEditorComponent {...others} value={value} /> : null;
 }

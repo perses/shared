@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourcePlugin, OptionsEditorProps, VariableOption, VariablePlugin } from '../../../model';
+import { DatasourceEditorProps, DatasourcePlugin, VariableOption, VariablePlugin } from '../../../model';
 
 const data: VariableOption[] = [
   { label: 'Grover', value: 'Grover' },
@@ -65,7 +65,7 @@ const ErnieDatasource: DatasourcePlugin<ErnieDatasourceSpec> = {
     value,
     onChange,
     testConnection,
-  }: OptionsEditorProps<ErnieDatasourceSpec>) {
+  }: DatasourceEditorProps<ErnieDatasourceSpec>) {
     return (
       <div>
         <label htmlFor="datasource-url">ErnieDatasource editor</label>
