@@ -87,7 +87,10 @@ describe('DatasourceTestConnectionButton', () => {
   it('disables the button while testConnection is in flight and re-enables after', async () => {
     let resolve!: () => void;
     const mockTestConnection = jest.fn(
-      () => new Promise<void>((res) => { resolve = res; })
+      () =>
+        new Promise<void>((res) => {
+          resolve = res;
+        })
     );
     render(<DatasourceTestConnectionButton testConnection={mockTestConnection} />);
 

@@ -22,6 +22,10 @@ export interface DatasourceSpecEditorProps extends OptionsEditorProps<UnknownSpe
   testConnection?: (spec: DatasourceSpec, healthCheckPath: string) => Promise<void>;
 }
 
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
@@ -42,12 +46,13 @@ export function DatasourceSpecEditor({
   const boundTestConnection = useMemo((): (() => Promise<void>) | undefined => {
     if (!testConnection || !healthCheckPath) return undefined;
     return () => {
+      const escapedPattern = escapeRegExp(healthCheckPath);
       const augmentedPluginSpec = hasHTTPProxy(value)
         ? produce(value, (draft) => {
             const existing = draft.proxy.spec.allowedEndpoints ?? [];
-            const alreadyAllowed = existing.some((e) => e.endpointPattern === healthCheckPath && e.method === 'GET');
+            const alreadyAllowed = existing.some((e) => e.endpointPattern === escapedPattern && e.method === 'GET');
             if (!alreadyAllowed) {
-              draft.proxy.spec.allowedEndpoints = [...existing, { endpointPattern: healthCheckPath, method: 'GET' }];
+              draft.proxy.spec.allowedEndpoints = [...existing, { endpointPattern: escapedPattern, method: 'GET' }];
             }
           })
         : value;
