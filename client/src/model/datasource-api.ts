@@ -80,7 +80,7 @@ export function createTestDatasourceConnection({ project, dashboard }: { project
     const pluginSpec = spec.plugin.spec;
 
     if (hasDirectUrl(pluginSpec)) {
-      await fetch(`${pluginSpec.directUrl}${normalizedPath}`, {
+      await fetch(`${pluginSpec.directUrl.replace(/\/$/, '')}${normalizedPath}`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });

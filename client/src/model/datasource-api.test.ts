@@ -99,6 +99,19 @@ describe('createTestDatasourceConnection', () => {
       });
     });
 
+    it('does not produce a double slash when directUrl ends with a trailing slash', async () => {
+      mockFetch.mockResolvedValue({ ok: true });
+      const testConnection = createTestDatasourceConnection();
+      const spec = makeSpec({ directUrl: 'http://localhost:9090/' });
+
+      await testConnection(spec, '/api/v1/query');
+
+      expect(mockFetch).toHaveBeenCalledWith('http://localhost:9090/api/v1/query', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
     it('normalizes healthCheckPath that lacks a leading slash', async () => {
       mockFetch.mockResolvedValue({ ok: true });
       const testConnection = createTestDatasourceConnection();
