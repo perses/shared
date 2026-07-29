@@ -460,3 +460,7 @@ export function useEditJsonDialog(): {
 } {
   return useDashboardStore(selectEditJsonDialog);
 }
+
+export function useRepeatVariableMaxValues(): number {
+  return useDashboardStore((state) => state.repeatVariableMaxValues);
+}

@@ -63,6 +63,7 @@ export interface DashboardStoreState
   display?: Display;
   datasources?: Record<string, DatasourceSpec>;
   ttl?: DurationString;
+  repeatVariableMaxValues: number;
 }
 
 export const DashboardContext = createContext<StoreApi<DashboardStoreState> | undefined>(undefined);
@@ -80,6 +81,8 @@ export interface DashboardStoreProps {
   isEditMode?: boolean;
   viewPanelRef?: VirtualPanelRef;
   setViewPanelRef?: (viewPanelRef: VirtualPanelRef | undefined) => void;
+  /** Maximum number of values rendered per repeat variable. 0 disables the limit. @default 0 */
+  repeatVariableMaxValues?: number;
 }
 
 export interface DashboardProviderProps {
@@ -117,7 +120,7 @@ export function DashboardProvider(props: DashboardProviderProps): ReactElement {
 
 function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState> {
   const {
-    initialState: { dashboardResource, isEditMode, viewPanelRef, setViewPanelRef },
+    initialState: { dashboardResource, isEditMode, viewPanelRef, setViewPanelRef, repeatVariableMaxValues = 0 },
   } = props;
 
   const {
@@ -167,6 +170,7 @@ function initStore(props: DashboardProviderProps): StoreApi<DashboardStoreState>
           refreshInterval,
           datasources,
           ttl,
+          repeatVariableMaxValues,
           isEditMode: !!isEditMode,
           setEditMode: (isEditMode: boolean): void => {
             set({ isEditMode });

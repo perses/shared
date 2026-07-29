@@ -157,17 +157,22 @@ describe('restoreRepeatItemLayout', () => {
   const baseLayout: PanelGroupItemLayout = { i: 'panel-1', x: 0, y: 0, w: 12, h: 13 };
 
   test('restores single-item height from expanded height', () => {
-    const meta = { itemRepeatVariable: repeatVariable, values: ['prod', 'staging', 'dev'], numberOfRows: 2 };
+    const meta = {
+      itemRepeatVariable: repeatVariable,
+      values: ['prod', 'staging', 'dev'],
+      totalValues: 3,
+      numberOfRows: 2,
+    };
     expect(restoreRepeatItemLayout(baseLayout, meta).h).toBe(6);
   });
 
   test('re-attaches repeatVariable from meta', () => {
-    const meta = { itemRepeatVariable: repeatVariable, values: ['prod'], numberOfRows: 1 };
+    const meta = { itemRepeatVariable: repeatVariable, values: ['prod'], totalValues: 1, numberOfRows: 1 };
     expect(restoreRepeatItemLayout(baseLayout, meta).repeatVariable).toBe(repeatVariable);
   });
 
   test('preserves other layout properties unchanged', () => {
-    const meta = { itemRepeatVariable: repeatVariable, values: ['prod'], numberOfRows: 1 };
+    const meta = { itemRepeatVariable: repeatVariable, values: ['prod'], totalValues: 1, numberOfRows: 1 };
     const restored = restoreRepeatItemLayout(baseLayout, meta);
     expect(restored.i).toBe('panel-1');
     expect(restored.x).toBe(0);
@@ -179,7 +184,7 @@ describe('restoreRepeatItemLayout', () => {
     const singleItemHeight = 8;
     const numberOfRows = 3;
     const expandedHeight = calculateExpandedHeight(singleItemHeight, numberOfRows);
-    const meta = { itemRepeatVariable: repeatVariable, values: ['a', 'b', 'c'], numberOfRows };
+    const meta = { itemRepeatVariable: repeatVariable, values: ['a', 'b', 'c'], totalValues: 3, numberOfRows };
     const restored = restoreRepeatItemLayout({ ...baseLayout, h: expandedHeight }, meta);
     expect(restored.h).toBe(singleItemHeight);
   });
@@ -188,7 +193,10 @@ describe('restoreRepeatItemLayout', () => {
 describe('restoreRepeatLayouts', () => {
   const repeatVariable: RepeatVariable = { value: 'env', alignment: 'horizontal', maxPer: 2 };
   const meta = new Map([
-    ['repeat-panel', { itemRepeatVariable: repeatVariable, values: ['prod', 'staging', 'dev'], numberOfRows: 2 }],
+    [
+      'repeat-panel',
+      { itemRepeatVariable: repeatVariable, values: ['prod', 'staging', 'dev'], totalValues: 3, numberOfRows: 2 },
+    ],
   ]);
 
   const expandedLayout = { i: 'repeat-panel', x: 0, y: 0, w: 12, h: 13 };
@@ -289,6 +297,26 @@ describe('buildRepeatMeta', () => {
     expect(repeatMeta.size).toBe(1);
     expect(repeatMeta.has('repeat-panel')).toBe(true);
     expect(repeatMeta.has('plain-panel')).toBe(false);
+  });
+
+  test('sets totalValues to full count regardless of maxValues', () => {
+    const layout: PanelGroupItemLayout = {
+      ...baseLayout,
+      repeatVariable: { value: 'env', alignment: 'horizontal' },
+    };
+    const { repeatMeta } = buildRepeatMeta([layout], variables, undefined, 2);
+    expect(repeatMeta.get('panel-1')?.values).toEqual(['prod', 'staging']);
+    expect(repeatMeta.get('panel-1')?.totalValues).toBe(3);
+  });
+
+  test('totalValues equals values length when no cap is applied', () => {
+    const layout: PanelGroupItemLayout = {
+      ...baseLayout,
+      repeatVariable: { value: 'env', alignment: 'horizontal' },
+    };
+    const { repeatMeta } = buildRepeatMeta([layout], variables);
+    expect(repeatMeta.get('panel-1')?.totalValues).toBe(3);
+    expect(repeatMeta.get('panel-1')?.values).toHaveLength(3);
   });
 });
 

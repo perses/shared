@@ -12,8 +12,7 @@
 // limitations under the License.
 
 import { ReactNode, useMemo } from 'react';
-import { useVariableValues, VariableContext } from '@perses-dev/plugin-system';
-import { PanelGroupId } from '@perses-dev/spec';
+import { PanelGroupId, useVariableValues, VariableContext } from '@perses-dev/plugin-system';
 import { Box } from '@mui/material';
 import { RepeatGrid } from '@perses-dev/components';
 import { calcPerPanelWidth } from '../../utils/repeatLayoutUtils';
@@ -33,6 +32,23 @@ interface RepeatPanelItemProps {
   itemGap: number;
   panelOptions?: PanelOptions;
   isEditMode: boolean;
+  isCapped?: boolean;
+}
+
+function getRepeatPanelTooltip(
+  isFirst: boolean,
+  isEditMode: boolean,
+  isCapped: boolean | undefined,
+  repeatVariableName: string,
+  value: string
+): string | undefined {
+  if (!isFirst && isEditMode) {
+    return `This panel is generated from the variable "${repeatVariableName}" with the value "${value}". To change panel definition, please edit the first panel.`;
+  }
+  if (isFirst && isCapped) {
+    return `Not all values are displayed. To display more, update the repeat variable limit in the server configuration.`;
+  }
+  return undefined;
 }
 
 /**
@@ -49,6 +65,7 @@ export function RepeatGridItemContent({
   itemGap,
   panelOptions,
   isEditMode,
+  isCapped,
 }: RepeatPanelItemProps): ReactNode {
   const { name: repeatVariableName, values: variableValues, maxPer: perRow } = panelRepeatVariable;
   const variables = useVariableValues();
@@ -69,7 +86,7 @@ export function RepeatGridItemContent({
       containerSx={{ overflow: 'hidden' }}
       rowSx={{ flex: 1, overflow: 'hidden' }}
       renderItem={(value, rowIndex, colIndex) => {
-        const isNotFirst = colIndex + rowIndex !== 0;
+        const isFirst = colIndex + rowIndex === 0;
         return (
           <VariableContext.Provider
             key={`${repeatVariableName}-${value}`}
@@ -92,12 +109,8 @@ export function RepeatGridItemContent({
                   },
                 }}
                 width={perPanelWidth}
-                readonly={isNotFirst}
-                informationTooltip={
-                  isNotFirst && isEditMode
-                    ? `This panel is generated from the variable "${repeatVariableName}" with the value "${value}". To change panel definition, please edit the first panel.`
-                    : undefined
-                }
+                readonly={!isFirst}
+                informationTooltip={getRepeatPanelTooltip(isFirst, isEditMode, isCapped, repeatVariableName, value)}
               />
             </Box>
           </VariableContext.Provider>

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelGroupId } from '@perses-dev/spec';
+import { PanelGroupId } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { PanelOptions } from '../Panel/Panel';
@@ -45,6 +45,7 @@ export function GridItemRenderer({
 
   const panelRepeatVariable = repeatItemMeta?.itemRepeatVariable;
   const panelVariableValues = repeatItemMeta?.values;
+  const totalValues = repeatItemMeta?.totalValues ?? 0;
   const effectiveValues = viewPanelItemId?.repeatVariable?.panel
     ? [viewPanelItemId.repeatVariable.panel[1]]
     : panelVariableValues;
@@ -71,6 +72,7 @@ export function GridItemRenderer({
           itemGap={DEFAULT_MARGIN}
           panelOptions={panelOptions}
           isEditMode={isEditMode}
+          isCapped={!isEditMode && effectiveValues.length < totalValues}
         />
       ) : (
         <GridItemContent panelOptions={panelOptions} panelGroupItemId={panelGroupItemId} width={width} />

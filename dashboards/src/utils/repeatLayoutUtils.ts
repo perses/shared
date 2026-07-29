@@ -75,6 +75,7 @@ export function calculateSingleItemHeight(totalHeight: number, numberOfRows: num
 export interface RepeatItemMeta {
   itemRepeatVariable: RepeatVariable;
   values: string[];
+  totalValues: number;
   numberOfRows: number;
 }
 
@@ -118,7 +119,8 @@ export function restoreRepeatLayouts(
 export function buildRepeatMeta(
   itemLayouts: PanelGroupItemLayout[],
   variableValues: VariableStateMap,
-  groupRepeatVariable?: [string, string]
+  groupRepeatVariable?: [string, string],
+  maxValues?: number
 ): { expandedItemLayouts: PanelGroupItemLayout[]; repeatMeta: Map<string, RepeatItemMeta> } {
   const repeatMeta = new Map<string, RepeatItemMeta>();
   const expandedItemLayouts = itemLayouts.map((itemLayout) => {
@@ -127,10 +129,11 @@ export function buildRepeatMeta(
       return itemLayout;
     }
 
-    const values = getRepeatVariableValues(itemRepeatVariable, variableValues, groupRepeatVariable);
+    const allValues = getRepeatVariableValues(itemRepeatVariable, variableValues, groupRepeatVariable);
+    const values = maxValues ? allValues.slice(0, maxValues) : allValues;
     const perRowCount = getPerRowCount(itemRepeatVariable);
     const numberOfRows = values.length > 0 ? Math.ceil(values.length / perRowCount) : 1;
-    repeatMeta.set(itemLayout.i, { itemRepeatVariable, values, numberOfRows });
+    repeatMeta.set(itemLayout.i, { itemRepeatVariable, values, totalValues: allValues.length, numberOfRows });
 
     if (values.length === 0 || numberOfRows <= 1) {
       return itemLayout;

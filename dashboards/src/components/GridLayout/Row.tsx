@@ -19,7 +19,7 @@ import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
 import { PanelGroupDefinition, PanelGroupItemLayout } from '../../model';
 import { buildRepeatMeta, restoreRepeatLayouts } from '../../utils';
-import { useViewPanelGroup } from '../../context';
+import { useRepeatVariableMaxValues, useViewPanelGroup } from '../../context';
 import { PanelOptions } from '../Panel/Panel';
 import { GridContainer } from './GridContainer';
 import { GridItemRenderer } from './GridItemRenderer';
@@ -60,12 +60,19 @@ export function Row({
   const theme = useTheme();
   const viewPanelItemId = useViewPanelGroup();
   const variableValues = useVariableValues();
+  const repeatVariableMaxValues = useRepeatVariableMaxValues();
 
   const [isOpen, setIsOpen] = useState(!groupDefinition.isCollapsed);
 
   const { expandedItemLayouts, repeatMeta } = useMemo(
-    () => buildRepeatMeta(groupDefinition.itemLayouts, variableValues, repeatVariable),
-    [groupDefinition.itemLayouts, repeatVariable, variableValues]
+    () =>
+      buildRepeatMeta(
+        groupDefinition.itemLayouts,
+        variableValues,
+        repeatVariable,
+        repeatVariableMaxValues || undefined
+      ),
+    [groupDefinition.itemLayouts, repeatVariable, variableValues, repeatVariableMaxValues]
   );
 
   const hasViewPanel =

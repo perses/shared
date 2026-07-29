@@ -38,6 +38,7 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, Dashboar
   externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   isEditing?: boolean;
   isCreating?: boolean;
+  repeatVariableMaxValues?: number;
 }
 
 /**
@@ -63,6 +64,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     onDiscard,
     sx,
     userPreferenceTimezone,
+    repeatVariableMaxValues,
     ...others
   } = props;
   const { spec } = dashboardResource;
@@ -113,6 +115,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
         initialState={{
           isEditMode: !!isEditing,
           dashboardResource,
+          repeatVariableMaxValues,
         }}
       >
         <TimeRangeProviderWithQueryParams
