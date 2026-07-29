@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/components",
-  "version": "0.54.0-rc.1",
+  "version": "0.54.0",
   "description": "Common UI components used across Perses features",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -34,8 +34,8 @@
     "@date-fns/tz": "^1.4.1",
     "@fontsource/inter": "^5.0.0",
     "@mui/x-date-pickers": "^7.23.1",
-    "@perses-dev/spec": "0.2.0-rc.0",
-    "@perses-dev/client": "0.54.0-rc.1",
+    "@perses-dev/spec": "0.2.0",
+    "@perses-dev/client": "0.54.0",
     "numbro": "^2.3.6",
     "@tanstack/match-sorter-utils": "^8.19.4",
     "@tanstack/react-table": "^8.20.5",
