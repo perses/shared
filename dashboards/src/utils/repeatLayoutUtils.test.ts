@@ -15,6 +15,7 @@ import { VariableStateMap } from '@perses-dev/plugin-system';
 import { PanelGroupItemLayout, RepeatVariable } from '../model';
 import {
   buildRepeatMeta,
+  calcPerPanelWidth,
   calculateExpandedHeight,
   calculateSingleItemHeight,
   getPerRowCount,
@@ -288,5 +289,30 @@ describe('buildRepeatMeta', () => {
     expect(repeatMeta.size).toBe(1);
     expect(repeatMeta.has('repeat-panel')).toBe(true);
     expect(repeatMeta.has('plain-panel')).toBe(false);
+  });
+});
+
+describe('calcPerPanelWidth', () => {
+  test('divides available width evenly across panels', () => {
+    // 400px wide, 8px gap, 2 columns: (400 - 8) / 2 = 196
+    expect(calcPerPanelWidth(400, 8, 2)).toBe(196);
+  });
+
+  test('floors fractional widths', () => {
+    // 100px wide, 0px gap, 3 columns: floor(100 / 3) = 33
+    expect(calcPerPanelWidth(100, 0, 3)).toBe(33);
+  });
+
+  test('returns at least 1 when container is narrower than gap space', () => {
+    // 50px wide, 8px gap, 10 columns: 50 - 8*9 = -22 → clamped to 1
+    expect(calcPerPanelWidth(50, 8, 10)).toBe(1);
+  });
+
+  test('returns at least 1 when width is zero', () => {
+    expect(calcPerPanelWidth(0, 8, 4)).toBe(1);
+  });
+
+  test('handles a single column', () => {
+    expect(calcPerPanelWidth(300, 8, 1)).toBe(300);
   });
 });

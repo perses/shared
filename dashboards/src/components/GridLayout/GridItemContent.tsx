@@ -92,7 +92,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
 
   // Provide actions to the panel when in edit mode
   let editHandlers: PanelProps['editHandlers'] = undefined;
-  if (canModify && !readonly) {
+  if (canModify) {
     editHandlers = {
       onEditPanelClick: openEditPanel,
       onDuplicatePanelClick: duplicatePanel,

@@ -13,9 +13,9 @@
 
 import { ReactElement, useMemo } from 'react';
 import { Grid2 as Grid, MenuItem, TextField, Typography } from '@mui/material';
-import { VariableDefinition } from '@perses-dev/spec';
 import { Control, Controller, useFormContext, useWatch } from 'react-hook-form';
 import { PanelEditorValues } from '../../model';
+import { VariableDefinitionGroup } from '../../model/variables';
 import { useVariableValues } from '../../runtime';
 import { DEFAULT_MAX_PER_ROW, DEFAULT_REPEAT_ALIGNMENT } from '../../constants';
 import { RepeatLayoutPreview } from './RepeatLayoutPreview';
@@ -23,10 +23,7 @@ import { RepeatVariableEditor } from './RepeatVariableEditor';
 
 const DEFAULT_LAYOUT_WIDTH = 24;
 
-export interface VariableDefinitionGroup {
-  source?: string;
-  definitions: VariableDefinition[];
-}
+export type { VariableDefinitionGroup };
 
 export interface PanelGroup {
   id: number;

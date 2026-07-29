@@ -139,3 +139,8 @@ export function buildRepeatMeta(
   });
   return { expandedItemLayouts, repeatMeta };
 }
+
+/** Returns the pixel width of a single repeated panel, clamped to at least 1 to prevent negative values when the container is narrower than the combined gaps. */
+export function calcPerPanelWidth(width: number, itemGap: number, perRow: number): number {
+  return Math.max(1, Math.floor((width - itemGap * (perRow - 1)) / perRow));
+}

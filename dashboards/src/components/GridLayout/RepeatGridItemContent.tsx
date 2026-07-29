@@ -16,6 +16,7 @@ import { useVariableValues, VariableContext } from '@perses-dev/plugin-system';
 import { PanelGroupId } from '@perses-dev/spec';
 import { Box } from '@mui/material';
 import { RepeatGrid } from '@perses-dev/components';
+import { calcPerPanelWidth } from '../../utils/repeatLayoutUtils';
 import { PanelOptions } from '../Panel/Panel';
 import { GridItemContent } from './GridItemContent';
 
@@ -59,7 +60,7 @@ export function RepeatGridItemContent({
     }
     return result;
   }, [variableValues, perRow]);
-  const perPanelWidth = useMemo(() => Math.floor((width - itemGap * (perRow - 1)) / perRow), [itemGap, perRow, width]);
+  const perPanelWidth = useMemo(() => calcPerPanelWidth(width, itemGap, perRow), [itemGap, perRow, width]);
 
   return (
     <RepeatGrid

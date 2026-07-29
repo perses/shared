@@ -13,3 +13,4 @@
 
 export * from './LayoutEditor';
 export * from './RepeatLayoutPreview';
+export * from './RepeatVariableEditor';

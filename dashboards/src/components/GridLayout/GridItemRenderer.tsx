@@ -20,8 +20,7 @@ import { PanelGroupItemId } from '../../model';
 import { getPerRowCount, RepeatItemMeta } from '../../utils';
 import { GridItemContent } from './GridItemContent';
 import { RepeatGridItemContent } from './RepeatGridItemContent';
-
-const DEFAULT_MARGIN = 10;
+import { DEFAULT_MARGIN } from './Row';
 
 interface GridItemRendererProps {
   panelGroupId: PanelGroupId;

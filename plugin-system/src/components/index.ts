@@ -17,6 +17,7 @@ export * from './DatasourceEditorForm';
 export * from './DatasourceSelect';
 export * from './HTTPSettingsEditor';
 export * from './ItemSelectionActionsOptionsEditor';
+export * from './LayoutEditor';
 export * from './LegendOptionsEditor';
 export * from './LinksEditor';
 export * from './MultiQueryEditor';

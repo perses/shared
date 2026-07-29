@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { VariableOption } from '@perses-dev/components';
-import { AbsoluteTimeRange, UnknownSpec } from '@perses-dev/spec';
+import { AbsoluteTimeRange, UnknownSpec, VariableDefinition } from '@perses-dev/spec';
 
 import { DatasourceStore, VariableStateMap } from '../runtime';
 import { Plugin } from './plugin-base';
@@ -50,4 +50,9 @@ export interface VariablePlugin<Spec = UnknownSpec> extends Plugin<Spec> {
    * Returns a list of variables name this variable depends on. Used to optimize fetching
    */
   dependsOn?: (definition: Spec, ctx: GetVariableOptionsContext) => VariablePluginDependencies;
+}
+
+export interface VariableDefinitionGroup {
+  source?: string;
+  definitions: VariableDefinition[];
 }

@@ -129,11 +129,11 @@ export function createPanelEditorSlice(): StateCreator<
             const currentGroup = state.panelGroups[panelGroupId];
             const layoutIndex = currentGroup?.itemLayouts.findIndex((layout) => layout.i === panelGroupLayoutId);
             if (currentGroup === undefined || layoutIndex === undefined || layoutIndex === -1) {
-              throw new Error(`Could not find layout for panel group item ${panelGroupItemId}`);
+              throw new Error(`Could not find layout for panel group item ${JSON.stringify(panelGroupItemId)}`);
             }
             const currentLayout = currentGroup.itemLayouts[layoutIndex];
             if (currentLayout === undefined) {
-              throw new Error(`Could not find layout for panel group item ${panelGroupItemId}`);
+              throw new Error(`Could not find layout for panel group item ${JSON.stringify(panelGroupItemId)}`);
             }
             currentLayout.repeatVariable = next.layoutDefinition?.repeatVariable;
             currentLayout.w = next.layoutDefinition?.width ?? currentLayout.w;

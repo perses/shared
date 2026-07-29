@@ -19,6 +19,7 @@ import {
   VariableOption,
   BuiltinVariableContext,
   useTimeRange,
+  VariableDefinitionGroup,
 } from '@perses-dev/plugin-system';
 import {
   DEFAULT_ALL_VALUE as ALL_VALUE,
@@ -154,15 +155,6 @@ export function useVariableDefinitionStates(variableNames?: string[]): VariableS
       return JSON.stringify(left) === JSON.stringify(right);
     },
   );
-}
-
-/**
- * A group of non-overridden variable definitions sharing a common source/scope.
- * `source` is undefined for dashboard-scoped variables.
- */
-export interface VariableDefinitionGroup {
-  source?: string;
-  definitions: VariableDefinition[];
 }
 
 /**
