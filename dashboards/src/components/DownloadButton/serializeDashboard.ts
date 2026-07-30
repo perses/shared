@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { DashboardResource } from '@perses-dev/client';
+import { DashboardSpec } from '@perses-dev/spec';
 import { stringify } from 'yaml';
 
 //TODO: Although the previous comment suggests the metadata not should not be used, I keep them. Need to be discussed.
@@ -20,6 +21,20 @@ import { stringify } from 'yaml';
 type SerializedDashboard = {
   contentType: string;
   content: string;
+};
+
+type PersesV1Alpha2CR = {
+  apiVersion: 'perses.dev/v1alpha2';
+  kind: 'PersesDashboard';
+  metadata: {
+    labels: Record<string, string>;
+    annotations?: Record<string, string>;
+    name: string;
+    namespace: string;
+  };
+  spec: {
+    config: DashboardSpec;
+  };
 };
 
 function serializeYaml(dashboard: DashboardResource, shape?: 'cr-v1alpha1' | 'cr-v1alpha2'): SerializedDashboard {
@@ -46,25 +61,28 @@ function serializeYaml(dashboard: DashboardResource, shape?: 'cr-v1alpha1' | 'cr
     );
   } else if (shape === 'cr-v1alpha2') {
     const name = dashboard.metadata.name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
-    content = stringify(
-      {
-        apiVersion: 'perses.dev/v1alpha2',
-        kind: 'PersesDashboard',
-        metadata: {
-          labels: {
-            'app.kubernetes.io/name': 'perses-dashboard',
-            'app.kubernetes.io/instance': name,
-            'app.kubernetes.io/part-of': 'perses-operator',
-          },
-          name,
-          namespace: dashboard.metadata.project,
+    const crContent: PersesV1Alpha2CR = {
+      apiVersion: 'perses.dev/v1alpha2',
+      kind: 'PersesDashboard',
+      metadata: {
+        labels: {
+          'app.kubernetes.io/name': 'perses-dashboard',
+          'app.kubernetes.io/instance': name,
+          'app.kubernetes.io/part-of': 'perses-operator',
         },
-        spec: {
-          config: dashboard.spec,
-        },
+        name,
+        namespace: dashboard.metadata.project,
       },
-      { schema: 'yaml-1.1' }
-    );
+      spec: {
+        config: dashboard.spec,
+      },
+    };
+
+    if (dashboard.metadata.tags && dashboard.metadata.tags.length > 0) {
+      crContent.metadata.annotations = { 'perses.dev/tags': dashboard.metadata.tags.join(',') };
+    }
+
+    content = stringify(crContent, { schema: 'yaml-1.1' });
   } else {
     content = stringify(dashboard, { schema: 'yaml-1.1' });
   }
