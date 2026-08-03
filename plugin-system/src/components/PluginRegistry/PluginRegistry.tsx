@@ -77,8 +77,12 @@ export function PluginRegistry(props: PluginRegistryProps): ReactElement {
         if (!resource) continue;
 
         const pluginModule = (await loadPluginModule(resource)) as Record<string, Plugin<UnknownSpec>>;
+        // Try to get the plugin implementation from the module using the versioned export first
         const plugin = pluginModule?.[resourceKey];
         if (plugin) return plugin as PluginImplementation<T>;
+        // If the plugin module doesn't have a versioned export, fallback to the plugin name
+        const versionlessPlugin = pluginModule?.[name];
+        if (versionlessPlugin) return versionlessPlugin as PluginImplementation<T>;
       }
 
       throw new Error(`A ${name} plugin for kind '${kind}' is not installed`);
