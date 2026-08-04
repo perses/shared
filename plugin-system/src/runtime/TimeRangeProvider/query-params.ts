@@ -22,6 +22,9 @@ import {
   AbsoluteTimeRange,
 } from '@perses-dev/spec';
 import { TimeRange } from './TimeRangeProvider';
+import { useDisableAutoRefreshSetting } from './TimeRangeSettingsProvider';
+
+const DISABLED_REFRESH_INTERVAL: DurationString = '0s';
 
 export type TimeOptionValue = Date | DurationString | null | undefined;
 
@@ -158,9 +161,13 @@ export function useTimeRangeParams(initialTimeRange: TimeRangeValue): Pick<TimeR
  * Sets refresh query param if it is empty on page load
  */
 export function useInitialRefreshInterval(dashboardDuration: DurationString): DurationString {
+  const disableAutoRefresh = useDisableAutoRefreshSetting();
   const [query] = useQueryParams(refreshIntervalQueryConfig, { updateType: 'replaceIn' });
   const { refresh } = query;
   return useMemo(() => {
+    if (disableAutoRefresh) {
+      return DISABLED_REFRESH_INTERVAL;
+    }
     let initialTimeRange: DurationString = dashboardDuration;
     if (!refresh) {
       return initialTimeRange;
@@ -170,7 +177,7 @@ export function useInitialRefreshInterval(dashboardDuration: DurationString): Du
       initialTimeRange = startStr;
     }
     return initialTimeRange;
-  }, [dashboardDuration, refresh]);
+  }, [dashboardDuration, disableAutoRefresh, refresh]);
 }
 
 /**
@@ -179,28 +186,43 @@ export function useInitialRefreshInterval(dashboardDuration: DurationString): Du
 export function useSetRefreshIntervalParams(
   initialRefreshInterval?: DurationString
 ): Pick<TimeRange, 'refreshInterval' | 'setRefreshInterval'> {
+  const disableAutoRefresh = useDisableAutoRefreshSetting();
   const [query, setQuery] = useQueryParams(refreshIntervalQueryConfig, { updateType: 'replaceIn' });
 
   // determine whether initial param had previously been populated to fix back btn
   const [paramsLoaded, setParamsLoaded] = useState<boolean>(false);
 
   const { refresh } = query;
+  const effectiveInitialRefreshInterval = disableAutoRefresh ? DISABLED_REFRESH_INTERVAL : initialRefreshInterval;
 
   useEffect(() => {
     // when dashboard loaded with no params, default to dashboard refresh interval
     if (!paramsLoaded && !refresh) {
-      setQuery({ refresh: initialRefreshInterval });
+      setQuery({ refresh: effectiveInitialRefreshInterval });
       setParamsLoaded(true);
     }
-  }, [initialRefreshInterval, paramsLoaded, refresh, setQuery]);
+  }, [effectiveInitialRefreshInterval, paramsLoaded, refresh, setQuery]);
+
+  useEffect(() => {
+    // when auto-refresh is disabled by admin, force Off and ignore URL/spec values
+    if (disableAutoRefresh && refresh !== DISABLED_REFRESH_INTERVAL) {
+      setQuery({ refresh: DISABLED_REFRESH_INTERVAL });
+    }
+  }, [disableAutoRefresh, refresh, setQuery]);
 
   const setRefreshInterval: TimeRange['setRefreshInterval'] = useCallback(
-    (refresh: DurationString) => setQuery({ refresh }),
-    [setQuery]
+    (refresh: DurationString) => {
+      if (disableAutoRefresh) {
+        setQuery({ refresh: DISABLED_REFRESH_INTERVAL });
+        return;
+      }
+      setQuery({ refresh });
+    },
+    [disableAutoRefresh, setQuery]
   );
 
   return {
-    refreshInterval: initialRefreshInterval,
+    refreshInterval: effectiveInitialRefreshInterval,
     setRefreshInterval: setRefreshInterval,
   };
 }

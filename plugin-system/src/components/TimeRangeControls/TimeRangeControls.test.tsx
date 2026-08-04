@@ -17,7 +17,11 @@ import { DurationString } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { ReactElement } from 'react';
 import { SnackbarProvider } from '@perses-dev/components';
-import { TimeRangeProviderBasic, TimeRangeProviderWithQueryParams } from '@perses-dev/plugin-system';
+import {
+  TimeRangeProviderBasic,
+  TimeRangeProviderWithQueryParams,
+  TimeRangeSettingsProvider,
+} from '@perses-dev/plugin-system';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
@@ -53,9 +57,9 @@ describe('TimeRangeControls', () => {
     return <TimeRangeControls timeZone={timeZone} onTimeZoneChange={(tz) => setTimeZone(tz.value)} />;
   };
 
-  const renderTimeRangeControls = (testURLParams: boolean): void => {
+  const renderTimeRangeControls = (testURLParams: boolean, disableAutoRefresh = false): void => {
     renderWithContext(
-      <>
+      <TimeRangeSettingsProvider disableAutoRefresh={disableAutoRefresh}>
         {testURLParams ? (
           <TimeRangeProviderWithQueryParams
             initialRefreshInterval={testDefaultRefreshInterval}
@@ -71,7 +75,7 @@ describe('TimeRangeControls', () => {
             <ControlsWithTZ />
           </TimeRangeProviderBasic>
         )}
-      </>,
+      </TimeRangeSettingsProvider>,
       undefined
     );
   };
@@ -84,6 +88,13 @@ describe('TimeRangeControls', () => {
     const firstSelected = screen.getByRole('option', { name: 'Last 5 minutes' });
     userEvent.click(firstSelected);
     expect(dateButton).toHaveTextContent(/5 minutes/i);
+  });
+
+  it('should disable the refresh interval picker when disableAutoRefresh is enabled', () => {
+    renderTimeRangeControls(false, true);
+    const refreshIntervalPicker = screen.getByLabelText(/Select refresh interval/i);
+    expect(refreshIntervalPicker).toBeDisabled();
+    expect(screen.getByText('Off')).toBeInTheDocument();
   });
 
   // TODO: add additional tests for absolute time selection, other inputs, form validation, etc.

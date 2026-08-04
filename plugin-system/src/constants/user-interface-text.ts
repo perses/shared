@@ -18,6 +18,7 @@ export const TOOLTIP_TEXT = {
   // Time range controls buttons
   refresh: 'Refresh',
   refreshInterval: 'Auto refresh interval',
+  refreshIntervalDisabledByAdmin: 'Auto-refresh has been turned off by your administrator.',
   zoomIn: 'Zoom in',
   zoomOut: 'Zoom out',
 };

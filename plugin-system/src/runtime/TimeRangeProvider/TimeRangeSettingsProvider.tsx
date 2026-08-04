@@ -19,12 +19,14 @@ const DEFAULT_OPTIONS: DurationString[] = ['5m', '15m', '30m', '1h', '6h', '12h'
 const defaultTimeRangeSettings: TimeRangeSettings = {
   showCustom: true,
   showZoomButtons: true,
+  disableAutoRefresh: false,
   options: DEFAULT_OPTIONS.map((duration) => buildRelativeTimeOption(duration)),
 };
 
 export interface TimeRangeSettingsProviderProps {
   showCustom?: boolean;
   showZoomButtons?: boolean;
+  disableAutoRefresh?: boolean;
   options?: TimeOption[];
   children: ReactNode;
 }
@@ -32,6 +34,7 @@ export interface TimeRangeSettingsProviderProps {
 export interface TimeRangeSettings {
   showCustom: boolean;
   showZoomButtons: boolean;
+  disableAutoRefresh: boolean;
   options: TimeOption[];
 }
 
@@ -89,6 +92,18 @@ export function useTimeRangeOptionsSetting(override?: TimeOption[]): TimeOption[
 }
 
 /**
+ * Get the current value of the disableAutoRefresh setting.
+ * @param override If set, the value of the provider will be overridden by this value.
+ */
+export function useDisableAutoRefreshSetting(override?: boolean): boolean {
+  const disableAutoRefresh = useTimeRangeSettings().disableAutoRefresh;
+  if (override !== undefined) {
+    return override;
+  }
+  return disableAutoRefresh;
+}
+
+/**
  * Provider implementation that supplies the time range state at runtime.
  */
 export function TimeRangeSettingsProvider(props: TimeRangeSettingsProviderProps): ReactElement {
@@ -97,9 +112,13 @@ export function TimeRangeSettingsProvider(props: TimeRangeSettingsProviderProps)
       showCustom: props.showCustom === undefined ? defaultTimeRangeSettings.showCustom : props.showCustom,
       showZoomButtons:
         props.showZoomButtons === undefined ? defaultTimeRangeSettings.showZoomButtons : props.showZoomButtons,
+      disableAutoRefresh:
+        props.disableAutoRefresh === undefined
+          ? defaultTimeRangeSettings.disableAutoRefresh
+          : props.disableAutoRefresh,
       options: props.options === undefined ? defaultTimeRangeSettings.options : props.options,
     };
-  }, [props.showCustom, props.showZoomButtons, props.options]);
+  }, [props.showCustom, props.showZoomButtons, props.disableAutoRefresh, props.options]);
 
   return <TimeRangeSettingsContext.Provider value={ctx}>{props.children}</TimeRangeSettingsContext.Provider>;
 }

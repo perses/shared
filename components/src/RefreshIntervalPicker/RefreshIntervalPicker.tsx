@@ -21,10 +21,11 @@ interface RefreshIntervalPickerProps {
   value?: DurationString;
   onChange: (value: DurationString) => void;
   height?: string;
+  disabled?: boolean;
 }
 
 export function RefreshIntervalPicker(props: RefreshIntervalPickerProps): ReactElement {
-  const { value, onChange, timeOptions, height } = props;
+  const { value, onChange, timeOptions, height, disabled = false } = props;
 
   // If the dashboard refresh interval is not provided in timeOptions, it will create a specific option for the select
   const customInterval = useMemo(() => {
@@ -39,6 +40,7 @@ export function RefreshIntervalPicker(props: RefreshIntervalPickerProps): ReactE
         <Select
           id="refreshInterval"
           value={value}
+          disabled={disabled}
           onChange={(event) => {
             const duration = event.target.value as DurationString;
             onChange(duration);
