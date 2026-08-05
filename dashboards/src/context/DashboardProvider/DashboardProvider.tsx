@@ -95,6 +95,7 @@ export function DashboardProvider(props: DashboardProviderProps): ReactElement {
   const { defaultPluginKinds } = usePluginRegistry();
   const defaultPanelKind = defaultPluginKinds?.['Panel'] ?? '';
   const { data: plugin } = usePlugin('Panel', defaultPanelKind);
+  const { viewPanelRef } = props.initialState;
 
   useEffect(() => {
     if (plugin === undefined) return;
@@ -106,6 +107,10 @@ export function DashboardProvider(props: DashboardProviderProps): ReactElement {
       },
     });
   }, [plugin, store, defaultPanelKind]);
+
+  useEffect(() => {
+    store.getState().setViewPanelFromRef(viewPanelRef);
+  }, [store, viewPanelRef]);
 
   return (
     <DashboardContext.Provider value={store as StoreApi<DashboardStoreState>}>

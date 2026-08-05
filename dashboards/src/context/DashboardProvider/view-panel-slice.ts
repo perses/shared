@@ -32,6 +32,7 @@ export interface ViewPanelSlice {
   viewPanel: ViewPanelState;
   getViewPanel: () => PanelGroupItemId | undefined;
   setViewPanel: (panelGroupItemId?: PanelGroupItemId) => void;
+  setViewPanelFromRef: (panelRef?: VirtualPanelRef) => void;
 }
 
 export interface ViewPanelState {
@@ -45,7 +46,7 @@ export interface ViewPanelState {
  */
 export function createViewPanelSlice(
   viewPanelRef?: VirtualPanelRef,
-  setViewPanelRef?: (ref: VirtualPanelRef | undefined) => void
+  setViewPanelRefQueryParam?: (ref: VirtualPanelRef | undefined) => void
 ): StateCreator<ViewPanelSlice & PanelGroupSlice, Middleware, [], ViewPanelSlice> {
   return (set, get) => ({
     viewPanel: {
@@ -64,12 +65,35 @@ export function createViewPanelSlice(
           panelGroupItemId: panelGroupItemId,
         };
         const panelRef = findPanelRefOfPanelGroupItemId(get().panelGroups, panelGroupItemId);
-        if (setViewPanelRef) {
-          setViewPanelRef(panelRef);
+        if (setViewPanelRefQueryParam) {
+          setViewPanelRefQueryParam(panelRef);
         }
       });
     },
+
+    setViewPanelFromRef(panelRef?: VirtualPanelRef): void {
+      set((state) => {
+        const currentPanelRef =
+          state.viewPanel.panelRef ??
+          findPanelRefOfPanelGroupItemId(state.panelGroups, state.viewPanel.panelGroupItemId);
+        if (areViewPanelRefsEqual(currentPanelRef, panelRef)) {
+          return;
+        }
+        state.viewPanel = {
+          panelGroupItemId: undefined,
+          panelRef,
+        };
+      });
+    },
   });
+}
+
+function areViewPanelRefsEqual(left?: VirtualPanelRef, right?: VirtualPanelRef): boolean {
+  return (
+    left?.ref === right?.ref &&
+    left?.repeatVariable?.[0] === right?.repeatVariable?.[0] &&
+    left?.repeatVariable?.[1] === right?.repeatVariable?.[1]
+  );
 }
 
 function getViewPanelGroupId(
