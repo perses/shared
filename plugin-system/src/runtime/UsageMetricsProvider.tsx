@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { fetch } from '@perses-dev/client';
+import { FetchFn, useFetch } from '@perses-dev/client';
 import { QueryDefinition } from '@perses-dev/spec';
 import { createContext, ReactElement, ReactNode, useContext } from 'react';
 
@@ -25,6 +25,7 @@ interface UsageMetrics {
   renderErrorCount: number;
   pendingQueries: Map<string, QueryState>;
   apiPrefix?: string;
+  fetchFn: FetchFn;
 }
 
 interface UsageMetricsProps {
@@ -76,7 +77,7 @@ export const useUsageMetrics = (): UseUsageMetricsResults => {
 };
 
 const submitMetrics = async (stats: UsageMetrics): Promise<void> => {
-  await fetch(`${stats.apiPrefix ?? ''}/api/v1/view`, {
+  await stats.fetchFn(`${stats.apiPrefix ?? ''}/api/v1/view`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -91,6 +92,8 @@ const submitMetrics = async (stats: UsageMetrics): Promise<void> => {
 };
 
 export const UsageMetricsProvider = ({ apiPrefix, project, dashboard, children }: UsageMetricsProps): ReactElement => {
+  const { fetch } = useFetch();
+
   const ctx: UsageMetrics = {
     project: project,
     dashboard: dashboard,
@@ -99,6 +102,7 @@ export const UsageMetricsProvider = ({ apiPrefix, project, dashboard, children }
     renderDurationMs: 0,
     pendingQueries: new Map(),
     apiPrefix,
+    fetchFn: fetch,
   };
 
   return <UsageMetricsContext.Provider value={ctx}>{children}</UsageMetricsContext.Provider>;

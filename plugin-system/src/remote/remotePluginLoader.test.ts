@@ -119,6 +119,19 @@ describe('remotePluginLoader', () => {
       expect(result).toEqual([]);
       expect(mockConsoleError).toHaveBeenCalledWith('RemotePluginLoader: No valid plugins found');
     });
+
+    it('should use custom fetchFn when provided', async () => {
+      const customFetch = jest.fn().mockResolvedValue({
+        json: jest.fn().mockResolvedValue([MOCK_VALID_PLUGIN_MODULE_RESOURCE]),
+      });
+
+      const loader = remotePluginLoader({ fetchFn: customFetch });
+      const result = await loader.getInstalledPlugins();
+
+      expect(customFetch).toHaveBeenCalledWith('/api/v1/plugins');
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(result).toEqual([MOCK_VALID_PLUGIN_MODULE_RESOURCE]);
+    });
   });
 
   describe('importPluginModule', () => {

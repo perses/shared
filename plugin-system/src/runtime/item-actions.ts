@@ -18,7 +18,7 @@ import {
   SelectionItem,
   VariableStateMap,
 } from '@perses-dev/components';
-import { fetch } from '@perses-dev/client';
+import { type FetchFn } from '@perses-dev/client';
 import { ItemAction, EventAction, WebhookAction } from '../components/ItemSelectionActionsOptionsEditor';
 
 const BODY_METHODS = new Set(['POST', 'PUT', 'PATCH']);
@@ -49,6 +49,8 @@ export interface ExecuteActionParams<Id = unknown> {
   variableState?: VariableStateMap;
   /** Callback to update action status */
   setActionStatus: (actionName: string, status: Partial<ActionStatus>, itemId?: Id) => void;
+  /** Fetch function from FetchProvider context */
+  fetchFn: FetchFn;
 }
 
 /**
@@ -163,7 +165,8 @@ async function executeWebhookIndividual<Id>(
   action: WebhookAction,
   selectionMap: Map<Id, SelectionItem>,
   variableState: VariableStateMap | undefined,
-  setActionStatus: ExecuteActionParams<Id>['setActionStatus']
+  setActionStatus: ExecuteActionParams<Id>['setActionStatus'],
+  fetchFn: FetchFn
 ): Promise<ActionExecutionResult> {
   const entries = Array.from(selectionMap.entries());
   const count = entries.length;
@@ -192,7 +195,7 @@ async function executeWebhookIndividual<Id>(
       }
 
       // Make the request
-      const response = await fetch(urlResult.text, {
+      const response = await fetchFn(urlResult.text, {
         method: action.method,
         headers: buildWebhookHeaders(action),
         body: body,
@@ -237,7 +240,8 @@ async function executeWebhookBatch<Id>(
   action: WebhookAction,
   selectionMap: Map<Id, SelectionItem>,
   variableState: VariableStateMap | undefined,
-  setActionStatus: ExecuteActionParams<Id>['setActionStatus']
+  setActionStatus: ExecuteActionParams<Id>['setActionStatus'],
+  fetchFn: FetchFn
 ): Promise<ActionExecutionResult> {
   const items = Array.from(selectionMap.values());
 
@@ -257,7 +261,7 @@ async function executeWebhookBatch<Id>(
     }
 
     // Make the request
-    const response = await fetch(urlResult.text, {
+    const response = await fetchFn(urlResult.text, {
       method: action.method,
       headers: buildWebhookHeaders(action),
       body: body,
@@ -283,12 +287,13 @@ async function executeWebhookAction<Id>(
   action: WebhookAction,
   selectionMap: Map<Id, SelectionItem>,
   variableState: VariableStateMap | undefined,
-  setActionStatus: ExecuteActionParams<Id>['setActionStatus']
+  setActionStatus: ExecuteActionParams<Id>['setActionStatus'],
+  fetchFn: FetchFn
 ): Promise<ActionExecutionResult> {
   if (action.batchMode === 'batch') {
-    return executeWebhookBatch(action, selectionMap, variableState, setActionStatus);
+    return executeWebhookBatch(action, selectionMap, variableState, setActionStatus, fetchFn);
   } else {
-    return executeWebhookIndividual(action, selectionMap, variableState, setActionStatus);
+    return executeWebhookIndividual(action, selectionMap, variableState, setActionStatus, fetchFn);
   }
 }
 
@@ -315,7 +320,7 @@ async function executeEventAction<Id>(
  * @returns Promise resolving to the execution result
  */
 export async function executeAction<Id = unknown>(params: ExecuteActionParams<Id>): Promise<ActionExecutionResult> {
-  const { action, selectionMap, variableState, setActionStatus } = params;
+  const { action, selectionMap, variableState, setActionStatus, fetchFn } = params;
 
   if (selectionMap.size === 0) {
     return { success: true };
@@ -324,7 +329,7 @@ export async function executeAction<Id = unknown>(params: ExecuteActionParams<Id
   if (action.type === 'event') {
     return executeEventAction(action, selectionMap, variableState, setActionStatus);
   } else if (action.type === 'webhook') {
-    return executeWebhookAction(action, selectionMap, variableState, setActionStatus);
+    return executeWebhookAction(action, selectionMap, variableState, setActionStatus, fetchFn);
   }
 
   return { success: false, error: new Error(`Unknown action type`) };

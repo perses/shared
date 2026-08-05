@@ -18,6 +18,7 @@ import {
   PluginType,
   getPluginModuleCompoundKey,
 } from '@perses-dev/plugin-system';
+import { fetch as defaultFetch, type FetchFn } from '@perses-dev/client';
 import { RemotePluginModule } from './PersesPlugin.types';
 import { loadPlugin } from './PluginRuntime';
 
@@ -58,6 +59,10 @@ type RemotePluginLoaderOptions = {
    * @default ''
    **/
   baseURL?: string;
+  /**
+   * Optional custom fetch function to use for network requests. If not provided, the default fetch implementation will be used.
+   */
+  fetchFn?: FetchFn;
 };
 
 type ParsedPluginOptions = {
@@ -88,10 +93,11 @@ const paramToOptions = (options?: RemotePluginLoaderOptions): ParsedPluginOption
  */
 export function remotePluginLoader(options?: RemotePluginLoaderOptions): PluginLoader {
   const { pluginsApiPath, pluginsAssetsPath } = paramToOptions(options);
+  const fetchFn = options?.fetchFn ?? defaultFetch;
 
   return {
     getInstalledPlugins: async (): Promise<PluginModuleResource[]> => {
-      const pluginsResponse = await fetch(pluginsApiPath);
+      const pluginsResponse = await fetchFn(pluginsApiPath);
 
       const plugins = await pluginsResponse.json();
       let pluginModules: PluginModuleResource[] = [];

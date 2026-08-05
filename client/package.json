@@ -18,6 +18,9 @@
     "@perses-dev/spec": "0.2.0",
     "zod": "^3.21.4"
   },
+  "peerDependencies": {
+    "react": "^17.0.2 || ^18.0.0"
+  },
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
