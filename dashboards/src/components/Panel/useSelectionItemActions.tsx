@@ -14,6 +14,7 @@
 import { Box, CircularProgress } from '@mui/material';
 import { Dialog, InfoTooltip, useItemActions, useSelection } from '@perses-dev/components';
 import { ACTION_ICONS, executeAction, ItemAction, VariableStateMap } from '@perses-dev/plugin-system';
+import { useFetch } from '@perses-dev/client';
 import { ReactNode, useCallback, useMemo, useState } from 'react';
 import { HeaderIconButton } from './HeaderIconButton';
 
@@ -41,6 +42,7 @@ export function useSelectionItemActions<Id extends string | number = string>({
 }: UseItemActionsOptions): UseItemActionsResult<Id> {
   const { selectionMap } = useSelection();
   const { actionStatuses, setActionStatus } = useItemActions();
+  const { fetch } = useFetch();
   const [confirmState, setConfirmState] = useState<{
     open: boolean;
     action?: ItemAction;
@@ -56,6 +58,7 @@ export function useSelectionItemActions<Id extends string | number = string>({
           selectionMap: new Map<Id, Record<string, unknown>>([[item.id, item.data]]),
           variableState,
           setActionStatus,
+          fetchFn: fetch,
         });
       } else {
         await executeAction({
@@ -63,10 +66,11 @@ export function useSelectionItemActions<Id extends string | number = string>({
           selectionMap: selectionMap as Map<string | number, Record<string, unknown>>,
           variableState,
           setActionStatus,
+          fetchFn: fetch,
         });
       }
     },
-    [selectionMap, variableState, setActionStatus]
+    [selectionMap, variableState, setActionStatus, fetch]
   );
 
   const handleActionClick = useCallback(
