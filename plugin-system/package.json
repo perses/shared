@@ -31,15 +31,15 @@
     "@module-federation/enhanced": "^2.8.0",
     "@perses-dev/client": "0.54.0",
     "@perses-dev/components": "0.54.0",
-    "@perses-dev/core": "0.53.0",
+    "@perses-dev/core": "0.54.0",
     "@perses-dev/spec": "0.2.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
-    "immer": "^10.1.1",
+    "immer": "^11.1.15",
     "react-hook-form": "^7.46.1",
     "semver": "^7.8.0",
     "use-query-params": "^2.2.1",
-    "zod": "^3.25.76"
+    "zod": "^4.4.3"
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",
