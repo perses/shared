@@ -93,7 +93,7 @@ describe('TimeRangeControls', () => {
   it('should disable the refresh interval picker when disableAutoRefresh is enabled', () => {
     renderTimeRangeControls(false, true);
     const refreshIntervalPicker = screen.getByLabelText(/Select refresh interval/i);
-    expect(refreshIntervalPicker).toBeDisabled();
+    expect(refreshIntervalPicker).toHaveAttribute('aria-disabled', 'true');
     expect(screen.getByText('Off')).toBeInTheDocument();
   });
 

@@ -13,7 +13,7 @@
 
 import { useCallback, useState } from 'react';
 import { isRelativeTimeRange } from '@perses-dev/spec';
-import { useTimeRange, useTimeZoneParams, useDisableAutoRefreshSetting } from '@perses-dev/plugin-system';
+import { useTimeRange, useTimeZoneParams } from '@perses-dev/plugin-system';
 import { useVariableDefinitionActions } from '../VariableProvider/VariableProvider';
 import { useDashboard } from '../useDashboard';
 import { OnSaveDashboard } from './common';
@@ -49,7 +49,6 @@ export function useSaveDashboard(onSave?: OnSaveDashboard): SaveDashboardResult 
   const { dashboard, setDashboard } = useDashboard();
   const { setEditMode } = useEditMode();
   const { timeRange, refreshInterval } = useTimeRange();
-  const disableAutoRefresh = useDisableAutoRefreshSetting();
   const { timeZone } = useTimeZoneParams();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useVariableDefinitionActions();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
@@ -77,8 +76,7 @@ export function useSaveDashboard(onSave?: OnSaveDashboard): SaveDashboardResult 
     const { isSavedVariableModified } = getSavedVariablesStatus();
     const isSavedDurationModified =
       isRelativeTimeRange(timeRange) && dashboard.spec.duration !== timeRange.pastDuration;
-    const isSavedRefreshIntervalModified =
-      !disableAutoRefresh && dashboard.spec.refreshInterval !== refreshInterval;
+    const isSavedRefreshIntervalModified = dashboard.spec.refreshInterval !== refreshInterval;
     const isTimeZoneModified =
       timeZone === 'local' && !dashboard.spec.timezone ? false : dashboard.spec.timezone !== timeZone;
 
@@ -119,7 +117,6 @@ export function useSaveDashboard(onSave?: OnSaveDashboard): SaveDashboardResult 
     timeRange,
     dashboard,
     refreshInterval,
-    disableAutoRefresh,
     timeZone,
     getSavedVariablesStatus,
     openSaveChangesConfirmationDialog,

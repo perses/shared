@@ -231,8 +231,8 @@ export function TimeRangeControls({
                  HERE The value MUST always be pastDuration, otherwise the component would not work as expected.
               */
                   DEFAULT_REFRESH_INTERVAL_OPTIONS.some((i) => i.value.pastDuration === refreshInterval)
-                    ? refreshInterval
-                    : DEFAULT_REFRESH_INTERVAL_OPTIONS.find((i) => i.display === refreshInterval)?.value.pastDuration
+                  ? refreshInterval
+                  : DEFAULT_REFRESH_INTERVAL_OPTIONS.find((i) => i.display === refreshInterval)?.value.pastDuration
             }
             onChange={handleRefreshIntervalChange}
             height={height}

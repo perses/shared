@@ -113,9 +113,7 @@ export function TimeRangeSettingsProvider(props: TimeRangeSettingsProviderProps)
       showZoomButtons:
         props.showZoomButtons === undefined ? defaultTimeRangeSettings.showZoomButtons : props.showZoomButtons,
       disableAutoRefresh:
-        props.disableAutoRefresh === undefined
-          ? defaultTimeRangeSettings.disableAutoRefresh
-          : props.disableAutoRefresh,
+        props.disableAutoRefresh === undefined ? defaultTimeRangeSettings.disableAutoRefresh : props.disableAutoRefresh,
       options: props.options === undefined ? defaultTimeRangeSettings.options : props.options,
     };
   }, [props.showCustom, props.showZoomButtons, props.disableAutoRefresh, props.options]);
