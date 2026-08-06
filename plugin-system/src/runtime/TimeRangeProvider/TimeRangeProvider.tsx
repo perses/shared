@@ -94,7 +94,6 @@ export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
   const handleSetRefreshInterval = useCallback(
     (value: DurationString) => {
       if (disableAutoRefresh) {
-        setRefreshInterval(DISABLED_REFRESH_INTERVAL);
         return;
       }
       setRefreshInterval(value);
