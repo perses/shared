@@ -21,6 +21,7 @@ import { useDataQueriesContext, usePlugin } from '../../runtime';
 import { OptionsEditorTabs, OptionsEditorTabsProps } from '../OptionsEditorTabs';
 import { MultiQueryEditor } from '../MultiQueryEditor';
 import { PluginEditorRef } from '../PluginEditor';
+import { PanelAnnotationsEditor } from './PanelAnnotationsEditor';
 
 export interface PanelSpecEditorProps {
   control: Control<PanelEditorValues>;
@@ -50,7 +51,7 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
     throw new Error(`Missing implementation for panel plugin with kind '${kind}'`);
   }
 
-  const { panelOptionsEditorComponents, hideQueryEditor } = plugin as PanelPlugin;
+  const { panelOptionsEditorComponents, hideQueryEditor, supportsAnnotations } = plugin as PanelPlugin;
   let tabs: OptionsEditorTabsProps['tabs'] = [];
 
   if (!hideQueryEditor) {
@@ -105,6 +106,25 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
         ),
       }))
     );
+  }
+
+  // annotations are common to all panel plugins, but only shown for plugins that render them
+  if (supportsAnnotations) {
+    tabs.push({
+      label: 'Annotations',
+      content: (
+        <Controller
+          control={control}
+          name="panelDefinition.spec.annotations"
+          render={({ field }) => (
+            <PanelAnnotationsEditor
+              value={panelDefinition.spec.annotations ?? []}
+              onChange={(annotations) => field.onChange(annotations)}
+            />
+          )}
+        />
+      ),
+    });
   }
 
   // always show json editor and links editor by default
