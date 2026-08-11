@@ -28,6 +28,7 @@ export * from './EditJsonButton';
 export * from './EmptyDashboard';
 export * from './GridLayout';
 export * from './LeaveDialog';
+export * from './LockDashboardButton';
 export * from './Panel';
 export * from './PanelDrawer';
 export * from './PanelGroupDialog';
