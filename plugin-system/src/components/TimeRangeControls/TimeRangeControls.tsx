@@ -96,12 +96,9 @@ export function TimeRangeControls({
   // set the new refresh interval both in the dashboard context & as query param
   const handleRefreshIntervalChange = useCallback(
     (duration: DurationString) => {
-      if (isAutoRefreshDisabled) {
-        return;
-      }
       setRefreshInterval(duration);
     },
-    [isAutoRefreshDisabled, setRefreshInterval]
+    [setRefreshInterval]
   );
 
   const fromDurationToMillis = (strDuration: string): number => {
