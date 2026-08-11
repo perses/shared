@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/design-tokens",
-  "version": "0.54.0-beta.10",
+  "version": "0.54.0",
   "description": "Perses design tokens for ui components",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",

@@ -37,6 +37,7 @@ const statusRole = (role: StatusRole) =>
     text: `var(--perses-status-text-${role})`,
     border: `var(--perses-status-border-${role})`,
     icon: `var(--perses-status-icon-${role})`,
+    solid: `var(--perses-status-solid-${role})`,
   }) as const;
 
 export const tokens = {
@@ -72,6 +73,7 @@ export const tokens = {
     linkHover: 'var(--perses-text-link-hover)',
     navigation: 'var(--perses-text-navigation)',
     accent: 'var(--perses-text-accent)',
+    onSolid: 'var(--perses-text-on-solid)',
   },
 
   status: {

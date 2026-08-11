@@ -38,7 +38,8 @@ export type SemanticTextVar =
   | '--perses-text-link'
   | '--perses-text-link-hover'
   | '--perses-text-navigation'
-  | '--perses-text-accent';
+  | '--perses-text-accent'
+  | '--perses-text-on-solid';
 
 export type StatusRole = 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info';
 
@@ -49,6 +50,8 @@ export type StatusTextVar = `--perses-status-text-${StatusRole}`;
 export type StatusBorderVar = `--perses-status-border-${StatusRole}`;
 
 export type StatusIconVar = `--perses-status-icon-${StatusRole}`;
+
+export type StatusSolidVar = `--perses-status-solid-${StatusRole}`;
 
 export type SpacingScale = '0' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 
@@ -80,6 +83,7 @@ export type PersesTokenVar =
   | StatusTextVar
   | StatusBorderVar
   | StatusIconVar
+  | StatusSolidVar
   | SpacingVar
   | RadiusVar
   | FontVar;
