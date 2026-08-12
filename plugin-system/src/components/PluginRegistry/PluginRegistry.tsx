@@ -66,12 +66,19 @@ export function PluginRegistry(props: PluginRegistryProps): ReactElement {
   const getPlugin = useCallback(
     async <T extends PluginType>(compoundKeyObj: PluginCompoundKey<T>): Promise<PluginImplementation<T>> => {
       const pluginIndexes = await getPluginIndexes();
-      const { kind, name } = compoundKeyObj;
+      const { kind, name, version } = compoundKeyObj;
 
-      const candidateKeys = resolvePluginKeys(
+      let candidateKeys = resolvePluginKeys(
         pluginIndexes.pluginResourcesByNameKindRegistryVersion.keys(),
         compoundKeyObj,
       );
+
+      // When a specific version is pinned, enforce an exact match and do NOT silently fall back to another (e.g. the
+      // latest) version. resolvePluginKeys() always returns the exact-match key first when a version is provided, so we
+      // only keep that first candidate.
+      if (version) {
+        candidateKeys = candidateKeys.slice(0, 1);
+      }
 
       for (const resourceKey of candidateKeys) {
         const resource = pluginIndexes.pluginResourcesByNameKindRegistryVersion.get(resourceKey);
@@ -86,7 +93,11 @@ export function PluginRegistry(props: PluginRegistryProps): ReactElement {
         if (versionlessPlugin) return versionlessPlugin as PluginImplementation<T>;
       }
 
-      throw new Error(`A ${name} plugin for kind '${kind}' is not installed`);
+      throw new Error(
+        version
+          ? `A ${name} plugin for kind '${kind}' with version '${version}' is not installed`
+          : `A ${name} plugin for kind '${kind}' is not installed`
+      );
     },
     [getPluginIndexes, loadPluginModule],
   );

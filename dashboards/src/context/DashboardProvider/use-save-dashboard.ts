@@ -11,12 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useTimeRange, useTimeZoneParams, useDisableAutoRefreshSetting } from '@perses-dev/plugin-system';
+import { useTimeRange, useTimeZoneParams, useDisableAutoRefreshSetting, usePluginRegistry } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange } from '@perses-dev/spec';
 import { useCallback, useState } from 'react';
-
+import { useSnackbar } from '@perses-dev/components';
+import { useVariableDefinitionActions } from '../VariableProvider';
 import { useDashboard } from '../useDashboard';
-import { useVariableDefinitionActions } from '../VariableProvider/VariableProvider';
+import { buildAvailablePluginVersions, findInvalidPinnedVersions, PLUGIN_VERSIONING_TYPES } from '../../utils';
 import { OnSaveDashboard } from './common';
 import { useEditMode, useSaveChangesConfirmationDialog } from './dashboard-provider-api';
 import { SaveChangesConfirmationDialogOptions } from './save-changes-dialog-slice';
@@ -54,6 +55,8 @@ export function useSaveDashboard(onSave?: OnSaveDashboard): SaveDashboardResult 
   const { timeZone } = useTimeZoneParams();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useVariableDefinitionActions();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
+  const { listPluginMetadata } = usePluginRegistry();
+  const { exceptionSnackbar } = useSnackbar();
   const performSave = useCallback(async (): Promise<void> => {
     if (!onSave) {
       setEditMode(false);
@@ -62,13 +65,22 @@ export function useSaveDashboard(onSave?: OnSaveDashboard): SaveDashboardResult 
 
     try {
       setSaving(true);
+      // Validate that any pinned plugin version (plugin.metadata.version) actually exists in the registry before
+      // saving, so we never persist a dashboard referencing a plugin version that cannot be loaded.
+      const pluginMetadata = await listPluginMetadata(PLUGIN_VERSIONING_TYPES);
+      const invalidPins = findInvalidPinnedVersions(dashboard, buildAvailablePluginVersions(pluginMetadata));
+      if (invalidPins.length > 0) {
+        const details = invalidPins.map((pin) => `${pin.kind}@${pin.version}`).join(', ');
+        exceptionSnackbar(new Error(`Cannot save dashboard: pinned plugin version(s) not available: ${details}`));
+        return;
+      }
       await onSave(dashboard);
       closeSaveChangesConfirmationDialog();
       setEditMode(false);
     } finally {
       setSaving(false);
     }
-  }, [closeSaveChangesConfirmationDialog, dashboard, onSave, setEditMode]);
+  }, [closeSaveChangesConfirmationDialog, dashboard, onSave, setEditMode, listPluginMetadata, exceptionSnackbar]);
 
   const saveDashboard = useCallback((): void => {
     if (isSaving) {

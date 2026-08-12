@@ -200,3 +200,59 @@ export function isDashboardLocked(dashboard: DashboardResource): boolean {
   });
   return locked;
 }
+
+/**
+ * Build a map of plugin kind (e.g. "TimeSeriesChart") to the full set of versions currently available in the instance,
+ * based on the installed plugin metadata returned by the plugin registry.
+ */
+export function buildAvailablePluginVersions(pluginMetadata: PluginMetadataWithModule[]): Map<string, Set<string>> {
+  const versions = new Map<string, Set<string>>();
+  for (const metadata of pluginMetadata) {
+    const name = metadata.spec?.name;
+    const version = getPluginVersion(metadata);
+    if (!name || !version) {
+      continue;
+    }
+    let set = versions.get(name);
+    if (!set) {
+      set = new Set<string>();
+      versions.set(name, set);
+    }
+    set.add(version);
+  }
+  return versions;
+}
+
+/** A plugin definition pinned to a version that is not available in the registry. */
+export interface InvalidPinnedVersion {
+  kind: string;
+  version: string;
+}
+
+/**
+ * Return the list of plugin definitions in the dashboard that are pinned to a version which is not present in the
+ * provided set of available versions (built from the plugin registry). An empty result means every pin is valid.
+ */
+export function findInvalidPinnedVersions(
+  dashboard: DashboardResource,
+  availableVersions: Map<string, Set<string>>
+): InvalidPinnedVersion[] {
+  const invalid: InvalidPinnedVersion[] = [];
+  const seen = new Set<string>();
+  visitPluginDefinitions(dashboard, (definition) => {
+    const version = definition.metadata?.version;
+    if (!version) {
+      return;
+    }
+    const identity = `${definition.kind}@${version}`;
+    if (seen.has(identity)) {
+      return;
+    }
+    seen.add(identity);
+    const versions = availableVersions.get(definition.kind);
+    if (!versions || !versions.has(version)) {
+      invalid.push({ kind: definition.kind, version });
+    }
+  });
+  return invalid;
+}

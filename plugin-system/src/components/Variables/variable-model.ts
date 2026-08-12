@@ -21,6 +21,7 @@ import {
   useDatasourceStore,
   usePlugin,
   usePlugins,
+  getPluginOverrides,
   useTimeRange,
   VariableStateMap,
 } from '../../runtime';
@@ -95,7 +96,12 @@ function resolveDependsOnVariables(
 }
 
 export function useListVariablePluginValues(definition: ListVariableDefinition): UseQueryResult<VariableOption[]> {
-  const { data: variablePlugin } = usePlugin('Variable', definition.spec.plugin.kind);
+  const { data: variablePlugin } = usePlugin(
+    'Variable',
+    definition.spec.plugin.kind,
+    undefined,
+    getPluginOverrides(definition.spec.plugin)
+  );
 
   const variablePluginCtx = useVariablePluginContext();
 
@@ -138,7 +144,7 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
 
   const pluginResults = usePlugins(
     'Variable',
-    listVariables.map((d) => ({ kind: d.spec.plugin.kind })),
+    listVariables.map((d) => ({ kind: d.spec.plugin.kind, ...getPluginOverrides(d.spec.plugin) }))
   );
 
   // Resolved variable state. Updated by onFetched when queries resolve.

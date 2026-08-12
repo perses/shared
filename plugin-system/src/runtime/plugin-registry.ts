@@ -45,18 +45,64 @@ export function usePluginRegistry(): PluginRegistryContextType {
 
 // Allows consumers to pass useQuery options from react-query when loading a plugin
 type UsePluginOptions<T extends PluginType> = Omit<
-  UseQueryOptions<PluginImplementation<T>, Error, PluginImplementation<T>, [string, PluginType | undefined, string]>,
+  UseQueryOptions<
+    PluginImplementation<T>,
+    Error,
+    PluginImplementation<T>,
+    [string, PluginType | undefined, string, string, string]
+  >,
   'queryKey' | 'queryFn'
 >;
 
 /**
+ * Optional overrides used to pin a plugin to a specific version/registry when loading it. When omitted, the latest
+ * available version is resolved.
+ */
+export interface UsePluginOverrides {
+  version?: string;
+  registry?: string;
+}
+
+/**
+ * A plugin definition, as stored in a dashboard/datasource spec, that may carry pinned version/registry metadata. We
+ * describe `metadata` locally so this keeps compiling regardless of the installed `@perses-dev/spec` version.
+ */
+type PluginDefinitionLike =
+  | { kind?: string; spec?: unknown; metadata?: { version?: string; registry?: string } }
+  | undefined;
+
+/**
+ * Extract the pinned version/registry from a plugin definition's `metadata`, if any. Returns `undefined` when nothing
+ * is pinned so the plugin resolves to its latest available version.
+ */
+export function getPluginOverrides(plugin: PluginDefinitionLike): UsePluginOverrides | undefined {
+  const metadata = plugin?.metadata;
+  if (!metadata) {
+    return undefined;
+  }
+  // `latest` is a sentinel (see the Go plugin.LatestVersion constant) meaning "resolve the latest available version",
+  // so it must not be treated as an exact-version pin.
+  const version = metadata.version === 'latest' ? undefined : metadata.version;
+  const registry = metadata.registry;
+  if (version === undefined && registry === undefined) {
+    return undefined;
+  }
+  return { version, registry };
+}
+
+/**
  * Loads a plugin and returns the plugin implementation, along with loading/error state.
+ *
+ * When `overrides.version` is provided, the plugin is resolved with an exact version match: if that version is not
+ * installed, the query fails instead of silently falling back to the latest available version.
  */
 export function usePlugin<T extends PluginType>(
   pluginType: T | undefined,
   kind: string,
   options?: UsePluginOptions<T>,
+  overrides?: UsePluginOverrides,
 ): UseQueryResult<PluginImplementation<T>, Error> {
+  const { version, registry } = overrides ?? {};
   // We never want to ask for a plugin when the kind isn't set yet, so disable those queries automatically
   options = {
     ...options,
@@ -64,10 +110,19 @@ export function usePlugin<T extends PluginType>(
   };
   const { getPlugin } = usePluginRegistry();
   return useQuery({
-    queryKey: ['getPlugin', pluginType, kind],
-    queryFn: () => getPlugin({ kind: pluginType!, name: kind }),
+    queryKey: ['getPlugin', pluginType, kind, version ?? '', registry ?? ''],
+    queryFn: () => getPlugin({ kind: pluginType!, name: kind, version, registry }),
     ...options,
   });
+}
+
+/**
+ * A plugin reference to load, optionally pinned to a specific version/registry.
+ */
+export interface UsePluginsItem {
+  kind: string;
+  version?: string;
+  registry?: string;
 }
 
 /**
@@ -75,27 +130,37 @@ export function usePlugin<T extends PluginType>(
  */
 export function usePlugins<T extends PluginType>(
   pluginType: T,
-  plugins: Array<{ kind: string }>,
+  plugins: UsePluginsItem[],
 ): Array<UseQueryResult<PluginImplementation<T>>> {
   const { getPlugin } = usePluginRegistry();
 
-  // useQueries() does not support queries with duplicate keys, therefore we de-duplicate the plugin kinds before running useQueries()
+  // useQueries() does not support queries with duplicate keys, therefore we de-duplicate the plugins before running useQueries()
   // This resolves the following warning in the JS console: "[QueriesObserver]: Duplicate Queries found. This might result in unexpected behavior."
   // https://github.com/TanStack/query/issues/8224#issuecomment-2523554831
   // https://github.com/TanStack/query/issues/4187#issuecomment-1256336901
-  const kinds = [...new Set(plugins.map((p) => p.kind))];
+  // Plugins are de-duplicated on their full identity (kind + version + registry) so that two definitions pinned to
+  // different versions of the same kind are still loaded independently.
+  const identity = (p: UsePluginsItem): string => `${p.kind}:${p.version ?? ''}:${p.registry ?? ''}`;
+  const uniquePlugins = new Map<string, UsePluginsItem>();
+  for (const p of plugins) {
+    if (!uniquePlugins.has(identity(p))) {
+      uniquePlugins.set(identity(p), p);
+    }
+  }
+  const uniqueKeys = [...uniquePlugins.keys()];
+  const uniqueValues = [...uniquePlugins.values()];
 
   const result: Array<UseQueryResult<PluginImplementation<T>>> = useQueries({
-    queries: kinds.map((kind) => {
+    queries: uniqueValues.map((p) => {
       return {
-        queryKey: ['getPlugin', pluginType, kind],
-        queryFn: () => getPlugin({ kind: pluginType, name: kind }),
+        queryKey: ['getPlugin', pluginType, p.kind, p.version ?? '', p.registry ?? ''],
+        queryFn: () => getPlugin({ kind: pluginType, name: p.kind, version: p.version, registry: p.registry }),
       };
     }),
   });
 
   // Re-assemble array in original order
-  return plugins.map((p) => result[kinds.indexOf(p.kind)]!);
+  return plugins.map((p) => result[uniqueKeys.indexOf(identity(p))]!);
 }
 
 // Allow consumers to pass useQuery options from react-query when listing metadata

@@ -15,8 +15,10 @@ import { DashboardResource } from '@perses-dev/client';
 import { PluginMetadataWithModule } from '@perses-dev/plugin-system';
 import {
   applyPluginVersions,
+  buildAvailablePluginVersions,
   buildLatestPluginVersions,
   compareVersions,
+  findInvalidPinnedVersions,
   isDashboardLocked,
   removePluginVersions,
 } from './pluginVersioning';
@@ -172,5 +174,50 @@ describe('applyPluginVersions / removePluginVersions / isDashboardLocked', () =>
     expect((partial.spec.panels.panel1 as any).spec.plugin.metadata.version).toBe('1.0.0');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((partial.spec.datasources!.ds1 as any).plugin.metadata).toBeUndefined();
+  });
+});
+
+describe('buildAvailablePluginVersions / findInvalidPinnedVersions', () => {
+  const available = buildAvailablePluginVersions([
+    buildMetadata('Panel', 'TimeSeriesChart', '1.0.0'),
+    buildMetadata('Panel', 'TimeSeriesChart', '2.0.0'),
+    buildMetadata('TimeSeriesQuery', 'PrometheusTimeSeriesQuery', '1.1.0'),
+    buildMetadata('Variable', 'PrometheusLabelValuesVariable', '1.2.0'),
+    buildMetadata('Datasource', 'PrometheusDatasource', '1.3.0'),
+    buildMetadata('Annotation', 'TempoAnnotation', '1.4.0'),
+  ]);
+
+  test('collects every available version per plugin name', () => {
+    expect(available.get('TimeSeriesChart')).toEqual(new Set(['1.0.0', '2.0.0']));
+  });
+
+  test('no invalid pins when all pinned versions exist', () => {
+    const dashboard = applyPluginVersions(
+      buildDashboard(),
+      new Map<string, string>([
+        ['TimeSeriesChart', '2.0.0'],
+        ['PrometheusTimeSeriesQuery', '1.1.0'],
+        ['PrometheusLabelValuesVariable', '1.2.0'],
+        ['PrometheusDatasource', '1.3.0'],
+        ['TempoAnnotation', '1.4.0'],
+      ])
+    );
+    expect(findInvalidPinnedVersions(dashboard, available)).toEqual([]);
+  });
+
+  test('reports pins whose version is not available', () => {
+    const dashboard = applyPluginVersions(
+      buildDashboard(),
+      new Map<string, string>([
+        ['TimeSeriesChart', '99.0.0'], // not available
+        ['PrometheusTimeSeriesQuery', '1.1.0'], // available
+      ])
+    );
+    const invalid = findInvalidPinnedVersions(dashboard, available);
+    expect(invalid).toEqual([{ kind: 'TimeSeriesChart', version: '99.0.0' }]);
+  });
+
+  test('unpinned dashboards have no invalid pins', () => {
+    expect(findInvalidPinnedVersions(buildDashboard(), available)).toEqual([]);
   });
 });

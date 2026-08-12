@@ -16,7 +16,7 @@ import { useQueries, UseQueryResult } from '@tanstack/react-query';
 
 import { LogQueryResult } from '../model/log-queries';
 import { useDatasourceStore } from './datasources';
-import { usePluginRegistry } from './plugin-registry';
+import { usePluginRegistry, getPluginOverrides } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
 import { useVariableValues } from './variables';
 
@@ -47,7 +47,11 @@ export function useLogQueries(definitions: LogQueryDefinition[]): Array<UseQuery
         refetchOnReconnect: false,
         staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<LogQueryResult> => {
-          const plugin = await getPlugin({ kind: LOG_QUERY_KEY, name: logQueryKind });
+          const plugin = await getPlugin({
+            kind: LOG_QUERY_KEY,
+            name: logQueryKind,
+            ...getPluginOverrides(definition.spec.plugin),
+          });
           const data = await plugin.getLogData(definition.spec.plugin.spec, context, signal);
           return data;
         },

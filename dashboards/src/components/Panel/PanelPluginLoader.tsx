@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Skeleton } from '@mui/material';
-import { usePlugin, PanelProps } from '@perses-dev/plugin-system';
+import { usePlugin, PanelProps, getPluginOverrides } from '@perses-dev/plugin-system';
 import { UnknownSpec, QueryDataType } from '@perses-dev/spec';
 import { ReactElement } from 'react';
 
@@ -26,7 +26,12 @@ interface PanelPluginProps extends PanelProps<UnknownSpec, QueryDataType> {
  */
 export function PanelPluginLoader(props: PanelPluginProps): ReactElement {
   const { kind, spec, contentDimensions, definition, queryResults } = props;
-  const { data: plugin, isLoading: isPanelLoading } = usePlugin('Panel', kind, { useErrorBoundary: true });
+  const { data: plugin, isLoading: isPanelLoading } = usePlugin(
+    'Panel',
+    kind,
+    { useErrorBoundary: true },
+    getPluginOverrides(definition?.spec.plugin)
+  );
   const PanelComponent = plugin?.PanelComponent;
   const supportedQueryTypes = plugin?.supportedQueryTypes || [];
   // Clear out the queryResults parameter for plugins which don't support any query types

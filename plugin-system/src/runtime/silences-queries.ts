@@ -16,7 +16,7 @@ import { QueryKey, useQueries, UseQueryResult } from '@tanstack/react-query';
 
 import { SilencesQueryContext, SilencesQueryPlugin } from '../model';
 import { useDatasourceStore } from './datasources';
-import { usePluginRegistry, usePlugins } from './plugin-registry';
+import { usePluginRegistry, usePlugins, getPluginOverrides } from './plugin-registry';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
 import { useAllVariableValues } from './variables';
 
@@ -34,7 +34,7 @@ export function useSilencesQueries(definitions: SilencesQueryDefinition[]): Arra
 
   const pluginLoaderResponse = usePlugins(
     'SilencesQuery',
-    definitions.map((d) => ({ kind: d.spec.plugin.kind })),
+    definitions.map((d) => ({ kind: d.spec.plugin.kind, ...getPluginOverrides(d.spec.plugin) }))
   );
 
   return useQueries({
@@ -50,7 +50,11 @@ export function useSilencesQueries(definitions: SilencesQueryDefinition[]): Arra
         refetchOnReconnect: false,
         staleTime: 60_000,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<SilencesData> => {
-          const plugin = await getPlugin({ kind: SILENCES_QUERY_KEY, name: silencesQueryKind });
+          const plugin = await getPlugin({
+            kind: SILENCES_QUERY_KEY,
+            name: silencesQueryKind,
+            ...getPluginOverrides(definition.spec.plugin),
+          });
           const data = await plugin.getSilencesData(definition.spec.plugin.spec, context, signal);
           return data;
         },

@@ -25,6 +25,7 @@ import {
   useEvent,
   DatasourceClient,
   DatasourceSelectItem,
+  getPluginOverrides,
 } from '@perses-dev/plugin-system';
 import { DashboardSpec, DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
 import { ReactElement, ReactNode, useCallback, useMemo, useRef, useState } from 'react';
@@ -132,10 +133,9 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
   const getDatasourceClient = useCallback(
     async function getClient<Client extends DatasourceClient>(selector: DatasourceSelector): Promise<Client> {
       const { kind } = selector;
-      const [{ spec, proxyUrl }, plugin] = await Promise.all([
-        findDatasource(selector),
-        getPlugin({ kind: 'Datasource', name: kind }),
-      ]);
+      const { spec, proxyUrl } = await findDatasource(selector);
+      // Resolve the datasource plugin, honoring any version/registry pinned in the datasource spec.
+      const plugin = await getPlugin({ kind: 'Datasource', name: kind, ...getPluginOverrides(spec.plugin) });
 
       // allows extending client
       const client = plugin.createClient(spec.plugin.spec, { proxyUrl }) as Client;

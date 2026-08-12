@@ -16,7 +16,7 @@ import { QueryKey, useQueries, useQuery, UseQueryResult } from '@tanstack/react-
 
 import { AnnotationContext, AnnotationPlugin } from '../model';
 import { useDatasourceStore } from './datasources';
-import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
+import { usePlugin, usePluginRegistry, usePlugins, getPluginOverrides } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
 import { useAllVariableValues } from './variables';
@@ -74,7 +74,7 @@ export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryRes
 
   const pluginLoaderResponse = usePlugins(
     'Annotation',
-    definitions.map((d) => ({ kind: d.plugin.kind })),
+    definitions.map((d) => ({ kind: d.plugin.kind, ...getPluginOverrides(d.plugin) })),
   );
 
   // useQueries() handles data fetching from query plugins
@@ -91,7 +91,11 @@ export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryRes
         refetchOnReconnect: false,
         staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<AnnotationData[]> => {
-          const plugin = await getPlugin({ kind: ANNOTATION_KEY, name: annotationKind });
+          const plugin = await getPlugin({
+            kind: ANNOTATION_KEY,
+            name: annotationKind,
+            ...getPluginOverrides(definition.plugin),
+          });
           const data = await plugin.getAnnotationData(definition.plugin.spec, context, signal);
           return data;
         },
@@ -101,7 +105,12 @@ export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryRes
 }
 
 export function useAnnotationData(spec: AnnotationSpec): UseQueryResult<AnnotationData[]> {
-  const { data: annotationPlugin } = usePlugin('Annotation', spec.plugin.kind);
+  const { data: annotationPlugin } = usePlugin(
+    'Annotation',
+    spec.plugin.kind,
+    undefined,
+    getPluginOverrides(spec.plugin)
+  );
 
   const datasourceStore = useDatasourceStore();
   const allVariables = useAllVariableValues();
