@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactNode } from 'react';
 import { Box, SxProps, Theme } from '@mui/material';
+import { ReactNode } from 'react';
 
 export interface RepeatGridProps<T> {
   rows: T[][];

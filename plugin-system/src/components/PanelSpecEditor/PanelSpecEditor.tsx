@@ -18,11 +18,11 @@ import { Control, Controller } from 'react-hook-form';
 
 import { PanelEditorValues, PanelPlugin } from '../../model';
 import { useDataQueriesContext, usePlugin } from '../../runtime';
+import { LayoutEditor, PanelGroup, VariableDefinitionGroup } from '../LayoutEditor';
 import { LinksEditor } from '../LinksEditor';
 import { MultiQueryEditor } from '../MultiQueryEditor';
 import { OptionsEditorTabs, OptionsEditorTabsProps } from '../OptionsEditorTabs';
 import { PluginEditorRef } from '../PluginEditor';
-import { LayoutEditor, PanelGroup, VariableDefinitionGroup } from '../LayoutEditor';
 import { PanelAnnotationsEditor } from './PanelAnnotationsEditor';
 
 export interface PanelSpecEditorProps {

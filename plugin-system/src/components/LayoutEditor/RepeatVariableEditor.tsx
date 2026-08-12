@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback } from 'react';
 import { Grid2 as Grid, ListSubheader, MenuItem, TextField, Typography } from '@mui/material';
+import { ReactElement, useCallback } from 'react';
 import { ControllerRenderProps, FieldErrors } from 'react-hook-form';
-import { PanelEditorValues } from '../../model';
+
 import { DEFAULT_MAX_PER_ROW, DEFAULT_REPEAT_ALIGNMENT } from '../../constants';
+import { PanelEditorValues } from '../../model';
 import { VariableDefinitionGroup } from './LayoutEditor';
 
 type RepeatVariableValue = ControllerRenderProps<PanelEditorValues, 'layoutDefinition.repeatVariable'>['value'];
@@ -52,7 +53,7 @@ export function RepeatVariableEditor({
         }
       }
     },
-    [current, onChange, onRepeatVariableSet]
+    [current, onChange, onRepeatVariableSet],
   );
 
   const handleAlignmentChange = useCallback(
@@ -61,10 +62,10 @@ export function RepeatVariableEditor({
       onChange(
         selected === 'vertical'
           ? { ...current, alignment: selected, maxPer: undefined }
-          : { ...current, alignment: selected }
+          : { ...current, alignment: selected },
       );
     },
-    [current, onChange]
+    [current, onChange],
   );
 
   const handleMaxPerChange = useCallback(
@@ -72,7 +73,7 @@ export function RepeatVariableEditor({
       if (!current) return;
       onChange({ ...current, maxPer: value === '' ? undefined : Number(value) });
     },
-    [current, onChange]
+    [current, onChange],
   );
 
   return (
@@ -92,7 +93,7 @@ export function RepeatVariableEditor({
             <Typography sx={{ fontStyle: 'italic' }}>None</Typography>
           </MenuItem>
           {variableDefinitionGroups.flatMap(({ source, definitions }) => {
-            const listDefs = definitions.filter((def) => def.kind === 'ListVariable');
+            const listDefs = definitions.filter((def) => def.kind === 'ListVariable' && def.spec.allowMultiple);
             if (listDefs.length === 0) return [];
             return [
               source && <ListSubheader key={`group-${source}`}>{source}</ListSubheader>,

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { VariableStateMap } from '@perses-dev/plugin-system';
+
 import { PanelGroupItemLayout, RepeatVariable } from '../model';
 import {
   buildRepeatMeta,
@@ -41,15 +42,15 @@ describe('getRepeatVariableValues', () => {
     expect(getRepeatVariableValues(repeatVariable, variables)).toEqual(['us-east']);
   });
 
-  test('falls back to options when selection is empty array', () => {
+  test('returns empty array when selection is empty array', () => {
     const variablesWithEmptySelection: VariableStateMap = {
       env: { value: [], options: [{ value: 'prod', label: 'prod' }], loading: false },
     };
     const repeatVariable: RepeatVariable = { value: 'env', alignment: 'horizontal' };
-    expect(getRepeatVariableValues(repeatVariable, variablesWithEmptySelection)).toEqual(['prod']);
+    expect(getRepeatVariableValues(repeatVariable, variablesWithEmptySelection)).toEqual([]);
   });
 
-  test('falls back to options when all values are selected', () => {
+  test('returns all values when all values are selected', () => {
     const repeatVariable: RepeatVariable = { value: 'env', alignment: 'horizontal' };
     expect(getRepeatVariableValues(repeatVariable, variables)).toEqual(['prod', 'staging', 'dev']);
   });
@@ -70,6 +71,16 @@ describe('getRepeatVariableValues', () => {
     expect(getRepeatVariableValues(repeatVariable, variables, ['env', 'staging'])).toEqual(['staging']);
   });
 
+  test('groupRepeatVariable pins value even when it is not in the current selection', () => {
+    const variablesWithNarrowSelection: VariableStateMap = {
+      env: makeVariableState(['prod', 'staging', 'dev'], ['prod']),
+    };
+    const repeatVariable: RepeatVariable = { value: 'env', alignment: 'horizontal' };
+    expect(getRepeatVariableValues(repeatVariable, variablesWithNarrowSelection, ['env', 'staging'])).toEqual([
+      'staging',
+    ]);
+  });
+
   test('ignores groupRepeatVariable when variable does not match', () => {
     const repeatVariable: RepeatVariable = { value: 'env', alignment: 'horizontal' };
     expect(getRepeatVariableValues(repeatVariable, variables, ['region', 'us-east'])).toEqual([
@@ -77,6 +88,22 @@ describe('getRepeatVariableValues', () => {
       'staging',
       'dev',
     ]);
+  });
+
+  test('returns empty array when variableState.value is undefined and options exist', () => {
+    const variablesWithUndefinedValue: VariableStateMap = {
+      env: { value: undefined as unknown as string[], options: [{ value: 'prod', label: 'prod' }], loading: false },
+    };
+    const repeatVariable: RepeatVariable = { value: 'env', alignment: 'horizontal' };
+    expect(getRepeatVariableValues(repeatVariable, variablesWithUndefinedValue)).toEqual([]);
+  });
+
+  test('returns empty array when variableState.value is a string (single-value variable)', () => {
+    const variablesWithStringValue: VariableStateMap = {
+      env: { value: 'prod' as unknown as string[], loading: false },
+    };
+    const repeatVariable: RepeatVariable = { value: 'env', alignment: 'horizontal' };
+    expect(getRepeatVariableValues(repeatVariable, variablesWithStringValue)).toEqual([]);
   });
 });
 

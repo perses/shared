@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo } from 'react';
 import { Grid2 as Grid, MenuItem, TextField, Typography } from '@mui/material';
+import { ReactElement, useMemo } from 'react';
 import { Control, Controller, useFormContext, useWatch } from 'react-hook-form';
+
+import { DEFAULT_MAX_PER_ROW, DEFAULT_REPEAT_ALIGNMENT } from '../../constants';
 import { PanelEditorValues } from '../../model';
 import { VariableDefinitionGroup } from '../../model/variables';
 import { useVariableValues } from '../../runtime';
-import { DEFAULT_MAX_PER_ROW, DEFAULT_REPEAT_ALIGNMENT } from '../../constants';
 import { RepeatLayoutPreview } from './RepeatLayoutPreview';
 import { RepeatVariableEditor } from './RepeatVariableEditor';
 

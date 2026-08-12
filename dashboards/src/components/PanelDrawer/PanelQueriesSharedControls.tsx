@@ -27,8 +27,8 @@ import { AnnotationSpec, Definition, PanelDefinition, QueryDefinition, UnknownSp
 import { ReactElement, useCallback, useContext, useMemo, useState } from 'react';
 import { Control, useWatch } from 'react-hook-form';
 
-import { useAllVariableDefinitions } from '../../context/VariableProvider';
 import { useListPanelGroups } from '../../context';
+import { useAllVariableDefinitions } from '../../context/VariableProvider';
 
 export interface PanelQueriesSharedControlsProps {
   control: Control<PanelEditorValues>;

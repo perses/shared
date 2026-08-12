@@ -168,7 +168,7 @@ export function useAllVariableDefinitions(): VariableDefinitionGroup[] {
       const groups: VariableDefinitionGroup[] = [];
 
       const dashboardDefinitions = s.variableDefinitions.filter(
-        (v) => !s.variableState.get({ name: v.spec.name })?.overridden
+        (v) => !s.variableState.get({ name: v.spec.name })?.overridden,
       );
       if (dashboardDefinitions.length > 0) {
         groups.push({ source: undefined, definitions: dashboardDefinitions });
@@ -176,7 +176,7 @@ export function useAllVariableDefinitions(): VariableDefinitionGroup[] {
 
       [...s.externalVariableDefinitions].forEach((def) => {
         const definitions = def.definitions.filter(
-          (v) => !s.variableState.get({ name: v.spec.name, source: def.source })?.overridden
+          (v) => !s.variableState.get({ name: v.spec.name, source: def.source })?.overridden,
         );
         if (definitions.length > 0) {
           groups.push({ source: def.source, definitions });
@@ -185,7 +185,7 @@ export function useAllVariableDefinitions(): VariableDefinitionGroup[] {
 
       return groups;
     },
-    shallow
+    shallow,
   );
 }
 

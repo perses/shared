@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactNode, useMemo } from 'react';
-import { PanelGroupId, useVariableValues, VariableContext } from '@perses-dev/plugin-system';
 import { Box } from '@mui/material';
 import { RepeatGrid } from '@perses-dev/components';
+import { PanelGroupId, useVariableValues, VariableContext } from '@perses-dev/plugin-system';
+import { ReactNode, useMemo } from 'react';
+
 import { calcPerPanelWidth } from '../../utils/repeatLayoutUtils';
 import { PanelOptions } from '../Panel/Panel';
 import { GridItemContent } from './GridItemContent';
@@ -40,7 +41,7 @@ function getRepeatPanelTooltip(
   isEditMode: boolean,
   isCapped: boolean | undefined,
   repeatVariableName: string,
-  value: string
+  value: string,
 ): string | undefined {
   if (!isFirst && isEditMode) {
     return `This panel is generated from the variable "${repeatVariableName}" with the value "${value}". To change panel definition, please edit the first panel.`;

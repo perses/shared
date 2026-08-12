@@ -11,19 +11,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Layout, Layouts } from 'react-grid-layout';
 import { DEFAULT_MAX_PER_ROW, DEFAULT_REPEAT_ALIGNMENT, VariableStateMap } from '@perses-dev/plugin-system';
-import { DEFAULT_MARGIN, ROW_HEIGHT } from '@perses-dev/dashboards';
+import { Layout, Layouts } from 'react-grid-layout';
+
+import { DEFAULT_MARGIN, ROW_HEIGHT } from '../constants';
 import { PanelGroupItemLayout, RepeatVariable } from '../model';
 
 /**
  * Resolves the list of string values for a repeat variable given the current variable state map.
- * Returns the currently selected values, falling back to all options when nothing is selected.
+ * When groupRepeatVariable matches, returns only that pinned value.
+ * Returns selected values when the selection is a non-empty array, otherwise returns empty array.
  */
 export function getRepeatVariableValues(
   repeatVariable: RepeatVariable,
   variableValues: VariableStateMap,
-  groupRepeatVariable?: [string, string]
+  groupRepeatVariable?: [string, string],
 ): string[] {
   const variableState = variableValues[repeatVariable.value];
   if (!variableState) {
@@ -35,7 +37,7 @@ export function getRepeatVariableValues(
   if (Array.isArray(variableState.value) && variableState.value.length > 0) {
     return variableState.value;
   }
-  return variableState.options?.map((option) => option.value) ?? [];
+  return [];
 }
 
 /**
@@ -99,7 +101,7 @@ export function restoreRepeatItemLayout(layout: PanelGroupItemLayout, meta: Repe
 export function restoreRepeatLayouts(
   currentLayout: Layout[],
   allLayouts: Layouts,
-  repeatMeta: Map<string, RepeatItemMeta>
+  repeatMeta: Map<string, RepeatItemMeta>,
 ): { currentLayout: PanelGroupItemLayout[]; allLayouts: Layouts } {
   const restore = (layout: Layout): PanelGroupItemLayout => {
     const meta = repeatMeta.get(layout.i);
@@ -120,7 +122,7 @@ export function buildRepeatMeta(
   itemLayouts: PanelGroupItemLayout[],
   variableValues: VariableStateMap,
   groupRepeatVariable?: [string, string],
-  maxValues?: number
+  maxValues?: number,
 ): { expandedItemLayouts: PanelGroupItemLayout[]; repeatMeta: Map<string, RepeatItemMeta> } {
   const repeatMeta = new Map<string, RepeatItemMeta>();
   const expandedItemLayouts = itemLayouts.map((itemLayout) => {

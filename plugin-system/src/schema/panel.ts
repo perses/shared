@@ -23,7 +23,7 @@ const layoutDefinitionSchema = z
     repeatVariable: z
       .object({
         value: z.string(),
-        maxPer: z.number().optional(),
+        maxPer: z.number().min(1).max(12).optional(),
         alignment: z.enum(['horizontal', 'vertical']).optional(),
       })
       .optional(),

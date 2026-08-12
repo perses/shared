@@ -16,17 +16,14 @@ import { useVariableValues, PanelGroupId } from '@perses-dev/plugin-system';
 import { ReactElement, useEffect, useMemo, useState } from 'react';
 import { Layout, Layouts, Responsive, WidthProvider } from 'react-grid-layout';
 
-import { GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
+import { DEFAULT_MARGIN, GRID_LAYOUT_COLS, GRID_LAYOUT_SMALL_BREAKPOINT, ROW_HEIGHT } from '../../constants';
+import { useRepeatVariableMaxValues, useViewPanelGroup } from '../../context';
 import { PanelGroupDefinition, PanelGroupItemLayout } from '../../model';
 import { buildRepeatMeta, restoreRepeatLayouts } from '../../utils';
-import { useRepeatVariableMaxValues, useViewPanelGroup } from '../../context';
 import { PanelOptions } from '../Panel/Panel';
 import { GridContainer } from './GridContainer';
 import { GridItemRenderer } from './GridItemRenderer';
 import { GridTitle } from './GridTitle';
-
-export const DEFAULT_MARGIN = 10;
-export const ROW_HEIGHT = 30;
 
 export interface RowProps {
   panelGroupId: PanelGroupId;
@@ -70,9 +67,9 @@ export function Row({
         groupDefinition.itemLayouts,
         variableValues,
         repeatVariable,
-        repeatVariableMaxValues || undefined
+        repeatVariableMaxValues || undefined,
       ),
-    [groupDefinition.itemLayouts, repeatVariable, variableValues, repeatVariableMaxValues]
+    [groupDefinition.itemLayouts, repeatVariable, variableValues, repeatVariableMaxValues],
   );
 
   const hasViewPanel =

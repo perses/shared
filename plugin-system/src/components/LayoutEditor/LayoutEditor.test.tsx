@@ -13,17 +13,18 @@
 
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FormProvider, useForm } from 'react-hook-form';
 import { ReactElement } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+
 import { PanelEditorValues } from '../../model';
-import { renderWithContext } from '../../test';
 import { VariableContext } from '../../runtime';
+import { renderWithContext } from '../../test';
 import { LayoutEditor, LayoutEditorProps } from './LayoutEditor';
 
 describe('LayoutEditor', () => {
   const renderComponent = (
     props: Omit<LayoutEditorProps, 'control'>,
-    defaultValues?: Partial<PanelEditorValues>
+    defaultValues?: Partial<PanelEditorValues>,
   ): void => {
     const Component = (): ReactElement => {
       const form = useForm<PanelEditorValues>({ defaultValues });
@@ -46,7 +47,7 @@ describe('LayoutEditor', () => {
     expect(screen.getByLabelText('Max Per Row')).toBeInTheDocument();
   });
 
-  it('should only show list variables in the repeat variable dropdown', async () => {
+  it('should only show list variables with allowMultiple in the repeat variable dropdown', async () => {
     renderComponent({
       variableDefinitionGroups: [
         {
@@ -55,6 +56,15 @@ describe('LayoutEditor', () => {
               kind: 'ListVariable',
               spec: {
                 name: 'env',
+                allowMultiple: true,
+                allowAllValue: false,
+                plugin: { kind: 'StaticListVariable', spec: { values: [] } },
+              },
+            },
+            {
+              kind: 'ListVariable',
+              spec: {
+                name: 'region',
                 allowMultiple: false,
                 allowAllValue: false,
                 plugin: { kind: 'StaticListVariable', spec: { values: [] } },
@@ -69,6 +79,7 @@ describe('LayoutEditor', () => {
     await userEvent.click(await screen.findByLabelText('Repeat Variable'));
 
     expect(await screen.findByRole('option', { name: 'env' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'region' })).not.toBeInTheDocument();
     expect(screen.queryByRole('option', { name: 'search' })).not.toBeInTheDocument();
   });
 
