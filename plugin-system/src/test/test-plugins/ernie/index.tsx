@@ -81,8 +81,32 @@ const ErnieDatasource: DatasourcePlugin<ErnieDatasourceSpec> = {
   },
 };
 
+const ErnieDatasourceNoHealthCheck: DatasourcePlugin<ErnieDatasourceSpec> = {
+  createClient: () => ({}),
+  createInitialOptions: () => ({}),
+  OptionsEditorComponent: function ErnieDatasourceNoHealthCheckEditor({
+    value,
+    onChange,
+    testConnection,
+  }: DatasourceEditorProps<ErnieDatasourceSpec>) {
+    return (
+      <div>
+        <label htmlFor="datasource-url">ErnieDatasourceNoHealthCheck editor</label>
+        <input
+          type="text"
+          id="datasource-url"
+          value={value.url ?? ''}
+          onChange={(e) => onChange({ ...value, url: e.target.value })}
+        />
+        {testConnection && <button onClick={testConnection}>test-connection-trigger</button>}
+      </div>
+    );
+  },
+};
+
 export const plugins = {
   'Variable:ErnieVariable1::1.0.0': ErnieVariable1,
   'Variable:ErnieVariable2::1.0.0': ErnieVariable2,
   'Datasource:ErnieDatasource::1.0.0': ErnieDatasource,
+  'Datasource:ErnieDatasourceNoHealthCheck::1.0.0': ErnieDatasourceNoHealthCheck,
 };

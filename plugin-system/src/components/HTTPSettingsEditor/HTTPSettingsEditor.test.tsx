@@ -519,7 +519,7 @@ describe('HTTPSettingsEditor - Test Connection', () => {
   const renderWithTestConnection = (
     value: HTTPDatasourceSpec,
     testConnection?: () => Promise<void>,
-    onChange = jest.fn()
+    onChange = jest.fn(),
   ): ReturnType<typeof render> => {
     const Wrapper = (): ReactElement => {
       const methods = useForm();

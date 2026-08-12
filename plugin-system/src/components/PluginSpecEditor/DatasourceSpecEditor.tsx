@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSpec, HTTPProxy, UnknownSpec } from '@perses-dev/spec';
-import { ReactElement, useMemo } from 'react';
+import { hasHTTPProxy } from '@perses-dev/client';
+import { DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
 import { produce } from 'immer';
+import { ReactElement, useMemo } from 'react';
+
 import { DatasourcePlugin, OptionsEditorProps } from '../../model';
 
 export interface DatasourceSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
@@ -24,14 +26,6 @@ export interface DatasourceSpecEditorProps extends OptionsEditorProps<UnknownSpe
 
 function escapeRegExp(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
-function hasHTTPProxy(spec: UnknownSpec): spec is { proxy: HTTPProxy } {
-  return isRecord(spec) && isRecord(spec['proxy']) && spec['proxy']['kind'] === 'HTTPProxy';
 }
 
 export function DatasourceSpecEditor({

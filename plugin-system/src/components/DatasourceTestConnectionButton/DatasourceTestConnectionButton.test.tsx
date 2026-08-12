@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { SnackbarContext } from '@perses-dev/components';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { SnackbarContext } from '@perses-dev/components';
+
 import { DatasourceTestConnectionButton } from './DatasourceTestConnectionButton';
 
 const mockSuccessSnackbar = jest.fn();
@@ -90,7 +91,7 @@ describe('DatasourceTestConnectionButton', () => {
       () =>
         new Promise<void>((res) => {
           resolve = res;
-        })
+        }),
     );
     render(<DatasourceTestConnectionButton testConnection={mockTestConnection} />);
 

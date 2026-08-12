@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
-import { buildProxyUrl, createTestDatasourceConnection } from './datasource-api';
+
+import { buildProxyUrl, createTestDatasourceConnection, hasHTTPProxy } from './datasource-api';
 
 describe('buildProxyUrl', () => {
   beforeEach(() => {
@@ -56,7 +57,7 @@ describe('buildProxyUrl', () => {
 
   it('should URL-encode special characters in project, dashboard, and name', () => {
     expect(buildProxyUrl({ project: 'my project', dashboard: 'my/dashboard', name: 'my datasource' })).toEqual(
-      '/proxy/projects/my%20project/dashboards/my%2Fdashboard/datasources/my%20datasource'
+      '/proxy/projects/my%20project/dashboards/my%2Fdashboard/datasources/my%20datasource',
     );
   });
 
@@ -68,6 +69,40 @@ describe('buildProxyUrl', () => {
   it('should use empty prefix when api_prefix is absent', () => {
     window.PERSES_APP_CONFIG = {};
     expect(buildProxyUrl({ name: 'datasourceA' })).toEqual('/proxy/globaldatasources/datasourceA');
+  });
+});
+
+describe('hasHTTPProxy', () => {
+  it('returns true for a valid HTTPProxy spec', () => {
+    expect(hasHTTPProxy({ proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090' } } })).toBe(true);
+  });
+
+  it('returns false when proxy kind is not HTTPProxy', () => {
+    expect(hasHTTPProxy({ proxy: { kind: 'SQLProxy', spec: { url: 'http://localhost:9090' } } })).toBe(false);
+  });
+
+  it('returns false when proxy spec url is missing', () => {
+    expect(hasHTTPProxy({ proxy: { kind: 'HTTPProxy', spec: {} } })).toBe(false);
+  });
+
+  it('returns false when proxy spec url is not a string', () => {
+    expect(hasHTTPProxy({ proxy: { kind: 'HTTPProxy', spec: { url: 9090 } } })).toBe(false);
+  });
+
+  it('returns false when proxy is not an object', () => {
+    expect(hasHTTPProxy({ proxy: 'HTTPProxy' })).toBe(false);
+  });
+
+  it('returns false when proxy is absent', () => {
+    expect(hasHTTPProxy({ directUrl: 'http://localhost:9090' })).toBe(false);
+  });
+
+  it('returns false for an empty spec', () => {
+    expect(hasHTTPProxy({})).toBe(false);
+  });
+
+  it('returns false for a non-object spec', () => {
+    expect(hasHTTPProxy('not-an-object' as unknown as UnknownSpec)).toBe(false);
   });
 });
 
@@ -99,7 +134,7 @@ describe('createTestDatasourceConnection', () => {
       });
     });
 
-    it('does not produce a double slash when directUrl ends with a trailing slash', async () => {
+    it('resolves correctly when directUrl has a trailing slash', async () => {
       mockFetch.mockResolvedValue({ ok: true });
       const testConnection = createTestDatasourceConnection();
       const spec = makeSpec({ directUrl: 'http://localhost:9090/' });
@@ -121,6 +156,13 @@ describe('createTestDatasourceConnection', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining('/api/v1/query'), expect.anything());
     });
+
+    it('throws when directUrl is not a valid URL', async () => {
+      const testConnection = createTestDatasourceConnection();
+      const spec = makeSpec({ directUrl: 'not-a-valid-url' });
+
+      await expect(testConnection(spec, '/health')).rejects.toThrow();
+    });
   });
 
   describe('proxy mode', () => {
@@ -133,7 +175,7 @@ describe('createTestDatasourceConnection', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/proxy/unsaved/globaldatasources/api/v1/query',
-        expect.objectContaining({ method: 'POST' })
+        expect.objectContaining({ method: 'POST' }),
       );
     });
 
@@ -146,7 +188,7 @@ describe('createTestDatasourceConnection', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/proxy/unsaved/projects/myProject/datasources/api/v1/query',
-        expect.objectContaining({ method: 'POST' })
+        expect.objectContaining({ method: 'POST' }),
       );
     });
 
@@ -159,7 +201,7 @@ describe('createTestDatasourceConnection', () => {
 
       expect(mockFetch).toHaveBeenCalledWith(
         '/proxy/unsaved/projects/myProject/dashboards/myDashboard/datasources/api/v1/query',
-        expect.objectContaining({ method: 'POST' })
+        expect.objectContaining({ method: 'POST' }),
       );
     });
 

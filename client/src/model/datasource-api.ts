@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DatasourceSpec, HTTPDatasourceSpec } from '@perses-dev/spec';
+import { DatasourceSpec, HTTPProxy, UnknownSpec } from '@perses-dev/spec';
+
 import { fetch } from '../util';
 import { DatasourceResource, DatasourceSelector, GlobalDatasourceResource } from './datasource';
 
@@ -50,7 +51,7 @@ interface UnsavedDatasourceProxyBody {
   spec: DatasourceSpec;
 }
 
-function hasDirectUrl(pluginSpec: unknown): pluginSpec is { directUrl: string } {
+function hasDirectUrl(pluginSpec: UnknownSpec): pluginSpec is { directUrl: string } {
   return (
     typeof pluginSpec === 'object' &&
     pluginSpec !== null &&
@@ -58,14 +59,19 @@ function hasDirectUrl(pluginSpec: unknown): pluginSpec is { directUrl: string } 
   );
 }
 
-function hasHTTPProxy(
-  pluginSpec: unknown
-): pluginSpec is HTTPDatasourceSpec & { proxy: NonNullable<HTTPDatasourceSpec['proxy']> } {
-  if (typeof pluginSpec !== 'object' || pluginSpec === null) return false;
-  const proxy = (pluginSpec as Record<string, unknown>)['proxy'];
-  return typeof proxy === 'object' && proxy !== null;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
 }
 
+export function hasHTTPProxy(spec: UnknownSpec): spec is { proxy: HTTPProxy } {
+  return (
+    isRecord(spec) &&
+    isRecord(spec['proxy']) &&
+    spec['proxy']['kind'] === 'HTTPProxy' &&
+    isRecord(spec['proxy']['spec']) &&
+    typeof spec['proxy']['spec']['url'] === 'string'
+  );
+}
 /**
  * Creates a function that tests connectivity for an unsaved datasource.
  * Supports directUrl (direct mode) and HTTPProxy (proxy mode).
@@ -73,14 +79,14 @@ function hasHTTPProxy(
  */
 export function createTestDatasourceConnection({ project, dashboard }: { project?: string; dashboard?: string } = {}): (
   spec: DatasourceSpec,
-  healthCheckPath: string
+  healthCheckPath: string,
 ) => Promise<void> {
   return async (spec: DatasourceSpec, healthCheckPath: string): Promise<void> => {
     const normalizedPath = healthCheckPath.startsWith('/') ? healthCheckPath : `/${healthCheckPath}`;
     const pluginSpec = spec.plugin.spec;
 
     if (hasDirectUrl(pluginSpec)) {
-      await fetch(`${pluginSpec.directUrl.replace(/\/$/, '')}${normalizedPath}`, {
+      await fetch(new URL(normalizedPath, pluginSpec.directUrl).toString(), {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });

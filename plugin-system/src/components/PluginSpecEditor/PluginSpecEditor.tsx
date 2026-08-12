@@ -13,9 +13,8 @@
 
 import { CircularProgress, Stack } from '@mui/material';
 import { ErrorAlert } from '@perses-dev/components';
-import { DatasourceSpec, UnknownSpec, HTTPProxy } from '@perses-dev/spec';
-import { ReactElement, useMemo } from 'react';
-import { produce } from 'immer';
+import { DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
+import { ReactElement } from 'react';
 
 import { DatasourcePlugin, OptionsEditorProps, Plugin, PluginType } from '../../model';
 import { usePlugin } from '../../runtime';
@@ -30,7 +29,7 @@ export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
 
 function isDatasourcePlugin(
   pluginType: PluginType,
-  plugin: Plugin<UnknownSpec>
+  plugin: Plugin<UnknownSpec>,
 ): plugin is DatasourcePlugin<UnknownSpec> {
   return pluginType === 'Datasource' && 'createClient' in plugin;
 }

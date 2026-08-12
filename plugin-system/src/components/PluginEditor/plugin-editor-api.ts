@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { BoxProps } from '@mui/material';
-import { DatasourceSpec,  UnknownSpec } from '@perses-dev/spec';
+import { DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
 import { produce } from 'immer';
 import { useState, useRef, useEffect } from 'react';
 

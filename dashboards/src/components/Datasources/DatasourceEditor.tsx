@@ -50,7 +50,7 @@ export function DatasourceEditor(props: {
         project: dashboard.metadata.project,
         dashboard: dashboard.metadata.name,
       }),
-    [dashboard.metadata.project, dashboard.metadata.name]
+    [dashboard.metadata.project, dashboard.metadata.name],
   );
   const defaultSpec: DatasourceSpec = {
     default: false,

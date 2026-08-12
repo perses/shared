@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DatasourceSpec } from '@perses-dev/spec';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DatasourceSpec } from '@perses-dev/spec';
 
 import { renderWithContext } from '../../test';
 import { PluginSpecEditor, PluginSpecEditorProps } from './PluginSpecEditor';
@@ -76,12 +76,12 @@ describe('PluginSpecEditor - boundTestConnection', () => {
   it('does not pass testConnection when plugin has no healthCheckPath', async () => {
     const testConnection = jest.fn();
     renderComponent({
-      pluginSelection: { type: 'Variable', kind: 'ErnieVariable1' },
+      pluginSelection: { type: 'Datasource', kind: 'ErnieDatasourceNoHealthCheck' },
       value: {},
       onChange: jest.fn(),
       testConnection,
     });
-    await screen.findByLabelText('ErnieVariable editor');
+    await screen.findByLabelText('ErnieDatasourceNoHealthCheck editor');
     expect(screen.queryByRole('button', { name: 'test-connection-trigger' })).not.toBeInTheDocument();
   });
 
@@ -115,7 +115,7 @@ describe('PluginSpecEditor - boundTestConnection', () => {
           default: false,
           plugin: { kind: 'ErnieDatasource', spec: pluginSpec },
         }),
-        '/api/v1/query'
+        '/api/v1/query',
       );
     });
   });
