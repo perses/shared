@@ -272,7 +272,7 @@ describe('Panel', () => {
     expect(panel).toHaveTextContent('Extra content');
   });
 
-  it('should not render extra panel content when not in edit mode', async () => {
+  it('should not render extra panel content when in edit mode', async () => {
     const onEditPanelClick = jest.fn();
     const onDeletePanelClick = jest.fn();
     const onDuplicatePanelClick = jest.fn();
