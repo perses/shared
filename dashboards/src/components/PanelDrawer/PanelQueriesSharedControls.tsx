@@ -21,7 +21,7 @@ import {
   usePlugin,
   useSuggestedStepMs,
 } from '@perses-dev/plugin-system';
-import { Definition, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
+import { AnnotationSpec, Definition, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { Control } from 'react-hook-form';
 import { ReactElement, useCallback, useContext, useMemo, useState } from 'react';
 
@@ -31,6 +31,7 @@ export interface PanelQueriesSharedControlsProps {
   panelDefinition: PanelDefinition;
   onQueriesChange: (queries: QueryDefinition[]) => void;
   onPluginSpecChange: (spec: UnknownSpec) => void;
+  onAnnotationsChange: (annotations: AnnotationSpec[]) => void;
   onJSONChange: (panelDefinitionStr: string) => void;
 }
 
@@ -42,6 +43,7 @@ export function PanelQueriesSharedControls({
   panelDefinition,
   onQueriesChange,
   onPluginSpecChange,
+  onAnnotationsChange,
   onJSONChange,
 }: PanelQueriesSharedControlsProps): ReactElement {
   const { data: pluginPreview } = usePlugin('Panel', plugin.kind);
@@ -98,6 +100,7 @@ export function PanelQueriesSharedControls({
             onQueriesChange={handleOnQueriesChange}
             onQueryRun={handleRunQuery}
             onPluginSpecChange={onPluginSpecChange}
+            onAnnotationsChange={onAnnotationsChange}
           />
         </ErrorBoundary>
       </Grid>

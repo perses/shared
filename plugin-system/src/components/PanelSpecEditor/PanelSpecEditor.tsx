@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { ErrorAlert, JSONEditor } from '@perses-dev/components';
-import { PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
+import { AnnotationSpec, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { Control, Controller } from 'react-hook-form';
 import { forwardRef, ReactElement } from 'react';
 import { LinksEditor } from '../LinksEditor';
@@ -29,11 +29,20 @@ export interface PanelSpecEditorProps {
   onQueriesChange: (queries: QueryDefinition[]) => void;
   onQueryRun: (index: number, query: QueryDefinition) => void;
   onPluginSpecChange: (spec: UnknownSpec) => void;
+  onAnnotationsChange: (annotations: AnnotationSpec[]) => void;
   onJSONChange: (panelDefinitionStr: string) => void;
 }
 
 export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>((props, ref): ReactElement | null => {
-  const { control, panelDefinition, onQueriesChange, onQueryRun, onPluginSpecChange, onJSONChange } = props;
+  const {
+    control,
+    panelDefinition,
+    onQueriesChange,
+    onQueryRun,
+    onPluginSpecChange,
+    onAnnotationsChange,
+    onJSONChange,
+  } = props;
   const { kind } = panelDefinition.spec.plugin;
   const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
 
@@ -119,7 +128,10 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
           render={({ field }) => (
             <PanelAnnotationsEditor
               value={panelDefinition.spec.annotations ?? []}
-              onChange={(annotations) => field.onChange(annotations)}
+              onChange={(annotations) => {
+                field.onChange(annotations);
+                onAnnotationsChange(annotations);
+              }}
             />
           )}
         />
