@@ -91,11 +91,11 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         '@perses-dev/spec': {
-          version: '0.3.0-beta.1',
+          version: '0.3.0-beta.2',
           lib: () => require('@perses-dev/spec'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.3.0-beta.1',
+            requiredVersion: '^0.3.0-beta.2',
           },
         },
         '@perses-dev/core': {
@@ -107,43 +107,43 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         '@perses-dev/client': {
-          version: '0.55.0-beta.1',
+          version: '0.55.0-beta.2',
           lib: () => require('@perses-dev/client'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.1',
+            requiredVersion: '^0.55.0-beta.2',
           },
         },
         '@perses-dev/components': {
-          version: '0.55.0-beta.1',
+          version: '0.55.0-beta.2',
           lib: () => require('@perses-dev/components'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.1',
+            requiredVersion: '^0.55.0-beta.2',
           },
         },
         '@perses-dev/plugin-system': {
-          version: '0.55.0-beta.1',
+          version: '0.55.0-beta.2',
           lib: () => require('@perses-dev/plugin-system'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.1',
+            requiredVersion: '^0.55.0-beta.2',
           },
         },
         '@perses-dev/explore': {
-          version: '0.55.0-beta.1',
+          version: '0.55.0-beta.2',
           lib: () => require('@perses-dev/explore'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.1',
+            requiredVersion: '^0.55.0-beta.2',
           },
         },
         '@perses-dev/dashboards': {
-          version: '0.55.0-beta.1',
+          version: '0.55.0-beta.2',
           lib: () => require('@perses-dev/dashboards'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.1',
+            requiredVersion: '^0.55.0-beta.2',
           },
         },
         // Below are the shared modules that are used by the plugins, this can be part of the SDK
