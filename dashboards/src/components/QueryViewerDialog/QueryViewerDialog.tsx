@@ -15,15 +15,27 @@ import React, { ReactElement, useMemo } from 'react';
 import { Dialog } from '@perses-dev/components';
 import { Button, Divider } from '@mui/material';
 import { PluginSpecEditor } from '@perses-dev/plugin-system';
-import { QueryDefinition } from '@perses-dev/spec';
+import { PanelDefinition, QueryDefinition } from '@perses-dev/spec';
+import { QueryPlayground } from './QueryPlayground';
 
 export interface QueryViewerDialogProps {
   open: boolean;
   queryDefinitions: QueryDefinition[];
+  /**
+   * When provided, the dialog becomes a query playground: queries are editable and can be run
+   * on the fly against a live preview of the panel. Edits are local to the dialog and dropped
+   * when it closes. When omitted, queries are rendered read-only.
+   */
+  panelDefinition?: PanelDefinition;
   onClose: () => void;
 }
 
-export function QueryViewerDialog({ open, queryDefinitions, onClose }: QueryViewerDialogProps): ReactElement {
+export function QueryViewerDialog({
+  open,
+  queryDefinitions,
+  panelDefinition,
+  onClose,
+}: QueryViewerDialogProps): ReactElement {
   const queryRows = useMemo(() => {
     if (!queryDefinitions?.length) return null;
 
@@ -50,7 +62,10 @@ export function QueryViewerDialog({ open, queryDefinitions, onClose }: QueryView
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth={true}>
       <Dialog.Header>Query Viewer</Dialog.Header>
-      <Dialog.Content>{queryRows}</Dialog.Content>
+      {/* Gating on `open` guarantees playground edits are dropped whenever the dialog closes. */}
+      <Dialog.Content>
+        {open && panelDefinition ? <QueryPlayground panelDefinition={panelDefinition} /> : queryRows}
+      </Dialog.Content>
       <Dialog.Actions>
         <Button variant="outlined" color="secondary" onClick={onClose}>
           Close

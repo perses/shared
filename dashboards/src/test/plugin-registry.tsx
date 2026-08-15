@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { UnknownSpec } from '@perses-dev/spec';
-import { PanelPlugin, MockPlugin } from '@perses-dev/plugin-system';
+import { OptionsEditorProps, PanelPlugin, MockPlugin, TimeSeriesQueryPlugin } from '@perses-dev/plugin-system';
 import { ReactElement } from 'react';
 
 const FakeTimeSeriesChartOptionEditor = (): ReactElement => {
@@ -39,5 +39,28 @@ const MOCK_TIME_SERIES_PANEL: MockPlugin = {
   plugin: FakeTimeSeriesPlugin,
 };
 
+const FakeTimeSeriesQueryEditor = ({ value, onChange, isReadonly }: OptionsEditorProps<UnknownSpec>): ReactElement => {
+  return (
+    <input
+      aria-label="query expression"
+      disabled={isReadonly}
+      value={typeof value?.query === 'string' ? value.query : ''}
+      onChange={(e): void => onChange({ ...value, query: e.target.value })}
+    />
+  );
+};
+
+const FakeTimeSeriesQueryPlugin: TimeSeriesQueryPlugin<UnknownSpec> = {
+  getTimeSeriesData: async () => ({ series: [] }),
+  createInitialOptions: () => ({ query: '' }),
+  OptionsEditorComponent: FakeTimeSeriesQueryEditor,
+};
+
+const MOCK_TIME_SERIES_QUERY: MockPlugin = {
+  kind: 'TimeSeriesQuery',
+  spec: { name: 'PrometheusTimeSeriesQuery' },
+  plugin: FakeTimeSeriesQueryPlugin,
+};
+
 // Array of default mock plugins added to the PluginRegistry during test renders
-export const MOCK_PLUGINS: MockPlugin[] = [MOCK_TIME_SERIES_PANEL];
+export const MOCK_PLUGINS: MockPlugin[] = [MOCK_TIME_SERIES_PANEL, MOCK_TIME_SERIES_QUERY];
