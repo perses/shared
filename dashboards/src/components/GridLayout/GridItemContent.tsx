@@ -135,6 +135,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
       <QueryViewerDialog
         open={openQueryViewer}
         queryDefinitions={queries ?? []}
+        panelDefinition={panelDefinition}
         onClose={() => setOpenQueryViewer(false)}
       />
     </Box>
