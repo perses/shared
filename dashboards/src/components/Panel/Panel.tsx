@@ -50,7 +50,7 @@ export type PanelOptions = {
   showIcons?: 'always' | 'hover';
   /**
    * Content to render in right of the panel header. (top right of the panel)
-   * It will only be rendered when the panel is in edit mode.
+   * It will only be rendered when the panel is not in edit mode.
    */
   extra?: (props: PanelExtraProps) => ReactNode;
 };

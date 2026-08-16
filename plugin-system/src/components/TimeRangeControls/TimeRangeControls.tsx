@@ -28,6 +28,7 @@ import {
   buildRelativeTimeOption,
 } from '@perses-dev/components';
 import { AbsoluteTimeRange, DurationString, parseDurationString, RelativeTimeRange } from '@perses-dev/spec';
+import { milliseconds } from 'date-fns';
 import { ReactElement, useCallback } from 'react';
 import { TOOLTIP_TEXT } from '../../constants';
 import {
@@ -80,12 +81,20 @@ export function TimeRangeControls({
   // Convert height to a string, then use the string for styling
   const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
 
-  // add time preset if one does not match duration given in time range
+  // add time preset if one does not match duration given in time range, keeping the list ordered by duration
   if (
     'pastDuration' in timeRange &&
     !timePresetsValue.some((option) => option.value.pastDuration === timeRange['pastDuration'])
   ) {
-    timePresetsValue.push(buildRelativeTimeOption(timeRange['pastDuration']));
+    const durationMs = milliseconds(parseDurationString(timeRange['pastDuration']));
+    const insertionIndex = timePresetsValue.findIndex(
+      (option) => milliseconds(parseDurationString(option.value.pastDuration)) > durationMs
+    );
+    timePresetsValue.splice(
+      insertionIndex === -1 ? timePresetsValue.length : insertionIndex,
+      0,
+      buildRelativeTimeOption(timeRange['pastDuration'])
+    );
   }
 
   // set the new refresh interval both in the dashboard context & as query param

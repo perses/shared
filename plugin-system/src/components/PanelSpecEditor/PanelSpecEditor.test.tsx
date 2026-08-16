@@ -63,6 +63,7 @@ describe('PanelSpecEditor', () => {
       onQueriesChange: jest.fn(),
       onQueryRun: jest.fn(),
       onPluginSpecChange: jest.fn(),
+      onAnnotationsChange: jest.fn(),
       onJSONChange: jest.fn(),
     });
     const queryEditor = await screen.findByLabelText('Query');
@@ -89,6 +90,7 @@ describe('PanelSpecEditor', () => {
       onQueriesChange: jest.fn(),
       onQueryRun: jest.fn(),
       onPluginSpecChange: jest.fn(),
+      onAnnotationsChange: jest.fn(),
       onJSONChange: jest.fn(),
     });
 

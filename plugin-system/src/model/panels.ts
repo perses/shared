@@ -57,6 +57,12 @@ export interface PanelPlugin<Spec = UnknownSpec, TPanelProps = PanelProps<Spec>>
    */
   hideQueryEditor?: boolean;
   /**
+   * If true, the panel editor exposes a common "Annotations" tab so annotations can be configured
+   * per panel. Only enable this for panel plugins whose PanelComponent actually renders annotations.
+   * @default false
+   */
+  supportsAnnotations?: boolean;
+  /**
    * List of panel actions that will be rendered in the panel header
    */
   actions?: Array<PanelAction<TPanelProps>>;

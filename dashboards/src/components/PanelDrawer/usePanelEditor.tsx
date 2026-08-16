@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useCallback, useMemo, useState } from 'react';
-import { Definition, Link, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
+import { AnnotationSpec, Definition, Link, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 
 interface UsePanelEditorResult {
   setName: (value: string) => void;
@@ -22,6 +22,7 @@ interface UsePanelEditorResult {
   setDescription: (value?: string) => void;
   setPanelDefinition: (panelDefinition: PanelDefinition) => void;
   setQueries: (queries?: QueryDefinition[], hideQueryEditor?: boolean) => void;
+  setAnnotations: (annotations?: AnnotationSpec[]) => void;
 }
 
 /**
@@ -31,13 +32,20 @@ interface UsePanelEditorResult {
 export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEditorResult = (
   panelDefinition: PanelDefinition
 ) => {
-  const { display, plugin: pluginDefinition, queries: initialQueries, links: initialLinks } = panelDefinition.spec;
+  const {
+    display,
+    plugin: pluginDefinition,
+    queries: initialQueries,
+    links: initialLinks,
+    annotations: initialAnnotations,
+  } = panelDefinition.spec;
   // Provide default display object if undefined
   const displayData = display ?? { name: undefined, description: undefined };
   const [name, setName] = useState(displayData.name);
   const [description, setDescription] = useState(displayData.description);
   const [links, setLinks] = useState(initialLinks);
   const [plugin, setPlugin] = useState(pluginDefinition);
+  const [annotations, setAnnotations] = useState(initialAnnotations);
 
   // need to keep track of prevQueries if switching from a panel with no queries (ex: markdown) to one with queries
   const [prevQueries, setPrevQueries] = useState(initialQueries);
@@ -62,14 +70,15 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
   // reset panel definition
   const setPanelDefinition = useCallback(
     (panelDefinition: PanelDefinition) => {
-      const { display, plugin, queries, links } = panelDefinition.spec;
+      const { display, plugin, queries, links, annotations } = panelDefinition.spec;
       setName(display?.name);
       setDescription(display?.description);
       setLinks(links);
       setPlugin(plugin);
       setQueries(queries);
+      setAnnotations(annotations);
     },
-    [setName, setDescription, setLinks, setPlugin, setQueries]
+    [setName, setDescription, setLinks, setPlugin, setQueries, setAnnotations]
   );
 
   return useMemo(
@@ -81,6 +90,7 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
           plugin,
           queries: currentQueries,
           links,
+          annotations,
         },
       } as PanelDefinition,
       setName,
@@ -88,8 +98,9 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
       setLinks,
       setQueries,
       setPlugin,
+      setAnnotations,
       setPanelDefinition,
     }),
-    [name, description, links, plugin, currentQueries, setQueries, setPanelDefinition]
+    [name, description, links, plugin, currentQueries, annotations, setQueries, setAnnotations, setPanelDefinition]
   );
 };

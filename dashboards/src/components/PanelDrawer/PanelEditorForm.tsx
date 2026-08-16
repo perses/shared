@@ -41,8 +41,16 @@ export interface PanelEditorFormProps {
 export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   const { initialValues, initialAction, panelKey, onSave, onClose } = props;
   const panelGroups = useListPanelGroups();
-  const { panelDefinition, setName, setDescription, setLinks, setQueries, setPlugin, setPanelDefinition } =
-    usePanelEditor(initialValues.panelDefinition);
+  const {
+    panelDefinition,
+    setName,
+    setDescription,
+    setLinks,
+    setQueries,
+    setPlugin,
+    setAnnotations,
+    setPanelDefinition,
+  } = usePanelEditor(initialValues.panelDefinition);
   const { plugin } = panelDefinition.spec;
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
 
@@ -258,6 +266,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                 onPluginSpecChange={(spec) => {
                   pluginEditor.onSpecChange(spec);
                 }}
+                onAnnotationsChange={(a) => setAnnotations(a)}
                 onJSONChange={handlePanelDefinitionChange}
               />
             </ErrorBoundary>

@@ -86,5 +86,23 @@ describe('TimeRangeControls', () => {
     expect(dateButton).toHaveTextContent(/5 minutes/i);
   });
 
+  it('should insert a duration missing from the time presets in order', async () => {
+    renderWithContext(
+      <TimeRangeProviderBasic
+        initialRefreshInterval={testDefaultRefreshInterval}
+        initialTimeRange={{ pastDuration: '3h' as DurationString }}
+      >
+        <ControlsWithTZ />
+      </TimeRangeProviderBasic>
+    );
+    const dateButton = await screen.findByLabelText(/time range/i, { selector: '[role="combobox"]' });
+    userEvent.click(dateButton);
+    const options = screen.getAllByRole('option').map((option) => option.textContent);
+    const insertedIndex = options.indexOf('Last 3 hours');
+    expect(insertedIndex).toBeGreaterThan(-1);
+    expect(options[insertedIndex - 1]).toBe('Last 1 hour');
+    expect(options[insertedIndex + 1]).toBe('Last 6 hours');
+  });
+
   // TODO: add additional tests for absolute time selection, other inputs, form validation, etc.
 });
