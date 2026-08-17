@@ -25,6 +25,11 @@ import { PluginSpecEditorProps } from '../PluginSpecEditor';
 export interface PluginEditorSelection {
   type: PluginType;
   kind: string;
+  /**
+   * Optional plugin version. Only set when the user explicitly selects a specific version of a plugin that has
+   * multiple versions available. When omitted, the latest available version is used.
+   */
+  version?: string;
 }
 
 export interface PluginEditorValue {
