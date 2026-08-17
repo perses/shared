@@ -11,14 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { act, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { ReactElement } from 'react';
 import { TimeRangeProviderBasic } from '@perses-dev/plugin-system';
 import { VariableDefinition } from '@perses-dev/spec';
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../test';
 import { DashboardProviderWithQueryParams } from './DashboardProvider/DashboardProviderWithQueryParams';
-import { useVariableDefinitionStates, VariableProviderWithQueryParams } from './VariableProvider';
+import {
+  useVariableDefinitionActions,
+  useVariableDefinitionStates,
+  VariableProviderWithQueryParams,
+} from './VariableProvider';
 
 const variableDefinitions: VariableDefinition[] = [
   {
@@ -28,11 +32,39 @@ const variableDefinitions: VariableDefinition[] = [
       value: 'default-trace',
     },
   },
+  {
+    kind: 'ListVariable',
+    spec: {
+      name: 'instance',
+      allowAllValue: false,
+      allowMultiple: true,
+      defaultValue: ['default-instance'],
+      plugin: {
+        kind: 'StaticListVariable',
+        spec: {
+          values: ['default-instance', 'first-instance', 'second-instance'],
+        },
+      },
+    },
+  },
 ];
 
 function VariableValue(): ReactElement {
   const variables = useVariableDefinitionStates(['traceId']);
   return <div>{variables.traceId?.value}</div>;
+}
+
+function MultipleVariableValue(): ReactElement {
+  const variables = useVariableDefinitionStates(['instance']);
+  const { setVariableValue } = useVariableDefinitionActions();
+  return (
+    <>
+      <div data-testid="instance-value">{JSON.stringify(variables.instance?.value)}</div>
+      <button type="button" onClick={() => setVariableValue('instance', ['second-instance'])}>
+        Update instance
+      </button>
+    </>
+  );
 }
 
 describe('query parameter synchronization', () => {
@@ -55,6 +87,32 @@ describe('query parameter synchronization', () => {
 
     act(() => history.push('/'));
     expect(await screen.findByText('default-trace')).toBeInTheDocument();
+  });
+
+  test('preserves array values for allowMultiple variables after URL synchronization', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/?var-instance=first-instance'] });
+    renderWithContext(
+      <TimeRangeProviderBasic initialTimeRange={{ pastDuration: '30m' }}>
+        <VariableProviderWithQueryParams initialVariableDefinitions={variableDefinitions}>
+          <MultipleVariableValue />
+        </VariableProviderWithQueryParams>
+      </TimeRangeProviderBasic>,
+      undefined,
+      history
+    );
+
+    expect(await screen.findByText('["first-instance"]')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Update instance' }));
+
+    await waitFor(() => expect(history.location.search).toContain('var-instance=second-instance'));
+    expect(screen.getByTestId('instance-value')).toHaveTextContent('["second-instance"]');
+
+    act(() => history.push('/'));
+    expect(await screen.findByText('["default-instance"]')).toBeInTheDocument();
+
+    act(() => history.push('/?var-instance=$__all'));
+    expect(await screen.findByText('"$__all"')).toBeInTheDocument();
   });
 
   test('updates the viewed panel when navigation changes query parameters', async () => {

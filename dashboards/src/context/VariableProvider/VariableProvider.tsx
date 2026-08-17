@@ -371,27 +371,17 @@ function createVariableDefinitionStore({
         setVariableValuesFromQueryParams(values: Record<string, VariableValue>): void {
           set(
             (state) => {
-              const hydratedState = hydrateVariableDefinitionStates(
-                state.variableDefinitions,
-                values,
-                state.externalVariableDefinitions
-              );
-
-              const updateValue = (name: string, source?: string): void => {
-                const currentState = state.variableState.get({ name, source });
-                const hydratedVariableState = hydratedState.get({ name, source });
-                if (
-                  currentState &&
-                  hydratedVariableState &&
-                  !areVariableValuesEqual(currentState.value, hydratedVariableState.value)
-                ) {
-                  currentState.value = hydratedVariableState.value;
+              const updateValue = (definition: VariableDefinition, source?: string): void => {
+                const currentState = state.variableState.get({ name: definition.spec.name, source });
+                const nextValue = getVariableValueFromQueryParams(definition, values);
+                if (currentState && !areVariableValuesEqual(currentState.value, nextValue)) {
+                  currentState.value = nextValue;
                 }
               };
 
-              state.variableDefinitions.forEach((definition) => updateValue(definition.spec.name));
+              state.variableDefinitions.forEach((definition) => updateValue(definition));
               state.externalVariableDefinitions.forEach(({ source, definitions }) => {
-                definitions.forEach((definition) => updateValue(definition.spec.name, source));
+                definitions.forEach((definition) => updateValue(definition, source));
               });
             },
             false,
@@ -567,4 +557,23 @@ function areVariableValuesEqual(left: VariableValue, right: VariableValue): bool
     return left.length === right.length && left.every((value, index) => value === right[index]);
   }
   return left === right;
+}
+
+function getVariableValueFromQueryParams(
+  definition: VariableDefinition,
+  values: Record<string, VariableValue>
+): VariableValue {
+  const queryParamValue = values[definition.spec.name];
+  if (definition.kind === 'TextVariable') {
+    return queryParamValue ?? definition.spec.value;
+  }
+
+  const value = queryParamValue ?? definition.spec.defaultValue ?? null;
+  if (Array.isArray(value) && value.length === 1 && value[0] === ALL_VALUE) {
+    return ALL_VALUE;
+  }
+  if (definition.spec.allowMultiple && value !== null && value !== ALL_VALUE && !Array.isArray(value)) {
+    return [value];
+  }
+  return value;
 }
