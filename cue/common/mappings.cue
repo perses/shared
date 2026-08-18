@@ -45,7 +45,7 @@ import (
 #miscCondition: {
 	kind: "Misc"
 	spec: {
-		value:  "empty" | "null" | "NaN" | "true" | "false"
+		value:  null | "empty" | "null" | "NaN" | "true" | "false"
 		result: #mappingResult
 	}
 }
