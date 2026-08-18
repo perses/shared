@@ -28,6 +28,7 @@ import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
 import { LinksDisplay } from '../LinksDisplay';
 import { LockDashboardButton } from '../LockDashboardButton';
+import { UpdatePluginsButton } from '../UpdatePluginsButton';
 import { SaveDashboardButton } from '../SaveDashboardButton';
 import { EditVariablesButton } from '../Variables';
 
@@ -109,6 +110,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
                 <AddPanelButton />
                 <AddGroupButton />
                 {isPluginVersioningEnabled && <LockDashboardButton />}
+                {isPluginVersioningEnabled && <UpdatePluginsButton />}
               </Stack>
               <SaveDashboardButton onSave={onSave} isDisabled={isReadonly} />
               <Button variant="outlined" onClick={onCancelButtonClick}>

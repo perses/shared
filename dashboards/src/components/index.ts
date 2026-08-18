@@ -36,4 +36,6 @@ export * from './QuerySummaryTable';
 export * from './QueryViewerDialog';
 export * from './SaveChangesConfirmationDialog';
 export * from './SaveDashboardButton';
+export * from './UpdatePluginsButton';
+export * from './UpdatePluginsDrawer';
 export * from './Variables';

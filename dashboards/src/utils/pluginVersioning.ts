@@ -31,6 +31,12 @@ export interface PluginDefinitionMetadata {
 type VersionedDefinition = Definition<unknown> & { metadata?: PluginDefinitionMetadata };
 
 /**
+ * Sentinel version meaning "the latest version available in the instance" (mirrors the Go `plugin.LatestVersion`).
+ * A definition using it is not considered pinned to a specific version.
+ */
+export const LATEST_VERSION = 'latest';
+
+/**
  * Plugin types whose definitions may appear inside a dashboard spec and therefore can be pinned to a version when the
  * dashboard is "locked".
  */
@@ -47,19 +53,21 @@ export const PLUGIN_VERSIONING_TYPES: PluginType[] = [
   'Annotation',
 ];
 
+/** Split a version string into its numeric segments, ignoring a leading `v`. */
+function normalizeVersion(version: string): number[] {
+  return version
+    .replace(/^v/, '')
+    .split(/[.+-]/)
+    .map((part) => Number.parseInt(part, 10));
+}
+
 /**
  * Compare two version strings using a best-effort semantic-versioning comparison.
  * Returns a positive number when `a` is greater than `b`, a negative number when it is lower, and 0 when equal.
  */
 export function compareVersions(a: string, b: string): number {
-  const normalize = (v: string): number[] =>
-    v
-      .replace(/^v/, '')
-      .split(/[.+-]/)
-      .map((part) => Number.parseInt(part, 10));
-
-  const aParts = normalize(a);
-  const bParts = normalize(b);
+  const aParts = normalizeVersion(a);
+  const bParts = normalizeVersion(b);
   const length = Math.max(aParts.length, bParts.length);
 
   for (let i = 0; i < length; i++) {
@@ -151,6 +159,149 @@ function visitPluginDefinitions(
 /** Deep-clone a dashboard resource so mutations don't affect the source object. */
 function cloneDashboard(dashboard: DashboardResource): DashboardResource {
   return JSON.parse(JSON.stringify(dashboard));
+}
+
+/** Context about where a plugin definition lives inside the dashboard spec. */
+interface PluginDefinitionContext {
+  /** The plugin type (e.g. 'Panel', 'TimeSeriesQuery', 'Variable', ...). */
+  pluginType: PluginType;
+  /** Key of the panel the definition belongs to, for panel plugins and panel query plugins. */
+  panelKey?: string;
+}
+
+/**
+ * Like {@link visitPluginDefinitions}, but also provides the plugin type and (when relevant) the panel key that the
+ * definition belongs to. Used to tell panel plugins apart from query/variable/datasource/annotation plugins.
+ */
+function visitPluginDefinitionsWithContext(
+  dashboard: DashboardResource,
+  visitor: (definition: VersionedDefinition, context: PluginDefinitionContext) => void
+): void {
+  const spec = dashboard.spec;
+
+  for (const [panelKey, panel] of Object.entries(spec.panels ?? {})) {
+    if (panel?.spec?.plugin) {
+      visitor(panel.spec.plugin as VersionedDefinition, { pluginType: 'Panel', panelKey });
+    }
+    for (const query of panel?.spec?.queries ?? []) {
+      // For a query definition, `query.kind` is the query plugin type (e.g. 'TimeSeriesQuery').
+      if (query?.spec?.plugin && query.kind) {
+        visitor(query.spec.plugin as VersionedDefinition, { pluginType: query.kind as PluginType, panelKey });
+      }
+    }
+  }
+
+  for (const variable of spec.variables ?? []) {
+    if (variable?.kind === 'ListVariable' && variable.spec?.plugin) {
+      visitor(variable.spec.plugin as VersionedDefinition, { pluginType: 'Variable' });
+    }
+  }
+
+  for (const datasource of Object.values(spec.datasources ?? {})) {
+    if (datasource?.plugin) {
+      visitor(datasource.plugin as VersionedDefinition, { pluginType: 'Datasource' });
+    }
+  }
+
+  for (const annotation of spec.annotations ?? []) {
+    if (annotation?.plugin) {
+      visitor(annotation.plugin as VersionedDefinition, { pluginType: 'Annotation' });
+    }
+  }
+}
+
+/** A plugin definition pinned to a version older than the latest one available in the instance. */
+export interface OutdatedPlugin {
+  /** The plugin type (e.g. 'Panel', 'TimeSeriesQuery'). */
+  pluginType: PluginType;
+  /** The plugin kind/name (e.g. 'TimeSeriesChart'). */
+  kind: string;
+  /** The version currently pinned in the dashboard spec. */
+  currentVersion: string;
+  /** The latest version available in the instance. */
+  latestVersion: string;
+  /** Number of definitions in the dashboard pinned to the outdated version. */
+  occurrences: number;
+  /**
+   * Key of the first panel using this plugin. Set for panel plugins and panel query plugins, and used to render a
+   * before/after preview of a representative panel.
+   */
+  examplePanelKey?: string;
+}
+
+/**
+ * A stable identity for an outdated plugin entry, usable as a React key or selection key.
+ */
+export function getOutdatedPluginId(plugin: Pick<OutdatedPlugin, 'pluginType' | 'kind' | 'currentVersion'>): string {
+  return `${plugin.pluginType}:${plugin.kind}:${plugin.currentVersion}`;
+}
+
+/**
+ * Find every plugin in the dashboard that is pinned to a version older than the latest version available in the
+ * instance. Definitions without a pinned version are ignored: they already float on the latest version.
+ */
+export function findOutdatedPlugins(
+  dashboard: DashboardResource,
+  latestVersions: Map<string, string>
+): OutdatedPlugin[] {
+  const outdated = new Map<string, OutdatedPlugin>();
+
+  visitPluginDefinitionsWithContext(dashboard, (definition, context) => {
+    const currentVersion = definition.metadata?.version;
+    if (!currentVersion || currentVersion === LATEST_VERSION) {
+      return;
+    }
+    const latestVersion = latestVersions.get(definition.kind);
+    if (!latestVersion || compareVersions(latestVersion, currentVersion) <= 0) {
+      return;
+    }
+
+    const id = getOutdatedPluginId({ pluginType: context.pluginType, kind: definition.kind, currentVersion });
+    const existing = outdated.get(id);
+    if (existing) {
+      existing.occurrences += 1;
+      if (existing.examplePanelKey === undefined) {
+        existing.examplePanelKey = context.panelKey;
+      }
+      return;
+    }
+    outdated.set(id, {
+      pluginType: context.pluginType,
+      kind: definition.kind,
+      currentVersion,
+      latestVersion,
+      occurrences: 1,
+      examplePanelKey: context.panelKey,
+    });
+  });
+
+  return [...outdated.values()].toSorted(
+    (a, b) => a.pluginType.localeCompare(b.pluginType) || a.kind.localeCompare(b.kind)
+  );
+}
+
+/**
+ * Return a copy of the dashboard where only the provided outdated plugins are re-pinned to their latest version. Any
+ * other plugin definition (including other versions of the same kind) is left untouched.
+ */
+export function updatePluginVersions(dashboard: DashboardResource, plugins: OutdatedPlugin[]): DashboardResource {
+  if (plugins.length === 0) {
+    return dashboard;
+  }
+  const targets = new Map(plugins.map((plugin) => [getOutdatedPluginId(plugin), plugin.latestVersion]));
+  const next = cloneDashboard(dashboard);
+  visitPluginDefinitionsWithContext(next, (definition, context) => {
+    const currentVersion = definition.metadata?.version;
+    if (!currentVersion) {
+      return;
+    }
+    const id = getOutdatedPluginId({ pluginType: context.pluginType, kind: definition.kind, currentVersion });
+    const latestVersion = targets.get(id);
+    if (latestVersion) {
+      definition.metadata = { ...definition.metadata, version: latestVersion };
+    }
+  });
+  return next;
 }
 
 /**
