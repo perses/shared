@@ -16,3 +16,9 @@ package common
 myDsVarSelector: #datasourceSelector & { _kind: "MyDatasource" }
 
 myDsVarSelector: #datasourceSelector & { datasource: "$dsVar" }
+
+// Regression for perses/perses#4327: a variable name may contain '-' and '.'
+// (name rule ^[a-zA-Z0-9_.-]+$), so a datasource reference to such a variable
+// must validate as well.
+myDsVarHyphen: #datasourceSelector & { _kind: "MyDatasource", datasource: "$ds-var" }
+myDsVarDot: #datasourceSelector & { _kind: "MyDatasource", datasource: "$ds.var" }
