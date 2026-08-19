@@ -23,10 +23,13 @@ import {
 
 // Workaround to get spyOn to work without a cannot redefine property error.
 // https://github.com/microsoft/TypeScript/issues/43081#issuecomment-1352352654
-jest.mock('../../Table', () => ({
-  __esModule: true,
-  ...jest.requireActual('../../Table'),
-}));
+vi.mock('../../Table', async () => {
+  const actual = await vi.importActual<typeof import('../../Table')>('../../Table');
+  return {
+    __esModule: true,
+    ...actual,
+  };
+});
 
 const mockMuiTheme = createTheme({});
 
@@ -72,7 +75,7 @@ describe('getContentWithLegendLayout', () => {
               },
               data: [],
               selectedItems: 'ALL',
-              onSelectedItemsChange: jest.fn(),
+              onSelectedItemsChange: vi.fn(),
             },
             legendSize: size,
             theme: mockMuiTheme,
@@ -109,7 +112,7 @@ describe('getContentWithLegendLayout', () => {
               },
               data: [],
               selectedItems: 'ALL',
-              onSelectedItemsChange: jest.fn(),
+              onSelectedItemsChange: vi.fn(),
             },
             legendSize: size,
             theme: mockMuiTheme,
@@ -146,7 +149,7 @@ describe('getContentWithLegendLayout', () => {
               },
               data: [],
               selectedItems: 'ALL',
-              onSelectedItemsChange: jest.fn(),
+              onSelectedItemsChange: vi.fn(),
             },
             legendSize: size,
             theme: mockMuiTheme,
@@ -181,7 +184,7 @@ describe('getContentWithLegendLayout', () => {
               },
               data: [],
               selectedItems: 'ALL',
-              onSelectedItemsChange: jest.fn(),
+              onSelectedItemsChange: vi.fn(),
             },
             legendSize: size,
             theme: mockMuiTheme,
@@ -219,7 +222,7 @@ describe('getContentWithLegendLayout', () => {
             },
             data: [],
             selectedItems: 'ALL',
-            onSelectedItemsChange: jest.fn(),
+            onSelectedItemsChange: vi.fn(),
           },
           legendSize: size,
           theme: mockMuiTheme,
@@ -256,7 +259,7 @@ describe('getContentWithLegendLayout', () => {
             },
             data: [],
             selectedItems: 'ALL',
-            onSelectedItemsChange: jest.fn(),
+            onSelectedItemsChange: vi.fn(),
           },
           legendSize: size,
           theme: mockMuiTheme,
@@ -305,7 +308,7 @@ describe('getContentWithLegendLayout', () => {
         },
         data: [],
         selectedItems: 'ALL',
-        onSelectedItemsChange: jest.fn(),
+        onSelectedItemsChange: vi.fn(),
       },
       legendSize: size,
       theme: mockMuiTheme,
@@ -353,14 +356,14 @@ describe('getContentWithLegendLayout', () => {
             },
           ],
           selectedItems: 'ALL',
-          onSelectedItemsChange: jest.fn(),
+          onSelectedItemsChange: vi.fn(),
         },
         legendSize: 'medium',
         theme: mockMuiTheme,
       };
 
       const MOCK_TABLE_CELL_HEIGHT = 20;
-      jest.spyOn(table, 'getTableCellLayout').mockReturnValue({
+      vi.spyOn(table, 'getTableCellLayout').mockReturnValue({
         height: MOCK_TABLE_CELL_HEIGHT,
       });
 

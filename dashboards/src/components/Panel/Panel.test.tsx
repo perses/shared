@@ -13,7 +13,7 @@
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { DataQueriesProvider, TimeRangeProviderBasic, useDataQueriesContext } from '@perses-dev/plugin-system';
-import { PanelDefinition } from '@perses-dev/spec';
+import { PanelDefinition, QueryDefinition } from '@perses-dev/spec';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -47,30 +47,67 @@ const testTheme = createTheme({
   },
 });
 
-jest.mock('@perses-dev/components', () => ({
-  ...jest.requireActual('@perses-dev/components'),
-  InfoTooltip: ({ children, description }: { children: React.ReactNode; description: string }): JSX.Element => (
-    <>
-      {children}
-      <div role="tooltip">{description}</div>
-    </>
-  ),
-}));
+const testQueryDefinition = {
+  kind: 'TimeSeriesQuery',
+  spec: {
+    plugin: {
+      kind: 'PrometheusTimeSeriesQuery',
+      spec: {},
+    },
+  },
+} as QueryDefinition;
 
-jest.mock('@mui/material/CircularProgress', () => {
+function makeQueryResult(
+  overrides: Partial<ReturnType<typeof useDataQueriesContext>['queryResults'][number]> = {},
+): ReturnType<typeof useDataQueriesContext>['queryResults'][number] {
+  return {
+    definition: testQueryDefinition,
+    error: new Error(''),
+    isFetching: false,
+    isLoading: false,
+    ...overrides,
+  };
+}
+
+function makeDataQueriesContext(
+  queryResults: ReturnType<typeof useDataQueriesContext>['queryResults'] = [],
+): ReturnType<typeof useDataQueriesContext> {
+  return {
+    queryDefinitions: [],
+    queryResults,
+    refetchAll: vi.fn(),
+    isFetching: queryResults.some((result) => result.isFetching),
+    isLoading: queryResults.some((result) => result.isLoading),
+    errors: queryResults.flatMap((result) => (result.error.message ? [result.error] : [])),
+  };
+}
+
+vi.mock('@perses-dev/components', async () => {
+  const actual = await vi.importActual<typeof import('@perses-dev/components')>('@perses-dev/components');
+  return {
+    ...actual,
+    InfoTooltip: ({ children, description }: { children: React.ReactNode; description: string }): JSX.Element => (
+      <>
+        {children}
+        <div role="tooltip">{description}</div>
+      </>
+    ),
+  };
+});
+
+vi.mock('@mui/material/CircularProgress', () => {
   return function MockCircularProgress(props: { 'aria-label'?: string }): JSX.Element {
     return <div aria-label={props['aria-label'] || 'loading'} />;
   };
 });
 
-jest.mock('@perses-dev/plugin-system', () => {
+vi.mock('@perses-dev/plugin-system', async () => {
+  const actual = await vi.importActual<typeof import('@perses-dev/plugin-system')>('@perses-dev/plugin-system');
   return {
-    ...jest.requireActual('@perses-dev/plugin-system'),
-    useDataQueriesContext: jest.fn(() => ({
-      queryResults: [],
-    })),
-    usePluginRegistry: jest.fn(() => ({
-      getPlugin: jest.fn().mockResolvedValue({
+    ...actual,
+    useDataQueriesContext: vi.fn(() => makeDataQueriesContext()),
+    usePluginRegistry: vi.fn(() => ({
+      getPlugin: vi.fn().mockResolvedValue({
         PanelComponent: (): JSX.Element => <div>TimeSeriesChart panel</div>,
         actions: [
           {
@@ -243,9 +280,9 @@ describe('Panel', () => {
   });
 
   it('can trigger panel actions in edit mode', async () => {
-    const onEditPanelClick = jest.fn();
-    const onDeletePanelClick = jest.fn();
-    const onDuplicatePanelClick = jest.fn();
+    const onEditPanelClick = vi.fn();
+    const onDeletePanelClick = vi.fn();
+    const onDuplicatePanelClick = vi.fn();
     await renderPanel(undefined, { onEditPanelClick, onDeletePanelClick, onDuplicatePanelClick });
 
     const panel = getPanel();
@@ -274,9 +311,9 @@ describe('Panel', () => {
   });
 
   it('should not render extra panel content when in edit mode', async () => {
-    const onEditPanelClick = jest.fn();
-    const onDeletePanelClick = jest.fn();
-    const onDuplicatePanelClick = jest.fn();
+    const onEditPanelClick = vi.fn();
+    const onDeletePanelClick = vi.fn();
+    const onDuplicatePanelClick = vi.fn();
     await renderPanel(
       undefined,
       { onEditPanelClick, onDeletePanelClick, onDuplicatePanelClick },
@@ -289,27 +326,30 @@ describe('Panel', () => {
   });
 
   it('shows loading indicator if 1/2 queries are loading', async () => {
-    (useDataQueriesContext as jest.Mock).mockReturnValue({
-      queryResults: [{ data: { series: [{ name: 'test', values: [[1, 2]] }] }, isFetching: true }],
-    });
+    vi.mocked(useDataQueriesContext).mockReturnValue(
+      makeDataQueriesContext([
+        makeQueryResult({
+          data: { series: [{ name: 'test', values: [[1, 2]] }] },
+          isFetching: true,
+        }),
+      ]),
+    );
 
     await renderPanel();
     expect(screen.queryAllByLabelText('loading').length).toBeGreaterThan(0);
   });
 
   it('does not show a loading indicator if 2/2 queries are loading', async () => {
-    (useDataQueriesContext as jest.Mock).mockReturnValue({
-      queryResults: [],
-    });
+    vi.mocked(useDataQueriesContext).mockReturnValue(makeDataQueriesContext());
 
     await renderPanel();
     expect(screen.queryAllByLabelText('loading')).toHaveLength(0);
   });
 
   it('shows query errors in the tooltip', async () => {
-    (useDataQueriesContext as jest.Mock).mockReturnValue({
-      queryResults: [{ error: 'test error' }],
-    });
+    vi.mocked(useDataQueriesContext).mockReturnValue(
+      makeDataQueriesContext([makeQueryResult({ error: new Error('test error') })]),
+    );
 
     await renderPanel();
     expect(screen.queryAllByLabelText('panel errors').length).toBeGreaterThan(0);

@@ -21,7 +21,7 @@ import { testChartsTheme } from '../test-utils';
 import { ThresholdsEditor } from './ThresholdsEditor';
 
 describe('ThresholdsEditor', () => {
-  const renderThresholdEditor = (thresholds: ThresholdOptions, onChange = jest.fn()): void => {
+  const renderThresholdEditor = (thresholds: ThresholdOptions, onChange = vi.fn()): void => {
     render(
       <ChartsProvider chartsTheme={testChartsTheme}>
         <ThresholdsEditor thresholds={thresholds} onChange={onChange} />
@@ -42,7 +42,7 @@ describe('ThresholdsEditor', () => {
     ],
   };
 
-  const onChange = jest.fn();
+  const onChange = vi.fn();
 
   afterEach(() => {
     onChange.mockClear();
@@ -127,12 +127,12 @@ describe('ThresholdsEditor', () => {
     userEvent.type(colorInput, '6a44eb');
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledTimes(2);
-      expect(onChange.mock.calls[0][0]).toStrictEqual(
+      expect(onChange.mock.calls[0]?.[0]).toStrictEqual(
         produce(thresholds, (draft) => {
           draft.defaultColor = '#6a4';
         }),
       );
-      expect(onChange.mock.calls[1][0]).toStrictEqual(
+      expect(onChange.mock.calls[1]?.[0]).toStrictEqual(
         produce(thresholds, (draft) => {
           draft.defaultColor = '#6a44eb';
         }),

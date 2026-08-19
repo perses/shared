@@ -19,8 +19,10 @@ import {
   VariableStateMap,
 } from '@perses-dev/plugin-system';
 import { ListVariableDefinition, VariableDefinition } from '@perses-dev/spec';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { waitFor } from '@testing-library/react';
 
+import type { VariablePlugin } from '../../model';
 import { renderHookWithContext } from '../../test/render-hook';
 import { filterVariableList, useListVariablePluginValues, useResolveListVariableValues } from './variable-model';
 
@@ -66,21 +68,42 @@ describe('filterVariableList', () => {
   });
 });
 
-jest.mock('../../runtime', () => ({
-  ...jest.requireActual('../../runtime'),
-  usePlugin: jest.fn(),
-  usePlugins: jest.fn(),
-  useDatasourceStore: jest.fn().mockReturnValue({}),
-  useAllVariableValues: jest.fn(),
-  useTimeRange: jest.fn().mockReturnValue({
-    absoluteTimeRange: { start: new Date('2023-01-01T00:00:00Z'), end: new Date('2023-01-02T00:00:00Z') },
-    refreshKey: 'refresh-key',
-  }),
-}));
+function makeVariablePlugin(overrides: Partial<VariablePlugin> = {}): VariablePlugin {
+  return {
+    createInitialOptions: () => ({}),
+    getVariableOptions: vi.fn().mockResolvedValue({ data: [] }),
+    ...overrides,
+  };
+}
+
+function makePluginQueryResult(
+  data: VariablePlugin | undefined,
+  isLoading = false,
+): UseQueryResult<VariablePlugin, Error> {
+  return {
+    data,
+    isLoading,
+  } as UseQueryResult<VariablePlugin, Error>;
+}
+
+vi.mock('../../runtime', async () => {
+  const actual = await vi.importActual<typeof import('../../runtime')>('../../runtime');
+  return {
+    ...actual,
+    usePlugin: vi.fn(),
+    usePlugins: vi.fn(),
+    useDatasourceStore: vi.fn().mockReturnValue({}),
+    useAllVariableValues: vi.fn(),
+    useTimeRange: vi.fn().mockReturnValue({
+      absoluteTimeRange: { start: new Date('2023-01-01T00:00:00Z'), end: new Date('2023-01-02T00:00:00Z') },
+      refreshKey: 'refresh-key',
+    }),
+  };
+});
 
 describe('useListVariablePluginValues', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const definition: ListVariableDefinition = {
@@ -104,13 +127,13 @@ describe('useListVariablePluginValues', () => {
       NewVariable3: { loading: false, value: [] },
     };
 
-    const getVariableOptionsMock = jest.fn();
+    const getVariableOptionsMock = vi.fn();
 
-    (usePlugin as jest.Mock).mockReturnValue({
-      data: { getVariableOptions: getVariableOptionsMock },
-    });
+    vi.mocked(usePlugin).mockReturnValue(
+      makePluginQueryResult(makeVariablePlugin({ getVariableOptions: getVariableOptionsMock })),
+    );
 
-    (useAllVariableValues as jest.Mock).mockImplementation((names?: string[]) =>
+    vi.mocked(useAllVariableValues).mockImplementation((names?: string[]) =>
       names ? Object.fromEntries(Object.entries(variables).filter(([k]) => names.includes(k))) : variables,
     );
 
@@ -130,7 +153,7 @@ describe('useListVariablePluginValues', () => {
   });
 
   it('should filter self variable from deps and ctx when dependsOn is passed', () => {
-    const getVariableOptionsMock = jest.fn();
+    const getVariableOptionsMock = vi.fn();
     const variables: VariableStateMap = {
       NewVariable: { loading: false, value: [] },
       NewVariable2: { loading: false, value: [] },
@@ -140,14 +163,16 @@ describe('useListVariablePluginValues', () => {
 
     const dependsOnVariables = Object.keys(variables).slice(0, 2);
 
-    (usePlugin as jest.Mock).mockReturnValue({
-      data: {
-        getVariableOptions: getVariableOptionsMock,
-        dependsOn: jest.fn().mockReturnValue({ variables: dependsOnVariables }),
-      },
-    });
+    vi.mocked(usePlugin).mockReturnValue(
+      makePluginQueryResult(
+        makeVariablePlugin({
+          getVariableOptions: getVariableOptionsMock,
+          dependsOn: vi.fn().mockReturnValue({ variables: dependsOnVariables }),
+        }),
+      ),
+    );
 
-    (useAllVariableValues as jest.Mock).mockImplementation((names?: string[]) =>
+    vi.mocked(useAllVariableValues).mockImplementation((names?: string[]) =>
       names ? Object.fromEntries(Object.entries(variables).filter(([k]) => names.includes(k))) : variables,
     );
 
@@ -173,7 +198,7 @@ describe('useListVariablePluginValues', () => {
 
 describe('useResolveListVariableValues', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   function makeDefinition(name: string, pluginKind = 'PrometheusLabelValuesVariable'): ListVariableDefinition {
@@ -190,7 +215,7 @@ describe('useResolveListVariableValues', () => {
   }
 
   function mockOuterVariables(variables: VariableStateMap): void {
-    (useAllVariableValues as jest.Mock).mockImplementation((names?: string[]) =>
+    vi.mocked(useAllVariableValues).mockImplementation((names?: string[]) =>
       names ? Object.fromEntries(Object.entries(variables).filter(([k]) => names.includes(k))) : variables,
     );
   }
@@ -198,18 +223,15 @@ describe('useResolveListVariableValues', () => {
   it('should resolve independent variables and return their default values', async () => {
     const definitions: VariableDefinition[] = [makeDefinition('VarA'), makeDefinition('VarB')];
 
-    const getVariableOptionsMock = jest.fn().mockResolvedValue({
+    const getVariableOptionsMock = vi.fn().mockResolvedValue({
       data: [
         { label: 'opt1', value: 'opt1' },
         { label: 'opt2', value: 'opt2' },
       ],
     });
 
-    (usePlugins as jest.Mock).mockReturnValue(
-      definitions.map(() => ({
-        data: { getVariableOptions: getVariableOptionsMock },
-        isLoading: false,
-      })),
+    vi.mocked(usePlugins).mockReturnValue(
+      definitions.map(() => makePluginQueryResult(makeVariablePlugin({ getVariableOptions: getVariableOptionsMock }))),
     );
 
     mockOuterVariables({});
@@ -229,26 +251,22 @@ describe('useResolveListVariableValues', () => {
     const varB = makeDefinition('VarB');
     const definitions: VariableDefinition[] = [varA, varB];
 
-    const getOptionsA = jest.fn().mockResolvedValue({
+    const getOptionsA = vi.fn().mockResolvedValue({
       data: [{ label: 'a1', value: 'a1' }],
     });
-    const getOptionsB = jest.fn().mockResolvedValue({
+    const getOptionsB = vi.fn().mockResolvedValue({
       data: [{ label: 'b1', value: 'b1' }],
     });
 
     // VarB depends on VarA
-    (usePlugins as jest.Mock).mockReturnValue([
-      {
-        data: { getVariableOptions: getOptionsA },
-        isLoading: false,
-      },
-      {
-        data: {
+    vi.mocked(usePlugins).mockReturnValue([
+      makePluginQueryResult(makeVariablePlugin({ getVariableOptions: getOptionsA })),
+      makePluginQueryResult(
+        makeVariablePlugin({
           getVariableOptions: getOptionsB,
-          dependsOn: jest.fn().mockReturnValue({ variables: ['VarA'] }),
-        },
-        isLoading: false,
-      },
+          dependsOn: vi.fn().mockReturnValue({ variables: ['VarA'] }),
+        }),
+      ),
     ]);
 
     mockOuterVariables({});
@@ -270,16 +288,15 @@ describe('useResolveListVariableValues', () => {
     const varB = makeDefinition('VarB');
     const definitions: VariableDefinition[] = [varA, varB];
 
-    const getOptionsB = jest.fn().mockResolvedValue({ data: [] });
-    (usePlugins as jest.Mock).mockReturnValue([
-      { data: undefined, isLoading: true },
-      {
-        data: {
+    const getOptionsB = vi.fn().mockResolvedValue({ data: [] });
+    vi.mocked(usePlugins).mockReturnValue([
+      makePluginQueryResult(undefined, true),
+      makePluginQueryResult(
+        makeVariablePlugin({
           getVariableOptions: getOptionsB,
-          dependsOn: jest.fn().mockReturnValue({ variables: ['VarA'] }),
-        },
-        isLoading: false,
-      },
+          dependsOn: vi.fn().mockReturnValue({ variables: ['VarA'] }),
+        }),
+      ),
     ]);
 
     mockOuterVariables({});
@@ -297,18 +314,17 @@ describe('useResolveListVariableValues', () => {
       VarA: { loading: false, value: 'outer-a' },
     };
 
-    const getOptionsB = jest.fn().mockResolvedValue({
+    const getOptionsB = vi.fn().mockResolvedValue({
       data: [{ label: 'b1', value: 'b1' }],
     });
 
-    (usePlugins as jest.Mock).mockReturnValue([
-      {
-        data: {
+    vi.mocked(usePlugins).mockReturnValue([
+      makePluginQueryResult(
+        makeVariablePlugin({
           getVariableOptions: getOptionsB,
-          dependsOn: jest.fn().mockReturnValue({ variables: ['VarA'] }),
-        },
-        isLoading: false,
-      },
+          dependsOn: vi.fn().mockReturnValue({ variables: ['VarA'] }),
+        }),
+      ),
     ]);
 
     mockOuterVariables(outerVariables);
@@ -330,26 +346,24 @@ describe('useResolveListVariableValues', () => {
     const varC = makeDefinition('VarC');
     const definitions: VariableDefinition[] = [varA, varB, varC];
 
-    const getOptionsA = jest.fn().mockResolvedValue({ data: [{ label: 'a1', value: 'a1' }] });
-    const getOptionsB = jest.fn().mockResolvedValue({ data: [{ label: 'b1', value: 'b1' }] });
-    const getOptionsC = jest.fn().mockResolvedValue({ data: [{ label: 'c1', value: 'c1' }] });
+    const getOptionsA = vi.fn().mockResolvedValue({ data: [{ label: 'a1', value: 'a1' }] });
+    const getOptionsB = vi.fn().mockResolvedValue({ data: [{ label: 'b1', value: 'b1' }] });
+    const getOptionsC = vi.fn().mockResolvedValue({ data: [{ label: 'c1', value: 'c1' }] });
 
-    (usePlugins as jest.Mock).mockReturnValue([
-      { data: { getVariableOptions: getOptionsA }, isLoading: false },
-      {
-        data: {
+    vi.mocked(usePlugins).mockReturnValue([
+      makePluginQueryResult(makeVariablePlugin({ getVariableOptions: getOptionsA })),
+      makePluginQueryResult(
+        makeVariablePlugin({
           getVariableOptions: getOptionsB,
-          dependsOn: jest.fn().mockReturnValue({ variables: ['VarA'] }),
-        },
-        isLoading: false,
-      },
-      {
-        data: {
+          dependsOn: vi.fn().mockReturnValue({ variables: ['VarA'] }),
+        }),
+      ),
+      makePluginQueryResult(
+        makeVariablePlugin({
           getVariableOptions: getOptionsC,
-          dependsOn: jest.fn().mockReturnValue({ variables: ['VarA'] }),
-        },
-        isLoading: false,
-      },
+          dependsOn: vi.fn().mockReturnValue({ variables: ['VarA'] }),
+        }),
+      ),
     ]);
 
     mockOuterVariables({});
@@ -371,27 +385,25 @@ describe('useResolveListVariableValues', () => {
     const varC = makeDefinition('VarC');
     const definitions: VariableDefinition[] = [varA, varB, varC];
 
-    const getOptionsA = jest.fn().mockResolvedValue({ data: [{ label: 'a1', value: 'a1' }] });
-    const getOptionsB = jest.fn().mockResolvedValue({ data: [{ label: 'b1', value: 'b1' }] });
-    const getOptionsC = jest.fn().mockResolvedValue({ data: [{ label: 'c1', value: 'c1' }] });
+    const getOptionsA = vi.fn().mockResolvedValue({ data: [{ label: 'a1', value: 'a1' }] });
+    const getOptionsB = vi.fn().mockResolvedValue({ data: [{ label: 'b1', value: 'b1' }] });
+    const getOptionsC = vi.fn().mockResolvedValue({ data: [{ label: 'c1', value: 'c1' }] });
 
     // A → B → C chain
-    (usePlugins as jest.Mock).mockReturnValue([
-      { data: { getVariableOptions: getOptionsA }, isLoading: false },
-      {
-        data: {
+    vi.mocked(usePlugins).mockReturnValue([
+      makePluginQueryResult(makeVariablePlugin({ getVariableOptions: getOptionsA })),
+      makePluginQueryResult(
+        makeVariablePlugin({
           getVariableOptions: getOptionsB,
-          dependsOn: jest.fn().mockReturnValue({ variables: ['VarA'] }),
-        },
-        isLoading: false,
-      },
-      {
-        data: {
+          dependsOn: vi.fn().mockReturnValue({ variables: ['VarA'] }),
+        }),
+      ),
+      makePluginQueryResult(
+        makeVariablePlugin({
           getVariableOptions: getOptionsC,
-          dependsOn: jest.fn().mockReturnValue({ variables: ['VarB'] }),
-        },
-        isLoading: false,
-      },
+          dependsOn: vi.fn().mockReturnValue({ variables: ['VarB'] }),
+        }),
+      ),
     ]);
 
     mockOuterVariables({});

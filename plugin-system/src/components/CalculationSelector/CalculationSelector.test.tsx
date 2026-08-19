@@ -18,7 +18,7 @@ import { CalculationType } from '../../model'; // TODO to come from the utils li
 import { CalculationSelector } from './CalculationSelector';
 
 describe('CalculationSelector', () => {
-  const renderCalculationSelector = (value: CalculationType, onChange = jest.fn()): void => {
+  const renderCalculationSelector = (value: CalculationType, onChange = vi.fn()): void => {
     render(
       <div>
         <CalculationSelector value={value} onChange={onChange} />
@@ -31,7 +31,7 @@ describe('CalculationSelector', () => {
   };
 
   it('can change the calculation by clicking', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderCalculationSelector('last', onChange);
 
     const calcSelector = getCalculationSelector();
@@ -45,7 +45,7 @@ describe('CalculationSelector', () => {
   });
 
   it('can change the calculation using a keyboard', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderCalculationSelector('first-number', onChange);
 
     const calcSelector = getCalculationSelector();

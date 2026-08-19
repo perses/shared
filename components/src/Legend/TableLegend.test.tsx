@@ -47,9 +47,9 @@ type RenderTableLegendOpts = Partial<
 const renderTableLegend = ({
   items = MOCK_ITEMS,
   selectedItems = 'ALL',
-  onSelectedItemsChange = jest.fn(),
-  onItemMouseOver = jest.fn(),
-  onItemMouseOut = jest.fn(),
+  onSelectedItemsChange = vi.fn(),
+  onItemMouseOver = vi.fn(),
+  onItemMouseOut = vi.fn(),
 }: RenderTableLegendOpts = {}): RenderResult => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: MOCK_VIEWPORT_HEIGHT, itemHeight: MOCK_ITEM_HEIGHT }}>
@@ -110,7 +110,7 @@ describe('TableLegend', () => {
     });
 
     test('selects none on click header checkbox', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
@@ -129,7 +129,7 @@ describe('TableLegend', () => {
     });
 
     test('focuses item on click associated checkbox', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
@@ -150,7 +150,7 @@ describe('TableLegend', () => {
     });
 
     test('unselects item on modified click associated checkbox', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
@@ -194,7 +194,7 @@ describe('TableLegend', () => {
     });
 
     test('selects all on click header checkbox', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
@@ -217,7 +217,7 @@ describe('TableLegend', () => {
     });
 
     test('selects item on click associated checkbox', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
@@ -238,7 +238,7 @@ describe('TableLegend', () => {
     });
 
     test('selects item on modified click associated checkbox', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
@@ -287,7 +287,7 @@ describe('TableLegend', () => {
     });
 
     test('selects all on click header checkbox', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
@@ -310,7 +310,7 @@ describe('TableLegend', () => {
     });
 
     test('focuses item on click associated checkbox for unselected item', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
@@ -331,7 +331,7 @@ describe('TableLegend', () => {
     });
 
     test('selects item on modified click associated checkbox for unselected item', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
@@ -355,7 +355,7 @@ describe('TableLegend', () => {
     });
 
     test('unselects item on modified click associated checkbox for selected item', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
@@ -376,7 +376,7 @@ describe('TableLegend', () => {
     });
 
     test('selects all on click associated checkbox for selected item', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderTableLegend({
         selectedItems,
         onSelectedItemsChange: mockOnSelectedItemsChange,
@@ -401,7 +401,7 @@ describe('TableLegend', () => {
 
   describe('on mouse over item', () => {
     test('calls `onItemMouseOver` with event and item information', () => {
-      const mockOnItemMouseOver = jest.fn();
+      const mockOnItemMouseOver = vi.fn();
       renderTableLegend({
         onItemMouseOver: mockOnItemMouseOver,
       });
@@ -428,7 +428,7 @@ describe('TableLegend', () => {
 
   describe('on mouse out item', () => {
     test('calls `onItemMouseOut` with event and item information', () => {
-      const mockOnItemMouseOut = jest.fn();
+      const mockOnItemMouseOut = vi.fn();
       renderTableLegend({
         onItemMouseOut: mockOnItemMouseOut,
       });

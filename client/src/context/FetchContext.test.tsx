@@ -51,7 +51,7 @@ describe('FetchContext', () => {
 
   describe('FetchProvider with custom fetchFn', () => {
     it('provides the custom fetch to useFetch consumers', async () => {
-      const customFetch: FetchFn = jest.fn().mockResolvedValue({
+      const customFetch: FetchFn = vi.fn().mockResolvedValue({
         ok: true,
       } as unknown as Response);
 
@@ -69,9 +69,9 @@ describe('FetchContext', () => {
     });
 
     it('derives fetchJson from the custom fetch', async () => {
-      const customFetch: FetchFn = jest.fn().mockResolvedValue({
+      const customFetch: FetchFn = vi.fn().mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue({ ok: true }),
+        json: vi.fn().mockResolvedValue({ ok: true }),
       } as unknown as Response);
 
       render(

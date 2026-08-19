@@ -19,20 +19,20 @@ import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 import { PluginLoaderComponent } from './PluginLoaderComponent';
 import * as PluginRuntime from './PluginRuntime';
 
-globalThis.fetch = jest.fn(() => Promise.resolve({ ok: true } as Response));
+globalThis.fetch = vi.fn(() => Promise.resolve({ ok: true } as Response));
 
-jest.mock('@module-federation/enhanced/runtime', () => ({
-  init: jest.fn(() => ({
+vi.mock('@module-federation/enhanced/runtime', () => ({
+  init: vi.fn(() => ({
     options: {
       remotes: [],
     },
-    registerRemotes: jest.fn(),
+    registerRemotes: vi.fn(),
   })),
-  loadRemote: jest.fn(),
+  loadRemote: vi.fn(),
 }));
 
-jest.mock('./PluginRuntime', () => ({
-  usePluginRuntime: jest.fn(),
+vi.mock('./PluginRuntime', () => ({
+  usePluginRuntime: vi.fn(),
   pluginRuntime: {} as ModuleFederation,
 }));
 
@@ -63,9 +63,9 @@ describe('PluginLoaderComponent', () => {
   };
 
   it('should render the plugin component', async () => {
-    const mockPluginModule = jest.fn(() => <div>Mock Plugin Component</div>);
+    const mockPluginModule = vi.fn(() => <div>Mock Plugin Component</div>);
 
-    jest.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
+    vi.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
       loadPlugin: (): Promise<{ 'test-plugin': () => React.ReactNode }> =>
         Promise.resolve({ 'test-plugin': mockPluginModule }),
       pluginRuntime: {} as ModuleFederation,
@@ -83,9 +83,9 @@ describe('PluginLoaderComponent', () => {
   });
 
   it('should throw an error if the plugin module does not have a named export', async () => {
-    const mockPluginModule = jest.fn(() => <div>Mock Plugin Component</div>);
+    const mockPluginModule = vi.fn(() => <div>Mock Plugin Component</div>);
 
-    jest.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
+    vi.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
       loadPlugin: (): Promise<RemotePluginModule> => Promise.resolve({ mockPluginModule } as RemotePluginModule),
       pluginRuntime: {} as ModuleFederation,
     }));
@@ -106,7 +106,7 @@ describe('PluginLoaderComponent', () => {
   });
 
   it('should throw an error if the plugin module named export is not a function', async () => {
-    jest.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
+    vi.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
       loadPlugin: (): Promise<RemotePluginModule> =>
         Promise.resolve({ 'test-plugin': 'not a function' } as unknown as RemotePluginModule),
       pluginRuntime: {} as ModuleFederation,

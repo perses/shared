@@ -59,7 +59,7 @@ describe('PluginKindSelect', () => {
 
   it('can select new value', async () => {
     let onChangeValue: string | undefined = undefined;
-    const onChange = jest.fn((value) => {
+    const onChange = vi.fn((value) => {
       onChangeValue = value;
     });
     renderComponent({

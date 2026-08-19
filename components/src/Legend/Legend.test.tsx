@@ -42,11 +42,11 @@ type RenderLegendOpts = Partial<
 };
 
 const renderLegend = ({
-  onSelectedItemsChange = jest.fn(),
+  onSelectedItemsChange = vi.fn(),
   selectedItems = 'ALL',
   position = 'bottom',
-  onItemMouseOver = jest.fn(),
-  onItemMouseOut = jest.fn(),
+  onItemMouseOver = vi.fn(),
+  onItemMouseOut = vi.fn(),
 }: RenderLegendOpts = {}): RenderResult => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
@@ -132,7 +132,7 @@ describe('Legend', () => {
     });
 
     test('selects unselected item on click', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderLegend({
         onSelectedItemsChange: mockOnSelectedItemsChange,
         position,
@@ -151,7 +151,7 @@ describe('Legend', () => {
     });
 
     test.each(['shiftKey', 'metaKey'])(`adds/removes selected items on click modified with %s`, (modifierKey) => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderLegend({
         onSelectedItemsChange: mockOnSelectedItemsChange,
         selectedItems: {
@@ -179,7 +179,7 @@ describe('Legend', () => {
     });
 
     test('reverts to select "ALL" on simple click of selected item', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderLegend({
         onSelectedItemsChange: mockOnSelectedItemsChange,
         selectedItems: {
@@ -201,7 +201,7 @@ describe('Legend', () => {
 
     describe('on mouse over item', () => {
       test('calls `onItemMouseOver` with event and item information', () => {
-        const mockOnItemMouseOver = jest.fn();
+        const mockOnItemMouseOver = vi.fn();
         renderLegend({
           onItemMouseOver: mockOnItemMouseOver,
           position,
@@ -229,7 +229,7 @@ describe('Legend', () => {
 
     describe('on mouse out item', () => {
       test('calls `onItemMouseOut` with event and item information', () => {
-        const mockOnItemMouseOut = jest.fn();
+        const mockOnItemMouseOut = vi.fn();
         renderLegend({
           onItemMouseOut: mockOnItemMouseOut,
           position,

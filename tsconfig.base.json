@@ -4,6 +4,7 @@
     "target": "es2023",
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "esnext",
+    "types": ["node", "vitest/globals", "@testing-library/jest-dom"],
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "esModuleInterop": true,

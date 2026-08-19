@@ -17,19 +17,19 @@ import { TransformsEditor } from '.';
 import { Transform } from '../model';
 
 describe('TransformsEditor', () => {
-  function renderTableColumnsEditor(value: Transform[], onChange = jest.fn()): void {
+  function renderTableColumnsEditor(value: Transform[], onChange = vi.fn()): void {
     render(<TransformsEditor value={value} onChange={onChange} />);
   }
 
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('can add a new transformation', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderTableColumnsEditor([], onChange);
     const addColumnButton = screen.getByRole('button', { name: /Add Transformation/i });
     fireEvent.click(addColumnButton);
@@ -37,7 +37,7 @@ describe('TransformsEditor', () => {
   });
 
   it('can collapse and update a transformation', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderTableColumnsEditor([{ kind: 'MergeIndexedColumns', spec: { column: 'env' } }], onChange);
 
     // Expand the transform editor for the first transform
@@ -46,7 +46,7 @@ describe('TransformsEditor', () => {
 
     const columnInput = screen.getByRole('textbox', { name: /Column/i });
     fireEvent.change(columnInput, { target: { value: 'MySuperName' } });
-    jest.advanceTimersByTime(500);
+    vi.advanceTimersByTime(500);
     expect(onChange).toHaveBeenCalledWith([{ kind: 'MergeIndexedColumns', spec: { column: 'MySuperName' } }]);
   });
 });

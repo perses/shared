@@ -23,8 +23,8 @@
     "build:types": "tsc --project tsconfig.build.json",
     "type-check": "tsc --noEmit",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
-    "test": "cross-env TZ=UTC jest",
-    "test:watch": "npm run test -- --watch",
+    "test": "cross-env TZ=UTC vitest run",
+    "test:watch": "cross-env TZ=UTC vitest",
     "lint": "oxlint src",
     "lint:fix": "oxlint --fix src"
   },

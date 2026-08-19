@@ -18,8 +18,8 @@ import { ReactElement, ReactNode } from 'react';
 
 // Resolve every annotation definition to a single data point derived from its name, so both the
 // dashboard hydration and the panel-local resolution go through the same predictable stub.
-jest.mock('@perses-dev/plugin-system', () => {
-  const actual = jest.requireActual('@perses-dev/plugin-system');
+vi.mock('@perses-dev/plugin-system', async () => {
+  const actual = await vi.importActual<typeof import('@perses-dev/plugin-system')>('@perses-dev/plugin-system');
   return {
     ...actual,
     useAnnotations: (definitions: AnnotationSpec[]): Array<{ data: Array<{ start: number; title: string }> }> =>

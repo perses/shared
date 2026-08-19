@@ -61,11 +61,11 @@ describe('PanelSpecEditor', () => {
           queries: [],
         },
       },
-      onQueriesChange: jest.fn(),
-      onQueryRun: jest.fn(),
-      onPluginSpecChange: jest.fn(),
-      onAnnotationsChange: jest.fn(),
-      onJSONChange: jest.fn(),
+      onQueriesChange: vi.fn(),
+      onQueryRun: vi.fn(),
+      onPluginSpecChange: vi.fn(),
+      onAnnotationsChange: vi.fn(),
+      onJSONChange: vi.fn(),
     });
     const queryEditor = await screen.findByLabelText('Query');
     expect(queryEditor).toBeInTheDocument();
@@ -88,11 +88,11 @@ describe('PanelSpecEditor', () => {
           queries: [],
         },
       },
-      onQueriesChange: jest.fn(),
-      onQueryRun: jest.fn(),
-      onPluginSpecChange: jest.fn(),
-      onAnnotationsChange: jest.fn(),
-      onJSONChange: jest.fn(),
+      onQueriesChange: vi.fn(),
+      onQueryRun: vi.fn(),
+      onPluginSpecChange: vi.fn(),
+      onAnnotationsChange: vi.fn(),
+      onJSONChange: vi.fn(),
     });
 
     const queryEditor = await screen.queryByLabelText('Query');

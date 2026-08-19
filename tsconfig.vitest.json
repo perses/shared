@@ -1,0 +1,9 @@
+// Shared tsconfig paths used by Vitest across workspaces
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "paths": {
+      "@perses-dev/*": ["./*/src"]
+    }
+  }
+}

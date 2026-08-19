@@ -219,7 +219,7 @@ describe('SelectionProvider', () => {
       });
 
       it('should use custom getId function', async () => {
-        const customGetId = jest.fn((item: TestItem) => item.id);
+        const customGetId = vi.fn((item: TestItem) => item.id);
         renderWithProvider(<TestConsumer getId={customGetId} />);
 
         userEvent.click(screen.getByTestId('toggle-item-1'));

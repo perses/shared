@@ -52,11 +52,11 @@ describe('PanelFocusProvider', () => {
 
   describe('usePanelFocusHandlers', () => {
     beforeEach(() => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
     });
 
     afterEach(() => {
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('should set focused panel on mouse enter after debounce', () => {
@@ -75,7 +75,7 @@ describe('PanelFocusProvider', () => {
 
       // After debounce (50ms)
       act(() => {
-        jest.advanceTimersByTime(50);
+        vi.advanceTimersByTime(50);
       });
 
       expect(screen.getByTestId('focused-panel').textContent).toBe('panel-1');
@@ -89,7 +89,7 @@ describe('PanelFocusProvider', () => {
       );
 
       const panelTarget = screen.getByTestId('panel-target');
-      const focusSpy = jest.spyOn(panelTarget, 'focus');
+      const focusSpy = vi.spyOn(panelTarget, 'focus');
 
       act(() => {
         fireEvent.mouseEnter(panelTarget);
@@ -98,7 +98,7 @@ describe('PanelFocusProvider', () => {
       expect(focusSpy).not.toHaveBeenCalled();
 
       act(() => {
-        jest.advanceTimersByTime(50);
+        vi.advanceTimersByTime(50);
       });
 
       expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
@@ -115,7 +115,7 @@ describe('PanelFocusProvider', () => {
       // First activate
       act(() => {
         fireEvent.mouseEnter(screen.getByTestId('panel-target'));
-        jest.advanceTimersByTime(50);
+        vi.advanceTimersByTime(50);
       });
 
       expect(screen.getByTestId('focused-panel').textContent).toBe('panel-1');
@@ -141,13 +141,13 @@ describe('PanelFocusProvider', () => {
 
       // Leave before the 50ms debounce fires
       act(() => {
-        jest.advanceTimersByTime(30);
+        vi.advanceTimersByTime(30);
         fireEvent.mouseLeave(screen.getByTestId('panel-target'));
       });
 
       // Advance past the debounce time
       act(() => {
-        jest.advanceTimersByTime(50);
+        vi.advanceTimersByTime(50);
       });
 
       // Panel should never have been focused
@@ -158,7 +158,7 @@ describe('PanelFocusProvider', () => {
   describe('error handling', () => {
     it('should throw when hooks are used outside PanelFocusProvider', () => {
       // Suppress console.error during expected error
-      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       expect(() => {
         renderHook(() => useFocusedPanel());

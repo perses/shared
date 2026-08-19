@@ -25,32 +25,32 @@ import {
 } from '../../test';
 import { DataQueriesProvider, useDataQueries } from './DataQueriesProvider';
 
-jest.mock('../time-series-queries', () => ({
-  useTimeSeriesQueries: jest.fn().mockImplementation(() => [{ data: MOCK_TIME_SERIES_DATA }]),
+vi.mock('../time-series-queries', () => ({
+  useTimeSeriesQueries: vi.fn().mockImplementation(() => [{ data: MOCK_TIME_SERIES_DATA }]),
 }));
 
-jest.mock('../trace-queries', () => ({
-  useTraceQueries: jest.fn().mockImplementation(() => [{ data: MOCK_TRACE_DATA }]),
+vi.mock('../trace-queries', () => ({
+  useTraceQueries: vi.fn().mockImplementation(() => [{ data: MOCK_TRACE_DATA }]),
 }));
 
-jest.mock('../profile-queries', () => ({
-  useProfileQueries: jest.fn().mockImplementation(() => [{ data: MOCK_PROFILE_DATA }]),
+vi.mock('../profile-queries', () => ({
+  useProfileQueries: vi.fn().mockImplementation(() => [{ data: MOCK_PROFILE_DATA }]),
 }));
 
-jest.mock('../log-queries', () => ({
-  useLogQueries: jest.fn().mockImplementation(() => [{ data: MOCK_LOG_DATA }]),
+vi.mock('../log-queries', () => ({
+  useLogQueries: vi.fn().mockImplementation(() => [{ data: MOCK_LOG_DATA }]),
 }));
 
-jest.mock('../alerts-queries', () => ({
-  useAlertsQueries: jest.fn().mockImplementation(() => [{ data: MOCK_ALERTS_DATA }]),
+vi.mock('../alerts-queries', () => ({
+  useAlertsQueries: vi.fn().mockImplementation(() => [{ data: MOCK_ALERTS_DATA }]),
 }));
 
-jest.mock('../silences-queries', () => ({
-  useSilencesQueries: jest.fn().mockImplementation(() => [{ data: MOCK_SILENCES_DATA }]),
+vi.mock('../silences-queries', () => ({
+  useSilencesQueries: vi.fn().mockImplementation(() => [{ data: MOCK_SILENCES_DATA }]),
 }));
 
-jest.mock('../plugin-registry', () => ({
-  useListPluginMetadata: jest.fn().mockImplementation(() => ({
+vi.mock('../plugin-registry', () => ({
+  useListPluginMetadata: vi.fn().mockImplementation(() => ({
     data: [
       {
         spec: {

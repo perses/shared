@@ -30,7 +30,7 @@ const PROJECT = 'perses';
 const FAKE_PLUGIN_NAME = 'FakeDatasourcePlugin';
 
 const FakeDataSourcePlugin: DatasourcePlugin = {
-  createClient: jest.fn().mockReturnValue(undefined),
+  createClient: vi.fn().mockReturnValue(undefined),
   OptionsEditorComponent: () => {
     return <div>Edit options here</div>;
   },
@@ -465,11 +465,11 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
     },
   ])('$title', async (data: TestData) => {
     const datasourceApiMock = {
-      buildProxyUrl: jest.fn().mockReturnValue(''),
-      getDatasource: jest.fn().mockReturnValue(Promise.resolve([])),
-      getGlobalDatasource: jest.fn().mockReturnValue(Promise.resolve([])),
-      listDatasources: jest.fn().mockReturnValue(Promise.resolve(data.input.datasources.project)),
-      listGlobalDatasources: jest.fn().mockReturnValue(Promise.resolve(data.input.datasources.global)),
+      buildProxyUrl: vi.fn().mockReturnValue(''),
+      getDatasource: vi.fn().mockReturnValue(Promise.resolve([])),
+      getGlobalDatasource: vi.fn().mockReturnValue(Promise.resolve([])),
+      listDatasources: vi.fn().mockReturnValue(Promise.resolve(data.input.datasources.project)),
+      listGlobalDatasources: vi.fn().mockReturnValue(Promise.resolve(data.input.datasources.global)),
     };
     const queryClient = new QueryClient();
     const dashboard: DashboardResource = {

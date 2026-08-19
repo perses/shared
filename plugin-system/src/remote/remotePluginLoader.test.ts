@@ -25,22 +25,22 @@ import { loadPlugin } from './PluginRuntime';
 import { remotePluginLoader } from './remotePluginLoader';
 
 // Mock the loadPlugin function
-jest.mock('./PluginRuntime', () => ({
-  loadPlugin: jest.fn(),
+vi.mock('./PluginRuntime', () => ({
+  loadPlugin: vi.fn(),
 }));
 
-const mockLoadPlugin = loadPlugin as jest.MockedFunction<typeof loadPlugin>;
+const mockLoadPlugin = vi.mocked(loadPlugin);
 
 // Mock global fetch
-const mockFetch = jest.fn();
+const mockFetch = vi.fn();
 global.fetch = mockFetch;
 
 // Mock console.error to spy on error logging
-const mockConsoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+const mockConsoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
 describe('remotePluginLoader', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockConsoleError.mockClear();
   });
 
@@ -50,7 +50,7 @@ describe('remotePluginLoader', () => {
 
   describe('getInstalledPlugins', () => {
     it('should fetch plugins from correct endpoint without options', async () => {
-      const mockResponse = { json: jest.fn().mockResolvedValue([MOCK_VALID_PLUGIN_MODULE_RESOURCE]) };
+      const mockResponse = { json: vi.fn().mockResolvedValue([MOCK_VALID_PLUGIN_MODULE_RESOURCE]) };
       mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const loader = remotePluginLoader();
@@ -63,7 +63,7 @@ describe('remotePluginLoader', () => {
 
     it('should fetch plugins from correct endpoint with apiPrefix', async () => {
       const apiPrefix = 'https://example.com';
-      const mockResponse = { json: jest.fn().mockResolvedValue([MOCK_VALID_PLUGIN_MODULE_RESOURCE]) };
+      const mockResponse = { json: vi.fn().mockResolvedValue([MOCK_VALID_PLUGIN_MODULE_RESOURCE]) };
       mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const loader = remotePluginLoader({ apiPrefix });
@@ -73,7 +73,7 @@ describe('remotePluginLoader', () => {
     });
 
     it('should filter out invalid plugin modules and return only valid ones', async () => {
-      const mockResponse = { json: jest.fn().mockResolvedValue(MOCK_MIXED_VALIDITY_PLUGIN_MODULES) };
+      const mockResponse = { json: vi.fn().mockResolvedValue(MOCK_MIXED_VALIDITY_PLUGIN_MODULES) };
       mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const loader = remotePluginLoader();
@@ -86,7 +86,7 @@ describe('remotePluginLoader', () => {
     });
 
     it('should log error and return empty array when response is not an array', async () => {
-      const mockResponse = { json: jest.fn().mockResolvedValue({ invalid: 'response' }) };
+      const mockResponse = { json: vi.fn().mockResolvedValue({ invalid: 'response' }) };
       mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const loader = remotePluginLoader();
@@ -99,7 +99,7 @@ describe('remotePluginLoader', () => {
     });
 
     it('should log error when no valid plugins are found', async () => {
-      const mockResponse = { json: jest.fn().mockResolvedValue([MOCK_INVALID_PLUGIN_MODULE]) };
+      const mockResponse = { json: vi.fn().mockResolvedValue([MOCK_INVALID_PLUGIN_MODULE]) };
       mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const loader = remotePluginLoader();
@@ -110,7 +110,7 @@ describe('remotePluginLoader', () => {
     });
 
     it('should return empty array for empty response array', async () => {
-      const mockResponse = { json: jest.fn().mockResolvedValue([]) };
+      const mockResponse = { json: vi.fn().mockResolvedValue([]) };
       mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const loader = remotePluginLoader();
@@ -121,8 +121,8 @@ describe('remotePluginLoader', () => {
     });
 
     it('should use custom fetchFn when provided', async () => {
-      const customFetch = jest.fn().mockResolvedValue({
-        json: jest.fn().mockResolvedValue([MOCK_VALID_PLUGIN_MODULE_RESOURCE]),
+      const customFetch = vi.fn().mockResolvedValue({
+        json: vi.fn().mockResolvedValue([MOCK_VALID_PLUGIN_MODULE_RESOURCE]),
       });
 
       const loader = remotePluginLoader({ fetchFn: customFetch });
@@ -289,7 +289,7 @@ describe('remotePluginLoader', () => {
     });
 
     it('should handle JSON parsing errors', async () => {
-      const mockResponse = { json: jest.fn().mockRejectedValue(new Error('Invalid JSON')) };
+      const mockResponse = { json: vi.fn().mockRejectedValue(new Error('Invalid JSON')) };
       mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const loader = remotePluginLoader();
@@ -318,7 +318,7 @@ describe('remotePluginLoader', () => {
         },
       ];
 
-      const mockResponse = { json: jest.fn().mockResolvedValue(mixedResponse) };
+      const mockResponse = { json: vi.fn().mockResolvedValue(mixedResponse) };
       mockFetch.mockResolvedValue(mockResponse as unknown as Response);
 
       const loader = remotePluginLoader();
