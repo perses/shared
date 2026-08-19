@@ -47,7 +47,7 @@ function getRepeatPanelTooltip(
     return `This panel is generated from the variable "${repeatVariableName}" with the value "${value}". To change panel definition, please edit the first panel.`;
   }
   if (isFirst && isCapped) {
-    return `Not all values are displayed. To display more, update the repeat variable limit in the server configuration.`;
+    return `Not all values are displayed. To display more, update the repeat variable limit in the server configuration or exit full screen mode.`;
   }
   return undefined;
 }
