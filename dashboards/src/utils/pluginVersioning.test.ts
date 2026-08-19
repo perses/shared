@@ -13,6 +13,7 @@
 
 import { DashboardResource } from '@perses-dev/client';
 import { PluginMetadataWithModule } from '@perses-dev/plugin-system';
+
 import {
   applyPluginVersions,
   buildAvailablePluginVersions,
@@ -30,7 +31,7 @@ function buildMetadata(
   kind: string,
   name: string,
   moduleVersion: string,
-  pluginVersion?: string
+  pluginVersion?: string,
 ): PluginMetadataWithModule {
   return {
     kind,
@@ -203,7 +204,7 @@ describe('buildAvailablePluginVersions / findInvalidPinnedVersions', () => {
         ['PrometheusLabelValuesVariable', '1.2.0'],
         ['PrometheusDatasource', '1.3.0'],
         ['TempoAnnotation', '1.4.0'],
-      ])
+      ]),
     );
     expect(findInvalidPinnedVersions(dashboard, available)).toEqual([]);
   });
@@ -214,7 +215,7 @@ describe('buildAvailablePluginVersions / findInvalidPinnedVersions', () => {
       new Map<string, string>([
         ['TimeSeriesChart', '99.0.0'], // not available
         ['PrometheusTimeSeriesQuery', '1.1.0'], // available
-      ])
+      ]),
     );
     const invalid = findInvalidPinnedVersions(dashboard, available);
     expect(invalid).toEqual([{ kind: 'TimeSeriesChart', version: '99.0.0' }]);
@@ -244,7 +245,7 @@ describe('findOutdatedPlugins / updatePluginVersions', () => {
         ['PrometheusLabelValuesVariable', '1.0.0'],
         ['PrometheusDatasource', '1.0.0'],
         ['TempoAnnotation', '1.0.0'],
-      ])
+      ]),
     );
 
   test('an unpinned dashboard reports nothing as outdated', () => {
@@ -324,10 +325,10 @@ describe('findOutdatedPlugins / updatePluginVersions', () => {
 
   test('getOutdatedPluginId distinguishes plugin type, kind and version', () => {
     expect(getOutdatedPluginId({ pluginType: 'Panel', kind: 'TimeSeriesChart', currentVersion: '1.0.0' })).toBe(
-      'Panel:TimeSeriesChart:1.0.0'
+      'Panel:TimeSeriesChart:1.0.0',
     );
     expect(getOutdatedPluginId({ pluginType: 'Panel', kind: 'TimeSeriesChart', currentVersion: '1.1.0' })).not.toBe(
-      getOutdatedPluginId({ pluginType: 'Panel', kind: 'TimeSeriesChart', currentVersion: '1.0.0' })
+      getOutdatedPluginId({ pluginType: 'Panel', kind: 'TimeSeriesChart', currentVersion: '1.0.0' }),
     );
   });
 });

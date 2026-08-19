@@ -11,9 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Definition } from '@perses-dev/spec';
 import { DashboardResource } from '@perses-dev/client';
 import { PluginMetadataWithModule, PluginType } from '@perses-dev/plugin-system';
+import { Definition } from '@perses-dev/spec';
 
 /**
  * Optional metadata attached to a plugin definition. Mirrors the backend `Plugin.Metadata` model (and the
@@ -118,7 +118,7 @@ export function buildLatestPluginVersions(pluginMetadata: PluginMetadataWithModu
  */
 function visitPluginDefinitions(
   dashboard: DashboardResource,
-  visitor: (definition: VersionedDefinition) => void
+  visitor: (definition: VersionedDefinition) => void,
 ): void {
   const spec = dashboard.spec;
 
@@ -156,11 +156,6 @@ function visitPluginDefinitions(
   }
 }
 
-/** Deep-clone a dashboard resource so mutations don't affect the source object. */
-function cloneDashboard(dashboard: DashboardResource): DashboardResource {
-  return JSON.parse(JSON.stringify(dashboard));
-}
-
 /** Context about where a plugin definition lives inside the dashboard spec. */
 interface PluginDefinitionContext {
   /** The plugin type (e.g. 'Panel', 'TimeSeriesQuery', 'Variable', ...). */
@@ -175,7 +170,7 @@ interface PluginDefinitionContext {
  */
 function visitPluginDefinitionsWithContext(
   dashboard: DashboardResource,
-  visitor: (definition: VersionedDefinition, context: PluginDefinitionContext) => void
+  visitor: (definition: VersionedDefinition, context: PluginDefinitionContext) => void,
 ): void {
   const spec = dashboard.spec;
 
@@ -242,7 +237,7 @@ export function getOutdatedPluginId(plugin: Pick<OutdatedPlugin, 'pluginType' | 
  */
 export function findOutdatedPlugins(
   dashboard: DashboardResource,
-  latestVersions: Map<string, string>
+  latestVersions: Map<string, string>,
 ): OutdatedPlugin[] {
   const outdated = new Map<string, OutdatedPlugin>();
 
@@ -276,7 +271,7 @@ export function findOutdatedPlugins(
   });
 
   return [...outdated.values()].toSorted(
-    (a, b) => a.pluginType.localeCompare(b.pluginType) || a.kind.localeCompare(b.kind)
+    (a, b) => a.pluginType.localeCompare(b.pluginType) || a.kind.localeCompare(b.kind),
   );
 }
 
@@ -289,7 +284,7 @@ export function updatePluginVersions(dashboard: DashboardResource, plugins: Outd
     return dashboard;
   }
   const targets = new Map(plugins.map((plugin) => [getOutdatedPluginId(plugin), plugin.latestVersion]));
-  const next = cloneDashboard(dashboard);
+  const next = structuredClone(dashboard);
   visitPluginDefinitionsWithContext(next, (definition, context) => {
     const currentVersion = definition.metadata?.version;
     if (!currentVersion) {
@@ -309,7 +304,7 @@ export function updatePluginVersions(dashboard: DashboardResource, plugins: Outd
  * definitions whose kind is not present in the version map are left untouched.
  */
 export function applyPluginVersions(dashboard: DashboardResource, versions: Map<string, string>): DashboardResource {
-  const next = cloneDashboard(dashboard);
+  const next = structuredClone(dashboard);
   visitPluginDefinitions(next, (definition) => {
     const version = versions.get(definition.kind);
     if (version) {
@@ -324,7 +319,7 @@ export function applyPluginVersions(dashboard: DashboardResource, versions: Map<
  * dropped entirely when it no longer holds any information.
  */
 export function removePluginVersions(dashboard: DashboardResource): DashboardResource {
-  const next = cloneDashboard(dashboard);
+  const next = structuredClone(dashboard);
   visitPluginDefinitions(next, (definition) => {
     if (definition.metadata === undefined) {
       return;
@@ -386,7 +381,7 @@ export interface InvalidPinnedVersion {
  */
 export function findInvalidPinnedVersions(
   dashboard: DashboardResource,
-  availableVersions: Map<string, Set<string>>
+  availableVersions: Map<string, Set<string>>,
 ): InvalidPinnedVersion[] {
   const invalid: InvalidPinnedVersion[] = [];
   const seen = new Set<string>();

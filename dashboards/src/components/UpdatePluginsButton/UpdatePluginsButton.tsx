@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Badge, Button, Tooltip } from '@mui/material';
+import { useListPluginMetadata } from '@perses-dev/plugin-system';
 import UpdateIcon from 'mdi-material-ui/Update';
 import { ReactElement, useMemo, useState } from 'react';
-import { useListPluginMetadata } from '@perses-dev/plugin-system';
+
 import { useDashboard } from '../../context';
 import {
   buildLatestPluginVersions,
@@ -54,7 +55,7 @@ export function UpdatePluginsButton(): ReactElement | null {
 
   return (
     <>
-      <Tooltip title="Update outdated plugins to their latest available version" placement="bottom">
+      <Tooltip title="Update plugins to their latest version" placement="bottom">
         <Badge badgeContent={outdatedPlugins.length} color="primary">
           <Button
             onClick={() => setDrawerOpen(true)}

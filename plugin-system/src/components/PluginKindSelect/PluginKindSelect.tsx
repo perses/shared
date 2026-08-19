@@ -13,8 +13,8 @@
 
 import { MenuItem, TextField, TextFieldProps } from '@mui/material';
 import { forwardRef, ReactElement, useCallback, useMemo } from 'react';
-
 import { gt } from 'semver';
+
 import { PluginType, PluginMetadataWithModule } from '../../model';
 import { useListPluginMetadata } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';
@@ -109,7 +109,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
   const findGroup = useCallback(
     (selection: PluginEditorSelection): PluginKindGroup | undefined =>
       kindGroups.find((g) => g.type === selection.type && g.kind === selection.kind),
-    [kindGroups]
+    [kindGroups],
   );
 
   // Pass an empty value while options are still loading so MUI doesn't complain about us using an "out of range" value

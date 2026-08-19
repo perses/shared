@@ -94,7 +94,7 @@ export const useTimeSeriesQuery = (
     TIME_SERIES_QUERY_KEY,
     definition.spec.plugin.kind,
     undefined,
-    getPluginOverrides(definition.spec.plugin)
+    getPluginOverrides(definition.spec.plugin),
   );
   const context = useTimeSeriesQueryContext();
   const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
@@ -130,7 +130,7 @@ export function useTimeSeriesQueries(
 
   const pluginLoaderResponse = usePlugins(
     TIME_SERIES_QUERY_KEY,
-    definitions.map((d) => ({ kind: d.spec.plugin.kind, ...getPluginOverrides(d.spec.plugin) }))
+    definitions.map((d) => ({ kind: d.spec.plugin.kind, ...getPluginOverrides(d.spec.plugin) })),
   );
   return useQueries({
     queries: definitions.map((definition, idx) => {

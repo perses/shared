@@ -35,7 +35,7 @@ export function PanelContent(props: PanelContentProps): ReactElement {
     'Panel',
     panelPluginKind,
     { useErrorBoundary: true },
-    getPluginOverrides(definition?.spec.plugin)
+    getPluginOverrides(definition?.spec.plugin),
   );
 
   // Show fullsize skeleton if the panel plugin is loading.

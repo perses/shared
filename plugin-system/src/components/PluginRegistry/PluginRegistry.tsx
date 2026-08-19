@@ -118,7 +118,7 @@ export function PluginRegistry(props: PluginRegistryProps): ReactElement {
       throw new Error(
         version
           ? `A ${name} plugin for kind '${kind}' with version '${version}' is not installed`
-          : `A ${name} plugin for kind '${kind}' is not installed`
+          : `A ${name} plugin for kind '${kind}' is not installed`,
       );
     },
     [getPluginIndexes, loadPluginModule],

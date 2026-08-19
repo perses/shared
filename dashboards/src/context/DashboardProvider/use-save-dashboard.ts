@@ -11,13 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useTimeRange, useTimeZoneParams, useDisableAutoRefreshSetting, usePluginRegistry } from '@perses-dev/plugin-system';
+import { useSnackbar } from '@perses-dev/components';
+import {
+  useTimeRange,
+  useTimeZoneParams,
+  useDisableAutoRefreshSetting,
+  usePluginRegistry,
+} from '@perses-dev/plugin-system';
 import { isRelativeTimeRange } from '@perses-dev/spec';
 import { useCallback, useState } from 'react';
-import { useSnackbar } from '@perses-dev/components';
-import { useVariableDefinitionActions } from '../VariableProvider';
-import { useDashboard } from '../useDashboard';
+
 import { buildAvailablePluginVersions, findInvalidPinnedVersions, PLUGIN_VERSIONING_TYPES } from '../../utils';
+import { useDashboard } from '../useDashboard';
+import { useVariableDefinitionActions } from '../VariableProvider';
 import { OnSaveDashboard } from './common';
 import { useEditMode, useSaveChangesConfirmationDialog } from './dashboard-provider-api';
 import { SaveChangesConfirmationDialogOptions } from './save-changes-dialog-slice';

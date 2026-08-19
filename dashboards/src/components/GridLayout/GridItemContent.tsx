@@ -107,7 +107,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
     'Panel',
     panelDefinition.spec.plugin.kind,
     undefined,
-    getPluginOverrides(panelDefinition.spec.plugin)
+    getPluginOverrides(panelDefinition.spec.plugin),
   );
 
   const pluginQueryOptions =

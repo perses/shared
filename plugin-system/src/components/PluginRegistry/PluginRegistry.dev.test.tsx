@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen } from '@testing-library/react';
 import { ReactElement, ReactNode } from 'react';
 
 import { dynamicImportPluginLoader, PluginModuleResource } from '../../model';
@@ -55,12 +55,15 @@ function renderWithLoader(children: ReactNode): void {
       resource: installedResource,
       importPlugin: (): Promise<Record<string, unknown>> => Promise.resolve(buildModule('installed')),
     },
-    { resource: devResource, importPlugin: (): Promise<Record<string, unknown>> => Promise.resolve(buildModule('dev')) },
+    {
+      resource: devResource,
+      importPlugin: (): Promise<Record<string, unknown>> => Promise.resolve(buildModule('dev')),
+    },
   ]);
   render(
     <QueryClientProvider client={queryClient}>
       <PluginRegistry pluginLoader={pluginLoader}>{children}</PluginRegistry>
-    </QueryClientProvider>
+    </QueryClientProvider>,
   );
 }
 

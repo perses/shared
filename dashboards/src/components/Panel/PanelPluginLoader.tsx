@@ -30,7 +30,7 @@ export function PanelPluginLoader(props: PanelPluginProps): ReactElement {
     'Panel',
     kind,
     { useErrorBoundary: true },
-    getPluginOverrides(definition?.spec.plugin)
+    getPluginOverrides(definition?.spec.plugin),
   );
   const PanelComponent = plugin?.PanelComponent;
   const supportedQueryTypes = plugin?.supportedQueryTypes || [];

@@ -109,7 +109,7 @@ export function useAnnotationData(spec: AnnotationSpec): UseQueryResult<Annotati
     'Annotation',
     spec.plugin.kind,
     undefined,
-    getPluginOverrides(spec.plugin)
+    getPluginOverrides(spec.plugin),
   );
 
   const datasourceStore = useDatasourceStore();

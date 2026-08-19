@@ -100,7 +100,7 @@ export function useListVariablePluginValues(definition: ListVariableDefinition):
     'Variable',
     definition.spec.plugin.kind,
     undefined,
-    getPluginOverrides(definition.spec.plugin)
+    getPluginOverrides(definition.spec.plugin),
   );
 
   const variablePluginCtx = useVariablePluginContext();
@@ -144,7 +144,7 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
 
   const pluginResults = usePlugins(
     'Variable',
-    listVariables.map((d) => ({ kind: d.spec.plugin.kind, ...getPluginOverrides(d.spec.plugin) }))
+    listVariables.map((d) => ({ kind: d.spec.plugin.kind, ...getPluginOverrides(d.spec.plugin) })),
   );
 
   // Resolved variable state. Updated by onFetched when queries resolve.

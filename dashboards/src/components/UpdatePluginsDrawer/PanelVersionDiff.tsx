@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Alert, Box, Chip, Stack, Typography } from '@mui/material';
-import { PanelDefinition } from '@perses-dev/spec';
-import { DataQueriesProvider } from '@perses-dev/plugin-system';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import { DataQueriesProvider } from '@perses-dev/plugin-system';
+import { PanelDefinition } from '@perses-dev/spec';
 import { ReactElement, useMemo } from 'react';
+
 import { Panel } from '../Panel';
 
 const PREVIEW_HEIGHT = 260;
@@ -46,11 +47,11 @@ export function PanelVersionDiff(props: PanelVersionDiffProps): ReactElement {
 
   const currentDefinition = useMemo(
     () => withPluginVersion(panelDefinition, currentVersion),
-    [panelDefinition, currentVersion]
+    [panelDefinition, currentVersion],
   );
   const latestDefinition = useMemo(
     () => withPluginVersion(panelDefinition, latestVersion),
-    [panelDefinition, latestVersion]
+    [panelDefinition, latestVersion],
   );
 
   const queries = panelDefinition.spec.queries ?? [];

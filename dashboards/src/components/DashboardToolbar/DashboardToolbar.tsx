@@ -28,8 +28,8 @@ import { EditButton } from '../EditButton';
 import { EditJsonButton } from '../EditJsonButton';
 import { LinksDisplay } from '../LinksDisplay';
 import { LockDashboardButton } from '../LockDashboardButton';
-import { UpdatePluginsButton } from '../UpdatePluginsButton';
 import { SaveDashboardButton } from '../SaveDashboardButton';
+import { UpdatePluginsButton } from '../UpdatePluginsButton';
 import { EditVariablesButton } from '../Variables';
 
 export interface DashboardToolbarProps {
@@ -109,8 +109,8 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
                 {isLinksEnabled && <EditDashboardLinksButton />}
                 <AddPanelButton />
                 <AddGroupButton />
-                {isPluginVersioningEnabled && <LockDashboardButton />}
                 {isPluginVersioningEnabled && <UpdatePluginsButton />}
+                {isPluginVersioningEnabled && <LockDashboardButton />}
               </Stack>
               <SaveDashboardButton onSave={onSave} isDisabled={isReadonly} />
               <Button variant="outlined" onClick={onCancelButtonClick}>
@@ -118,13 +118,11 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
               </Button>
             </Stack>
           ) : (
-            <>
-              {isBiggerThanSm && (
-                <Stack direction="row" gap={1} ml="auto">
-                  <EditButton onClick={onEditButtonClick} />
-                </Stack>
-              )}
-            </>
+            isBiggerThanSm && (
+              <Stack direction="row" gap={1} ml="auto">
+                <EditButton onClick={onEditButtonClick} />
+              </Stack>
+            )
           )}
         </Box>
         <Box

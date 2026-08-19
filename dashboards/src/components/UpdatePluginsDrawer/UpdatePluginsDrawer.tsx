@@ -23,13 +23,14 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import ArrowRight from 'mdi-material-ui/ArrowRight';
 import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronUp from 'mdi-material-ui/ChevronUp';
-import ArrowRight from 'mdi-material-ui/ArrowRight';
-import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import { ReactElement, useMemo, useState } from 'react';
-import { OutdatedPlugin, getOutdatedPluginId } from '../../utils';
+
 import { useDashboard } from '../../context';
+import { OutdatedPlugin, getOutdatedPluginId } from '../../utils';
 import { PanelVersionDiff } from './PanelVersionDiff';
 
 export interface UpdatePluginsDrawerProps {
@@ -128,9 +129,8 @@ export function UpdatePluginsDrawer(props: UpdatePluginsDrawerProps): ReactEleme
               const id = getOutdatedPluginId(plugin);
               const isExpanded = expandedIds.includes(id);
               // Only panel plugins can be previewed, and only if we found a panel using them.
-              const examplePanel = plugin.pluginType === 'Panel' && plugin.examplePanelKey
-                ? panels[plugin.examplePanelKey]
-                : undefined;
+              const examplePanel =
+                plugin.pluginType === 'Panel' && plugin.examplePanelKey ? panels[plugin.examplePanelKey] : undefined;
 
               return (
                 <Box key={id} py={1} data-testid="outdated-plugin">
