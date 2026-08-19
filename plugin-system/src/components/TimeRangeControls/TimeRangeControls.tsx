@@ -47,7 +47,6 @@ export const DEFAULT_REFRESH_INTERVAL_OPTIONS: TimeOption[] = [
 ];
 
 const DEFAULT_HEIGHT = '34px';
-const DISABLED_REFRESH_INTERVAL: DurationString = '0s';
 
 interface TimeRangeControlsProps {
   // The controls look best at heights >= 28 pixels
@@ -211,29 +210,22 @@ export function TimeRangeControls({
           </ToolbarIconButton>
         </InfoTooltip>
       )}
-      {showRefreshInterval && (
-        <InfoTooltip
-          description={
-            isAutoRefreshDisabled ? TOOLTIP_TEXT.refreshIntervalDisabledByAdmin : TOOLTIP_TEXT.refreshInterval
-          }
-        >
+      {showRefreshInterval && !isAutoRefreshDisabled && (
+        <InfoTooltip description={TOOLTIP_TEXT.refreshInterval}>
           <RefreshIntervalPicker
             timeOptions={DEFAULT_REFRESH_INTERVAL_OPTIONS}
             value={
-              isAutoRefreshDisabled
-                ? DISABLED_REFRESH_INTERVAL
-                : /* TODO: There is a bug here which should be fixed in a proper way. (This is only a quick remedy)
-                 display: 1m has the pastDuration of 60s. Initially (if the persisted value is 1m) when the page is loaded, instead of 60s, 1m is passed down.
+              /* TODO: There is a bug here which should be fixed in a proper way. (This is only a quick remedy)
+                 display: 1m has the pastDuration of 60s. Initially (if the persisted value is 1m) when the page is loaded, instead of 60s, 1m is passed down.              
                  This only happens for 1m, because for other items the display and the pastDuration are the same.  Example 30s-30s
-                 HERE The value MUST always be pastDuration, otherwise the component would not work as expected.
+                 HERE The value MUST always be pastDuration, otherwise the component would not work as expected. 
               */
-                  DEFAULT_REFRESH_INTERVAL_OPTIONS.some((i) => i.value.pastDuration === refreshInterval)
-                  ? refreshInterval
-                  : DEFAULT_REFRESH_INTERVAL_OPTIONS.find((i) => i.display === refreshInterval)?.value.pastDuration
+              DEFAULT_REFRESH_INTERVAL_OPTIONS.some((i) => i.value.pastDuration === refreshInterval)
+                ? refreshInterval
+                : DEFAULT_REFRESH_INTERVAL_OPTIONS.find((i) => i.display === refreshInterval)?.value.pastDuration
             }
             onChange={handleRefreshIntervalChange}
             height={height}
-            disabled={isAutoRefreshDisabled}
           />
         </InfoTooltip>
       )}

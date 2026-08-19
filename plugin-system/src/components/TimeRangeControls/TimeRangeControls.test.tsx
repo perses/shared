@@ -11,20 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import userEvent from '@testing-library/user-event';
-import { screen, RenderOptions, render, RenderResult } from '@testing-library/react';
+import { SnackbarProvider } from '@perses-dev/components';
+import { TimeRangeProviderBasic, TimeRangeProviderWithQueryParams, TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
 import { DurationString } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { screen, RenderOptions, render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React, { ReactElement } from 'react';
-import { SnackbarProvider } from '@perses-dev/components';
-import {
-  TimeRangeProviderBasic,
-  TimeRangeProviderWithQueryParams,
-  TimeRangeSettingsProvider,
-} from '@perses-dev/plugin-system';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
+
 import { useTimeZoneParams } from '../../runtime/TimeRangeProvider/query-params';
 import { TimeRangeControls } from './TimeRangeControls';
 
@@ -57,9 +54,9 @@ describe('TimeRangeControls', () => {
     return <TimeRangeControls timeZone={timeZone} onTimeZoneChange={(tz) => setTimeZone(tz.value)} />;
   };
 
-  const renderTimeRangeControls = (testURLParams: boolean, disableAutoRefresh = false): void => {
+  const renderTimeRangeControls = (testURLParams: boolean): void => {
     renderWithContext(
-      <TimeRangeSettingsProvider disableAutoRefresh={disableAutoRefresh}>
+      <>
         {testURLParams ? (
           <TimeRangeProviderWithQueryParams
             initialRefreshInterval={testDefaultRefreshInterval}
@@ -75,8 +72,8 @@ describe('TimeRangeControls', () => {
             <ControlsWithTZ />
           </TimeRangeProviderBasic>
         )}
-      </TimeRangeSettingsProvider>,
-      undefined
+      </>,
+      undefined,
     );
   };
 
@@ -90,11 +87,36 @@ describe('TimeRangeControls', () => {
     expect(dateButton).toHaveTextContent(/5 minutes/i);
   });
 
-  it('should disable the refresh interval picker when disableAutoRefresh is enabled', () => {
-    renderTimeRangeControls(false, true);
-    const refreshIntervalPicker = screen.getByLabelText(/Select refresh interval/i);
-    expect(refreshIntervalPicker).toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByText('Off')).toBeInTheDocument();
+  it('should insert a duration missing from the time presets in order', async () => {
+    renderWithContext(
+      <TimeRangeProviderBasic
+        initialRefreshInterval={testDefaultRefreshInterval}
+        initialTimeRange={{ pastDuration: '3h' as DurationString }}
+      >
+        <ControlsWithTZ />
+      </TimeRangeProviderBasic>,
+    );
+    const dateButton = await screen.findByLabelText(/time range/i, { selector: '[role="combobox"]' });
+    userEvent.click(dateButton);
+    const options = screen.getAllByRole('option').map((option) => option.textContent);
+    const insertedIndex = options.indexOf('Last 3 hours');
+    expect(insertedIndex).toBeGreaterThan(-1);
+    expect(options[insertedIndex - 1]).toBe('Last 1 hour');
+    expect(options[insertedIndex + 1]).toBe('Last 6 hours');
+  });
+
+  it('should hide the entire auto refresh selection when disableAutoRefresh is enabled', () => {
+    renderWithContext(
+      <TimeRangeSettingsProvider disableAutoRefresh={true}>
+        <TimeRangeProviderBasic
+          initialRefreshInterval={testDefaultRefreshInterval}
+          initialTimeRange={testDefaultTimeRange}
+        >
+          <ControlsWithTZ />
+        </TimeRangeProviderBasic>
+      </TimeRangeSettingsProvider>,
+    );
+    expect(screen.queryByLabelText(/Select refresh interval/i)).not.toBeInTheDocument();
   });
 
   // TODO: add additional tests for absolute time selection, other inputs, form validation, etc.
