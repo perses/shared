@@ -34,6 +34,20 @@ export interface PluginRegistryProps {
 }
 
 /**
+ * Returns the indexed key of a plugin served by a local dev server for the given plugin type and kind, if any.
+ * Keys are `${kind}:${name}:${registry}:${version}`, so we match on the `kind:name:` prefix.
+ */
+function findDevPluginKey(devPluginKeys: Set<string>, kind: string, name: string): string | undefined {
+  const prefix = `${kind}:${name}:`;
+  for (const key of devPluginKeys) {
+    if (key.startsWith(prefix)) {
+      return key;
+    }
+  }
+  return undefined;
+}
+
+/**
  * PluginRegistryContext provider that keeps track of all available plugins and provides an API for getting them or
  * querying the metadata about them.
  */
@@ -78,6 +92,14 @@ export function PluginRegistry(props: PluginRegistryProps): ReactElement {
       // only keep that first candidate.
       if (version) {
         candidateKeys = candidateKeys.slice(0, 1);
+      } else {
+        // No version pinned: a plugin served by a local dev server (`percli plugin start`) wins over installed archives,
+        // whatever their versions. Otherwise a dev plugin whose package version is lower than an installed archive would
+        // never be used, which defeats the purpose of running it in dev.
+        const devKey = findDevPluginKey(pluginIndexes.devPluginKeys, kind, name);
+        if (devKey) {
+          candidateKeys = [devKey, ...candidateKeys.filter((key) => key !== devKey)];
+        }
       }
 
       for (const resourceKey of candidateKeys) {
