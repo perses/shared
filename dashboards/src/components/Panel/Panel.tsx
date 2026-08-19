@@ -28,8 +28,7 @@ import useResizeObserver from 'use-resize-observer';
 import { PanelGroupItemId } from '../../model';
 import { PanelContent } from './PanelContent';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
-
-const SEMANTIC_CLASS_NAME = 'ps-Panel';
+import { PANEL_CLASS_NAME } from '../../constants/class-names';
 
 export interface PanelProps extends CardProps<'section'> {
   definition: PanelDefinition;
@@ -212,7 +211,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           aria-labelledby={headerId}
           aria-describedby={headerId}
           data-testid="panel"
-          className={className ? `${SEMANTIC_CLASS_NAME} ${className}` : SEMANTIC_CLASS_NAME}
+          className={className ? `${PANEL_CLASS_NAME} ${className}` : PANEL_CLASS_NAME}
           {...others}
         >
           {!panelOptions?.hideHeader && (
