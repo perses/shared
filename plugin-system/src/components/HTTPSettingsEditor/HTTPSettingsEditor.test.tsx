@@ -11,12 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { SnackbarContext } from '@perses-dev/components';
+import { HTTPDatasourceSpec } from '@perses-dev/spec';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { FormProvider, useForm } from 'react-hook-form';
 import { ReactElement } from 'react';
-import { HTTPDatasourceSpec } from '@perses-dev/spec';
+import { FormProvider, useForm } from 'react-hook-form';
+
 import { HTTPSettingsEditor } from './HTTPSettingsEditor';
+
+const mockSuccessSnackbar = vi.fn();
+const mockExceptionSnackbar = vi.fn();
+
+vi.mock('@perses-dev/components', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@perses-dev/components')>()),
+  useSnackbar: (): Partial<SnackbarContext> => ({
+    successSnackbar: mockSuccessSnackbar,
+    exceptionSnackbar: mockExceptionSnackbar,
+  }),
+}));
 
 describe('HTTPSettingsEditor - Request Headers', () => {
   const initialSpecDirect: HTTPDatasourceSpec = {
@@ -32,7 +45,7 @@ describe('HTTPSettingsEditor - Request Headers', () => {
     },
   };
 
-  const renderComponent = (value: HTTPDatasourceSpec, onChange = jest.fn()): ReturnType<typeof render> => {
+  const renderComponent = (value: HTTPDatasourceSpec, onChange = vi.fn()): ReturnType<typeof render> => {
     const Wrapper = (): ReactElement => {
       const methods = useForm();
       return (
@@ -51,7 +64,7 @@ describe('HTTPSettingsEditor - Request Headers', () => {
 
   describe('Adding headers', () => {
     it('should add a new empty header when clicking the add button', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: HTTPDatasourceSpec = {
         proxy: {
           kind: 'HTTPProxy',
@@ -77,7 +90,7 @@ describe('HTTPSettingsEditor - Request Headers', () => {
     });
 
     it('should allow adding multiple headers', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: HTTPDatasourceSpec = {
         proxy: {
           kind: 'HTTPProxy',
@@ -109,7 +122,7 @@ describe('HTTPSettingsEditor - Request Headers', () => {
 
   describe('Editing headers', () => {
     it('should update header name', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: HTTPDatasourceSpec = {
         proxy: {
           kind: 'HTTPProxy',
@@ -130,13 +143,13 @@ describe('HTTPSettingsEditor - Request Headers', () => {
 
       await waitFor(() => {
         expect(onChange).toHaveBeenCalled();
-        const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-        expect(lastCall.proxy?.spec.headers).toHaveProperty('Authorization');
+        const lastCall = onChange.mock.lastCall?.[0];
+        expect(lastCall?.proxy?.spec.headers).toHaveProperty('Authorization');
       });
     });
 
     it('should update header value', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: HTTPDatasourceSpec = {
         proxy: {
           kind: 'HTTPProxy',
@@ -157,8 +170,8 @@ describe('HTTPSettingsEditor - Request Headers', () => {
 
       await waitFor(() => {
         expect(onChange).toHaveBeenCalled();
-        const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-        expect(lastCall.proxy?.spec.headers?.['X-Custom']).toBe('Bearer token123');
+        const lastCall = onChange.mock.lastCall?.[0];
+        expect(lastCall?.proxy?.spec.headers?.['X-Custom']).toBe('Bearer token123');
       });
     });
 
@@ -188,7 +201,7 @@ describe('HTTPSettingsEditor - Request Headers', () => {
 
   describe('Removing headers', () => {
     it('should remove a header when clicking the remove button', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: HTTPDatasourceSpec = {
         proxy: {
           kind: 'HTTPProxy',
@@ -214,15 +227,15 @@ describe('HTTPSettingsEditor - Request Headers', () => {
         () => {
           expect(onChange).toHaveBeenCalled();
         },
-        { timeout: 2000 }
+        { timeout: 2000 },
       );
 
-      const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-      expect(lastCall.proxy?.spec.headers).toBeUndefined();
+      const lastCall = onChange.mock.lastCall?.[0];
+      expect(lastCall?.proxy?.spec.headers).toBeUndefined();
     });
 
     it('should sync removed headers to parent immediately', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: HTTPDatasourceSpec = {
         proxy: {
           kind: 'HTTPProxy',
@@ -246,18 +259,18 @@ describe('HTTPSettingsEditor - Request Headers', () => {
       await waitFor(
         () => {
           expect(onChange).toHaveBeenCalled();
-          const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-          expect(lastCall.proxy?.spec.headers).toEqual({ Authorization: 'Bearer token' });
-          expect(lastCall.proxy?.spec.headers).not.toHaveProperty('X-Custom');
+          const lastCall = onChange.mock.lastCall?.[0];
+          expect(lastCall?.proxy?.spec.headers).toEqual({ Authorization: 'Bearer token' });
+          expect(lastCall?.proxy?.spec.headers).not.toHaveProperty('X-Custom');
         },
-        { timeout: 2000 }
+        { timeout: 2000 },
       );
     });
   });
 
   describe('Duplicate header detection', () => {
     it('should show warning when duplicate header names exist', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: HTTPDatasourceSpec = {
         proxy: {
           kind: 'HTTPProxy',
@@ -288,7 +301,7 @@ describe('HTTPSettingsEditor - Request Headers', () => {
     });
 
     it('should highlight duplicate header names with error state', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: HTTPDatasourceSpec = {
         proxy: {
           kind: 'HTTPProxy',
@@ -331,7 +344,7 @@ describe('HTTPSettingsEditor - Request Headers', () => {
     });
 
     it('should preserve order when header names start with numbers', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: HTTPDatasourceSpec = {
         proxy: {
           kind: 'HTTPProxy',
@@ -385,7 +398,7 @@ describe('HTTPSettingsEditor - Request Headers', () => {
     });
 
     it('should not sync empty headers to parent', async () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       const value: HTTPDatasourceSpec = {
         proxy: {
           kind: 'HTTPProxy',
@@ -433,7 +446,7 @@ describe('HTTPSettingsEditor - Request Headers', () => {
           <FormProvider {...methods}>
             <HTTPSettingsEditor
               value={value}
-              onChange={jest.fn()}
+              onChange={vi.fn()}
               isReadonly={true}
               initialSpecDirect={initialSpecDirect}
               initialSpecProxy={initialSpecProxy}
@@ -469,7 +482,7 @@ describe('HTTPSettingsEditor - Request Headers', () => {
           <FormProvider {...methods}>
             <HTTPSettingsEditor
               value={value}
-              onChange={jest.fn()}
+              onChange={vi.fn()}
               isReadonly={true}
               initialSpecDirect={initialSpecDirect}
               initialSpecProxy={initialSpecProxy}
@@ -485,6 +498,116 @@ describe('HTTPSettingsEditor - Request Headers', () => {
       iconButtons.forEach((btn) => {
         expect(btn).toBeDisabled();
       });
+    });
+  });
+});
+
+describe('HTTPSettingsEditor - Test Connection', () => {
+  const initialSpecDirect: HTTPDatasourceSpec = {
+    directUrl: '',
+  };
+
+  const initialSpecProxy: HTTPDatasourceSpec = {
+    proxy: {
+      kind: 'HTTPProxy',
+      spec: {
+        url: '',
+      },
+    },
+  };
+
+  const renderWithTestConnection = (
+    value: HTTPDatasourceSpec,
+    testConnection?: () => Promise<void>,
+    onChange = vi.fn(),
+  ): ReturnType<typeof render> => {
+    const Wrapper = (): ReactElement => {
+      const methods = useForm();
+      return (
+        <FormProvider {...methods}>
+          <HTTPSettingsEditor
+            value={value}
+            onChange={onChange}
+            initialSpecDirect={initialSpecDirect}
+            initialSpecProxy={initialSpecProxy}
+            testConnection={testConnection}
+          />
+        </FormProvider>
+      );
+    };
+    return render(<Wrapper />);
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should not show "Test Connection" button when testConnection is not provided', () => {
+    const value: HTTPDatasourceSpec = {
+      proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090' } },
+    };
+
+    renderWithTestConnection(value, undefined);
+
+    expect(screen.queryByRole('button', { name: /test connection/i })).not.toBeInTheDocument();
+  });
+
+  it('should show "Test Connection" button when testConnection is provided', () => {
+    const value: HTTPDatasourceSpec = {
+      proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090' } },
+    };
+
+    renderWithTestConnection(value, vi.fn().mockResolvedValue(undefined));
+
+    expect(screen.getByRole('button', { name: /test connection/i })).toBeInTheDocument();
+  });
+
+  it('should disable "Test Connection" button when proxy URL is empty', () => {
+    const value: HTTPDatasourceSpec = {
+      proxy: { kind: 'HTTPProxy', spec: { url: '' } },
+    };
+
+    renderWithTestConnection(value, vi.fn().mockResolvedValue(undefined));
+
+    expect(screen.getByRole('button', { name: /test connection/i })).toBeDisabled();
+  });
+
+  it('should disable "Test Connection" button when direct URL is empty', () => {
+    const value: HTTPDatasourceSpec = { directUrl: '' };
+
+    renderWithTestConnection(value, vi.fn().mockResolvedValue(undefined));
+
+    expect(screen.getByRole('button', { name: /test connection/i })).toBeDisabled();
+  });
+
+  it('should show success snackbar when testConnection resolves', async () => {
+    const mockTestConnection = vi.fn().mockResolvedValue(undefined);
+    const value: HTTPDatasourceSpec = {
+      proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090' } },
+    };
+
+    renderWithTestConnection(value, mockTestConnection);
+
+    await userEvent.click(screen.getByRole('button', { name: /test connection/i }));
+
+    await waitFor(() => {
+      expect(mockTestConnection).toHaveBeenCalledTimes(1);
+      expect(mockSuccessSnackbar).toHaveBeenCalledWith('Datasource is healthy');
+    });
+  });
+
+  it('should show error snackbar when testConnection rejects', async () => {
+    const mockTestConnection = vi.fn().mockRejectedValue(new Error('connection refused'));
+    const value: HTTPDatasourceSpec = {
+      proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090' } },
+    };
+
+    renderWithTestConnection(value, mockTestConnection);
+
+    await userEvent.click(screen.getByRole('button', { name: /test connection/i }));
+
+    await waitFor(() => {
+      expect(mockExceptionSnackbar).toHaveBeenCalledWith(expect.any(Error));
     });
   });
 });

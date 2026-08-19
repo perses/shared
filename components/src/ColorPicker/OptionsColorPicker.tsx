@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState, MouseEvent } from 'react';
 import { styled, IconButton, Popover } from '@mui/material';
 import CircleIcon from 'mdi-material-ui/Circle';
+import { ReactElement, useState, MouseEvent } from 'react';
+
 import { useChartsTheme } from '../context';
 import { ColorPicker } from './ColorPicker';
 

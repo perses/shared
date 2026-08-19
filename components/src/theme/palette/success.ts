@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PaletteMode, SimplePaletteColorOptions } from '@mui/material';
+
 import { green } from './colors';
 
 export const success = (mode: PaletteMode): SimplePaletteColorOptions => {

@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
+
 import { Middleware } from './common';
 
 export interface SaveChangesConfirmationDialogSlice {
@@ -50,7 +51,7 @@ export const createSaveChangesDialogSlice: StateCreator<
         state.saveChangesConfirmationDialog = dialog;
       },
       false,
-      'openSaveChangesConfirmationDialog'
+      'openSaveChangesConfirmationDialog',
     );
   },
 
@@ -60,7 +61,7 @@ export const createSaveChangesDialogSlice: StateCreator<
         state.saveChangesConfirmationDialog = undefined;
       },
       false,
-      'closeSaveChangesConfirmationDialog'
+      'closeSaveChangesConfirmationDialog',
     );
   },
 });

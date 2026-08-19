@@ -13,15 +13,16 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { FormatOptions } from '../model';
 import { FormatControls } from './FormatControls';
 
 describe('FormatControls', () => {
-  const renderFormatControls = (value: FormatOptions, onChange = jest.fn()): void => {
+  const renderFormatControls = (value: FormatOptions, onChange = vi.fn()): void => {
     render(
       <div>
         <FormatControls value={value} onChange={onChange} />
-      </div>
+      </div>,
     );
   };
 
@@ -38,7 +39,7 @@ describe('FormatControls', () => {
   };
 
   it('can change the unit by clicking', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderFormatControls({ unit: 'minutes' }, onChange);
 
     const unitSelector = getUnitSelector();
@@ -54,7 +55,7 @@ describe('FormatControls', () => {
   });
 
   it('can change the unit using a keyboard', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderFormatControls({ unit: 'bytes' }, onChange);
 
     const unitSelector = getUnitSelector();
@@ -76,7 +77,7 @@ describe('FormatControls', () => {
   });
 
   it('can change the decimal places by clicking', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderFormatControls({ unit: 'decimal', decimalPlaces: 0, shortValues: true }, onChange);
 
     userEvent.click(getDecimalPlacesSelector());
@@ -93,7 +94,7 @@ describe('FormatControls', () => {
   });
 
   it('can change the decimal places using a keyboard', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderFormatControls({ unit: 'percent' }, onChange);
 
     const decimalPlacesSelector = getDecimalPlacesSelector();
@@ -115,7 +116,7 @@ describe('FormatControls', () => {
   });
 
   it('can change shortValues by clicking', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderFormatControls({ unit: 'decimal', decimalPlaces: 3, shortValues: true }, onChange);
 
     userEvent.click(getShortValuesSwitch());
@@ -128,7 +129,7 @@ describe('FormatControls', () => {
   });
 
   it('can change shortValues using a keyboard', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderFormatControls({ unit: 'decimal', decimalPlaces: 0 }, onChange);
 
     userEvent.tab();
@@ -192,7 +193,7 @@ describe('FormatControls', () => {
   });
 
   it('should not show an option for disabled units', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderFormatControls({ unit: 'decimal' }, onChange);
 
     userEvent.click(getUnitSelector());

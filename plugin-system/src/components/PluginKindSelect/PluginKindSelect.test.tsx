@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import userEvent from '@testing-library/user-event';
 import { RenderResult, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
 import { renderWithContext } from '../../test';
 import { PluginKindSelect, PluginKindSelectProps } from './PluginKindSelect';
 
@@ -58,7 +59,7 @@ describe('PluginKindSelect', () => {
 
   it('can select new value', async () => {
     let onChangeValue: string | undefined = undefined;
-    const onChange = jest.fn((value) => {
+    const onChange = vi.fn((value) => {
       onChangeValue = value;
     });
     renderComponent({

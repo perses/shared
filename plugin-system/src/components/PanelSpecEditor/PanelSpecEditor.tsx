@@ -12,27 +12,43 @@
 // limitations under the License.
 
 import { ErrorAlert, JSONEditor } from '@perses-dev/components';
-import { PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
-import { Control, Controller } from 'react-hook-form';
+import { AnnotationSpec, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { forwardRef, ReactElement } from 'react';
-import { LinksEditor } from '../LinksEditor';
+import { Control, Controller } from 'react-hook-form';
+
 import { PanelEditorValues, PanelPlugin } from '../../model';
 import { useDataQueriesContext, usePlugin } from '../../runtime';
-import { OptionsEditorTabs, OptionsEditorTabsProps } from '../OptionsEditorTabs';
+import { LayoutEditor, PanelGroup, VariableDefinitionGroup } from '../LayoutEditor';
+import { LinksEditor } from '../LinksEditor';
 import { MultiQueryEditor } from '../MultiQueryEditor';
+import { OptionsEditorTabs, OptionsEditorTabsProps } from '../OptionsEditorTabs';
 import { PluginEditorRef } from '../PluginEditor';
+import { PanelAnnotationsEditor } from './PanelAnnotationsEditor';
 
 export interface PanelSpecEditorProps {
   control: Control<PanelEditorValues>;
   panelDefinition: PanelDefinition;
+  variableDefinitionGroups: VariableDefinitionGroup[];
+  panelGroups?: PanelGroup[];
   onQueriesChange: (queries: QueryDefinition[]) => void;
   onQueryRun: (index: number, query: QueryDefinition) => void;
   onPluginSpecChange: (spec: UnknownSpec) => void;
+  onAnnotationsChange: (annotations: AnnotationSpec[]) => void;
   onJSONChange: (panelDefinitionStr: string) => void;
 }
 
 export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>((props, ref): ReactElement | null => {
-  const { control, panelDefinition, onQueriesChange, onQueryRun, onPluginSpecChange, onJSONChange } = props;
+  const {
+    control,
+    panelDefinition,
+    variableDefinitionGroups,
+    panelGroups,
+    onQueriesChange,
+    onQueryRun,
+    onPluginSpecChange,
+    onAnnotationsChange,
+    onJSONChange,
+  } = props;
   const { kind } = panelDefinition.spec.plugin;
   const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
 
@@ -50,7 +66,7 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
     throw new Error(`Missing implementation for panel plugin with kind '${kind}'`);
   }
 
-  const { panelOptionsEditorComponents, hideQueryEditor } = plugin as PanelPlugin;
+  const { panelOptionsEditorComponents, hideQueryEditor, supportsAnnotations } = plugin as PanelPlugin;
   let tabs: OptionsEditorTabsProps['tabs'] = [];
 
   if (!hideQueryEditor) {
@@ -103,11 +119,33 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
             )}
           />
         ),
-      }))
+      })),
     );
   }
 
-  // always show json editor and links editor by default
+  // annotations are common to all panel plugins, but only shown for plugins that render them
+  if (supportsAnnotations) {
+    tabs.push({
+      label: 'Annotations',
+      content: (
+        <Controller
+          control={control}
+          name="panelDefinition.spec.annotations"
+          render={({ field }) => (
+            <PanelAnnotationsEditor
+              value={panelDefinition.spec.annotations ?? []}
+              onChange={(annotations) => {
+                field.onChange(annotations);
+                onAnnotationsChange(annotations);
+              }}
+            />
+          )}
+        />
+      ),
+    });
+  }
+
+  // Always show the JSON editor, Links editor, and Layout editor by default.
   tabs.push({
     label: 'Links',
     content: <LinksEditor control={control} />,
@@ -129,6 +167,12 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
           />
         )}
       />
+    ),
+  });
+  tabs.push({
+    label: 'Layout',
+    content: (
+      <LayoutEditor control={control} variableDefinitionGroups={variableDefinitionGroups} panelGroups={panelGroups} />
     ),
   });
 

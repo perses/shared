@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
 import { PanelDefinition, QueryDataType, QueryDefinition, QueryPluginType, UnknownSpec } from '@perses-dev/spec';
+import React from 'react';
+
 import { OptionsEditorTab } from '../components';
 import { QueryOptions } from '../runtime';
 import { OptionsEditorProps, Plugin } from './plugin-base';
@@ -57,6 +58,12 @@ export interface PanelPlugin<Spec = UnknownSpec, TPanelProps = PanelProps<Spec>>
    */
   hideQueryEditor?: boolean;
   /**
+   * If true, the panel editor exposes a common "Annotations" tab so annotations can be configured
+   * per panel. Only enable this for panel plugins whose PanelComponent actually renders annotations.
+   * @default false
+   */
+  supportsAnnotations?: boolean;
+  /**
    * List of panel actions that will be rendered in the panel header
    */
   actions?: Array<PanelAction<TPanelProps>>;
@@ -88,4 +95,13 @@ export type PanelGroupId = number;
 export interface PanelEditorValues {
   groupId: PanelGroupId;
   panelDefinition: PanelDefinition;
+  layoutDefinition?: {
+    width: number;
+    height: number;
+    repeatVariable?: {
+      value: string;
+      maxPer?: number;
+      alignment?: 'horizontal' | 'vertical';
+    };
+  };
 }

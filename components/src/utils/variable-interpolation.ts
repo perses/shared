@@ -136,7 +136,7 @@ export function replaceVariable(
   text: string,
   varName: string,
   variableValue: VariableValue,
-  varFormat?: InterpolationFormat
+  varFormat?: InterpolationFormat,
 ): string {
   const variableSyntax = '$' + varName;
   const alternativeVariableSyntax = '${' + varName + (varFormat ? ':' + varFormat : '') + '}';

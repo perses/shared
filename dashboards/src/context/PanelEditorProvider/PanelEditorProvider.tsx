@@ -36,7 +36,7 @@ export const PanelEditorProvider = ({ children }: PanelEditorProviderProps): Rea
         setPreviewPanelWidth,
       },
     }),
-    [previewPanelWidth]
+    [previewPanelWidth],
   );
 
   return <PanelEditorContext.Provider value={ctx}>{children}</PanelEditorContext.Provider>;

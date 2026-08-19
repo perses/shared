@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { GlobalDatasourceResource } from '@perses-dev/client';
+
 import { DatasourceStoreProviderProps } from '../context';
 import { getTestDashboard } from './dashboard-provider';
 

@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import { Box, useForkRef } from '@mui/material';
-import { useInView } from 'react-intersection-observer';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import React, { ReactElement, useMemo, useState } from 'react';
-import { isPanelGroupItemIdEqual, PanelGroupItemId } from '../../model'; // TODO
+import { useInView } from 'react-intersection-observer';
+
 import { useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
 import { usePanelFocusHandlers } from '../../keyboard-shortcuts';
+import { isPanelGroupItemIdEqual, PanelGroupItemId } from '../../model'; // TODO
 import { Panel, PanelProps, PanelOptions } from '../Panel';
 import { QueryViewerDialog } from '../QueryViewerDialog';
 
@@ -25,13 +26,15 @@ export interface GridItemContentProps {
   panelGroupItemId: PanelGroupItemId;
   width: number; // necessary for determining the suggested step ms
   panelOptions?: PanelOptions;
+  readonly?: boolean;
+  informationTooltip?: string;
 }
 
 /**
  * Resolves the reference to panel content in a GridItemDefinition and renders the panel.
  */
 export function GridItemContent(props: GridItemContentProps): ReactElement {
-  const { panelGroupItemId, width } = props;
+  const { readonly, panelGroupItemId, width, informationTooltip } = props;
   const panelDefinition = usePanel(panelGroupItemId);
 
   const {
@@ -39,12 +42,15 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   } = panelDefinition;
 
   const { isEditMode } = useEditMode();
+  const canModify = useMemo(() => {
+    return isEditMode && !readonly;
+  }, [isEditMode, readonly]);
   const { openEditPanel, openDeletePanelDialog, duplicatePanel, viewPanel } = usePanelActions(panelGroupItemId);
   const viewPanelGroupItemId = useViewPanelGroup();
 
   // Panel focus tracking for keyboard shortcuts
   const { onMouseEnter, onMouseLeave } = usePanelFocusHandlers(
-    `${panelGroupItemId.panelGroupId}-${panelGroupItemId.panelGroupItemLayoutId}`
+    `${panelGroupItemId.panelGroupId}-${panelGroupItemId.panelGroupItemLayoutId}`,
   );
 
   const { ref: queryRef, inView: shouldQuery } = useInView({
@@ -64,14 +70,14 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   const [openQueryViewer, setOpenQueryViewer] = useState(false);
 
   const viewQueriesHandler = useMemo(() => {
-    return isEditMode || !queries?.length
+    return canModify || !queries?.length
       ? undefined
       : {
           onClick: (): void => {
             setOpenQueryViewer(true);
           },
         };
-  }, [isEditMode, queries]);
+  }, [canModify, queries]);
 
   const readHandlers = {
     isPanelViewed: isPanelGroupItemIdEqual(viewPanelGroupItemId, panelGroupItemId),
@@ -86,7 +92,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
 
   // Provide actions to the panel when in edit mode
   let editHandlers: PanelProps['editHandlers'] = undefined;
-  if (isEditMode) {
+  if (canModify) {
     editHandlers = {
       onEditPanelClick: openEditPanel,
       onDuplicatePanelClick: duplicatePanel,
@@ -129,6 +135,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
             viewQueriesHandler={viewQueriesHandler}
             panelOptions={props.panelOptions}
             panelGroupItemId={panelGroupItemId}
+            informationTooltip={informationTooltip}
           />
         )}
       </DataQueriesProvider>

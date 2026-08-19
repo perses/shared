@@ -12,14 +12,15 @@
 // limitations under the License.
 
 import { BoxProps } from '@mui/material';
-import { UnknownSpec } from '@perses-dev/spec';
-import { useState, useRef, useEffect } from 'react';
+import { DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
 import { produce } from 'immer';
+import { useState, useRef, useEffect } from 'react';
+
 import { PanelPlugin, PluginType } from '../../model';
-import { PluginKindSelectProps } from '../PluginKindSelect';
-import { PluginSpecEditorProps } from '../PluginSpecEditor';
 import { usePlugin, usePluginRegistry } from '../../runtime';
 import { useEvent } from '../../utils';
+import { PluginKindSelectProps } from '../PluginKindSelect';
+import { PluginSpecEditorProps } from '../PluginSpecEditor';
 
 export interface PluginEditorSelection {
   type: PluginType;
@@ -44,6 +45,7 @@ export interface PluginEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   filteredQueryPlugins?: string[];
   onChange: (next: PluginEditorValue) => void;
   onRunQuery?: () => void;
+  testConnection?: (spec: DatasourceSpec, healthCheckPath: string) => Promise<void>;
 }
 
 export interface PluginEditorRef {
@@ -191,7 +193,7 @@ export function usePluginEditor(props: UsePluginEditorProps): {
     onChange(
       produce(value, (draft) => {
         draft.spec = next;
-      })
+      }),
     );
   };
 

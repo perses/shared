@@ -20,6 +20,7 @@ import {
   LegendPositions,
   LegendSize,
 } from '@perses-dev/components';
+
 import { CALCULATIONS_CONFIG, CalculationType } from './calculations';
 
 // This file contains legend-related model code specific to panel plugin specs.
@@ -82,7 +83,7 @@ export const LEGEND_VALUE_CONFIG = legendValues.reduce(
 
     return config;
   },
-  {} as Partial<Record<LegendValue, LegendSingleSelectConfig>>
+  {} as Partial<Record<LegendValue, LegendSingleSelectConfig>>,
 );
 
 export function validateLegendSpec(legend?: LegendOptionsBase): boolean {

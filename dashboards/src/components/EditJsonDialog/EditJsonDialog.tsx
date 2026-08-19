@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormEvent, ReactElement, useState } from 'react';
 import { Alert, FormControl } from '@mui/material';
 import { Dialog, JSONEditor } from '@perses-dev/components';
 import { useDatasourceStore, useTimeRange } from '@perses-dev/plugin-system';
+import { FormEvent, ReactElement, useState } from 'react';
+
 import { useEditJsonDialog, useDashboard } from '../../context';
 
 export interface EditJsonDialogProps {

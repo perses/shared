@@ -28,6 +28,7 @@ import {
 } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
 import { MouseEvent, ReactElement } from 'react';
+
 import { combineSx } from '../utils';
 
 export interface DialogHeaderProps extends DialogTitleProps {

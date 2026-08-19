@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PaletteMode, SimplePaletteColorOptions } from '@mui/material';
+
 import { blue } from './colors';
 
 export const primary = (mode: PaletteMode): SimplePaletteColorOptions => {

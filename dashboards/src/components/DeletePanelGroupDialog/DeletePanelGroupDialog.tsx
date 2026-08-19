@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { FormEvent, ReactElement } from 'react';
-import { Dialog } from '@perses-dev/components';
 import { Button } from '@mui/material';
+import { Dialog } from '@perses-dev/components';
+import { FormEvent, ReactElement } from 'react';
+
 import { useDeletePanelGroupDialog, useViewPanel } from '../../context';
 
 export const DeletePanelGroupDialog = (): ReactElement => {

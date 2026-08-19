@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { TimeSeriesData } from '@perses-dev/spec';
+
 import { getCommonTimeScale } from './time-series-data';
 
 describe('getCommonTimeScale', () => {

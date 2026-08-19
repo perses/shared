@@ -14,3 +14,6 @@
 export const GRID_LAYOUT_COLS = { sm: 24, xxs: 2 } as const;
 
 export const GRID_LAYOUT_SMALL_BREAKPOINT = 'sm' as const;
+
+export const DEFAULT_MARGIN = 10 as const;
+export const ROW_HEIGHT = 30 as const;

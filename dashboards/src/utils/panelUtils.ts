@@ -74,7 +74,7 @@ export type UnpositionedPanelGroupItemLayout = Omit<PanelGroupItemLayout, 'x' | 
 export function insertPanelInLayout(
   newLayout: UnpositionedPanelGroupItemLayout,
   referenceLayout: PanelGroupItemLayout,
-  itemLayouts: PanelGroupItemLayout[]
+  itemLayouts: PanelGroupItemLayout[],
 ): PanelGroupItemLayout[] {
   const MAX_LAYOUT_WIDTH = GRID_LAYOUT_COLS[GRID_LAYOUT_SMALL_BREAKPOINT];
 

@@ -11,13 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ReactElement, useState } from 'react';
-import { renderWithContext } from '../../test';
+import type { MockedFunction } from 'vitest';
+
 import { DefaultPluginKinds, PluginType } from '../../model';
-import { PluginEditor } from './PluginEditor';
+import { renderWithContext } from '../../test';
 import { PluginEditorProps } from './plugin-editor-api';
+import { PluginEditor } from './PluginEditor';
 
 type RenderComponentOptions = {
   pluginTypes?: PluginEditorProps['pluginTypes'];
@@ -27,7 +29,7 @@ type RenderComponentOptions = {
 
 describe('PluginEditor', () => {
   const renderComponent: ({ pluginTypes, defaultPluginKinds, value }?: RenderComponentOptions) => {
-    onChange: jest.Mocked<PluginEditorProps['onChange']>;
+    onChange: MockedFunction<PluginEditorProps['onChange']>;
   } = ({ pluginTypes = ['Variable'], defaultPluginKinds, value }: RenderComponentOptions = {}) => {
     const testValue: PluginEditorProps['value'] = value || {
       selection: {
@@ -38,10 +40,10 @@ describe('PluginEditor', () => {
     };
 
     // A test helper component that includes the state that's controlled from outside
-    let onChange: jest.Mocked<PluginEditorProps['onChange']> = jest.fn();
+    let onChange: MockedFunction<PluginEditorProps['onChange']> = vi.fn();
     function TestHelperForm(): ReactElement {
       const [value, setValue] = useState(testValue);
-      onChange = jest.fn((v) => setValue(v));
+      onChange = vi.fn((v) => setValue(v));
 
       return (
         <PluginEditor pluginTypes={pluginTypes} pluginKindLabel="Variable Type" value={value} onChange={onChange} />
@@ -148,16 +150,16 @@ describe('PluginEditor', () => {
     describe('When withRunQueryButton is true', () => {
       ['TimeSeriesQuery', 'TraceQuery', 'ProfileQuery'].forEach((type) => {
         it(`should render the run query button for ${type}`, () => {
-          const onRunQueryHandler = jest.fn();
+          const onRunQueryHandler = vi.fn();
           renderWithContext(
             <PluginEditor
               pluginTypes={[type] as unknown as PluginEditorProps['pluginTypes']}
               pluginKindLabel="Variable Type"
               withRunQueryButton
               value={{ selection: { type: type as PluginType, kind: '' }, spec: {} }}
-              onChange={jest.fn}
+              onChange={vi.fn()}
               onRunQuery={onRunQueryHandler}
-            />
+            />,
           );
           const queryButton = screen.getByTestId('run_query_button');
           expect(queryButton).toBeInTheDocument();

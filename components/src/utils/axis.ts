@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import merge from 'lodash/merge';
 import type { XAXisComponentOption, YAXisComponentOption } from 'echarts';
+import merge from 'lodash/merge';
+
 import { FormatOptions, formatValue } from '../model';
 
 export interface YAxisConfig {
@@ -74,7 +75,7 @@ export function getFormattedMultipleYAxes(
   baseAxis: YAXisComponentOption | undefined,
   baseFormat: FormatOptions | undefined,
   additionalFormats: FormatOptions[],
-  maxValues?: number[]
+  maxValues?: number[],
 ): YAXisComponentOption[] {
   const axes: YAXisComponentOption[] = [];
 
@@ -92,7 +93,7 @@ export function getFormattedMultipleYAxes(
         overflow: 'truncate',
       },
     },
-    baseAxis
+    baseAxis,
   );
   axes.push(baseAxisConfig);
 

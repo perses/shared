@@ -12,22 +12,23 @@
 // limitations under the License.
 
 import { Stack, Box, CircularProgress, styled, Popper, ClickAwayListener } from '@mui/material';
-import { isValidElement, PropsWithChildren, ReactElement, ReactNode, useMemo, useState, MouseEvent } from 'react';
 import { InfoTooltip } from '@perses-dev/components';
 import { QueryData } from '@perses-dev/plugin-system';
-import DatabaseSearch from 'mdi-material-ui/DatabaseSearch';
-import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
-import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
-import PencilIcon from 'mdi-material-ui/PencilOutline';
-import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import DragIcon from 'mdi-material-ui/DragVertical';
-import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
-import MenuIcon from 'mdi-material-ui/Menu';
+import { Link, Notice } from '@perses-dev/spec';
 import AlertIcon from 'mdi-material-ui/Alert';
 import AlertCircleIcon from 'mdi-material-ui/AlertCircle';
+import ArrowCollapseIcon from 'mdi-material-ui/ArrowCollapse';
+import ArrowExpandIcon from 'mdi-material-ui/ArrowExpand';
+import ContentCopyIcon from 'mdi-material-ui/ContentCopy';
+import DatabaseSearch from 'mdi-material-ui/DatabaseSearch';
+import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import DragIcon from 'mdi-material-ui/DragVertical';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
 import LightningBoltIcon from 'mdi-material-ui/LightningBolt';
-import { Link, Notice } from '@perses-dev/spec';
+import MenuIcon from 'mdi-material-ui/Menu';
+import PencilIcon from 'mdi-material-ui/PencilOutline';
+import { isValidElement, PropsWithChildren, ReactElement, ReactNode, useMemo, useState, MouseEvent } from 'react';
+
 import {
   ARIA_LABEL_TEXT,
   HEADER_ACTIONS_CONTAINER_NAME,
@@ -49,6 +50,7 @@ export interface PanelActionsProps {
   title?: string;
   description?: string;
   descriptionTooltipId: string;
+  informationTooltip?: string;
   links?: Link[];
   extra?: React.ReactNode;
   editHandlers?: {
@@ -85,6 +87,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   title,
   description,
   descriptionTooltipId,
+  informationTooltip,
   links,
   queryResults,
   pluginActions = [],
@@ -179,6 +182,18 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
     return undefined;
   }, [readHandlers, title]);
 
+  const informationTooltipIcon = useMemo((): ReactNode | undefined => {
+    return (
+      informationTooltip && (
+        <InfoTooltip description={informationTooltip}>
+          <HeaderIconButton aria-label="information tooltip" size="small">
+            <InformationOutlineIcon fontSize="inherit" color="info" />
+          </HeaderIconButton>
+        </InfoTooltip>
+      )
+    );
+  }, [informationTooltip]);
+
   const viewQueryAction = useMemo(() => {
     if (!viewQueriesHandler?.onClick) return null;
     return (
@@ -271,7 +286,8 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         {divider}
         <OnHover>
           <OverflowMenu title={title}>
-            {descriptionAction} {linksAction} {queryStateIndicator} {noticesIndicator} {extraActions} {viewQueryAction}
+            {descriptionAction} {linksAction} {queryStateIndicator} {noticesIndicator}
+            {informationTooltipIcon} {extraActions} {viewQueryAction}
             {readActions} {pluginActions} {itemActions}
             {editActions}
           </OverflowMenu>
@@ -295,6 +311,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         <OnHover>
           {extraActions}
           {readActions}
+          {informationTooltipIcon}
           <OverflowMenu title={title}>
             {editActions} {viewQueryAction} {pluginActions} {itemActions}
           </OverflowMenu>
@@ -318,7 +335,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
         <OnHover>
           {extraActions}
           {viewQueryAction}
-          {readActions} {editActions}
+          {readActions} {informationTooltipIcon} {editActions}
           {/* Show plugin actions inside a menu if it gets crowded */}
           {pluginActions.length <= 1 ? pluginActions : <OverflowMenu title={title}>{pluginActions}</OverflowMenu>}
           {itemActions.length <= 1 ? (

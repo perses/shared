@@ -79,7 +79,7 @@ export function SettingsAutocomplete<
   ...otherProps
 }: SettingsAutocompleteProps<OptionType, Multiple, DisableClearable>): ReactElement {
   const getOptionLabel: UseAutocompleteProps<OptionType, undefined, boolean, undefined>['getOptionLabel'] = (
-    option
+    option,
   ) => {
     return option.label ?? option.id;
   };
@@ -87,7 +87,7 @@ export function SettingsAutocomplete<
   // Merge id and aria-labelledby props into the input element for proper accessibility
   // and form association, while still allowing custom renderInput implementations.
   const handleRenderInput: AutocompleteProps<OptionType, Multiple, DisableClearable, false>['renderInput'] = (
-    params
+    params,
   ) => {
     const mergedParams = {
       ...params,

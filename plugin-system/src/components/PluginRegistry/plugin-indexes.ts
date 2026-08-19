@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { useCallback, useRef } from 'react';
+
 import {
   PluginLoader,
   PluginMetadataWithModule,
@@ -36,7 +37,7 @@ export interface PluginIndexes {
  * Returns an async callback for getting indexes of the installed plugin data.
  */
 export function usePluginIndexes(
-  getInstalledPlugins: PluginLoader['getInstalledPlugins']
+  getInstalledPlugins: PluginLoader['getInstalledPlugins'],
 ): () => Promise<PluginIndexes> {
   // Creates indexes from the installed plugins data (does useEvent because this accesses the getInstalledPlugins prop
   // and we want a stable reference for the callback below)
@@ -60,7 +61,7 @@ export function usePluginIndexes(
         const key = getPluginModuleCompoundKey({ kind, name, registry, version });
         if (pluginResourcesByNameKindRegistryVersion.has(key)) {
           console.warn(
-            `Got more than one ${kind} plugin for kind ${name}, registry '${registry || 'undefined'}', and version '${version || 'undefined'}'`
+            `Got more than one ${kind} plugin for kind ${name}, registry '${registry || 'undefined'}', and version '${version || 'undefined'}'`,
           );
         }
         pluginResourcesByNameKindRegistryVersion.set(key, resource);

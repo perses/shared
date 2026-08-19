@@ -26,12 +26,12 @@
 // limitations under the License.
 
 import { createInstance, ModuleFederation } from '@module-federation/enhanced/runtime';
-
 import * as ReactQuery from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import * as ReactHookForm from 'react-hook-form';
 import * as ReactRouterDOM from 'react-router-dom';
+
 import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 
 let instance: ModuleFederation | null = null;
@@ -91,11 +91,11 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         '@perses-dev/spec': {
-          version: '0.2.0-rc.0',
+          version: '0.3.0-beta.2',
           lib: () => require('@perses-dev/spec'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.2.0-rc.0',
+            requiredVersion: '^0.3.0-beta.2',
           },
         },
         '@perses-dev/core': {
@@ -107,43 +107,43 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         '@perses-dev/client': {
-          version: '0.54.0-rc.1',
+          version: '0.55.0-beta.2',
           lib: () => require('@perses-dev/client'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.54.0-rc.1',
+            requiredVersion: '^0.55.0-beta.2',
           },
         },
         '@perses-dev/components': {
-          version: '0.54.0-rc.1',
+          version: '0.55.0-beta.2',
           lib: () => require('@perses-dev/components'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.54.0-rc.1',
+            requiredVersion: '^0.55.0-beta.2',
           },
         },
         '@perses-dev/plugin-system': {
-          version: '0.54.0-rc.1',
+          version: '0.55.0-beta.2',
           lib: () => require('@perses-dev/plugin-system'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.54.0-rc.1',
+            requiredVersion: '^0.55.0-beta.2',
           },
         },
         '@perses-dev/explore': {
-          version: '0.54.0-rc.1',
+          version: '0.55.0-beta.2',
           lib: () => require('@perses-dev/explore'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.54.0-rc.1',
+            requiredVersion: '^0.55.0-beta.2',
           },
         },
         '@perses-dev/dashboards': {
-          version: '0.54.0-rc.1',
+          version: '0.55.0-beta.2',
           lib: () => require('@perses-dev/dashboards'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.54.0-rc.1',
+            requiredVersion: '^0.55.0-beta.2',
           },
         },
         // Below are the shared modules that are used by the plugins, this can be part of the SDK

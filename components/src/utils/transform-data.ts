@@ -34,7 +34,7 @@ import { Transform } from '../model';
  */
 export function applyJoinTransform(
   data: Array<Record<string, unknown>>,
-  columns: string[]
+  columns: string[],
 ): Array<Record<string, unknown>> {
   // If column is undefined or empty, return data as is
   if (columns.length === 0) {
@@ -86,7 +86,7 @@ export function applyJoinTransform(
 export function applyMergeColumnsTransform(
   data: Array<Record<string, unknown>>,
   selectedColumns: string[],
-  outputName: string
+  outputName: string,
 ): Array<Record<string, unknown>> {
   const result: Array<Record<string, unknown>> = [];
 
@@ -138,13 +138,13 @@ export function applyMergeColumnsTransform(
  */
 export function applyMergeIndexedColumnsTransform(
   data: Array<Record<string, unknown>>,
-  column: string
+  column: string,
 ): Array<Record<string, unknown>> {
   const result: Array<Record<string, unknown>> = [];
 
   for (const entry of data) {
     const indexedColumns = Object.keys(entry).filter((k) =>
-      new RegExp('^((' + column + ' #\\d+)|(' + column + '))$').test(k)
+      new RegExp('^((' + column + ' #\\d+)|(' + column + '))$').test(k),
     );
     const indexedColumnValues: Record<string, unknown> = {};
 
@@ -190,8 +190,8 @@ export function applyMergeSeriesTransform(data: Array<Record<string, unknown>>):
       data
         .flatMap(Object.keys)
         .map((label) => label.replace(/ #\d+/, ''))
-        .filter((label) => label !== 'value')
-    )
+        .filter((label) => label !== 'value'),
+    ),
   );
 
   for (const label of labelColumns) {
@@ -208,7 +208,7 @@ export function applyMergeSeriesTransform(data: Array<Record<string, unknown>>):
  */
 export function transformData(
   data: Array<Record<string, unknown>>,
-  transforms: Transform[]
+  transforms: Transform[],
 ): Array<Record<string, unknown>> {
   let result: Array<Record<string, unknown>> = data;
 

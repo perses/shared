@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { QueryDefinition } from '@perses-dev/spec';
+
 import { defaultQueryName, generateQueryNames } from './utils';
 
 function buildQuery(name?: string): QueryDefinition {

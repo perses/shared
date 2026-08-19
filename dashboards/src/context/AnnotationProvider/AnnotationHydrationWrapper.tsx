@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactNode, useEffect } from 'react';
-import { AnnotationData } from '@perses-dev/spec';
 import { useAnnotations } from '@perses-dev/plugin-system';
+import { AnnotationData } from '@perses-dev/spec';
 import { UseQueryResult } from '@tanstack/react-query';
+import { ReactNode, useEffect } from 'react';
+
 import { useAnnotationActions, useAnnotationSpecs } from './AnnotationProvider';
 
 interface AnnotationHydrationWrapperProps {

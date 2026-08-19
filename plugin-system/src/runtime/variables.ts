@@ -20,6 +20,7 @@ import {
 } from '@perses-dev/components';
 import { immerable } from 'immer';
 import { createContext, useContext, useMemo } from 'react';
+
 import { useBuiltinVariableValues } from './builtin-variables';
 
 // Re-export types from @perses-dev/components for backwards compatibility
@@ -162,7 +163,7 @@ export function useAllVariableValues(names?: string[]): VariableStateMap {
 export function replaceVariablesInString(
   text: string,
   variableValues: VariableStateMap,
-  extraVariables?: Record<string, string>
+  extraVariables?: Record<string, string>,
 ): string {
   const vars = { ...variableValues }; // shallow clone to avoid modifying the original object
   for (const [key, value] of Object.entries(extraVariables ?? {})) {

@@ -28,7 +28,7 @@ export interface UseTableKeyboardNavProps {
   onActiveCellChange?: (
     e: React.KeyboardEvent<HTMLTableElement>,
     currentActiveCell: TableCellPosition,
-    defaultNextActiveCell: TableCellPosition | undefined
+    defaultNextActiveCell: TableCellPosition | undefined,
   ) => TableCellPosition | undefined;
 }
 
@@ -120,7 +120,7 @@ export function useTableKeyboardNav({ maxRows, maxColumns, onActiveCellChange }:
         });
       }
     },
-    [maxColumns, maxRows, onActiveCellChange]
+    [maxColumns, maxRows, onActiveCellChange],
   );
 
   const handleTableBlur: FocusEventHandler<HTMLTableElement> = useCallback((e) => {

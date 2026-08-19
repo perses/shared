@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { AbsoluteTimeRange, TimeScale, TimeSeries, TimeSeriesData, TimeSeriesValueTuple } from '@perses-dev/spec';
+
 import { gcd } from './mathjs';
 
 export const MIN_STEP_INTERVAL_MS = 10;
@@ -54,7 +55,7 @@ export function getTimeSeriesValues(series: TimeSeries, timeScale: TimeScale): T
  * the queries' steps).
  */
 export function getCommonTimeScale(
-  seriesData: Array<TimeSeriesData | Pick<TimeSeries, 'values'> | undefined>
+  seriesData: Array<TimeSeriesData | Pick<TimeSeries, 'values'> | undefined>,
 ): TimeScale | undefined {
   let timeRange: AbsoluteTimeRange | undefined = undefined;
   const steps: number[] = [];

@@ -11,11 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import RefreshIcon from 'mdi-material-ui/Refresh';
-// eslint-disable-next-line import/no-duplicates
-import ZoomIn from 'mdi-material-ui/PlusCircleOutline';
-// eslint-disable-next-line import/no-duplicates
-import ZoomOut from 'mdi-material-ui/MinusCircleOutline';
 import { Stack } from '@mui/material';
 import {
   RefreshIntervalPicker,
@@ -28,7 +23,14 @@ import {
   buildRelativeTimeOption,
 } from '@perses-dev/components';
 import { AbsoluteTimeRange, DurationString, parseDurationString, RelativeTimeRange } from '@perses-dev/spec';
+import { milliseconds } from 'date-fns';
+// eslint-disable-next-line import/no-duplicates
+import ZoomOut from 'mdi-material-ui/MinusCircleOutline';
+// eslint-disable-next-line import/no-duplicates
+import ZoomIn from 'mdi-material-ui/PlusCircleOutline';
+import RefreshIcon from 'mdi-material-ui/Refresh';
 import { ReactElement, useCallback } from 'react';
+
 import { TOOLTIP_TEXT } from '../../constants';
 import {
   useTimeRange,
@@ -84,12 +86,20 @@ export function TimeRangeControls({
   // Convert height to a string, then use the string for styling
   const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
 
-  // add time preset if one does not match duration given in time range
+  // add time preset if one does not match duration given in time range, keeping the list ordered by duration
   if (
     'pastDuration' in timeRange &&
     !timePresetsValue.some((option) => option.value.pastDuration === timeRange['pastDuration'])
   ) {
-    timePresetsValue.push(buildRelativeTimeOption(timeRange['pastDuration']));
+    const durationMs = milliseconds(parseDurationString(timeRange['pastDuration']));
+    const insertionIndex = timePresetsValue.findIndex(
+      (option) => milliseconds(parseDurationString(option.value.pastDuration)) > durationMs,
+    );
+    timePresetsValue.splice(
+      insertionIndex === -1 ? timePresetsValue.length : insertionIndex,
+      0,
+      buildRelativeTimeOption(timeRange['pastDuration']),
+    );
   }
 
   // set the new refresh interval both in the dashboard context & as query param
@@ -97,13 +107,12 @@ export function TimeRangeControls({
     (duration: DurationString) => {
       setRefreshInterval(duration);
     },
-    [setRefreshInterval]
+    [setRefreshInterval],
   );
 
   const fromDurationToMillis = (strDuration: string): number => {
     const duration = parseDurationString(strDuration);
     const millis =
-      // eslint-disable-next-line prettier/prettier
       ((duration.seconds ?? 0) +
         (duration.minutes ?? 0) * 60 +
         (duration.hours ?? 0) * 3600 +
@@ -111,7 +120,6 @@ export function TimeRangeControls({
         (duration.weeks ?? 0) * 7 * 86400 +
         (duration.months ?? 0) * 30.436875 * 86400 + // avg month duration is ok for zoom purposes
         (duration.years ?? 0) * 365.2425 * 86400) * // avg year duration is ok for zoom purposes
-      // eslint-disable-next-line prettier/prettier
       1000; // to milliseconds
     return millis;
   };
@@ -172,7 +180,7 @@ export function TimeRangeControls({
     (tz: TimeZoneOption) => {
       onTimeZoneChange(tz);
     },
-    [onTimeZoneChange]
+    [onTimeZoneChange],
   );
 
   return (

@@ -12,9 +12,9 @@
 // limitations under the License.
 
 import { useListVariableState } from '@perses-dev/dashboards';
-import { renderHook } from '@testing-library/react';
-import { VariableValue } from '@perses-dev/spec';
 import { VariableOption } from '@perses-dev/plugin-system';
+import { VariableValue } from '@perses-dev/spec';
+import { renderHook } from '@testing-library/react';
 
 /**
  * Builder shortcut used in test to build a dummy option from value.
@@ -195,8 +195,8 @@ describe('useListVariableState', () => {
         {
           isFetching: params.input.isFetchingOptions,
           data: params.input.fetchedOptions,
-        }
-      )
+        },
+      ),
     );
 
     expect(result.current).toStrictEqual({

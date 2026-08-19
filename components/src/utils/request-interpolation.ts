@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { RequestHeaders } from '@perses-dev/client';
+
+import { createRegexFromString } from './regexp';
 import {
   replaceVariables,
   VariableStateMap,
   parseVariablesAndFormat,
   InterpolationFormat,
 } from './variable-interpolation';
-import { createRegexFromString } from './regexp';
 
 export type QueryParamValues = Record<string, string | string[]>;
 
@@ -90,7 +91,7 @@ export function interpolateHeaders(headers: Record<string, string>, variableStat
 
 export function interpolateQueryParams(
   queryParams: QueryParamValues,
-  variableState: VariableStateMap
+  variableState: VariableStateMap,
 ): QueryParamValues {
   const result: QueryParamValues = {};
   for (const [key, value] of Object.entries(queryParams)) {

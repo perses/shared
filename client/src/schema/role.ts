@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { z } from 'zod';
+
 import { Permission, Role, RoleSpec } from '../model';
 import { metadataSchema, projectMetadataSchema } from './metadata';
 
@@ -37,7 +38,7 @@ export const permissionSchema: z.ZodSchema<Permission> = z.object({
         'Secret',
         'User',
         'Variable',
-      ])
+      ]),
     )
     .nonempty('Must contains at least 1 scope'), // TODO: limit project role
 });

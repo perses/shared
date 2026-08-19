@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ReactElement } from 'react';
+
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
 

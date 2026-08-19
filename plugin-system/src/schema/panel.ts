@@ -11,18 +11,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { z } from 'zod';
 import { PluginSchema, panelDefinitionSchema, buildPanelDefinitionSchema } from '@perses-dev/spec';
+import { z } from 'zod';
+
 import { PanelEditorValues } from '../model';
+
+const layoutDefinitionSchema = z
+  .object({
+    width: z.number(),
+    height: z.number(),
+    repeatVariable: z
+      .object({
+        value: z.string(),
+        maxPer: z.number().min(1).max(12).optional(),
+        alignment: z.enum(['horizontal', 'vertical']).optional(),
+      })
+      .optional(),
+  })
+  .optional();
 
 export const panelEditorSchema: z.ZodSchema<PanelEditorValues> = z.object({
   groupId: z.number(),
   panelDefinition: panelDefinitionSchema,
+  layoutDefinition: layoutDefinitionSchema,
 });
 
 export function buildPanelEditorSchema(pluginSchema: PluginSchema): z.ZodSchema<PanelEditorValues> {
   return z.object({
     groupId: z.number(),
     panelDefinition: buildPanelDefinitionSchema(pluginSchema),
+    layoutDefinition: layoutDefinitionSchema,
   });
 }

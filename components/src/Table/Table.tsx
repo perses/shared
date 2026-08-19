@@ -28,10 +28,11 @@ import {
   VisibilityState,
 } from '@tanstack/react-table';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
+
 import { useFuzzySearch } from './hooks/useFuzzySearch';
+import { DEFAULT_COLUMN_WIDTH, persesColumnsToTanstackColumns, TableProps } from './model/table-model';
 import { TableCheckbox } from './TableCheckbox';
 import { VirtualizedTable } from './VirtualizedTable';
-import { DEFAULT_COLUMN_WIDTH, persesColumnsToTanstackColumns, TableProps } from './model/table-model';
 
 const DEFAULT_GET_ROW_ID = (data: unknown, index: number): string => {
   return `${index}`;
@@ -85,11 +86,11 @@ export function Table<TableData>({
     tableToolbarConfig?.isSearchEnabled,
     tableToolbarConfig?.fuzzyMatchThreshold ?? 'CONTAINS',
     expanded,
-    setExpanded
+    setExpanded,
   );
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
-    hiddenColumns?.reduce((acc, columnId) => ({ ...acc, [columnId]: false }), {}) ?? {}
+    hiddenColumns?.reduce((acc, columnId) => ({ ...acc, [columnId]: false }), {}) ?? {},
   );
 
   const handleRowSelectionChange: OnChangeFn<RowSelectionState> = (rowSelectionUpdater) => {
@@ -117,7 +118,7 @@ export function Table<TableData>({
         }
       }
     },
-    [onRowSelectionChange, rowSelectionVariant]
+    [onRowSelectionChange, rowSelectionVariant],
   );
 
   const handleCheckboxChange = useCallback(
@@ -129,7 +130,7 @@ export function Table<TableData>({
       const isModifed = !!nativePointerEvent?.metaKey || !!nativePointerEvent?.shiftKey;
       handleRowSelectionEvent(table, row, isModifed);
     },
-    [handleRowSelectionEvent]
+    [handleRowSelectionEvent],
   );
 
   const handleSortingChange: OnChangeFn<SortingState> = (sortingUpdater) => {
@@ -238,7 +239,7 @@ export function Table<TableData>({
       const isModifiedClick = e.metaKey || e.shiftKey;
       handleRowSelectionEvent(table, row, isModifiedClick);
     },
-    [handleRowSelectionEvent, table]
+    [handleRowSelectionEvent, table],
   );
 
   return (

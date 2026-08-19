@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { ReactElement, useMemo } from 'react';
+
 import { Table, TableProps, TableColumnConfig, DEFAULT_COLUMN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../Table';
 import { LegendItem } from './legend-model';
 
@@ -74,7 +75,7 @@ export function TableLegend({
             allRowSelection[getRowId(item, index)] = true;
             return allRowSelection;
           },
-          {} as Record<string, boolean>
+          {} as Record<string, boolean>,
         );
   }, [initRowSelection, items]);
 
@@ -87,7 +88,7 @@ export function TableLegend({
       }, 0) ?? 0;
     const availableWidth = Math.max(
       width - additionalColumnsLength - TABLE_PADDING,
-      DEFAULT_COLUMN_MIN_WIDTH * COLUMNS.length
+      DEFAULT_COLUMN_MIN_WIDTH * COLUMNS.length,
     );
     const columnWidth = availableWidth / COLUMNS.length;
     return [

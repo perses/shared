@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
+
 import { TableCell } from './TableCell';
 
 describe('TableCell', () => {
@@ -26,7 +27,7 @@ describe('TableCell', () => {
           dataLink={{ url: 'https://famke.com/${__data.fields["code"]}/${__data.fields["job"]}' }}
         >
           prometheus_http_requests_total
-        </TableCell>
+        </TableCell>,
       );
       expect(await screen.findByRole('link', { name: 'prometheus_http_requests_total' })).toBeInTheDocument();
     });

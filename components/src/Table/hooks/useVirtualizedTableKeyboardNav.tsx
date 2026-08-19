@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TableVirtuosoHandle } from 'react-virtuoso';
 import { FocusEventHandler, KeyboardEventHandler, MutableRefObject, RefObject } from 'react';
+import { TableVirtuosoHandle } from 'react-virtuoso';
+
 import { useTableKeyboardNav, UseTableKeyboardNavProps } from './useTableKeyboardNav';
 
 interface UseVirtualizedTableKeyboardNavProps extends Omit<UseTableKeyboardNavProps, 'onActiveCellChange'> {

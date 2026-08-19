@@ -13,12 +13,13 @@
 
 import { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
 import { QueryKey, useQueries, useQuery, UseQueryResult } from '@tanstack/react-query';
+
 import { AnnotationContext, AnnotationPlugin } from '../model';
+import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
-import { useAllVariableValues } from './variables';
-import { useDatasourceStore } from './datasources';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
+import { useAllVariableValues } from './variables';
 
 export const ANNOTATION_KEY = 'Annotation';
 
@@ -73,7 +74,7 @@ export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryRes
 
   const pluginLoaderResponse = usePlugins(
     'Annotation',
-    definitions.map((d) => ({ kind: d.plugin.kind }))
+    definitions.map((d) => ({ kind: d.plugin.kind })),
   );
 
   // useQueries() handles data fetching from query plugins
@@ -128,7 +129,7 @@ export function useAnnotationData(spec: AnnotationSpec): UseQueryResult<Annotati
       const resp = await annotationPlugin?.getAnnotationData(
         spec.plugin.spec,
         { ...variablePluginCtx, variableState: variables },
-        signal
+        signal,
       );
       if (!resp?.length) {
         return [];

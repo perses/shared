@@ -13,6 +13,7 @@
 
 import { TableContainer as MuiTableContainer, TableContainerProps as MuiTableContainerProps } from '@mui/material';
 import { forwardRef } from 'react';
+
 import { combineSx } from '../utils/combine-sx';
 
 type VirtualizedTableContainerProps = MuiTableContainerProps;
@@ -20,5 +21,5 @@ type VirtualizedTableContainerProps = MuiTableContainerProps;
 export const VirtualizedTableContainer = forwardRef<HTMLDivElement, VirtualizedTableContainerProps>(
   function VirtualizedTableContainer(props, ref) {
     return <MuiTableContainer {...props} tabIndex={-1} ref={ref} sx={combineSx({ flexGrow: 1 }, props.sx)} />;
-  }
+  },
 );

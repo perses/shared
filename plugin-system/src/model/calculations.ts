@@ -78,7 +78,7 @@ type CalculationValue = number | null | undefined;
  */
 export function getCalculations<IncludeCalcs extends CalculationType[]>(
   values: TimeSeriesValueTuple[],
-  includeCalculations: IncludeCalcs
+  includeCalculations: IncludeCalcs,
 ): Record<
   // This extract combined with the generics above keeps the key of the returned
   // record to *just* the specified calculations.
@@ -90,7 +90,7 @@ export function getCalculations<IncludeCalcs extends CalculationType[]>(
       initResult[calculation] = undefined;
       return initResult;
     },
-    {} as Record<string, CalculationValue>
+    {} as Record<string, CalculationValue>,
   );
 
   // We save these values as separate values instead of directly setting them

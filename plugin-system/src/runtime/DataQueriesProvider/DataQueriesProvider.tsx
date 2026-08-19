@@ -11,16 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactElement, useCallback, useContext, useMemo } from 'react';
 import { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/spec';
+import { createContext, ReactElement, useCallback, useContext, useMemo } from 'react';
+
+import { useAlertsQueries, AlertsQueryDefinition } from '../alerts-queries';
+import { LogQueryDefinition, useLogQueries } from '../log-queries';
+import { useProfileQueries, ProfileQueryDefinition } from '../profile-queries';
+import { useSilencesQueries, SilencesQueryDefinition } from '../silences-queries';
 import { useTimeSeriesQueries } from '../time-series-queries';
 import { useTraceQueries, TraceQueryDefinition } from '../trace-queries';
-import { useProfileQueries, ProfileQueryDefinition } from '../profile-queries';
-import { useAlertsQueries, AlertsQueryDefinition } from '../alerts-queries';
-import { useSilencesQueries, SilencesQueryDefinition } from '../silences-queries';
-
 import { useUsageMetrics } from '../UsageMetricsProvider';
-import { LogQueryDefinition, useLogQueries } from '../log-queries';
 import {
   DataQueriesProviderProps,
   UseDataQueryResults,
@@ -47,7 +47,7 @@ export function useDataQueries<T extends keyof QueryType>(queryType: T): UseData
 
   // Filter the query results based on the specified query type
   const filteredQueryResults = ctx.queryResults.filter(
-    (queryResult) => queryResult?.definition?.kind === queryType
+    (queryResult) => queryResult?.definition?.kind === queryType,
   ) as Array<QueryData<QueryType[T]>>;
 
   // Filter the errors based on the specified query type
@@ -71,7 +71,7 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
 
   // Filter definitions for time series query and other future query plugins
   const timeSeriesQueries = definitions.filter(
-    (definition) => definition.kind === 'TimeSeriesQuery'
+    (definition) => definition.kind === 'TimeSeriesQuery',
   ) as TimeSeriesQueryDefinition[];
   const timeSeriesResults = useTimeSeriesQueries(timeSeriesQueries, options, queryOptions);
 
@@ -79,7 +79,7 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
   const traceResults = useTraceQueries(traceQueries);
 
   const profileQueries = definitions.filter(
-    (definition) => definition.kind === 'ProfileQuery'
+    (definition) => definition.kind === 'ProfileQuery',
   ) as ProfileQueryDefinition[];
   const profileResults = useProfileQueries(profileQueries);
 
@@ -87,12 +87,12 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
   const logResults = useLogQueries(logQueries);
 
   const alertsQueries = definitions.filter(
-    (definition) => definition.kind === 'AlertsQuery'
+    (definition) => definition.kind === 'AlertsQuery',
   ) as AlertsQueryDefinition[];
   const alertsResults = useAlertsQueries(alertsQueries);
 
   const silencesQueries = definitions.filter(
-    (definition) => definition.kind === 'SilencesQuery'
+    (definition) => definition.kind === 'SilencesQuery',
   ) as SilencesQueryDefinition[];
   const silencesResults = useSilencesQueries(silencesQueries);
 

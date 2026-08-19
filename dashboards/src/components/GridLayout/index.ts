@@ -16,3 +16,4 @@ export * from './GridItemContent';
 export * from './GridLayout';
 export * from './GridTitle';
 export * from './Row';
+export * from './RepeatGridItemContent';

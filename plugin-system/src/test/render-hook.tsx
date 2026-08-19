@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { renderHook, RenderHookOptions, RenderHookResult } from '@testing-library/react';
+
 import { ContextOptions, getTestContextWrapper } from './utils';
 
 /**
@@ -21,7 +22,7 @@ import { ContextOptions, getTestContextWrapper } from './utils';
 export function renderHookWithContext<TProps, TResult>(
   callback: (props: TProps) => TResult,
   contextOptions?: ContextOptions,
-  renderHookOptions?: Omit<RenderHookOptions<TProps>, 'wrapper'>
+  renderHookOptions?: Omit<RenderHookOptions<TProps>, 'wrapper'>,
 ): RenderHookResult<TResult, TProps> {
   const wrapper = getTestContextWrapper(contextOptions);
   return renderHook(callback, { wrapper, ...renderHookOptions });

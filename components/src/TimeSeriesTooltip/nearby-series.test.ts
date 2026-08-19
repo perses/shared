@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ECharts as EChartsInstance } from 'echarts/core';
 import { TimeSeries } from '@perses-dev/spec';
+import { ECharts as EChartsInstance } from 'echarts/core';
+
 import { EChartsDataFormat, FormatOptions, TimeChartSeriesMapping } from '../model';
 import {
   checkforNearbyTimeSeries,
@@ -72,7 +73,7 @@ describe('legacyCheckforNearbySeries', () => {
       decimalPlaces: 2,
     };
     expect(legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, undefined, decimalUnit)).toEqual(
-      nearbySeriesOutput
+      nearbySeriesOutput,
     );
   });
 
@@ -86,7 +87,7 @@ describe('legacyCheckforNearbySeries', () => {
       decimalPlaces: 0,
     };
     expect(legacyCheckforNearbySeries(chartData, pointInGrid, yBuffer, undefined, percentFormattedUnit)).toEqual(
-      percentFormattedOutput
+      percentFormattedOutput,
     );
   });
 });

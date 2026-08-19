@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Virtuoso } from 'react-virtuoso';
 import { ReactElement } from 'react';
-import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
+import { Virtuoso } from 'react-virtuoso';
+
 import { LegendItem, SelectedLegendItemState, isLegendItemVisuallySelected } from './legend-model';
+import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
 
 export interface ListLegendProps {
   items: LegendItem[];
@@ -43,6 +44,8 @@ export function ListLegend({
 }: ListLegendProps): ReactElement {
   // show full labels on hover when there are many total series
   const truncateLabels = items.length > 5;
+  // Virtuoso requires its scroll container to remain a div, so native ul semantics cannot be used here.
+  /* oxlint-disable jsx-a11y/prefer-tag-over-role */
   return (
     <Virtuoso
       style={{ height, width }}
@@ -69,4 +72,5 @@ export function ListLegend({
       role="list"
     />
   );
+  /* oxlint-enable jsx-a11y/prefer-tag-over-role */
 }

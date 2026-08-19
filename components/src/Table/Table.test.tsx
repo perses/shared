@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import userEvent from '@testing-library/user-event';
 import { render, screen, getAllByRole, within, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { VirtuosoMockContext } from 'react-virtuoso';
-import { Table } from './Table';
+
 import { TableCellConfigs, TableColumnConfig, TableProps } from './model/table-model';
+import { Table } from './Table';
 
 type MockTableData = {
   id: string;
@@ -88,14 +89,14 @@ const renderTable = ({
   width = 300,
   checkboxSelection,
   rowSelection = {},
-  onRowSelectionChange = jest.fn(),
+  onRowSelectionChange = vi.fn(),
   columns = COLUMNS,
   cellConfigs = {},
   rowSelectionVariant,
   sorting,
-  onSortingChange = jest.fn(),
-  onRowMouseOver = jest.fn(),
-  onRowMouseOut = jest.fn(),
+  onSortingChange = vi.fn(),
+  onRowMouseOver = vi.fn(),
+  onRowMouseOut = vi.fn(),
 }: RenderTableOpts = {}): RenderResult => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: height, itemHeight: MOCK_ITEM_HEIGHT }}>
@@ -114,7 +115,7 @@ const renderTable = ({
         sorting={sorting}
         onSortingChange={onSortingChange}
       />
-    </VirtuosoMockContext.Provider>
+    </VirtuosoMockContext.Provider>,
   );
 };
 
@@ -575,7 +576,7 @@ describe('table', () => {
       const data = generateMockTableData(3);
 
       test('selects all after clicking header checkbox', () => {
-        const mockOnRowSelectionChange = jest.fn();
+        const mockOnRowSelectionChange = vi.fn();
         renderTable({
           data: data,
           checkboxSelection: true,
@@ -602,7 +603,7 @@ describe('table', () => {
       // Behavior shouldn't be different between variations in this case, so use an each.
       describe.each(['standard', 'legend'] as const)('with "%s" row selection', (rowSelectionVariant) => {
         test('selects a single row on clicking that row', () => {
-          const mockOnRowSelectionChange = jest.fn();
+          const mockOnRowSelectionChange = vi.fn();
           renderTable({
             data: data,
             checkboxSelection: true,
@@ -628,7 +629,7 @@ describe('table', () => {
         });
 
         test('selects a single row on clicking the checkbox in the row', () => {
-          const mockOnRowSelectionChange = jest.fn();
+          const mockOnRowSelectionChange = vi.fn();
           renderTable({
             data: data,
             checkboxSelection: true,
@@ -669,7 +670,7 @@ describe('table', () => {
         ['legend', true],
       ] as const)('with "%s" row selection (modifed: %p)', (rowSelectionVariant, isModifed) => {
         test('selects none after clicking header checkbox', () => {
-          const mockOnRowSelectionChange = jest.fn();
+          const mockOnRowSelectionChange = vi.fn();
           renderTable({
             data: data,
             checkboxSelection: true,
@@ -693,7 +694,7 @@ describe('table', () => {
         });
 
         test('unselects a row on clicking that row', () => {
-          const mockOnRowSelectionChange = jest.fn();
+          const mockOnRowSelectionChange = vi.fn();
           renderTable({
             data: data,
             checkboxSelection: true,
@@ -722,7 +723,7 @@ describe('table', () => {
         });
 
         test('unselects a row on clicking the checkbox in the row', () => {
-          const mockOnRowSelectionChange = jest.fn();
+          const mockOnRowSelectionChange = vi.fn();
           renderTable({
             data: data,
             checkboxSelection: true,
@@ -755,7 +756,7 @@ describe('table', () => {
         const rowSelectionVariant = 'legend' as const;
 
         test('selects none after clicking header checkbox', () => {
-          const mockOnRowSelectionChange = jest.fn();
+          const mockOnRowSelectionChange = vi.fn();
           renderTable({
             data: data,
             checkboxSelection: true,
@@ -777,7 +778,7 @@ describe('table', () => {
         });
 
         test('focuses a row on clicking that row', () => {
-          const mockOnRowSelectionChange = jest.fn();
+          const mockOnRowSelectionChange = vi.fn();
           renderTable({
             data: data,
             checkboxSelection: true,
@@ -803,7 +804,7 @@ describe('table', () => {
         });
 
         test('focuses a row on clicking the checkbox in the row', () => {
-          const mockOnRowSelectionChange = jest.fn();
+          const mockOnRowSelectionChange = vi.fn();
           renderTable({
             data: data,
             checkboxSelection: true,
@@ -882,7 +883,7 @@ describe('table', () => {
       });
 
       test('changes sorting to descending on clicking the header', () => {
-        const mockOnSortingChange = jest.fn();
+        const mockOnSortingChange = vi.fn();
         renderTable({
           onSortingChange: mockOnSortingChange,
           sorting: sortingState,
@@ -903,7 +904,7 @@ describe('table', () => {
       });
 
       test('changes sorting to unsorted on clicking another sortable column', () => {
-        const mockOnSortingChange = jest.fn();
+        const mockOnSortingChange = vi.fn();
         renderTable({
           onSortingChange: mockOnSortingChange,
           sorting: sortingState,
@@ -960,7 +961,7 @@ describe('table', () => {
       });
 
       test('changes sorting to ascending on clicking the header', () => {
-        const mockOnSortingChange = jest.fn();
+        const mockOnSortingChange = vi.fn();
         renderTable({
           onSortingChange: mockOnSortingChange,
           sorting: sortingState,
@@ -981,7 +982,7 @@ describe('table', () => {
       });
 
       test('changes sorting to unsorted on clicking another sortable column', () => {
-        const mockOnSortingChange = jest.fn();
+        const mockOnSortingChange = vi.fn();
         renderTable({
           onSortingChange: mockOnSortingChange,
           sorting: sortingState,
@@ -1038,7 +1039,7 @@ describe('table', () => {
       });
 
       test('changes sorting to unsorted on clicking the header', () => {
-        const mockOnSortingChange = jest.fn();
+        const mockOnSortingChange = vi.fn();
         renderTable({
           onSortingChange: mockOnSortingChange,
           sorting: sortingState,
@@ -1054,7 +1055,7 @@ describe('table', () => {
       });
 
       test('changes sorting to unsorted on clicking another sortable column', () => {
-        const mockOnSortingChange = jest.fn();
+        const mockOnSortingChange = vi.fn();
         renderTable({
           onSortingChange: mockOnSortingChange,
           sorting: sortingState,
@@ -1078,7 +1079,7 @@ describe('table', () => {
 
   describe('on mouse over row', () => {
     test('calls `onRowMouseOver` with event and row information', () => {
-      const mockOnRowMouseOver = jest.fn();
+      const mockOnRowMouseOver = vi.fn();
       renderTable({ onRowMouseOver: mockOnRowMouseOver });
       screen.getByRole('table');
 
@@ -1097,14 +1098,14 @@ describe('table', () => {
         {
           id: '1',
           index: 1,
-        }
+        },
       );
     });
   });
 
   describe('on mouse out row', () => {
     test('calls `onRowMouseOut` with event and row information', () => {
-      const mockOnRowMouseOut = jest.fn();
+      const mockOnRowMouseOut = vi.fn();
       renderTable({ onRowMouseOut: mockOnRowMouseOut });
       screen.getByRole('table');
 
@@ -1123,7 +1124,7 @@ describe('table', () => {
         {
           id: '2',
           index: 2,
-        }
+        },
       );
     });
   });

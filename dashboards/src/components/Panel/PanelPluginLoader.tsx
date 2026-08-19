@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Skeleton } from '@mui/material';
 import { usePlugin, PanelProps } from '@perses-dev/plugin-system';
 import { UnknownSpec, QueryDataType } from '@perses-dev/spec';
 import { ReactElement } from 'react';
-import { Skeleton } from '@mui/material';
 
 interface PanelPluginProps extends PanelProps<UnknownSpec, QueryDataType> {
   kind: string;
@@ -51,7 +51,7 @@ export function PanelPluginLoader(props: PanelPluginProps): ReactElement {
   for (const queryResult of supportedQueryResults) {
     if (!supportedQueryTypes.includes(queryResult.definition.kind)) {
       throw new Error(
-        `This panel does not support queries of type '${queryResult.definition.kind}'. Supported query types: ${supportedQueryTypes.join(', ')}.`
+        `This panel does not support queries of type '${queryResult.definition.kind}'. Supported query types: ${supportedQueryTypes.join(', ')}.`,
       );
     }
   }

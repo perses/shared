@@ -13,6 +13,7 @@
 
 import { MenuItem, TextField, TextFieldProps } from '@mui/material';
 import { forwardRef, ReactElement, useCallback, useMemo } from 'react';
+
 import { PluginType } from '../../model';
 import { useListPluginMetadata } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';
@@ -61,7 +62,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
       return sortedData?.find((v) => v.kind === selectedValue.type && v.spec.name === selectedValue.kind)?.spec.display
         .name;
     },
-    [sortedData]
+    [sortedData],
   );
 
   // TODO: Does this need a loading indicator of some kind?

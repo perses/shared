@@ -12,15 +12,21 @@
 // limitations under the License.
 
 import { BuiltinVariableDefinition, UnknownSpec } from '@perses-dev/spec';
-import { Plugin } from './plugin-base';
+
+import { OptionsEditorProps, Plugin } from './plugin-base';
 
 /**
  * Plugin that defines options for an external system that Perses talks to for data.
  */
-export interface DatasourcePlugin<Spec = UnknownSpec, Client = unknown> extends Plugin<Spec> {
+export interface DatasourcePlugin<
+  Spec = UnknownSpec,
+  Client = unknown,
+  OptionsEditorPropsType = DatasourceEditorProps<Spec>,
+> extends Plugin<Spec, OptionsEditorPropsType> {
   createClient: (spec: Spec, options: DatasourceClientOptions) => Client;
   // Provide builtin variable definitions available on the datasource. Optional
   getBuiltinVariableDefinitions?: () => BuiltinVariableDefinition[];
+  healthCheckPath?: string;
 }
 
 export interface DatasourceClientOptions {
@@ -34,4 +40,11 @@ export interface DatasourceClient {
   // TODO: set kind and define healthCheck function
   kind?: string;
   healthCheck?: () => Promise<boolean>;
+}
+
+/**
+ * Common props passed to datasource options editor components.
+ */
+export interface DatasourceEditorProps<Spec> extends OptionsEditorProps<Spec> {
+  testConnection?: () => Promise<void>;
 }

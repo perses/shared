@@ -13,6 +13,7 @@
 
 import { OptionsEditorControl, SettingsAutocomplete } from '@perses-dev/components';
 import { ReactElement } from 'react';
+
 import { CALCULATIONS_CONFIG, CalculationConfig, CalculationType } from '../../model'; // TODO weird this is part of the model from the core package ...
 
 type AutocompleteCalculationOption = CalculationConfig & { id: CalculationType };

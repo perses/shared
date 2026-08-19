@@ -13,8 +13,9 @@
 
 import { TableSortLabel, Typography, tableSortLabelClasses, Box, Divider } from '@mui/material';
 import { ReactElement } from 'react';
-import { TableCell, TableCellProps } from './TableCell';
+
 import { SortDirection } from './model/table-model';
+import { TableCell, TableCellProps } from './TableCell';
 
 export interface TableHeaderCellProps extends TableCellProps {
   /**

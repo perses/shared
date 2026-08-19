@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariablePlugin, VariableOption } from '../../../model';
+import { DatasourceEditorProps, DatasourcePlugin, VariableOption, VariablePlugin } from '../../../model';
 
 const data: VariableOption[] = [
   { label: 'Grover', value: 'Grover' },
@@ -55,7 +55,58 @@ const ErnieVariable2: VariablePlugin<{ variableOption2: string }> = {
   createInitialOptions: () => ({ variableOption2: '' }),
 };
 
+type ErnieDatasourceSpec = { url?: string };
+
+const ErnieDatasource: DatasourcePlugin<ErnieDatasourceSpec> = {
+  createClient: () => ({}),
+  createInitialOptions: () => ({}),
+  healthCheckPath: '/api/v1/query',
+  OptionsEditorComponent: function ErnieDatasourceEditor({
+    value,
+    onChange,
+    testConnection,
+  }: DatasourceEditorProps<ErnieDatasourceSpec>) {
+    return (
+      <div>
+        <label htmlFor="datasource-url">ErnieDatasource editor</label>
+        <input
+          type="text"
+          id="datasource-url"
+          value={value.url ?? ''}
+          onChange={(e) => onChange({ ...value, url: e.target.value })}
+        />
+        {testConnection && <button onClick={testConnection}>test-connection-trigger</button>}
+      </div>
+    );
+  },
+};
+
+const ErnieDatasourceNoHealthCheck: DatasourcePlugin<ErnieDatasourceSpec> = {
+  createClient: () => ({}),
+  createInitialOptions: () => ({}),
+  OptionsEditorComponent: function ErnieDatasourceNoHealthCheckEditor({
+    value,
+    onChange,
+    testConnection,
+  }: DatasourceEditorProps<ErnieDatasourceSpec>) {
+    return (
+      <div>
+        <label htmlFor="datasource-url">ErnieDatasourceNoHealthCheck editor</label>
+        <input
+          type="text"
+          id="datasource-url"
+          value={value.url ?? ''}
+          onChange={(e) => onChange({ ...value, url: e.target.value })}
+        />
+        {testConnection && <button onClick={testConnection}>test-connection-trigger</button>}
+      </div>
+    );
+  },
+};
+
 export const plugins = {
   'Variable:ErnieVariable1::1.0.0': ErnieVariable1,
   'Variable:ErnieVariable2::1.0.0': ErnieVariable2,
+  'Datasource:ErnieDatasource::1.0.0': ErnieDatasource,
+  'Datasource:ErnieDatasourceNoHealthCheck::1.0.0': ErnieDatasourceNoHealthCheck,
 };

@@ -11,7 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PanelGroupId } from '@perses-dev/plugin-system';
+import { PanelEditorValues, PanelGroupId } from '@perses-dev/plugin-system';
+
+export type RepeatVariable = NonNullable<NonNullable<PanelEditorValues['layoutDefinition']>['repeatVariable']>;
+
 /**
  * Panel Group Item Layout ID type. String identifier for items within a panel group.
  */
@@ -23,7 +26,10 @@ export type PanelGroupItemLayoutId = string;
 export interface PanelGroupItemId {
   panelGroupId: PanelGroupId;
   panelGroupItemLayoutId: PanelGroupItemLayoutId;
-  repeatVariable?: [string, string]; // Optional, used for repeated panel groups. Variable name and value.
+  repeatVariable?: {
+    group?: [string, string];
+    panel?: [string, string];
+  }; // Optional, used for repeated panels and panel groups.
 }
 
 /**
@@ -55,6 +61,7 @@ export interface BaseLayout {
 
 export interface PanelGroupItemLayout extends BaseLayout {
   i: PanelGroupItemLayoutId;
+  repeatVariable?: RepeatVariable;
 }
 
 /**

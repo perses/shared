@@ -35,7 +35,7 @@ export function interpolateSelectionIndividual(
   item: SelectionItem,
   index: number,
   count: number,
-  variableState?: VariableStateMap
+  variableState?: VariableStateMap,
 ): InterpolationResult {
   // Replace __data patterns using shared utility (includes __data.index and __data.count)
   const dataFieldResult = replaceDataFields(template, item, { index, count });
@@ -68,7 +68,7 @@ export function interpolateSelectionIndividual(
 export function interpolateSelectionBatch(
   template: string,
   items: SelectionItem[],
-  variableState?: VariableStateMap
+  variableState?: VariableStateMap,
 ): InterpolationResult {
   // Replace __data patterns using shared utility (includes __data.count)
   const dataFieldResult = replaceDataFieldsBatch(template, items);

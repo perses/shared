@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { FormControl, FormLabel, FormControlLabelProps, Stack, Box, IconButton } from '@mui/material';
-import React, { ReactElement } from 'react';
 import InformationOutlineIcon from 'mdi-material-ui/InformationOutline';
-import { useId } from '../utils';
+import React, { ReactElement } from 'react';
+
 import { InfoTooltip } from '../InfoTooltip';
+import { useId } from '../utils';
 
 export type OptionsEditorControlProps = Pick<FormControlLabelProps, 'label' | 'control'> & {
   description?: string;

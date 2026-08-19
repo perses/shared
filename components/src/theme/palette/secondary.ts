@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { SimplePaletteColorOptions, PaletteMode } from '@mui/material';
+
 import { grey, white } from './colors';
 
 export const secondary = (mode: PaletteMode): SimplePaletteColorOptions => {

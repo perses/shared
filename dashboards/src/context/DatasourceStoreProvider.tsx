@@ -11,8 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, ReactNode, useCallback, useMemo, useRef, useState } from 'react';
-import { DashboardSpec, DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
+import {
+  BuildDatasourceProxyUrlParams,
+  DashboardResource,
+  DatasourceApi,
+  DatasourceDefinition,
+} from '@perses-dev/client';
 import {
   DatasourceStoreContext,
   DatasourceStore,
@@ -22,12 +26,8 @@ import {
   DatasourceClient,
   DatasourceSelectItem,
 } from '@perses-dev/plugin-system';
-import {
-  BuildDatasourceProxyUrlParams,
-  DashboardResource,
-  DatasourceApi,
-  DatasourceDefinition,
-} from '@perses-dev/client';
+import { DashboardSpec, DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
+import { ReactElement, ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 
 export interface DatasourceStoreProviderProps {
   dashboardResource?: DashboardResource;
@@ -45,7 +45,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
   const { projectName, datasourceApi, onCreate, children } = props;
   const [dashboardResource, setDashboardResource] = useState(props.dashboardResource);
   const [savedDatasources, setSavedDatasources] = useState<Record<string, DatasourceSpec>>(
-    props.savedDatasources ?? {}
+    props.savedDatasources ?? {},
   );
   // Cache for synchronous datasource spec access
   const datasourceSpecCache = useRef<Map<string, DatasourceSpec>>(new Map());
@@ -59,7 +59,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       const name = selector.name === undefined ? '__undefined__' : selector.name;
       return `${selector.kind}:${name}:${project ?? 'global'}`;
     },
-    [project]
+    [project],
   );
 
   const findDatasource = useEvent(async (selector: DatasourceSelector) => {
@@ -125,7 +125,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       const { spec } = await findDatasource(selector);
       return spec;
     },
-    [findDatasource]
+    [findDatasource],
   );
 
   // Given a Datasource selector, finds the spec for it and then uses its corresponding plugin the create a client
@@ -144,7 +144,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       }
       return client;
     },
-    [findDatasource, getPlugin, onCreate]
+    [findDatasource, getPlugin, onCreate],
   );
 
   const listDatasourceSelectItems = useEvent(
@@ -193,7 +193,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       }
 
       return results;
-    }
+    },
   );
 
   const getLocalDatasources = useCallback((): Record<string, DatasourceSpec> => {
@@ -210,7 +210,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       const cacheKey = createCacheKey(selector);
       return datasourceSpecCache.current.get(cacheKey);
     },
-    [createCacheKey]
+    [createCacheKey],
   );
 
   const setLocalDatasources = useCallback(
@@ -225,7 +225,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
         });
       }
     },
-    [dashboardResource]
+    [dashboardResource],
   );
 
   const ctxValue: DatasourceStore = useMemo(
@@ -249,7 +249,7 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       listDatasourceSelectItems,
       setSavedDatasources,
       getSavedDatasources,
-    ]
+    ],
   );
 
   return <DatasourceStoreContext.Provider value={ctxValue}>{children}</DatasourceStoreContext.Provider>;
@@ -262,7 +262,7 @@ function buildDatasourceProxyUrl(api: DatasourceApi, params: BuildDatasourceProx
 // Helper to find a datasource in the list embedded in a dashboard spec
 function findDashboardDatasource(
   dashboardDatasources: DashboardSpec['datasources'],
-  selector: DatasourceSelector
+  selector: DatasourceSelector,
 ): DatasourceDefinition | undefined {
   if (dashboardDatasources === undefined) return undefined;
 
@@ -275,7 +275,7 @@ function findDashboardDatasource(
 
   // If only using a kind, try to find one with that kind that is the default
   const result = Object.entries(dashboardDatasources).find(
-    (entry) => entry[1].plugin.kind === selector.kind && entry[1].default
+    (entry) => entry[1].plugin.kind === selector.kind && entry[1].default,
   );
   if (!result) {
     return undefined;

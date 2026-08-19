@@ -98,7 +98,7 @@ export function useDatasourceStore(): DatasourceStore {
  */
 export function useListDatasourceSelectItems(
   datasourcePluginName: string,
-  project?: string
+  project?: string,
 ): UseQueryResult<DatasourceSelectItemGroup[]> {
   const { listDatasourceSelectItems } = useDatasourceStore();
   return useQuery<DatasourceSelectItemGroup[]>({

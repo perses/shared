@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
-import { TooltipContent, TooltipContentProps } from './TooltipContent';
+import { render } from '@testing-library/react';
+
 import { EMPHASIZED_SERIES_DESCRIPTION, NEARBY_SERIES_DESCRIPTION } from './tooltip-model';
+import { TooltipContent, TooltipContentProps } from './TooltipContent';
 
 describe('TooltipContent', () => {
   const renderComponent = (props: TooltipContentProps): void => {
@@ -75,10 +76,10 @@ describe('TooltipContent', () => {
     expect(screen.getByText('84.64M')).toBeInTheDocument();
     expect(screen.getByText('33.77M')).toBeInTheDocument();
     expect(
-      screen.getAllByText('node_memory_Buffers_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}')
+      screen.getAllByText('node_memory_Buffers_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}'),
     ).toHaveLength(1);
     expect(
-      screen.getAllByText('node_memory_MemFree_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}')
+      screen.getAllByText('node_memory_MemFree_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}'),
     ).toHaveLength(1);
   });
 
@@ -112,10 +113,10 @@ describe('TooltipContent', () => {
     };
     renderComponent(tooltipContent);
     expect(
-      screen.getByText('node_memory_MemFree_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}')
+      screen.getByText('node_memory_MemFree_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}'),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('node_memory_Buffers_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}')
+      screen.getByText('node_memory_Buffers_bytes{env="demo", instance="demo.do.prometheus.io:9100", job="node"}'),
     ).toBeInTheDocument();
     expect(screen.queryByText(EMPHASIZED_SERIES_DESCRIPTION)).not.toBeInTheDocument();
     expect(screen.getAllByLabelText(NEARBY_SERIES_DESCRIPTION)).toHaveLength(2);

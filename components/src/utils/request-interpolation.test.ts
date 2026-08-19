@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableStateMap } from './variable-interpolation';
 import { interpolateHeaders, interpolateQueryParams } from './request-interpolation';
+import { VariableStateMap } from './variable-interpolation';
 
 const variableState: VariableStateMap = {
   namespace: { value: 'default', loading: false },
@@ -32,7 +32,7 @@ describe('interpolateHeaders()', () => {
         'X-Scope-OrgID': '$namespace',
         'X-Cluster': '$cluster',
       },
-      variableState
+      variableState,
     );
     expect(result).toEqual({
       'X-Scope-OrgID': 'default',
@@ -66,7 +66,7 @@ describe('interpolateHeaders()', () => {
         'Content-Type': 'application/json',
         'X-Tenant': '$namespace',
       },
-      variableState
+      variableState,
     );
     expect(result).toEqual({
       'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ describe('interpolateQueryParams()', () => {
         namespace: '$namespace',
         cluster: '$cluster',
       },
-      variableState
+      variableState,
     );
     expect(result).toEqual({
       namespace: 'default',
@@ -127,7 +127,7 @@ describe('interpolateQueryParams()', () => {
         namespace: '$namespace',
         tags: ['$cluster', 'static'],
       },
-      variableState
+      variableState,
     );
     expect(result).toEqual({
       dedup: 'false',
@@ -176,7 +176,7 @@ describe('interpolateQueryParams()', () => {
       {
         namespaces: ['$namespace', '${multi:csv}'],
       },
-      variableState
+      variableState,
     );
     expect(result).toEqual({
       namespaces: ['default', 'ns1,ns2'],
@@ -251,7 +251,7 @@ describe('interpolateQueryParams()', () => {
     it('expands customAllValue alongside other params', () => {
       const result = interpolateQueryParams(
         { namespace: '${namespace:queryparam}', cluster: '$cluster' },
-        customAllValueState
+        customAllValueState,
       );
       expect(result).toEqual({
         namespace: ['project-alpha', 'project-beta', 'project-gamma'],

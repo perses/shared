@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render } from '@testing-library/react';
 import { screen } from '@testing-library/dom';
-import { TooltipHeader, TooltipHeaderProps } from './TooltipHeader';
+import { render } from '@testing-library/react';
+
 import { PIN_TOOLTIP_HELP_TEXT, UNPIN_TOOLTIP_HELP_TEXT } from './tooltip-model';
+import { TooltipHeader, TooltipHeaderProps } from './TooltipHeader';
 
 describe('TooltipHeader', () => {
   const renderComponent = (props: TooltipHeaderProps): void => {

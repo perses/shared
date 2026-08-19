@@ -13,12 +13,13 @@
 
 import { CardHeader, CardHeaderProps, Stack, Typography, Tooltip } from '@mui/material';
 import { combineSx } from '@perses-dev/components';
-import { Link } from '@perses-dev/spec';
 import { ItemAction, QueryData, useAllVariableValues, useReplaceVariablesInString } from '@perses-dev/plugin-system';
+import { Link } from '@perses-dev/spec';
 import { ReactElement, ReactNode, useRef } from 'react';
+
 import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants';
-import { PanelActions, PanelActionsProps } from './PanelActions';
 import { PanelOptions } from './Panel';
+import { PanelActions, PanelActionsProps } from './PanelActions';
 import { useSelectionItemActions } from './useSelectionItemActions';
 
 type OmittedProps = 'children' | 'action' | 'title' | 'disableTypography';
@@ -37,6 +38,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   itemActionsListConfig?: ItemAction[];
   showIcons: PanelOptions['showIcons'];
   dimension?: { width: number };
+  informationTooltip?: string;
 }
 
 export function PanelHeader({
@@ -54,6 +56,7 @@ export function PanelHeader({
   showIcons,
   viewQueriesHandler,
   dimension,
+  informationTooltip,
   ...rest
 }: PanelHeaderProps): ReactElement {
   const titleElementId = `${id}-title`;
@@ -107,6 +110,7 @@ export function PanelHeader({
                 title={title}
                 description={description}
                 descriptionTooltipId={descriptionTooltipId}
+                informationTooltip={informationTooltip}
                 links={links}
                 readHandlers={readHandlers}
                 editHandlers={editHandlers}
@@ -129,7 +133,7 @@ export function PanelHeader({
                 overflow: 'hidden',
               },
             }),
-            sx
+            sx,
           )}
           {...rest}
         />
@@ -147,7 +151,7 @@ export function PanelHeader({
               containerType: 'inline-size',
               containerName: HEADER_ACTIONS_CONTAINER_NAME,
             },
-            sx
+            sx,
           )}
           {...rest}
         >
@@ -155,6 +159,7 @@ export function PanelHeader({
             title={title}
             description={description}
             descriptionTooltipId={descriptionTooltipId}
+            informationTooltip={informationTooltip}
             links={links}
             readHandlers={readHandlers}
             editHandlers={editHandlers}

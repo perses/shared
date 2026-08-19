@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactNode, useMemo, useState } from 'react';
-import { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
 import {
   Card,
   CardContent,
@@ -26,7 +24,10 @@ import {
   Typography,
 } from '@mui/material';
 import { getDateAndTime, InfoTooltip, useTimeZone } from '@perses-dev/components';
+import { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
 import AlertIcon from 'mdi-material-ui/Alert';
+import { ReactNode, useMemo, useState } from 'react';
+
 import { useAnnotationData } from '../../../runtime';
 
 interface AnnotationPreviewCardProps extends CardProps {

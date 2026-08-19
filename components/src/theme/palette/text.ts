@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PaletteOptions, PaletteMode } from '@mui/material';
+
 import { grey, white, blue } from './colors';
 
 export const text = (mode: PaletteMode): PaletteOptions['text'] => {

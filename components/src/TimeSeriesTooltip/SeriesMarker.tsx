@@ -13,6 +13,7 @@
 
 import { Box, BoxProps } from '@mui/material';
 import { ReactElement } from 'react';
+
 import { combineSx } from '../utils';
 
 interface SeriesMarkerProps extends BoxProps<'div'> {
@@ -32,7 +33,7 @@ export function SeriesMarker(props: SeriesMarkerProps): ReactElement {
           marginRight: 1,
           verticalAlign: 'top',
         },
-        sx
+        sx,
       )}
       style={{ backgroundColor: markerColor }}
     ></Box>

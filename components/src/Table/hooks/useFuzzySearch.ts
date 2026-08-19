@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ExpandedState, FilterFn, getFilteredRowModel, TableOptions } from '@tanstack/react-table';
-import { rankings, rankItem } from '@tanstack/match-sorter-utils';
-import { SetStateAction, useCallback, useState } from 'react';
 import { FuzzyMatchThreshold } from '@perses-dev/components';
+import { rankings, rankItem } from '@tanstack/match-sorter-utils';
+import { ExpandedState, FilterFn, getFilteredRowModel, TableOptions } from '@tanstack/react-table';
+import { SetStateAction, useCallback, useState } from 'react';
 
 const getFuzzyFilterFunction =
   (threshold: FuzzyMatchThreshold): FilterFn<unknown> =>
@@ -41,7 +41,7 @@ export function useFuzzySearch<TableData>(
   isSearchEnabled: boolean | undefined,
   threshold: FuzzyMatchThreshold,
   expanded: ExpandedState,
-  setExpanded: (value: SetStateAction<ExpandedState>) => void
+  setExpanded: (value: SetStateAction<ExpandedState>) => void,
 ): UseFuzzySearchResult<TableData> {
   const [globalFilter, setGlobalFilter] = useState('');
   const [prevExpandedState, setPrevExpandedState] = useState<ExpandedState>(expanded);
@@ -59,7 +59,7 @@ export function useFuzzySearch<TableData>(
         return value;
       });
     },
-    [expanded, prevExpandedState, setExpanded]
+    [expanded, prevExpandedState, setExpanded],
   );
   return {
     globalFilter,

@@ -49,7 +49,7 @@ describe('resolvePluginKeys', () => {
     it('should prefer registry variant on version tie with registryOverVersion', () => {
       const keys = ['Panel:TimeSeriesChart:dev:2.0.0', 'Panel:TimeSeriesChart::2.0.0'];
       expect(
-        resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart' }, { registryOverVersion: true })
+        resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart' }, { registryOverVersion: true }),
       ).toEqual(['Panel:TimeSeriesChart:dev:2.0.0']);
     });
 
@@ -63,21 +63,21 @@ describe('resolvePluginKeys', () => {
     it('should return exact-match key first, then fallback', () => {
       const keys = ['Panel:TimeSeriesChart:dev:1.0.0', 'Panel:TimeSeriesChart:dev:2.0.0'];
       expect(
-        resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart', version: '1.0.0', registry: 'dev' })
+        resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart', version: '1.0.0', registry: 'dev' }),
       ).toEqual(['Panel:TimeSeriesChart:dev:1.0.0', 'Panel:TimeSeriesChart:dev:2.0.0']);
     });
 
     it('should not duplicate if exact match is the same as fallback', () => {
       const keys = ['Panel:TimeSeriesChart:dev:2.0.0'];
       expect(
-        resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart', version: '2.0.0', registry: 'dev' })
+        resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart', version: '2.0.0', registry: 'dev' }),
       ).toEqual(['Panel:TimeSeriesChart:dev:2.0.0']);
     });
 
     it('should include exact-match key even if it is not in allKeys', () => {
       const keys = ['Panel:TimeSeriesChart:dev:2.0.0'];
       expect(
-        resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart', version: '3.0.0', registry: 'dev' })
+        resolvePluginKeys(keys, { kind: 'Panel', name: 'TimeSeriesChart', version: '3.0.0', registry: 'dev' }),
       ).toEqual(['Panel:TimeSeriesChart:dev:3.0.0', 'Panel:TimeSeriesChart:dev:2.0.0']);
     });
 

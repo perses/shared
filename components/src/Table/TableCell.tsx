@@ -20,6 +20,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { ReactElement, useEffect, useMemo, useRef } from 'react';
+
 import { hasDataFieldPatterns, replaceDataFields } from '../utils/data-field-interpolation';
 import { DataLink, TableCellAlignment, TableDensity, getTableCellLayout } from './model/table-model';
 
@@ -109,7 +110,7 @@ export function TableCell({
   const handleFocus: React.FocusEventHandler<HTMLTableCellElement> = (e) => {
     // From https://zellwk.com/blog/keyboard-focusable-elements/
     const nestedFocusTarget = e.currentTarget?.querySelector<HTMLElement>(
-      'a[href], button, input, textarea, select, details,[role="button"]'
+      'a[href], button, input, textarea, select, details,[role="button"]',
     );
     if (nestedFocusTarget) {
       // If the cell has a focusable child, focus it instead. Mostly used for

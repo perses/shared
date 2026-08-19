@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { VariableValue } from '@perses-dev/spec';
+
 import { getInitalValuesFromQueryParameters, decodeVariableValue, encodeVariableValue } from './query-params';
 
 describe('getInitalValuesFromQueryParameters', () => {
@@ -20,7 +21,7 @@ describe('getInitalValuesFromQueryParameters', () => {
       getInitalValuesFromQueryParameters({
         'var-foo': 'bar',
         'var-baz': ['qux', 'quux'],
-      })
+      }),
     ).toEqual({
       foo: 'bar',
       baz: ['qux', 'quux'],

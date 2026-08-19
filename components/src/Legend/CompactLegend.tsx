@@ -13,8 +13,9 @@
 
 import { Box } from '@mui/material';
 import { ReactElement } from 'react';
-import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
+
 import { LegendItem, SelectedLegendItemState, isLegendItemVisuallySelected } from './legend-model';
+import { ListLegendItem, ListLegendItemProps } from './ListLegendItem';
 
 export interface CompactLegendProps {
   height: number;

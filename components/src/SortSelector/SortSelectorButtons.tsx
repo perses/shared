@@ -13,6 +13,7 @@
 
 import { Button, ButtonGroup, ButtonGroupProps } from '@mui/material';
 import { ReactElement } from 'react';
+
 import { SortOption } from './SortSelector';
 
 export interface SortSelectorButtonsProps extends Omit<ButtonGroupProps, 'onChange'> {

@@ -2,13 +2,8 @@
   "$schema": "https://turborepo.org/schema.json",
   "tasks": {
     "build": {
-      "dependsOn": [
-        "clean",
-        "^build"
-      ],
-      "outputs": [
-        "dist/**"
-      ]
+      "dependsOn": ["clean", "^build"],
+      "outputs": ["dist/**"]
     },
     "clean": {
       "dependsOn": [],
@@ -18,10 +13,16 @@
       "dependsOn": [],
       "outputs": []
     },
+    "//#format:root": {
+      "cache": false,
+      "outputs": []
+    },
+    "//#format:root:check": {
+      "cache": false,
+      "outputs": []
+    },
     "start": {
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "cache": false
     },
     "test": {
@@ -29,9 +30,7 @@
       "outputs": []
     },
     "type-check": {
-      "dependsOn": [
-        "^build"
-      ],
+      "dependsOn": ["^build"],
       "outputs": [],
       "cache": false
     },

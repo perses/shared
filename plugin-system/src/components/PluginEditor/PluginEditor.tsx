@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Box, Button } from '@mui/material';
-import Reload from 'mdi-material-ui/Reload';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { ReactElement, useCallback } from 'react';
 import { UnknownSpec } from '@perses-dev/spec';
+import Reload from 'mdi-material-ui/Reload';
+import { ReactElement, useCallback } from 'react';
+
 import { PluginKindSelect } from '../PluginKindSelect';
 import { PluginSpecEditor } from '../PluginSpecEditor';
 import { PluginEditorProps, usePluginEditor } from './plugin-editor-api';
@@ -39,6 +40,7 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
     isReadonly,
     onRunQuery,
     filteredQueryPlugins,
+    testConnection,
     ...others
   } = props;
 
@@ -48,7 +50,7 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
     (nextSpec: UnknownSpec) => {
       onSpecChange(nextSpec);
     },
-    [onSpecChange]
+    [onSpecChange],
   );
 
   return (
@@ -97,6 +99,7 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
           value={value.spec}
           onChange={handleSpecChange}
           isReadonly={isReadonly}
+          testConnection={testConnection}
         />
       </ErrorBoundary>
     </Box>

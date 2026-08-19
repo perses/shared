@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { forwardRef, memo, MouseEvent, MouseEventHandler, ReactElement, useState } from 'react';
 import { Box, ListItemText, ListItemProps, ListItemButton } from '@mui/material';
+import { forwardRef, memo, MouseEvent, MouseEventHandler, ReactElement, useState } from 'react';
+
 import { combineSx } from '../utils';
-import { LegendColorBadge } from './LegendColorBadge';
 import { LegendItem } from './legend-model';
+import { LegendColorBadge } from './LegendColorBadge';
 
 export type LegendItemEventOpts = {
   /**
@@ -56,7 +57,7 @@ export interface ListLegendItemProps extends Omit<ListItemProps<'div'>, 'onClick
 
 const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(function ListLegendItem(
   { item, sx, truncateLabel, onClick, isVisuallySelected, onMouseOver, onMouseOut, index, ...others },
-  ref
+  ref,
 ): ReactElement {
   const [noWrap, setNoWrap] = useState(truncateLabel);
 
@@ -77,6 +78,8 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
     item.onClick?.(e);
   };
 
+  // ListItemButton must remain the measured and interactive element while exposing its position in the surrounding list.
+  /* oxlint-disable jsx-a11y/prefer-tag-over-role */
   return (
     <ListItemButton
       {...others}
@@ -86,7 +89,7 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
           padding: 0,
           cursor: 'pointer',
         },
-        sx
+        sx,
       )}
       dense={true}
       onClick={handleClick}
@@ -106,6 +109,7 @@ const ListLegendItemBase = forwardRef<HTMLDivElement, ListLegendItemProps>(funct
       ></ListItemText>
     </ListItemButton>
   );
+  /* oxlint-enable jsx-a11y/prefer-tag-over-role */
 });
 
 export const ListLegendItem = memo(ListLegendItemBase);

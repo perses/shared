@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getPanelKeyFromRef, LayoutDefinition } from '@perses-dev/spec';
-import { StateCreator } from 'zustand';
-import { WritableDraft } from 'immer';
 import { PanelGroupId } from '@perses-dev/plugin-system';
+import { getPanelKeyFromRef, LayoutDefinition } from '@perses-dev/spec';
+import { WritableDraft } from 'immer';
+import { StateCreator } from 'zustand';
+
 import { PanelGroupDefinition } from '../../model';
 import { generateId, Middleware } from './common';
 
@@ -47,7 +48,7 @@ export interface PanelGroupSlice {
  * Curried function for creating a PanelGroupSlice.
  */
 export function createPanelGroupSlice(
-  layouts: LayoutDefinition[]
+  layouts: LayoutDefinition[],
 ): StateCreator<PanelGroupSlice, Middleware, [], PanelGroupSlice> {
   const { panelGroups, panelGroupOrder } = convertLayoutsToPanelGroups(layouts);
 
@@ -85,7 +86,7 @@ export function createPanelGroupSlice(
 }
 
 export function convertLayoutsToPanelGroups(
-  layouts: LayoutDefinition[]
+  layouts: LayoutDefinition[],
 ): Pick<PanelGroupSlice, 'panelGroups' | 'panelGroupOrder'> {
   // Convert the initial layouts from the JSON
   const panelGroups: PanelGroupSlice['panelGroups'] = {};
@@ -104,6 +105,7 @@ export function convertLayoutsToPanelGroups(
           h: item.height,
           x: item.x,
           y: item.y,
+          repeatVariable: item.repeatVariable,
         });
         itemPanelKeys[panelGroupLayoutId] = getPanelKeyFromRef(item.content);
       }

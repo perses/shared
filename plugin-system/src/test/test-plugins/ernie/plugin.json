@@ -32,6 +32,26 @@
             "description": "A variable plugin that exists here in the metadata, but is not in the plugin module"
           }
         }
+      },
+      {
+        "kind": "Datasource",
+        "spec": {
+          "name": "ErnieDatasource",
+          "display": {
+            "name": "Ernie Datasource",
+            "description": "A datasource plugin for testing"
+          }
+        }
+      },
+      {
+        "kind": "Datasource",
+        "spec": {
+          "name": "ErnieDatasourceNoHealthCheck",
+          "display": {
+            "name": "Ernie Datasource No Health Check",
+            "description": "A datasource plugin for testing without a health check path"
+          }
+        }
       }
     ]
   }

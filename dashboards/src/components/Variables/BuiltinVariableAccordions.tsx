@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BuiltinVariableDefinition } from '@perses-dev/spec';
 import {
   Accordion,
   AccordionDetails,
@@ -24,8 +23,9 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
 import { InfoTooltip } from '@perses-dev/components';
+import { BuiltinVariableDefinition } from '@perses-dev/spec';
+import ExpandMoreIcon from 'mdi-material-ui/ChevronUp';
 import { ReactElement, useMemo } from 'react';
 
 type BuiltinVariableAccordionsProps = {

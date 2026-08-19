@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { Button, Stack, StackProps } from '@mui/material';
-import { ReactElement, useState } from 'react';
 import AddIcon from 'mdi-material-ui/Plus';
+import { ReactElement, useState } from 'react';
+
 import { Transform } from '../model';
 import { TransformEditorContainer } from './TransformEditorContainer';
 

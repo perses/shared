@@ -21,6 +21,7 @@ import { ReactElement, useLayoutEffect, useState } from 'react';
 import { Router } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
+
 import { DatasourceStoreProvider } from '../context';
 import { PanelFocusProvider } from '../keyboard-shortcuts';
 import { defaultDatasourceProps } from '../test';
@@ -56,7 +57,7 @@ const CustomRouter: React.FC<CustomRouterProps> = ({ history, children }) => {
 export function renderWithContext(
   ui: React.ReactElement,
   options?: Omit<RenderOptions, 'queries'>,
-  history?: MemoryHistory
+  history?: MemoryHistory,
 ): RenderResult {
   // Create a new QueryClient for each test to avoid caching issues
   const queryClient = new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false, retry: false } } });

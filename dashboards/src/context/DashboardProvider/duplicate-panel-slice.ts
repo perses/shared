@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
+
 import { PanelGroupItemId } from '../../model';
-import { generatePanelKey, insertPanelInLayout, UnpositionedPanelGroupItemLayout } from '../../utils/panelUtils';
+import { generatePanelKey, insertPanelInLayout, UnpositionedPanelGroupItemLayout } from '../../utils';
 import { generateId, Middleware } from './common';
 import { PanelGroupSlice } from './panel-group-slice';
 import { PanelSlice } from './panel-slice';
@@ -77,6 +78,7 @@ export function createDuplicatePanelSlice(): StateCreator<
           i: generateId().toString(),
           w: matchingLayout.w,
           h: matchingLayout.h,
+          repeatVariable: matchingLayout.repeatVariable,
         };
 
         group.itemLayouts = insertPanelInLayout(duplicateLayout, matchingLayout, group.itemLayouts);

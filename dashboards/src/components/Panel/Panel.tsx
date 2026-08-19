@@ -20,10 +20,11 @@ import {
   combineSx,
   useId,
 } from '@perses-dev/components';
-import { PanelDefinition } from '@perses-dev/spec';
 import { ActionOptions, useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
+import { PanelDefinition } from '@perses-dev/spec';
 import { ReactNode, memo, useEffect, useMemo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
+
 import { PanelGroupItemId } from '../../model';
 import { PanelContent } from './PanelContent';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
@@ -35,6 +36,7 @@ export interface PanelProps extends CardProps<'section'> {
   panelOptions?: PanelOptions;
   panelGroupItemId?: PanelGroupItemId;
   viewQueriesHandler?: PanelHeaderProps['viewQueriesHandler'];
+  informationTooltip?: string;
 }
 
 export type PanelOptions = {
@@ -50,7 +52,7 @@ export type PanelOptions = {
   showIcons?: 'always' | 'hover';
   /**
    * Content to render in right of the panel header. (top right of the panel)
-   * It will only be rendered when the panel is in edit mode.
+   * It will only be rendered when the panel is not in edit mode.
    */
   extra?: (props: PanelExtraProps) => ReactNode;
 };
@@ -85,6 +87,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
     panelOptions,
     panelGroupItemId,
     viewQueriesHandler,
+    informationTooltip,
     ...others
   } = props;
 
@@ -197,7 +200,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
               flexFlow: 'column nowrap',
               ':hover': { '--panel-hover': 'block' },
             },
-            sx
+            sx,
           )}
           variant="outlined"
           onMouseEnter={handleMouseEnter}
@@ -213,6 +216,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
               id={headerId}
               title={definition.spec.display?.name ?? ''}
               description={definition.spec.display?.description}
+              informationTooltip={informationTooltip}
               queryResults={queryResults}
               readHandlers={readHandlers}
               editHandlers={editHandlers}
