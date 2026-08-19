@@ -67,18 +67,18 @@ describe('PluginSpecEditor - boundTestConnection', () => {
     renderComponent({
       pluginSelection: { type: 'Datasource', kind: 'ErnieDatasource' },
       value: { url: 'http://localhost:9090' },
-      onChange: jest.fn(),
+      onChange: vi.fn(),
     });
     await screen.findByLabelText('ErnieDatasource editor');
     expect(screen.queryByRole('button', { name: 'test-connection-trigger' })).not.toBeInTheDocument();
   });
 
   it('does not pass testConnection when plugin has no healthCheckPath', async () => {
-    const testConnection = jest.fn();
+    const testConnection = vi.fn();
     renderComponent({
       pluginSelection: { type: 'Datasource', kind: 'ErnieDatasourceNoHealthCheck' },
       value: {},
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       testConnection,
     });
     await screen.findByLabelText('ErnieDatasourceNoHealthCheck editor');
@@ -86,11 +86,11 @@ describe('PluginSpecEditor - boundTestConnection', () => {
   });
 
   it('passes a bound testConnection when plugin has healthCheckPath', async () => {
-    const testConnection = jest.fn().mockResolvedValue(undefined);
+    const testConnection = vi.fn().mockResolvedValue(undefined);
     renderComponent({
       pluginSelection: { type: 'Datasource', kind: 'ErnieDatasource' },
       value: { url: 'http://localhost:9090' },
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       testConnection,
     });
     await screen.findByLabelText('ErnieDatasource editor');
@@ -98,12 +98,12 @@ describe('PluginSpecEditor - boundTestConnection', () => {
   });
 
   it('calls testConnection with the full DatasourceSpec and healthCheckPath', async () => {
-    const testConnection = jest.fn().mockResolvedValue(undefined);
+    const testConnection = vi.fn().mockResolvedValue(undefined);
     const pluginSpec = { url: 'http://localhost:9090' };
     renderComponent({
       pluginSelection: { type: 'Datasource', kind: 'ErnieDatasource' },
       value: pluginSpec,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       testConnection,
     });
     await screen.findByLabelText('ErnieDatasource editor');
@@ -121,7 +121,7 @@ describe('PluginSpecEditor - boundTestConnection', () => {
   });
 
   it('augments allowedEndpoints with the healthCheckPath when proxy spec is present', async () => {
-    const testConnection = jest.fn().mockResolvedValue(undefined);
+    const testConnection = vi.fn().mockResolvedValue(undefined);
     const pluginSpec = {
       proxy: {
         kind: 'HTTPProxy' as const,
@@ -131,21 +131,21 @@ describe('PluginSpecEditor - boundTestConnection', () => {
     renderComponent({
       pluginSelection: { type: 'Datasource', kind: 'ErnieDatasource' },
       value: pluginSpec,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       testConnection,
     });
     await screen.findByLabelText('ErnieDatasource editor');
     await userEvent.click(screen.getByRole('button', { name: 'test-connection-trigger' }));
 
     await waitFor(() => {
-      const calledSpec: DatasourceSpec = testConnection.mock.calls[0][0];
+      const calledSpec: DatasourceSpec = testConnection.mock.calls[0]?.[0];
       const allowedEndpoints = (calledSpec.plugin.spec as typeof pluginSpec).proxy.spec.allowedEndpoints;
       expect(allowedEndpoints).toContainEqual({ endpointPattern: '/api/v1/query', method: 'GET' });
     });
   });
 
   it('does not duplicate allowedEndpoints when healthCheckPath already present', async () => {
-    const testConnection = jest.fn().mockResolvedValue(undefined);
+    const testConnection = vi.fn().mockResolvedValue(undefined);
     const pluginSpec = {
       proxy: {
         kind: 'HTTPProxy' as const,
@@ -158,14 +158,14 @@ describe('PluginSpecEditor - boundTestConnection', () => {
     renderComponent({
       pluginSelection: { type: 'Datasource', kind: 'ErnieDatasource' },
       value: pluginSpec,
-      onChange: jest.fn(),
+      onChange: vi.fn(),
       testConnection,
     });
     await screen.findByLabelText('ErnieDatasource editor');
     await userEvent.click(screen.getByRole('button', { name: 'test-connection-trigger' }));
 
     await waitFor(() => {
-      const calledSpec: DatasourceSpec = testConnection.mock.calls[0][0];
+      const calledSpec: DatasourceSpec = testConnection.mock.calls[0]?.[0];
       const allowedEndpoints = (calledSpec.plugin.spec as typeof pluginSpec).proxy.spec.allowedEndpoints;
       expect(allowedEndpoints?.filter((e) => e.endpointPattern === '/api/v1/query')).toHaveLength(1);
     });

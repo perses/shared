@@ -17,11 +17,11 @@ import userEvent from '@testing-library/user-event';
 
 import { DatasourceTestConnectionButton } from './DatasourceTestConnectionButton';
 
-const mockSuccessSnackbar = jest.fn();
-const mockExceptionSnackbar = jest.fn();
+const mockSuccessSnackbar = vi.fn();
+const mockExceptionSnackbar = vi.fn();
 
-jest.mock('@perses-dev/components', () => ({
-  ...jest.requireActual('@perses-dev/components'),
+vi.mock('@perses-dev/components', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@perses-dev/components')>()),
   useSnackbar: (): Partial<SnackbarContext> => ({
     successSnackbar: mockSuccessSnackbar,
     exceptionSnackbar: mockExceptionSnackbar,
@@ -30,16 +30,16 @@ jest.mock('@perses-dev/components', () => ({
 
 describe('DatasourceTestConnectionButton', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('renders the button with "Test Connection" label', () => {
-    render(<DatasourceTestConnectionButton testConnection={jest.fn().mockResolvedValue(undefined)} />);
+    render(<DatasourceTestConnectionButton testConnection={vi.fn().mockResolvedValue(undefined)} />);
     expect(screen.getByRole('button', { name: /test connection/i })).toBeInTheDocument();
   });
 
   it('calls testConnection when clicked', async () => {
-    const mockTestConnection = jest.fn().mockResolvedValue(undefined);
+    const mockTestConnection = vi.fn().mockResolvedValue(undefined);
     render(<DatasourceTestConnectionButton testConnection={mockTestConnection} />);
 
     await userEvent.click(screen.getByRole('button', { name: /test connection/i }));
@@ -50,7 +50,7 @@ describe('DatasourceTestConnectionButton', () => {
   });
 
   it('shows success snackbar when testConnection resolves', async () => {
-    render(<DatasourceTestConnectionButton testConnection={jest.fn().mockResolvedValue(undefined)} />);
+    render(<DatasourceTestConnectionButton testConnection={vi.fn().mockResolvedValue(undefined)} />);
 
     await userEvent.click(screen.getByRole('button', { name: /test connection/i }));
 
@@ -61,7 +61,7 @@ describe('DatasourceTestConnectionButton', () => {
 
   it('shows error snackbar when testConnection rejects with an Error', async () => {
     const error = new Error('connection refused');
-    render(<DatasourceTestConnectionButton testConnection={jest.fn().mockRejectedValue(error)} />);
+    render(<DatasourceTestConnectionButton testConnection={vi.fn().mockRejectedValue(error)} />);
 
     await userEvent.click(screen.getByRole('button', { name: /test connection/i }));
 
@@ -71,7 +71,7 @@ describe('DatasourceTestConnectionButton', () => {
   });
 
   it('wraps non-Error rejections in a generic Error', async () => {
-    render(<DatasourceTestConnectionButton testConnection={jest.fn().mockRejectedValue('string error')} />);
+    render(<DatasourceTestConnectionButton testConnection={vi.fn().mockRejectedValue('string error')} />);
 
     await userEvent.click(screen.getByRole('button', { name: /test connection/i }));
 
@@ -81,13 +81,13 @@ describe('DatasourceTestConnectionButton', () => {
   });
 
   it('respects the disabled prop', () => {
-    render(<DatasourceTestConnectionButton testConnection={jest.fn()} disabled />);
+    render(<DatasourceTestConnectionButton testConnection={vi.fn()} disabled />);
     expect(screen.getByRole('button', { name: /test connection/i })).toBeDisabled();
   });
 
   it('disables the button while testConnection is in flight and re-enables after', async () => {
     let resolve!: () => void;
-    const mockTestConnection = jest.fn(
+    const mockTestConnection = vi.fn(
       () =>
         new Promise<void>((res) => {
           resolve = res;

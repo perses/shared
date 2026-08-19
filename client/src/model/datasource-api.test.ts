@@ -107,10 +107,10 @@ describe('hasHTTPProxy', () => {
 });
 
 describe('createTestDatasourceConnection', () => {
-  const mockFetch = jest.fn();
+  const mockFetch = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     delete window.PERSES_APP_CONFIG;
     globalThis.fetch = mockFetch;
   });
@@ -212,7 +212,7 @@ describe('createTestDatasourceConnection', () => {
 
       await testConnection(spec, '/api/v1/query');
 
-      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+      const callBody = JSON.parse(mockFetch.mock.calls[0]?.[1].body);
       expect(callBody).toMatchObject({ method: 'GET', body: null, spec });
     });
   });
