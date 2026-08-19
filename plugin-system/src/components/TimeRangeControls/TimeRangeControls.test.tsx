@@ -12,7 +12,11 @@
 // limitations under the License.
 
 import { SnackbarProvider } from '@perses-dev/components';
-import { TimeRangeProviderBasic, TimeRangeProviderWithQueryParams, TimeRangeSettingsProvider } from '@perses-dev/plugin-system';
+import {
+  TimeRangeProviderBasic,
+  TimeRangeProviderWithQueryParams,
+  TimeRangeSettingsProvider,
+} from '@perses-dev/plugin-system';
 import { DurationString } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { screen, RenderOptions, render, RenderResult } from '@testing-library/react';

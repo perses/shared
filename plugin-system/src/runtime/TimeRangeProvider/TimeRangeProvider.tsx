@@ -97,7 +97,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
       }
       setRefreshInterval(value);
     },
-    [disableAutoRefresh, setRefreshInterval]
+    [disableAutoRefresh, setRefreshInterval],
   );
 
   // Refresh is called when clicking on the refresh button, it refreshes all queries including variables
@@ -123,7 +123,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
   // Gate the timer only — do not rewrite refreshInterval / ?refresh= so re-enabling restores them.
   const refreshIntervalInMs = useMemo(
     () => (disableAutoRefresh ? 0 : getRefreshIntervalInMs(refreshInterval)),
-    [disableAutoRefresh, refreshInterval]
+    [disableAutoRefresh, refreshInterval],
   );
   useEffect(() => {
     if (refreshIntervalInMs > 0) {

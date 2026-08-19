@@ -58,7 +58,6 @@ interface TimeRangeControlsProps {
   showRefreshInterval?: boolean;
   showCustomTimeRange?: boolean;
   showZoomButtons?: boolean;
-  disableAutoRefresh?: boolean;
   timePresets?: TimeOption[];
   timeZone: string;
   onTimeZoneChange: (timeZone: TimeZoneOption) => void;
@@ -71,7 +70,6 @@ export function TimeRangeControls({
   showRefreshInterval = true,
   showCustomTimeRange,
   showZoomButtons = true,
-  disableAutoRefresh,
   timePresets,
   timeZone,
   onTimeZoneChange,
@@ -80,7 +78,7 @@ export function TimeRangeControls({
 
   const showCustomTimeRangeValue = useShowCustomTimeRangeSetting(showCustomTimeRange);
   const showZoomInOutButtons = useShowZoomRangeSetting(showZoomButtons);
-  const isAutoRefreshDisabled = useDisableAutoRefreshSetting(disableAutoRefresh);
+  const isAutoRefreshDisabled = useDisableAutoRefreshSetting();
   const timePresetsValue = useTimeRangeOptionsSetting(timePresets);
 
   // Convert height to a string, then use the string for styling
