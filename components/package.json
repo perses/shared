@@ -14,12 +14,28 @@
   "module": "dist/index.js",
   "main": "dist/cjs/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./next": {
+      "types": "./dist/next/index.d.ts",
+      "import": "./dist/next/index.js",
+      "require": "./dist/cjs/next/index.js"
+    },
+    "./next/css": "./dist/next/css/index.css"
+  },
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
     "build:cjs": "swc ./src -d dist/cjs --strip-leading-paths --config-file ../.cjs.swcrc",
     "build:esm": "swc ./src -d dist --strip-leading-paths --config-file ../.swcrc",
     "build:types": "tsc --project tsconfig.build.json",
+    "build:next-css": "copyfiles -u 1 \"src/next/**/*.css\" dist",
+    "ladle": "ladle serve",
+    "ladle:build": "ladle build",
     "type-check": "tsc --noEmit",
     "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
     "test": "cross-env TZ=UTC vitest run",
@@ -30,6 +46,7 @@
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "^1.4.0",
     "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.0.3",
+    "@base-ui/react": "^1.0.0",
     "@codemirror/lang-json": "^6.0.1",
     "@date-fns/tz": "^1.4.1",
     "@fontsource/inter": "^5.0.0",
@@ -40,6 +57,7 @@
     "@tanstack/match-sorter-utils": "^8.19.4",
     "@tanstack/react-table": "^8.20.5",
     "@uiw/react-codemirror": "^4.19.1",
+    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "echarts": "5.5.0",
     "immer": "^10.1.1",
@@ -47,21 +65,28 @@
     "mathjs": "^10.6.4",
     "mdi-material-ui": "^7.9.2",
     "notistack": "^3.0.2",
+    "numbro": "^2.3.6",
     "react-colorful": "^5.6.1",
     "react-error-boundary": "^3.1.4",
     "react-virtuoso": "^4.12.2"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.20"
+    "@ladle/react": "^4.0.0",
+    "@types/lodash": "^4.17.20",
+    "copyfiles": "^2.4.1"
   },
   "peerDependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^6.1.10",
+    "@perses-dev/design-tokens": "^0.54.0",
     "lodash": "^4.17.21",
-    "react": "^17.0.2 || ^18.0.0",
-    "react-dom": "^17.0.2 || ^18.0.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
+  "sideEffects": [
+    "*.css"
+  ],
   "files": [
     "dist"
   ]
