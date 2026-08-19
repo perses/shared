@@ -13,11 +13,12 @@
 
 import { Box } from '@mui/material';
 import { RepeatGrid } from '@perses-dev/components';
-import { PanelGroupId, useVariableValues, VariableContext } from '@perses-dev/plugin-system';
+import { PanelGroupId } from '@perses-dev/plugin-system';
 import { ReactNode, useMemo } from 'react';
 
 import { calcPerPanelWidth } from '../../utils/repeatLayoutUtils';
 import { PanelOptions } from '../Panel/Panel';
+import { FixedValueVariableProvider } from '../Variables';
 import { GridItemContent } from './GridItemContent';
 
 interface RepeatPanelItemProps {
@@ -69,7 +70,6 @@ export function RepeatGridItemContent({
   isCapped,
 }: RepeatPanelItemProps): ReactNode {
   const { name: repeatVariableName, values: variableValues, maxPer: perRow } = panelRepeatVariable;
-  const variables = useVariableValues();
 
   const rows: string[][] = useMemo(() => {
     const result: string[][] = [];
@@ -89,14 +89,10 @@ export function RepeatGridItemContent({
       renderItem={(value, rowIndex, colIndex) => {
         const isFirst = colIndex + rowIndex === 0;
         return (
-          <VariableContext.Provider
+          <FixedValueVariableProvider
             key={`${repeatVariableName}-${value}`}
-            value={{
-              state: {
-                ...variables,
-                [repeatVariableName]: { ...variables[repeatVariableName], value, loading: false },
-              },
-            }}
+            variableName={repeatVariableName}
+            value={value}
           >
             <Box sx={{ width: perPanelWidth, overflow: 'hidden' }}>
               <GridItemContent
@@ -114,7 +110,7 @@ export function RepeatGridItemContent({
                 informationTooltip={getRepeatPanelTooltip(isFirst, isEditMode, isCapped, repeatVariableName, value)}
               />
             </Box>
-          </VariableContext.Provider>
+          </FixedValueVariableProvider>
         );
       }}
     />

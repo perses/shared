@@ -21,7 +21,6 @@ import {
   usePlugin,
   useSuggestedStepMs,
   useVariableValues,
-  VariableContext,
 } from '@perses-dev/plugin-system';
 import { AnnotationSpec, Definition, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { ReactElement, useCallback, useContext, useMemo, useState } from 'react';
@@ -29,6 +28,7 @@ import { Control, useWatch } from 'react-hook-form';
 
 import { useListPanelGroups } from '../../context';
 import { useAllVariableDefinitions } from '../../context/VariableProvider';
+import { FixedValueVariableProvider } from '../Variables';
 
 export interface PanelQueriesSharedControlsProps {
   control: Control<PanelEditorValues>;
@@ -102,20 +102,9 @@ export function PanelQueriesSharedControls({
 
   const preview =
     watchedRepeatVariable && repeatVariableValue ? (
-      <VariableContext.Provider
-        value={{
-          state: {
-            ...variableValues,
-            [watchedRepeatVariable.value]: {
-              ...variableValues[watchedRepeatVariable.value],
-              value: repeatVariableValue,
-              loading: false,
-            },
-          },
-        }}
-      >
+      <FixedValueVariableProvider variableName={watchedRepeatVariable.value} value={repeatVariableValue}>
         <PanelPreview panelDefinition={panelDefinition} />
-      </VariableContext.Provider>
+      </FixedValueVariableProvider>
     ) : (
       <PanelPreview panelDefinition={panelDefinition} />
     );

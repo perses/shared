@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useVariableValues, VariableContext, PanelGroupId } from '@perses-dev/plugin-system';
+import { useVariableValues, PanelGroupId } from '@perses-dev/plugin-system';
 import { ReactElement, useState } from 'react';
 import { Layout, Layouts } from 'react-grid-layout';
 
@@ -19,6 +19,7 @@ import { GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
 import { useEditMode, usePanelGroup, usePanelGroupActions, useViewPanelGroup } from '../../context';
 import { PanelGroupDefinition } from '../../model';
 import { PanelOptions } from '../Panel';
+import { FixedValueVariableProvider } from '../Variables';
 import { Row, RowProps } from './Row';
 
 export interface GridLayoutProps {
@@ -139,18 +140,10 @@ export function RepeatGridLayout({
   return (
     <>
       {variable.value.map((value) => (
-        <VariableContext.Provider
+        <FixedValueVariableProvider
           key={`${repeatVariableName}-${value}`}
-          value={{
-            state: {
-              ...variables,
-              [repeatVariableName]: {
-                ...variables[repeatVariableName],
-                value: value,
-                loading: false,
-              },
-            },
-          }}
+          variableName={repeatVariableName}
+          value={value}
         >
           <Row
             panelGroupId={panelGroupId}
@@ -163,7 +156,7 @@ export function RepeatGridLayout({
             onWidthChange={onWidthChange}
             repeatVariable={[repeatVariableName, value]}
           />
-        </VariableContext.Provider>
+        </FixedValueVariableProvider>
       ))}
     </>
   );

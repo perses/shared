@@ -12,6 +12,7 @@
 // limitations under the License.
 
 export * from './BuiltinVariableAccordions';
+export * from './FixedValueVariableProvider';
 export * from './EditVariablesButton';
 export * from './ListVariableListBox';
 export * from './Variable';
