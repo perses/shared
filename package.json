@@ -49,8 +49,6 @@
     "react-dom": "^18.2.0",
     "react-refresh": "^0.16.0",
     "rimraf": "^5.0.5",
-    "terser-webpack-plugin": "^5.3.11",
-    "ts-node": "^10.9.2",
     "turbo": "^2.3.4",
     "typescript": "5.9.3",
     "vite-tsconfig-paths": "^5.1.4",
