@@ -212,7 +212,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           aria-labelledby={headerId}
           aria-describedby={headerId}
           data-testid="panel"
-          className={className ? `${SEMANTIC_CLASS_NAME} className` : SEMANTIC_CLASS_NAME}
+          className={className ? `${SEMANTIC_CLASS_NAME} ${className}` : SEMANTIC_CLASS_NAME}
           {...others}
         >
           {!panelOptions?.hideHeader && (
