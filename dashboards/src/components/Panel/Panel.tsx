@@ -29,6 +29,8 @@ import { PanelGroupItemId } from '../../model';
 import { PanelContent } from './PanelContent';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 
+const SEMANTIC_CLASS_NAME = 'Panel';
+
 export interface PanelProps extends CardProps<'section'> {
   definition: PanelDefinition;
   readHandlers?: PanelHeaderProps['readHandlers'];
@@ -37,6 +39,7 @@ export interface PanelProps extends CardProps<'section'> {
   panelGroupItemId?: PanelGroupItemId;
   viewQueriesHandler?: PanelHeaderProps['viewQueriesHandler'];
   informationTooltip?: string;
+  className?: string;
 }
 
 export type PanelOptions = {
@@ -88,6 +91,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
     panelGroupItemId,
     viewQueriesHandler,
     informationTooltip,
+    className,
     ...others
   } = props;
 
@@ -208,6 +212,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           aria-labelledby={headerId}
           aria-describedby={headerId}
           data-testid="panel"
+          className={className ? `${SEMANTIC_CLASS_NAME} className` : SEMANTIC_CLASS_NAME}
           {...others}
         >
           {!panelOptions?.hideHeader && (
