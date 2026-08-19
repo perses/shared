@@ -1,0 +1,138 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@layer perses.components {
+  /* ---- Base ---- */
+  .ps-Button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--perses-spacing-xs);
+    border: 1px solid transparent;
+    border-radius: var(--perses-radius-md);
+    cursor: pointer;
+    font-family: var(--perses-font-family);
+    font-weight: var(--perses-font-weight-medium);
+    line-height: var(--perses-line-height-tight);
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .ps-Button:focus-visible {
+    outline: 2px solid var(--perses-status-border-primary);
+    outline-offset: 2px;
+  }
+
+  .ps-Button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* ---- Sizes ---- */
+  .ps-Button[data-size='sm'] {
+    padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
+    font-size: var(--perses-font-size-xs);
+  }
+
+  .ps-Button[data-size='md'] {
+    padding: var(--perses-spacing-sm) var(--perses-spacing-lg);
+    font-size: var(--perses-font-size-sm);
+  }
+
+  .ps-Button[data-size='lg'] {
+    padding: var(--perses-spacing-md) var(--perses-spacing-xl);
+    font-size: var(--perses-font-size-md);
+  }
+
+  /* ---- Color tokens (scoped per data-color) ---- */
+  .ps-Button[data-color='primary'] {
+    --btn-bg: var(--perses-status-solid-primary);
+    --btn-bg-hover: var(--perses-status-bg-primary-hover);
+    --btn-text: var(--perses-status-solid-primary);
+    --btn-border: var(--perses-status-border-primary);
+    --btn-bg-subtle: var(--perses-status-bg-primary);
+  }
+
+  .ps-Button[data-color='secondary'] {
+    --btn-bg: var(--perses-status-solid-secondary);
+    --btn-bg-hover: var(--perses-status-bg-secondary-hover);
+    --btn-text: var(--perses-status-solid-secondary);
+    --btn-border: var(--perses-status-border-secondary);
+    --btn-bg-subtle: var(--perses-status-bg-secondary);
+  }
+
+  .ps-Button[data-color='error'] {
+    --btn-bg: var(--perses-status-solid-error);
+    --btn-bg-hover: var(--perses-status-bg-error-hover);
+    --btn-text: var(--perses-status-solid-error);
+    --btn-border: var(--perses-status-border-error);
+    --btn-bg-subtle: var(--perses-status-bg-error);
+  }
+
+  .ps-Button[data-color='warning'] {
+    --btn-bg: var(--perses-status-solid-warning);
+    --btn-bg-hover: var(--perses-status-bg-warning-hover);
+    --btn-text: var(--perses-status-solid-warning);
+    --btn-border: var(--perses-status-border-warning);
+    --btn-bg-subtle: var(--perses-status-bg-warning);
+  }
+
+  .ps-Button[data-color='success'] {
+    --btn-bg: var(--perses-status-solid-success);
+    --btn-bg-hover: var(--perses-status-bg-success-hover);
+    --btn-text: var(--perses-status-solid-success);
+    --btn-border: var(--perses-status-border-success);
+    --btn-bg-subtle: var(--perses-status-bg-success);
+  }
+
+  .ps-Button[data-color='info'] {
+    --btn-bg: var(--perses-status-solid-info);
+    --btn-bg-hover: var(--perses-status-bg-info-hover);
+    --btn-text: var(--perses-status-solid-info);
+    --btn-border: var(--perses-status-border-info);
+    --btn-bg-subtle: var(--perses-status-bg-info);
+  }
+
+  /* ---- Variant: solid ---- */
+  .ps-Button[data-variant='solid'] {
+    color: var(--perses-text-on-solid);
+    background-color: var(--btn-bg);
+  }
+  .ps-Button[data-variant='solid']:hover:not(:disabled) {
+    background-color: var(--btn-bg-hover);
+  }
+
+  /* ---- Variant: outline ---- */
+  .ps-Button[data-variant='outline'] {
+    color: var(--btn-text);
+    background-color: transparent;
+    border-color: var(--btn-border);
+  }
+  .ps-Button[data-variant='outline']:hover:not(:disabled) {
+    background-color: var(--btn-bg-subtle);
+  }
+
+  /* ---- Variant: ghost ---- */
+  .ps-Button[data-variant='ghost'] {
+    color: var(--btn-text);
+    background-color: transparent;
+    border-color: transparent;
+  }
+  .ps-Button[data-variant='ghost']:hover:not(:disabled) {
+    background-color: var(--btn-bg-subtle);
+  }
+}
