@@ -29,7 +29,7 @@ import { PanelGroupItemId } from '../../model';
 import { PanelContent } from './PanelContent';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
 
-const SEMANTIC_CLASS_NAME = 'Panel';
+const SEMANTIC_CLASS_NAME = 'ps-Panel';
 
 export interface PanelProps extends CardProps<'section'> {
   definition: PanelDefinition;
