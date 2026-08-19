@@ -12,17 +12,35 @@
 // limitations under the License.
 
 import { Box, SxProps, Theme } from '@mui/material';
-import { ReactNode } from 'react';
+import { ReactNode, useMemo } from 'react';
 
 export interface RepeatGridProps<T> {
-  rows: T[][];
+  repeatItems: T[];
+  maxPer: number;
   gap: number;
-  renderItem: (item: T, rowIndex: number, colIndex: number) => ReactNode;
+  renderItem: (item: T, options: { rowIndex: number; colIndex: number }) => ReactNode;
   containerSx?: SxProps<Theme>;
   rowSx?: SxProps<Theme>;
 }
 
-export function RepeatGrid<T>({ rows, gap, renderItem, containerSx, rowSx }: RepeatGridProps<T>): ReactNode {
+export function RepeatGrid<T>({
+  repeatItems,
+  maxPer,
+  gap,
+  renderItem,
+  containerSx,
+  rowSx,
+}: RepeatGridProps<T>): ReactNode {
+  const { rows, perRow } = useMemo(() => {
+    const perRow = Math.max(1, maxPer);
+    const rows: T[][] = [];
+    for (let i = 0; i < repeatItems.length; i += perRow) {
+      rows.push(repeatItems.slice(i, i + perRow));
+    }
+
+    return { rows, perRow };
+  }, [maxPer, repeatItems]);
+
   return (
     <Box
       sx={[
@@ -32,7 +50,17 @@ export function RepeatGrid<T>({ rows, gap, renderItem, containerSx, rowSx }: Rep
     >
       {rows.map((rowItems, rowIndex) => (
         <Box key={rowIndex} sx={[{ display: 'flex', gap: `${gap}px` }, ...(Array.isArray(rowSx) ? rowSx : [rowSx])]}>
-          {rowItems.map((item, colIndex) => renderItem(item, rowIndex, colIndex))}
+          {rowItems.map((item, colIndex) => (
+            <Box
+              key={`${rowIndex}-${colIndex}`}
+              sx={{
+                width: `calc((100% - ${gap * (perRow - 1)}px) / ${perRow})`,
+                overflow: 'hidden',
+              }}
+            >
+              {renderItem(item, { rowIndex, colIndex })}
+            </Box>
+          ))}
         </Box>
       ))}
     </Box>

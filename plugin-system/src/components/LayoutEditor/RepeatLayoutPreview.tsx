@@ -24,15 +24,7 @@ export interface RepeatLayoutPreviewProps {
 const PREVIEW_GAP = 4;
 
 export function RepeatLayoutPreview({ optionCount, maxPer }: RepeatLayoutPreviewProps): ReactElement {
-  const { rows, perRow } = useMemo(() => {
-    const perRow = Math.max(1, maxPer);
-    const rows: number[][] = [];
-    for (let i = 0; i < optionCount; i += perRow) {
-      rows.push(Array.from({ length: Math.min(perRow, optionCount - i) }, (_, j) => i + j));
-    }
-
-    return { rows, perRow };
-  }, [maxPer, optionCount]);
+  const repeatItems = useMemo(() => Array.from({ length: optionCount }, (_, i) => i), [optionCount]);
 
   return (
     <Box>
@@ -56,13 +48,13 @@ export function RepeatLayoutPreview({ optionCount, maxPer }: RepeatLayoutPreview
       </Box>
       <Box sx={{ height: 315, overflow: 'auto' }}>
         <RepeatGrid
-          rows={rows}
+          repeatItems={repeatItems}
+          maxPer={maxPer}
           gap={PREVIEW_GAP}
-          renderItem={(panelIndex) => (
+          renderItem={() => (
             <Box
-              key={panelIndex}
               sx={{
-                width: `calc((100% - ${PREVIEW_GAP * (perRow - 1)}px) / ${perRow})`,
+                width: `100%`,
                 height: 150,
                 borderRadius: 1,
                 bgcolor: 'action.selected',

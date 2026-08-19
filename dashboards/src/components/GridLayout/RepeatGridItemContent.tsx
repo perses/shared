@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box } from '@mui/material';
 import { RepeatGrid } from '@perses-dev/components';
 import { PanelGroupId } from '@perses-dev/plugin-system';
 import { ReactNode, useMemo } from 'react';
@@ -71,22 +70,16 @@ export function RepeatGridItemContent({
 }: RepeatPanelItemProps): ReactNode {
   const { name: repeatVariableName, values: variableValues, maxPer: perRow } = panelRepeatVariable;
 
-  const rows: string[][] = useMemo(() => {
-    const result: string[][] = [];
-    for (let i = 0; i < variableValues.length; i += perRow) {
-      result.push(variableValues.slice(i, i + perRow));
-    }
-    return result;
-  }, [variableValues, perRow]);
   const perPanelWidth = useMemo(() => calcPerPanelWidth(width, itemGap, perRow), [itemGap, perRow, width]);
 
   return (
     <RepeatGrid
-      rows={rows}
+      repeatItems={variableValues}
+      maxPer={perRow}
       gap={itemGap}
       containerSx={{ overflow: 'hidden' }}
       rowSx={{ flex: 1, overflow: 'hidden' }}
-      renderItem={(value, rowIndex, colIndex) => {
+      renderItem={(value, { rowIndex, colIndex }) => {
         const isFirst = colIndex + rowIndex === 0;
         return (
           <FixedValueVariableProvider
@@ -94,22 +87,20 @@ export function RepeatGridItemContent({
             variableName={repeatVariableName}
             value={value}
           >
-            <Box sx={{ width: perPanelWidth, overflow: 'hidden' }}>
-              <GridItemContent
-                panelOptions={panelOptions}
-                panelGroupItemId={{
-                  panelGroupId,
-                  panelGroupItemLayoutId,
-                  repeatVariable: {
-                    panel: [repeatVariableName, value],
-                    group: groupRepeatVariable,
-                  },
-                }}
-                width={perPanelWidth}
-                readonly={!isFirst}
-                informationTooltip={getRepeatPanelTooltip(isFirst, isEditMode, isCapped, repeatVariableName, value)}
-              />
-            </Box>
+            <GridItemContent
+              panelOptions={panelOptions}
+              panelGroupItemId={{
+                panelGroupId,
+                panelGroupItemLayoutId,
+                repeatVariable: {
+                  panel: [repeatVariableName, value],
+                  group: groupRepeatVariable,
+                },
+              }}
+              width={perPanelWidth}
+              readonly={!isFirst}
+              informationTooltip={getRepeatPanelTooltip(isFirst, isEditMode, isCapped, repeatVariableName, value)}
+            />
           </FixedValueVariableProvider>
         );
       }}
