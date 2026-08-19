@@ -3,7 +3,8 @@
   "include": ["src"],
   "compilerOptions": {
     "paths": {
-      "@perses-dev/components": ["./src"]
+      "@perses-dev/components": ["./src"],
+      "@perses-dev/components/next": ["./src/next"]
     }
   }
 }
