@@ -22,6 +22,7 @@ import {
 } from '@perses-dev/components';
 import { ActionOptions, useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
 import { PanelDefinition } from '@perses-dev/spec';
+import clsx from 'clsx';
 import { ReactNode, memo, useEffect, useMemo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 
@@ -88,6 +89,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
     panelGroupItemId,
     viewQueriesHandler,
     informationTooltip,
+    className,
     ...others
   } = props;
 
@@ -208,6 +210,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           aria-labelledby={headerId}
           aria-describedby={headerId}
           data-testid="panel"
+          className={clsx('ps-Panel', className)}
           {...others}
         >
           {!panelOptions?.hideHeader && (
