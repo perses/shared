@@ -13,6 +13,8 @@
 
 package common
 
-myDsVarSelector: #datasourceSelector & { _kind: "MyDatasource" }
+myDsVarSelector: #datasourceSelector & {_kind: "MyDatasource"}
 
-myDsVarSelector: #datasourceSelector & { datasource: "$dsVar" }
+myDsVarSelector: #datasourceSelector & {datasource: "$dsVar"}
+
+myBracedDsVarSelector: #datasourceSelector & {datasource: "${dsVar}"}
