@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { IconButton, InputAdornment, TextField } from '@mui/material';
+import ClearIcon from 'mdi-material-ui/Close';
 import { ReactElement } from 'react';
 
 import { FormatOptions, UNIT_CONFIG, UnitConfig } from '../model';
@@ -48,12 +50,39 @@ export function UnitSelector({ value, onChange, disabled = false, ...otherProps 
   };
 
   return (
-    <SettingsAutocomplete<AutocompleteUnitOption, false, false>
-      value={value ? { id: value.unit || 'decimal', ...unitConfig } : null}
+    <SettingsAutocomplete<AutocompleteUnitOption, false, true>
+      value={{ id: value?.unit || 'decimal', ...unitConfig }}
       options={KIND_OPTIONS}
       groupBy={(option) => option.group ?? 'Decimal'}
       onChange={handleChange}
       disabled={disabled}
+      disableClearable
+      renderInput={({ InputProps, ...params }) => (
+        <TextField
+          {...params}
+          slotProps={{
+            input: {
+              ...InputProps,
+              endAdornment: (
+                <>
+                  {InputProps.endAdornment}
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      aria-label="clear unit"
+                      onClick={() => onChange(undefined)}
+                      disabled={disabled}
+                      tabIndex={-1}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                </>
+              ),
+            },
+          }}
+        />
+      )}
       {...otherProps}
     />
   );
