@@ -21,8 +21,14 @@ import {
   getSubmitText,
   getTitleAction,
 } from '@perses-dev/components';
-import { PanelEditorValues, PluginKindSelect, usePluginEditor, useValidationSchemas } from '@perses-dev/plugin-system';
-import { PanelDefinition } from '@perses-dev/spec';
+import {
+  getPluginOverrides,
+  PanelEditorValues,
+  PluginKindSelect,
+  usePluginEditor,
+  useValidationSchemas,
+} from '@perses-dev/plugin-system';
+import { PanelDefinition, Definition, UnknownSpec } from '@perses-dev/spec';
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Controller, FormProvider, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 
@@ -60,16 +66,27 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
     defaultValues: initialValues,
   });
 
+  // The version/registry the panel is currently pinned to, if any. `latest` is not a pin, so it is filtered out.
+  const pinnedPluginMetadata = getPluginOverrides(plugin);
+
   // Use common plugin editor logic even though we've split the inputs up in this form
   const pluginEditor = usePluginEditor({
     pluginTypes: ['Panel'],
-    value: { selection: { kind: plugin.kind, type: 'Panel' }, spec: plugin.spec },
-    onChange: (plugin) => {
-      form.setValue('panelDefinition.spec.plugin', { kind: plugin.selection.kind, spec: plugin.spec });
-      setPlugin({
-        kind: plugin.selection.kind,
-        spec: plugin.spec,
-      });
+    // Carry the current pin so that editing the options doesn't silently drop it, and so the options editor is loaded
+    // from the pinned implementation.
+    value: { selection: { kind: plugin.kind, type: 'Panel', metadata: pinnedPluginMetadata }, spec: plugin.spec },
+    onChange: (next) => {
+      // Persist the selected version/registry (if any) as plugin metadata so the panel uses that exact implementation.
+      // When nothing is selected (a single version/registry is available), metadata is omitted so the latest version
+      // of the default registry is used.
+      const metadata = next.selection.metadata;
+      const nextPlugin: Definition<UnknownSpec> = {
+        kind: next.selection.kind,
+        ...(metadata?.version || metadata?.registry ? { metadata } : {}),
+        spec: next.spec,
+      };
+      form.setValue('panelDefinition.spec.plugin', nextPlugin);
+      setPlugin(nextPlugin);
     },
     onHideQueryEditorChange: (isHidden) => {
       setQueries(undefined, isHidden);
@@ -214,16 +231,18 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                   <PluginKindSelect
                     {...field}
                     pluginTypes={['Panel']}
+                    enableVersionSelection
+                    enableRegistrySelection
                     required
                     fullWidth
                     label="Type"
                     disabled={pluginEditor.isLoading}
                     error={!!pluginEditor.error || !!fieldState.error}
                     helperText={pluginEditor.error?.message ?? fieldState.error?.message}
-                    value={{ type: 'Panel', kind: watchedPluginKind }}
-                    onChange={(event) => {
-                      field.onChange(event.kind);
-                      pluginEditor.onSelectionChange(event);
+                    value={{ type: 'Panel', kind: watchedPluginKind, metadata: pinnedPluginMetadata }}
+                    onChange={(selection) => {
+                      field.onChange(selection.kind);
+                      pluginEditor.onSelectionChange(selection);
                     }}
                   />
                 )}

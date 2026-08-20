@@ -59,6 +59,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     isCreating,
     isInitialVariableSticky,
     isLeavingConfirmDialogEnabled,
+    isLockModeAvailable,
     dashboardTitleComponent,
     onSave,
     onDiscard,
@@ -153,6 +154,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
                     isCreating={isCreating}
                     isInitialVariableSticky={isInitialVariableSticky}
                     isLeavingConfirmDialogEnabled={isLeavingConfirmDialogEnabled}
+                    isLockModeAvailable={isLockModeAvailable}
                     dashboardTitleComponent={dashboardTitleComponent}
                     onSave={onSave}
                     onDiscard={onDiscard}

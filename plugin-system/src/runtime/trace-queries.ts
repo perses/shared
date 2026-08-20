@@ -16,7 +16,7 @@ import { QueryKey, useQueries, UseQueryResult } from '@tanstack/react-query';
 
 import { TraceQueryContext, TraceQueryPlugin } from '../model';
 import { useDatasourceStore } from './datasources';
-import { usePluginRegistry, usePlugins } from './plugin-registry';
+import { usePluginRegistry, usePlugins, getPluginOverrides } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
 import { useAllVariableValues } from './variables';
@@ -34,7 +34,7 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQ
 
   const pluginLoaderResponse = usePlugins(
     'TraceQuery',
-    definitions.map((d) => ({ kind: d.spec.plugin.kind })),
+    definitions.map((d) => ({ kind: d.spec.plugin.kind, ...getPluginOverrides(d.spec.plugin) })),
   );
 
   // useQueries() handles data fetching from query plugins (e.g. traceQL queries, promQL queries)
@@ -52,7 +52,11 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQ
         refetchOnReconnect: false,
         staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<TraceData> => {
-          const plugin = await getPlugin({ kind: TRACE_QUERY_KEY, name: traceQueryKind });
+          const plugin = await getPlugin({
+            kind: TRACE_QUERY_KEY,
+            name: traceQueryKind,
+            ...getPluginOverrides(definition.spec.plugin),
+          });
           const data = await plugin.getTraceData(definition.spec.plugin.spec, context, signal);
           return data;
         },

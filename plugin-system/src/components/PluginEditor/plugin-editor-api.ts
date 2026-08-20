@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import { BoxProps } from '@mui/material';
-import { DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
+import { DatasourceSpec, PluginDefinitionMetadata, UnknownSpec } from '@perses-dev/spec';
 import { produce } from 'immer';
 import { useState, useRef, useEffect } from 'react';
 
 import { PanelPlugin, PluginType } from '../../model';
-import { usePlugin, usePluginRegistry } from '../../runtime';
+import { getPluginOverrides, usePlugin, usePluginRegistry } from '../../runtime';
 import { useEvent } from '../../utils';
 import { PluginKindSelectProps } from '../PluginKindSelect';
 import { PluginSpecEditorProps } from '../PluginSpecEditor';
@@ -25,6 +25,12 @@ import { PluginSpecEditorProps } from '../PluginSpecEditor';
 export interface PluginEditorSelection {
   type: PluginType;
   kind: string;
+  /**
+   * Optional plugin definition metadata (version and/or registry), matching the `metadata` field of a spec
+   * `Definition`. Only set when the user explicitly picks a specific version/registry of a plugin that has several of
+   * them available. When omitted, the latest available version is used.
+   */
+  metadata?: PluginDefinitionMetadata;
 }
 
 export interface PluginEditorValue {
@@ -124,7 +130,13 @@ export function usePluginEditor(props: UsePluginEditorProps): {
     }
   }, [value.selection, defaultPluginKind]);
 
-  const { data: plugin, isFetching, error } = usePlugin(pendingSelection?.type, pendingSelection?.kind || '');
+  // Load the pending plugin honoring the pinned version/registry, so the initial options come from the exact
+  // implementation the definition will use rather than from the latest one.
+  const {
+    data: plugin,
+    isFetching,
+    error,
+  } = usePlugin(pendingSelection?.type, pendingSelection?.kind || '', undefined, getPluginOverrides(pendingSelection));
 
   useEffect(() => {
     // Nothing to do if no new plugin kind is pending
