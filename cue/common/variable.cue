@@ -13,4 +13,4 @@
 
 package common
 
-#variableSyntaxRegex: "^\\$\\w+$"
+#variableSyntaxRegex: "^\\$(\\w+|\\{\\w+\\})$"
