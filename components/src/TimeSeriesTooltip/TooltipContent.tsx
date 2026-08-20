@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo } from 'react';
 import { Box } from '@mui/material';
-import { NearbySeriesArray } from './types';
+import { ReactElement, useMemo } from 'react';
+
 import { SeriesInfo } from './SeriesInfo';
+import { NearbySeriesArray } from './types';
 
 export interface TooltipContentProps {
   series: NearbySeriesArray | null;

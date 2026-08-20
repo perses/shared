@@ -13,6 +13,7 @@
 
 import { TableRow as MuiTableRow, TableRowProps as MuiTableRowProps, alpha } from '@mui/material';
 import { forwardRef } from 'react';
+
 import { TableDensity } from './model/table-model';
 
 interface TableRowProps extends MuiTableRowProps<'div'> {

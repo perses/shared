@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import {
   Stack,
   ListItemText,
@@ -24,7 +23,9 @@ import {
   TextField,
 } from '@mui/material';
 import { DatasourceSelector, VariableName } from '@perses-dev/spec';
+import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import { ReactElement, useMemo } from 'react';
+
 import {
   DatasourceSelectItem,
   DatasourceSelectItemGroup,
@@ -92,7 +93,7 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
         saved: item.saved ?? true,
         group: item.selector.group,
         value: selectorToOptionValue(item.selector),
-      }))
+      })),
     );
 
     const datasourceOptionsMap = new Map(datasourceOptions.map((option) => [option.name, option]));
@@ -238,7 +239,7 @@ export function isVariableDatasource(value: DatasourceSelectValue | undefined): 
 export const datasourceSelectValueToSelector = (
   value: DatasourceSelectValue | undefined,
   variables: VariableStateMap,
-  datasourceSelectItemGroups: DatasourceSelectItemGroup[] | undefined
+  datasourceSelectItemGroups: DatasourceSelectItemGroup[] | undefined,
 ): DatasourceSelector | undefined => {
   if (!isVariableDatasource(value)) {
     return value;
@@ -271,7 +272,7 @@ export const datasourceSelectValueToSelector = (
 
 export const useDatasourceSelectValueToSelector = (
   value: DatasourceSelectValue,
-  datasourcePluginKind: string
+  datasourcePluginKind: string,
 ): DatasourceSelector => {
   const { data } = useListDatasourceSelectItems(datasourcePluginKind);
   const variables = useVariableValues();

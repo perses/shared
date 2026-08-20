@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { createTheme } from '@mui/material';
+
 import { TableColumnConfig, getTableCellLayout, persesColumnsToTanstackColumns } from './table-model';
 
 const mockMuiTheme = createTheme({});
@@ -61,7 +62,7 @@ describe('persesColumnToTanstackColumn', () => {
         size: 0,
         minSize: 0,
         maxSize: 0,
-      })
+      }),
     );
   });
 
@@ -77,7 +78,7 @@ describe('persesColumnToTanstackColumn', () => {
     expect(tanstackColumns[0]).toEqual(
       expect.objectContaining({
         size: 100,
-      })
+      }),
     );
   });
 
@@ -95,7 +96,7 @@ describe('persesColumnToTanstackColumn', () => {
         meta: {
           align: 'center',
         },
-      })
+      }),
     );
   });
 
@@ -113,7 +114,7 @@ describe('persesColumnToTanstackColumn', () => {
         meta: {
           headerDescription: 'The name',
         },
-      })
+      }),
     );
   });
 
@@ -131,7 +132,7 @@ describe('persesColumnToTanstackColumn', () => {
         meta: {
           cellDescription: true,
         },
-      })
+      }),
     );
   });
 
@@ -147,7 +148,7 @@ describe('persesColumnToTanstackColumn', () => {
     expect(tanstackColumns[0]).toEqual(
       expect.objectContaining({
         enableSorting: false,
-      })
+      }),
     );
   });
 
@@ -164,7 +165,7 @@ describe('persesColumnToTanstackColumn', () => {
     expect(tanstackColumns[0]).toEqual(
       expect.objectContaining({
         enableSorting: true,
-      })
+      }),
     );
   });
 
@@ -175,7 +176,7 @@ describe('persesColumnToTanstackColumn', () => {
       expect(tanstackColumns[0]).toEqual(
         expect.objectContaining({
           enableResizing: true,
-        })
+        }),
       );
     });
 
@@ -187,7 +188,7 @@ describe('persesColumnToTanstackColumn', () => {
       expect(tanstackColumns[0]).toEqual(
         expect.objectContaining({
           enableResizing: false,
-        })
+        }),
       );
     });
 
@@ -202,7 +203,7 @@ describe('persesColumnToTanstackColumn', () => {
         expect.objectContaining({
           minSize: 80,
           maxSize: 500,
-        })
+        }),
       );
     });
 
@@ -213,7 +214,7 @@ describe('persesColumnToTanstackColumn', () => {
         expect.objectContaining({
           minSize: 60,
           maxSize: 1000,
-        })
+        }),
       );
     });
 
@@ -227,7 +228,7 @@ describe('persesColumnToTanstackColumn', () => {
           size: 0,
           minSize: 0,
           maxSize: 0,
-        })
+        }),
       );
     });
 
@@ -245,7 +246,7 @@ describe('persesColumnToTanstackColumn', () => {
           size: 200,
           minSize: 100,
           maxSize: 400,
-        })
+        }),
       );
     });
   });

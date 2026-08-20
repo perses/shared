@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { gt } from 'semver';
+
 import { PluginType, getPluginModuleCompoundKey } from '../../model';
 import { PluginCompoundKey } from './plugin-indexes';
 
@@ -31,7 +32,7 @@ const PLUGIN_LOOKUP_PRECEDENCE_LOGIC: PluginLookupPrecedenceLogic = { registryOv
 export const resolvePluginKeys = <T extends PluginType>(
   allKeys: Iterable<string>,
   query: PluginCompoundKey<T>,
-  precedenceLogic: PluginLookupPrecedenceLogic = PLUGIN_LOOKUP_PRECEDENCE_LOGIC
+  precedenceLogic: PluginLookupPrecedenceLogic = PLUGIN_LOOKUP_PRECEDENCE_LOGIC,
 ): string[] => {
   const { kind, name, version, registry } = query;
   const candidates: string[] = [];

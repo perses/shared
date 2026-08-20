@@ -15,19 +15,20 @@ import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { TimeRangeControls, useTimeZoneParams } from '@perses-dev/plugin-system';
 import { ReactElement, ReactNode } from 'react';
+
 import { OnSaveDashboard, useEditMode, useDashboardLinks } from '../../context';
-import { AddPanelButton } from '../AddPanelButton';
 import { AddGroupButton } from '../AddGroupButton';
-import { DownloadButton } from '../DownloadButton';
-import { EditVariablesButton } from '../Variables';
-import { EditDatasourcesButton } from '../Datasources';
-import { EditButton } from '../EditButton';
-import { EditJsonButton } from '../EditJsonButton';
-import { SaveDashboardButton } from '../SaveDashboardButton';
-import { DashboardStickyToolbar } from '../DashboardStickyToolbar';
+import { AddPanelButton } from '../AddPanelButton';
 import { EditAnnotationsButton } from '../Annotations/EditAnnotationsButton';
 import { EditDashboardLinksButton } from '../DashboardLinks';
+import { DashboardStickyToolbar } from '../DashboardStickyToolbar';
+import { EditDatasourcesButton } from '../Datasources';
+import { DownloadButton } from '../DownloadButton';
+import { EditButton } from '../EditButton';
+import { EditJsonButton } from '../EditJsonButton';
 import { LinksDisplay } from '../LinksDisplay';
+import { SaveDashboardButton } from '../SaveDashboardButton';
+import { EditVariablesButton } from '../Variables';
 
 export interface DashboardToolbarProps {
   dashboardName: string;

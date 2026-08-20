@@ -17,11 +17,11 @@ import React from 'react';
 /**
  * Base type of all plugin implementations.
  */
-export interface Plugin<Spec> {
+export interface Plugin<Spec, OptionsEditorPropsType = OptionsEditorProps<Spec>> {
   /**
    * React component for editing the plugin's options in the UI.
    */
-  OptionsEditorComponent?: React.ComponentType<OptionsEditorProps<Spec>>;
+  OptionsEditorComponent?: React.ComponentType<OptionsEditorPropsType>;
 
   /**
    * Callback for creating the initial options for the plugin.

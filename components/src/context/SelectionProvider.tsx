@@ -93,7 +93,7 @@ export function SelectionProvider({ children }: SelectionProviderProps): ReactEl
 
   const isSelected = useCallback(
     (item: unknown, index: number) => selectionMap.has(getIdRef.current(item, index)),
-    [selectionMap]
+    [selectionMap],
   );
 
   const ctx = useMemo<InternalState<unknown, unknown>>(
@@ -106,7 +106,7 @@ export function SelectionProvider({ children }: SelectionProviderProps): ReactEl
       isSelected,
       registerGetId,
     }),
-    [selectionMap, setSelection, toggleSelection, removeFromSelection, clearSelection, isSelected, registerGetId]
+    [selectionMap, setSelection, toggleSelection, removeFromSelection, clearSelection, isSelected, registerGetId],
   );
 
   return <SelectionContext.Provider value={ctx}>{children}</SelectionContext.Provider>;
@@ -137,7 +137,7 @@ const defaultState: SelectionState<unknown, unknown> & { hasContext: false } = {
  * @param options.getId Function to get the unique identifier for an item, this allows the selection state to identify items.
  */
 export function useSelection<T, Id = string | number>(
-  options?: UseSelectionOptions<T, Id>
+  options?: UseSelectionOptions<T, Id>,
 ): SelectionState<T, Id> & { hasContext: boolean } {
   const ctx = useContext(SelectionContext);
 

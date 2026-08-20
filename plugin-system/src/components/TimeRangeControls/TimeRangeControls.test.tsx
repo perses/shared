@@ -11,16 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import userEvent from '@testing-library/user-event';
-import { screen, RenderOptions, render, RenderResult } from '@testing-library/react';
-import { DurationString } from '@perses-dev/spec';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React, { ReactElement } from 'react';
 import { SnackbarProvider } from '@perses-dev/components';
 import { TimeRangeProviderBasic, TimeRangeProviderWithQueryParams } from '@perses-dev/plugin-system';
+import { DurationString } from '@perses-dev/spec';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { screen, RenderOptions, render, RenderResult } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import React, { ReactElement } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryParamProvider } from 'use-query-params';
 import { ReactRouter6Adapter } from 'use-query-params/adapters/react-router-6';
+
 import { useTimeZoneParams } from '../../runtime/TimeRangeProvider/query-params';
 import { TimeRangeControls } from './TimeRangeControls';
 
@@ -72,7 +73,7 @@ describe('TimeRangeControls', () => {
           </TimeRangeProviderBasic>
         )}
       </>,
-      undefined
+      undefined,
     );
   };
 
@@ -93,7 +94,7 @@ describe('TimeRangeControls', () => {
         initialTimeRange={{ pastDuration: '3h' as DurationString }}
       >
         <ControlsWithTZ />
-      </TimeRangeProviderBasic>
+      </TimeRangeProviderBasic>,
     );
     const dateButton = await screen.findByLabelText(/time range/i, { selector: '[role="combobox"]' });
     userEvent.click(dateButton);

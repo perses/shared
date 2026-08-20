@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo } from 'react';
-import { AnnotationSpec } from '@perses-dev/spec';
 import { useAnnotations } from '@perses-dev/plugin-system';
+import { AnnotationSpec } from '@perses-dev/spec';
+import { useMemo } from 'react';
+
 import { AnnotationSpecWithData, useAnnotationsWithData } from './AnnotationProvider';
 
 /**

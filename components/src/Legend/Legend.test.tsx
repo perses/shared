@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import userEvent from '@testing-library/user-event';
 import { render, RenderResult, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { VirtuosoMockContext } from 'react-virtuoso';
+
 import { Legend, LegendProps } from './Legend';
 
 const mockItems = [
@@ -41,11 +42,11 @@ type RenderLegendOpts = Partial<
 };
 
 const renderLegend = ({
-  onSelectedItemsChange = jest.fn(),
+  onSelectedItemsChange = vi.fn(),
   selectedItems = 'ALL',
   position = 'bottom',
-  onItemMouseOver = jest.fn(),
-  onItemMouseOut = jest.fn(),
+  onItemMouseOver = vi.fn(),
+  onItemMouseOut = vi.fn(),
 }: RenderLegendOpts = {}): RenderResult => {
   return render(
     <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: 100 }}>
@@ -61,7 +62,7 @@ const renderLegend = ({
         onItemMouseOver={onItemMouseOver}
         onItemMouseOut={onItemMouseOut}
       />
-    </VirtuosoMockContext.Provider>
+    </VirtuosoMockContext.Provider>,
   );
 };
 
@@ -131,7 +132,7 @@ describe('Legend', () => {
     });
 
     test('selects unselected item on click', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderLegend({
         onSelectedItemsChange: mockOnSelectedItemsChange,
         position,
@@ -150,7 +151,7 @@ describe('Legend', () => {
     });
 
     test.each(['shiftKey', 'metaKey'])(`adds/removes selected items on click modified with %s`, (modifierKey) => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderLegend({
         onSelectedItemsChange: mockOnSelectedItemsChange,
         selectedItems: {
@@ -178,7 +179,7 @@ describe('Legend', () => {
     });
 
     test('reverts to select "ALL" on simple click of selected item', () => {
-      const mockOnSelectedItemsChange = jest.fn();
+      const mockOnSelectedItemsChange = vi.fn();
       renderLegend({
         onSelectedItemsChange: mockOnSelectedItemsChange,
         selectedItems: {
@@ -200,7 +201,7 @@ describe('Legend', () => {
 
     describe('on mouse over item', () => {
       test('calls `onItemMouseOver` with event and item information', () => {
-        const mockOnItemMouseOver = jest.fn();
+        const mockOnItemMouseOver = vi.fn();
         renderLegend({
           onItemMouseOver: mockOnItemMouseOver,
           position,
@@ -221,14 +222,14 @@ describe('Legend', () => {
           {
             id: '3',
             index: 2,
-          }
+          },
         );
       });
     });
 
     describe('on mouse out item', () => {
       test('calls `onItemMouseOut` with event and item information', () => {
-        const mockOnItemMouseOut = jest.fn();
+        const mockOnItemMouseOut = vi.fn();
         renderLegend({
           onItemMouseOut: mockOnItemMouseOut,
           position,
@@ -249,7 +250,7 @@ describe('Legend', () => {
           {
             id: '2',
             index: 1,
-          }
+          },
         );
       });
     });

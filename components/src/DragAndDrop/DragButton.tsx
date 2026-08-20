@@ -49,7 +49,7 @@ export interface DragButtonProps extends IconButtonProps {
 
 export const DragButton = forwardRef<HTMLButtonElement, DragButtonProps>(function DragButton(
   { onMoveUp, onMoveDown, onMoveLeft, onMoveRight, menuSx, ...otherProps }: DragButtonProps,
-  ref
+  ref,
 ): ReactElement {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);

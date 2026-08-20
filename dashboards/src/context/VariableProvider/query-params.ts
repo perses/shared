@@ -58,7 +58,7 @@ export function useVariableQueryParams(defs: VariableDefinition[]): ReturnType<t
 }
 
 export function getInitalValuesFromQueryParameters(
-  queryParamValues: Record<string, VariableValue>
+  queryParamValues: Record<string, VariableValue>,
 ): Record<string, VariableValue> {
   const values: Record<string, VariableValue> = {};
   Object.keys(queryParamValues).forEach((key) => {

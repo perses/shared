@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { StateCreator } from 'zustand';
 import { PanelGroupId } from '@perses-dev/plugin-system';
+import { StateCreator } from 'zustand';
+
 import { PanelGroupDefinition, PanelGroupItemId } from '../../model';
 import { Middleware } from './common';
 import { PanelGroupSlice } from './panel-group-slice';
@@ -22,7 +23,10 @@ import { PanelGroupSlice } from './panel-group-slice';
  */
 export interface VirtualPanelRef {
   ref: string;
-  repeatVariable?: [string, string];
+  repeatVariable?: {
+    group?: [string, string];
+    panel?: [string, string];
+  };
 }
 
 /**
@@ -46,7 +50,7 @@ export interface ViewPanelState {
  */
 export function createViewPanelSlice(
   viewPanelRef?: VirtualPanelRef,
-  setViewPanelRefQueryParam?: (ref: VirtualPanelRef | undefined) => void
+  setViewPanelRef?: (ref: VirtualPanelRef | undefined) => void,
 ): StateCreator<ViewPanelSlice & PanelGroupSlice, Middleware, [], ViewPanelSlice> {
   return (set, get) => ({
     viewPanel: {
@@ -65,8 +69,8 @@ export function createViewPanelSlice(
           panelGroupItemId: panelGroupItemId,
         };
         const panelRef = findPanelRefOfPanelGroupItemId(get().panelGroups, panelGroupItemId);
-        if (setViewPanelRefQueryParam) {
-          setViewPanelRefQueryParam(panelRef);
+        if (setViewPanelRef) {
+          setViewPanelRef(panelRef);
         }
       });
     },
@@ -91,15 +95,17 @@ export function createViewPanelSlice(
 function areViewPanelRefsEqual(left?: VirtualPanelRef, right?: VirtualPanelRef): boolean {
   return (
     left?.ref === right?.ref &&
-    left?.repeatVariable?.[0] === right?.repeatVariable?.[0] &&
-    left?.repeatVariable?.[1] === right?.repeatVariable?.[1]
+    left?.repeatVariable?.group?.[0] === right?.repeatVariable?.group?.[0] &&
+    left?.repeatVariable?.group?.[1] === right?.repeatVariable?.group?.[1] &&
+    left?.repeatVariable?.panel?.[0] === right?.repeatVariable?.panel?.[0] &&
+    left?.repeatVariable?.panel?.[1] === right?.repeatVariable?.panel?.[1]
   );
 }
 
 function getViewPanelGroupId(
   panelGroups: Record<PanelGroupId, PanelGroupDefinition>,
   panelGroupItemId?: PanelGroupItemId,
-  panelRef?: VirtualPanelRef
+  panelRef?: VirtualPanelRef,
 ): PanelGroupItemId | undefined {
   if (panelGroupItemId) {
     return panelGroupItemId;
@@ -115,7 +121,7 @@ function getViewPanelGroupId(
 // Find the PanelGroupItemId of a Panel from a PanelRef
 function findPanelGroupItemIdOfPanelRef(
   panelGroups: Record<PanelGroupId, PanelGroupDefinition>,
-  panelRef: VirtualPanelRef
+  panelRef: VirtualPanelRef,
 ): PanelGroupItemId | undefined {
   for (const panelGroup of Object.values(panelGroups)) {
     const itemPanel = Object.entries(panelGroup.itemPanelKeys ?? []).find(([_, value]) => value === panelRef.ref);
@@ -134,7 +140,7 @@ function findPanelGroupItemIdOfPanelRef(
 // Find the PanelRef from a PanelGroupItemId
 function findPanelRefOfPanelGroupItemId(
   panelGroups: Record<PanelGroupId, PanelGroupDefinition>,
-  panelGroupItemId?: PanelGroupItemId
+  panelGroupItemId?: PanelGroupItemId,
 ): VirtualPanelRef | undefined {
   if (!panelGroupItemId) {
     return undefined;

@@ -1,0 +1,47 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Button, ButtonProps } from '@mui/material';
+import { useSnackbar } from '@perses-dev/components';
+import { ReactElement, useCallback, useState } from 'react';
+
+type DatasourceTestConnectionButtonProps = {
+  testConnection: () => Promise<void>;
+} & Omit<ButtonProps, 'onClick'>;
+
+export const DatasourceTestConnectionButton = ({
+  testConnection,
+  disabled,
+  ...buttonProps
+}: DatasourceTestConnectionButtonProps): ReactElement => {
+  const { successSnackbar, exceptionSnackbar } = useSnackbar();
+  const [isTesting, setIsTesting] = useState(false);
+
+  const handleClick = useCallback(async (): Promise<void> => {
+    setIsTesting(true);
+    try {
+      await testConnection();
+      successSnackbar('Datasource is healthy');
+    } catch (e) {
+      exceptionSnackbar(e instanceof Error ? e : new Error('Datasource is not healthy'));
+    } finally {
+      setIsTesting(false);
+    }
+  }, [testConnection, successSnackbar, exceptionSnackbar]);
+
+  return (
+    <Button onClick={handleClick} color="info" variant="outlined" disabled={disabled || isTesting} {...buttonProps}>
+      Test Connection
+    </Button>
+  );
+};

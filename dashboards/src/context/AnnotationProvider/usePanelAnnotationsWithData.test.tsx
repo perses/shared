@@ -11,15 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, ReactNode } from 'react';
-import { renderHook, waitFor } from '@testing-library/react';
-import { AnnotationSpec } from '@perses-dev/spec';
 import { AnnotationProvider, usePanelAnnotationsWithData } from '@perses-dev/dashboards';
+import { AnnotationSpec } from '@perses-dev/spec';
+import { renderHook, waitFor } from '@testing-library/react';
+import { ReactElement, ReactNode } from 'react';
 
 // Resolve every annotation definition to a single data point derived from its name, so both the
 // dashboard hydration and the panel-local resolution go through the same predictable stub.
-jest.mock('@perses-dev/plugin-system', () => {
-  const actual = jest.requireActual('@perses-dev/plugin-system');
+vi.mock('@perses-dev/plugin-system', async () => {
+  const actual = await vi.importActual<typeof import('@perses-dev/plugin-system')>('@perses-dev/plugin-system');
   return {
     ...actual,
     useAnnotations: (definitions: AnnotationSpec[]): Array<{ data: Array<{ start: number; title: string }> }> =>
@@ -46,7 +46,7 @@ function renderPanelHook(panelAnnotations?: AnnotationSpec[]): { current: string
     () => usePanelAnnotationsWithData(panelAnnotations).map((a) => a.definition.display.name),
     {
       wrapper,
-    }
+    },
   );
   return result;
 }

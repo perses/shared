@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
+import { TZDate } from '@date-fns/tz';
 import { Box, Stack, Typography, Button } from '@mui/material';
 import { DateTimeField, LocalizationProvider, StaticDateTimePicker } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { AbsoluteTimeRange } from '@perses-dev/spec';
-import { TZDate } from '@date-fns/tz';
-import { ErrorBoundary } from '../ErrorBoundary';
+import { ReactElement, useState } from 'react';
+
 import { ErrorAlert } from '../ErrorAlert';
+import { ErrorBoundary } from '../ErrorBoundary';
 import { DATE_TIME_FORMAT, validateDateRange } from './utils';
 
 export interface AbsoluteTimeFormProps {

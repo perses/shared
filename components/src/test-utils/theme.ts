@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { createTheme as createMuiTheme } from '@mui/material';
+
+import { SharedChartsState } from '../context';
 import { PersesChartsTheme, EChartsTheme } from '../model';
 import { generateChartsTheme } from '../utils';
-import { SharedChartsState } from '../context';
 
 // app specific echarts option overrides
 const TEST_ECHARTS_THEME_OVERRIDES: EChartsTheme = {

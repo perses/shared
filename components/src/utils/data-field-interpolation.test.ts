@@ -163,7 +163,7 @@ describe('replaceDataFields()', () => {
       const result = replaceDataFields(
         'Item ${__data.index}: ${__data.fields["name"]}',
         { name: 'test' },
-        { index: 2 }
+        { index: 2 },
       );
       expect(result.text).toBe('Item 2: test');
     });
@@ -177,7 +177,7 @@ describe('replaceDataFields()', () => {
       const result = replaceDataFields(
         '${__data.index} of ${__data.count}: ${__data.fields["name"]}',
         { name: 'Alice' },
-        { index: 0, count: 3 }
+        { index: 0, count: 3 },
       );
       expect(result.text).toBe('0 of 3: Alice');
     });
@@ -253,14 +253,14 @@ describe('replaceDataFieldsBatch()', () => {
     it('replace all values as JSON removing surrounding quotes to generate a valid JSON', () => {
       const result = replaceDataFieldsBatch('{"data":"${__data:json}"}', items);
       expect(result.text).toBe(
-        '{"data":[{"name":"Alice","id":"1"},{"name":"Bob","id":"2"},{"name":"Charlie","id":"3"}]}'
+        '{"data":[{"name":"Alice","id":"1"},{"name":"Bob","id":"2"},{"name":"Charlie","id":"3"}]}',
       );
     });
 
     it('replace all values as JSON keeping surrounding quotes if they are not surrounding the full_data pattern', () => {
       const result = replaceDataFieldsBatch('{"data":"${__data} something"}', items);
       expect(result.text).toBe(
-        '{"data":"{"name":"Alice","id":"1"},{"name":"Bob","id":"2"},{"name":"Charlie","id":"3"} something"}'
+        '{"data":"{"name":"Alice","id":"1"},{"name":"Bob","id":"2"},{"name":"Charlie","id":"3"} something"}',
       );
     });
   });
@@ -269,7 +269,7 @@ describe('replaceDataFieldsBatch()', () => {
     it('handles both indexed and aggregated patterns', () => {
       const result = replaceDataFieldsBatch(
         'First: ${__data[0].fields["name"]}, All: ${__data.fields["id"]:pipe}',
-        items
+        items,
       );
       expect(result.text).toBe('First: Alice, All: 1|2|3');
     });
@@ -521,7 +521,7 @@ describe('dot notation support', () => {
         const result = replaceDataFields(
           '${__data.fields["foo.bar"]}',
           { foo: { bar: { nested: 'object' } } },
-          { urlEncode: false }
+          { urlEncode: false },
         );
         expect(result.text).toBe('{"nested":"object"}');
       });

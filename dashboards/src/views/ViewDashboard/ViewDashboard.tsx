@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Box, BoxProps } from '@mui/material';
-import { BuiltinVariableDefinition } from '@perses-dev/spec';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
   TimeRangeProviderWithQueryParams,
@@ -20,7 +19,9 @@ import {
   useInitialTimeRange,
   usePluginBuiltinVariableDefinitions,
 } from '@perses-dev/plugin-system';
+import { BuiltinVariableDefinition } from '@perses-dev/spec';
 import { ReactElement, useMemo } from 'react';
+
 import { DEFAULT_DASHBOARD_DURATION, DEFAULT_REFRESH_INTERVAL } from '../../constants';
 import {
   DatasourceStoreProviderProps,
@@ -37,6 +38,7 @@ export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, Dashboar
   externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   isEditing?: boolean;
   isCreating?: boolean;
+  repeatVariableMaxValues?: number;
 }
 
 /**
@@ -62,6 +64,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     onDiscard,
     sx,
     userPreferenceTimezone,
+    repeatVariableMaxValues,
     ...others
   } = props;
   const { spec } = dashboardResource;
@@ -112,6 +115,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
         initialState={{
           isEditMode: !!isEditing,
           dashboardResource,
+          repeatVariableMaxValues,
         }}
       >
         <TimeRangeProviderWithQueryParams
@@ -133,7 +137,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
                     position: 'relative',
                     overflow: 'hidden',
                   },
-                  sx
+                  sx,
                 )}
                 {...others}
               >

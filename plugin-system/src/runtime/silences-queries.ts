@@ -13,11 +13,12 @@
 
 import { SilencesData, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { QueryKey, useQueries, UseQueryResult } from '@tanstack/react-query';
+
 import { SilencesQueryContext, SilencesQueryPlugin } from '../model';
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry, usePlugins } from './plugin-registry';
-import { useAllVariableValues } from './variables';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
+import { useAllVariableValues } from './variables';
 
 export type SilencesQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'SilencesQuery', PluginSpec>;
 export const SILENCES_QUERY_KEY = 'SilencesQuery';
@@ -33,7 +34,7 @@ export function useSilencesQueries(definitions: SilencesQueryDefinition[]): Arra
 
   const pluginLoaderResponse = usePlugins(
     'SilencesQuery',
-    definitions.map((d) => ({ kind: d.spec.plugin.kind }))
+    definitions.map((d) => ({ kind: d.spec.plugin.kind })),
   );
 
   return useQueries({

@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Skeleton } from '@mui/material';
+import { LoadingOverlay } from '@perses-dev/components';
 import { usePlugin, PanelProps, QueryData, PanelPlugin } from '@perses-dev/plugin-system';
 import { UnknownSpec, PanelDefinition, QueryDataType } from '@perses-dev/spec';
 import { ReactElement } from 'react';
-import { LoadingOverlay } from '@perses-dev/components';
-import { Skeleton } from '@mui/material';
+
 import { PanelPluginLoader } from './PanelPluginLoader';
 
 export interface PanelContentProps extends Omit<PanelProps<UnknownSpec>, 'queryResults'> {
@@ -47,7 +48,7 @@ export function PanelContent(props: PanelContentProps): ReactElement {
   // Render the panel if any query has data, or the panel doesn't have a query attached (for example MarkdownPanel).
   // Loading indicator or errors of other queries are shown in the panel header.
   const queryResultsWithData = queryResults.flatMap((q) =>
-    q.data ? [{ data: q.data, definition: q.definition }] : []
+    q.data ? [{ data: q.data, definition: q.definition }] : [],
   );
   if (queryResultsWithData.length > 0 || queryResults.length === 0) {
     return (

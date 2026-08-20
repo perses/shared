@@ -14,6 +14,7 @@
 import { ListVariableDefinition, VariableDefinition, VariableValue } from '@perses-dev/spec';
 import { useQueries, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
+
 import { GetVariableOptionsContext, VariableOption, VariablePlugin } from '../../model';
 import {
   useAllVariableValues,
@@ -60,7 +61,7 @@ const getVariableQueryConfig = (
   variablePluginCtx: GetVariableOptionsContext,
   variablePlugin: VariablePlugin | undefined,
   enabled: boolean,
-  onFetched?: (name: string, options: VariableOption[], definition: ListVariableDefinition) => void
+  onFetched?: (name: string, options: VariableOption[], definition: ListVariableDefinition) => void,
 ): UseQueryOptions<VariableOption[]> => {
   const capturingRegexp =
     definition.spec.capturingRegexp !== undefined ? new RegExp(definition.spec.capturingRegexp, 'g') : undefined;
@@ -84,7 +85,7 @@ const getVariableQueryConfig = (
 function resolveDependsOnVariables(
   variablePlugin: VariablePlugin | undefined,
   variablePluginCtx: GetVariableOptionsContext,
-  definition: ListVariableDefinition
+  definition: ListVariableDefinition,
 ): string[] {
   if (variablePlugin?.dependsOn) {
     const dependencies = variablePlugin.dependsOn(definition.spec.plugin.spec, variablePluginCtx);
@@ -132,12 +133,12 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
 
   const listVariables = useMemo(
     () => variableDefinitions.filter((v): v is ListVariableDefinition => v.kind === 'ListVariable'),
-    [variableDefinitions]
+    [variableDefinitions],
   );
 
   const pluginResults = usePlugins(
     'Variable',
-    listVariables.map((d) => ({ kind: d.spec.plugin.kind }))
+    listVariables.map((d) => ({ kind: d.spec.plugin.kind })),
   );
 
   // Resolved variable state. Updated by onFetched when queries resolve.
@@ -163,13 +164,13 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
       const dependsOn = resolveDependsOnVariables(
         plugin,
         { timeRange, datasourceStore, variables: allVariables },
-        definition
+        definition,
       );
 
       const hasPendingDeps = dependsOn.some(
         (v) =>
           (resolvedVariables[v] === undefined && listVariables.some((lv) => lv.spec.name === v)) ||
-          allVariables[v]?.loading
+          allVariables[v]?.loading,
       );
 
       const dependentVariables: VariableStateMap = {};
@@ -190,9 +191,9 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
       Object.fromEntries(
         Object.entries(allVariables)
           .filter(([, state]) => state?.value !== undefined)
-          .map(([name, state]) => [name, state!.value])
+          .map(([name, state]) => [name, state!.value]),
       ),
-    [allVariables]
+    [allVariables],
   );
 
   return { initialVariableValues, isLoading: queryResults.some((r) => r.isLoading) };

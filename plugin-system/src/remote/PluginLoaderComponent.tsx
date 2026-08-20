@@ -26,6 +26,7 @@
 // limitations under the License.
 
 import { useEffect, useRef, useState } from 'react';
+
 import { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 import { usePluginRuntime } from './PluginRuntime';
 
@@ -65,10 +66,10 @@ export function PluginLoaderComponent<P>({ plugin, props, field }: PluginLoaderP
         setPluginModule(null);
         console.error(
           `PluginLoaderComponent: Error loading plugin ${plugin.name} from module ${plugin.moduleName}:`,
-          error
+          error,
         );
         setError(
-          new Error(`PluginLoaderComponent: Error loading plugin ${plugin.name} from module ${plugin.moduleName}`)
+          new Error(`PluginLoaderComponent: Error loading plugin ${plugin.name} from module ${plugin.moduleName}`),
         );
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps

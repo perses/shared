@@ -10,14 +10,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+import { useVariableValues, PanelGroupId } from '@perses-dev/plugin-system';
 import { ReactElement, useState } from 'react';
 import { Layout, Layouts } from 'react-grid-layout';
 
-import { useVariableValues, VariableContext, PanelGroupId } from '@perses-dev/plugin-system';
-import { PanelGroupDefinition } from '../../model';
-import { useEditMode, usePanelGroup, usePanelGroupActions, useViewPanelGroup } from '../../context';
 import { GRID_LAYOUT_SMALL_BREAKPOINT } from '../../constants';
+import { useEditMode, usePanelGroup, usePanelGroupActions, useViewPanelGroup } from '../../context';
+import { PanelGroupDefinition } from '../../model';
 import { PanelOptions } from '../Panel';
+import { FixedValueVariableProvider } from '../Variables';
 import { Row, RowProps } from './Row';
 
 export interface GridLayoutProps {
@@ -59,7 +61,7 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
     containerWidth: number,
     margin: [number, number],
     cols: number,
-    containerPadding: [number, number]
+    containerPadding: [number, number],
   ): void => {
     const marginX = margin[0];
     const marginWidth = marginX * (cols - 1);
@@ -138,9 +140,10 @@ export function RepeatGridLayout({
   return (
     <>
       {variable.value.map((value) => (
-        <VariableContext.Provider
+        <FixedValueVariableProvider
           key={`${repeatVariableName}-${value}`}
-          value={{ state: { ...variables, [repeatVariableName]: { value, loading: false } } }}
+          variableName={repeatVariableName}
+          value={value}
         >
           <Row
             panelGroupId={panelGroupId}
@@ -153,7 +156,7 @@ export function RepeatGridLayout({
             onWidthChange={onWidthChange}
             repeatVariable={[repeatVariableName, value]}
           />
-        </VariableContext.Provider>
+        </FixedValueVariableProvider>
       ))}
     </>
   );

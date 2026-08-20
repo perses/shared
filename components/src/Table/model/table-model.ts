@@ -13,6 +13,7 @@
 
 import { Theme } from '@mui/material';
 import { Link } from '@perses-dev/spec';
+import { rankings } from '@tanstack/match-sorter-utils';
 import {
   AccessorKeyColumnDef,
   CellContext,
@@ -25,7 +26,6 @@ import {
   SortingState,
 } from '@tanstack/react-table';
 import { CSSProperties, ReactNode } from 'react';
-import { rankings } from '@tanstack/match-sorter-utils';
 
 export const DEFAULT_COLUMN_WIDTH = 150;
 export const DEFAULT_COLUMN_MIN_WIDTH = 60;
@@ -290,7 +290,7 @@ type GetTableCellLayoutOpts = {
 export function getTableCellLayout(
   theme: Theme,
   density: TableDensity,
-  { isHeader, isLastColumn, isFirstColumn, defaultColumnHeight }: GetTableCellLayoutOpts = {}
+  { isHeader, isLastColumn, isFirstColumn, defaultColumnHeight }: GetTableCellLayoutOpts = {},
 ): TableCellLayout {
   // Density Standard
   let paddingY = theme.spacing(1);
@@ -439,7 +439,7 @@ export interface TableColumnConfig<TableData>
  */
 export function persesColumnsToTanstackColumns<TableData>(
   columns: Array<TableColumnConfig<TableData>>,
-  defaultColumnConfig?: DefaultColumnConfig
+  defaultColumnConfig?: DefaultColumnConfig,
 ): Array<ColumnDef<TableData>> {
   return columns.map(
     ({ width, align, headerDescription, cellDescription, enableSorting, dataLink, enableResizing, ...otherProps }) => {
@@ -451,7 +451,7 @@ export function persesColumnsToTanstackColumns<TableData>(
               isResizingEnabled,
               width,
               defaultColumnConfig?.minWidth,
-              defaultColumnConfig?.maxWidth
+              defaultColumnConfig?.maxWidth,
             );
 
       return {
@@ -471,7 +471,7 @@ export function persesColumnsToTanstackColumns<TableData>(
           dataLink,
         },
       };
-    }
+    },
   );
 }
 
@@ -479,7 +479,7 @@ function getUserProvidedSizeProps<TableData>(
   isResizingEnabled: boolean,
   width: number,
   minWidth?: number,
-  maxWidth?: number
+  maxWidth?: number,
 ): Pick<ColumnDef<TableData>, 'size' | 'minSize' | 'maxSize'> {
   // When resizing is enabled, we need to set min and max size to ensure the column can be resized within a reasonable range.
   return isResizingEnabled
@@ -496,7 +496,7 @@ function getUserProvidedSizeProps<TableData>(
 function getDefaultSizeProps<TableData>(
   isResizingEnabled: boolean,
   minWidth?: number,
-  maxWidth?: number
+  maxWidth?: number,
 ): Pick<ColumnDef<TableData>, 'size' | 'minSize' | 'maxSize'> {
   return isResizingEnabled
     ? {

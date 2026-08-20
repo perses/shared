@@ -57,7 +57,7 @@ function serializeYaml(dashboard: DashboardResource, shape?: 'cr-v1alpha1' | 'cr
         },
         spec: dashboard.spec,
       },
-      { schema: 'yaml-1.1' }
+      { schema: 'yaml-1.1' },
     );
   } else if (shape === 'cr-v1alpha2') {
     const name = dashboard.metadata.name.toLowerCase().replace(/[^a-z0-9-]/g, '-');
@@ -93,7 +93,7 @@ function serializeYaml(dashboard: DashboardResource, shape?: 'cr-v1alpha1' | 'cr
 export function serializeDashboard(
   dashboard: DashboardResource,
   format: 'json' | 'yaml',
-  shape?: 'cr-v1alpha1' | 'cr-v1alpha2'
+  shape?: 'cr-v1alpha1' | 'cr-v1alpha2',
 ): SerializedDashboard {
   switch (format) {
     case 'json':

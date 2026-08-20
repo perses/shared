@@ -61,7 +61,7 @@ export function PanelFocusProvider({ children }: { children: ReactNode }): React
       setFocusedPanel,
       clearFocusedPanel,
     }),
-    [focusedPanelKey, setFocusedPanel, clearFocusedPanel]
+    [focusedPanelKey, setFocusedPanel, clearFocusedPanel],
   );
 
   return <PanelFocusContext.Provider value={value}>{children}</PanelFocusContext.Provider>;
@@ -93,7 +93,7 @@ export function usePanelFocusHandlers(panelKey: string): {
         timerRef.current = null;
       }, PANEL_FOCUS_DEBOUNCE_MS);
     },
-    [panelKey, setFocusedPanel]
+    [panelKey, setFocusedPanel],
   );
 
   const onMouseLeave = useCallback(() => {

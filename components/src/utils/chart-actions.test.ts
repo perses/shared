@@ -13,6 +13,7 @@
 
 import { TimeSeries, TimeSeriesValueTuple } from '@perses-dev/spec';
 import { ECharts as EChartsInstance } from 'echarts/core';
+
 import { DatapointInfo } from '../model';
 import {
   batchDispatchNearbySeriesActions,
@@ -163,10 +164,10 @@ describe('batchDispatchNearbySeriesActions', () => {
     batchDispatchNearbySeriesActions(chart, [1, 2, 3, 4], [3], [1, 2, 4], [winnerDatapoint], []);
 
     const blanketDownplayIdx = calls.findIndex(
-      (c) => c.type === 'downplay' && (c.payload as { seriesIndex?: unknown }).seriesIndex === undefined
+      (c) => c.type === 'downplay' && (c.payload as { seriesIndex?: unknown }).seriesIndex === undefined,
     );
     const targetedDownplayIdx = calls.findIndex(
-      (c) => c.type === 'downplay' && Array.isArray((c.payload as { seriesIndex?: unknown }).seriesIndex)
+      (c) => c.type === 'downplay' && Array.isArray((c.payload as { seriesIndex?: unknown }).seriesIndex),
     );
     const highlightIdx = calls.findIndex((c) => c.type === 'highlight');
 

@@ -13,6 +13,7 @@
 
 import { Checkbox, FormControlLabel, Stack } from '@mui/material';
 import { ReactElement } from 'react';
+
 import { TextField } from '../controls';
 
 export interface LinkEditorFormField<T> {

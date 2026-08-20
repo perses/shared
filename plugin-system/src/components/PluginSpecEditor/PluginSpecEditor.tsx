@@ -11,25 +11,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ErrorAlert } from '@perses-dev/components';
-import { UnknownSpec } from '@perses-dev/spec';
-import { ReactElement } from 'react';
 import { CircularProgress, Stack } from '@mui/material';
-import { OptionsEditorProps } from '../../model';
+import { ErrorAlert } from '@perses-dev/components';
+import { DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
+import { ReactElement } from 'react';
+
+import { DatasourcePlugin, OptionsEditorProps, Plugin, PluginType } from '../../model';
 import { usePlugin } from '../../runtime';
 import { PluginEditorSelection } from '../PluginEditor';
+import { DatasourceSpecEditor } from './DatasourceSpecEditor';
 
 export interface PluginSpecEditorProps extends OptionsEditorProps<UnknownSpec> {
   pluginSelection: PluginEditorSelection;
   isEditor?: boolean;
+  testConnection?: (spec: DatasourceSpec, healthCheckPath: string) => Promise<void>;
+}
+
+function isDatasourcePlugin(
+  pluginType: PluginType,
+  plugin: Plugin<UnknownSpec>,
+): plugin is DatasourcePlugin<UnknownSpec> {
+  return pluginType === 'Datasource' && 'createClient' in plugin;
 }
 
 export function PluginSpecEditor(props: PluginSpecEditorProps): ReactElement | null {
   const {
     pluginSelection: { type: pluginType, kind: pluginKind },
+    value,
+    testConnection,
     ...others
   } = props;
   const { data: plugin, isLoading, error } = usePlugin(pluginType, pluginKind);
+
   if (error) {
     return <ErrorAlert error={error} />;
   }
@@ -49,7 +62,19 @@ export function PluginSpecEditor(props: PluginSpecEditorProps): ReactElement | n
   if (pluginType === 'Panel') {
     throw new Error('This editor should not be used for panel type. Please use Panel Spec Editor instead.');
   }
-  const { OptionsEditorComponent } = plugin;
 
-  return OptionsEditorComponent ? <OptionsEditorComponent {...others} /> : null;
+  if (isDatasourcePlugin(pluginType, plugin)) {
+    return (
+      <DatasourceSpecEditor
+        plugin={plugin}
+        pluginKind={pluginKind}
+        value={value}
+        testConnection={testConnection}
+        {...others}
+      />
+    );
+  }
+
+  const { OptionsEditorComponent } = plugin;
+  return OptionsEditorComponent ? <OptionsEditorComponent {...others} value={value} /> : null;
 }

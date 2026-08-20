@@ -12,15 +12,16 @@
 // limitations under the License.
 
 import { PaletteMode, PaletteOptions } from '@mui/material';
-import { text } from './text';
+
 import { background } from './background';
-import { greyOption } from './grey';
+import { blue, green, grey, orange, purple, red } from './colors';
 import { black, white } from './colors/common';
+import { error } from './error';
+import { greyOption } from './grey';
 import { primary } from './primary';
 import { secondary } from './secondary';
-import { blue, green, grey, orange, purple, red } from './colors';
-import { error } from './error';
 import { success } from './success';
+import { text } from './text';
 import { warning } from './warning';
 
 /**

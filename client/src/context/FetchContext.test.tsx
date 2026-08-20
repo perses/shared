@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { render, screen, waitFor } from '@testing-library/react';
+
 import { FetchProvider, useFetch, FetchFn } from './FetchContext';
 
 function TestConsumer(): React.ReactElement {
@@ -50,14 +51,14 @@ describe('FetchContext', () => {
 
   describe('FetchProvider with custom fetchFn', () => {
     it('provides the custom fetch to useFetch consumers', async () => {
-      const customFetch: FetchFn = jest.fn().mockResolvedValue({
+      const customFetch: FetchFn = vi.fn().mockResolvedValue({
         ok: true,
       } as unknown as Response);
 
       render(
         <FetchProvider fetchFn={customFetch}>
           <TestConsumer />
-        </FetchProvider>
+        </FetchProvider>,
       );
 
       screen.getByText('fire').click();
@@ -68,15 +69,15 @@ describe('FetchContext', () => {
     });
 
     it('derives fetchJson from the custom fetch', async () => {
-      const customFetch: FetchFn = jest.fn().mockResolvedValue({
+      const customFetch: FetchFn = vi.fn().mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue({ ok: true }),
+        json: vi.fn().mockResolvedValue({ ok: true }),
       } as unknown as Response);
 
       render(
         <FetchProvider fetchFn={customFetch}>
           <TestJsonConsumer url="/api/data" />
-        </FetchProvider>
+        </FetchProvider>,
       );
 
       screen.getByText('json').click();

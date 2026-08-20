@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { createContext, ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import {
   AbsoluteTimeRange,
   DurationString,
@@ -21,6 +20,8 @@ import {
   getSuggestedStepMs,
 } from '@perses-dev/spec';
 import { useQueryClient } from '@tanstack/react-query';
+import React, { createContext, ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+
 import { getRefreshIntervalInMs } from './refresh-interval';
 
 export interface TimeRangeProviderProps {
@@ -75,7 +76,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
 
   const queryClient = useQueryClient();
   const [absoluteTimeRange, setAbsoluteTimeRange] = useState<AbsoluteTimeRange>(
-    isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange
+    isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange,
   );
 
   const handleSetTimeRange = useCallback(
@@ -83,7 +84,7 @@ export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
       setTimeRange(value);
       setAbsoluteTimeRange(isRelativeTimeRange(value) ? toAbsoluteTimeRange(value) : value);
     },
-    [setTimeRange]
+    [setTimeRange],
   );
 
   // Refresh is called when clicking on the refresh button, it refreshes all queries including variables

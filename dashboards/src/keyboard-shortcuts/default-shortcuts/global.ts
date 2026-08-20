@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { PersesShortcutDef } from '../types';
 import { OPEN_SEARCH_EVENT, SHOW_SHORTCUTS_EVENT, TOGGLE_THEME_EVENT } from '../events';
+import { PersesShortcutDef } from '../types';
 
 export const GO_HOME_SHORTCUT: PersesShortcutDef = {
   id: 'go-home',

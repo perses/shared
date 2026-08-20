@@ -22,10 +22,11 @@ import {
   useQueryClient,
   UseQueryResult,
 } from '@tanstack/react-query';
+
 import { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode, TimeSeriesQueryPlugin } from '../model';
-import { useTimeRange } from './TimeRangeProvider';
 import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
+import { useTimeRange } from './TimeRangeProvider';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
 import { useAllVariableValues } from './variables';
 
@@ -87,7 +88,7 @@ function getQueryOptions({
 export const useTimeSeriesQuery = (
   definition: TimeSeriesQueryDefinition,
   options?: UseTimeSeriesQueryOptions,
-  queryOptions?: QueryObserverOptions<TimeSeriesData>
+  queryOptions?: QueryObserverOptions<TimeSeriesData>,
 ): UseQueryResult<TimeSeriesData> => {
   const { data: plugin } = usePlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
   const context = useTimeSeriesQueryContext();
@@ -113,7 +114,7 @@ export const useTimeSeriesQuery = (
 export function useTimeSeriesQueries(
   definitions: TimeSeriesQueryDefinition[],
   options?: UseTimeSeriesQueryOptions,
-  queryOptions?: Omit<QueryObserverOptions, 'queryKey'>
+  queryOptions?: Omit<QueryObserverOptions, 'queryKey'>,
 ): Array<UseQueryResult<TimeSeriesData>> {
   const { getPlugin } = usePluginRegistry();
   const context = {
@@ -124,7 +125,7 @@ export function useTimeSeriesQueries(
 
   const pluginLoaderResponse = usePlugins(
     TIME_SERIES_QUERY_KEY,
-    definitions.map((d) => ({ kind: d.spec.plugin.kind }))
+    definitions.map((d) => ({ kind: d.spec.plugin.kind })),
   );
   return useQueries({
     queries: definitions.map((definition, idx) => {

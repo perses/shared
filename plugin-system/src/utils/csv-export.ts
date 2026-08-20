@@ -262,7 +262,7 @@ export const exportDataAsCSV = ({ data }: ExportDataOptions): Blob => {
       if (!result[dateTime]) {
         result[dateTime] = {};
       }
-      /* linter complains, so assert result[dateTime] 
+      /* linter complains, so assert result[dateTime]
           It has already been checked by the if statement
       */
       result[dateTime]![currentSeriesInfo.columnName] = value;

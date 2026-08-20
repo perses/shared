@@ -23,6 +23,7 @@ import {
   getLegendPosition,
 } from '@perses-dev/components';
 import { ReactElement, useMemo } from 'react';
+
 import {
   LEGEND_MODE_CONFIG,
   LEGEND_POSITIONS_CONFIG,

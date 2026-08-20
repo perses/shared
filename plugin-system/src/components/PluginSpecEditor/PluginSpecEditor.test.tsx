@@ -11,8 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DatasourceSpec } from '@perses-dev/spec';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+
 import { renderWithContext } from '../../test';
 import { PluginSpecEditor, PluginSpecEditorProps } from './PluginSpecEditor';
 
@@ -22,13 +24,13 @@ describe('PluginSpecEditor', () => {
   };
 
   it('shows the options editor component for a plugin', async () => {
-    renderComponent({ pluginSelection: { type: 'Variable', kind: 'ErnieVariable1' }, value: {}, onChange: jest.fn() });
+    renderComponent({ pluginSelection: { type: 'Variable', kind: 'ErnieVariable1' }, value: {}, onChange: vi.fn() });
     const editor = await screen.findByLabelText('ErnieVariable editor');
     expect(editor).toBeInTheDocument();
   });
 
   it('propagates value changes', async () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderComponent({
       pluginSelection: { type: 'Variable', kind: 'ErnieVariable1' },
       value: { variableOption: 'Option1Value' },
@@ -42,16 +44,130 @@ describe('PluginSpecEditor', () => {
   });
 
   it('shows an error if plugin fails to load', async () => {
-    renderComponent({ pluginSelection: { type: 'Variable', kind: 'DoesNotExist' }, value: {}, onChange: jest.fn() });
+    renderComponent({ pluginSelection: { type: 'Variable', kind: 'DoesNotExist' }, value: {}, onChange: vi.fn() });
     const errorAlert = await screen.findByRole('alert');
     expect(errorAlert).toHaveTextContent(/doesnotexist/i);
   });
 
   it('should throw an error if panel type is used', () => {
     try {
-      renderComponent({ pluginSelection: { type: 'Panel', kind: 'TimeSeriesChart' }, value: {}, onChange: jest.fn() });
+      renderComponent({ pluginSelection: { type: 'Panel', kind: 'TimeSeriesChart' }, value: {}, onChange: vi.fn() });
     } catch (e) {
       expect(e).toBe('This editor should not be used for panel type. Please use Panel Spec Editor instead.');
     }
+  });
+});
+
+describe('PluginSpecEditor - boundTestConnection', () => {
+  const renderComponent = (props: PluginSpecEditorProps): void => {
+    renderWithContext(<PluginSpecEditor {...props} />);
+  };
+
+  it('does not pass testConnection when testConnection prop is absent', async () => {
+    renderComponent({
+      pluginSelection: { type: 'Datasource', kind: 'ErnieDatasource' },
+      value: { url: 'http://localhost:9090' },
+      onChange: vi.fn(),
+    });
+    await screen.findByLabelText('ErnieDatasource editor');
+    expect(screen.queryByRole('button', { name: 'test-connection-trigger' })).not.toBeInTheDocument();
+  });
+
+  it('does not pass testConnection when plugin has no healthCheckPath', async () => {
+    const testConnection = vi.fn();
+    renderComponent({
+      pluginSelection: { type: 'Datasource', kind: 'ErnieDatasourceNoHealthCheck' },
+      value: {},
+      onChange: vi.fn(),
+      testConnection,
+    });
+    await screen.findByLabelText('ErnieDatasourceNoHealthCheck editor');
+    expect(screen.queryByRole('button', { name: 'test-connection-trigger' })).not.toBeInTheDocument();
+  });
+
+  it('passes a bound testConnection when plugin has healthCheckPath', async () => {
+    const testConnection = vi.fn().mockResolvedValue(undefined);
+    renderComponent({
+      pluginSelection: { type: 'Datasource', kind: 'ErnieDatasource' },
+      value: { url: 'http://localhost:9090' },
+      onChange: vi.fn(),
+      testConnection,
+    });
+    await screen.findByLabelText('ErnieDatasource editor');
+    expect(screen.getByRole('button', { name: 'test-connection-trigger' })).toBeInTheDocument();
+  });
+
+  it('calls testConnection with the full DatasourceSpec and healthCheckPath', async () => {
+    const testConnection = vi.fn().mockResolvedValue(undefined);
+    const pluginSpec = { url: 'http://localhost:9090' };
+    renderComponent({
+      pluginSelection: { type: 'Datasource', kind: 'ErnieDatasource' },
+      value: pluginSpec,
+      onChange: vi.fn(),
+      testConnection,
+    });
+    await screen.findByLabelText('ErnieDatasource editor');
+    await userEvent.click(screen.getByRole('button', { name: 'test-connection-trigger' }));
+
+    await waitFor(() => {
+      expect(testConnection).toHaveBeenCalledWith(
+        expect.objectContaining<Partial<DatasourceSpec>>({
+          default: false,
+          plugin: { kind: 'ErnieDatasource', spec: pluginSpec },
+        }),
+        '/api/v1/query',
+      );
+    });
+  });
+
+  it('augments allowedEndpoints with the healthCheckPath when proxy spec is present', async () => {
+    const testConnection = vi.fn().mockResolvedValue(undefined);
+    const pluginSpec = {
+      proxy: {
+        kind: 'HTTPProxy' as const,
+        spec: { url: 'http://localhost:9090', allowedEndpoints: [] },
+      },
+    };
+    renderComponent({
+      pluginSelection: { type: 'Datasource', kind: 'ErnieDatasource' },
+      value: pluginSpec,
+      onChange: vi.fn(),
+      testConnection,
+    });
+    await screen.findByLabelText('ErnieDatasource editor');
+    await userEvent.click(screen.getByRole('button', { name: 'test-connection-trigger' }));
+
+    await waitFor(() => {
+      const calledSpec: DatasourceSpec = testConnection.mock.calls[0]?.[0];
+      const allowedEndpoints = (calledSpec.plugin.spec as typeof pluginSpec).proxy.spec.allowedEndpoints;
+      expect(allowedEndpoints).toContainEqual({ endpointPattern: '/api/v1/query', method: 'GET' });
+    });
+  });
+
+  it('does not duplicate allowedEndpoints when healthCheckPath already present', async () => {
+    const testConnection = vi.fn().mockResolvedValue(undefined);
+    const pluginSpec = {
+      proxy: {
+        kind: 'HTTPProxy' as const,
+        spec: {
+          url: 'http://localhost:9090',
+          allowedEndpoints: [{ endpointPattern: '/api/v1/query', method: 'GET' }],
+        },
+      },
+    };
+    renderComponent({
+      pluginSelection: { type: 'Datasource', kind: 'ErnieDatasource' },
+      value: pluginSpec,
+      onChange: vi.fn(),
+      testConnection,
+    });
+    await screen.findByLabelText('ErnieDatasource editor');
+    await userEvent.click(screen.getByRole('button', { name: 'test-connection-trigger' }));
+
+    await waitFor(() => {
+      const calledSpec: DatasourceSpec = testConnection.mock.calls[0]?.[0];
+      const allowedEndpoints = (calledSpec.plugin.spec as typeof pluginSpec).proxy.spec.allowedEndpoints;
+      expect(allowedEndpoints?.filter((e) => e.endpointPattern === '/api/v1/query')).toHaveLength(1);
+    });
   });
 });

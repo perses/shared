@@ -13,8 +13,9 @@
 
 import { Box } from '@mui/material';
 import { ReactElement } from 'react';
-import { SeriesMarker } from './SeriesMarker';
+
 import { SeriesLabelsStack } from './SeriesLabelsStack';
+import { SeriesMarker } from './SeriesMarker';
 import { TOOLTIP_LABELS_MAX_WIDTH, EMPHASIZED_SERIES_DESCRIPTION, NEARBY_SERIES_DESCRIPTION } from './tooltip-model';
 
 export interface SeriesInfoProps {

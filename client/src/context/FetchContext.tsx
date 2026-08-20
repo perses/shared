@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { createContext, ReactElement, ReactNode, useCallback, useContext } from 'react';
+
 import { fetch as defaultFetch } from '../util/fetch';
 
 export type FetchFn = (...args: Parameters<typeof globalThis.fetch>) => Promise<Response>;
@@ -38,7 +39,7 @@ export function useFetch(): {
       const response = await fetch(...args);
       return await response.json();
     },
-    [fetch]
+    [fetch],
   );
 
   return { fetch, fetchJson };

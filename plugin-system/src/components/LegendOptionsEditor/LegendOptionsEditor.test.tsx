@@ -13,15 +13,16 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { LegendSpecOptions } from '../../model';
 import { LegendOptionsEditor } from './LegendOptionsEditor';
 
 describe('LegendOptionsEditor', () => {
-  const renderLegendOptionsEditor = (value?: LegendSpecOptions, onChange = jest.fn()): void => {
+  const renderLegendOptionsEditor = (value?: LegendSpecOptions, onChange = vi.fn()): void => {
     render(
       <div>
         <LegendOptionsEditor value={value} onChange={onChange} />
-      </div>
+      </div>,
     );
   };
 
@@ -42,7 +43,7 @@ describe('LegendOptionsEditor', () => {
   };
 
   it('can change legend visibility by clicking', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderLegendOptionsEditor(undefined, onChange);
     expect(screen.queryByRole('combobox', { name: 'Position' })).not.toBeInTheDocument();
     userEvent.click(getLegendShowSwitch());
@@ -50,7 +51,7 @@ describe('LegendOptionsEditor', () => {
   });
 
   it('should allow changing legend position', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderLegendOptionsEditor({ position: 'bottom' }, onChange);
     expect(getLegendPositionSelector()).toBeEnabled();
     userEvent.click(getLegendPositionSelector());
@@ -62,7 +63,7 @@ describe('LegendOptionsEditor', () => {
   });
 
   it('should allow changing legend mode', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderLegendOptionsEditor({ position: 'bottom', mode: 'list' }, onChange);
     expect(getLegendModeSelector()).toBeInTheDocument();
     const tableModeButton = screen.getByRole('button', {
@@ -73,7 +74,7 @@ describe('LegendOptionsEditor', () => {
   });
 
   it('should allow setting a legend value', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderLegendOptionsEditor({ position: 'bottom', mode: 'table' }, onChange);
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
@@ -85,7 +86,7 @@ describe('LegendOptionsEditor', () => {
   });
 
   it('should allow adding a legend value', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderLegendOptionsEditor({ position: 'bottom', mode: 'table', values: ['sum'] }, onChange);
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
@@ -97,7 +98,7 @@ describe('LegendOptionsEditor', () => {
   });
 
   it('should allow removing a legend value', () => {
-    const onChange = jest.fn();
+    const onChange = vi.fn();
     renderLegendOptionsEditor({ position: 'bottom', mode: 'table', values: ['sum', 'min'] }, onChange);
     expect(getLegendValuesSelector()).toBeEnabled();
     userEvent.click(getLegendValuesSelector());
@@ -110,7 +111,7 @@ describe('LegendOptionsEditor', () => {
 
   describe('when legend mode is "list"', () => {
     test('legend values should not be visible', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderLegendOptionsEditor({ position: 'bottom', mode: 'list' }, onChange);
       expect(screen.queryByRole('combobox', { name: 'Values' })).not.toBeInTheDocument();
     });
@@ -118,7 +119,7 @@ describe('LegendOptionsEditor', () => {
 
   describe('when legend mode is "table"', () => {
     test('legend values should be present & enabled', () => {
-      const onChange = jest.fn();
+      const onChange = vi.fn();
       renderLegendOptionsEditor({ position: 'bottom', mode: 'table' }, onChange);
       expect(getLegendValuesSelector()).toBeEnabled();
     });

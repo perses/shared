@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PaletteMode, SimplePaletteColorOptions } from '@mui/material';
+
 import { red } from './colors';
 
 export const error = (mode: PaletteMode): SimplePaletteColorOptions => {

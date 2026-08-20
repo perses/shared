@@ -13,6 +13,7 @@
 
 import { Theme } from '@mui/material';
 import merge from 'lodash/merge';
+
 import { EChartsTheme, PersesChartsTheme } from '../model';
 
 const DEFAULT_TEXT_COLOR = '#222';
@@ -22,7 +23,7 @@ type MuiTheme = Omit<Theme, 'components'>;
 
 export function generateChartsTheme(
   muiTheme: MuiTheme,
-  persesChartsThemeOverride: Partial<PersesChartsTheme>
+  persesChartsThemeOverride: Partial<PersesChartsTheme>,
 ): PersesChartsTheme {
   const primaryTextColor = muiTheme.palette.text?.primary ?? DEFAULT_TEXT_COLOR;
 
@@ -262,6 +263,6 @@ export function generateChartsTheme(
         palette: ['#FFCC00', muiTheme.palette.warning.main, muiTheme.palette.error.main],
       },
     },
-    persesChartsThemeOverride
+    persesChartsThemeOverride,
   );
 }

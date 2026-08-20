@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useState } from 'react';
-import { useVariableValues } from '@perses-dev/plugin-system';
-import { Dialog } from '@perses-dev/components';
 import { Button } from '@mui/material';
+import { Dialog } from '@perses-dev/components';
+import { useVariableValues } from '@perses-dev/plugin-system';
+import { ReactElement, useState } from 'react';
+
 import { usePanelGroupEditor } from '../../context';
 import { PanelGroupEditorForm, panelGroupEditorFormId, PanelGroupEditorFormProps } from './PanelGroupEditorForm';
 

@@ -20,10 +20,15 @@ import {
   PanelSpecEditor,
   usePlugin,
   useSuggestedStepMs,
+  useVariableValues,
 } from '@perses-dev/plugin-system';
 import { AnnotationSpec, Definition, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
-import { Control } from 'react-hook-form';
 import { ReactElement, useCallback, useContext, useMemo, useState } from 'react';
+import { Control, useWatch } from 'react-hook-form';
+
+import { useListPanelGroups } from '../../context';
+import { useAllVariableDefinitions } from '../../context/VariableProvider';
+import { FixedValueVariableProvider } from '../Variables';
 
 export interface PanelQueriesSharedControlsProps {
   control: Control<PanelEditorValues>;
@@ -48,6 +53,10 @@ export function PanelQueriesSharedControls({
 }: PanelQueriesSharedControlsProps): ReactElement {
   const { data: pluginPreview } = usePlugin('Panel', plugin.kind);
   const panelEditorContext = useContext(PanelEditorContext);
+  const variableValues = useVariableValues();
+  const variableDefinitionGroups = useAllVariableDefinitions();
+  const panelGroups = useListPanelGroups();
+  const watchedRepeatVariable = useWatch({ control, name: 'layoutDefinition.repeatVariable' });
 
   const suggestedStepMs = useSuggestedStepMs(panelEditorContext?.preview.previewPanelWidth);
 
@@ -56,8 +65,18 @@ export function PanelQueriesSharedControls({
       typeof pluginPreview?.queryOptions === 'function'
         ? pluginPreview?.queryOptions(panelDefinition.spec.plugin.spec)
         : pluginPreview?.queryOptions,
-    [panelDefinition.spec.plugin.spec, pluginPreview]
+    [panelDefinition.spec.plugin.spec, pluginPreview],
   );
+
+  const repeatVariableValue = useMemo(() => {
+    if (watchedRepeatVariable && variableValues[watchedRepeatVariable.value]) {
+      return (
+        variableValues[watchedRepeatVariable.value]?.options?.[0]?.value ??
+        variableValues[watchedRepeatVariable.value]?.value
+      );
+    }
+    return undefined;
+  }, [variableValues, watchedRepeatVariable]);
 
   const [previewDefinition, setPreviewDefinition] = useState<QueryDefinition[]>(panelDefinition.spec.queries ?? []);
 
@@ -70,7 +89,7 @@ export function PanelQueriesSharedControls({
         setPreviewDefinition(queries);
       }
     },
-    [onQueriesChange, previewDefinition.length]
+    [onQueriesChange, previewDefinition.length],
   );
 
   const handleRunQuery = useCallback((index: number, newDef: QueryDefinition) => {
@@ -81,21 +100,30 @@ export function PanelQueriesSharedControls({
     });
   }, []);
 
+  const preview =
+    watchedRepeatVariable && repeatVariableValue ? (
+      <FixedValueVariableProvider variableName={watchedRepeatVariable.value} value={repeatVariableValue}>
+        <PanelPreview panelDefinition={panelDefinition} />
+      </FixedValueVariableProvider>
+    ) : (
+      <PanelPreview panelDefinition={panelDefinition} />
+    );
+
   return (
     <DataQueriesProvider definitions={previewDefinition} options={{ suggestedStepMs, ...pluginQueryOptions }}>
       <Grid item xs={12}>
         <Typography variant="h4" marginBottom={1}>
           Preview
         </Typography>
-        <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <PanelPreview panelDefinition={panelDefinition} />
-        </ErrorBoundary>
+        <ErrorBoundary FallbackComponent={ErrorAlert}>{preview}</ErrorBoundary>
       </Grid>
       <Grid item xs={12}>
         <ErrorBoundary FallbackComponent={ErrorAlert}>
           <PanelSpecEditor
             control={control}
             panelDefinition={panelDefinition}
+            variableDefinitionGroups={variableDefinitionGroups}
+            panelGroups={panelGroups}
             onJSONChange={onJSONChange}
             onQueriesChange={handleOnQueriesChange}
             onQueryRun={handleRunQuery}

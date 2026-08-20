@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { StateCreator } from 'zustand';
+
 import { Middleware } from './common';
 
 export interface EditJsonDialogSlice {
@@ -25,7 +26,7 @@ export interface EditJsonDialogState {
 }
 
 export const createEditJsonDialogSlice: StateCreator<EditJsonDialogSlice, Middleware, [], EditJsonDialogSlice> = (
-  set
+  set,
 ) => ({
   openEditJsonDialog(): void {
     set((state) => {

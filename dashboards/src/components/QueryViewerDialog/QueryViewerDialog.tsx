@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ReactElement, useMemo } from 'react';
-import { Dialog } from '@perses-dev/components';
 import { Button, Divider } from '@mui/material';
+import { Dialog } from '@perses-dev/components';
 import { PluginSpecEditor } from '@perses-dev/plugin-system';
 import { QueryDefinition } from '@perses-dev/spec';
+import React, { ReactElement, useMemo } from 'react';
 
 export interface QueryViewerDialogProps {
   open: boolean;
@@ -39,7 +39,7 @@ export function QueryViewerDialog({ open, queryDefinitions, onClose }: QueryView
               isReadonly
             />
             {index < queryDefinitions.length - 1 && <Divider sx={{ my: 2 }} />}
-          </React.Fragment>
+          </React.Fragment>,
         );
       }
     });

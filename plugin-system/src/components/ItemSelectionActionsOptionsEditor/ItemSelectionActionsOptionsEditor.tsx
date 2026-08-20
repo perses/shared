@@ -252,14 +252,14 @@ function EventActionEditor({
 
       onChange(index, { ...eventAction, bodyTemplate: bodyTemplate });
     },
-    [index, onChange, eventAction]
+    [index, onChange, eventAction],
   );
 
   const handleBodyTemplateChange = useCallback(
     (template: string) => {
       onChange(index, { ...eventAction, bodyTemplate: template || undefined });
     },
-    [index, onChange, eventAction]
+    [index, onChange, eventAction],
   );
 
   const jsonDataTemplate = useMemo(() => {
@@ -446,14 +446,14 @@ function WebhookActionEditor({
     (template: string) => {
       onChange(index, { ...webhookAction, bodyTemplate: template || undefined });
     },
-    [index, onChange, webhookAction]
+    [index, onChange, webhookAction],
   );
 
   const handleTextTemplateChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onChange(index, { ...webhookAction, bodyTemplate: event.target.value || undefined });
     },
-    [index, onChange, webhookAction]
+    [index, onChange, webhookAction],
   );
 
   const handleContentTypeChange = useCallback(
@@ -470,7 +470,7 @@ function WebhookActionEditor({
 
       onChange(index, { ...webhookAction, contentType: nextContentType });
     },
-    [contentTypeValue, hasBodyTemplate, index, onChange, webhookAction]
+    [contentTypeValue, hasBodyTemplate, index, onChange, webhookAction],
   );
 
   const handleMethodChange = useCallback(
@@ -488,7 +488,7 @@ function WebhookActionEditor({
 
       onChange(index, { ...webhookAction, method: nextMethod });
     },
-    [hasBodyTemplate, index, onChange, webhookAction]
+    [hasBodyTemplate, index, onChange, webhookAction],
   );
 
   const handleConfirmClose = useCallback(() => {
@@ -717,7 +717,7 @@ export function ItemSelectionActionsEditor({
 }: ItemSelectionActionsEditorProps): ReactElement {
   const actions = useMemo(
     () => actionOptions || { enabled: true, displayInHeader: true, displayWithItem: false },
-    [actionOptions]
+    [actionOptions],
   );
 
   const handleEnableActionsChange: SwitchProps['onChange'] = (_: unknown, checked: boolean) => {
@@ -750,7 +750,7 @@ export function ItemSelectionActionsEditor({
       newActions[index] = updatedAction;
       onChangeActions({ ...actions, actionsList: newActions });
     },
-    [actions, onChangeActions]
+    [actions, onChangeActions],
   );
 
   const handleRemoveAction = useCallback(
@@ -758,7 +758,7 @@ export function ItemSelectionActionsEditor({
       const newActions = actions.actionsList ? actions.actionsList.filter((_, i) => i !== index) : [];
       onChangeActions(newActions.length > 0 ? { ...actions, actionsList: newActions } : undefined);
     },
-    [actions, onChangeActions]
+    [actions, onChangeActions],
   );
 
   useDragAndDropMonitor({

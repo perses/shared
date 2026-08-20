@@ -79,7 +79,7 @@ export function ItemActionsProvider({ children }: ItemActionsProviderProps): Rea
       setActionStatus,
       clearActionStatus,
     }),
-    [actionStatuses, setActionStatus, clearActionStatus]
+    [actionStatuses, setActionStatus, clearActionStatus],
   );
 
   return <ItemActionsContext.Provider value={ctx}>{children}</ItemActionsContext.Provider>;

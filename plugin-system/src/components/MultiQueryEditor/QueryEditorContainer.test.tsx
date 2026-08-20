@@ -11,22 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { screen, cleanup } from '@testing-library/react';
 import { QueryDefinition, QueryPluginType } from '@perses-dev/spec';
+import { screen, cleanup } from '@testing-library/react';
+
 import { renderWithContext } from '../../test';
 import { QueryEditorContainer } from './QueryEditorContainer';
 
 describe('QueryEditorContainer', () => {
   beforeEach(() => {
-    globalThis.fetch = jest.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve({ success: true }),
-      })
-    ) as jest.Mock;
+      }),
+    ) as unknown as typeof fetch;
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     cleanup();
   });
 
@@ -66,11 +67,11 @@ describe('QueryEditorContainer', () => {
           index={1}
           query={renderingProps[key]?.value as QueryDefinition}
           isCollapsed={false}
-          onDelete={jest.fn()}
-          onChange={jest.fn()}
-          onQueryRun={jest.fn()}
-          onCollapseExpand={jest.fn()}
-        />
+          onDelete={vi.fn()}
+          onChange={vi.fn()}
+          onQueryRun={vi.fn()}
+          onCollapseExpand={vi.fn()}
+        />,
       );
       const runQuerybutton = screen.getByTestId('run_query_button');
       expect(runQuerybutton).toBeInTheDocument();

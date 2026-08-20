@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { TimeRangeProviderBasic } from '@perses-dev/plugin-system';
+import { VariableDefinition } from '@perses-dev/spec';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { ReactElement } from 'react';
-import { TimeRangeProviderBasic } from '@perses-dev/plugin-system';
-import { VariableDefinition } from '@perses-dev/spec';
+
 import { createDashboardProviderSpy, getTestDashboard, renderWithContext } from '../test';
 import { DashboardProviderWithQueryParams } from './DashboardProvider/DashboardProviderWithQueryParams';
 import {
@@ -77,7 +78,7 @@ describe('query parameter synchronization', () => {
         </VariableProviderWithQueryParams>
       </TimeRangeProviderBasic>,
       undefined,
-      history
+      history,
     );
 
     expect(await screen.findByText('first-trace')).toBeInTheDocument();
@@ -98,7 +99,7 @@ describe('query parameter synchronization', () => {
         </VariableProviderWithQueryParams>
       </TimeRangeProviderBasic>,
       undefined,
-      history
+      history,
     );
 
     expect(await screen.findByText('["first-instance"]')).toBeInTheDocument();
@@ -117,7 +118,10 @@ describe('query parameter synchronization', () => {
 
   test('updates the viewed panel when navigation changes query parameters', async () => {
     const firstPanelRef = { ref: 'cpu' };
-    const secondPanelRef = { ref: 'memory', repeatVariable: ['instance', 'demo'] as [string, string] };
+    const secondPanelRef = {
+      ref: 'memory',
+      repeatVariable: { panel: ['instance', 'demo'] as [string, string] },
+    };
     const history = createMemoryHistory({
       initialEntries: [`/?viewPanelRef=${encodeURIComponent(JSON.stringify(firstPanelRef))}`],
     });
@@ -128,7 +132,7 @@ describe('query parameter synchronization', () => {
         <DashboardProviderSpy />
       </DashboardProviderWithQueryParams>,
       undefined,
-      history
+      history,
     );
 
     await waitFor(() => expect(store.value?.getState().viewPanel.panelRef).toEqual(firstPanelRef));
@@ -149,7 +153,7 @@ describe('query parameter synchronization', () => {
         <DashboardProviderSpy />
       </DashboardProviderWithQueryParams>,
       undefined,
-      history
+      history,
     );
 
     const dashboardState = store.value?.getState();

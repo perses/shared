@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { createTheme } from '@mui/material';
+
 import { EChartsTheme, PersesChartsTheme } from '../model';
 import { generateChartsTheme } from './theme-gen';
 

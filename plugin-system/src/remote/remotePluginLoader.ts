@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { fetch as defaultFetch, type FetchFn } from '@perses-dev/client';
 import {
   PluginLoader,
   PluginMetadata,
@@ -18,7 +19,7 @@ import {
   PluginType,
   getPluginModuleCompoundKey,
 } from '@perses-dev/plugin-system';
-import { fetch as defaultFetch, type FetchFn } from '@perses-dev/client';
+
 import { RemotePluginModule } from './PersesPlugin.types';
 import { loadPlugin } from './PluginRuntime';
 

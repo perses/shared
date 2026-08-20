@@ -11,13 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactNode, useContext, useState } from 'react';
 import { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
+import { createContext, ReactNode, useContext, useState } from 'react';
 import { createStore, StoreApi, useStore } from 'zustand';
-import { useStoreWithEqualityFn } from 'zustand/traditional';
-import { shallow } from 'zustand/shallow';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { shallow } from 'zustand/shallow';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
+
 import { AnnotationHydrationWrapper } from './AnnotationHydrationWrapper';
 
 export type AnnotationState = {
@@ -77,7 +78,7 @@ export function useAnnotationStates(annotationNames?: string[]): AnnotationState
     },
     (left, right) => {
       return JSON.stringify(left) === JSON.stringify(right);
-    }
+    },
   );
 }
 
@@ -91,7 +92,7 @@ export function useAnnotationActions(): AnnotationStoreActions {
         setAnnotationSpecs: s.setAnnotationSpecs,
       };
     },
-    shallow
+    shallow,
   );
 }
 
@@ -145,7 +146,7 @@ function createAnnotationStore({ initialAnnotationSpecs = [] }: AnnotationStoreA
               s.annotationSpecs = definitions;
             },
             false,
-            '[Annotations] setAnnotationSpecs' // Used for action name in Redux devtools
+            '[Annotations] setAnnotationSpecs', // Used for action name in Redux devtools
           );
         },
         setAnnotationState: (name: string, state: AnnotationState): void => {
@@ -154,11 +155,11 @@ function createAnnotationStore({ initialAnnotationSpecs = [] }: AnnotationStoreA
               s.annotationState[name] = state;
             },
             false,
-            '[Annotations] setAnnotationState' // Used for action name in Redux devtools
+            '[Annotations] setAnnotationState', // Used for action name in Redux devtools
           );
         },
-      }))
-    )
+      })),
+    ),
   );
   return store;
 }

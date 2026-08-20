@@ -11,12 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CSSProperties, memo, useEffect, useLayoutEffect, useRef } from 'react';
-import { ECharts, EChartsCoreOption, init, connect, use } from 'echarts/core';
 import { Box, SxProps, Theme } from '@mui/material';
-import isEqual from 'lodash/isEqual';
-import debounce from 'lodash/debounce';
-
 import {
   BarChart as EChartsBarChart,
   LineChart as EChartsLineChart,
@@ -39,12 +34,17 @@ import {
   MarkAreaComponent,
   MarkLineComponent,
 } from 'echarts/components';
+import { ECharts, EChartsCoreOption, init, connect, use as registerEChartsComponents } from 'echarts/core';
 import { CanvasRenderer } from 'echarts/renderers';
+import debounce from 'lodash/debounce';
+import isEqual from 'lodash/isEqual';
+import { CSSProperties, memo, useEffect, useLayoutEffect, useRef } from 'react';
+
 import { EChartsTheme } from '../model';
 
 // Loading the ECharts extensions should happen in the respective plugins.
 // This is a workaround for https://github.com/perses/plugins/issues/83.
-use([
+registerEChartsComponents([
   DatasetComponent,
   DataZoomComponent,
   LegendComponent,
@@ -84,7 +84,7 @@ export interface MouseEventsParameters<T> {
 type OnEventFunction<T> = (
   params: MouseEventsParameters<T>,
   // This is potentially undefined for testing purposes
-  instance?: ECharts
+  instance?: ECharts,
 ) => void;
 
 const mouseEvents = [
@@ -249,7 +249,7 @@ export const EChart = memo(function EChart<T>({
       200,
       {
         leading: true,
-      }
+      },
     );
     updateSize();
   }, [sx, style]);

@@ -25,6 +25,7 @@ import {
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
 import PlusIcon from 'mdi-material-ui/Plus';
 import { FC } from 'react';
+
 import { OptionsColorPicker } from '../ColorPicker/OptionsColorPicker';
 import { ValueMapping } from '../model';
 

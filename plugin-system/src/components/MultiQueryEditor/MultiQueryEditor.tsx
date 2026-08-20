@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { forwardRef, ReactElement, useState } from 'react';
-import { produce } from 'immer';
 import { Button, Stack } from '@mui/material';
-import AddIcon from 'mdi-material-ui/Plus';
 import { QueryDefinition, QueryPluginType } from '@perses-dev/spec';
+import { produce } from 'immer';
+import AddIcon from 'mdi-material-ui/Plus';
+import { forwardRef, ReactElement, useState } from 'react';
+
 import { QueryData, useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
 import { PluginEditorRef } from '../PluginEditor';
 import { QueryEditorContainer } from './QueryEditorContainer';
@@ -31,7 +32,7 @@ export interface MultiQueryEditorProps {
 
 function useDefaultQueryDefinition(
   queryTypes: QueryPluginType[],
-  filteredQueryPlugins?: string[]
+  filteredQueryPlugins?: string[],
 ): {
   defaultInitialQueryDefinition: QueryDefinition;
   isLoading: boolean;
@@ -95,7 +96,7 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
         } else {
           draft = [queryDef];
         }
-      })
+      }),
     );
   };
 
@@ -111,7 +112,7 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
         } else {
           draft = [...queries, defaultInitialQueryDefinition];
         }
-      })
+      }),
     );
     setQueriesCollapsed((queriesCollapsed) => {
       queriesCollapsed.push(false);
@@ -123,7 +124,7 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
     onChange(
       produce(queries, (draft) => {
         draft.splice(index, 1);
-      })
+      }),
     );
     setQueriesCollapsed((queriesCollapsed) => {
       queriesCollapsed.splice(index, 1);
@@ -139,11 +140,10 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
   };
 
   // show one query input if queries is empty
-  const queryDefinitions: QueryDefinition[] = queries.length
-    ? queries
-    : !isLoading
-      ? [defaultInitialQueryDefinition]
-      : [];
+  let queryDefinitions: QueryDefinition[] = queries;
+  if (queries.length === 0 && !isLoading) {
+    queryDefinitions = [defaultInitialQueryDefinition];
+  }
 
   return (
     <>

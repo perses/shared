@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useCallback, useMemo, useState } from 'react';
 import { AnnotationSpec, Definition, Link, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
+import { useCallback, useMemo, useState } from 'react';
 
 interface UsePanelEditorResult {
   setName: (value: string) => void;
@@ -30,7 +30,7 @@ interface UsePanelEditorResult {
  * This hook stores the states of panel definition and returns the onChange handlers for each state
  */
 export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEditorResult = (
-  panelDefinition: PanelDefinition
+  panelDefinition: PanelDefinition,
 ) => {
   const {
     display,
@@ -64,7 +64,7 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
         setCurrentQueries(queries === undefined ? prevQueries : queries);
       }
     },
-    [setCurrentQueries, currentQueries, setPrevQueries, prevQueries]
+    [setCurrentQueries, currentQueries, setPrevQueries, prevQueries],
   );
 
   // reset panel definition
@@ -78,7 +78,7 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
       setQueries(queries);
       setAnnotations(annotations);
     },
-    [setName, setDescription, setLinks, setPlugin, setQueries, setAnnotations]
+    [setName, setDescription, setLinks, setPlugin, setQueries, setAnnotations],
   );
 
   return useMemo(
@@ -101,6 +101,6 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
       setAnnotations,
       setPanelDefinition,
     }),
-    [name, description, links, plugin, currentQueries, annotations, setQueries, setAnnotations, setPanelDefinition]
+    [name, description, links, plugin, currentQueries, annotations, setQueries, setAnnotations, setPanelDefinition],
   );
 };

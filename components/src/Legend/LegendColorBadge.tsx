@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { memo, ReactElement } from 'react';
 import { Box, BoxProps } from '@mui/material';
+import { memo, ReactElement } from 'react';
+
 import { combineSx } from '../utils';
 
 export interface LegendColorBadgeProps extends BoxProps<'div'> {
@@ -33,7 +34,7 @@ export const LegendColorBadge = memo(function LegendColorBadge({
           width: 16,
           margin: (theme) => theme.spacing(0.5),
         },
-        sx
+        sx,
       )}
       style={{ backgroundColor: color }}
     />

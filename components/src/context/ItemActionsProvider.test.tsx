@@ -14,6 +14,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ReactNode } from 'react';
+
 import { ItemActionsProvider, useItemActions } from './ItemActionsProvider';
 
 // Test component that exposes action state and operations
@@ -230,7 +231,7 @@ describe('ItemActionsProvider', () => {
             onRender={(state) => {
               capturedState = state;
             }}
-          />
+          />,
         );
 
         userEvent.click(screen.getByTestId('set-item-loading'));
@@ -275,7 +276,7 @@ describe('ItemActionsProvider', () => {
             onRender={(state) => {
               capturedState = state;
             }}
-          />
+          />,
         );
 
         userEvent.click(screen.getByTestId('set-action-loading'));
@@ -315,7 +316,7 @@ describe('ItemActionsProvider', () => {
             onRender={(state) => {
               capturedState = state;
             }}
-          />
+          />,
         );
 
         userEvent.click(screen.getByTestId('set-item-success'));
@@ -336,7 +337,7 @@ describe('ItemActionsProvider', () => {
             onRender={(state) => {
               capturedState = state;
             }}
-          />
+          />,
         );
 
         userEvent.click(screen.getByTestId('set-action-loading'));
@@ -389,7 +390,7 @@ describe('ItemActionsProvider', () => {
         <ItemActionsProvider>
           <Consumer1 />
           <Consumer2 />
-        </ItemActionsProvider>
+        </ItemActionsProvider>,
       );
 
       expect(screen.getByTestId('consumer1-loading')).toHaveTextContent('false');
@@ -412,7 +413,7 @@ describe('ItemActionsProvider', () => {
           onRender={(state) => {
             capturedState = state;
           }}
-        />
+        />,
       );
 
       // Set action-level loading

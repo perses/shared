@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { useCallback } from 'react';
 import { styled } from '@mui/material/styles';
 import {
   SnackbarProvider as NotistackProvider,
@@ -22,6 +21,7 @@ import {
   SnackbarKey,
   MaterialDesignContent,
 } from 'notistack';
+import React, { useCallback } from 'react';
 
 export interface SnackbarContext extends NotistackContext {
   errorSnackbar: EnqueueFunction;
@@ -84,7 +84,7 @@ export function useSnackbar(): SnackbarContext {
 
       return errorSnackbar(message, options);
     },
-    [errorSnackbar]
+    [errorSnackbar],
   );
 
   return {
@@ -101,7 +101,7 @@ export function useSnackbar(): SnackbarContext {
 // Helper to create a variant-specific enqueue function
 function useEnqueueFunction(
   enqueueSnackbar: NotistackContext['enqueueSnackbar'],
-  variant: OptionsObject['variant']
+  variant: OptionsObject['variant'],
 ): EnqueueFunction {
   return useCallback(
     (message, options) => {
@@ -111,6 +111,6 @@ function useEnqueueFunction(
       };
       return enqueueSnackbar(message, allOptions);
     },
-    [enqueueSnackbar, variant]
+    [enqueueSnackbar, variant],
   );
 }

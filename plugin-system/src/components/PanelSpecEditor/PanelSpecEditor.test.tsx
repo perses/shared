@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import { screen } from '@testing-library/react';
-import { useForm } from 'react-hook-form';
 import { ReactElement } from 'react';
+import { useForm } from 'react-hook-form';
+
 import { PanelEditorValues } from '../../model';
-import { renderWithContext } from '../../test';
 import { DataQueriesContext } from '../../runtime';
+import { renderWithContext } from '../../test';
 import { PanelSpecEditor, PanelSpecEditorProps } from './PanelSpecEditor';
 
 describe('PanelSpecEditor', () => {
@@ -60,11 +61,12 @@ describe('PanelSpecEditor', () => {
           queries: [],
         },
       },
-      onQueriesChange: jest.fn(),
-      onQueryRun: jest.fn(),
-      onPluginSpecChange: jest.fn(),
-      onAnnotationsChange: jest.fn(),
-      onJSONChange: jest.fn(),
+      variableDefinitionGroups: [],
+      onQueriesChange: vi.fn(),
+      onQueryRun: vi.fn(),
+      onPluginSpecChange: vi.fn(),
+      onAnnotationsChange: vi.fn(),
+      onJSONChange: vi.fn(),
     });
     const queryEditor = await screen.findByLabelText('Query');
     expect(queryEditor).toBeInTheDocument();
@@ -87,11 +89,12 @@ describe('PanelSpecEditor', () => {
           queries: [],
         },
       },
-      onQueriesChange: jest.fn(),
-      onQueryRun: jest.fn(),
-      onPluginSpecChange: jest.fn(),
-      onAnnotationsChange: jest.fn(),
-      onJSONChange: jest.fn(),
+      variableDefinitionGroups: [],
+      onQueriesChange: vi.fn(),
+      onQueryRun: vi.fn(),
+      onPluginSpecChange: vi.fn(),
+      onAnnotationsChange: vi.fn(),
+      onJSONChange: vi.fn(),
     });
 
     const queryEditor = await screen.queryByLabelText('Query');

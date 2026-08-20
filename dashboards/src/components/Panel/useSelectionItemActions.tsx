@@ -12,10 +12,11 @@
 // limitations under the License.
 
 import { Box, CircularProgress } from '@mui/material';
+import { useFetch } from '@perses-dev/client';
 import { Dialog, InfoTooltip, useItemActions, useSelection } from '@perses-dev/components';
 import { ACTION_ICONS, executeAction, ItemAction, VariableStateMap } from '@perses-dev/plugin-system';
-import { useFetch } from '@perses-dev/client';
 import { ReactNode, useCallback, useMemo, useState } from 'react';
+
 import { HeaderIconButton } from './HeaderIconButton';
 
 export interface UseItemActionsOptions {
@@ -70,7 +71,7 @@ export function useSelectionItemActions<Id extends string | number = string>({
         });
       }
     },
-    [selectionMap, variableState, setActionStatus, fetch]
+    [selectionMap, variableState, setActionStatus, fetch],
   );
 
   const handleActionClick = useCallback(
@@ -81,7 +82,7 @@ export function useSelectionItemActions<Id extends string | number = string>({
         handleExecuteAction(action, item);
       }
     },
-    [handleExecuteAction]
+    [handleExecuteAction],
   );
 
   const closeConfirm = useCallback(() => setConfirmState((prev) => ({ ...prev, open: false })), []);
@@ -107,6 +108,17 @@ export function useSelectionItemActions<Id extends string | number = string>({
 
       const isLoading = actionStatuses.get(action.name)?.loading ?? false;
       const iconConfig = action.icon ? ACTION_ICONS.find((i) => i.value === action.icon) : undefined;
+      let actionIcon: ReactNode = (
+        <Box component="span" sx={{ fontSize: '0.75rem', px: 0.5 }}>
+          {action.name}
+        </Box>
+      );
+      if (iconConfig) {
+        actionIcon = iconConfig.icon;
+      }
+      if (isLoading) {
+        actionIcon = <CircularProgress size={14} />;
+      }
 
       buttons.push(
         <InfoTooltip key={action.name} description={action.name}>
@@ -119,17 +131,9 @@ export function useSelectionItemActions<Id extends string | number = string>({
             }}
             aria-label={action.name}
           >
-            {isLoading ? (
-              <CircularProgress size={14} />
-            ) : iconConfig ? (
-              iconConfig.icon
-            ) : (
-              <Box component="span" sx={{ fontSize: '0.75rem', px: 0.5 }}>
-                {action.name}
-              </Box>
-            )}
+            {actionIcon}
           </HeaderIconButton>
-        </InfoTooltip>
+        </InfoTooltip>,
       );
     }
 
@@ -149,6 +153,17 @@ export function useSelectionItemActions<Id extends string | number = string>({
 
         const isLoading = actionStatuses.get(action.name)?.itemStatuses?.get(item.id)?.loading ?? false;
         const iconConfig = action.icon ? ACTION_ICONS.find((i) => i.value === action.icon) : undefined;
+        let actionIcon: ReactNode = (
+          <Box component="span" sx={{ fontSize: '0.75rem', px: 0.5 }}>
+            {action.name}
+          </Box>
+        );
+        if (iconConfig) {
+          actionIcon = iconConfig.icon;
+        }
+        if (isLoading) {
+          actionIcon = <CircularProgress size={14} />;
+        }
 
         buttons.push(
           <InfoTooltip key={`${action.name}-${item.id}`} description={action.name}>
@@ -161,23 +176,15 @@ export function useSelectionItemActions<Id extends string | number = string>({
               }}
               aria-label={action.name}
             >
-              {isLoading ? (
-                <CircularProgress size={14} />
-              ) : iconConfig ? (
-                iconConfig.icon
-              ) : (
-                <Box component="span" sx={{ fontSize: '0.75rem', px: 0.5 }}>
-                  {action.name}
-                </Box>
-              )}
+              {actionIcon}
             </HeaderIconButton>
-          </InfoTooltip>
+          </InfoTooltip>,
         );
       }
 
       return buttons;
     },
-    [actions, actionStatuses, areButtonsDisabled, handleActionClick]
+    [actions, actionStatuses, areButtonsDisabled, handleActionClick],
   );
 
   const confirmDialog = useMemo(
@@ -195,7 +202,7 @@ export function useSelectionItemActions<Id extends string | number = string>({
         </Dialog.Actions>
       </Dialog>
     ),
-    [confirmState.open, confirmState.action, closeConfirm, handleConfirm]
+    [confirmState.open, confirmState.action, closeConfirm, handleConfirm],
   );
 
   return { actionButtons, confirmDialog, getItemActionButtons };

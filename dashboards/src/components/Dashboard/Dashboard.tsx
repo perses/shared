@@ -14,9 +14,10 @@
 import { Box, BoxProps } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { ReactElement, useRef } from 'react';
+
 import { usePanelGroupIds } from '../../context';
-import { GridLayout } from '../GridLayout';
 import { EmptyDashboard, EmptyDashboardProps } from '../EmptyDashboard';
+import { GridLayout } from '../GridLayout';
 import { PanelOptions } from '../Panel';
 
 export type DashboardProps = BoxProps & {

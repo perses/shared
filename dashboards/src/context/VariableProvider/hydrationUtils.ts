@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DEFAULT_ALL_VALUE, VariableValue, VariableDefinition } from '@perses-dev/spec';
 import { VariableStoreStateMap, VariableState } from '@perses-dev/plugin-system';
+import { DEFAULT_ALL_VALUE, VariableValue, VariableDefinition } from '@perses-dev/spec';
+
 import { ExternalVariableDefinition } from '../../model/VariableDefinition';
 
 // TODO: move to VariableProvider/utils.ts
@@ -63,7 +64,7 @@ function hydrateVariableState(variable: VariableDefinition, initialValue?: Varia
 export function hydrateVariableDefinitionStates(
   localDefinitions: VariableDefinition[],
   initialValues: Record<string, VariableValue>,
-  externalDefinitions: ExternalVariableDefinition[] = []
+  externalDefinitions: ExternalVariableDefinition[] = [],
 ): VariableStoreStateMap {
   const state: VariableStoreStateMap = new VariableStoreStateMap();
 
@@ -73,7 +74,7 @@ export function hydrateVariableDefinitionStates(
     (v) => {
       overridingNames[v.spec.name] = true;
     },
-    {} as Record<string, boolean>
+    {} as Record<string, boolean>,
   );
 
   // Then populate the external variables state,
@@ -91,14 +92,14 @@ export function hydrateVariableDefinitionStates(
           {
             ...hydrateVariableState(v, initialValue),
             overridden: !!overridingNames[name],
-          }
+          },
         );
 
         overridingNames[name] = true;
         overriddenNames[v.spec.name] = true;
       });
     },
-    {} as Record<string, boolean>
+    {} as Record<string, boolean>,
   );
 
   // Then populate the local variables state,
@@ -112,7 +113,7 @@ export function hydrateVariableDefinitionStates(
       {
         ...hydrateVariableState(v, initialValue),
         overriding: !!overriddenNames[name],
-      }
+      },
     );
   });
 

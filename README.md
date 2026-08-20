@@ -64,6 +64,9 @@ npm run lint
 npm run lint:fix
 ```
 
+The Oxlint configuration includes React Doctor's lint-native rules. Run `npm run doctor` for the full React Doctor
+project scan; pull requests and pushes to `main` also run that scan in GitHub Actions.
+
 #### Development mode
 
 Watch for changes and rebuild automatically:

@@ -13,6 +13,7 @@
 
 import { QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { useQueries, UseQueryResult } from '@tanstack/react-query';
+
 import { LogQueryResult } from '../model/log-queries';
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry } from './plugin-registry';

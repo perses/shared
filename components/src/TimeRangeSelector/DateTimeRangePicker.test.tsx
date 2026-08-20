@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { AbsoluteTimeRange } from '@perses-dev/spec';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AbsoluteTimeRange } from '@perses-dev/spec';
+
 import { AbsoluteTimeFormProps, DateTimeRangePicker } from './DateTimeRangePicker';
 
 type ExpectedType = {
@@ -27,13 +28,13 @@ type MockDataType = Omit<AbsoluteTimeFormProps, 'onChange'> & {
 };
 
 describe('DateTimeRangePicker', () => {
-  const spy = jest.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions');
+  const spy = vi.spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions');
   const INITIAL_TIME_RANGE: AbsoluteTimeRange = {
     start: new Date('2026-03-09T10:00:00+01:00'),
     end: new Date('2026-03-09T11:00:00+01:00'),
   };
 
-  const onCancel = jest.fn();
+  const onCancel = vi.fn();
   const MOCK_DATA_COLLECTIONS: MockDataType[] = [
     {
       title: 'should consider local time zone',
@@ -83,10 +84,10 @@ describe('DateTimeRangePicker', () => {
       render(
         <DateTimeRangePicker
           timeZone={timeZone}
-          onChange={jest.fn()}
+          onChange={vi.fn()}
           onCancel={onCancel}
           initialTimeRange={initialTimeRange}
-        />
+        />,
       );
 
       Object.keys(expected).forEach((k) => {
@@ -98,15 +99,14 @@ describe('DateTimeRangePicker', () => {
     });
 
     test('onChange should receive the local time regardless of the timezone', () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const onChange = jest.fn<[AbsoluteTimeRange], any[]>();
+      const onChange = vi.fn<(timeRange: AbsoluteTimeRange) => void>();
       render(
         <DateTimeRangePicker
           timeZone={timeZone}
           onChange={onChange}
           onCancel={onCancel}
           initialTimeRange={initialTimeRange}
-        />
+        />,
       );
       const applyButton = screen.getByRole('button', { name: /apply/i });
       expect(applyButton).toBeInTheDocument();

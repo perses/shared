@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, ReactNode, useMemo } from 'react';
 import { Select, MenuItem, SelectProps, SelectChangeEvent } from '@mui/material';
+import { ReactElement, ReactNode, useMemo } from 'react';
+
 import { TimeZoneOption, getTimeZoneOptions } from './model/timeZoneOption';
 
 export interface TimeZoneSelectorProps extends Omit<SelectProps, 'onChange' | 'variant' | 'value'> {
@@ -37,7 +38,10 @@ export function TimeZoneSelector({
 }: TimeZoneSelectorProps): ReactElement {
   const options = useMemo(() => timeZoneOptions ?? getTimeZoneOptions(), [timeZoneOptions]);
 
-  const height = heightPx ? (typeof heightPx === 'number' ? `${heightPx}px` : heightPx) : undefined;
+  let height: string | undefined;
+  if (heightPx) {
+    height = typeof heightPx === 'number' ? `${heightPx}px` : heightPx;
+  }
 
   const handleChange = (selectedValue: string): void => {
     const selectedOption = options.find((opt: TimeZoneOption) => opt.value === selectedValue);
@@ -52,7 +56,7 @@ export function TimeZoneSelector({
       ...(height && { lineHeight: height, paddingY: 0 }),
       ...selectProps.sx,
     }),
-    [variant, height, selectProps.sx]
+    [variant, height, selectProps.sx],
   );
 
   return (

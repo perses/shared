@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useState, useMemo, ReactElement } from 'react';
 import {
   Button,
   Stack,
@@ -28,16 +27,17 @@ import {
   Alert,
   styled,
 } from '@mui/material';
-import AddIcon from 'mdi-material-ui/Plus';
-import { AnnotationSpec, Definition, UnknownSpec } from '@perses-dev/spec';
-import { useImmer } from 'use-immer';
-import PencilIcon from 'mdi-material-ui/Pencil';
-import TrashIcon from 'mdi-material-ui/TrashCan';
-import ArrowUp from 'mdi-material-ui/ArrowUp';
-import ArrowDown from 'mdi-material-ui/ArrowDown';
-
-import { ValidationProvider, AnnotationEditorForm } from '@perses-dev/plugin-system';
 import { Action } from '@perses-dev/client';
+import { ValidationProvider, AnnotationEditorForm } from '@perses-dev/plugin-system';
+import { AnnotationSpec, Definition, UnknownSpec } from '@perses-dev/spec';
+import ArrowDown from 'mdi-material-ui/ArrowDown';
+import ArrowUp from 'mdi-material-ui/ArrowUp';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import AddIcon from 'mdi-material-ui/Plus';
+import TrashIcon from 'mdi-material-ui/TrashCan';
+import { useState, useMemo, ReactElement } from 'react';
+import { useImmer } from 'use-immer';
+
 import { useDiscardChangesConfirmationDialog } from '../../context';
 
 function validateAnnotationSpecs(annotationSpecs: AnnotationSpec[]): { isValid: boolean; errors: string[] } {

@@ -54,7 +54,7 @@ export function getFormatterFromCache(
   key: Array<string | number | boolean | undefined>,
   inputType: InputType,
   formatterOptions: Intl.NumberFormatOptions,
-  locals: Locals = 'en-US'
+  locals: Locals = 'en-US',
 ): FormatFn {
   const compoundKey = `${key.filter((k) => !([undefined, null, '', NaN] as unknown[]).includes(k)).join('|')}|${locals}`;
   const inputTypeFormatters = ALL_FORMATTERS.get(inputType);

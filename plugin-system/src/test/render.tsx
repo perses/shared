@@ -13,6 +13,7 @@
 
 import { render, RenderOptions, RenderResult } from '@testing-library/react';
 import { ReactNode } from 'react';
+
 import { ContextOptions, getTestContextWrapper } from './utils';
 
 /**
@@ -22,7 +23,7 @@ import { ContextOptions, getTestContextWrapper } from './utils';
 export function renderWithContext(
   ui: ReactNode,
   renderOptions?: Omit<RenderOptions, 'queries'>,
-  contextOptions?: ContextOptions
+  contextOptions?: ContextOptions,
 ): RenderResult {
   const Wrapper = getTestContextWrapper(contextOptions);
   return render(<Wrapper>{ui}</Wrapper>, renderOptions);

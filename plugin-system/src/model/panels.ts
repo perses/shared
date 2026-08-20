@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react';
 import { PanelDefinition, QueryDataType, QueryDefinition, QueryPluginType, UnknownSpec } from '@perses-dev/spec';
+import React from 'react';
+
 import { OptionsEditorTab } from '../components';
 import { QueryOptions } from '../runtime';
 import { OptionsEditorProps, Plugin } from './plugin-base';
@@ -94,4 +95,13 @@ export type PanelGroupId = number;
 export interface PanelEditorValues {
   groupId: PanelGroupId;
   panelDefinition: PanelDefinition;
+  layoutDefinition?: {
+    width: number;
+    height: number;
+    repeatVariable?: {
+      value: string;
+      maxPer?: number;
+      alignment?: 'horizontal' | 'vertical';
+    };
+  };
 }

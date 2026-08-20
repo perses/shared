@@ -29,7 +29,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): StorageTuple<T
 function useStorage<T>(
   storage: Storage,
   key: string,
-  initialValue: T
+  initialValue: T,
 ): {
   setValueAndStore: (value: T) => void;
   setValue: (value: T) => void;
@@ -58,7 +58,7 @@ function useStorage<T>(
       setValue(val);
       storage.setItem(key, JSON.stringify(val));
     },
-    [setValue, storage, key]
+    [setValue, storage, key],
   );
 
   return { value, setValue, setValueAndStore };

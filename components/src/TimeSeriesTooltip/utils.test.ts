@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { assembleTransform } from './utils';
 import { CursorData, TOOLTIP_MAX_HEIGHT, TOOLTIP_MAX_WIDTH } from './tooltip-model';
+import { assembleTransform } from './utils';
 
 const VIEWPORT_WIDTH = 1600;
 const VIEWPORT_HEIGHT = 720;

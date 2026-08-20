@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React, { ForwardedRef, HTMLAttributes, ReactNode, forwardRef, useContext, useMemo } from 'react';
 import { Checkbox, Divider } from '@mui/material';
 import { VariableOption } from '@perses-dev/plugin-system';
 import { DEFAULT_ALL_VALUE } from '@perses-dev/spec';
+import React, { ForwardedRef, HTMLAttributes, ReactNode, forwardRef, useContext, useMemo } from 'react';
 
 export interface ListVariableListBoxContextValue {
   options: VariableOption[];
@@ -53,7 +53,7 @@ function handleGlobalSelectToggle(
   isIndeterminate: boolean,
   isAllSelected: boolean,
   allowAllValue: boolean,
-  onChange: (selectedOptions: VariableOption[]) => void
+  onChange: (selectedOptions: VariableOption[]) => void,
 ): void {
   if (isAllSelected) {
     if (filteredOptions.length !== options.length) {
@@ -109,7 +109,7 @@ export function ListVariableListBoxProvider({
 
 export const ListVariableListBox = forwardRef(function ListVariableListBox(
   props: HTMLAttributes<HTMLUListElement>,
-  ref: ForwardedRef<HTMLUListElement>
+  ref: ForwardedRef<HTMLUListElement>,
 ) {
   const { children, ...rest } = props;
   const { options, selectedOptions, filteredOptions, allowAllValue, onChange } = useListVariableListBoxContext();
@@ -118,10 +118,12 @@ export const ListVariableListBox = forwardRef(function ListVariableListBox(
   const selectedCount = useMemo(() => selectedOptions.length, [selectedOptions]);
   const isIndeterminate = useMemo(
     () => options.length > 0 && selectedCount > 0 && selectedCount !== options.length,
-    [selectedCount, options]
+    [selectedCount, options],
   );
   const isAllSelected = useMemo(() => options.length > 0 && selectedCount === options.length, [selectedCount, options]);
 
+  // MUI Autocomplete requires this custom ul to retain listbox semantics; a native select cannot render its header.
+  /* oxlint-disable jsx-a11y/no-noninteractive-element-to-interactive-role, jsx-a11y/prefer-tag-over-role */
   return (
     <ul {...rest} ref={ref} role="listbox">
       <li style={{ display: 'flex', alignItems: 'center' }}>
@@ -137,7 +139,7 @@ export const ListVariableListBox = forwardRef(function ListVariableListBox(
               isIndeterminate,
               isAllSelected,
               allowAllValue,
-              onChange
+              onChange,
             )
           }
         />
@@ -149,4 +151,5 @@ export const ListVariableListBox = forwardRef(function ListVariableListBox(
       {children}
     </ul>
   );
+  /* oxlint-enable jsx-a11y/no-noninteractive-element-to-interactive-role, jsx-a11y/prefer-tag-over-role */
 });

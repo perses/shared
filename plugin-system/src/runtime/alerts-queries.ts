@@ -13,11 +13,12 @@
 
 import { AlertsData, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 import { QueryKey, useQueries, UseQueryResult } from '@tanstack/react-query';
+
 import { AlertsQueryContext, AlertsQueryPlugin } from '../model';
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry, usePlugins } from './plugin-registry';
-import { useAllVariableValues } from './variables';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
+import { useAllVariableValues } from './variables';
 
 export type AlertsQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'AlertsQuery', PluginSpec>;
 export const ALERTS_QUERY_KEY = 'AlertsQuery';
@@ -33,7 +34,7 @@ export function useAlertsQueries(definitions: AlertsQueryDefinition[]): Array<Us
 
   const pluginLoaderResponse = usePlugins(
     'AlertsQuery',
-    definitions.map((d) => ({ kind: d.spec.plugin.kind }))
+    definitions.map((d) => ({ kind: d.spec.plugin.kind })),
   );
 
   return useQueries({

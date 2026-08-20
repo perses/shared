@@ -14,6 +14,7 @@
 import { BuiltinVariableDefinition } from '@perses-dev/spec';
 import { useQueries, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
+
 import {
   DefaultPluginKinds,
   PluginImplementation,
@@ -54,7 +55,7 @@ type UsePluginOptions<T extends PluginType> = Omit<
 export function usePlugin<T extends PluginType>(
   pluginType: T | undefined,
   kind: string,
-  options?: UsePluginOptions<T>
+  options?: UsePluginOptions<T>,
 ): UseQueryResult<PluginImplementation<T>, Error> {
   // We never want to ask for a plugin when the kind isn't set yet, so disable those queries automatically
   options = {
@@ -74,7 +75,7 @@ export function usePlugin<T extends PluginType>(
  */
 export function usePlugins<T extends PluginType>(
   pluginType: T,
-  plugins: Array<{ kind: string }>
+  plugins: Array<{ kind: string }>,
 ): Array<UseQueryResult<PluginImplementation<T>>> {
   const { getPlugin } = usePluginRegistry();
 
@@ -108,7 +109,7 @@ type UseListPluginMetadataOptions = Omit<
  */
 export function useListPluginMetadata(
   pluginTypes: PluginType[],
-  options?: UseListPluginMetadataOptions
+  options?: UseListPluginMetadataOptions,
 ): UseQueryResult<PluginMetadataWithModule[]> {
   const { listPluginMetadata } = usePluginRegistry();
   return useQuery({

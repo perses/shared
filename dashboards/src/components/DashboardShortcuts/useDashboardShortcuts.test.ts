@@ -11,22 +11,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { act, renderHook, waitFor } from '@testing-library/react';
 import { DashboardResource } from '@perses-dev/client';
+import { act, renderHook, waitFor } from '@testing-library/react';
+
 import { useDashboardShortcuts } from './useDashboardShortcuts';
 
-const mockInfoSnackbar = jest.fn();
-const mockWarningSnackbar = jest.fn();
-const mockExceptionSnackbar = jest.fn();
+const mockInfoSnackbar = vi.fn();
+const mockWarningSnackbar = vi.fn();
+const mockExceptionSnackbar = vi.fn();
 
-const mockSetEditMode = jest.fn();
+const mockSetEditMode = vi.fn();
 let mockIsEditMode = false;
 
 const mockDashboardStoreActions = {
-  openEditPanel: jest.fn(),
-  duplicatePanel: jest.fn(),
-  openDeletePanelDialog: jest.fn(),
-  setViewPanel: jest.fn(),
+  openEditPanel: vi.fn(),
+  duplicatePanel: vi.fn(),
+  openDeletePanelDialog: vi.fn(),
+  setViewPanel: vi.fn(),
   panelEditor: undefined,
 };
 
@@ -47,7 +48,7 @@ const mockDashboard: DashboardResource = {
   },
 };
 
-jest.mock('@perses-dev/components', () => ({
+vi.mock('@perses-dev/components', () => ({
   useSnackbar: (): {
     infoSnackbar: typeof mockInfoSnackbar;
     warningSnackbar: typeof mockWarningSnackbar;
@@ -59,14 +60,15 @@ jest.mock('@perses-dev/components', () => ({
   }),
 }));
 
-const mockSetTimeRange = jest.fn();
-const mockRefresh = jest.fn();
+const mockSetTimeRange = vi.fn();
+const mockRefresh = vi.fn();
+const mockSetDashboard = vi.fn();
 
-jest.mock('@perses-dev/plugin-system', () => ({
+vi.mock('@perses-dev/plugin-system', () => ({
   useTimeRange: (): {
     timeRange: { pastDuration: string };
-    setTimeRange: jest.Mock;
-    refresh: jest.Mock;
+    setTimeRange: typeof mockSetTimeRange;
+    refresh: typeof mockRefresh;
   } => ({
     timeRange: { pastDuration: '30m' },
     setTimeRange: mockSetTimeRange,
@@ -78,23 +80,23 @@ jest.mock('@perses-dev/plugin-system', () => ({
 let latestHotkeyConfigs: Array<{ hotkey: string; callback: () => void }> = [];
 let latestSequenceConfigs: Array<{ sequence: string[]; callback: () => void }> = [];
 
-jest.mock('@tanstack/react-hotkeys', () => ({
-  useHotkeys: jest.fn((configs: Array<{ hotkey: string; callback: () => void }>) => {
+vi.mock('@tanstack/react-hotkeys', () => ({
+  useHotkeys: vi.fn((configs: Array<{ hotkey: string; callback: () => void }>) => {
     latestHotkeyConfigs = configs;
   }),
-  useHotkeySequences: jest.fn((configs: Array<{ sequence: string[]; callback: () => void }>) => {
+  useHotkeySequences: vi.fn((configs: Array<{ sequence: string[]; callback: () => void }>) => {
     latestSequenceConfigs = configs;
   }),
 }));
 
-jest.mock('../../context', () => ({
-  useDashboard: (): { dashboard: DashboardResource; setDashboard: jest.Mock } => ({
+vi.mock('../../context', () => ({
+  useDashboard: (): { dashboard: DashboardResource; setDashboard: typeof mockSetDashboard } => ({
     dashboard: mockDashboard,
-    setDashboard: jest.fn(),
+    setDashboard: mockSetDashboard,
   }),
 }));
 
-jest.mock('../../context/DashboardProvider', () => ({
+vi.mock('../../context/DashboardProvider', () => ({
   useEditMode: (): { isEditMode: boolean; setEditMode: typeof mockSetEditMode } => ({
     isEditMode: mockIsEditMode,
     setEditMode: mockSetEditMode,
@@ -111,9 +113,9 @@ jest.mock('../../context/DashboardProvider', () => ({
   }),
 }));
 
-jest.mock('../../keyboard-shortcuts', () => ({
+vi.mock('../../keyboard-shortcuts', () => ({
   useFocusedPanel: (): null => null,
-  buildShortcutOptions: jest.fn(() => ({ enabled: true, meta: {} })),
+  buildShortcutOptions: vi.fn(() => ({ enabled: true, meta: {} })),
   requireShortcutHotkey: (def: { hotkey?: string }): string => def.hotkey ?? 'missing-hotkey',
   requireShortcutSequence: (def: { sequence?: string[] }): string[] => def.sequence ?? ['missing-sequence'],
 
@@ -161,11 +163,11 @@ describe('useDashboardShortcuts save behavior', () => {
     mockIsEditMode = false;
     latestHotkeyConfigs = [];
     latestSequenceConfigs = [];
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('shows an info snackbar when save shortcut is used outside edit mode', async () => {
-    const onSave = jest.fn(async () => undefined);
+    const onSave = vi.fn(async () => undefined);
     renderHook(() => useDashboardShortcuts({ onSave, isReadonly: false }));
 
     act(() => {
@@ -179,7 +181,7 @@ describe('useDashboardShortcuts save behavior', () => {
   });
 
   it('shows a warning snackbar when dashboard is read-only', async () => {
-    const onSave = jest.fn(async () => undefined);
+    const onSave = vi.fn(async () => undefined);
     mockIsEditMode = true;
     renderHook(() => useDashboardShortcuts({ onSave, isReadonly: true }));
 
@@ -194,7 +196,7 @@ describe('useDashboardShortcuts save behavior', () => {
   });
 
   it('calls save callback and exits edit mode when save shortcut is used in edit mode', async () => {
-    const onSave = jest.fn(async () => undefined);
+    const onSave = vi.fn(async () => undefined);
     mockIsEditMode = true;
     renderHook(() => useDashboardShortcuts({ onSave, isReadonly: false }));
 
@@ -214,14 +216,14 @@ describe('useDashboardShortcuts paste time range behavior', () => {
     mockIsEditMode = false;
     latestHotkeyConfigs = [];
     latestSequenceConfigs = [];
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('sets time range when clipboard contains a valid time range', async () => {
     const start = '2026-04-13T10:00:00.000Z';
     const end = '2026-04-13T11:00:00.000Z';
     Object.assign(navigator, {
-      clipboard: { readText: jest.fn().mockResolvedValue(`${start} - ${end}`) },
+      clipboard: { readText: vi.fn().mockResolvedValue(`${start} - ${end}`) },
     });
 
     renderHook(() => useDashboardShortcuts({ isReadonly: false }));
@@ -240,7 +242,7 @@ describe('useDashboardShortcuts paste time range behavior', () => {
 
   it('shows a warning snackbar when clipboard text is not a valid time range', async () => {
     Object.assign(navigator, {
-      clipboard: { readText: jest.fn().mockResolvedValue('not a time range') },
+      clipboard: { readText: vi.fn().mockResolvedValue('not a time range') },
     });
 
     renderHook(() => useDashboardShortcuts({ isReadonly: false }));
@@ -252,7 +254,7 @@ describe('useDashboardShortcuts paste time range behavior', () => {
     await waitFor(() => {
       expect(mockSetTimeRange).not.toHaveBeenCalled();
       expect(mockWarningSnackbar).toHaveBeenCalledWith(
-        'Clipboard does not contain a valid time range. Expected format: "<ISO date format> - <ISO date format>".'
+        'Clipboard does not contain a valid time range. Expected format: "<ISO date format> - <ISO date format>".',
       );
     });
   });
@@ -261,7 +263,7 @@ describe('useDashboardShortcuts paste time range behavior', () => {
     const start = '2026-04-13T12:00:00.000Z';
     const end = '2026-04-13T10:00:00.000Z';
     Object.assign(navigator, {
-      clipboard: { readText: jest.fn().mockResolvedValue(`${start} - ${end}`) },
+      clipboard: { readText: vi.fn().mockResolvedValue(`${start} - ${end}`) },
     });
 
     renderHook(() => useDashboardShortcuts({ isReadonly: false }));
@@ -278,7 +280,7 @@ describe('useDashboardShortcuts paste time range behavior', () => {
 
   it('shows a warning snackbar when clipboard read fails', async () => {
     Object.assign(navigator, {
-      clipboard: { readText: jest.fn().mockRejectedValue(new Error('Permission denied')) },
+      clipboard: { readText: vi.fn().mockRejectedValue(new Error('Permission denied')) },
     });
 
     renderHook(() => useDashboardShortcuts({ isReadonly: false }));
@@ -299,12 +301,12 @@ describe('useDashboardShortcuts toggle edit mode behavior', () => {
     mockIsEditMode = false;
     latestHotkeyConfigs = [];
     latestSequenceConfigs = [];
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('calls onCancelButtonClick when toggling from edit to view mode', async () => {
     mockIsEditMode = true;
-    const onCancelButtonClick = jest.fn();
+    const onCancelButtonClick = vi.fn();
     renderHook(() => useDashboardShortcuts({ isReadonly: false, onCancelButtonClick }));
 
     act(() => {
@@ -319,7 +321,7 @@ describe('useDashboardShortcuts toggle edit mode behavior', () => {
 
   it('calls onEditButtonClick when toggling from view to edit mode', async () => {
     mockIsEditMode = false;
-    const onEditButtonClick = jest.fn();
+    const onEditButtonClick = vi.fn();
     renderHook(() => useDashboardShortcuts({ isReadonly: false, onEditButtonClick }));
 
     act(() => {

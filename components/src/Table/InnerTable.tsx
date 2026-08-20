@@ -13,6 +13,7 @@
 
 import { Table as MuiTable, styled, TableProps as MuiTableProps } from '@mui/material';
 import { forwardRef } from 'react';
+
 import { TableDensity } from './model/table-model';
 
 const StyledMuiTable = styled(MuiTable)(({ theme }) => ({
@@ -34,7 +35,7 @@ const TABLE_DENSITY_CONFIG: Record<TableDensity, MuiTableProps['size']> = {
 
 export const InnerTable = forwardRef<HTMLTableElement, InnerTableProps>(function InnerTable(
   { density, ...otherProps },
-  ref
+  ref,
 ) {
   return (
     <StyledMuiTable

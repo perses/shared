@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { VariableDefinition } from '@perses-dev/spec';
 import { VariableStoreStateMap } from '@perses-dev/plugin-system';
+import { VariableDefinition } from '@perses-dev/spec';
+
 import { ExternalVariableDefinition } from '../../model/VariableDefinition';
 import { checkSavedDefaultVariableStatus, mergeVariableDefinitions } from './utils';
 
@@ -95,7 +96,7 @@ describe('checkSavedDefaultVariableStatus', () => {
             value: '5m',
           },
         ],
-      }
+      },
     );
     variableState.set(
       { name: 'NewListVariable' },
@@ -117,14 +118,14 @@ describe('checkSavedDefaultVariableStatus', () => {
           },
         ],
         defaultValue: 'test list value',
-      }
+      },
     );
     variableState.set(
       { name: 'NewTextVariable' },
       {
         value: 'New text value',
         loading: false,
-      }
+      },
     );
     const { isSavedVariableModified } = checkSavedDefaultVariableStatus(savedVariables, variableState);
     expect(isSavedVariableModified).toBe(true);
@@ -165,7 +166,7 @@ describe('checkSavedDefaultVariableStatus', () => {
             value: '5m',
           },
         ],
-      }
+      },
     );
     const { isSavedVariableModified } = checkSavedDefaultVariableStatus(savedVariables, variableState);
     expect(isSavedVariableModified).toBe(false);
@@ -195,7 +196,7 @@ describe('checkSavedDefaultVariableStatus', () => {
         value: null,
         loading: false,
         options: [],
-      }
+      },
     );
     const { isSavedVariableModified } = checkSavedDefaultVariableStatus(savedVariables, variableState);
     expect(isSavedVariableModified).toBe(false);
@@ -222,7 +223,7 @@ describe('checkSavedDefaultVariableStatus', () => {
       {
         value: 'first text value',
         loading: false,
-      }
+      },
     );
     const { isSavedVariableModified } = checkSavedDefaultVariableStatus(savedVariables, variableState);
     expect(isSavedVariableModified).toBe(false);
@@ -244,7 +245,7 @@ describe('checkSavedDefaultVariableStatus', () => {
       {
         value: 'updated text value',
         loading: false,
-      }
+      },
     );
     const { isSavedVariableModified } = checkSavedDefaultVariableStatus(savedVariables, variableState);
     expect(isSavedVariableModified).toBe(true);

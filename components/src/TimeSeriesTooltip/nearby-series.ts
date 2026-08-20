@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ECharts as EChartsInstance } from 'echarts/core';
-import { BarSeriesOption } from 'echarts/charts';
 import { TimeSeries, TimeSeriesValueTuple } from '@perses-dev/spec';
+import { BarSeriesOption } from 'echarts/charts';
+import { ECharts as EChartsInstance } from 'echarts/core';
+
 import {
   EChartsDataFormat,
   OPTIMIZED_MODE_SERIES_LIMIT,
@@ -24,6 +25,7 @@ import {
 } from '../model';
 import { batchDispatchNearbySeriesActions, getPointInGrid, getClosestTimestamp } from '../utils';
 import { CursorCoordinates, CursorData, EMPTY_TOOLTIP_DATA } from './tooltip-model';
+import { Candidate, GetYBufferParams, IsWithinPercentageRangeParams, NearbySeriesArray } from './types';
 import {
   calculateBarBandwidth,
   calculateBarSegmentBounds,
@@ -31,7 +33,6 @@ import {
   calculateVisualYForSeries,
   getPixelXFromGrid,
 } from './utils';
-import { Candidate, GetYBufferParams, IsWithinPercentageRangeParams, NearbySeriesArray } from './types';
 
 export type { NearbySeriesArray, NearbySeriesInfo } from './types';
 
@@ -50,7 +51,7 @@ function gatherCandidates(
   cursorPixelY: number | undefined,
   yBuffer: number,
   yBufferPixels: number | null,
-  chart: EChartsInstance
+  chart: EChartsInstance,
 ): Candidate[] {
   const candidates: Candidate[] = [];
   const totalSeries = data.length;
@@ -155,7 +156,7 @@ function gatherCandidates(
         barRelativeIdx,
         barBandwidth,
         barCenterPixelX,
-        barSeriesIndexes.length
+        barSeriesIndexes.length,
       );
 
       const isWithinXBounds = cursorXPixel >= segmentBounds.left && cursorXPixel <= segmentBounds.right;
@@ -223,7 +224,7 @@ function processCandidates(
   format: FormatOptions | undefined,
   seriesFormatMap: Map<string, FormatOptions> | undefined,
   chart: EChartsInstance,
-  nonCandidateSeriesIndexes: number[]
+  nonCandidateSeriesIndexes: number[],
 ): NearbySeriesArray {
   const nearbySeriesIndexes: number[] = [];
   const emphasizedSeriesIndexes: number[] = [];
@@ -286,7 +287,7 @@ function processCandidates(
     emphasizedSeriesIndexes,
     nonEmphasizedSeriesIndexes,
     emphasizedDatapoints,
-    duplicateDatapoints
+    duplicateDatapoints,
   );
 
   return result;
@@ -306,7 +307,7 @@ export function checkforNearbyTimeSeries(
   seriesFormatMap?: Map<string, FormatOptions>,
   // in the case of multi-axis, we need the cursor Y position in pixel space
   cursorPixelY?: number,
-  cursorXPixel?: number | null
+  cursorXPixel?: number | null,
 ): NearbySeriesArray {
   const cursorX: number | null = pointInGrid[0] ?? null;
   const cursorY: number | null = pointInGrid[1] ?? null;
@@ -341,7 +342,7 @@ export function checkforNearbyTimeSeries(
     cursorPixelY,
     yBuffer,
     yBufferPixels,
-    chart
+    chart,
   );
 
   const winner = findClosestCandidate(candidates);
@@ -365,7 +366,7 @@ export function legacyCheckforNearbySeries(
   pointInGrid: number[],
   yBuffer: number,
   chart?: EChartsInstance,
-  format?: FormatOptions
+  format?: FormatOptions,
 ): NearbySeriesArray {
   const currentNearbySeriesData: NearbySeriesArray = [];
   const cursorX: number | null = pointInGrid[0] ?? null;
@@ -548,7 +549,7 @@ export function getNearbySeriesData({
       format,
       seriesFormatMap,
       hasMultipleYAxes ? cursorPixelY : undefined,
-      cursorXPixel
+      cursorXPixel,
     );
   }
 

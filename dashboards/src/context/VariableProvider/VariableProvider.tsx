@@ -11,13 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ReactElement, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
-import { createStore, StoreApi, useStore } from 'zustand';
-import { useStoreWithEqualityFn } from 'zustand/traditional';
-import { immer } from 'zustand/middleware/immer';
-import { devtools } from 'zustand/middleware';
-import { shallow } from 'zustand/shallow';
-import { produce } from 'immer';
 import {
   VariableContext,
   VariableStateMap,
@@ -26,6 +19,7 @@ import {
   VariableOption,
   BuiltinVariableContext,
   useTimeRange,
+  VariableDefinitionGroup,
 } from '@perses-dev/plugin-system';
 import {
   DEFAULT_ALL_VALUE as ALL_VALUE,
@@ -38,10 +32,18 @@ import {
   ListVariableDefinition,
   intervalToDuration,
 } from '@perses-dev/spec';
+import { produce } from 'immer';
+import { createContext, ReactElement, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
+import { createStore, StoreApi, useStore } from 'zustand';
+import { devtools } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+import { shallow } from 'zustand/shallow';
+import { useStoreWithEqualityFn } from 'zustand/traditional';
+
 import { ExternalVariableDefinition } from '../../model/VariableDefinition';
-import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
-import { hydrateVariableDefinitionStates as hydrateVariableDefinitionStates } from './hydrationUtils';
+import { hydrateVariableDefinitionStates } from './hydrationUtils';
 import { getInitalValuesFromQueryParameters, getURLQueryParamName, useVariableQueryParams } from './query-params';
+import { checkSavedDefaultVariableStatus, findVariableDefinitionByName, mergeVariableDefinitions } from './utils';
 
 /**
  * This store is used to manipulate and read the definition of the variables and their state.
@@ -152,7 +154,39 @@ export function useVariableDefinitionStates(variableNames?: string[]): VariableS
     },
     (left, right) => {
       return JSON.stringify(left) === JSON.stringify(right);
-    }
+    },
+  );
+}
+
+/**
+ * Returns all non-overridden variable definitions grouped by source.
+ */
+export function useAllVariableDefinitions(): VariableDefinitionGroup[] {
+  const store = useVariableDefinitionStoreCtx();
+  return useStoreWithEqualityFn(
+    store,
+    (s) => {
+      const groups: VariableDefinitionGroup[] = [];
+
+      const dashboardDefinitions = s.variableDefinitions.filter(
+        (v) => !s.variableState.get({ name: v.spec.name })?.overridden,
+      );
+      if (dashboardDefinitions.length > 0) {
+        groups.push({ source: undefined, definitions: dashboardDefinitions });
+      }
+
+      [...s.externalVariableDefinitions].forEach((def) => {
+        const definitions = def.definitions.filter(
+          (v) => !s.variableState.get({ name: v.spec.name, source: def.source })?.overridden,
+        );
+        if (definitions.length > 0) {
+          groups.push({ source: def.source, definitions });
+        }
+      });
+
+      return groups;
+    },
+    shallow,
   );
 }
 
@@ -163,7 +197,7 @@ export function useVariableDefinitionStates(variableNames?: string[]): VariableS
  */
 export function useVariableDefinitionAndState(
   name: string,
-  source?: string
+  source?: string,
 ): {
   definition: TextVariableDefinition | ListVariableDefinition | undefined;
   state: VariableState | undefined;
@@ -201,7 +235,7 @@ export function useVariableDefinitionActions(): {
         getSavedVariablesStatus: s.getSavedVariablesStatus,
       };
     },
-    shallow
+    shallow,
   );
 }
 
@@ -350,7 +384,7 @@ function createVariableDefinitionStore({
         variableState: hydrateVariableDefinitionStates(
           initialVariableDefinitions,
           initialParams,
-          externalVariableDefinitions
+          externalVariableDefinitions,
         ),
         variableDefinitions: initialVariableDefinitions,
         externalVariableDefinitions: externalVariableDefinitions,
@@ -361,11 +395,11 @@ function createVariableDefinitionStore({
               state.variableState = hydrateVariableDefinitionStates(
                 definitions,
                 initialParams,
-                externalVariableDefinitions
+                externalVariableDefinitions,
               );
             },
             false,
-            '[Variables] setVariableDefinitions' // Used for action name in Redux devtools
+            '[Variables] setVariableDefinitions', // Used for action name in Redux devtools
           );
         },
         setVariableValuesFromQueryParams(values: Record<string, VariableValue>): void {
@@ -385,7 +419,7 @@ function createVariableDefinitionStore({
               });
             },
             false,
-            '[Variables] setVariableValuesFromQueryParams'
+            '[Variables] setVariableValuesFromQueryParams',
           );
         },
         setVariableOptions(name, options, source?: string): void {
@@ -398,7 +432,7 @@ function createVariableDefinitionStore({
               varState.options = options;
             },
             false,
-            '[Variables] setVariableOptions'
+            '[Variables] setVariableOptions',
           );
         },
         setVariableLoading(name, loading, source?: string): void {
@@ -411,7 +445,7 @@ function createVariableDefinitionStore({
               varState.loading = loading;
             },
             false,
-            '[Variables] setVariableLoading'
+            '[Variables] setVariableLoading',
           );
         },
         setVariableValue: (name, value, source?: string): void =>
@@ -438,7 +472,7 @@ function createVariableDefinitionStore({
               varState.value = val;
             },
             false,
-            '[Variables] setVariableValue'
+            '[Variables] setVariableValue',
           ),
         setVariableDefaultValues: (): VariableDefinition[] => {
           const variableDefinitions = get().variableDefinitions;
@@ -475,7 +509,7 @@ function createVariableDefinitionStore({
               state.variableDefinitions = updatedVariables;
             },
             false,
-            '[Variables] setVariableDefaultValues'
+            '[Variables] setVariableDefaultValues',
           );
           return updatedVariables;
         },
@@ -485,8 +519,8 @@ function createVariableDefinitionStore({
         } => {
           return checkSavedDefaultVariableStatus(get().variableDefinitions, get().variableState);
         },
-      }))
-    )
+      })),
+    ),
   );
 
   return store as StoreApi<VariableDefinitionStore>;
@@ -518,7 +552,7 @@ export function VariableProvider({
   initialVariableValues,
 }: VariableProviderProps): ReactElement {
   const [store] = useState(() =>
-    createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions, initialVariableValues })
+    createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions, initialVariableValues }),
   );
 
   return (
@@ -537,7 +571,7 @@ export function VariableProviderWithQueryParams({
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);
   const [store] = useState(() =>
-    createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions, queryParams })
+    createVariableDefinitionStore({ initialVariableDefinitions, externalVariableDefinitions, queryParams }),
   );
   const queryParamValues = queryParams[0];
 
@@ -561,7 +595,7 @@ function areVariableValuesEqual(left: VariableValue, right: VariableValue): bool
 
 function getVariableValueFromQueryParams(
   definition: VariableDefinition,
-  values: Record<string, VariableValue>
+  values: Record<string, VariableValue>,
 ): VariableValue {
   const queryParamValue = values[definition.spec.name];
   if (definition.kind === 'TextVariable') {

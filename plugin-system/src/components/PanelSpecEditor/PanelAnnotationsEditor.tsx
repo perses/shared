@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useMemo, useState } from 'react';
 import {
   Alert,
   Box,
@@ -27,13 +26,15 @@ import {
   TableRow,
   styled,
 } from '@mui/material';
-import AddIcon from 'mdi-material-ui/Plus';
-import PencilIcon from 'mdi-material-ui/Pencil';
-import TrashIcon from 'mdi-material-ui/TrashCan';
-import ArrowUp from 'mdi-material-ui/ArrowUp';
-import ArrowDown from 'mdi-material-ui/ArrowDown';
-import { AnnotationSpec, Definition, UnknownSpec } from '@perses-dev/spec';
 import { Action } from '@perses-dev/client';
+import { AnnotationSpec, Definition, UnknownSpec } from '@perses-dev/spec';
+import ArrowDown from 'mdi-material-ui/ArrowDown';
+import ArrowUp from 'mdi-material-ui/ArrowUp';
+import PencilIcon from 'mdi-material-ui/Pencil';
+import AddIcon from 'mdi-material-ui/Plus';
+import TrashIcon from 'mdi-material-ui/TrashCan';
+import { ReactElement, useMemo, useState } from 'react';
+
 import { ValidationProvider } from '../../context';
 import { AnnotationEditorForm } from '../Annotations';
 
@@ -105,7 +106,7 @@ export function PanelAnnotationsEditor({ value, onChange, isReadonly }: PanelAnn
 
   const toggleAnnotationVisibility = (index: number, visible: boolean): void => {
     onChange(
-      value.map((spec, i) => (i === index ? { ...spec, display: { ...spec.display, hidden: !visible } } : spec))
+      value.map((spec, i) => (i === index ? { ...spec, display: { ...spec.display, hidden: !visible } } : spec)),
     );
   };
 

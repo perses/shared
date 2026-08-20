@@ -22,8 +22,8 @@ describe('isLegendItemVisuallySelected', () => {
           label: 'One',
           color: 'red',
         },
-        'ALL'
-      )
+        'ALL',
+      ),
     ).toBeFalsy();
   });
 
@@ -37,8 +37,8 @@ describe('isLegendItemVisuallySelected', () => {
         },
         {
           two: true,
-        }
-      )
+        },
+      ),
     ).toBeFalsy();
   });
 
@@ -53,8 +53,8 @@ describe('isLegendItemVisuallySelected', () => {
         {
           one: false,
           two: true,
-        }
-      )
+        },
+      ),
     ).toBeFalsy();
   });
 
@@ -69,8 +69,8 @@ describe('isLegendItemVisuallySelected', () => {
         {
           one: true,
           two: true,
-        }
-      )
+        },
+      ),
     ).toBeTruthy();
   });
 });

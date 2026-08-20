@@ -11,8 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { TextField, Popper, PopperProps, Checkbox, Autocomplete, createFilterOptions, Chip, Box } from '@mui/material';
+import {
+  SORT_METHODS,
+  SortMethodName,
+  useListVariablePluginValues,
+  VariableOption,
+  VariableState,
+} from '@perses-dev/plugin-system';
 import {
   DEFAULT_ALL_VALUE,
   ListVariableDefinition,
@@ -21,16 +27,11 @@ import {
   VariableName,
   VariableValue,
 } from '@perses-dev/spec';
-import {
-  SORT_METHODS,
-  SortMethodName,
-  useListVariablePluginValues,
-  VariableOption,
-  VariableState,
-} from '@perses-dev/plugin-system';
 import { UseQueryResult } from '@tanstack/react-query';
-import { useVariableDefinitionAndState, useVariableDefinitionActions } from '../../context';
+import { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+
 import { MAX_VARIABLE_WIDTH, MIN_VARIABLE_WIDTH } from '../../constants';
+import { useVariableDefinitionAndState, useVariableDefinitionActions } from '../../context';
 import { ListVariableListBoxProvider, ListVariableListBox } from './ListVariableListBox';
 
 type VariableProps = {
@@ -66,7 +67,7 @@ export function Variable({ name, source }: VariableProps): ReactElement {
 export function useListVariableState(
   spec: ListVariableSpec | undefined,
   state: VariableState | undefined,
-  variablesOptionsQuery: Partial<UseQueryResult<VariableOption[]>>
+  variablesOptionsQuery: Partial<UseQueryResult<VariableOption[]>>,
 ): {
   // Value, Loading, Options are modified only when we want to save the changes made
   value: VariableValue | undefined;
@@ -117,9 +118,9 @@ export function useListVariableState(
             return (value as string[]).includes(v.value);
           }
           return value === v.value;
-        })
+        }),
       ),
-    [viewOptions, value, allowMultiple]
+    [viewOptions, value, allowMultiple],
   );
 
   value = useMemo(() => {
@@ -179,7 +180,7 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
   const { selectedOptions, value, loading, options, viewOptions } = useListVariableState(
     definition?.spec,
     ctx.state,
-    variablesOptionsQuery
+    variablesOptionsQuery,
   );
   const [inputWidth, setInputWidth] = useState(MIN_VARIABLE_WIDTH);
   // Used for multiple value variables, it will not clear variable input when selecting an option
@@ -193,7 +194,7 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
 
   const filteredOptions = useMemo(
     () => filterOptions(viewOptions, { inputValue, getOptionLabel: (o) => o.label }),
-    [inputValue, viewOptions, filterOptions]
+    [inputValue, viewOptions, filterOptions],
   );
 
   // Update value when changed
@@ -219,7 +220,7 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
     (options: VariableOption[]): void => {
       setVariableValue(name, variableOptionToVariableValue(options), source);
     },
-    [name, setVariableValue, source]
+    [name, setVariableValue, source],
   );
 
   const listBoxProviderValue = useMemo(
@@ -230,7 +231,7 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
       allowAllValue,
       onChange: handleGlobalSelect,
     }),
-    [allowAllValue, filteredOptions, handleGlobalSelect, selectedOptions, viewOptions]
+    [allowAllValue, filteredOptions, handleGlobalSelect, selectedOptions, viewOptions],
   );
 
   const autocompleteComponent = useMemo(() => {

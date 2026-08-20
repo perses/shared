@@ -63,6 +63,7 @@ WORKSPACE_PACKAGES=(
     "@perses-dev/dashboards:dashboards"
     "@perses-dev/plugin-system:plugin-system"
     "@perses-dev/explore:explore"
+    "@perses-dev/client:client"
 )
 
 # Debug flag (set via --debug flag)
@@ -159,7 +160,7 @@ get_package_folder() {
 package_exists_in_external() {
     local package_name="$1"
     local external_package_json="$2"
-    
+
     if jq -e ".dependencies[\"$package_name\"] // .devDependencies[\"$package_name\"]" "$external_package_json" > /dev/null 2>&1; then
         return 0
     fi
@@ -171,7 +172,7 @@ package_exists_in_external() {
 get_current_version() {
     local package_name="$1"
     local external_package_json="$2"
-    
+
     local version
     if [[ "$DEP_SECTION" == "devDependencies" ]]; then
         version=$(jq -r ".devDependencies[\"$package_name\"] // .dependencies[\"$package_name\"] // empty" "$external_package_json")
@@ -203,7 +204,7 @@ is_built() {
 # Convert Git Bash path to Windows path for npm on Windows
 convert_path_for_npm() {
     local path="$1"
-    
+
     # Check if we're on Windows (Git Bash/MSYS/MinGW)
     if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "win32" ]]; then
         # Convert /c/Users/... to C:/Users/...
@@ -212,14 +213,14 @@ convert_path_for_npm() {
             path="${drive_letter^^}:${path:2}"
         fi
     fi
-    
+
     echo "$path"
 }
 
 # Build workspaces that are not built
 build_if_needed() {
     local needs_build=false
-    
+
     for workspace in "${WORKSPACE_PACKAGES[@]}"; do
         local package_folder=$(get_package_folder "$workspace")
         if ! is_built "$package_folder"; then
@@ -227,7 +228,7 @@ build_if_needed() {
             break
         fi
     done
-    
+
     if [[ "$needs_build" == true ]]; then
         echo "Building shared packages..."
         if (cd "$SHARED_ROOT" && npm run build --silent 2>/dev/null); then
@@ -250,26 +251,26 @@ show_status() {
         package_json_path="$target_root/$PACKAGE_JSON_RELATIVE_PATH"
     fi
     local external_package_json="$package_json_path/package.json"
-    
+
     if [[ ! -f "$external_package_json" ]]; then
         log_error "package.json not found at: $external_package_json"
         exit 1
     fi
-    
+
     local linked_count=0
     local total_count=0
-    
+
     echo ""
     echo "Status ($package_json_path) [target: $TARGET_MODE]:"
-    
+
     for workspace in "${WORKSPACE_PACKAGES[@]}"; do
         local package_name=$(get_package_name "$workspace")
         local package_folder=$(get_package_folder "$workspace")
-        
+
         if package_exists_in_external "$package_name" "$external_package_json"; then
             ((total_count++)) || true
             local current_version=$(get_current_version "$package_name" "$external_package_json")
-            
+
             if is_linked "$current_version"; then
                 ((linked_count++)) || true
                 if is_built "$package_folder"; then
@@ -284,7 +285,7 @@ show_status() {
             printf "  ${RED}✗${NC} %s (not in project)\n" "$package_name"
         fi
     done
-    
+
     echo ""
     echo "$linked_count of $total_count packages linked"
 }
@@ -307,20 +308,20 @@ do_link() {
     local external_package_lock="$lock_path/package-lock.json"
     local backup_path="$package_json_path/$BACKUP_FILE"
     local backup_lock_path="$lock_path/$BACKUP_LOCK_FILE"
-    
+
     if [[ ! -f "$external_package_json" ]]; then
         log_error "package.json not found at: $external_package_json"
         exit 1
     fi
-    
+
     # Build shared packages if not already built
     build_if_needed
-    
+
     # Backup package-lock.json if it exists and backup doesn't
     if [[ -f "$external_package_lock" && ! -f "$backup_lock_path" ]]; then
         cp "$external_package_lock" "$backup_lock_path"
     fi
-    
+
     # Create backup of original versions if it doesn't exist
     if [[ ! -f "$backup_path" ]]; then
         echo "{}" > "$backup_path"
@@ -335,12 +336,12 @@ do_link() {
             fi
         done
     fi
-    
+
     # Link each workspace package
     local already_linked=0
 
     echo "Linking packages to $package_json_path [$TARGET_MODE]..."
-    
+
     # Temporarily disable exit on error to handle npm install failures gracefully.
     # npm install may fail (non-zero exit code) but still succeed in linking the package.
     # This allows us to check the actual result and continue trying other packages.
@@ -349,13 +350,13 @@ do_link() {
         local package_name=$(get_package_name "$workspace")
         local package_folder=$(get_package_folder "$workspace")
         local package_path="$SHARED_ROOT/$package_folder"
-        
+
         # Convert path for Windows npm if needed
         local npm_package_path=$(convert_path_for_npm "$package_path")
-        
+
         if package_exists_in_external "$package_name" "$external_package_json"; then
             local current_version=$(get_current_version "$package_name" "$external_package_json")
-            
+
             if is_linked "$current_version"; then
                 ((already_linked++)) || true
                 if [[ "$DEBUG" == true ]]; then
@@ -365,7 +366,7 @@ do_link() {
             fi
 
             echo -n "  Linking $package_name... "
-            
+
             # Capture both stdout and stderr for debugging
             local npm_output
             # Build npm install command based on target mode
@@ -378,10 +379,10 @@ do_link() {
             fi
             npm_output=$(cd "$lock_path" && eval "$npm_cmd" 2>&1)
             local npm_exit_code=$?
-            
+
             # Check if package was actually linked (npm on Windows may return error but still succeed)
             local new_version=$(get_current_version "$package_name" "$external_package_json")
-            
+
             if is_linked "$new_version"; then
                 printf "${GREEN}done${NC}\n"
             elif [[ $npm_exit_code -eq 0 ]]; then
@@ -402,11 +403,11 @@ do_link() {
         fi
     done
     set -e  # Re-enable exit on error
-    
+
     if [[ $already_linked -gt 0 ]]; then
         echo "  ($already_linked package(s) already linked)"
     fi
-    
+
     # Check if any packages failed and suggest debug mode
     local failed_count=0
     for workspace in "${WORKSPACE_PACKAGES[@]}"; do
@@ -418,7 +419,7 @@ do_link() {
             fi
         fi
     done
-    
+
     if [[ $failed_count -gt 0 && "$DEBUG" != true ]]; then
         echo ""
         log_warning "Some packages failed to link. Run with --debug flag for detailed error information:"
@@ -456,18 +457,18 @@ do_unlink() {
     local external_package_lock="$lock_path/package-lock.json"
     local backup_path="$package_json_path/$BACKUP_FILE"
     local backup_lock_path="$lock_path/$BACKUP_LOCK_FILE"
-    
+
     if [[ ! -f "$external_package_json" ]]; then
         log_error "package.json not found at: $external_package_json"
         exit 1
     fi
-    
+
     if [[ ! -f "$backup_path" ]]; then
         log_error "No backup file found. Cannot restore original versions."
         echo "  Manually restore: cd $package_json_path && npm install @perses-dev/components@<version> ..."
         exit 1
     fi
-    
+
     # Check if backup file is empty or has no entries
     local backup_count=$(jq 'keys | length' "$backup_path" 2>/dev/null)
     if [[ -z "$backup_count" || "$backup_count" -eq 0 ]]; then
@@ -476,31 +477,31 @@ do_unlink() {
         echo "  Or: rm $backup_path && cd $package_json_path && npm install"
         exit 1
     fi
-    
+
     local unlinked_any=false
     local missing_backups=()
-    
+
     echo "Unlinking packages..."
-    
+
     for workspace in "${WORKSPACE_PACKAGES[@]}"; do
         local package_name=$(get_package_name "$workspace")
-        
+
         if package_exists_in_external "$package_name" "$external_package_json"; then
             local current_version=$(get_current_version "$package_name" "$external_package_json")
-            
+
             if ! is_linked "$current_version"; then
                 continue
             fi
-            
+
             local original_version=$(jq -r ".[\"$package_name\"] // empty" "$backup_path")
-            
+
             if [[ -z "$original_version" ]]; then
                 missing_backups+=("$package_name")
                 continue
             fi
-            
+
             echo -n "  Restoring $package_name@$original_version... "
-            
+
             # Update package.json directly using jq instead of npm install
             # Use the correct dependency section based on target mode
             local tmp=$(mktemp)
@@ -514,7 +515,7 @@ do_unlink() {
             fi
         fi
     done
-    
+
     # Check if all packages are unlinked, then restore lockfile and run npm install
     if [[ "$unlinked_any" == true ]]; then
         local all_unlinked=true
@@ -528,7 +529,7 @@ do_unlink() {
                 fi
             fi
         done
-        
+
         if [[ "$all_unlinked" == true ]]; then
             rm -f "$backup_path"
             # Restore package-lock.json if backup exists and run npm install from lock root
@@ -541,14 +542,14 @@ do_unlink() {
             (cd "$lock_path" && npm install --silent 2>/dev/null)
         fi
     fi
-    
+
     # Show warning for packages with missing backups
     if [[ ${#missing_backups[@]} -gt 0 ]]; then
         echo ""
         log_warning "Missing backup for: ${missing_backups[*]}"
         echo "  Manually restore: cd $package_json_path && npm install <package>@<version>"
     fi
-    
+
     # Show status
     show_status "$target_root"
 }
@@ -559,11 +560,11 @@ do_unlink() {
 
 main() {
     check_jq
-    
+
     local command=""
     local target_root=""
     local target_specified=false
-    
+
     # Parse arguments
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -618,16 +619,16 @@ main() {
                 ;;
         esac
     done
-    
+
     # Default to perses if no target specified
     if [[ "$target_specified" == false ]]; then
         TARGET_MODE="perses"
         target_root="$DEFAULT_PERSES_ROOT"
     fi
-    
+
     # Configure paths and settings based on target mode
     configure_target_mode
-    
+
     # Resolve to absolute path
     if [[ ! "$target_root" = /* ]]; then
         target_root="$(cd "$SHARED_ROOT" && cd "$target_root" 2>/dev/null && pwd)" || {
@@ -635,13 +636,13 @@ main() {
             exit 1
         }
     fi
-    
+
     # Check if target root exists
     if [[ ! -d "$target_root" ]]; then
         log_error "Target repository not found at: $target_root"
         exit 1
     fi
-    
+
     # Check if package.json directory exists
     local package_json_path="$target_root/$PACKAGE_JSON_RELATIVE_PATH"
     if [[ ! -d "$package_json_path" ]]; then
@@ -649,7 +650,7 @@ main() {
         log_error "Make sure the repository has the expected structure."
         exit 1
     fi
-    
+
     # Execute command (default to 'link' if no command specified)
     case "$command" in
         link|"")

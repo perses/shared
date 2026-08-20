@@ -135,7 +135,7 @@ export function parseFormat(format: string | undefined): InterpolationFormat | u
 export function replaceDataFields(
   template: string,
   item: DataItem,
-  options: ReplaceDataFieldsOptions = {}
+  options: ReplaceDataFieldsOptions = {},
 ): InterpolationResult {
   const { urlEncode = true, index, count } = options;
   let result = template;
@@ -164,12 +164,12 @@ export function replaceDataFields(
         interpolationResult = interpolate(
           Object.values(item).map((v) => JSON.stringify(v)),
           '',
-          interpolationFormat
+          interpolationFormat,
         );
       }
 
       return interpolationResult;
-    }
+    },
   );
 
   // Reset regex lastIndex
@@ -205,7 +205,7 @@ export function replaceDataFields(
       }
 
       return value;
-    }
+    },
   );
 
   return { text: result, errors: errors.length > 0 ? errors : undefined };
@@ -230,7 +230,7 @@ export function replaceDataFields(
 export function replaceDataFieldsBatch(
   template: string,
   items: DataItem[],
-  options: ReplaceDataFieldsOptions = {}
+  options: ReplaceDataFieldsOptions = {},
 ): InterpolationResult {
   const { urlEncode = true } = options;
   let result = template;
@@ -252,7 +252,7 @@ export function replaceDataFieldsBatch(
       const interpolationResult = interpolate(
         Object.values(items).map((e) => JSON.stringify(e)),
         '',
-        interpolationFormat
+        interpolationFormat,
       );
 
       if (!leadingQuote || !trailingQuote) {
@@ -261,7 +261,7 @@ export function replaceDataFieldsBatch(
       }
 
       return interpolationResult;
-    }
+    },
   );
 
   // Replace indexed access: ${__data[0].fields["fieldName"]} or ${__data[0].fields['fieldName']}
@@ -286,7 +286,7 @@ export function replaceDataFieldsBatch(
       const values = items.map((item) => getFieldValue(item, fieldName));
       const interpolationFormat = parseFormat(format) || InterpolationFormat.CSV;
       return interpolate(values, fieldName, interpolationFormat);
-    }
+    },
   );
 
   return { text: result, errors: errors.length > 0 ? errors : undefined };

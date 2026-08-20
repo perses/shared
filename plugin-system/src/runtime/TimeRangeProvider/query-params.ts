@@ -11,9 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useMemo, useCallback, useEffect, useState } from 'react';
-import { QueryParamConfig, useQueryParams, StringParam } from 'use-query-params';
-import { getUnixTime, isDate } from 'date-fns';
 import {
   TimeRangeValue,
   isRelativeTimeRange,
@@ -21,6 +18,10 @@ import {
   DurationString,
   AbsoluteTimeRange,
 } from '@perses-dev/spec';
+import { getUnixTime, isDate } from 'date-fns';
+import { useMemo, useCallback, useEffect, useState } from 'react';
+import { QueryParamConfig, useQueryParams, StringParam } from 'use-query-params';
+
 import { TimeRange } from './TimeRangeProvider';
 
 export type TimeOptionValue = Date | DurationString | null | undefined;
@@ -28,7 +29,7 @@ export type TimeOptionValue = Date | DurationString | null | undefined;
 /* Interprets an encoded string and returns either the string or null/undefined if not available */
 function getEncodedValue(
   input: string | Array<string | null> | null | undefined,
-  allowEmptyString?: boolean
+  allowEmptyString?: boolean,
 ): string | null | undefined {
   // '' or []
   if (!input || (input.length === 0 && (!allowEmptyString || (allowEmptyString && input !== '')))) {
@@ -62,7 +63,7 @@ export function encodeTimeRangeValue(timeOptionValue: TimeOptionValue): string |
 
 /* Converts param input to supported relative or absolute time range format */
 export function decodeTimeRangeValue(
-  input: string | Array<string | null> | null | undefined
+  input: string | Array<string | null> | null | undefined,
 ): Date | DurationString | null | undefined {
   const paramString = getEncodedValue(input);
   if (!paramString) return null;
@@ -147,7 +148,7 @@ export function useTimeRangeParams(initialTimeRange: TimeRangeValue): Pick<TimeR
         setQuery(value);
       }
     },
-    [setQuery]
+    [setQuery],
   );
 
   return { timeRange: initialTimeRange, setTimeRange: setTimeRange };
@@ -177,7 +178,7 @@ export function useInitialRefreshInterval(dashboardDuration: DurationString): Du
  * Returns refresh interval getter and setter, taking the URL query params.
  */
 export function useSetRefreshIntervalParams(
-  initialRefreshInterval?: DurationString
+  initialRefreshInterval?: DurationString,
 ): Pick<TimeRange, 'refreshInterval' | 'setRefreshInterval'> {
   const [query, setQuery] = useQueryParams(refreshIntervalQueryConfig, { updateType: 'replaceIn' });
 
@@ -196,7 +197,7 @@ export function useSetRefreshIntervalParams(
 
   const setRefreshInterval: TimeRange['setRefreshInterval'] = useCallback(
     (refresh: DurationString) => setQuery({ refresh }),
-    [setQuery]
+    [setQuery],
   );
 
   return {
@@ -219,7 +220,7 @@ export function useTimeZoneParams(initialTimeZone?: string): { timeZone: string;
     (newTz: string) => {
       setQuery({ tz: newTz });
     },
-    [setQuery]
+    [setQuery],
   );
 
   return { timeZone, setTimeZone };

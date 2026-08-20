@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import { PaletteOptions, PaletteMode } from '@mui/material';
+
 import { grey } from './colors/grey';
 
 export const greyOption = (mode: PaletteMode): PaletteOptions['grey'] => {

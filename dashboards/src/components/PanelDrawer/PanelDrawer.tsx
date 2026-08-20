@@ -25,10 +25,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
 import { Drawer, ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PanelEditorValues, useVariableValues, VariableContext } from '@perses-dev/plugin-system';
+import { PanelEditorValues } from '@perses-dev/plugin-system';
+import { ReactElement, useCallback, useMemo, useState } from 'react';
+
 import { usePanelEditor, usePanelKey } from '../../context';
+import { FixedValueVariableProvider } from '../Variables';
 import { PanelEditorForm } from './PanelEditorForm';
 
 /**
@@ -53,7 +55,7 @@ export const PanelDrawer = (): ReactElement => {
       panelEditor.applyChanges(values);
       setIsClosing(true);
     },
-    [panelEditor]
+    [panelEditor],
   );
 
   const handleClose = (): void => {
@@ -97,33 +99,14 @@ export const PanelDrawer = (): ReactElement => {
   }, [handleExited, handleSave, isOpen, panelEditor, panelKey]);
 
   // If the panel editor is using a repeat variable, we need to wrap the drawer in a VariableContext.Provider
-  if (panelEditor?.panelGroupItemId?.repeatVariable) {
+  if (panelEditor?.panelGroupItemId?.repeatVariable?.group) {
+    const [variableName, value] = panelEditor.panelGroupItemId.repeatVariable.group;
     return (
-      <RepeatVariableWrapper repeatVariable={panelEditor.panelGroupItemId.repeatVariable}>
+      <FixedValueVariableProvider variableName={variableName} value={value}>
         {drawer}
-      </RepeatVariableWrapper>
+      </FixedValueVariableProvider>
     );
   }
 
   return drawer;
 };
-
-// Wraps the drawer in a VariableContext.Provider to provide the repeat variable value
-// This is necessary for previewing panels that use repeat variables and query editor
-function RepeatVariableWrapper({
-  repeatVariable,
-  children,
-}: {
-  repeatVariable: [string, string];
-  children: ReactNode;
-}): ReactElement {
-  const variables = useVariableValues();
-
-  return (
-    <VariableContext.Provider
-      value={{ state: { ...variables, [repeatVariable[0]]: { value: repeatVariable[1], loading: false } } }}
-    >
-      {children}
-    </VariableContext.Provider>
-  );
-}
