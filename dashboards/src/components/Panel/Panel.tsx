@@ -22,13 +22,13 @@ import {
 } from '@perses-dev/components';
 import { ActionOptions, useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
 import { PanelDefinition } from '@perses-dev/spec';
+import clsx from 'clsx';
 import { ReactNode, memo, useEffect, useMemo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 
 import { PanelGroupItemId } from '../../model';
 import { PanelContent } from './PanelContent';
 import { PanelHeader, PanelHeaderProps } from './PanelHeader';
-import { PANEL_CLASS_NAME } from '../../constants/class-names';
 
 export interface PanelProps extends CardProps<'section'> {
   definition: PanelDefinition;
@@ -38,7 +38,6 @@ export interface PanelProps extends CardProps<'section'> {
   panelGroupItemId?: PanelGroupItemId;
   viewQueriesHandler?: PanelHeaderProps['viewQueriesHandler'];
   informationTooltip?: string;
-  className?: string;
 }
 
 export type PanelOptions = {
@@ -211,7 +210,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           aria-labelledby={headerId}
           aria-describedby={headerId}
           data-testid="panel"
-          className={className ? `${PANEL_CLASS_NAME} ${className}` : PANEL_CLASS_NAME}
+          className={clsx('ps-Panel', className)}
           {...others}
         >
           {!panelOptions?.hideHeader && (
