@@ -12,5 +12,6 @@
 // limitations under the License.
 
 export * from './event';
+export * from './plugin-versions';
 export * from './variables';
 export * from './csv-export';

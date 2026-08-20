@@ -17,7 +17,7 @@ import { DataQueriesProvider } from '@perses-dev/plugin-system';
 import { PanelDefinition } from '@perses-dev/spec';
 import { ReactElement, useMemo } from 'react';
 
-import { Panel } from '../Panel';
+import { Panel } from '../Panel/Panel';
 
 const PREVIEW_HEIGHT = 260;
 
@@ -28,13 +28,14 @@ export interface PanelVersionDiffProps {
   currentVersion: string;
   /** The latest available version the plugin would be updated to. */
   latestVersion: string;
+  /** The registry the plugin is pinned to, when the definition pins one. */
+  registry?: string;
 }
 
-/** Returns a copy of the panel definition with its panel plugin pinned to the given version. */
-function withPluginVersion(panelDefinition: PanelDefinition, version: string): PanelDefinition {
-  const next: PanelDefinition = JSON.parse(JSON.stringify(panelDefinition));
-  const plugin = next.spec.plugin as typeof next.spec.plugin & { metadata?: { version?: string } };
-  plugin.metadata = { ...plugin.metadata, version };
+/** Returns a copy of the panel definition with its panel plugin pinned to the given version/registry. */
+function withPluginVersion(panelDefinition: PanelDefinition, version: string, registry?: string): PanelDefinition {
+  const next = structuredClone(panelDefinition);
+  next.spec.plugin.metadata = { ...next.spec.plugin.metadata, version, ...(registry ? { registry } : {}) };
   return next;
 }
 
@@ -43,15 +44,15 @@ function withPluginVersion(panelDefinition: PanelDefinition, version: string): P
  * with the latest available version. This lets users spot new features or rendering regressions before updating.
  */
 export function PanelVersionDiff(props: PanelVersionDiffProps): ReactElement {
-  const { panelDefinition, currentVersion, latestVersion } = props;
+  const { panelDefinition, currentVersion, latestVersion, registry } = props;
 
   const currentDefinition = useMemo(
-    () => withPluginVersion(panelDefinition, currentVersion),
-    [panelDefinition, currentVersion],
+    () => withPluginVersion(panelDefinition, currentVersion, registry),
+    [panelDefinition, currentVersion, registry],
   );
   const latestDefinition = useMemo(
-    () => withPluginVersion(panelDefinition, latestVersion),
-    [panelDefinition, latestVersion],
+    () => withPluginVersion(panelDefinition, latestVersion, registry),
+    [panelDefinition, latestVersion, registry],
   );
 
   const queries = panelDefinition.spec.queries ?? [];

@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { BuiltinVariableDefinition } from '@perses-dev/spec';
+import { BuiltinVariableDefinition, Definition, PluginDefinitionMetadata } from '@perses-dev/spec';
 import { useQueries, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 
@@ -22,10 +22,11 @@ import {
   PluginType,
   PluginCompoundKey,
 } from '../model';
+import { LATEST_PLUGIN_VERSION } from '../utils/plugin-versions';
 
 export interface PluginRegistryContextType {
   getPlugin<T extends PluginType>(compoundKey: PluginCompoundKey<T>): Promise<PluginImplementation<T>>;
-  listPluginMetadata(pluginTypes: PluginType[]): Promise<PluginMetadataWithModule[]>;
+  listPluginMetadata(pluginTypes?: PluginType[]): Promise<PluginMetadataWithModule[]>;
   defaultPluginKinds?: DefaultPluginKinds;
 }
 
@@ -55,34 +56,18 @@ type UsePluginOptions<T extends PluginType> = Omit<
 >;
 
 /**
- * Optional overrides used to pin a plugin to a specific version/registry when loading it. When omitted, the latest
- * available version is resolved.
- */
-export interface UsePluginOverrides {
-  version?: string;
-  registry?: string;
-}
-
-/**
- * A plugin definition, as stored in a dashboard/datasource spec, that may carry pinned version/registry metadata. We
- * describe `metadata` locally so this keeps compiling regardless of the installed `@perses-dev/spec` version.
- */
-type PluginDefinitionLike =
-  | { kind?: string; spec?: unknown; metadata?: { version?: string; registry?: string } }
-  | undefined;
-
-/**
  * Extract the pinned version/registry from a plugin definition's `metadata`, if any. Returns `undefined` when nothing
  * is pinned so the plugin resolves to its latest available version.
  */
-export function getPluginOverrides(plugin: PluginDefinitionLike): UsePluginOverrides | undefined {
+export function getPluginOverrides(
+  plugin: Pick<Definition<unknown>, 'metadata'> | undefined,
+): PluginDefinitionMetadata | undefined {
   const metadata = plugin?.metadata;
   if (!metadata) {
     return undefined;
   }
-  // `latest` is a sentinel (see the Go plugin.LatestVersion constant) meaning "resolve the latest available version",
-  // so it must not be treated as an exact-version pin.
-  const version = metadata.version === 'latest' ? undefined : metadata.version;
+  // `latest` means "resolve the latest available version", so it must not be treated as an exact-version pin.
+  const version = metadata.version === LATEST_PLUGIN_VERSION ? undefined : metadata.version;
   const registry = metadata.registry;
   if (version === undefined && registry === undefined) {
     return undefined;
@@ -100,7 +85,7 @@ export function usePlugin<T extends PluginType>(
   pluginType: T | undefined,
   kind: string,
   options?: UsePluginOptions<T>,
-  overrides?: UsePluginOverrides,
+  overrides?: PluginDefinitionMetadata,
 ): UseQueryResult<PluginImplementation<T>, Error> {
   const { version, registry } = overrides ?? {};
   // We never want to ask for a plugin when the kind isn't set yet, so disable those queries automatically
@@ -119,10 +104,16 @@ export function usePlugin<T extends PluginType>(
 /**
  * A plugin reference to load, optionally pinned to a specific version/registry.
  */
-export interface UsePluginsItem {
+export interface UsePluginsItem extends PluginDefinitionMetadata {
   kind: string;
-  version?: string;
-  registry?: string;
+}
+
+/**
+ * Full identity of a plugin to load. Two definitions pinned to different versions (or registries) of the same kind are
+ * distinct plugins and must be loaded independently.
+ */
+function getUsePluginsItemIdentity(plugin: UsePluginsItem): string {
+  return `${plugin.kind}:${plugin.version ?? ''}:${plugin.registry ?? ''}`;
 }
 
 /**
@@ -138,13 +129,11 @@ export function usePlugins<T extends PluginType>(
   // This resolves the following warning in the JS console: "[QueriesObserver]: Duplicate Queries found. This might result in unexpected behavior."
   // https://github.com/TanStack/query/issues/8224#issuecomment-2523554831
   // https://github.com/TanStack/query/issues/4187#issuecomment-1256336901
-  // Plugins are de-duplicated on their full identity (kind + version + registry) so that two definitions pinned to
-  // different versions of the same kind are still loaded independently.
-  const identity = (p: UsePluginsItem): string => `${p.kind}:${p.version ?? ''}:${p.registry ?? ''}`;
   const uniquePlugins = new Map<string, UsePluginsItem>();
   for (const p of plugins) {
-    if (!uniquePlugins.has(identity(p))) {
-      uniquePlugins.set(identity(p), p);
+    const key = getUsePluginsItemIdentity(p);
+    if (!uniquePlugins.has(key)) {
+      uniquePlugins.set(key, p);
     }
   }
   const uniqueKeys = [...uniquePlugins.keys()];
@@ -159,8 +148,9 @@ export function usePlugins<T extends PluginType>(
     }),
   });
 
-  // Re-assemble array in original order
-  return plugins.map((p) => result[uniqueKeys.indexOf(identity(p))]!);
+  // Re-assemble array in original order. Index lookups go through a Map so this stays linear on large panels.
+  const indexByIdentity = new Map(uniqueKeys.map((key, index) => [key, index]));
+  return plugins.map((p) => result[indexByIdentity.get(getUsePluginsItemIdentity(p))!]!);
 }
 
 // Allow consumers to pass useQuery options from react-query when listing metadata
@@ -170,15 +160,17 @@ type UseListPluginMetadataOptions = Omit<
 >;
 
 /**
- * Gets a list of plugin metadata for the specified plugin type and returns it, along with loading/error state.
+ * Gets a list of plugin metadata for the specified plugin types and returns it, along with loading/error state. When
+ * `pluginTypes` is omitted, the metadata of every installed plugin is returned, whatever its type.
  */
 export function useListPluginMetadata(
-  pluginTypes: PluginType[],
+  pluginTypes?: PluginType[],
   options?: UseListPluginMetadataOptions,
 ): UseQueryResult<PluginMetadataWithModule[]> {
   const { listPluginMetadata } = usePluginRegistry();
   return useQuery({
-    queryKey: ['listPluginMetadata', pluginTypes],
+    // `['*']` marks the "every plugin type" query so it gets its own cache entry.
+    queryKey: ['listPluginMetadata', pluginTypes ?? ['*']],
     queryFn: () => listPluginMetadata(pluginTypes),
     ...options,
   });

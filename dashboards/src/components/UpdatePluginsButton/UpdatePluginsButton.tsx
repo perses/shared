@@ -16,32 +16,31 @@ import { useListPluginMetadata } from '@perses-dev/plugin-system';
 import UpdateIcon from 'mdi-material-ui/Update';
 import { ReactElement, useMemo, useState } from 'react';
 
-import { useDashboard } from '../../context';
+import { useDashboard } from '../../context/useDashboard';
 import {
   buildLatestPluginVersions,
   findOutdatedPlugins,
-  isDashboardLocked,
   OutdatedPlugin,
-  PLUGIN_VERSIONING_TYPES,
   updatePluginVersions,
-} from '../../utils';
+} from '../../utils/pluginVersioning';
 import { UpdatePluginsDrawer } from '../UpdatePluginsDrawer';
 
 /**
- * Toolbar button shown next to the lock button when the dashboard is locked and at least one of its pinned plugins has
- * a newer version installed. Opens a drawer to review and select which plugins to update.
+ * Toolbar button shown when at least one plugin pinned by the dashboard has a newer version installed. Opens a drawer to
+ * review and select which plugins to update.
+ *
+ * This is not reserved to fully locked dashboards: versioning can be enforced partially (a single panel pinned from the
+ * panel editor, for instance) and those pins are just as worth updating.
  */
 export function UpdatePluginsButton(): ReactElement | null {
   const { dashboard, setDashboard } = useDashboard();
-  const { data: pluginMetadata } = useListPluginMetadata(PLUGIN_VERSIONING_TYPES);
+  const { data: pluginMetadata } = useListPluginMetadata();
   const [isDrawerOpen, setDrawerOpen] = useState(false);
 
-  const outdatedPlugins = useMemo(() => {
-    if (!isDashboardLocked(dashboard)) {
-      return [];
-    }
-    return findOutdatedPlugins(dashboard, buildLatestPluginVersions(pluginMetadata ?? []));
-  }, [dashboard, pluginMetadata]);
+  const outdatedPlugins = useMemo(
+    () => findOutdatedPlugins(dashboard, buildLatestPluginVersions(pluginMetadata ?? [])),
+    [dashboard, pluginMetadata],
+  );
 
   const handleUpdate = (plugins: OutdatedPlugin[]): void => {
     setDashboard(updatePluginVersions(dashboard, plugins));

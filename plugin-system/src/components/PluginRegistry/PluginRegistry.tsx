@@ -23,7 +23,7 @@ import {
   DefaultPluginKinds,
 } from '../../model';
 import { PluginRegistryContext } from '../../runtime';
-import { useEvent } from '../../utils';
+import { comparePluginVersions, useEvent } from '../../utils';
 import { resolvePluginKeys } from './getPluginSearchHelper';
 import { usePluginIndexes, PluginCompoundKey } from './plugin-indexes';
 
@@ -45,6 +45,33 @@ function findDevPluginKey(devPluginKeys: Set<string>, kind: string, name: string
     }
   }
   return undefined;
+}
+
+/**
+ * Returns the indexed keys (`${kind}:${name}:${registry}:${version}`) matching *every* field supplied in the query.
+ * `kind` and `name` are always compared; `registry` and `version` are only compared when they are set, so a
+ * version-only pin matches whatever registry the plugin happens to be installed under, and a registry-only pin never
+ * leaks into another registry. Results are ordered from the newest version to the oldest.
+ */
+function findMatchingPluginKeys<T extends PluginType>(
+  allKeys: Iterable<string>,
+  query: PluginCompoundKey<T>,
+): string[] {
+  const { kind, name, registry, version } = query;
+  const prefix = `${kind}:${name}:`;
+  const matches: Array<{ key: string; version: string }> = [];
+
+  for (const key of allKeys) {
+    if (!key.startsWith(prefix)) continue;
+    const parts = key.split(':');
+    if (parts.length !== 4) continue;
+    const [, , keyRegistry, keyVersion] = parts;
+    if (registry !== undefined && keyRegistry !== registry) continue;
+    if (version !== undefined && keyVersion !== version) continue;
+    matches.push({ key, version: keyVersion ?? '' });
+  }
+
+  return matches.toSorted((a, b) => comparePluginVersions(b.version, a.version)).map((match) => match.key);
 }
 
 /**
@@ -80,20 +107,17 @@ export function PluginRegistry(props: PluginRegistryProps): ReactElement {
   const getPlugin = useCallback(
     async <T extends PluginType>(compoundKeyObj: PluginCompoundKey<T>): Promise<PluginImplementation<T>> => {
       const pluginIndexes = await getPluginIndexes();
-      const { kind, name, version } = compoundKeyObj;
+      const { kind, name, version, registry } = compoundKeyObj;
+      const allKeys = pluginIndexes.pluginResourcesByNameKindRegistryVersion.keys();
 
-      let candidateKeys = resolvePluginKeys(
-        pluginIndexes.pluginResourcesByNameKindRegistryVersion.keys(),
-        compoundKeyObj,
-      );
-
-      // When a specific version is pinned, enforce an exact match and do NOT silently fall back to another (e.g. the
-      // latest) version. resolvePluginKeys() always returns the exact-match key first when a version is provided, so we
-      // only keep that first candidate.
-      if (version) {
-        candidateKeys = candidateKeys.slice(0, 1);
+      let candidateKeys: string[];
+      if (version || registry) {
+        // A pin is an exact constraint: only the plugins matching every supplied field are acceptable, and we never
+        // silently fall back to another version or another registry.
+        candidateKeys = findMatchingPluginKeys(allKeys, compoundKeyObj);
       } else {
-        // No version pinned: a plugin served by a local dev server (`percli plugin start`) wins over installed archives,
+        candidateKeys = resolvePluginKeys(allKeys, compoundKeyObj);
+        // Nothing pinned: a plugin served by a local dev server (`percli plugin start`) wins over installed archives,
         // whatever their versions. Otherwise a dev plugin whose package version is lower than an installed archive would
         // never be used, which defeats the purpose of running it in dev.
         const devKey = findDevPluginKey(pluginIndexes.devPluginKeys, kind, name);
@@ -115,9 +139,13 @@ export function PluginRegistry(props: PluginRegistryProps): ReactElement {
         if (versionlessPlugin) return versionlessPlugin as PluginImplementation<T>;
       }
 
+      const pins = [
+        version ? `version '${version}'` : undefined,
+        registry ? `registry '${registry}'` : undefined,
+      ].filter((pin) => pin !== undefined);
       throw new Error(
-        version
-          ? `A ${name} plugin for kind '${kind}' with version '${version}' is not installed`
+        pins.length > 0
+          ? `A ${name} plugin for kind '${kind}' with ${pins.join(' and ')} is not installed`
           : `A ${name} plugin for kind '${kind}' is not installed`,
       );
     },
@@ -125,8 +153,12 @@ export function PluginRegistry(props: PluginRegistryProps): ReactElement {
   );
 
   const listPluginMetadata = useCallback(
-    async (pluginTypes: PluginType[]) => {
+    async (pluginTypes?: PluginType[]) => {
       const pluginIndexes = await getPluginIndexes();
+      if (pluginTypes === undefined) {
+        // No filter: return the metadata of every installed plugin, whatever its type.
+        return [...pluginIndexes.pluginMetadataByKind.values()].flat();
+      }
       return pluginTypes.flatMap((type) => pluginIndexes.pluginMetadataByKind.get(type) ?? []);
     },
     [getPluginIndexes],

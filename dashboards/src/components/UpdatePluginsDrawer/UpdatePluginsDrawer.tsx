@@ -29,8 +29,8 @@ import ChevronDown from 'mdi-material-ui/ChevronDown';
 import ChevronUp from 'mdi-material-ui/ChevronUp';
 import { ReactElement, useMemo, useState } from 'react';
 
-import { useDashboard } from '../../context';
-import { OutdatedPlugin, getOutdatedPluginId } from '../../utils';
+import { useDashboard } from '../../context/useDashboard';
+import { OutdatedPlugin, getOutdatedPluginId } from '../../utils/pluginVersioning';
 import { PanelVersionDiff } from './PanelVersionDiff';
 
 export interface UpdatePluginsDrawerProps {
@@ -43,9 +43,9 @@ export interface UpdatePluginsDrawerProps {
 }
 
 /**
- * Drawer listing every outdated plugin of a locked dashboard, letting the user pick which ones to update to their
- * latest available version. Panel plugins can be expanded to show a side-by-side preview of a representative panel
- * rendered with the current and the new plugin version.
+ * Drawer listing every plugin the dashboard pins to an outdated version, letting the user pick which ones to update to
+ * their latest available version. Panel plugins can be expanded to show a side-by-side preview of a representative
+ * panel rendered with the current and the new plugin version.
  */
 export function UpdatePluginsDrawer(props: UpdatePluginsDrawerProps): ReactElement {
   const { isOpen, outdatedPlugins, onUpdate, onClose } = props;
@@ -53,33 +53,47 @@ export function UpdatePluginsDrawer(props: UpdatePluginsDrawerProps): ReactEleme
   const panels = dashboard.spec.panels ?? {};
 
   // Selected plugin ids. Everything starts unselected so updating is always an explicit action.
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [expandedIds, setExpandedIds] = useState<string[]>([]);
+  // Sets, because these ids are looked up once per rendered row.
+  const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set());
+  const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(new Set());
 
-  const allIds = useMemo(() => outdatedPlugins.map((plugin) => getOutdatedPluginId(plugin)), [outdatedPlugins]);
-  const selectedCount = selectedIds.length;
-  const isAllSelected = allIds.length > 0 && selectedCount === allIds.length;
+  const allIds = useMemo(
+    () => new Set(outdatedPlugins.map((plugin) => getOutdatedPluginId(plugin))),
+    [outdatedPlugins],
+  );
+  const selectedCount = selectedIds.size;
+  const isAllSelected = allIds.size > 0 && selectedCount === allIds.size;
   const isPartiallySelected = selectedCount > 0 && !isAllSelected;
 
   const toggleAll = (): void => {
-    setSelectedIds(isAllSelected ? [] : allIds);
+    setSelectedIds(isAllSelected ? new Set() : new Set(allIds));
   };
 
-  const toggleOne = (id: string): void => {
-    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+  const toggleId = (setIds: typeof setSelectedIds, id: string): void => {
+    setIds((prev) => {
+      const next = new Set(prev);
+      if (!next.delete(id)) {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
-  const toggleExpanded = (id: string): void => {
-    setExpandedIds((prev) => (prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]));
+  const resetSelection = (): void => {
+    setSelectedIds(new Set());
+    setExpandedIds(new Set());
   };
 
   const handleUpdate = (): void => {
-    onUpdate(outdatedPlugins.filter((plugin) => selectedIds.includes(getOutdatedPluginId(plugin))));
+    const selection = outdatedPlugins.filter((plugin) => selectedIds.has(getOutdatedPluginId(plugin)));
+    // The parent closes the drawer without going through `handleClose`, so reset here too: otherwise a partial update
+    // would leave stale selections behind and re-enable Update on plugins that are already up to date.
+    resetSelection();
+    onUpdate(selection);
   };
 
   const handleClose = (): void => {
-    setSelectedIds([]);
-    setExpandedIds([]);
+    resetSelection();
     onClose();
   };
 
@@ -127,7 +141,7 @@ export function UpdatePluginsDrawer(props: UpdatePluginsDrawerProps): ReactEleme
           <Stack divider={<Divider />}>
             {outdatedPlugins.map((plugin) => {
               const id = getOutdatedPluginId(plugin);
-              const isExpanded = expandedIds.includes(id);
+              const isExpanded = expandedIds.has(id);
               // Only panel plugins can be previewed, and only if we found a panel using them.
               const examplePanel =
                 plugin.pluginType === 'Panel' && plugin.examplePanelKey ? panels[plugin.examplePanelKey] : undefined;
@@ -136,8 +150,8 @@ export function UpdatePluginsDrawer(props: UpdatePluginsDrawerProps): ReactEleme
                 <Box key={id} py={1} data-testid="outdated-plugin">
                   <Stack direction="row" alignItems="center" spacing={1}>
                     <Checkbox
-                      checked={selectedIds.includes(id)}
-                      onChange={() => toggleOne(id)}
+                      checked={selectedIds.has(id)}
+                      onChange={() => toggleId(setSelectedIds, id)}
                       inputProps={{ 'aria-label': `Select ${plugin.kind}` }}
                     />
                     <Stack flex={1} minWidth={0}>
@@ -162,7 +176,7 @@ export function UpdatePluginsDrawer(props: UpdatePluginsDrawerProps): ReactEleme
                     </Stack>
                     {examplePanel && (
                       <IconButton
-                        onClick={() => toggleExpanded(id)}
+                        onClick={() => toggleId(setExpandedIds, id)}
                         aria-label={isExpanded ? `Hide preview of ${plugin.kind}` : `Show preview of ${plugin.kind}`}
                         aria-expanded={isExpanded}
                       >
@@ -179,6 +193,7 @@ export function UpdatePluginsDrawer(props: UpdatePluginsDrawerProps): ReactEleme
                             panelDefinition={examplePanel}
                             currentVersion={plugin.currentVersion}
                             latestVersion={plugin.latestVersion}
+                            registry={plugin.registry}
                           />
                         </ErrorBoundary>
                       </Box>

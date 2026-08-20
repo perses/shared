@@ -18,14 +18,14 @@ import LockOpenOutline from 'mdi-material-ui/LockOpenOutline';
 import LockOutline from 'mdi-material-ui/LockOutline';
 import { ReactElement, useCallback, useMemo, useState } from 'react';
 
-import { useDashboard } from '../../context';
+import { useDashboard } from '../../context/useDashboard';
 import {
   applyPluginVersions,
   buildLatestPluginVersions,
+  hasPinnedPluginVersions,
   isDashboardLocked,
-  PLUGIN_VERSIONING_TYPES,
   removePluginVersions,
-} from '../../utils';
+} from '../../utils/pluginVersioning';
 
 /**
  * Toolbar button that "locks" or "unlocks" the dashboard.
@@ -34,60 +34,78 @@ import {
  * currently available in the Perses instance, by setting `plugin.metadata.version`. Unlocking removes that pinned
  * version so the plugins float on the latest available version again.
  *
+ * A dashboard can also be versioned partially (a single panel pinned from the panel editor, for instance). In that case
+ * both actions are offered: locking completes the pinning, unlocking clears it.
+ *
  * Both actions are confirmed through a dialog explaining their consequences before the dashboard is updated.
  */
 export function LockDashboardButton(): ReactElement {
   const { dashboard, setDashboard } = useDashboard();
-  const { data: pluginMetadata, isLoading } = useListPluginMetadata(PLUGIN_VERSIONING_TYPES);
-  const [isConfirmationOpen, setConfirmationOpen] = useState(false);
+  const { data: pluginMetadata, isLoading } = useListPluginMetadata();
+  const [pendingAction, setPendingAction] = useState<'lock' | 'unlock' | undefined>(undefined);
 
-  const locked = useMemo(() => isDashboardLocked(dashboard), [dashboard]);
+  const isLocked = useMemo(() => isDashboardLocked(dashboard), [dashboard]);
+  const hasPins = useMemo(() => hasPinnedPluginVersions(dashboard), [dashboard]);
 
-  const openConfirmation = useCallback((): void => setConfirmationOpen(true), []);
-  const closeConfirmation = useCallback((): void => setConfirmationOpen(false), []);
+  const closeConfirmation = useCallback((): void => setPendingAction(undefined), []);
 
   const handleConfirm = useCallback((): void => {
-    if (locked) {
+    if (pendingAction === 'unlock') {
       setDashboard(removePluginVersions(dashboard));
-    } else {
-      const versions = buildLatestPluginVersions(pluginMetadata ?? []);
-      setDashboard(applyPluginVersions(dashboard, versions));
+    } else if (pendingAction === 'lock') {
+      setDashboard(applyPluginVersions(dashboard, buildLatestPluginVersions(pluginMetadata ?? [])));
     }
-    setConfirmationOpen(false);
-  }, [dashboard, locked, pluginMetadata, setDashboard]);
+    setPendingAction(undefined);
+  }, [dashboard, pendingAction, pluginMetadata, setDashboard]);
 
-  const label = locked ? 'Unlock' : 'Lock';
-  const tooltip = locked ? 'Remove the pinned plugin versions' : 'Pin every plugin to its latest version';
+  const isUnlockAction = pendingAction === 'unlock';
+  const confirmLabel = isUnlockAction ? 'Unlock' : 'Lock';
 
   return (
     <>
-      <Tooltip title={tooltip} placement="bottom">
-        <span>
-          <Button
-            onClick={openConfirmation}
-            // When unlocked we need the plugin metadata to resolve the latest versions to pin.
-            disabled={!locked && isLoading}
-            startIcon={locked ? <LockOpenOutline /> : <LockOutline />}
-            variant="outlined"
-            color="secondary"
-            sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
-          >
-            {label}
-          </Button>
-        </span>
-      </Tooltip>
-      <Dialog open={isConfirmationOpen} onClose={closeConfirmation} aria-labelledby="lock-dashboard-dialog">
+      {!isLocked && (
+        <Tooltip title="Pin every plugin to its latest version" placement="bottom">
+          <span>
+            <Button
+              onClick={() => setPendingAction('lock')}
+              disabled={isLoading}
+              startIcon={<LockOutline />}
+              variant="outlined"
+              color="secondary"
+              sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
+            >
+              Lock
+            </Button>
+          </span>
+        </Tooltip>
+      )}
+      {hasPins && (
+        <Tooltip title="Remove the pinned plugin versions" placement="bottom">
+          <span>
+            <Button
+              onClick={() => setPendingAction('unlock')}
+              startIcon={<LockOpenOutline />}
+              variant="outlined"
+              color="secondary"
+              sx={{ whiteSpace: 'nowrap', minWidth: 'auto' }}
+            >
+              Unlock
+            </Button>
+          </span>
+        </Tooltip>
+      )}
+      <Dialog open={pendingAction !== undefined} onClose={closeConfirmation} aria-labelledby="lock-dashboard-dialog">
         <Dialog.Header id="lock-dashboard-dialog" onClose={closeConfirmation}>
-          {locked ? 'Unlock Dashboard' : 'Lock Dashboard'}
+          {isUnlockAction ? 'Unlock Dashboard' : 'Lock Dashboard'}
         </Dialog.Header>
         <Dialog.Content>
-          {locked
+          {isUnlockAction
             ? 'Unlocking removes the plugin versions pinned on this dashboard. Its panels, queries, variables, datasources and annotations will use the latest plugin versions available in this Perses instance, so their behavior may change when those plugins are updated.'
-            : 'Locking pins every plugin used by this dashboard (panels, queries, variables, datasources and annotations) to the latest version currently available in this Perses instance. The dashboard keeps using those exact versions, even after the plugins are updated.'}
+            : 'Locking pins every plugin used by this dashboard (panels, queries, variables, datasources and annotations) to the latest version currently available in this Perses instance. The dashboard keeps using those exact versions, even after the plugins are updated. Plugins that are not installed in this instance cannot be pinned.'}
           {' The change only applies once you save the dashboard.'}
         </Dialog.Content>
         <Dialog.Actions>
-          <Dialog.PrimaryButton onClick={handleConfirm}>{label}</Dialog.PrimaryButton>
+          <Dialog.PrimaryButton onClick={handleConfirm}>{confirmLabel}</Dialog.PrimaryButton>
           <Dialog.SecondaryButton onClick={closeConfirmation}>Cancel</Dialog.SecondaryButton>
         </Dialog.Actions>
       </Dialog>

@@ -16,13 +16,13 @@ import { PluginMetadataWithModule } from '@perses-dev/plugin-system';
 
 import {
   applyPluginVersions,
-  buildAvailablePluginVersions,
   buildLatestPluginVersions,
-  compareVersions,
-  findInvalidPinnedVersions,
   findOutdatedPlugins,
   getOutdatedPluginId,
+  getPluginIdentityKey,
+  hasPinnedPluginVersions,
   isDashboardLocked,
+  LatestPluginVersions,
   removePluginVersions,
   updatePluginVersions,
 } from './pluginVersioning';
@@ -31,15 +31,31 @@ function buildMetadata(
   kind: string,
   name: string,
   moduleVersion: string,
-  pluginVersion?: string,
+  options?: { pluginVersion?: string; registry?: string },
 ): PluginMetadataWithModule {
   return {
     kind,
-    metadata: pluginVersion ? { version: pluginVersion } : undefined,
+    metadata: options?.pluginVersion ? { version: options.pluginVersion } : undefined,
     spec: { name, display: { name } },
-    module: { name: `${name}-module`, version: moduleVersion },
+    module: { name: `${name}-module`, version: moduleVersion, registry: options?.registry },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
+}
+
+/** Build the version map used by `applyPluginVersions` from a plain `pluginType:kind -> version` record. */
+function buildVersions(entries: Array<[pluginType: string, kind: string, version: string]>): LatestPluginVersions {
+  return new Map(entries.map(([pluginType, kind, version]) => [getPluginIdentityKey({ pluginType, kind }), version]));
+}
+
+/** Every plugin of the test dashboard, pinned to the same version. */
+function allPluginsAt(version: string): LatestPluginVersions {
+  return buildVersions([
+    ['Panel', 'TimeSeriesChart', version],
+    ['TimeSeriesQuery', 'PrometheusTimeSeriesQuery', version],
+    ['Variable', 'PrometheusLabelValuesVariable', version],
+    ['Datasource', 'PrometheusDatasource', version],
+    ['Annotation', 'TempoAnnotation', version],
+  ]);
 }
 
 function buildDashboard(): DashboardResource {
@@ -100,44 +116,66 @@ function buildDashboard(): DashboardResource {
   };
 }
 
-describe('compareVersions', () => {
-  test.each([
-    ['1.0.0', '1.0.0', 0],
-    ['1.2.0', '1.1.9', 1],
-    ['1.1.0', '1.2.0', -1],
-    ['v2.0.0', '1.9.9', 1],
-    ['0.10.0', '0.9.0', 1],
-  ])('compareVersions(%s, %s)', (a, b, expected) => {
-    expect(Math.sign(compareVersions(a as string, b as string))).toBe(expected);
-  });
-});
-
 describe('buildLatestPluginVersions', () => {
-  test('keeps the highest version per plugin name and prefers plugin-level version', () => {
-    const metadata: PluginMetadataWithModule[] = [
+  test('keeps the highest version per plugin identity and prefers plugin-level version', () => {
+    const versions = buildLatestPluginVersions([
       buildMetadata('Panel', 'TimeSeriesChart', '0.1.0'),
       buildMetadata('Panel', 'TimeSeriesChart', '0.3.0'),
       buildMetadata('Panel', 'TimeSeriesChart', '0.2.0'),
-      buildMetadata('TimeSeriesQuery', 'PrometheusTimeSeriesQuery', '1.0.0', '2.0.0'),
-    ];
-    const versions = buildLatestPluginVersions(metadata);
-    expect(versions.get('TimeSeriesChart')).toBe('0.3.0');
+      buildMetadata('TimeSeriesQuery', 'PrometheusTimeSeriesQuery', '1.0.0', { pluginVersion: '2.0.0' }),
+    ]);
+    expect(versions.get(getPluginIdentityKey({ pluginType: 'Panel', kind: 'TimeSeriesChart' }))).toBe('0.3.0');
     // plugin-level version wins over module version
-    expect(versions.get('PrometheusTimeSeriesQuery')).toBe('2.0.0');
+    expect(
+      versions.get(getPluginIdentityKey({ pluginType: 'TimeSeriesQuery', kind: 'PrometheusTimeSeriesQuery' })),
+    ).toBe('2.0.0');
+  });
+
+  test('a pre-release never wins over its stable release', () => {
+    const versions = buildLatestPluginVersions([
+      buildMetadata('Panel', 'TimeSeriesChart', '1.0.0'),
+      buildMetadata('Panel', 'TimeSeriesChart', '1.0.0-beta'),
+    ]);
+    expect(versions.get(getPluginIdentityKey({ pluginType: 'Panel', kind: 'TimeSeriesChart' }))).toBe('1.0.0');
+  });
+
+  test('the same kind in two registries keeps a version per registry', () => {
+    const versions = buildLatestPluginVersions([
+      buildMetadata('Panel', 'TimeSeriesChart', '1.0.0', { registry: 'a' }),
+      buildMetadata('Panel', 'TimeSeriesChart', '2.0.0', { registry: 'b' }),
+    ]);
+    expect(versions.get(getPluginIdentityKey({ pluginType: 'Panel', kind: 'TimeSeriesChart', registry: 'a' }))).toBe(
+      '1.0.0',
+    );
+    expect(versions.get(getPluginIdentityKey({ pluginType: 'Panel', kind: 'TimeSeriesChart', registry: 'b' }))).toBe(
+      '2.0.0',
+    );
+    // Without a pinned registry, the latest version across registries is used.
+    expect(versions.get(getPluginIdentityKey({ pluginType: 'Panel', kind: 'TimeSeriesChart' }))).toBe('2.0.0');
+  });
+
+  test('the same kind under two plugin types is versioned independently', () => {
+    const versions = buildLatestPluginVersions([
+      buildMetadata('Panel', 'Shared', '1.0.0'),
+      buildMetadata('Variable', 'Shared', '2.0.0'),
+    ]);
+    expect(versions.get(getPluginIdentityKey({ pluginType: 'Panel', kind: 'Shared' }))).toBe('1.0.0');
+    expect(versions.get(getPluginIdentityKey({ pluginType: 'Variable', kind: 'Shared' }))).toBe('2.0.0');
   });
 });
 
 describe('applyPluginVersions / removePluginVersions / isDashboardLocked', () => {
-  const versions = new Map<string, string>([
-    ['TimeSeriesChart', '1.0.0'],
-    ['PrometheusTimeSeriesQuery', '1.1.0'],
-    ['PrometheusLabelValuesVariable', '1.2.0'],
-    ['PrometheusDatasource', '1.3.0'],
-    ['TempoAnnotation', '1.4.0'],
+  const versions = buildVersions([
+    ['Panel', 'TimeSeriesChart', '1.0.0'],
+    ['TimeSeriesQuery', 'PrometheusTimeSeriesQuery', '1.1.0'],
+    ['Variable', 'PrometheusLabelValuesVariable', '1.2.0'],
+    ['Datasource', 'PrometheusDatasource', '1.3.0'],
+    ['Annotation', 'TempoAnnotation', '1.4.0'],
   ]);
 
-  test('a fresh dashboard is not locked', () => {
+  test('a fresh dashboard is neither locked nor pinned', () => {
     expect(isDashboardLocked(buildDashboard())).toBe(false);
+    expect(hasPinnedPluginVersions(buildDashboard())).toBe(false);
   });
 
   test('applies versions to every plugin definition and marks the dashboard as locked', () => {
@@ -162,91 +200,47 @@ describe('applyPluginVersions / removePluginVersions / isDashboardLocked', () =>
   });
 
   test('removePluginVersions reverts the lock', () => {
-    const dashboard = buildDashboard();
-    const locked = applyPluginVersions(dashboard, versions);
+    const locked = applyPluginVersions(buildDashboard(), versions);
     const unlocked = removePluginVersions(locked);
 
     expect(isDashboardLocked(unlocked)).toBe(false);
+    expect(hasPinnedPluginVersions(unlocked)).toBe(false);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((unlocked.spec.panels.panel1 as any).spec.plugin.metadata).toBeUndefined();
   });
 
   test('plugins without an available version are left unpinned', () => {
-    const dashboard = buildDashboard();
-    const partial = applyPluginVersions(dashboard, new Map([['TimeSeriesChart', '1.0.0']]));
+    const partial = applyPluginVersions(buildDashboard(), buildVersions([['Panel', 'TimeSeriesChart', '1.0.0']]));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((partial.spec.panels.panel1 as any).spec.plugin.metadata.version).toBe('1.0.0');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect((partial.spec.datasources!.ds1 as any).plugin.metadata).toBeUndefined();
   });
-});
 
-describe('buildAvailablePluginVersions / findInvalidPinnedVersions', () => {
-  const available = buildAvailablePluginVersions([
-    buildMetadata('Panel', 'TimeSeriesChart', '1.0.0'),
-    buildMetadata('Panel', 'TimeSeriesChart', '2.0.0'),
-    buildMetadata('TimeSeriesQuery', 'PrometheusTimeSeriesQuery', '1.1.0'),
-    buildMetadata('Variable', 'PrometheusLabelValuesVariable', '1.2.0'),
-    buildMetadata('Datasource', 'PrometheusDatasource', '1.3.0'),
-    buildMetadata('Annotation', 'TempoAnnotation', '1.4.0'),
-  ]);
-
-  test('collects every available version per plugin name', () => {
-    expect(available.get('TimeSeriesChart')).toEqual(new Set(['1.0.0', '2.0.0']));
+  test('a partially pinned dashboard is pinned but not locked', () => {
+    const partial = applyPluginVersions(buildDashboard(), buildVersions([['Panel', 'TimeSeriesChart', '1.0.0']]));
+    expect(hasPinnedPluginVersions(partial)).toBe(true);
+    expect(isDashboardLocked(partial)).toBe(false);
   });
 
-  test('no invalid pins when all pinned versions exist', () => {
-    const dashboard = applyPluginVersions(
-      buildDashboard(),
-      new Map<string, string>([
-        ['TimeSeriesChart', '2.0.0'],
-        ['PrometheusTimeSeriesQuery', '1.1.0'],
-        ['PrometheusLabelValuesVariable', '1.2.0'],
-        ['PrometheusDatasource', '1.3.0'],
-        ['TempoAnnotation', '1.4.0'],
-      ]),
-    );
-    expect(findInvalidPinnedVersions(dashboard, available)).toEqual([]);
-  });
-
-  test('reports pins whose version is not available', () => {
-    const dashboard = applyPluginVersions(
-      buildDashboard(),
-      new Map<string, string>([
-        ['TimeSeriesChart', '99.0.0'], // not available
-        ['PrometheusTimeSeriesQuery', '1.1.0'], // available
-      ]),
-    );
-    const invalid = findInvalidPinnedVersions(dashboard, available);
-    expect(invalid).toEqual([{ kind: 'TimeSeriesChart', version: '99.0.0' }]);
-  });
-
-  test('unpinned dashboards have no invalid pins', () => {
-    expect(findInvalidPinnedVersions(buildDashboard(), available)).toEqual([]);
+  test('the `latest` sentinel does not count as a pin', () => {
+    const sentinel = applyPluginVersions(buildDashboard(), allPluginsAt('latest'));
+    expect(hasPinnedPluginVersions(sentinel)).toBe(false);
+    expect(isDashboardLocked(sentinel)).toBe(false);
   });
 });
 
 describe('findOutdatedPlugins / updatePluginVersions', () => {
-  const latest = new Map<string, string>([
-    ['TimeSeriesChart', '2.0.0'],
-    ['PrometheusTimeSeriesQuery', '1.5.0'],
-    ['PrometheusLabelValuesVariable', '1.2.0'],
-    ['PrometheusDatasource', '1.3.0'],
-    ['TempoAnnotation', '1.4.0'],
+  const latest = buildVersions([
+    ['Panel', 'TimeSeriesChart', '2.0.0'],
+    ['TimeSeriesQuery', 'PrometheusTimeSeriesQuery', '1.5.0'],
+    ['Variable', 'PrometheusLabelValuesVariable', '1.2.0'],
+    ['Datasource', 'PrometheusDatasource', '1.3.0'],
+    ['Annotation', 'TempoAnnotation', '1.4.0'],
   ]);
 
   // Lock everything to an older version so every plugin is outdated.
-  const lockedOld = (): DashboardResource =>
-    applyPluginVersions(
-      buildDashboard(),
-      new Map<string, string>([
-        ['TimeSeriesChart', '1.0.0'],
-        ['PrometheusTimeSeriesQuery', '1.0.0'],
-        ['PrometheusLabelValuesVariable', '1.0.0'],
-        ['PrometheusDatasource', '1.0.0'],
-        ['TempoAnnotation', '1.0.0'],
-      ]),
-    );
+  const lockedOld = (): DashboardResource => applyPluginVersions(buildDashboard(), allPluginsAt('1.0.0'));
 
   test('an unpinned dashboard reports nothing as outdated', () => {
     expect(findOutdatedPlugins(buildDashboard(), latest)).toEqual([]);
@@ -259,7 +253,7 @@ describe('findOutdatedPlugins / updatePluginVersions', () => {
 
   test('detects outdated plugins with their type, versions and example panel', () => {
     const outdated = findOutdatedPlugins(lockedOld(), latest);
-    const kinds = outdated.map((o) => o.kind).sort();
+    const kinds = outdated.map((o) => o.kind).toSorted();
     expect(kinds).toEqual([
       'PrometheusDatasource',
       'PrometheusLabelValuesVariable',
@@ -268,8 +262,7 @@ describe('findOutdatedPlugins / updatePluginVersions', () => {
       'TimeSeriesChart',
     ]);
 
-    const panelPlugin = outdated.find((o) => o.kind === 'TimeSeriesChart');
-    expect(panelPlugin).toMatchObject({
+    expect(outdated.find((o) => o.kind === 'TimeSeriesChart')).toMatchObject({
       pluginType: 'Panel',
       currentVersion: '1.0.0',
       latestVersion: '2.0.0',
@@ -286,7 +279,22 @@ describe('findOutdatedPlugins / updatePluginVersions', () => {
   });
 
   test('the `latest` sentinel is not considered outdated', () => {
-    const dashboard = applyPluginVersions(buildDashboard(), new Map([['TimeSeriesChart', 'latest']]));
+    const dashboard = applyPluginVersions(buildDashboard(), allPluginsAt('latest'));
+    expect(findOutdatedPlugins(dashboard, latest)).toEqual([]);
+  });
+
+  test('a pre-release pin is not reported as newer than its stable release', () => {
+    const dashboard = applyPluginVersions(buildDashboard(), buildVersions([['Panel', 'TimeSeriesChart', '2.0.0-rc1']]));
+    expect(findOutdatedPlugins(dashboard, latest)).toMatchObject([
+      { kind: 'TimeSeriesChart', currentVersion: '2.0.0-rc1', latestVersion: '2.0.0' },
+    ]);
+  });
+
+  test('a pin on a plugin registry that has nothing newer is left alone', () => {
+    const dashboard = applyPluginVersions(buildDashboard(), buildVersions([['Panel', 'TimeSeriesChart', '1.0.0']]));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (dashboard.spec.panels.panel1 as any).spec.plugin.metadata.registry = 'other';
+    // `latest` only knows about the registry-less identity, so nothing can be proposed for registry 'other'.
     expect(findOutdatedPlugins(dashboard, latest)).toEqual([]);
   });
 
@@ -323,12 +331,15 @@ describe('findOutdatedPlugins / updatePluginVersions', () => {
     expect(updatePluginVersions(dashboard, [])).toBe(dashboard);
   });
 
-  test('getOutdatedPluginId distinguishes plugin type, kind and version', () => {
+  test('getOutdatedPluginId distinguishes plugin type, kind, registry and version', () => {
     expect(getOutdatedPluginId({ pluginType: 'Panel', kind: 'TimeSeriesChart', currentVersion: '1.0.0' })).toBe(
-      'Panel:TimeSeriesChart:1.0.0',
+      'Panel:TimeSeriesChart::1.0.0',
     );
     expect(getOutdatedPluginId({ pluginType: 'Panel', kind: 'TimeSeriesChart', currentVersion: '1.1.0' })).not.toBe(
       getOutdatedPluginId({ pluginType: 'Panel', kind: 'TimeSeriesChart', currentVersion: '1.0.0' }),
     );
+    expect(
+      getOutdatedPluginId({ pluginType: 'Panel', kind: 'TimeSeriesChart', registry: 'a', currentVersion: '1.0.0' }),
+    ).not.toBe(getOutdatedPluginId({ pluginType: 'Panel', kind: 'TimeSeriesChart', currentVersion: '1.0.0' }));
   });
 });

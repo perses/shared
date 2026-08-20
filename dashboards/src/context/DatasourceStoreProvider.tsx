@@ -134,7 +134,6 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
     async function getClient<Client extends DatasourceClient>(selector: DatasourceSelector): Promise<Client> {
       const { kind } = selector;
       const { spec, proxyUrl } = await findDatasource(selector);
-      // Resolve the datasource plugin, honoring any version/registry pinned in the datasource spec.
       const plugin = await getPlugin({ kind: 'Datasource', name: kind, ...getPluginOverrides(spec.plugin) });
 
       // allows extending client
