@@ -21,6 +21,7 @@ export * from './time-series-queries';
 export * from './trace-queries';
 export * from './profile-queries';
 export * from './alerts-queries';
+export * from './json-queries';
 export * from './silences-queries';
 export * from './item-actions';
 export * from './DataQueriesProvider';

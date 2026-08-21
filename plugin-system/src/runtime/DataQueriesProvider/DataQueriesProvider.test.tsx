@@ -22,6 +22,7 @@ import {
   MOCK_LOG_DATA,
   MOCK_ALERTS_DATA,
   MOCK_SILENCES_DATA,
+  MOCK_JSON_DATA,
 } from '../../test';
 import { DataQueriesProvider, useDataQueries } from './DataQueriesProvider';
 
@@ -47,6 +48,10 @@ vi.mock('../alerts-queries', () => ({
 
 vi.mock('../silences-queries', () => ({
   useSilencesQueries: vi.fn().mockImplementation(() => [{ data: MOCK_SILENCES_DATA }]),
+}));
+
+vi.mock('../json-queries', () => ({
+  useJsonQueries: vi.fn().mockImplementation(() => [{ data: MOCK_JSON_DATA }]),
 }));
 
 vi.mock('../plugin-registry', () => ({
@@ -188,5 +193,28 @@ describe('useDataQueries', (): void => {
       wrapper,
     });
     expect(result.current.queryResults[0]?.data).toEqual(MOCK_SILENCES_DATA);
+  });
+
+  it('should return the correct data for JsonQuery', () => {
+    const definitions: QueryDefinition[] = [
+      {
+        kind: 'JsonQuery',
+        spec: {
+          plugin: {
+            kind: 'SomeJsonQuery',
+            spec: {},
+          },
+        },
+      },
+    ];
+
+    const wrapper = ({ children }: React.PropsWithChildren): ReactElement => {
+      return <DataQueriesProvider definitions={definitions}>{children}</DataQueriesProvider>;
+    };
+
+    const { result } = renderHook(() => useDataQueries('JsonQuery'), {
+      wrapper,
+    });
+    expect(result.current.queryResults[0]?.data).toEqual(MOCK_JSON_DATA);
   });
 });

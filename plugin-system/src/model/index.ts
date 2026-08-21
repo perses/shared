@@ -13,6 +13,7 @@
 
 export * from './annotations';
 export * from './datasource';
+export * from './json-queries';
 export * from './legend';
 export * from './log-queries';
 export * from './log-volume-utils';

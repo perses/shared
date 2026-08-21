@@ -14,19 +14,20 @@
 import { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/spec';
 import { createContext, ReactElement, useCallback, useContext, useMemo } from 'react';
 
-import { useAlertsQueries, AlertsQueryDefinition } from '../alerts-queries';
+import { AlertsQueryDefinition, useAlertsQueries } from '../alerts-queries';
+import { JsonQueryDefinition, useJsonQueries } from '../json-queries';
 import { LogQueryDefinition, useLogQueries } from '../log-queries';
-import { useProfileQueries, ProfileQueryDefinition } from '../profile-queries';
-import { useSilencesQueries, SilencesQueryDefinition } from '../silences-queries';
+import { ProfileQueryDefinition, useProfileQueries } from '../profile-queries';
+import { SilencesQueryDefinition, useSilencesQueries } from '../silences-queries';
 import { useTimeSeriesQueries } from '../time-series-queries';
-import { useTraceQueries, TraceQueryDefinition } from '../trace-queries';
+import { TraceQueryDefinition, useTraceQueries } from '../trace-queries';
 import { useUsageMetrics } from '../UsageMetricsProvider';
 import {
-  DataQueriesProviderProps,
-  UseDataQueryResults,
-  transformQueryResults,
   DataQueriesContextType,
+  DataQueriesProviderProps,
   QueryData,
+  transformQueryResults,
+  UseDataQueryResults,
 } from './model';
 
 export const DataQueriesContext = createContext<DataQueriesContextType | undefined>(undefined);
@@ -96,6 +97,9 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
   ) as SilencesQueryDefinition[];
   const silencesResults = useSilencesQueries(silencesQueries);
 
+  const jsonQueries = definitions.filter((definition) => definition.kind === 'JsonQuery') as JsonQueryDefinition[];
+  const jsonResults = useJsonQueries(jsonQueries);
+
   const refetchAll = useCallback(() => {
     timeSeriesResults.forEach((result) => result.refetch());
     traceResults.forEach((result) => result.refetch());
@@ -103,7 +107,8 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
     logResults.forEach((result) => result.refetch());
     alertsResults.forEach((result) => result.refetch());
     silencesResults.forEach((result) => result.refetch());
-  }, [timeSeriesResults, traceResults, profileResults, logResults, alertsResults, silencesResults]);
+    jsonResults.forEach((result) => result.refetch());
+  }, [timeSeriesResults, traceResults, profileResults, logResults, alertsResults, silencesResults, jsonResults]);
 
   const ctx = useMemo(() => {
     const mergedQueryResults = [
@@ -113,6 +118,7 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
       ...transformQueryResults(logResults, logQueries),
       ...transformQueryResults(alertsResults, alertsQueries),
       ...transformQueryResults(silencesResults, silencesQueries),
+      ...transformQueryResults(jsonResults, jsonQueries),
     ];
 
     if (queryOptions?.enabled) {
@@ -144,6 +150,8 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
     profileResults,
     silencesQueries,
     silencesResults,
+    jsonQueries,
+    jsonResults,
     timeSeriesQueries,
     timeSeriesResults,
     traceQueries,
