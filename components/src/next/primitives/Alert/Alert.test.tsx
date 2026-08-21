@@ -12,6 +12,10 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
+import { ReactElement, SVGProps } from 'react';
+
+import { ComponentsProvider } from '../../contexts/ComponentsProvider';
+import { DEFAULT_COMPONENTS, DEFAULT_ICONS } from '../../contexts/defaults';
 import { Alert } from './Alert';
 
 describe('Alert', () => {
@@ -52,5 +56,51 @@ describe('Alert', () => {
       expect(screen.getByRole('alert')).toHaveAttribute('data-severity', severity);
       cleanup();
     }
+  });
+
+  it('renders a default icon when icon prop is omitted', () => {
+    render(<Alert severity="info">Test</Alert>);
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).toBeInTheDocument();
+    expect(iconContainer?.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('composes the shared Icon primitive for its icon wrapper', () => {
+    render(<Alert severity="info">Test</Alert>);
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).toHaveClass('ps-Icon');
+  });
+
+  it('renders a custom icon when icon prop is provided', () => {
+    const customIcon = <svg data-testid="custom-icon" />;
+    render(<Alert icon={customIcon}>Test</Alert>);
+    expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
+  });
+
+  it('renders no icon when icon is set to null', () => {
+    render(<Alert icon={null}>Test</Alert>);
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).not.toBeInTheDocument();
+  });
+
+  it('uses provider icons when inside a ComponentsProvider', () => {
+    const CustomErrorIcon = (props: SVGProps<SVGSVGElement>): ReactElement => (
+      <svg data-testid="provider-error-icon" {...props} />
+    );
+
+    render(
+      <ComponentsProvider components={DEFAULT_COMPONENTS} icons={{ ...DEFAULT_ICONS, Error: CustomErrorIcon }}>
+        <Alert severity="error">Error</Alert>
+      </ComponentsProvider>,
+    );
+
+    expect(screen.getByTestId('provider-error-icon')).toBeInTheDocument();
+  });
+
+  it('falls back to default icons when outside a ComponentsProvider', () => {
+    render(<Alert severity="error">Error</Alert>);
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).toBeInTheDocument();
+    expect(iconContainer?.querySelector('svg')).toBeInTheDocument();
   });
 });

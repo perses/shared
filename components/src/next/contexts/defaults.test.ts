@@ -11,19 +11,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Story } from '@ladle/react';
+import { DEFAULT_COMPONENTS, DEFAULT_ICONS } from './defaults';
 
-import { Alert, AlertSeverity } from './Alert';
+describe('defaults', () => {
+  it('exports default components', () => {
+    expect(DEFAULT_COMPONENTS.Button).toBeDefined();
+    expect(DEFAULT_COMPONENTS.Alert).toBeDefined();
+  });
 
-const severities: AlertSeverity[] = ['error', 'warning', 'success', 'info'];
-
-export const AllSeverities: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-    {severities.map((severity) => (
-      <Alert key={severity} severity={severity}>
-        This is a {severity} alert.
-      </Alert>
-    ))}
-  </div>
-);
-AllSeverities.storyName = 'All Severities';
+  it('exports default icons', () => {
+    expect(DEFAULT_ICONS.Error).toBeDefined();
+    expect(DEFAULT_ICONS.Info).toBeDefined();
+    expect(DEFAULT_ICONS.Success).toBeDefined();
+    expect(DEFAULT_ICONS.Warning).toBeDefined();
+  });
+});

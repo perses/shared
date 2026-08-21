@@ -12,9 +12,47 @@
 // limitations under the License.
 
 import type { GlobalProvider } from '@ladle/react';
+import { useEffect } from 'react';
 import '@perses-dev/design-tokens/css';
+
 import '../src/next/css/index.css';
 
-export const Provider: GlobalProvider = ({ children, globalState }) => (
-  <div data-perses-mode={globalState.theme === 'dark' ? 'dark' : 'light'}>{children}</div>
-);
+export const Provider: GlobalProvider = ({ children, globalState }) => {
+  const isDark = globalState.theme === 'dark';
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-perses-mode', isDark ? 'dark' : 'light');
+
+    let style = document.getElementById('perses-dark-bg');
+    if (!style) {
+      style = document.createElement('style');
+      style.id = 'perses-dark-bg';
+      document.head.appendChild(style);
+    }
+    style.textContent = isDark
+      ? `html, body, #ladle-root, [data-storyloaded] {
+           background: var(--perses-bg-default);
+           color: var(--perses-text-primary);
+         }
+         [data-perses-mode='dark'] h1, [data-perses-mode='dark'] h2, [data-perses-mode='dark'] h3,
+         [data-perses-mode='dark'] h4, [data-perses-mode='dark'] h5, [data-perses-mode='dark'] h6,
+         [data-perses-mode='dark'] p,
+         [data-perses-mode='dark'] label { color: var(--perses-text-primary); }`
+      : '';
+
+    return (): void => {
+      style.remove();
+    };
+  }, [isDark]);
+
+  return (
+    <div
+      data-perses-mode={isDark ? 'dark' : 'light'}
+      style={{
+        minHeight: '100vh',
+      }}
+    >
+      {children}
+    </div>
+  );
+};
