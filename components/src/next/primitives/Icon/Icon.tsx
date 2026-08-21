@@ -11,19 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Story } from '@ladle/react';
+import clsx from 'clsx';
+import { forwardRef, HTMLAttributes, ReactNode } from 'react';
 
-import { Alert, AlertSeverity } from './Alert';
+import './icon.css';
 
-const severities: AlertSeverity[] = ['error', 'warning', 'success', 'info'];
+export interface IconProps extends HTMLAttributes<HTMLSpanElement> {
+  children?: ReactNode;
+}
 
-export const AllSeverities: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-    {severities.map((severity) => (
-      <Alert key={severity} severity={severity}>
-        This is a {severity} alert.
-      </Alert>
-    ))}
-  </div>
-);
-AllSeverities.storyName = 'All Severities';
+export const Icon = forwardRef<HTMLSpanElement, IconProps>(function Icon({ className, children, ...rest }, ref) {
+  return (
+    <span ref={ref} aria-hidden="true" {...rest} className={clsx('ps-Icon', className)}>
+      {children}
+    </span>
+  );
+});

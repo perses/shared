@@ -16,7 +16,7 @@
 @layer perses.components {
   .ps-Alert {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: var(--perses-spacing-sm);
     padding: var(--perses-spacing-md) var(--perses-spacing-lg);
     border: 1px solid transparent;
@@ -48,5 +48,24 @@
     background-color: var(--perses-status-bg-info);
     border-color: var(--perses-status-border-info);
     color: var(--perses-status-text-info);
+  }
+
+  /* ---- Icon ---- */
+  .ps-Alert > .ps-Icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .ps-Alert[data-severity='error'] > .ps-Icon {
+    color: var(--perses-status-icon-error);
+  }
+  .ps-Alert[data-severity='warning'] > .ps-Icon {
+    color: var(--perses-status-icon-warning);
+  }
+  .ps-Alert[data-severity='success'] > .ps-Icon {
+    color: var(--perses-status-icon-success);
+  }
+  .ps-Alert[data-severity='info'] > .ps-Icon {
+    color: var(--perses-status-icon-info);
   }
 }

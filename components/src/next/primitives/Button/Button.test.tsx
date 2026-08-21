@@ -13,6 +13,7 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { Button } from './Button';
 
 describe('Button', () => {
@@ -30,7 +31,7 @@ describe('Button', () => {
     render(
       <Button variant="outline" color="error" size="lg">
         Test
-      </Button>
+      </Button>,
     );
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('data-variant', 'outline');
@@ -54,7 +55,7 @@ describe('Button', () => {
   });
 
   it('handles click events', async () => {
-    const handleClick = jest.fn();
+    const handleClick = vi.fn();
     render(<Button onClick={handleClick}>Click</Button>);
     await userEvent.click(screen.getByRole('button'));
     expect(handleClick).toHaveBeenCalledTimes(1);
@@ -63,5 +64,34 @@ describe('Button', () => {
   it('supports disabled state', () => {
     render(<Button disabled>Disabled</Button>);
     expect(screen.getByRole('button')).toBeDisabled();
+  });
+
+  it('renders spinner when loading is true', () => {
+    const { container } = render(<Button loading>Save</Button>);
+    expect(container.querySelector('.ps-Button__spinner')).toBeInTheDocument();
+    expect(container.querySelector('.ps-Spinner')).toBeInTheDocument();
+  });
+
+  it('composes the shared Icon primitive for its spinner wrapper', () => {
+    const { container } = render(<Button loading>Save</Button>);
+    const spinnerContainer = container.querySelector('.ps-Button__spinner');
+    expect(spinnerContainer).toHaveClass('ps-Icon');
+  });
+
+  it('disables button when loading is true', () => {
+    render(<Button loading>Save</Button>);
+    expect(screen.getByRole('button')).toBeDisabled();
+  });
+
+  it('sets aria-busy and data-loading when loading', () => {
+    render(<Button loading>Save</Button>);
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(button).toHaveAttribute('data-loading');
+  });
+
+  it('does not render spinner when loading is false', () => {
+    const { container } = render(<Button>Save</Button>);
+    expect(container.querySelector('.ps-Button__spinner')).not.toBeInTheDocument();
   });
 });

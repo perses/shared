@@ -11,19 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Story } from '@ladle/react';
+import React from 'react';
 
-import { Alert, AlertSeverity } from './Alert';
-
-const severities: AlertSeverity[] = ['error', 'warning', 'success', 'info'];
-
-export const AllSeverities: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-    {severities.map((severity) => (
-      <Alert key={severity} severity={severity}>
-        This is a {severity} alert.
-      </Alert>
-    ))}
-  </div>
-);
-AllSeverities.storyName = 'All Severities';
+export function InfoIcon(props: React.SVGProps<SVGSVGElement>): React.ReactElement {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" {...props}>
+      <path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8" />
+    </svg>
+  );
+}

@@ -11,4 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-module.exports = require('../.eslintrc.base.js');
+import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../icons';
+import { Alert } from '../primitives/Alert/Alert';
+import { Button } from '../primitives/Button/Button';
+import type { PersesComponents, PersesIcons } from './ComponentsContext';
+
+export const DEFAULT_COMPONENTS: PersesComponents = {
+  Button,
+  Alert,
+};
+
+export const DEFAULT_ICONS: PersesIcons = {
+  Error: ErrorIcon,
+  Info: InfoIcon,
+  Success: SuccessIcon,
+  Warning: WarningIcon,
+};
