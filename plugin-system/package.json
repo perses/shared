@@ -32,7 +32,6 @@
     "@module-federation/enhanced": "^2.8.0",
     "@perses-dev/client": "0.55.0-beta.2",
     "@perses-dev/components": "0.55.0-beta.2",
-    "@perses-dev/core": "0.53.0",
     "@perses-dev/spec": "0.3.0-beta.2",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
