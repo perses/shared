@@ -17,6 +17,8 @@ import { PluginSpecEditor } from '@perses-dev/plugin-system';
 import { QueryDefinition } from '@perses-dev/spec';
 import React, { ReactElement, useMemo } from 'react';
 
+import { GoToExplorerButton } from './GoToExplorerButton';
+
 export interface QueryViewerDialogProps {
   open: boolean;
   queryDefinitions: QueryDefinition[];
@@ -52,6 +54,7 @@ export function QueryViewerDialog({ open, queryDefinitions, onClose }: QueryView
       <Dialog.Header>Query Viewer</Dialog.Header>
       <Dialog.Content>{queryRows}</Dialog.Content>
       <Dialog.Actions>
+        <GoToExplorerButton queryDefinitions={queryDefinitions} />
         <Button variant="outlined" color="secondary" onClick={onClose}>
           Close
         </Button>
