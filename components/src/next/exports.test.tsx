@@ -12,12 +12,7 @@
 // limitations under the License.
 
 import { ComponentsProvider, useComponents } from './index';
-import type {
-  PersesComponents,
-  PersesIcons,
-  ComponentsProviderProps,
-  ComponentsContextValue,
-} from './index';
+import type { PersesComponents, PersesIcons, ComponentsProviderProps, ComponentsContextValue } from './index';
 
 describe('next barrel exports', () => {
   it('exports the configuration API', () => {

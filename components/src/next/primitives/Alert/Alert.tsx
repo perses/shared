@@ -16,22 +16,20 @@ import { ComponentType, forwardRef, HTMLAttributes, ReactNode, SVGProps, useCont
 
 import { ComponentsContext } from '../../contexts/ComponentsContext';
 import type { PersesIcons } from '../../contexts/ComponentsContext';
-import { SuccessIcon, InfoIcon, WarningIcon, ErrorIcon } from '../Icon/icons';
 import { Icon } from '../Icon/Icon';
+import { SuccessIcon, InfoIcon, WarningIcon, ErrorIcon } from '../Icon/icons';
 
 import './alert.css';
 
 export type AlertSeverity = 'error' | 'warning' | 'success' | 'info';
 
-const SEVERITY_ICONS: Record<
-  AlertSeverity,
-  { key: keyof PersesIcons; icon: ComponentType<SVGProps<SVGSVGElement>> }
-> = {
-  success: { key: 'Success', icon: SuccessIcon },
-  info: { key: 'Info', icon: InfoIcon },
-  warning: { key: 'Warning', icon: WarningIcon },
-  error: { key: 'Error', icon: ErrorIcon },
-};
+const SEVERITY_ICONS: Record<AlertSeverity, { key: keyof PersesIcons; icon: ComponentType<SVGProps<SVGSVGElement>> }> =
+  {
+    success: { key: 'Success', icon: SuccessIcon },
+    info: { key: 'Info', icon: InfoIcon },
+    warning: { key: 'Warning', icon: WarningIcon },
+    error: { key: 'Error', icon: ErrorIcon },
+  };
 
 export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
   severity?: AlertSeverity;
@@ -61,9 +59,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
 
   return (
     <div role={role} {...rest} ref={ref} className={classes} data-severity={severity}>
-      {Boolean(resolvedIcon) && (
-        <Icon className="ps-Alert__icon">{resolvedIcon}</Icon>
-      )}
+      {Boolean(resolvedIcon) && <Icon className="ps-Alert__icon">{resolvedIcon}</Icon>}
       <div className="ps-Alert__message">{children}</div>
     </div>
   );

@@ -29,7 +29,7 @@ const WRAPPER_STYLE = { minHeight: '100vh' } as const;
 export function ThemeModeProvider({ mode, children }: ThemeModeProviderProps): ReactElement {
   useEffect(() => {
     document.documentElement.setAttribute('data-perses-mode', mode);
-    return () => document.documentElement.removeAttribute('data-perses-mode');
+    return (): void => document.documentElement.removeAttribute('data-perses-mode');
   }, [mode]);
 
   return (

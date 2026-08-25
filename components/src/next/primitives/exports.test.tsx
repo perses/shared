@@ -12,7 +12,16 @@
 // limitations under the License.
 
 import { Alert, Button, Icon, Spinner } from './index';
-import type { AlertProps, AlertSeverity, ButtonColor, ButtonProps, ButtonSize, ButtonVariant, IconProps, SpinnerProps } from './index';
+import type {
+  AlertProps,
+  AlertSeverity,
+  ButtonColor,
+  ButtonProps,
+  ButtonSize,
+  ButtonVariant,
+  IconProps,
+  SpinnerProps,
+} from './index';
 
 describe('primitives barrel exports', () => {
   it('exports the concrete component implementations', () => {

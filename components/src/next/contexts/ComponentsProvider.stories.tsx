@@ -14,12 +14,14 @@
 import type { Story } from '@ladle/react';
 import { forwardRef, ReactElement } from 'react';
 
-import { PatternFlyV6Alert, Pf6AlertDemo } from '../stories/pf6/PatternFlyV6Alert';
 import { Alert, Button, ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../primitives';
 import type { ButtonProps } from '../primitives';
+import { PatternFlyV6Alert, Pf6AlertDemo } from '../stories/pf6/PatternFlyV6Alert';
 import { ComponentsProvider, useComponents } from './ComponentsProvider';
 
 const icons = { Error: ErrorIcon, Info: InfoIcon, Success: SuccessIcon, Warning: WarningIcon };
+
+const SIZE_PADDING: Record<string, string> = { sm: '4px 8px', lg: '12px 24px', md: '8px 16px' };
 
 const CustomButton = forwardRef<HTMLButtonElement, ButtonProps>(function CustomButton(
   { children, variant = 'solid', size = 'md', loading, disabled, ...rest },
@@ -32,7 +34,7 @@ const CustomButton = forwardRef<HTMLButtonElement, ButtonProps>(function CustomB
       aria-busy={loading || undefined}
       {...rest}
       style={{
-        padding: size === 'sm' ? '4px 8px' : size === 'lg' ? '12px 24px' : '8px 16px',
+        padding: SIZE_PADDING[size] ?? '8px 16px',
         borderRadius: '4px',
         border: variant === 'outline' ? '2px solid currentColor' : '1px solid transparent',
         background: variant === 'solid' ? '#1e3a5f' : 'transparent',
