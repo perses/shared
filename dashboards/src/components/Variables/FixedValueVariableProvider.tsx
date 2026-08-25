@@ -32,7 +32,7 @@ export function FixedValueVariableProvider({
       value={{
         state: {
           ...variables,
-          [variableName]: { ...variables[variableName], value, loading: false },
+          [variableName]: { ...variables[variableName], value, displayValue: value, loading: false },
         },
       }}
     >

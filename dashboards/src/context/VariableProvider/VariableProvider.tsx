@@ -270,6 +270,7 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps): Re
       const v = { ...originalValues[name] } as VariableState;
 
       if (v.value === ALL_VALUE) {
+        v.displayValue = 'All';
         const definition = findVariableDefinitionByName(name, definitions, externalDefinitions);
         // If the variable is a list variable and has a custom all value, then use that value instead
         if (definition?.kind === 'ListVariable' && definition.spec.customAllValue) {

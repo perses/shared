@@ -11,7 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { parseVariables, replaceVariable, replaceVariables } from './variable-interpolation';
+import {
+  parseVariables,
+  replaceVariable,
+  replaceVariables,
+  replaceVariablesForDisplay,
+} from './variable-interpolation';
 
 describe('parseVariables()', () => {
   const tests = [
@@ -95,6 +100,21 @@ describe('replaceVariables()', () => {
     it(`replaces ${text} ${JSON.stringify(state)}`, () => {
       expect(replaceVariables(text, state)).toEqual(expected);
     });
+  });
+});
+
+describe('replaceVariablesForDisplay()', () => {
+  it('uses a compact display value without changing standard interpolation', () => {
+    const state = {
+      stack: {
+        value: ['stack-a', 'stack-b'],
+        displayValue: 'All',
+        loading: false,
+      },
+    };
+
+    expect(replaceVariables('Stacks: $stack', state)).toBe('Stacks: (stack-a|stack-b)');
+    expect(replaceVariablesForDisplay('Stacks: $stack', state)).toBe('Stacks: All');
   });
 });
 

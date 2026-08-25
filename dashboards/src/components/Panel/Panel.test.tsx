@@ -13,7 +13,13 @@
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { DataQueriesProvider, TimeRangeProviderBasic, useDataQueriesContext } from '@perses-dev/plugin-system';
-import { PanelDefinition, QueryDefinition } from '@perses-dev/spec';
+import {
+  DEFAULT_ALL_VALUE,
+  PanelDefinition,
+  QueryDefinition,
+  VariableDefinition,
+  VariableValue,
+} from '@perses-dev/spec';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -56,6 +62,34 @@ const testQueryDefinition = {
     },
   },
 } as QueryDefinition;
+
+const textVariableDefinitions: VariableDefinition[] = [
+  {
+    kind: 'TextVariable',
+    spec: {
+      name: 'foo',
+      value: 'bar ',
+    },
+  },
+];
+
+const allVariableDefinitions: VariableDefinition[] = [
+  {
+    kind: 'ListVariable',
+    spec: {
+      name: 'stack',
+      allowAllValue: true,
+      allowMultiple: true,
+      plugin: {
+        kind: 'StaticListVariable',
+        spec: {
+          values: ['stack-a', 'stack-b'],
+        },
+      },
+    },
+  },
+];
+const allVariableValues: Record<string, VariableValue> = { stack: DEFAULT_ALL_VALUE };
 
 function makeQueryResult(
   overrides: Partial<ReturnType<typeof useDataQueriesContext>['queryResults'][number]> = {},
@@ -153,6 +187,8 @@ describe('Panel', () => {
     definition?: PanelDefinition,
     editHandlers?: PanelProps['editHandlers'],
     panelOptions?: PanelProps['panelOptions'],
+    variableDefinitions: VariableDefinition[] = textVariableDefinitions,
+    initialVariableValues?: Record<string, VariableValue>,
   ): Promise<void> => {
     definition ??= createTestPanel();
 
@@ -160,15 +196,8 @@ describe('Panel', () => {
       <ThemeProvider theme={testTheme}>
         <TimeRangeProviderBasic initialTimeRange={{ pastDuration: '1h' }}>
           <VariableProvider
-            initialVariableDefinitions={[
-              {
-                kind: 'TextVariable',
-                spec: {
-                  name: 'foo',
-                  value: 'bar ',
-                },
-              },
-            ]}
+            initialVariableDefinitions={variableDefinitions}
+            initialVariableValues={initialVariableValues}
           >
             <DataQueriesProvider definitions={[]}>
               <Panel definition={definition} editHandlers={editHandlers} panelOptions={panelOptions} />
@@ -212,6 +241,18 @@ describe('Panel', () => {
       expect(content).toHaveTextContent('TimeSeriesChart panel');
     });
     expect(content);
+  });
+
+  it('renders an all variable selection compactly in the panel title', async () => {
+    const definition = createTestPanel();
+    if (definition.spec.display === undefined) {
+      throw new Error('Test setup error: display should be defined');
+    }
+    definition.spec.display.name = 'Stacks - $stack';
+
+    await renderPanel(definition, undefined, undefined, allVariableDefinitions, allVariableValues);
+
+    expect(screen.getByRole('banner')).toHaveTextContent('Stacks - All');
   });
 
   it('shows panel description', async () => {

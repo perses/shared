@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { CardHeader, CardHeaderProps, Stack, Typography, Tooltip } from '@mui/material';
-import { combineSx } from '@perses-dev/components';
+import { combineSx, replaceVariablesForDisplay } from '@perses-dev/components';
 import { ItemAction, QueryData, useAllVariableValues, useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { Link } from '@perses-dev/spec';
 import { ReactElement, ReactNode, useRef } from 'react';
@@ -62,9 +62,9 @@ export function PanelHeader({
   const titleElementId = `${id}-title`;
   const descriptionTooltipId = `${id}-description`;
 
-  const title = useReplaceVariablesInString(rawTitle);
-  const description = useReplaceVariablesInString(rawDescription);
   const variableState = useAllVariableValues();
+  const title = rawTitle ? replaceVariablesForDisplay(rawTitle, variableState) : undefined;
+  const description = useReplaceVariablesInString(rawDescription);
 
   const textRef = useRef<HTMLDivElement>(null);
 
