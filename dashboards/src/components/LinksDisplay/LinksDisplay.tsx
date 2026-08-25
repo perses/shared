@@ -29,6 +29,10 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isMenuOpened = Boolean(anchorEl);
   const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>): void => {
+    // Prevent this from bubbling up to an ancestor OverflowMenu's onClick={handleClose},
+    // which would close (and unmount) the overflow before this menu can open.
+    // See https://github.com/perses/perses/issues/3654
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 

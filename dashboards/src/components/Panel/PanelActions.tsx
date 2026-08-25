@@ -354,7 +354,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   );
 };
 
-const OverflowMenu: React.FC<
+export const OverflowMenu: React.FC<
   PropsWithChildren<{
     title?: string;
     icon?: ReactElement;
