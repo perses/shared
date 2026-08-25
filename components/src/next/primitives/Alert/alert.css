@@ -52,8 +52,8 @@
 
   /* ---- Icon ---- */
   .ps-Alert > .ps-Icon {
-    width: 22px;
-    height: 22px;
+    width: 1.6em;
+    height: 1.6em;
   }
 
   .ps-Alert[data-severity='error'] > .ps-Icon {

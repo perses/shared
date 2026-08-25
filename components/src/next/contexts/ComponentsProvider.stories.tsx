@@ -14,12 +14,10 @@
 import type { Story } from '@ladle/react';
 import { forwardRef, ReactElement } from 'react';
 
-import { Alert, Button, ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../primitives';
 import type { ButtonProps } from '../primitives';
 import { PatternFlyV6Alert, Pf6AlertDemo } from '../stories/pf6/PatternFlyV6Alert';
 import { ComponentsProvider, useComponents } from './ComponentsProvider';
-
-const icons = { Error: ErrorIcon, Info: InfoIcon, Success: SuccessIcon, Warning: WarningIcon };
+import { defaultComponents, defaultIcons } from './storyDefaults';
 
 const SIZE_PADDING: Record<string, string> = { sm: '4px 8px', lg: '12px 24px', md: '8px 16px' };
 
@@ -78,58 +76,15 @@ function CustomButtonDemo(): ReactElement {
 }
 
 export const CustomButtonInjection: Story = () => (
-  <ComponentsProvider components={{ Button: CustomButton, Alert }} icons={icons}>
+  <ComponentsProvider components={{ ...defaultComponents, Button: CustomButton }} icons={defaultIcons}>
     <CustomButtonDemo />
   </ComponentsProvider>
 );
 CustomButtonInjection.storyName = 'Button customization';
 
 export const PatternFlyAlertInjection: Story = () => (
-  <ComponentsProvider components={{ Button, Alert: PatternFlyV6Alert }} icons={icons}>
+  <ComponentsProvider components={{ ...defaultComponents, Alert: PatternFlyV6Alert }} icons={defaultIcons}>
     <Pf6AlertDemo />
   </ComponentsProvider>
 );
 PatternFlyAlertInjection.storyName = 'Alert customization';
-
-function TokenDemo(): ReactElement {
-  const { components } = useComponents();
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <h3 style={{ margin: 0 }}>Token Customization</h3>
-      <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>
-        Same default Button, different look — achieved by overriding CSS custom properties on a wrapper element.
-      </p>
-      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-        <components.Button variant="solid" color="primary">
-          Solid
-        </components.Button>
-        <components.Button variant="outline" color="primary">
-          Outline
-        </components.Button>
-        <components.Button variant="ghost" color="primary">
-          Ghost
-        </components.Button>
-      </div>
-    </div>
-  );
-}
-
-export const TokenCustomization: Story = () => (
-  <ComponentsProvider components={{ Button, Alert }} icons={icons}>
-    <div
-      style={
-        {
-          '--perses-status-solid-primary': '#7c3aed',
-          '--perses-status-bg-primary-hover': 'rgba(124, 58, 237, 0.15)',
-          '--perses-status-border-primary': '#7c3aed',
-          '--perses-status-bg-primary': 'rgba(124, 58, 237, 0.08)',
-          '--perses-radius-md': '4px',
-        } as React.CSSProperties
-      }
-    >
-      <TokenDemo />
-    </div>
-  </ComponentsProvider>
-);
-TokenCustomization.storyName = 'Token Customization';

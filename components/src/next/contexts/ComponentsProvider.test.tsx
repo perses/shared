@@ -25,11 +25,13 @@ const icons: PersesIcons = { Error: ErrorIcon, Info: InfoIcon, Success: SuccessI
 describe('ComponentsProvider', () => {
   it('renders components passed in via props', () => {
     function TestConsumer(): ReactElement {
-      const { components } = useComponents();
+      const {
+        components: { Button, Alert },
+      } = useComponents();
       return (
         <div>
-          <components.Button>Default Button</components.Button>
-          <components.Alert>Default Alert</components.Alert>
+          <Button>Default Button</Button>
+          <Alert>Default Alert</Alert>
         </div>
       );
     }

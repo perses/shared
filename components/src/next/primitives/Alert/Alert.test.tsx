@@ -61,17 +61,34 @@ describe('Alert', () => {
     }
   });
 
-  it('renders a default icon when icon prop is omitted', () => {
+  it('renders no icon when icon prop is omitted', () => {
     render(<Alert severity="info">Test</Alert>);
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).not.toBeInTheDocument();
+  });
+
+  it('renders the built-in icon matching a severity key passed to icon', () => {
+    render(<Alert icon="info">Test</Alert>);
     const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
     expect(iconContainer).toBeInTheDocument();
     expect(iconContainer?.querySelector('svg')).toBeInTheDocument();
   });
 
   it('composes the shared Icon primitive for its icon wrapper', () => {
-    render(<Alert severity="info">Test</Alert>);
+    render(<Alert icon="info">Test</Alert>);
     const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
     expect(iconContainer).toHaveClass('ps-Icon');
+  });
+
+  it('resolves the icon key independently of the severity prop', () => {
+    render(
+      <Alert severity="error" icon="info">
+        Test
+      </Alert>,
+    );
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveAttribute('data-severity', 'error');
+    expect(alert.querySelector('.ps-Alert__icon svg')).toBeInTheDocument();
   });
 
   it('renders a custom icon when icon prop is provided', () => {
@@ -86,6 +103,15 @@ describe('Alert', () => {
     expect(iconContainer).not.toBeInTheDocument();
   });
 
+  it('renders no icon when icon is set to false or 0', () => {
+    const { rerender } = render(<Alert icon={false}>Test</Alert>);
+    expect(screen.getByRole('alert').querySelector('.ps-Alert__icon')).not.toBeInTheDocument();
+
+    rerender(<Alert icon={0}>Test</Alert>);
+    expect(screen.getByRole('alert').querySelector('.ps-Alert__icon')).not.toBeInTheDocument();
+    expect(screen.getByRole('alert')).not.toHaveTextContent('0');
+  });
+
   it('uses provider icons when inside a ComponentsProvider', () => {
     const CustomErrorIcon = (props: SVGProps<SVGSVGElement>): ReactElement => (
       <svg data-testid="provider-error-icon" {...props} />
@@ -93,7 +119,9 @@ describe('Alert', () => {
 
     render(
       <ComponentsProvider components={components} icons={{ ...icons, Error: CustomErrorIcon }}>
-        <Alert severity="error">Error</Alert>
+        <Alert severity="error" icon="error">
+          Error
+        </Alert>
       </ComponentsProvider>,
     );
 
@@ -101,7 +129,11 @@ describe('Alert', () => {
   });
 
   it('falls back to default icons when outside a ComponentsProvider', () => {
-    render(<Alert severity="error">Error</Alert>);
+    render(
+      <Alert severity="error" icon="error">
+        Error
+      </Alert>,
+    );
     const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
     expect(iconContainer).toBeInTheDocument();
     expect(iconContainer?.querySelector('svg')).toBeInTheDocument();

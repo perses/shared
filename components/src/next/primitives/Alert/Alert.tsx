@@ -23,21 +23,36 @@ import './alert.css';
 
 export type AlertSeverity = 'error' | 'warning' | 'success' | 'info';
 
-const SEVERITY_ICONS: Record<AlertSeverity, { key: keyof PersesIcons; icon: ComponentType<SVGProps<SVGSVGElement>> }> =
-  {
-    success: { key: 'Success', icon: SuccessIcon },
-    info: { key: 'Info', icon: InfoIcon },
-    warning: { key: 'Warning', icon: WarningIcon },
-    error: { key: 'Error', icon: ErrorIcon },
-  };
+/** A severity key selects one of the built-in icons; anything else is rendered as a custom icon. */
+export type AlertIconKey = AlertSeverity;
+
+const SEVERITY_ICONS: Record<AlertIconKey, { key: keyof PersesIcons; icon: ComponentType<SVGProps<SVGSVGElement>> }> = {
+  success: { key: 'Success', icon: SuccessIcon },
+  info: { key: 'Info', icon: InfoIcon },
+  warning: { key: 'Warning', icon: WarningIcon },
+  error: { key: 'Error', icon: ErrorIcon },
+};
+
+function isAlertIconKey(icon: unknown): icon is AlertIconKey {
+  return typeof icon === 'string' && icon in SEVERITY_ICONS;
+}
 
 export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
   severity?: AlertSeverity;
-  icon?: ReactNode;
+  /**
+   * No icon by default. Pass a severity key (e.g. `"error"`) to use the matching built-in icon —
+   * respecting any `ComponentsProvider` icon overrides — or a custom `ReactNode` to render your own.
+   *
+   * @example
+   * <Alert severity="error" icon="error">Something went wrong</Alert>
+   * <Alert severity="error" icon={<MyIcon />}>Something went wrong</Alert>
+   */
+  icon?: AlertIconKey | ReactNode;
 }
 
 /**
- * DOM structure: `.ps-Alert > .ps-Alert__icon + .ps-Alert__message`
+ * DOM structure: `.ps-Alert > .ps-Alert__icon? + .ps-Alert__message`
+ * `.ps-Alert__icon` is only rendered when `icon` resolves to a non-empty value.
  * Consumers should target `.ps-Alert__message` for content styling.
  */
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
@@ -49,12 +64,12 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
 
   let resolvedIcon: ReactNode;
 
-  if (icon !== undefined) {
-    resolvedIcon = icon;
-  } else {
-    const { key, icon: DefaultIcon } = SEVERITY_ICONS[severity];
+  if (isAlertIconKey(icon)) {
+    const { key, icon: DefaultIcon } = SEVERITY_ICONS[icon];
     const IconComponent = ctx?.icons[key] ?? DefaultIcon;
     resolvedIcon = <IconComponent />;
+  } else {
+    resolvedIcon = icon;
   }
 
   return (
