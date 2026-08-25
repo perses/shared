@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { ComponentType, forwardRef, HTMLAttributes, ReactNode, SVGProps, useContext } from 'react';
+import { ComponentType, forwardRef, HTMLAttributes, ReactElement, ReactNode, SVGProps, useContext } from 'react';
 
 import { ComponentsContext } from '../../contexts/ComponentsContext';
 import type { PersesIcons } from '../../contexts/ComponentsContext';
@@ -23,17 +23,15 @@ import './alert.css';
 
 export type AlertSeverity = 'error' | 'warning' | 'success' | 'info';
 
-/** A severity key selects one of the built-in icons; anything else is rendered as a custom icon. */
-export type AlertIconKey = AlertSeverity;
+const SEVERITY_ICONS: Record<AlertSeverity, { key: keyof PersesIcons; icon: ComponentType<SVGProps<SVGSVGElement>> }> =
+  {
+    success: { key: 'Success', icon: SuccessIcon },
+    info: { key: 'Info', icon: InfoIcon },
+    warning: { key: 'Warning', icon: WarningIcon },
+    error: { key: 'Error', icon: ErrorIcon },
+  };
 
-const SEVERITY_ICONS: Record<AlertIconKey, { key: keyof PersesIcons; icon: ComponentType<SVGProps<SVGSVGElement>> }> = {
-  success: { key: 'Success', icon: SuccessIcon },
-  info: { key: 'Info', icon: InfoIcon },
-  warning: { key: 'Warning', icon: WarningIcon },
-  error: { key: 'Error', icon: ErrorIcon },
-};
-
-function isAlertIconKey(icon: unknown): icon is AlertIconKey {
+function isAlertSeverity(icon: unknown): icon is AlertSeverity {
   return typeof icon === 'string' && icon in SEVERITY_ICONS;
 }
 
@@ -41,13 +39,17 @@ export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
   severity?: AlertSeverity;
   /**
    * No icon by default. Pass a severity key (e.g. `"error"`) to use the matching built-in icon —
-   * respecting any `ComponentsProvider` icon overrides — or a custom `ReactNode` to render your own.
+   * respecting any `ComponentsProvider` icon overrides — or a custom `ReactElement` to render your own.
+   *
+   * Deliberately typed as `ReactElement` rather than `ReactNode`: `ReactNode` includes `string`
+   * (both directly and structurally, since `string` satisfies `Iterable<ReactNode>`), which would
+   * let a misspelled severity key silently render as literal text instead of failing to compile.
    *
    * @example
    * <Alert severity="error" icon="error">Something went wrong</Alert>
    * <Alert severity="error" icon={<MyIcon />}>Something went wrong</Alert>
    */
-  icon?: AlertIconKey | ReactNode;
+  icon?: AlertSeverity | ReactElement | number | boolean | null;
 }
 
 /**
@@ -64,7 +66,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
 
   let resolvedIcon: ReactNode;
 
-  if (isAlertIconKey(icon)) {
+  if (isAlertSeverity(icon)) {
     const { key, icon: DefaultIcon } = SEVERITY_ICONS[icon];
     const IconComponent = ctx?.icons[key] ?? DefaultIcon;
     resolvedIcon = <IconComponent />;
