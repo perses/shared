@@ -12,25 +12,122 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
+import { forwardRef, ReactElement } from 'react';
 
 import { PatternFlyV6Alert, Pf6AlertDemo } from '../stories/pf6/PatternFlyV6Alert';
-import { PatternFlyButton, Pf6ButtonDemo } from '../stories/pf6/PatternFlyV6Button';
-import { ComponentsProvider } from './ComponentsProvider';
-import { DEFAULT_COMPONENTS, DEFAULT_ICONS } from './defaults';
+import { Alert, Button, ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../primitives';
+import type { ButtonProps } from '../primitives';
+import { ComponentsProvider, useComponents } from './ComponentsProvider';
 
-const PF_BUTTON_COMPONENTS = { ...DEFAULT_COMPONENTS, Button: PatternFlyButton };
-const PF_ALERT_COMPONENTS = { ...DEFAULT_COMPONENTS, Alert: PatternFlyV6Alert };
+const icons = { Error: ErrorIcon, Info: InfoIcon, Success: SuccessIcon, Warning: WarningIcon };
 
-export const PatternFlyButtonInjection: Story = () => (
-  <ComponentsProvider components={PF_BUTTON_COMPONENTS} icons={DEFAULT_ICONS}>
-    <Pf6ButtonDemo />
+const CustomButton = forwardRef<HTMLButtonElement, ButtonProps>(function CustomButton(
+  { children, variant = 'solid', size = 'md', loading, disabled, ...rest },
+  ref,
+) {
+  return (
+    <button
+      ref={ref}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...rest}
+      style={{
+        padding: size === 'sm' ? '4px 8px' : size === 'lg' ? '12px 24px' : '8px 16px',
+        borderRadius: '4px',
+        border: variant === 'outline' ? '2px solid currentColor' : '1px solid transparent',
+        background: variant === 'solid' ? '#1e3a5f' : 'transparent',
+        color: variant === 'solid' ? '#fff' : '#1e3a5f',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled ? 0.5 : 1,
+        fontFamily: 'monospace',
+        fontSize: '0.875rem',
+      }}
+    >
+      {loading ? 'Loading…' : children}
+    </button>
+  );
+});
+
+function CustomButtonDemo(): ReactElement {
+  const { components } = useComponents();
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <h3 style={{ margin: 0 }}>Custom Button (via ComponentsProvider)</h3>
+      <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>
+        A minimal custom Button injected through ComponentsProvider, replacing the default.
+      </p>
+      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <components.Button variant="solid" color="primary">
+          Solid
+        </components.Button>
+        <components.Button variant="outline" color="primary">
+          Outline
+        </components.Button>
+        <components.Button variant="ghost" color="primary">
+          Ghost
+        </components.Button>
+        <components.Button variant="solid" color="primary" disabled>
+          Disabled
+        </components.Button>
+      </div>
+    </div>
+  );
+}
+
+export const CustomButtonInjection: Story = () => (
+  <ComponentsProvider components={{ Button: CustomButton, Alert }} icons={icons}>
+    <CustomButtonDemo />
   </ComponentsProvider>
 );
-PatternFlyButtonInjection.storyName = 'Patternfly v6 Button Injection';
+CustomButtonInjection.storyName = 'Button customization';
 
 export const PatternFlyAlertInjection: Story = () => (
-  <ComponentsProvider components={PF_ALERT_COMPONENTS} icons={DEFAULT_ICONS}>
+  <ComponentsProvider components={{ Button, Alert: PatternFlyV6Alert }} icons={icons}>
     <Pf6AlertDemo />
   </ComponentsProvider>
 );
-PatternFlyAlertInjection.storyName = 'Patternfly v6 Alert Injection';
+PatternFlyAlertInjection.storyName = 'Alert customization';
+
+function TokenDemo(): ReactElement {
+  const { components } = useComponents();
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <h3 style={{ margin: 0 }}>Token Customization</h3>
+      <p style={{ margin: 0, fontSize: '0.875rem', color: '#6b7280' }}>
+        Same default Button, different look — achieved by overriding CSS custom properties on a wrapper element.
+      </p>
+      <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <components.Button variant="solid" color="primary">
+          Solid
+        </components.Button>
+        <components.Button variant="outline" color="primary">
+          Outline
+        </components.Button>
+        <components.Button variant="ghost" color="primary">
+          Ghost
+        </components.Button>
+      </div>
+    </div>
+  );
+}
+
+export const TokenCustomization: Story = () => (
+  <ComponentsProvider components={{ Button, Alert }} icons={icons}>
+    <div
+      style={
+        {
+          '--perses-status-solid-primary': '#7c3aed',
+          '--perses-status-bg-primary-hover': 'rgba(124, 58, 237, 0.15)',
+          '--perses-status-border-primary': '#7c3aed',
+          '--perses-status-bg-primary': 'rgba(124, 58, 237, 0.08)',
+          '--perses-radius-md': '4px',
+        } as React.CSSProperties
+      }
+    >
+      <TokenDemo />
+    </div>
+  </ComponentsProvider>
+);
+TokenCustomization.storyName = 'Token Customization';

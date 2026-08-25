@@ -13,8 +13,8 @@
 
 import { createContext, ComponentType, ReactNode, SVGProps } from 'react';
 
-import type { AlertProps } from '../primitives/Alert/Alert';
-import type { ButtonProps } from '../primitives/Button/Button';
+import type { AlertProps } from '../primitives/Alert';
+import type { ButtonProps } from '../primitives/Button';
 
 export interface PersesComponents {
   Button: ComponentType<ButtonProps>;
@@ -34,9 +34,9 @@ export interface ComponentsContextValue {
 }
 
 export interface ComponentsProviderProps {
-  /** No implicit defaults — pass `DEFAULT_COMPONENTS` from `./defaults`, spreading in overrides as needed. Memoize or hoist to a stable reference to avoid unnecessary re-renders. */
+  /** No implicit defaults — import the primitives from `@perses-dev/components/next/primitives` and construct this object, spreading in overrides as needed. Memoize or hoist to a stable reference to avoid unnecessary re-renders. */
   components: PersesComponents;
-  /** No implicit defaults — pass `DEFAULT_ICONS` from `./defaults`, spreading in overrides as needed. Memoize or hoist to a stable reference to avoid unnecessary re-renders. */
+  /** No implicit defaults — import the icon components from `@perses-dev/components/next/primitives` and construct this object, spreading in overrides as needed. Memoize or hoist to a stable reference to avoid unnecessary re-renders. */
   icons: PersesIcons;
   children?: ReactNode;
 }

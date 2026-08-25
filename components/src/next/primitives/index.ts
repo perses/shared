@@ -11,19 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../icons';
-import { Alert } from '../primitives/Alert/Alert';
-import { Button } from '../primitives/Button/Button';
-import type { PersesComponents, PersesIcons } from './ComponentsContext';
-
-export const DEFAULT_COMPONENTS: PersesComponents = {
-  Button,
-  Alert,
-};
-
-export const DEFAULT_ICONS: PersesIcons = {
-  Error: ErrorIcon,
-  Info: InfoIcon,
-  Success: SuccessIcon,
-  Warning: WarningIcon,
-};
+export * from './Alert';
+export * from './Button';
+export * from './Icon';
+export * from './Spinner';

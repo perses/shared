@@ -17,8 +17,6 @@ node_modules
 .env.production.local
 webpack.local.js
 
-.npmrc
-
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -40,3 +38,5 @@ coverage
 CHANGELOG.md
 
 .idea/
+
+.tasks

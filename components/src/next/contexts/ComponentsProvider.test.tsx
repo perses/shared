@@ -14,10 +14,13 @@
 import { render, screen } from '@testing-library/react';
 import { FC, forwardRef, ReactElement, SVGProps } from 'react';
 
-import type { ButtonProps } from '../primitives/Button/Button';
+import { Alert, Button, ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../primitives';
+import type { ButtonProps } from '../primitives';
 import { ComponentsProvider, useComponents } from './ComponentsProvider';
-import type { ComponentsContextValue, PersesComponents } from './ComponentsProvider';
-import { DEFAULT_COMPONENTS, DEFAULT_ICONS } from './defaults';
+import type { ComponentsContextValue, PersesComponents, PersesIcons } from './ComponentsProvider';
+
+const components: PersesComponents = { Button, Alert };
+const icons: PersesIcons = { Error: ErrorIcon, Info: InfoIcon, Success: SuccessIcon, Warning: WarningIcon };
 
 describe('ComponentsProvider', () => {
   it('renders components passed in via props', () => {
@@ -32,7 +35,7 @@ describe('ComponentsProvider', () => {
     }
 
     render(
-      <ComponentsProvider components={DEFAULT_COMPONENTS} icons={DEFAULT_ICONS}>
+      <ComponentsProvider components={components} icons={icons}>
         <TestConsumer />
       </ComponentsProvider>,
     );
@@ -61,7 +64,7 @@ describe('ComponentsProvider', () => {
     }
 
     render(
-      <ComponentsProvider components={{ ...DEFAULT_COMPONENTS, Button: CustomButton }} icons={DEFAULT_ICONS}>
+      <ComponentsProvider components={{ ...components, Button: CustomButton }} icons={icons}>
         <TestConsumer />
       </ComponentsProvider>,
     );
@@ -101,7 +104,7 @@ describe('ComponentsProvider', () => {
     }
 
     render(
-      <ComponentsProvider components={DEFAULT_COMPONENTS} icons={{ ...DEFAULT_ICONS, Error: CustomErrorIcon }}>
+      <ComponentsProvider components={components} icons={{ ...icons, Error: CustomErrorIcon }}>
         <TestConsumer />
       </ComponentsProvider>,
     );
@@ -119,13 +122,13 @@ describe('ComponentsProvider', () => {
     }
 
     const { rerender } = render(
-      <ComponentsProvider components={DEFAULT_COMPONENTS} icons={DEFAULT_ICONS}>
+      <ComponentsProvider components={components} icons={icons}>
         <Collector />
       </ComponentsProvider>,
     );
 
     rerender(
-      <ComponentsProvider components={DEFAULT_COMPONENTS} icons={DEFAULT_ICONS}>
+      <ComponentsProvider components={components} icons={icons}>
         <Collector />
       </ComponentsProvider>,
     );
@@ -146,16 +149,16 @@ describe('ComponentsProvider', () => {
       return <button ref={ref}>{children}</button>;
     });
 
-    const overrides = { ...DEFAULT_COMPONENTS, Button: CustomButton };
+    const overrides = { ...components, Button: CustomButton };
 
     const { rerender } = render(
-      <ComponentsProvider components={overrides} icons={DEFAULT_ICONS}>
+      <ComponentsProvider components={overrides} icons={icons}>
         <Collector />
       </ComponentsProvider>,
     );
 
     rerender(
-      <ComponentsProvider components={overrides} icons={DEFAULT_ICONS}>
+      <ComponentsProvider components={overrides} icons={icons}>
         <Collector />
       </ComponentsProvider>,
     );
@@ -165,7 +168,7 @@ describe('ComponentsProvider', () => {
   });
 
   it('does not automatically merge partial components with defaults', () => {
-    const partialComponents = { Button: DEFAULT_COMPONENTS.Button } as PersesComponents;
+    const partialComponents = { Button: components.Button } as PersesComponents;
 
     function TestConsumer(): ReactElement {
       const { components } = useComponents();
@@ -173,7 +176,7 @@ describe('ComponentsProvider', () => {
     }
 
     render(
-      <ComponentsProvider components={partialComponents} icons={DEFAULT_ICONS}>
+      <ComponentsProvider components={partialComponents} icons={icons}>
         <TestConsumer />
       </ComponentsProvider>,
     );
@@ -196,7 +199,7 @@ describe('ComponentsProvider', () => {
     }
 
     render(
-      <ComponentsProvider components={{ ...DEFAULT_COMPONENTS, Button: CustomButton }} icons={DEFAULT_ICONS}>
+      <ComponentsProvider components={{ ...components, Button: CustomButton }} icons={icons}>
         <App />
       </ComponentsProvider>,
     );
@@ -220,7 +223,7 @@ describe('ComponentsProvider', () => {
     }
 
     render(
-      <ComponentsProvider components={DEFAULT_COMPONENTS} icons={DEFAULT_ICONS}>
+      <ComponentsProvider components={components} icons={icons}>
         <TestConsumer />
       </ComponentsProvider>,
     );

@@ -1,0 +1,33 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+html[data-perses-mode='dark'],
+html[data-perses-mode='dark'] body,
+html[data-perses-mode='dark'] #ladle-root,
+html[data-perses-mode='dark'] [data-storyloaded] {
+  background: var(--perses-bg-default);
+  color: var(--perses-text-primary);
+}
+
+html[data-perses-mode='dark'] h1,
+html[data-perses-mode='dark'] h2,
+html[data-perses-mode='dark'] h3,
+html[data-perses-mode='dark'] h4,
+html[data-perses-mode='dark'] h5,
+html[data-perses-mode='dark'] h6,
+html[data-perses-mode='dark'] p,
+html[data-perses-mode='dark'] label {
+  color: var(--perses-text-primary);
+}

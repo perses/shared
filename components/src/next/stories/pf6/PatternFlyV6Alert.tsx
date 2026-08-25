@@ -14,7 +14,7 @@
 import { CSSProperties, FC, forwardRef, ReactElement, ReactNode, SVGProps, useRef } from 'react';
 
 import { useComponents } from '../../contexts/ComponentsProvider';
-import type { AlertProps } from '../../primitives/Alert/Alert';
+import type { AlertProps } from '../../primitives/Alert';
 import { PF_FONT, mergeRefs, useDarkMode } from './utils';
 
 function Pf6CustomIcon(props: SVGProps<SVGSVGElement>): ReactElement {
@@ -175,7 +175,7 @@ export function Pf6AlertDemo(): ReactElement {
 
   return (
     <div ref={innerRef} style={{ fontFamily: PF_FONT, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <h3 style={{ margin: 0 }}>PatternFly v6 Alert Variations (via ComponentsProvider)</h3>
+      <h3 style={{ margin: 0 }}>Alert Customization (via ComponentsProvider)</h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
         <Pf6AlertBox variant="custom" isDark={isDark}>
           Custom alert title

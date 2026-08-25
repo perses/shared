@@ -16,25 +16,21 @@ import { ComponentType, forwardRef, HTMLAttributes, ReactNode, SVGProps, useCont
 
 import { ComponentsContext } from '../../contexts/ComponentsContext';
 import type { PersesIcons } from '../../contexts/ComponentsContext';
-import { SuccessIcon, InfoIcon, WarningIcon, ErrorIcon } from '../../icons';
+import { SuccessIcon, InfoIcon, WarningIcon, ErrorIcon } from '../Icon/icons';
 import { Icon } from '../Icon/Icon';
 
 import './alert.css';
 
 export type AlertSeverity = 'error' | 'warning' | 'success' | 'info';
 
-const DEFAULT_SEVERITY_ICONS: Record<AlertSeverity, ComponentType<SVGProps<SVGSVGElement>>> = {
-  success: SuccessIcon,
-  info: InfoIcon,
-  warning: WarningIcon,
-  error: ErrorIcon,
-};
-
-const SEVERITY_TO_PROVIDER_KEY: Record<AlertSeverity, keyof PersesIcons> = {
-  error: 'Error',
-  warning: 'Warning',
-  success: 'Success',
-  info: 'Info',
+const SEVERITY_ICONS: Record<
+  AlertSeverity,
+  { key: keyof PersesIcons; icon: ComponentType<SVGProps<SVGSVGElement>> }
+> = {
+  success: { key: 'Success', icon: SuccessIcon },
+  info: { key: 'Info', icon: InfoIcon },
+  warning: { key: 'Warning', icon: WarningIcon },
+  error: { key: 'Error', icon: ErrorIcon },
 };
 
 export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
@@ -56,21 +52,18 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   let resolvedIcon: ReactNode;
 
   if (icon !== undefined) {
-    // Caller provided an explicit icon (or null to suppress it)
     resolvedIcon = icon;
   } else {
-    // Check if a ComponentsProvider is supplying a custom icon for this severity
-    const providerKey = SEVERITY_TO_PROVIDER_KEY[severity];
-    const providerIcon = ctx?.icons[providerKey];
-
-    // Fall back to the built-in default if no provider icon exists
-    const IconComponent = providerIcon ?? DEFAULT_SEVERITY_ICONS[severity];
-    resolvedIcon = IconComponent ? <IconComponent /> : null;
+    const { key, icon: DefaultIcon } = SEVERITY_ICONS[severity];
+    const IconComponent = ctx?.icons[key] ?? DefaultIcon;
+    resolvedIcon = <IconComponent />;
   }
 
   return (
     <div role={role} {...rest} ref={ref} className={classes} data-severity={severity}>
-      {resolvedIcon !== null && <Icon className="ps-Alert__icon">{resolvedIcon}</Icon>}
+      {Boolean(resolvedIcon) && (
+        <Icon className="ps-Alert__icon">{resolvedIcon}</Icon>
+      )}
       <div className="ps-Alert__message">{children}</div>
     </div>
   );

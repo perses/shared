@@ -11,18 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { DEFAULT_COMPONENTS, DEFAULT_ICONS } from './defaults';
-
-describe('defaults', () => {
-  it('exports default components', () => {
-    expect(DEFAULT_COMPONENTS.Button).toBeDefined();
-    expect(DEFAULT_COMPONENTS.Alert).toBeDefined();
-  });
-
-  it('exports default icons', () => {
-    expect(DEFAULT_ICONS.Error).toBeDefined();
-    expect(DEFAULT_ICONS.Info).toBeDefined();
-    expect(DEFAULT_ICONS.Success).toBeDefined();
-    expect(DEFAULT_ICONS.Warning).toBeDefined();
-  });
-});
+export * from './Button';

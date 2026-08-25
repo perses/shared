@@ -11,13 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { GlobalProvider } from '@ladle/react';
-import '@perses-dev/design-tokens/css';
-
-import { ThemeModeProvider } from '../src/next/contexts/ThemeModeProvider';
-import '../src/next/css/index.css';
-import './theme-mode.css';
-
-export const Provider: GlobalProvider = ({ children, globalState }) => (
-  <ThemeModeProvider mode={globalState.theme === 'dark' ? 'dark' : 'light'}>{children}</ThemeModeProvider>
-);
+export * from './Spinner';

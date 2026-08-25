@@ -15,8 +15,11 @@ import { render, screen } from '@testing-library/react';
 import { ReactElement, SVGProps } from 'react';
 
 import { ComponentsProvider } from '../../contexts/ComponentsProvider';
-import { DEFAULT_COMPONENTS, DEFAULT_ICONS } from '../../contexts/defaults';
+import { Button, ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../index';
 import { Alert } from './Alert';
+
+const components = { Button, Alert };
+const icons = { Error: ErrorIcon, Info: InfoIcon, Success: SuccessIcon, Warning: WarningIcon };
 
 describe('Alert', () => {
   it('renders children', () => {
@@ -89,7 +92,7 @@ describe('Alert', () => {
     );
 
     render(
-      <ComponentsProvider components={DEFAULT_COMPONENTS} icons={{ ...DEFAULT_ICONS, Error: CustomErrorIcon }}>
+      <ComponentsProvider components={components} icons={{ ...icons, Error: CustomErrorIcon }}>
         <Alert severity="error">Error</Alert>
       </ComponentsProvider>,
     );

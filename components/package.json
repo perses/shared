@@ -25,6 +25,11 @@
       "import": "./dist/next/index.js",
       "require": "./dist/cjs/next/index.js"
     },
+    "./next/primitives": {
+      "types": "./dist/next/primitives/index.d.ts",
+      "import": "./dist/next/primitives/index.js",
+      "require": "./dist/cjs/next/primitives/index.js"
+    },
     "./next/css": "./dist/next/css/index.css"
   },
   "scripts": {

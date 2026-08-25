@@ -11,18 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { Button } from './primitives/Button/Button';
-export type { ButtonProps, ButtonVariant, ButtonColor, ButtonSize } from './primitives/Button/Button';
-
-export { Alert } from './primitives/Alert/Alert';
-export type { AlertProps, AlertSeverity } from './primitives/Alert/Alert';
-
-export { Icon } from './primitives/Icon/Icon';
-export type { IconProps } from './primitives/Icon/Icon';
-
-export { Spinner } from './primitives/Spinner/Spinner';
-export type { SpinnerProps } from './primitives/Spinner/Spinner';
-
 export { ComponentsProvider, useComponents } from './contexts/ComponentsProvider';
 export type {
   PersesComponents,
@@ -30,5 +18,3 @@ export type {
   ComponentsProviderProps,
   ComponentsContextValue,
 } from './contexts/ComponentsProvider';
-
-export { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './icons';
