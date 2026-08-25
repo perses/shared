@@ -16,7 +16,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@perses-dev/spec": "0.3.0-beta.4",
-    "zod": "^3.21.4"
+    "zod": "^4.4.3"
   },
   "peerDependencies": {
     "react": "^17.0.2 || ^18.0.0"
