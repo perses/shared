@@ -23,6 +23,10 @@ export type VariableOption = { label: string; value: string };
  */
 export type VariableState = {
   value: VariableValue;
+  /**
+   * Optional compact value for human-readable text. Query interpolation continues to use `value`.
+   */
+  displayValue?: VariableValue;
   options?: VariableOption[];
   loading: boolean;
   error?: Error;
@@ -227,4 +231,15 @@ export function replaceVariables(text: string, variableState: VariableStateMap):
     });
 
   return finalText;
+}
+
+/**
+ * Replace variables using their compact display values when available.
+ */
+export function replaceVariablesForDisplay(text: string, variableState: VariableStateMap): string {
+  const displayState: VariableStateMap = {};
+  for (const [name, state] of Object.entries(variableState)) {
+    displayState[name] = state.displayValue === undefined ? state : { ...state, value: state.displayValue };
+  }
+  return replaceVariables(text, displayState);
 }

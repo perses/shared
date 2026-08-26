@@ -36,10 +36,11 @@ function renderWithProvider(
 describe('FixedValueVariableProvider', () => {
   it('overrides the value of an existing variable and sets loading to false', () => {
     const { result } = renderWithProvider('env', 'prod', {
-      env: { value: ['prod', 'dev'], loading: true },
+      env: { value: ['prod', 'dev'], displayValue: 'All', loading: true },
     });
 
     expect(result.current['env']?.value).toBe('prod');
+    expect(result.current['env']?.displayValue).toBe('prod');
     expect(result.current['env']?.loading).toBe(false);
   });
 
