@@ -11,13 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CardHeader, CardHeaderProps, Stack, Typography, Tooltip } from '@mui/material';
+import { CardHeader, CardHeaderProps, Stack, Typography, Tooltip, Box } from '@mui/material';
 import { combineSx, replaceVariablesForDisplay } from '@perses-dev/components';
 import { ItemAction, QueryData, useAllVariableValues, useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import { Link } from '@perses-dev/spec';
 import { ReactElement, ReactNode, useRef } from 'react';
 
-import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants';
+import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants/styles';
 import { PanelOptions } from './Panel';
 import { PanelActions, PanelActionsProps } from './PanelActions';
 import { useSelectionItemActions } from './useSelectionItemActions';
@@ -94,6 +94,8 @@ export function PanelHeader({
                   variant="subtitle1"
                   ref={textRef}
                   sx={{
+                    minWidth: 0,
+                    flexShrink: 1,
                     // `minHeight` guarantees that the header has the correct height
                     // when there is no title (i.e. in the preview)
                     lineHeight: '24px',
@@ -106,21 +108,23 @@ export function PanelHeader({
                   {title}
                 </Typography>
               </Tooltip>
-              <PanelActions
-                title={title}
-                description={description}
-                descriptionTooltipId={descriptionTooltipId}
-                informationTooltip={informationTooltip}
-                links={links}
-                readHandlers={readHandlers}
-                editHandlers={editHandlers}
-                viewQueriesHandler={viewQueriesHandler}
-                extra={extra}
-                queryResults={queryResults}
-                pluginActions={pluginActions}
-                itemActions={actionButtons}
-                showIcons={showIcons}
-              />
+              <Box sx={{ ml: 'auto', pl: 1, flexShrink: 0 }}>
+                <PanelActions
+                  title={title}
+                  description={description}
+                  descriptionTooltipId={descriptionTooltipId}
+                  informationTooltip={informationTooltip}
+                  links={links}
+                  readHandlers={readHandlers}
+                  editHandlers={editHandlers}
+                  viewQueriesHandler={viewQueriesHandler}
+                  extra={extra}
+                  queryResults={queryResults}
+                  pluginActions={pluginActions}
+                  itemActions={actionButtons}
+                  showIcons={showIcons}
+                />
+              </Box>
             </Stack>
           }
           sx={combineSx(
