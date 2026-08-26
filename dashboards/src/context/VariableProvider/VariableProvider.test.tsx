@@ -59,4 +59,42 @@ describe('VariableProvider', () => {
     expect(result.current.stack?.value).toEqual([]);
     expect(result.current.stack?.displayValue).toBe('All');
   });
+
+  it('uses the custom all value as the display value when one is set', () => {
+    const queryClient = new QueryClient();
+    const definitionsWithCustomAll: VariableDefinition[] = [
+      {
+        kind: 'ListVariable',
+        spec: {
+          name: 'stack',
+          allowAllValue: true,
+          allowMultiple: true,
+          customAllValue: 'every stack',
+          plugin: {
+            kind: 'StaticListVariable',
+            spec: {
+              values: ['stack-a', 'stack-b'],
+            },
+          },
+        },
+      },
+    ];
+    const wrapper = ({ children }: { children: ReactNode }): ReactElement => (
+      <QueryClientProvider client={queryClient}>
+        <TimeRangeProviderBasic initialTimeRange={initialTimeRange}>
+          <VariableProvider
+            initialVariableDefinitions={definitionsWithCustomAll}
+            initialVariableValues={initialVariableValues}
+          >
+            {children}
+          </VariableProvider>
+        </TimeRangeProviderBasic>
+      </QueryClientProvider>
+    );
+
+    const { result } = renderHook(() => useVariableValues(), { wrapper });
+
+    expect(result.current.stack?.value).toBe('every stack');
+    expect(result.current.stack?.displayValue).toBe('every stack');
+  });
 });
