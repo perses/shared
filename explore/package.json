@@ -6,7 +6,7 @@
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/perses/perses.git"
+    "url": "git+https://github.com/perses/shared.git"
   },
   "bugs": {
     "url": "https://github.com/perses/perses/issues"
