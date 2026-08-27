@@ -16,6 +16,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -27,46 +28,46 @@ import (
 )
 
 func publishPackage(workspacePath string, dryRun bool) error {
+	return publishPackageWithOutput(workspacePath, dryRun, os.Stdout, os.Stderr)
+}
+
+func publishPackageWithOutput(workspacePath string, dryRun bool, stdout io.Writer, stderr io.Writer) error {
 	// Read package.json from workspace
 	pck, err := npm.GetPackage(workspacePath)
 	if err != nil {
 		return err
 	}
 
-	// Get the dist directory path
-	libraryPath := filepath.Join(workspacePath, "dist")
-
-	// Get absolute path to return to later
-	originalDir, err := os.Getwd()
+	// Get the absolute dist directory path
+	libraryPath, err := filepath.Abs(filepath.Join(workspacePath, "dist"))
 	if err != nil {
-		return err
-	}
-
-	// Change to the dist directory
-	if err := os.Chdir(libraryPath); err != nil {
-		return err
+		return fmt.Errorf("unable to resolve dist directory for package %s@%s: %w", pck.Name, pck.Version, err)
 	}
 
 	// Prepare the npm publish command
-	args := []string{"publish", "--access", "public"}
+	args := []string{"publish", "--access", "public", "--tag", npmDistTag(pck.Version)}
 	if dryRun {
 		args = append(args, "--dry-run")
 	}
 
 	cmd := exec.Command("npm", args...)
-	output, execErr := cmd.CombinedOutput()
-
-	// Change back to original directory
-	if chdirErr := os.Chdir(originalDir); chdirErr != nil {
-		logrus.WithError(chdirErr).Warnf("unable to change back to original directory")
+	cmd.Dir = libraryPath
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	if execErr := cmd.Run(); execErr != nil {
+		return fmt.Errorf("npm %s failed for package %s@%s in %s: %w", strings.Join(args, " "), pck.Name, pck.Version, libraryPath, execErr)
 	}
 
-	if execErr != nil {
-		return execErr
-	}
-
-	logrus.Infof("Package %s@%s published to npm. Output:\n%s", pck.Name, pck.Version, string(output))
+	logrus.Infof("Package %s@%s published to npm", pck.Name, pck.Version)
 	return nil
+}
+
+func npmDistTag(version string) string {
+	_, _, found := strings.Cut(version, "-")
+	if !found {
+		return "latest"
+	}
+	return "prerelease"
 }
 
 func verifyVersions(workspaces []string, expectedVersion string) error {
