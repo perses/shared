@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/dashboards",
-  "version": "0.55.0-beta.5",
+  "version": "0.55.0-beta.6",
   "description": "The dashboards feature in Perses",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -29,10 +29,10 @@
     "lint:fix": "oxlint --fix src"
   },
   "dependencies": {
-    "@perses-dev/components": "0.55.0-beta.5",
-    "@perses-dev/plugin-system": "0.55.0-beta.5",
+    "@perses-dev/components": "0.55.0-beta.6",
+    "@perses-dev/plugin-system": "0.55.0-beta.6",
     "@perses-dev/spec": "0.3.0-beta.5",
-    "@perses-dev/client": "0.55.0-beta.5",
+    "@perses-dev/client": "0.55.0-beta.6",
     "@tanstack/hotkeys": "^0.8.0",
     "@tanstack/react-hotkeys": "^0.9.1",
     "immer": "^10.1.1",

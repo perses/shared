@@ -100,43 +100,43 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         '@perses-dev/client': {
-          version: '0.55.0-beta.5',
+          version: '0.55.0-beta.6',
           lib: () => require('@perses-dev/client'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.5',
+            requiredVersion: '^0.55.0-beta.6',
           },
         },
         '@perses-dev/components': {
-          version: '0.55.0-beta.5',
+          version: '0.55.0-beta.6',
           lib: () => require('@perses-dev/components'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.5',
+            requiredVersion: '^0.55.0-beta.6',
           },
         },
         '@perses-dev/plugin-system': {
-          version: '0.55.0-beta.5',
+          version: '0.55.0-beta.6',
           lib: () => require('@perses-dev/plugin-system'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.5',
+            requiredVersion: '^0.55.0-beta.6',
           },
         },
         '@perses-dev/explore': {
-          version: '0.55.0-beta.5',
+          version: '0.55.0-beta.6',
           lib: () => require('@perses-dev/explore'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.5',
+            requiredVersion: '^0.55.0-beta.6',
           },
         },
         '@perses-dev/dashboards': {
-          version: '0.55.0-beta.5',
+          version: '0.55.0-beta.6',
           lib: () => require('@perses-dev/dashboards'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.5',
+            requiredVersion: '^0.55.0-beta.6',
           },
         },
         // Below are the shared modules that are used by the plugins, this can be part of the SDK
