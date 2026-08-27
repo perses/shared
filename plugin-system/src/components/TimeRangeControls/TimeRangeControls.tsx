@@ -32,22 +32,15 @@ import RefreshIcon from 'mdi-material-ui/Refresh';
 import type { ReactElement } from 'react';
 import { useCallback } from 'react';
 
-import { TOOLTIP_TEXT } from '../../constants';
+import { TOOLTIP_TEXT } from '../../constants/user-interface-text';
+import { useTimeRange } from '../../runtime/TimeRangeProvider/TimeRangeProvider';
 import {
-  useTimeRange,
   useShowCustomTimeRangeSetting,
   useTimeRangeOptionsSetting,
   useShowZoomRangeSetting,
   useDisableAutoRefreshSetting,
-} from '../../runtime';
-export const DEFAULT_REFRESH_INTERVAL_OPTIONS: TimeOption[] = [
-  { value: { pastDuration: '0s' }, display: 'Off' },
-  { value: { pastDuration: '5s' }, display: '5s' },
-  { value: { pastDuration: '10s' }, display: '10s' },
-  { value: { pastDuration: '15s' }, display: '15s' },
-  { value: { pastDuration: '30s' }, display: '30s' },
-  { value: { pastDuration: '60s' }, display: '1m' },
-];
+  useAutoRefreshIntervalsOptions,
+} from '../../runtime/TimeRangeProvider/TimeRangeSettingsProvider';
 
 const DEFAULT_HEIGHT = '34px';
 
@@ -60,6 +53,7 @@ interface TimeRangeControlsProps {
   showCustomTimeRange?: boolean;
   showZoomButtons?: boolean;
   timePresets?: TimeOption[];
+  refreshIntervalOptions?: TimeOption[];
   timeZone: string;
   onTimeZoneChange: (timeZone: TimeZoneOption) => void;
 }
@@ -73,6 +67,7 @@ export function TimeRangeControls({
   showZoomButtons = true,
   timePresets,
   timeZone,
+  refreshIntervalOptions,
   onTimeZoneChange,
 }: TimeRangeControlsProps): ReactElement {
   const { timeRange, setTimeRange, refresh, refreshInterval, setRefreshInterval } = useTimeRange();
@@ -81,6 +76,7 @@ export function TimeRangeControls({
   const showZoomInOutButtons = useShowZoomRangeSetting(showZoomButtons);
   const isAutoRefreshDisabled = useDisableAutoRefreshSetting();
   const timePresetsValue = useTimeRangeOptionsSetting(timePresets);
+  const autoRefreshIntervalOptions = useAutoRefreshIntervalsOptions(refreshIntervalOptions);
 
   // Convert height to a string, then use the string for styling
   const height = heightPx === undefined ? DEFAULT_HEIGHT : `${heightPx}px`;
@@ -220,16 +216,16 @@ export function TimeRangeControls({
       {showRefreshInterval && !isAutoRefreshDisabled && (
         <InfoTooltip description={TOOLTIP_TEXT.refreshInterval}>
           <RefreshIntervalPicker
-            timeOptions={DEFAULT_REFRESH_INTERVAL_OPTIONS}
+            timeOptions={autoRefreshIntervalOptions}
             value={
               /* TODO: There is a bug here which should be fixed in a proper way. (This is only a quick remedy)
                  display: 1m has the pastDuration of 60s. Initially (if the persisted value is 1m) when the page is loaded, instead of 60s, 1m is passed down.              
                  This only happens for 1m, because for other items the display and the pastDuration are the same.  Example 30s-30s
                  HERE The value MUST always be pastDuration, otherwise the component would not work as expected. 
               */
-              DEFAULT_REFRESH_INTERVAL_OPTIONS.some((i) => i.value.pastDuration === refreshInterval)
+              autoRefreshIntervalOptions.some((i) => i.value.pastDuration === refreshInterval)
                 ? refreshInterval
-                : DEFAULT_REFRESH_INTERVAL_OPTIONS.find((i) => i.display === refreshInterval)?.value.pastDuration
+                : autoRefreshIntervalOptions.find((i) => i.display === refreshInterval)?.value.pastDuration
             }
             onChange={handleRefreshIntervalChange}
             height={height}

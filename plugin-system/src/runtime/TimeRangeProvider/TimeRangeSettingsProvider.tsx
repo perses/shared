@@ -18,10 +18,21 @@ import type { ReactElement, ReactNode } from 'react';
 import { createContext, useContext, useMemo } from 'react';
 
 const DEFAULT_OPTIONS: DurationString[] = ['5m', '15m', '30m', '1h', '6h', '12h', '24h', '7d', '14d'];
+
+export const DEFAULT_REFRESH_INTERVAL_OPTIONS: TimeOption[] = [
+  { value: { pastDuration: '0s' }, display: 'Off' },
+  { value: { pastDuration: '5s' }, display: '5s' },
+  { value: { pastDuration: '10s' }, display: '10s' },
+  { value: { pastDuration: '15s' }, display: '15s' },
+  { value: { pastDuration: '30s' }, display: '30s' },
+  { value: { pastDuration: '60s' }, display: '1m' },
+];
+
 const defaultTimeRangeSettings: TimeRangeSettings = {
   showCustom: true,
   showZoomButtons: true,
   disableAutoRefresh: false,
+  autoRefreshIntervalOptions: DEFAULT_REFRESH_INTERVAL_OPTIONS,
   options: DEFAULT_OPTIONS.map((duration) => buildRelativeTimeOption(duration)),
 };
 
@@ -29,6 +40,7 @@ export interface TimeRangeSettingsProviderProps {
   showCustom?: boolean;
   showZoomButtons?: boolean;
   disableAutoRefresh?: boolean;
+  autoRefreshIntervalOptions?: TimeOption[];
   options?: TimeOption[];
   children: ReactNode;
 }
@@ -37,6 +49,7 @@ export interface TimeRangeSettings {
   showCustom: boolean;
   showZoomButtons: boolean;
   disableAutoRefresh: boolean;
+  autoRefreshIntervalOptions: TimeOption[];
   options: TimeOption[];
 }
 
@@ -105,20 +118,37 @@ export function useDisableAutoRefreshSetting(override?: boolean): boolean {
   return disableAutoRefresh;
 }
 
+export function useAutoRefreshIntervalsOptions(override?: TimeOption[]): TimeOption[] {
+  const { autoRefreshIntervalOptions } = useTimeRangeSettings();
+  if (override?.length) {
+    return override;
+  }
+  return autoRefreshIntervalOptions;
+}
+
 /**
  * Provider implementation that supplies the time range state at runtime.
  */
 export function TimeRangeSettingsProvider(props: TimeRangeSettingsProviderProps): ReactElement {
-  const ctx = useMemo(() => {
+  const ctx = useMemo((): TimeRangeSettings => {
     return {
       showCustom: props.showCustom === undefined ? defaultTimeRangeSettings.showCustom : props.showCustom,
       showZoomButtons:
         props.showZoomButtons === undefined ? defaultTimeRangeSettings.showZoomButtons : props.showZoomButtons,
       disableAutoRefresh:
         props.disableAutoRefresh === undefined ? defaultTimeRangeSettings.disableAutoRefresh : props.disableAutoRefresh,
+      autoRefreshIntervalOptions: !props.autoRefreshIntervalOptions?.length
+        ? defaultTimeRangeSettings.autoRefreshIntervalOptions
+        : props.autoRefreshIntervalOptions,
       options: props.options === undefined ? defaultTimeRangeSettings.options : props.options,
     };
-  }, [props.showCustom, props.showZoomButtons, props.disableAutoRefresh, props.options]);
+  }, [
+    props.showCustom,
+    props.showZoomButtons,
+    props.disableAutoRefresh,
+    props.options,
+    props.autoRefreshIntervalOptions,
+  ]);
 
   return <TimeRangeSettingsContext.Provider value={ctx}>{props.children}</TimeRangeSettingsContext.Provider>;
 }

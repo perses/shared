@@ -12,7 +12,9 @@
 // limitations under the License.
 
 import { SnackbarProvider } from '@perses-dev/components';
+import type { TimeOption } from '@perses-dev/components';
 import {
+  DEFAULT_REFRESH_INTERVAL_OPTIONS,
   TimeRangeProviderBasic,
   TimeRangeProviderWithQueryParams,
   TimeRangeSettingsProvider,
@@ -20,7 +22,7 @@ import {
 import type { DurationString } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
-import { screen, render } from '@testing-library/react';
+import { screen, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import React from 'react';
@@ -123,6 +125,38 @@ describe('TimeRangeControls', () => {
       </TimeRangeSettingsProvider>,
     );
     expect(screen.queryByLabelText(/Select refresh interval/i)).not.toBeInTheDocument();
+  });
+
+  describe('auto refresh interval', () => {
+    const cases: Array<{ options: TimeOption[]; expectedOptions: string[] }> = [
+      {
+        options: [{ display: 'SPECIAL_VALUE_DISPLAY', value: { pastDuration: '1000s' } }],
+        expectedOptions: ['SPECIAL_VALUE_DISPLAY'],
+      },
+      {
+        options: [],
+        expectedOptions: DEFAULT_REFRESH_INTERVAL_OPTIONS.map((i) => i.display),
+      },
+    ];
+
+    it.each(cases)('show expected refresh interval', (args) => {
+      const { expectedOptions, options } = args;
+      renderWithContext(
+        <TimeRangeSettingsProvider disableAutoRefresh={false} autoRefreshIntervalOptions={options}>
+          <TimeRangeProviderBasic
+            initialRefreshInterval={testDefaultRefreshInterval}
+            initialTimeRange={testDefaultTimeRange}
+          >
+            <ControlsWithTZ />
+          </TimeRangeProviderBasic>
+        </TimeRangeSettingsProvider>,
+      );
+      const intervalSelect = screen.getByRole('combobox', { name: /select refresh interval/i });
+      fireEvent.mouseDown(intervalSelect);
+      for (const eo of expectedOptions) {
+        expect(screen.getByRole('option', { name: eo })).toBeInTheDocument();
+      }
+    });
   });
 
   // TODO: add additional tests for absolute time selection, other inputs, form validation, etc.

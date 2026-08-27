@@ -13,13 +13,13 @@
 
 import { Checkbox, FormGroup, FormControlLabel, Typography } from '@mui/material';
 import { Dialog } from '@perses-dev/components';
-import { DEFAULT_REFRESH_INTERVAL_OPTIONS, useTimeRange, useTimeZoneParams } from '@perses-dev/plugin-system';
+import { useAutoRefreshIntervalsOptions, useTimeRange, useTimeZoneParams } from '@perses-dev/plugin-system';
 import { isRelativeTimeRange } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
 
-import { useSaveChangesConfirmationDialog, useVariableDefinitionActions } from '../../context';
-
+import { useSaveChangesConfirmationDialog } from '../../context/DashboardProvider/dashboard-provider-api';
+import { useVariableDefinitionActions } from '../../context/VariableProvider/VariableProvider';
 const SAVE_DEFAULTS_DIALOG_TEXT =
   'You have made changes to the time range or the variables values. Would you like to save these as defaults?';
 
@@ -47,6 +47,8 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
     ? `(Last ${timeRange.pastDuration})`
     : '(Absolute time ranges can not be saved)';
 
+  const autRefreshIntervalOptions = useAutoRefreshIntervalsOptions();
+
   const saveTimeRangeMessage = `Save current time range as the new default ${currentTimeRangeText}`;
 
   const saveTimeZoneMessage = `Save the current timezone as the new default (${timeZone})`;
@@ -55,9 +57,9 @@ export const SaveChangesConfirmationDialog = (): ReactElement => {
     modifiedVariableNames.length > 0 ? modifiedVariableNames.join(', ') : 'No modified variables'
   })`;
 
-  const refreshIntervalDisplay = DEFAULT_REFRESH_INTERVAL_OPTIONS.some((i) => i.display === refreshInterval)
+  const refreshIntervalDisplay = autRefreshIntervalOptions.some((i) => i.display === refreshInterval)
     ? refreshInterval
-    : DEFAULT_REFRESH_INTERVAL_OPTIONS.find((i) => i.value.pastDuration === refreshInterval)?.display;
+    : autRefreshIntervalOptions.find((i) => i.value.pastDuration === refreshInterval)?.display;
 
   const saveRefreshIntervalMessage = `Save current refresh interval as new default ${refreshIntervalDisplay ? `(${refreshIntervalDisplay})` : 'refresh interval not modified'}`;
 
