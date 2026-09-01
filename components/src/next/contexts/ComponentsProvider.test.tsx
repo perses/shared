@@ -17,7 +17,7 @@ import { FC, forwardRef, ReactElement, SVGProps } from 'react';
 import type { ButtonProps } from '../primitives';
 import { defaultComponents, defaultIcons } from '../primitives/defaults';
 import { ComponentsProvider, useComponents } from './ComponentsProvider';
-import type { ComponentsContextValue, PersesComponents, PersesIcons } from './ComponentsProvider';
+import type { ComponentsContextValue, PersesComponents } from './ComponentsProvider';
 
 const components = defaultComponents;
 const icons = defaultIcons;

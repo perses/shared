@@ -15,9 +15,9 @@ import type { Story } from '@ladle/react';
 import { forwardRef, ReactElement } from 'react';
 
 import type { ButtonProps } from '../primitives';
+import { defaultComponents, defaultIcons } from '../primitives/defaults';
 import { PatternFlyV6Alert, Pf6AlertDemo } from '../stories/pf6/PatternFlyV6Alert';
 import { ComponentsProvider, useComponents } from './ComponentsProvider';
-import { defaultComponents, defaultIcons } from '../primitives/defaults';
 
 const SIZE_PADDING: Record<string, string> = { sm: '4px 8px', lg: '12px 24px', md: '8px 16px' };
 

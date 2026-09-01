@@ -14,8 +14,8 @@
 import type { Story } from '@ladle/react';
 import type { CSSProperties, ReactElement } from 'react';
 
-import { ComponentsProvider, useComponents } from './ComponentsProvider';
 import { defaultComponents, defaultIcons } from '../primitives/defaults';
+import { ComponentsProvider, useComponents } from './ComponentsProvider';
 
 function TokenDemo(): ReactElement {
   const {
