@@ -36,12 +36,20 @@ function isDatasourcePlugin(
 
 export function PluginSpecEditor(props: PluginSpecEditorProps): ReactElement | null {
   const {
-    pluginSelection: { type: pluginType, kind: pluginKind },
+    pluginSelection: { type: pluginType, kind: pluginKind, metadata: pluginMetadata },
     value,
     testConnection,
     ...others
   } = props;
-  const { data: plugin, isLoading, error } = usePlugin(pluginType, pluginKind);
+  // Edit the exact implementation the definition is pinned to, so the options editor matches the saved spec schema.
+  const {
+    data: plugin,
+    isLoading,
+    error,
+  } = usePlugin(pluginType, pluginKind, {
+    version: pluginMetadata?.version,
+    registry: pluginMetadata?.registry,
+  });
 
   if (error) {
     return <ErrorAlert error={error} />;

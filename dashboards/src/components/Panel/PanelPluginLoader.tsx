@@ -27,7 +27,11 @@ interface PanelPluginProps extends PanelProps<UnknownSpec, QueryDataType> {
  */
 export function PanelPluginLoader(props: PanelPluginProps): ReactElement {
   const { kind, spec, contentDimensions, definition, queryResults } = props;
-  const { data: plugin, isLoading: isPanelLoading } = usePlugin('Panel', kind, { useErrorBoundary: true });
+  const { data: plugin, isLoading: isPanelLoading } = usePlugin('Panel', kind, {
+    useErrorBoundary: true,
+    version: definition?.spec.plugin.metadata?.version,
+    registry: definition?.spec.plugin.metadata?.registry,
+  });
   const PanelComponent = plugin?.PanelComponent;
   const supportedQueryTypes = plugin?.supportedQueryTypes || [];
   // Clear out the queryResults parameter for plugins which don't support any query types

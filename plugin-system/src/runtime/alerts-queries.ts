@@ -35,7 +35,11 @@ export function useAlertsQueries(definitions: AlertsQueryDefinition[]): Array<Us
 
   const pluginLoaderResponse = usePlugins(
     'AlertsQuery',
-    definitions.map((d) => ({ kind: d.spec.plugin.kind })),
+    definitions.map((d) => ({
+      kind: d.spec.plugin.kind,
+      version: d.spec.plugin.metadata?.version,
+      registry: d.spec.plugin.metadata?.registry,
+    })),
   );
 
   return useQueries({
@@ -51,7 +55,12 @@ export function useAlertsQueries(definitions: AlertsQueryDefinition[]): Array<Us
         refetchOnReconnect: false,
         staleTime: 60_000,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<AlertsData> => {
-          const plugin = await getPlugin({ kind: ALERTS_QUERY_KEY, name: alertsQueryKind });
+          const plugin = await getPlugin({
+            kind: ALERTS_QUERY_KEY,
+            name: alertsQueryKind,
+            version: definition.spec.plugin.metadata?.version,
+            registry: definition.spec.plugin.metadata?.registry,
+          });
           const data = await plugin.getAlertsData(definition.spec.plugin.spec, context, signal);
           return data;
         },

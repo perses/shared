@@ -35,7 +35,11 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQ
 
   const pluginLoaderResponse = usePlugins(
     'TraceQuery',
-    definitions.map((d) => ({ kind: d.spec.plugin.kind })),
+    definitions.map((d) => ({
+      kind: d.spec.plugin.kind,
+      version: d.spec.plugin.metadata?.version,
+      registry: d.spec.plugin.metadata?.registry,
+    })),
   );
 
   // useQueries() handles data fetching from query plugins (e.g. traceQL queries, promQL queries)
@@ -53,7 +57,12 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQ
         refetchOnReconnect: false,
         staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<TraceData> => {
-          const plugin = await getPlugin({ kind: TRACE_QUERY_KEY, name: traceQueryKind });
+          const plugin = await getPlugin({
+            kind: TRACE_QUERY_KEY,
+            name: traceQueryKind,
+            version: definition.spec.plugin.metadata?.version,
+            registry: definition.spec.plugin.metadata?.registry,
+          });
           const data = await plugin.getTraceData(definition.spec.plugin.spec, context, signal);
           return data;
         },

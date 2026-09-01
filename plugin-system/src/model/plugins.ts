@@ -63,11 +63,23 @@ export interface PluginModuleMetadata {
 }
 
 /**
+ * Status of a module/package that contains plugins, as reported by the Perses server.
+ */
+export interface PluginModuleStatus {
+  isLoaded?: boolean;
+  /**
+   * True when the module is served by a local dev server (`percli plugin start`) instead of an installed archive.
+   */
+  inDev?: boolean;
+}
+
+/**
  * Information about a module/package that contains plugins.
  */
 export interface PluginModuleResource {
   kind: 'PluginModule';
   metadata: PluginModuleMetadata;
+  status?: PluginModuleStatus;
   spec: PluginModuleSpec;
 }
 

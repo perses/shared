@@ -131,10 +131,13 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
   const getDatasourceClient = useCallback(
     async function getClient<Client extends DatasourceClient>(selector: DatasourceSelector): Promise<Client> {
       const { kind } = selector;
-      const [{ spec, proxyUrl }, plugin] = await Promise.all([
-        findDatasource(selector),
-        getPlugin({ kind: 'Datasource', name: kind }),
-      ]);
+      const { spec, proxyUrl } = await findDatasource(selector);
+      const plugin = await getPlugin({
+        kind: 'Datasource',
+        name: kind,
+        version: spec.plugin.metadata?.version,
+        registry: spec.plugin.metadata?.registry,
+      });
 
       // allows extending client
       const client = plugin.createClient(spec.plugin.spec, { proxyUrl }) as Client;

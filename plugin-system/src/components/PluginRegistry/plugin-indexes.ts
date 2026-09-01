@@ -31,6 +31,8 @@ export interface PluginIndexes {
   pluginResourcesByNameKindRegistryVersion: Map<string, PluginModuleResource>;
   // Plugin metadata by plugin type
   pluginMetadataByKind: Map<PluginType, PluginMetadataWithModule[]>;
+  // Subset of the keys above that are served by a local dev server (`percli plugin start`)
+  devPluginKeys: Set<string>;
 }
 
 /**
@@ -47,6 +49,7 @@ export function usePluginIndexes(
     // Create the two indexes from the installed plugins
     const pluginResourcesByNameKindRegistryVersion = new Map<string, PluginModuleResource>();
     const pluginMetadataByKind = new Map<PluginType, PluginMetadataWithModule[]>();
+    const devPluginKeys = new Set<string>();
 
     for (const resource of installedPlugins) {
       const {
@@ -65,6 +68,9 @@ export function usePluginIndexes(
           );
         }
         pluginResourcesByNameKindRegistryVersion.set(key, resource);
+        if (resource.status?.inDev) {
+          devPluginKeys.add(key);
+        }
 
         // Index the metadata by plugin type
         let list = pluginMetadataByKind.get(kind);
@@ -79,6 +85,7 @@ export function usePluginIndexes(
     return {
       pluginResourcesByNameKindRegistryVersion,
       pluginMetadataByKind,
+      devPluginKeys,
     };
   });
 

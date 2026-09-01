@@ -54,7 +54,14 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
     onJSONChange,
   } = props;
   const { kind } = panelDefinition.spec.plugin;
-  const { data: plugin, isLoading, error } = usePlugin('Panel', kind);
+  const {
+    data: plugin,
+    isLoading,
+    error,
+  } = usePlugin('Panel', kind, {
+    version: panelDefinition.spec.plugin.metadata?.version,
+    registry: panelDefinition.spec.plugin.metadata?.registry,
+  });
 
   const { queryResults } = useDataQueriesContext();
 

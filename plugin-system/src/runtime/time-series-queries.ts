@@ -82,7 +82,10 @@ export const useTimeSeriesQuery = (
   options?: UseTimeSeriesQueryOptions,
   queryOptions?: QueryObserverOptions<TimeSeriesData>,
 ): UseQueryResult<TimeSeriesData> => {
-  const { data: plugin } = usePlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind);
+  const { data: plugin } = usePlugin(TIME_SERIES_QUERY_KEY, definition.spec.plugin.kind, {
+    version: definition.spec.plugin.metadata?.version,
+    registry: definition.spec.plugin.metadata?.registry,
+  });
   const context = useTimeSeriesQueryContext();
   const { queryEnabled, queryKey } = getQueryOptions({ plugin, definition, context });
   return useQuery({
@@ -117,7 +120,11 @@ export function useTimeSeriesQueries(
 
   const pluginLoaderResponse = usePlugins(
     TIME_SERIES_QUERY_KEY,
-    definitions.map((d) => ({ kind: d.spec.plugin.kind })),
+    definitions.map((d) => ({
+      kind: d.spec.plugin.kind,
+      version: d.spec.plugin.metadata?.version,
+      registry: d.spec.plugin.metadata?.registry,
+    })),
   );
   return useQueries({
     queries: definitions.map((definition, idx) => {
@@ -132,7 +139,12 @@ export function useTimeSeriesQueries(
         staleTime: Infinity,
         queryKey: queryKey,
         queryFn: async ({ signal }: { signal: AbortSignal }): Promise<TimeSeriesData> => {
-          const plugin = await getPlugin({ kind: TIME_SERIES_QUERY_KEY, name: definition.spec.plugin.kind });
+          const plugin = await getPlugin({
+            kind: TIME_SERIES_QUERY_KEY,
+            name: definition.spec.plugin.kind,
+            version: definition.spec.plugin.metadata?.version,
+            registry: definition.spec.plugin.metadata?.registry,
+          });
           const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, context, signal);
           return data;
         },

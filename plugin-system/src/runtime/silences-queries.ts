@@ -35,7 +35,11 @@ export function useSilencesQueries(definitions: SilencesQueryDefinition[]): Arra
 
   const pluginLoaderResponse = usePlugins(
     'SilencesQuery',
-    definitions.map((d) => ({ kind: d.spec.plugin.kind })),
+    definitions.map((d) => ({
+      kind: d.spec.plugin.kind,
+      version: d.spec.plugin.metadata?.version,
+      registry: d.spec.plugin.metadata?.registry,
+    })),
   );
 
   return useQueries({
@@ -51,7 +55,12 @@ export function useSilencesQueries(definitions: SilencesQueryDefinition[]): Arra
         refetchOnReconnect: false,
         staleTime: 60_000,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<SilencesData> => {
-          const plugin = await getPlugin({ kind: SILENCES_QUERY_KEY, name: silencesQueryKind });
+          const plugin = await getPlugin({
+            kind: SILENCES_QUERY_KEY,
+            name: silencesQueryKind,
+            version: definition.spec.plugin.metadata?.version,
+            registry: definition.spec.plugin.metadata?.registry,
+          });
           const data = await plugin.getSilencesData(definition.spec.plugin.spec, context, signal);
           return data;
         },

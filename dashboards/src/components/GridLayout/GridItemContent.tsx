@@ -106,7 +106,10 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
   // map TimeSeriesQueryDefinition to Definition<UnknownSpec>
   const suggestedStepMs = useSuggestedStepMs(width);
 
-  const { data: plugin } = usePlugin('Panel', panelDefinition.spec.plugin.kind);
+  const { data: plugin } = usePlugin('Panel', panelDefinition.spec.plugin.kind, {
+    version: panelDefinition.spec.plugin.metadata?.version,
+    registry: panelDefinition.spec.plugin.metadata?.registry,
+  });
 
   const pluginQueryOptions =
     typeof plugin?.queryOptions === 'function'

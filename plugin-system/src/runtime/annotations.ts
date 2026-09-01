@@ -75,7 +75,11 @@ export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryRes
 
   const pluginLoaderResponse = usePlugins(
     'Annotation',
-    definitions.map((d) => ({ kind: d.plugin.kind })),
+    definitions.map((d) => ({
+      kind: d.plugin.kind,
+      version: d.plugin.metadata?.version,
+      registry: d.plugin.metadata?.registry,
+    })),
   );
 
   // useQueries() handles data fetching from query plugins
@@ -92,7 +96,12 @@ export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryRes
         refetchOnReconnect: false,
         staleTime: Infinity,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<AnnotationData[]> => {
-          const plugin = await getPlugin({ kind: ANNOTATION_KEY, name: annotationKind });
+          const plugin = await getPlugin({
+            kind: ANNOTATION_KEY,
+            name: annotationKind,
+            version: definition.plugin.metadata?.version,
+            registry: definition.plugin.metadata?.registry,
+          });
           const data = await plugin.getAnnotationData(definition.plugin.spec, context, signal);
           return data;
         },
@@ -102,7 +111,10 @@ export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryRes
 }
 
 export function useAnnotationData(spec: AnnotationSpec): UseQueryResult<AnnotationData[]> {
-  const { data: annotationPlugin } = usePlugin('Annotation', spec.plugin.kind);
+  const { data: annotationPlugin } = usePlugin('Annotation', spec.plugin.kind, {
+    version: spec.plugin.metadata?.version,
+    registry: spec.plugin.metadata?.registry,
+  });
 
   const datasourceStore = useDatasourceStore();
   const allVariables = useAllVariableValues();

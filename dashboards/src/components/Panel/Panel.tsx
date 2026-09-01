@@ -136,7 +136,12 @@ export const Panel = memo(function Panel(props: PanelProps) {
       }
 
       try {
-        const plugin = await getPlugin({ kind: 'Panel', name: panelPluginKind });
+        const plugin = await getPlugin({
+          kind: 'Panel',
+          name: panelPluginKind,
+          version: definition.spec.plugin.metadata?.version,
+          registry: definition.spec.plugin.metadata?.registry,
+        });
 
         // More defensive checking for plugin and actions
         if (
@@ -173,7 +178,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
     };
 
     loadPluginActions();
-  }, [definition.spec.plugin.kind, panelPropsForActions, getPlugin]);
+  }, [definition.spec.plugin, panelPropsForActions, getPlugin]);
 
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
     onMouseEnter?.(e);
