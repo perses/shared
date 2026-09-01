@@ -15,10 +15,12 @@ import { createContext, ComponentType, ReactNode, SVGProps } from 'react';
 
 import type { AlertProps } from '../primitives/Alert';
 import type { ButtonProps } from '../primitives/Button';
+import type { SpinnerProps } from '../primitives/Spinner';
 
 export interface PersesComponents {
   Button: ComponentType<ButtonProps>;
   Alert: ComponentType<AlertProps>;
+  Spinner: ComponentType<SpinnerProps>;
 }
 
 export interface PersesIcons {
@@ -44,6 +46,12 @@ export interface ComponentsProviderProps {
    * const components: PersesComponents = { Alert, Button };
    * // Override just one primitive:
    * const withCustomButton: PersesComponents = { ...components, Button: MyButton };
+   *
+   * @example
+   * // Or start from the built-in defaults:
+   * import { defaultComponents } from '@perses-dev/components/next/primitives/defaults';
+   *
+   * const withCustomButton: PersesComponents = { ...defaultComponents, Button: MyButton };
    */
   components: PersesComponents;
   /**
@@ -55,6 +63,12 @@ export interface ComponentsProviderProps {
    * import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '@perses-dev/components/next/primitives';
    *
    * const icons: PersesIcons = { Error: ErrorIcon, Info: InfoIcon, Success: SuccessIcon, Warning: WarningIcon };
+   *
+   * @example
+   * // Or start from the built-in defaults:
+   * import { defaultIcons } from '@perses-dev/components/next/primitives/defaults';
+   *
+   * const withCustomError: PersesIcons = { ...defaultIcons, Error: MyErrorIcon };
    */
   icons: PersesIcons;
   children?: ReactNode;

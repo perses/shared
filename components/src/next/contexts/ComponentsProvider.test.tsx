@@ -14,13 +14,13 @@
 import { render, screen } from '@testing-library/react';
 import { FC, forwardRef, ReactElement, SVGProps } from 'react';
 
-import { Alert, Button, ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../primitives';
 import type { ButtonProps } from '../primitives';
+import { defaultComponents, defaultIcons } from '../primitives/defaults';
 import { ComponentsProvider, useComponents } from './ComponentsProvider';
 import type { ComponentsContextValue, PersesComponents, PersesIcons } from './ComponentsProvider';
 
-const components: PersesComponents = { Button, Alert };
-const icons: PersesIcons = { Error: ErrorIcon, Info: InfoIcon, Success: SuccessIcon, Warning: WarningIcon };
+const components = defaultComponents;
+const icons = defaultIcons;
 
 describe('ComponentsProvider', () => {
   it('renders components passed in via props', () => {

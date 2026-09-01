@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { ReactElement, ReactNode, useEffect } from 'react';
+import { ReactElement, ReactNode } from 'react';
 
 export type ThemeMode = 'dark' | 'light';
 
@@ -20,21 +20,6 @@ export interface ThemeModeProviderProps {
   children?: ReactNode;
 }
 
-/**
- * Applies `data-perses-mode` to the document root so design-tokens' dark mode
- * CSS variables take effect, and to a wrapping element for scoped consumers.
- */
-const WRAPPER_STYLE = { minHeight: '100vh' } as const;
-
 export function ThemeModeProvider({ mode, children }: ThemeModeProviderProps): ReactElement {
-  useEffect(() => {
-    document.documentElement.setAttribute('data-perses-mode', mode);
-    return (): void => document.documentElement.removeAttribute('data-perses-mode');
-  }, [mode]);
-
-  return (
-    <div data-perses-mode={mode} style={WRAPPER_STYLE}>
-      {children}
-    </div>
-  );
+  return <div data-perses-mode={mode}>{children}</div>;
 }

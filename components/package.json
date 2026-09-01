@@ -30,7 +30,12 @@
       "import": "./dist/next/primitives/index.js",
       "require": "./dist/cjs/next/primitives/index.js"
     },
-    "./next/css": "./dist/next/css/index.css"
+    "./next/css": "./dist/next/css/index.css",
+    "./next/primitives/defaults": {
+      "types": "./dist/next/primitives/defaults.d.ts",
+      "import": "./dist/next/primitives/defaults.js",
+      "require": "./dist/cjs/next/primitives/defaults.js"
+    }
   },
   "scripts": {
     "clean": "rimraf dist/",

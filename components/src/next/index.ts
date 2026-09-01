@@ -18,3 +18,6 @@ export type {
   ComponentsProviderProps,
   ComponentsContextValue,
 } from './contexts/ComponentsProvider';
+
+export { ThemeModeProvider } from './contexts/ThemeModeProvider';
+export type { ThemeMode, ThemeModeProviderProps } from './contexts/ThemeModeProvider';

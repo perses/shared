@@ -84,7 +84,7 @@
     --perses-status-icon-warning: var(--perses-color-orange-700);
     --perses-status-solid-warning: var(--perses-color-orange-700);
 
-    /* Status: Success — green-800 (not green-700) for WCAG AA contrast against green-50 background */
+    /* Status: Success */
     --perses-status-bg-success: var(--perses-color-green-50);
     --perses-status-bg-success-hover: var(--perses-color-green-800);
     --perses-status-text-success: var(--perses-color-green-900);

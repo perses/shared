@@ -22,7 +22,7 @@ export interface IconProps extends HTMLAttributes<HTMLSpanElement> {
 
 export const Icon = forwardRef<HTMLSpanElement, IconProps>(function Icon({ className, children, ...rest }, ref) {
   return (
-    <span ref={ref} aria-hidden="true" {...rest} className={clsx('ps-Icon', className)}>
+    <span ref={ref} {...rest} aria-hidden="true" className={clsx('ps-Icon', className)}>
       {children}
     </span>
   );

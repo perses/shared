@@ -12,10 +12,10 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { ComponentType, forwardRef, HTMLAttributes, ReactElement, ReactNode, SVGProps, useContext } from 'react';
+import { ComponentType, forwardRef, HTMLAttributes, ReactElement, ReactNode, SVGProps } from 'react';
 
-import { ComponentsContext } from '../../contexts/ComponentsContext';
 import type { PersesIcons } from '../../contexts/ComponentsContext';
+import { useComponents } from '../../contexts/ComponentsProvider';
 import { Icon } from '../Icon/Icon';
 import { SuccessIcon, InfoIcon, WarningIcon, ErrorIcon } from '../Icon/icons';
 
@@ -37,18 +37,6 @@ function isAlertSeverity(icon: unknown): icon is AlertSeverity {
 
 export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
   severity?: AlertSeverity;
-  /**
-   * No icon by default. Pass a severity key (e.g. `"error"`) to use the matching built-in icon —
-   * respecting any `ComponentsProvider` icon overrides — or a custom `ReactElement` to render your own.
-   *
-   * Deliberately typed as `ReactElement` rather than `ReactNode`: `ReactNode` includes `string`
-   * (both directly and structurally, since `string` satisfies `Iterable<ReactNode>`), which would
-   * let a misspelled severity key silently render as literal text instead of failing to compile.
-   *
-   * @example
-   * <Alert severity="error" icon="error">Something went wrong</Alert>
-   * <Alert severity="error" icon={<MyIcon />}>Something went wrong</Alert>
-   */
   icon?: AlertSeverity | ReactElement | number | boolean | null;
 }
 
@@ -62,13 +50,13 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   ref,
 ) {
   const classes = clsx('ps-Alert', className);
-  const ctx = useContext(ComponentsContext);
+  const { icons } = useComponents();
 
   let resolvedIcon: ReactNode;
 
   if (isAlertSeverity(icon)) {
     const { key, icon: DefaultIcon } = SEVERITY_ICONS[icon];
-    const IconComponent = ctx?.icons[key] ?? DefaultIcon;
+    const IconComponent = icons[key] ?? DefaultIcon;
     resolvedIcon = <IconComponent />;
   } else {
     resolvedIcon = icon;

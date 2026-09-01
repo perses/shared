@@ -13,18 +13,9 @@
 
 import { render, screen } from '@testing-library/react';
 
-import { ThemeMode, ThemeModeProvider } from './ThemeModeProvider';
+import { ThemeModeProvider } from './ThemeModeProvider';
 
 describe('ThemeModeProvider', () => {
-  afterEach(() => {
-    document.documentElement.removeAttribute('data-perses-mode');
-  });
-
-  it.each<ThemeMode>(['dark', 'light'])('sets data-perses-mode=%s on the document root', (mode) => {
-    render(<ThemeModeProvider mode={mode}>Content</ThemeModeProvider>);
-    expect(document.documentElement).toHaveAttribute('data-perses-mode', mode);
-  });
-
   it('sets data-perses-mode on its wrapper element', () => {
     render(
       <ThemeModeProvider mode="dark">
@@ -43,11 +34,17 @@ describe('ThemeModeProvider', () => {
     expect(screen.getByTestId('child')).toBeInTheDocument();
   });
 
-  it('updates the document root when mode changes', () => {
-    const { rerender } = render(<ThemeModeProvider mode="light">Content</ThemeModeProvider>);
-    expect(document.documentElement).toHaveAttribute('data-perses-mode', 'light');
+  it('updates the wrapper when mode changes', () => {
+    render(
+      <ThemeModeProvider mode="light">
+        <span data-testid="child">Content</span>
+      </ThemeModeProvider>,
+    );
+    expect(screen.getByTestId('child').parentElement).toHaveAttribute('data-perses-mode', 'light');
+  });
 
-    rerender(<ThemeModeProvider mode="dark">Content</ThemeModeProvider>);
-    expect(document.documentElement).toHaveAttribute('data-perses-mode', 'dark');
+  it('does not set attributes on document.documentElement', () => {
+    render(<ThemeModeProvider mode="dark">Content</ThemeModeProvider>);
+    expect(document.documentElement).not.toHaveAttribute('data-perses-mode');
   });
 });

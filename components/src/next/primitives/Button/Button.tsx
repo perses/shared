@@ -15,8 +15,8 @@ import { Button as BaseButton } from '@base-ui/react/button';
 import clsx from 'clsx';
 import { ButtonHTMLAttributes, forwardRef } from 'react';
 
+import { useComponents } from '../../contexts/ComponentsProvider';
 import { Icon } from '../Icon/Icon';
-import { Spinner } from '../Spinner/Spinner';
 
 import './button.css';
 
@@ -35,6 +35,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   { variant = 'solid', color = 'primary', size = 'md', loading = false, disabled, className, children, ...rest },
   ref,
 ) {
+  const { components: { Spinner } } = useComponents();
   const classes = clsx('ps-Button', className);
   const isDisabled = disabled || loading;
 
