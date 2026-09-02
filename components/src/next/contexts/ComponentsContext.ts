@@ -37,38 +37,43 @@ export interface ComponentsContextValue {
 
 export interface ComponentsProviderProps {
   /**
-   * No implicit defaults — import the primitives from `@perses-dev/components/next/primitives` and construct this
-   * object, spreading in overrides as needed. Memoize or hoist to a stable reference to avoid unnecessary re-renders.
+   * Map of components that will be loaded when using the `useComponents` hook.
    *
    * @example
-   * import { Alert, Button } from '@perses-dev/components/next/primitives';
-   *
-   * const components: PersesComponents = { Alert, Button };
-   * // Override just one primitive:
-   * const withCustomButton: PersesComponents = { ...components, Button: MyButton };
-   *
-   * @example
-   * // Or start from the built-in defaults:
+   * // Use the default components
    * import { defaultComponents } from '@perses-dev/components/next/primitives/defaults';
    *
-   * const withCustomButton: PersesComponents = { ...defaultComponents, Button: MyButton };
+   * const components: PersesComponents = defaultComponents;
+   *
+   * @example
+   * // Override one component, spreading over the defaults
+   * import { defaultComponents } from '@perses-dev/components/next/primitives/defaults';
+   *
+   * const components: PersesComponents = { ...defaultComponents, Button: MyButton };
+   *
+   * @example
+   * // Provide only custom components
+   * const components: PersesComponents = { Alert: MyAlert, Button: MyButton, Spinner: MySpinner };
    */
   components: PersesComponents;
   /**
-   * No implicit defaults — import the icon components from `@perses-dev/components/next/primitives` and construct
-   * this object, spreading in overrides as needed. Memoize or hoist to a stable reference to avoid unnecessary
-   * re-renders.
+   * Map of icons that will be loaded when using the `useComponents` hook.
    *
    * @example
-   * import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '@perses-dev/components/next/primitives';
-   *
-   * const icons: PersesIcons = { Error: ErrorIcon, Info: InfoIcon, Success: SuccessIcon, Warning: WarningIcon };
-   *
-   * @example
-   * // Or start from the built-in defaults:
+   * // Use the default icons
    * import { defaultIcons } from '@perses-dev/components/next/primitives/defaults';
    *
-   * const withCustomError: PersesIcons = { ...defaultIcons, Error: MyErrorIcon };
+   * const icons: PersesIcons = defaultIcons;
+   *
+   * @example
+   * // Override one icon, spreading over the defaults
+   * import { defaultIcons } from '@perses-dev/components/next/primitives/defaults';
+   *
+   * const icons: PersesIcons = { ...defaultIcons, Error: MyErrorIcon };
+   *
+   * @example
+   * // Provide all custom icons
+   * const icons: PersesIcons = { Error: MyErrorIcon, Info: MyInfoIcon, Success: MySuccessIcon, Warning: MyWarningIcon };
    */
   icons: PersesIcons;
   children?: ReactNode;

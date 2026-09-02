@@ -24,9 +24,6 @@ import type {
 export type { PersesComponents, PersesIcons, ComponentsContextValue, ComponentsProviderProps };
 
 export function ComponentsProvider({ children, components, icons }: ComponentsProviderProps): ReactElement {
-  // Callers must memoize or hoist components/icons to a stable reference to avoid unnecessary
-  // re-renders — the useMemo below only skips recomputing `value`, it does not make an unstable
-  // components/icons reference stable (see ComponentsProviderProps).
   const value = useMemo(() => ({ components, icons }), [components, icons]);
 
   return <ComponentsContext.Provider value={value}>{children}</ComponentsContext.Provider>;
@@ -35,7 +32,7 @@ export function ComponentsProvider({ children, components, icons }: ComponentsPr
 export function useComponents(): ComponentsContextValue {
   const ctx = useContext(ComponentsContext);
   if (ctx === undefined) {
-    throw new Error('No ComponentsContext found. Did you forget a Provider?');
+    throw new Error('No ComponentsContext found. Did you forget a ComponentsProvider?');
   }
   return ctx;
 }

@@ -13,21 +13,19 @@
  * limitations under the License.
  */
 
-html[data-perses-mode='dark'],
-html[data-perses-mode='dark'] body,
-html[data-perses-mode='dark'] #ladle-root,
-html[data-perses-mode='dark'] [data-storyloaded] {
+[data-perses-mode='dark'] {
+  min-height: 100vh;
   background: var(--perses-bg-default);
   color: var(--perses-text-primary);
 }
 
-html[data-perses-mode='dark'] h1,
-html[data-perses-mode='dark'] h2,
-html[data-perses-mode='dark'] h3,
-html[data-perses-mode='dark'] h4,
-html[data-perses-mode='dark'] h5,
-html[data-perses-mode='dark'] h6,
-html[data-perses-mode='dark'] p,
-html[data-perses-mode='dark'] label {
+[data-perses-mode='dark'] h1,
+[data-perses-mode='dark'] h2,
+[data-perses-mode='dark'] h3,
+[data-perses-mode='dark'] h4,
+[data-perses-mode='dark'] h5,
+[data-perses-mode='dark'] h6,
+[data-perses-mode='dark'] p,
+[data-perses-mode='dark'] label {
   color: var(--perses-text-primary);
 }

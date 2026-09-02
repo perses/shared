@@ -14,11 +14,17 @@
 import type { GlobalProvider } from '@ladle/react';
 import '@perses-dev/design-tokens/css';
 
+import { ComponentsProvider } from '../src/next/contexts/ComponentsProvider';
 import { ThemeModeProvider } from '../src/next/contexts/ThemeModeProvider';
+import { defaultComponents, defaultIcons } from '../src/next/primitives/defaults';
 
 import '../src/next/css/index.css';
 import './theme-mode.css';
 
 export const Provider: GlobalProvider = ({ children, globalState }) => (
-  <ThemeModeProvider mode={globalState.theme === 'dark' ? 'dark' : 'light'}>{children}</ThemeModeProvider>
+  <ThemeModeProvider mode={globalState.theme === 'dark' ? 'dark' : 'light'}>
+    <ComponentsProvider components={defaultComponents} icons={defaultIcons}>
+      {children}
+    </ComponentsProvider>
+  </ThemeModeProvider>
 );

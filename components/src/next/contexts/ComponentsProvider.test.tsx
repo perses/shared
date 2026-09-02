@@ -83,7 +83,7 @@ describe('ComponentsProvider', () => {
       return null;
     }
 
-    expect(() => render(<BadConsumer />)).toThrow('No ComponentsContext found. Did you forget a Provider?');
+    expect(() => render(<BadConsumer />)).toThrow('No ComponentsContext found. Did you forget a ComponentsProvider?');
 
     consoleSpy.mockRestore();
   });
