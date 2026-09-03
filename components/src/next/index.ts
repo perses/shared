@@ -11,8 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { Button } from './primitives/Button/Button';
-export type { ButtonProps, ButtonVariant, ButtonColor, ButtonSize } from './primitives/Button/Button';
+export { ComponentsProvider, useComponents } from './contexts/ComponentsProvider';
+export type {
+  PersesComponents,
+  PersesIcons,
+  ComponentsProviderProps,
+  ComponentsContextValue,
+} from './contexts/ComponentsProvider';
 
-export { Alert } from './primitives/Alert/Alert';
-export type { AlertProps, AlertSeverity } from './primitives/Alert/Alert';
+export { ThemeModeProvider } from './contexts/ThemeModeProvider';
+export type { ThemeMode, ThemeModeProviderProps } from './contexts/ThemeModeProvider';

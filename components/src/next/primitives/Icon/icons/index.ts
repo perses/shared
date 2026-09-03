@@ -11,11 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { Config } from '@jest/types';
-import shared from '../jest.shared';
-
-const jestConfig: Config.InitialOptions = {
-  ...shared,
-};
-
-export default jestConfig;
+export { ErrorIcon } from './ErrorIcon';
+export { InfoIcon } from './InfoIcon';
+export { SuccessIcon } from './SuccessIcon';
+export { WarningIcon } from './WarningIcon';

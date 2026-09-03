@@ -11,29 +11,53 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { forwardRef } from 'react';
 import { Button as BaseButton } from '@base-ui/react/button';
 import clsx from 'clsx';
+import { ButtonHTMLAttributes, forwardRef } from 'react';
+
+import { useComponents } from '../../contexts/ComponentsProvider';
+import { Icon } from '../Icon/Icon';
+
 import './button.css';
 
 export type ButtonVariant = 'solid' | 'outline' | 'ghost';
 export type ButtonColor = 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
-export interface ButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'color'> {
+export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'color'> {
   variant?: ButtonVariant;
   color?: ButtonColor;
   size?: ButtonSize;
+  loading?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'solid', color = 'primary', size = 'md', className, children, ...rest },
-  ref
+  { variant = 'solid', color = 'primary', size = 'md', loading = false, disabled, className, children, ...rest },
+  ref,
 ) {
+  const {
+    components: { Spinner },
+  } = useComponents();
   const classes = clsx('ps-Button', className);
+  const isDisabled = disabled || loading;
 
   return (
-    <BaseButton {...rest} ref={ref} className={classes} data-variant={variant} data-color={color} data-size={size}>
+    <BaseButton
+      {...rest}
+      ref={ref}
+      className={classes}
+      disabled={isDisabled}
+      aria-busy={loading || undefined}
+      data-variant={variant}
+      data-color={color}
+      data-size={size}
+      data-loading={loading || undefined}
+    >
+      {loading && (
+        <Icon className="ps-Button__spinner">
+          <Spinner />
+        </Icon>
+      )}
       {children}
     </BaseButton>
   );
