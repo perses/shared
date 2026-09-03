@@ -11,13 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { ComponentsProvider, useComponents } from './contexts/ComponentsProvider';
-export type {
-  PersesComponents,
-  PersesIcons,
-  ComponentsProviderProps,
-  ComponentsContextValue,
-} from './contexts/ComponentsProvider';
+import type { PersesComponents, PersesIcons } from '../contexts/ComponentsContext';
+import { Alert } from './Alert';
+import { Button } from './Button';
+import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon';
+import { Spinner } from './Spinner';
 
-export { ThemeModeProvider } from './contexts/ThemeModeProvider';
-export type { ThemeMode, ThemeModeProviderProps } from './contexts/ThemeModeProvider';
+export const defaultComponents: PersesComponents = { Button, Alert, Spinner };
+
+export const defaultIcons: PersesIcons = {
+  Error: ErrorIcon,
+  Info: InfoIcon,
+  Success: SuccessIcon,
+  Warning: WarningIcon,
+};
