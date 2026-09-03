@@ -13,6 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+
 import { tokens } from '../tokens';
 
 const cssDir = resolve(__dirname, '../css');

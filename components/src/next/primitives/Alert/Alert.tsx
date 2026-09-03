@@ -11,25 +11,61 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { forwardRef } from 'react';
 import clsx from 'clsx';
+import { ComponentType, forwardRef, HTMLAttributes, ReactElement, ReactNode, SVGProps } from 'react';
+
+import type { PersesIcons } from '../../contexts/ComponentsContext';
+import { useComponents } from '../../contexts/ComponentsProvider';
+import { Icon } from '../Icon/Icon';
+import { SuccessIcon, InfoIcon, WarningIcon, ErrorIcon } from '../Icon/icons';
+
 import './alert.css';
 
 export type AlertSeverity = 'error' | 'warning' | 'success' | 'info';
 
-export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
-  severity?: AlertSeverity;
+const SEVERITY_ICONS: Record<AlertSeverity, { key: keyof PersesIcons; icon: ComponentType<SVGProps<SVGSVGElement>> }> =
+  {
+    success: { key: 'Success', icon: SuccessIcon },
+    info: { key: 'Info', icon: InfoIcon },
+    warning: { key: 'Warning', icon: WarningIcon },
+    error: { key: 'Error', icon: ErrorIcon },
+  };
+
+function isAlertSeverity(icon: unknown): icon is AlertSeverity {
+  return typeof icon === 'string' && icon in SEVERITY_ICONS;
 }
 
+export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
+  severity?: AlertSeverity;
+  icon?: AlertSeverity | ReactElement | number | boolean | null;
+}
+
+/**
+ * DOM structure: `.ps-Alert > .ps-Alert__icon? + .ps-Alert__message`
+ * `.ps-Alert__icon` is only rendered when `icon` resolves to a non-empty value.
+ * Consumers should target `.ps-Alert__message` for content styling.
+ */
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  { severity = 'info', role = 'alert', className, children, ...rest },
-  ref
+  { severity = 'info', role = 'alert', className, icon, children, ...rest },
+  ref,
 ) {
   const classes = clsx('ps-Alert', className);
+  const { icons } = useComponents();
+
+  let resolvedIcon: ReactNode;
+
+  if (isAlertSeverity(icon)) {
+    const { key, icon: DefaultIcon } = SEVERITY_ICONS[icon];
+    const IconComponent = icons[key] ?? DefaultIcon;
+    resolvedIcon = <IconComponent />;
+  } else {
+    resolvedIcon = icon;
+  }
 
   return (
     <div role={role} {...rest} ref={ref} className={classes} data-severity={severity}>
-      {children}
+      {Boolean(resolvedIcon) && <Icon className="ps-Alert__icon">{resolvedIcon}</Icon>}
+      <div className="ps-Alert__message">{children}</div>
     </div>
   );
 });

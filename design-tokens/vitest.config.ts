@@ -11,13 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { ComponentsProvider, useComponents } from './contexts/ComponentsProvider';
-export type {
-  PersesComponents,
-  PersesIcons,
-  ComponentsProviderProps,
-  ComponentsContextValue,
-} from './contexts/ComponentsProvider';
+import { resolve } from 'node:path';
 
-export { ThemeModeProvider } from './contexts/ThemeModeProvider';
-export type { ThemeMode, ThemeModeProviderProps } from './contexts/ThemeModeProvider';
+import { definePackageVitestConfig } from '../vitest.shared';
+
+export default definePackageVitestConfig({
+  packageDir: resolve(__dirname),
+});

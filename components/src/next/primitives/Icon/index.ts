@@ -11,13 +11,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { ComponentsProvider, useComponents } from './contexts/ComponentsProvider';
-export type {
-  PersesComponents,
-  PersesIcons,
-  ComponentsProviderProps,
-  ComponentsContextValue,
-} from './contexts/ComponentsProvider';
-
-export { ThemeModeProvider } from './contexts/ThemeModeProvider';
-export type { ThemeMode, ThemeModeProviderProps } from './contexts/ThemeModeProvider';
+export * from './Icon';
+export * from './icons';

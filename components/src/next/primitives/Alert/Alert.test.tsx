@@ -12,31 +12,43 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
+import { ReactElement, ReactNode, SVGProps } from 'react';
+
+import { ComponentsProvider } from '../../contexts/ComponentsProvider';
+import { defaultComponents, defaultIcons } from '../defaults';
 import { Alert } from './Alert';
+
+function Wrapper({ children }: { children: ReactNode }): ReactElement {
+  return (
+    <ComponentsProvider components={defaultComponents} icons={defaultIcons}>
+      {children}
+    </ComponentsProvider>
+  );
+}
 
 describe('Alert', () => {
   it('renders children', () => {
-    render(<Alert>Something happened</Alert>);
+    render(<Alert>Something happened</Alert>, { wrapper: Wrapper });
     expect(screen.getByRole('alert')).toHaveTextContent('Something happened');
   });
 
   it('applies the ps-Alert class', () => {
-    render(<Alert>Test</Alert>);
+    render(<Alert>Test</Alert>, { wrapper: Wrapper });
     expect(screen.getByRole('alert')).toHaveClass('ps-Alert');
   });
 
   it('defaults to info severity', () => {
-    render(<Alert>Test</Alert>);
+    render(<Alert>Test</Alert>, { wrapper: Wrapper });
     expect(screen.getByRole('alert')).toHaveAttribute('data-severity', 'info');
   });
 
   it('sets data-severity attribute', () => {
-    render(<Alert severity="error">Error!</Alert>);
+    render(<Alert severity="error">Error!</Alert>, { wrapper: Wrapper });
     expect(screen.getByRole('alert')).toHaveAttribute('data-severity', 'error');
   });
 
   it('merges additional className', () => {
-    render(<Alert className="custom">Test</Alert>);
+    render(<Alert className="custom">Test</Alert>, { wrapper: Wrapper });
     const alert = screen.getByRole('alert');
     expect(alert).toHaveClass('ps-Alert');
     expect(alert).toHaveClass('custom');
@@ -44,13 +56,87 @@ describe('Alert', () => {
 
   it('renders all severity levels', () => {
     const severities = ['error', 'warning', 'success', 'info'] as const;
-    const { unmount } = render(<Alert severity="error">Test</Alert>);
-    unmount();
 
     for (const severity of severities) {
-      const { unmount: cleanup } = render(<Alert severity={severity}>{severity}</Alert>);
+      const { unmount } = render(<Alert severity={severity}>{severity}</Alert>, { wrapper: Wrapper });
       expect(screen.getByRole('alert')).toHaveAttribute('data-severity', severity);
-      cleanup();
+      unmount();
     }
+  });
+
+  it('renders no icon when icon prop is omitted', () => {
+    render(<Alert severity="info">Test</Alert>, { wrapper: Wrapper });
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).not.toBeInTheDocument();
+  });
+
+  it('renders the built-in icon matching a severity key passed to icon', () => {
+    render(<Alert icon="info">Test</Alert>, { wrapper: Wrapper });
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).toBeInTheDocument();
+    expect(iconContainer?.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('composes the shared Icon primitive for its icon wrapper', () => {
+    render(<Alert icon="info">Test</Alert>, { wrapper: Wrapper });
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).toHaveClass('ps-Icon');
+  });
+
+  it('resolves the icon key independently of the severity prop', () => {
+    render(
+      <Alert severity="error" icon="info">
+        Test
+      </Alert>,
+      { wrapper: Wrapper },
+    );
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveAttribute('data-severity', 'error');
+    expect(alert.querySelector('.ps-Alert__icon svg')).toBeInTheDocument();
+  });
+
+  it('renders a custom icon when icon prop is provided', () => {
+    const customIcon = <svg data-testid="custom-icon" />;
+    render(<Alert icon={customIcon}>Test</Alert>, { wrapper: Wrapper });
+    expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
+  });
+
+  it('renders no icon when icon is set to null', () => {
+    render(<Alert icon={null}>Test</Alert>, { wrapper: Wrapper });
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).not.toBeInTheDocument();
+  });
+
+  it('renders no icon when icon is set to false or 0', () => {
+    const { rerender } = render(<Alert icon={false}>Test</Alert>, { wrapper: Wrapper });
+    expect(screen.getByRole('alert').querySelector('.ps-Alert__icon')).not.toBeInTheDocument();
+
+    rerender(<Alert icon={0}>Test</Alert>);
+    expect(screen.getByRole('alert').querySelector('.ps-Alert__icon')).not.toBeInTheDocument();
+    expect(screen.getByRole('alert')).not.toHaveTextContent('0');
+  });
+
+  it('uses provider icons when inside a ComponentsProvider', () => {
+    const CustomErrorIcon = (props: SVGProps<SVGSVGElement>): ReactElement => (
+      <svg data-testid="provider-error-icon" {...props} />
+    );
+
+    render(
+      <ComponentsProvider components={defaultComponents} icons={{ ...defaultIcons, Error: CustomErrorIcon }}>
+        <Alert severity="error" icon="error">
+          Error
+        </Alert>
+      </ComponentsProvider>,
+    );
+
+    expect(screen.getByTestId('provider-error-icon')).toBeInTheDocument();
+  });
+
+  it('throws when rendered outside a ComponentsProvider', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(() => render(<Alert>Error</Alert>)).toThrow(
+      'No ComponentsContext found. Did you forget a ComponentsProvider?',
+    );
+    consoleSpy.mockRestore();
   });
 });
