@@ -11,13 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { ComponentsProvider, useComponents } from './contexts/ComponentsProvider';
-export type {
-  PersesComponents,
-  PersesIcons,
-  ComponentsProviderProps,
-  ComponentsContextValue,
-} from './contexts/ComponentsProvider';
+import React from 'react';
 
-export { ThemeModeProvider } from './contexts/ThemeModeProvider';
-export type { ThemeMode, ThemeModeProviderProps } from './contexts/ThemeModeProvider';
+export function SuccessIcon(props: React.SVGProps<SVGSVGElement>): React.ReactElement {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor" {...props}>
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8m4.59-12.42L10 14.17l-2.59-2.58L6 13l4 4 8-8z" />
+    </svg>
+  );
+}

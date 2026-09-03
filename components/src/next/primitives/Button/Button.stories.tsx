@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
+
 import { Button, ButtonVariant, ButtonColor, ButtonSize } from './Button';
 
 const variants: ButtonVariant[] = ['solid', 'outline', 'ghost'];
@@ -51,6 +52,20 @@ export const Disabled: Story = () => (
     </Button>
     <Button variant="ghost" color="primary" disabled>
       Ghost Disabled
+    </Button>
+  </div>
+);
+
+export const Loading: Story = () => (
+  <div style={{ display: 'flex', gap: '1rem' }}>
+    <Button variant="solid" color="primary" loading>
+      Saving…
+    </Button>
+    <Button variant="outline" color="primary" loading>
+      Submitting…
+    </Button>
+    <Button variant="ghost" color="primary" loading>
+      Loading…
     </Button>
   </div>
 );
