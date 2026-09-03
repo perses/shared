@@ -11,8 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { tokens } from '../tokens';
 import { blue, green, gray, orange, purple, red, white, black } from '../colors';
+import { tokens } from '../tokens';
 
 const HEX_PATTERN = /^#[0-9A-Fa-f]{6}$/;
 
@@ -126,7 +126,7 @@ describe('tokens object', () => {
 
   it('has all expected top-level categories', () => {
     expect(Object.keys(tokens)).toEqual(
-      expect.arrayContaining(['color', 'bg', 'border', 'text', 'status', 'spacing', 'radius', 'font'])
+      expect.arrayContaining(['color', 'bg', 'border', 'text', 'status', 'spacing', 'radius', 'font']),
     );
   });
 });
