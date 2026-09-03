@@ -134,7 +134,9 @@ describe('Alert', () => {
 
   it('throws when rendered outside a ComponentsProvider', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    expect(() => render(<Alert>Error</Alert>)).toThrow('No ComponentsContext found. Did you forget a ComponentsProvider?');
+    expect(() => render(<Alert>Error</Alert>)).toThrow(
+      'No ComponentsContext found. Did you forget a ComponentsProvider?',
+    );
     consoleSpy.mockRestore();
   });
 });
