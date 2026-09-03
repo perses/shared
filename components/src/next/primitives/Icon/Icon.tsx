@@ -11,13 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { ComponentsProvider, useComponents } from './contexts/ComponentsProvider';
-export type {
-  PersesComponents,
-  PersesIcons,
-  ComponentsProviderProps,
-  ComponentsContextValue,
-} from './contexts/ComponentsProvider';
+import clsx from 'clsx';
+import { forwardRef, HTMLAttributes, ReactNode } from 'react';
 
-export { ThemeModeProvider } from './contexts/ThemeModeProvider';
-export type { ThemeMode, ThemeModeProviderProps } from './contexts/ThemeModeProvider';
+import './icon.css';
+
+export interface IconProps extends HTMLAttributes<HTMLSpanElement> {
+  children?: ReactNode;
+}
+
+export const Icon = forwardRef<HTMLSpanElement, IconProps>(function Icon({ className, children, ...rest }, ref) {
+  return (
+    <span ref={ref} {...rest} aria-hidden="true" className={clsx('ps-Icon', className)}>
+      {children}
+    </span>
+  );
+});

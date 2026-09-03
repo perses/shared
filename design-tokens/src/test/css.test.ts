@@ -13,6 +13,7 @@
 
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+
 import { blue, green, gray, orange, purple, red, white, black, type PersesColor } from '../colors';
 
 const cssDir = resolve(__dirname, '../css');
