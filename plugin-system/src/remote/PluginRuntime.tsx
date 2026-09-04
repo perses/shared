@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import * as EmotionReact from '@emotion/react';
+import * as EmotionStyled from '@emotion/styled';
 import type { ModuleFederation } from '@module-federation/enhanced/runtime';
 import { createInstance } from '@module-federation/enhanced/runtime';
 import * as ReactQuery from '@tanstack/react-query';
@@ -87,7 +89,7 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         'react-router-dom': {
-          version: '6.26.0',
+          version: '6.30.4',
           lib: () => ReactRouterDOM,
           shareConfig: {
             singleton: true,
@@ -95,7 +97,7 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         '@tanstack/react-query': {
-          version: '4.39.1',
+          version: '4.44.0',
           lib: () => ReactQuery,
           shareConfig: {
             singleton: true,
@@ -103,11 +105,27 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         'react-hook-form': {
-          version: '7.52.2',
+          version: '7.76.0',
           lib: () => ReactHookForm,
           shareConfig: {
             singleton: true,
             requiredVersion: '^7.52.2',
+          },
+        },
+        '@emotion/react': {
+          version: '11.14.0',
+          lib: () => EmotionReact,
+          shareConfig: {
+            singleton: true,
+            requiredVersion: '^11.11.3',
+          },
+        },
+        '@emotion/styled': {
+          version: '11.14.1',
+          lib: () => EmotionStyled,
+          shareConfig: {
+            singleton: true,
+            requiredVersion: '^11.11.0',
           },
         },
         '@perses-dev/spec': {
@@ -169,7 +187,7 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         'date-fns': {
-          version: '4.1.0',
+          version: '4.2.1',
           get: createSharedModuleLoader(() => import('date-fns')),
           shareConfig: {
             singleton: true,
@@ -185,31 +203,15 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         lodash: {
-          version: '4.17.21',
+          version: '4.18.1',
           get: createSharedModuleLoader(() => import('lodash')),
           shareConfig: {
             singleton: true,
             requiredVersion: '^4.17.21',
           },
         },
-        '@emotion/react': {
-          version: '11.11.3',
-          get: createSharedModuleLoader(() => import('@emotion/react')),
-          shareConfig: {
-            singleton: true,
-            requiredVersion: '^11.11.3',
-          },
-        },
-        '@emotion/styled': {
-          version: '11.11.0',
-          get: createSharedModuleLoader(() => import('@emotion/styled')),
-          shareConfig: {
-            singleton: true,
-            requiredVersion: '^11.11.0',
-          },
-        },
         '@hookform/resolvers/zod': {
-          version: '3.3.4',
+          version: '3.10.0',
           get: createSharedModuleLoader(() => import('@hookform/resolvers/zod')),
           shareConfig: {
             singleton: true,
@@ -225,7 +227,7 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         'mdi-material-ui': {
-          version: '7.4.0',
+          version: '7.9.4',
           get: createSharedModuleLoader(() => import('mdi-material-ui')),
           shareConfig: {
             singleton: true,
@@ -233,7 +235,7 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         immer: {
-          version: '10.1.1',
+          version: '10.2.0',
           get: createSharedModuleLoader(() => import('immer')),
           shareConfig: {
             singleton: true,
