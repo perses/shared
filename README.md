@@ -20,7 +20,7 @@ This monorepo manages the core UI libraries that power the Perses platform. Each
 ### Prerequisites
 
 - Node.js 24+
-- npm 11+
+- pnpm 12
 
 ### Installation
 
@@ -29,42 +29,42 @@ Clone the repository and install dependencies:
 ```bash
 git clone https://github.com/perses/shared.git
 cd shared
-npm install
+pnpm install
 ```
 
 ### Development
 
-This monorepo uses [Turborepo](https://turbo.build/repo) for efficient task running and caching.
+This monorepo uses pnpm workspaces and recursive commands to run tasks across packages.
 
 #### Build all packages
 
 ```bash
-npm run build
+pnpm build
 ```
 
 #### Run tests
 
 ```bash
-npm run test
+pnpm test
 ```
 
 #### Type checking
 
 ```bash
-npm run type-check
+pnpm type-check
 ```
 
 #### Linting
 
 ```bash
 # Check for linting issues
-npm run lint
+pnpm lint
 
 # Fix linting issues automatically
-npm run lint:fix
+pnpm lint:fix
 ```
 
-The Oxlint configuration includes React Doctor's lint-native rules. Run `npm run doctor` for the full React Doctor
+The Oxlint configuration includes React Doctor's lint-native rules. Run `pnpm doctor` for the full React Doctor
 project scan; pull requests and pushes to `main` also run that scan in GitHub Actions.
 
 #### Development mode
@@ -72,20 +72,18 @@ project scan; pull requests and pushes to `main` also run that scan in GitHub Ac
 Watch for changes and rebuild automatically:
 
 ```bash
-npm run start
+pnpm start
 ```
 
 #### Clean build artifacts
 
 ```bash
 # Clean all build outputs
-npm run clean
+pnpm clean
 
 # Clean and reinstall all dependencies
-npm run reinstall
+pnpm reinstall
 
-# Clear Turborepo cache
-npm run clear-turbo-cache
 ```
 
 ### Linking with Local Projects
@@ -132,19 +130,19 @@ Common commands:
 #### Workflow for Perses UI Development
 
 1. Clone the perses repo [https://github.com/perses/perses](https://github.com/perses/perses)
-2. From the perses `ui` folder install the ui dependencies with `npm install`.
+2. From the perses `ui` folder install the ui dependencies with `pnpm install`.
 3. From the perses root folder, start the Perses API in dev mode with `./scripts/api_backend_dev.sh`.
-4. Clone this shared repo and install dependencies with `npm install`. ⚠️ Do not rename the cloned repo, otherwise it breaks the paths resolution on the perses repo side.
+4. Clone this shared repo and install dependencies with `pnpm install`. ⚠️ Do not rename the cloned repo, otherwise it breaks the paths resolution on the perses repo side.
 5. From the shared root folder, run `./scripts/link-with-perses/link-with-perses.sh link`. If your perses repo is in a different location than a sibling directory, use the `--perses` option to specify its location.
-6. From the perses `ui/app` folder, run `npm run start:shared` to start the Perses UI in dev mode using the linked shared libraries with hot module reloading.
+6. From the perses `ui/app` folder, run `pnpm start:shared` to start the Perses UI in dev mode using the linked shared libraries with hot module reloading.
 7. Make changes to the shared libraries and see them reflected in your local Perses UI.
 8. When done, run `./scripts/link-with-perses/link-with-perses.sh unlink` to restore the original dependencies in the Perses UI.
 
 #### Workflow for Plugins Development
 
 1. Clone the plugins repo [https://github.com/perses/plugins](https://github.com/perses/plugins)
-2. From the plugins root folder install dependencies with `npm install`.
-3. Clone this shared repo and install dependencies with `npm install`.
+2. From the plugins root folder install dependencies with `pnpm install`.
+3. Clone this shared repo and install dependencies with `pnpm install`.
 4. From the shared root folder, run `./scripts/link-with-perses/link-with-perses.sh link --plugins`. If your plugins repo is in a different location than a sibling directory, use the `--plugins` option with the custom path.
 5. From the plugins root folder, run the appropriate development command for your plugin.
 6. Make changes to the shared libraries and see them reflected in your plugins.

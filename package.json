@@ -6,23 +6,34 @@
   "type": "module",
   "engines": {
     "node": ">=24",
-    "npm": ">=11"
+    "pnpm": ">=12"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "^12.0.0",
+      "onFail": "ignore"
+    },
+    "runtime": {
+      "name": "node",
+      "version": "24",
+      "onFail": "download"
+    }
   },
   "scripts": {
-    "build": "turbo run build",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
-    "lint:fix": "turbo run lint -- --fix",
-    "format": "turbo run format:root",
-    "format:check": "turbo run format:root:check",
+    "build": "pnpm run clean && pnpm -r --if-present run build",
+    "test": "pnpm -r --if-present run test",
+    "lint": "pnpm -r --parallel --if-present run lint",
+    "lint:fix": "pnpm -r --parallel --if-present run lint:fix",
+    "format": "pnpm run format:root",
+    "format:check": "pnpm run format:root:check",
     "format:root": "oxfmt",
     "format:root:check": "oxfmt --check",
-    "type-check": "turbo run type-check",
-    "start": "turbo run start",
-    "clean": "turbo run clean",
-    "reinstall": "npm run clean && rm -rf **/node_modules && npm install",
-    "clear-turbo-cache": "rimraf ./.turbo/cache",
-    "doctor": "npx react-doctor@latest"
+    "type-check": "pnpm run build && pnpm -r --parallel --if-present run type-check",
+    "start": "pnpm run build && pnpm -r --parallel --if-present run start",
+    "clean": "pnpm -r --parallel --if-present run clean",
+    "reinstall": "pnpm clean && rm -rf **/node_modules && pnpm install",
+    "doctor": "pnpm dlx react-doctor@latest"
   },
   "workspaces": [
     "components",
@@ -35,29 +46,27 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@swc/cli": "^0.8.1",
-    "@swc/core": "^1.3.61",
-    "@tanstack/react-query": "^4.39.1",
-    "@testing-library/dom": "^10.1.0",
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^16.0.0",
+    "@swc/core": "^1.15.3",
+    "@tanstack/react-query": "^4.44.0",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/node": "^24.0.0",
-    "@types/react": "^18.0.0",
-    "@types/react-dom": "^18.0.0",
+    "@types/node": "^24.13.3",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
     "concurrently": "^10.0.3",
-    "cross-env": "^7.0.3",
-    "jsdom": "^26.1.0",
+    "cross-env": "^10.1.0",
+    "jsdom": "^27.0.0",
     "oxfmt": "0.55.0",
     "oxlint": "1.70.0",
     "oxlint-plugin-react-doctor": "0.9.12",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-refresh": "^0.16.0",
-    "rimraf": "^5.0.5",
-    "turbo": "^2.3.4",
+    "rimraf": "^6.1.0",
     "typescript": "5.9.3",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "4.1.11"
-  },
-  "packageManager": "npm@11.17.0"
+  }
 }

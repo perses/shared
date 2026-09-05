@@ -17,15 +17,19 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
+      - uses: pnpm/setup@v2.1.0
+        with:
+          install: false
+          cache: true
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
           enable_go: true
           nvmrc_path: './.nvmrc'
       - name: install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: build libraries
-        run: 'npm run build'
+        run: 'pnpm build'
       - name: store libraries archives
         uses: actions/upload-artifact@v7
         with:
@@ -34,32 +38,40 @@ jobs:
             **/dist
             !node_modules
 
-  lint-npm:
-    name: 'lint-npm'
+  lint-pnpm:
+    name: 'lint-pnpm'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
+      - uses: pnpm/setup@v2.1.0
+        with:
+          install: false
+          cache: true
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run format:check
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm format:check
 
-  test-npm:
-    name: 'test-npm'
+  test-pnpm:
+    name: 'test-pnpm'
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
+      - uses: pnpm/setup@v2.1.0
+        with:
+          install: false
+          cache: true
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
-      - run: npm ci
-      - run: npm run test
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
 
   type-check:
     name: 'type-check'
@@ -68,11 +80,15 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
+      - uses: pnpm/setup@v2.1.0
+        with:
+          install: false
+          cache: true
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true
-      - run: npm ci
-      - run: npm run type-check
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm type-check
 
   release:
     name: 'release'
@@ -88,6 +104,10 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.12.0
+      - uses: pnpm/setup@v2.1.0
+        with:
+          install: false
+          cache: true
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
           enable_npm: true

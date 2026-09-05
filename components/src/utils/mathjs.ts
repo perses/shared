@@ -13,6 +13,10 @@
 
 import { roundDependencies, gcdDependencies, create } from 'mathjs';
 
+if (roundDependencies === undefined || gcdDependencies === undefined) {
+  throw new Error('Required mathjs dependencies are unavailable');
+}
+
 // This ensures we get a minimal mathjs bundle for just what we need (see https://mathjs.org/docs/custom_bundling.html)
 const { round } = create({ roundDependencies });
 const { gcd } = create({ gcdDependencies });
