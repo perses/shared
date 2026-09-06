@@ -38,24 +38,25 @@ func publishPackageWithOutput(workspacePath string, dryRun bool, stdout io.Write
 		return err
 	}
 
-	// Get the absolute dist directory path
-	libraryPath, err := filepath.Abs(filepath.Join(workspacePath, "dist"))
+	// Resolve the workspace directory. pnpm requires package.json in the publish working directory.
+	libraryPath, err := filepath.Abs(workspacePath)
 	if err != nil {
-		return fmt.Errorf("unable to resolve dist directory for package %s@%s: %w", pck.Name, pck.Version, err)
+		return fmt.Errorf("unable to resolve workspace directory for package %s@%s: %w", pck.Name, pck.Version, err)
 	}
 
-	// Prepare the npm publish command
+	// Prepare the pnpm publish command
 	args := []string{"publish", "--access", "public", "--tag", npmDistTag(pck.Version)}
 	if dryRun {
 		args = append(args, "--dry-run")
 	}
 
-	cmd := exec.Command("npm", args...)
+	args = append(args, "--no-git-checks")
+	cmd := exec.Command("pnpm", args...)
 	cmd.Dir = libraryPath
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	if execErr := cmd.Run(); execErr != nil {
-		return fmt.Errorf("npm %s failed for package %s@%s in %s: %w", strings.Join(args, " "), pck.Name, pck.Version, libraryPath, execErr)
+		return fmt.Errorf("pnpm %s failed for package %s@%s in %s: %w", strings.Join(args, " "), pck.Name, pck.Version, libraryPath, execErr)
 	}
 
 	logrus.Infof("Package %s@%s published to npm", pck.Name, pck.Version)

@@ -3,7 +3,7 @@
 # =============================================================================
 # link-with-perses.sh
 # =============================================================================
-# This script manages file-based npm dependencies between this project (shared)
+# This script manages file-based pnpm dependencies between this project (shared)
 # and external projects (perses or plugins). It allows developers to link local
 # workspace packages as file dependencies for local development.
 #
@@ -12,7 +12,7 @@
 #
 # Commands:
 #   link      - Install workspace packages as file references in the external project
-#   unlink    - Restore original npm package versions in the external project
+#   unlink    - Restore original pnpm package versions in the external project
 #   status    - Show current link status of workspace packages
 #
 # Target Options (mutually exclusive):
@@ -79,10 +79,10 @@ configure_target_mode() {
         perses)
             PACKAGE_JSON_RELATIVE_PATH="ui/app"
             LOCK_RELATIVE_PATH="ui"
-            WORKSPACE_FLAG="-w app"
+            WORKSPACE_FLAG="--filter app"
             DEP_SECTION="dependencies"
             BACKUP_FILE=".perses-shared-link-bk.json"
-            BACKUP_LOCK_FILE=".perses-shared-link-lock-bk.json"
+            BACKUP_LOCK_FILE=".perses-shared-link-lock-bk.yaml"
             ;;
         plugins)
             PACKAGE_JSON_RELATIVE_PATH="."
@@ -90,7 +90,7 @@ configure_target_mode() {
             WORKSPACE_FLAG=""
             DEP_SECTION="devDependencies"
             BACKUP_FILE=".plugins-shared-link-bk.json"
-            BACKUP_LOCK_FILE=".plugins-shared-link-lock-bk.json"
+            BACKUP_LOCK_FILE=".plugins-shared-link-lock-bk.yaml"
             ;;
     esac
 }
@@ -104,7 +104,7 @@ print_help() {
     echo ""
     echo "Commands:"
     echo "  link      Install workspace packages as file references in the target project"
-    echo "  unlink    Restore original npm package versions in the target project"
+    echo "  unlink    Restore original pnpm package versions in the target project"
     echo "  status    Show current link status of workspace packages"
     echo ""
     echo "Target Options (mutually exclusive):"
@@ -201,8 +201,8 @@ is_built() {
     return 1
 }
 
-# Convert Git Bash path to Windows path for npm on Windows
-convert_path_for_npm() {
+# Convert Git Bash path to Windows path for pnpm on Windows
+convert_path_for_pnpm() {
     local path="$1"
 
     # Check if we're on Windows (Git Bash/MSYS/MinGW)
@@ -231,10 +231,10 @@ build_if_needed() {
 
     if [[ "$needs_build" == true ]]; then
         echo "Building shared packages..."
-        if (cd "$SHARED_ROOT" && npm run build --silent 2>/dev/null); then
+        if (cd "$SHARED_ROOT" && pnpm run build --silent 2>/dev/null); then
             printf "  ${GREEN}Build complete${NC}\n"
         else
-            log_error "Build failed. Please run 'npm run build' manually."
+            log_error "Build failed. Please run 'pnpm run build' manually."
             exit 1
         fi
     fi
@@ -305,7 +305,7 @@ do_link() {
         lock_path="$target_root/$LOCK_RELATIVE_PATH"
     fi
     local external_package_json="$package_json_path/package.json"
-    local external_package_lock="$lock_path/package-lock.json"
+    local external_package_lock="$lock_path/pnpm-lock.yaml"
     local backup_path="$package_json_path/$BACKUP_FILE"
     local backup_lock_path="$lock_path/$BACKUP_LOCK_FILE"
 
@@ -317,7 +317,7 @@ do_link() {
     # Build shared packages if not already built
     build_if_needed
 
-    # Backup package-lock.json if it exists and backup doesn't
+    # Backup pnpm-lock.yaml if it exists and backup doesn't
     if [[ -f "$external_package_lock" && ! -f "$backup_lock_path" ]]; then
         cp "$external_package_lock" "$backup_lock_path"
     fi
@@ -342,8 +342,8 @@ do_link() {
 
     echo "Linking packages to $package_json_path [$TARGET_MODE]..."
 
-    # Temporarily disable exit on error to handle npm install failures gracefully.
-    # npm install may fail (non-zero exit code) but still succeed in linking the package.
+    # Temporarily disable exit on error to handle pnpm install failures gracefully.
+    # pnpm install may fail (non-zero exit code) but still succeed in linking the package.
     # This allows us to check the actual result and continue trying other packages.
     set +e
     for workspace in "${WORKSPACE_PACKAGES[@]}"; do
@@ -351,8 +351,8 @@ do_link() {
         local package_folder=$(get_package_folder "$workspace")
         local package_path="$SHARED_ROOT/$package_folder"
 
-        # Convert path for Windows npm if needed
-        local npm_package_path=$(convert_path_for_npm "$package_path")
+        # Convert path for Windows pnpm if needed
+        local pnpm_package_path=$(convert_path_for_pnpm "$package_path")
 
         if package_exists_in_external "$package_name" "$external_package_json"; then
             local current_version=$(get_current_version "$package_name" "$external_package_json")
@@ -368,35 +368,35 @@ do_link() {
             echo -n "  Linking $package_name... "
 
             # Capture both stdout and stderr for debugging
-            local npm_output
-            # Build npm install command based on target mode
-            local npm_cmd="npm install \"file:$npm_package_path\" --save"
+            local pnpm_output
+            # Build pnpm install command based on target mode
+            local pnpm_cmd="pnpm add \"file:$pnpm_package_path\""
             if [[ -n "$WORKSPACE_FLAG" ]]; then
-                npm_cmd="$npm_cmd $WORKSPACE_FLAG"
+                pnpm_cmd="$pnpm_cmd $WORKSPACE_FLAG"
             fi
             if [[ "$DEP_SECTION" == "devDependencies" ]]; then
-                npm_cmd="$npm_cmd --save-dev"
+                pnpm_cmd="$pnpm_cmd --save-dev"
             fi
-            npm_output=$(cd "$lock_path" && eval "$npm_cmd" 2>&1)
-            local npm_exit_code=$?
+            pnpm_output=$(cd "$lock_path" && eval "$pnpm_cmd" 2>&1)
+            local pnpm_exit_code=$?
 
-            # Check if package was actually linked (npm on Windows may return error but still succeed)
+            # Check if package was actually linked (pnpm on Windows may return error but still succeed)
             local new_version=$(get_current_version "$package_name" "$external_package_json")
 
             if is_linked "$new_version"; then
                 printf "${GREEN}done${NC}\n"
-            elif [[ $npm_exit_code -eq 0 ]]; then
+            elif [[ $pnpm_exit_code -eq 0 ]]; then
                 printf "${GREEN}done${NC}\n"
             else
                 printf "${RED}failed${NC}\n"
                 if [[ "$DEBUG" == true ]]; then
-                    log_error "npm install failed with exit code $npm_exit_code"
+                    log_error "pnpm install failed with exit code $pnpm_exit_code"
                     echo "  Package path: $package_path"
-                    echo "  NPM package path: $npm_package_path"
+                    echo "  PNPM package path: $pnpm_package_path"
                     echo "  Lock path: $lock_path"
-                    echo "  Command: $npm_cmd"
+                    echo "  Command: $pnpm_cmd"
                     echo "  Output:"
-                    echo "$npm_output" | sed 's/^/    /'
+                    echo "$pnpm_output" | sed 's/^/    /'
                     echo ""
                 fi
             fi
@@ -432,7 +432,7 @@ do_link() {
     # Show next steps on success
     if [[ $failed_count -eq 0 ]]; then
         if [[ "$TARGET_MODE" == "perses" ]]; then
-            printf "\nNow you can start the app dev server, in shared mode, from Perses:\n\ncd %s\nnpm run start:shared\n" "$package_json_path"
+            printf "\nNow you can start the app dev server, in shared mode, from Perses:\n\ncd %s\npnpm run start:shared\n" "$package_json_path"
         else
             printf "\nPackages linked successfully to plugins.\n"
         fi
@@ -454,7 +454,7 @@ do_unlink() {
         lock_path="$target_root/$LOCK_RELATIVE_PATH"
     fi
     local external_package_json="$package_json_path/package.json"
-    local external_package_lock="$lock_path/package-lock.json"
+    local external_package_lock="$lock_path/pnpm-lock.yaml"
     local backup_path="$package_json_path/$BACKUP_FILE"
     local backup_lock_path="$lock_path/$BACKUP_LOCK_FILE"
 
@@ -465,7 +465,7 @@ do_unlink() {
 
     if [[ ! -f "$backup_path" ]]; then
         log_error "No backup file found. Cannot restore original versions."
-        echo "  Manually restore: cd $package_json_path && npm install @perses-dev/components@<version> ..."
+        echo "  Manually restore: cd $package_json_path && pnpm add @perses-dev/components@<version> ..."
         exit 1
     fi
 
@@ -473,8 +473,8 @@ do_unlink() {
     local backup_count=$(jq 'keys | length' "$backup_path" 2>/dev/null)
     if [[ -z "$backup_count" || "$backup_count" -eq 0 ]]; then
         log_error "Backup file is empty. Cannot restore original versions."
-        echo "  Manually restore: cd $package_json_path && npm install @perses-dev/components@<version> ..."
-        echo "  Or: rm $backup_path && cd $package_json_path && npm install"
+        echo "  Manually restore: cd $package_json_path && pnpm add @perses-dev/components@<version> ..."
+        echo "  Or: rm $backup_path && cd $package_json_path && pnpm install"
         exit 1
     fi
 
@@ -502,7 +502,7 @@ do_unlink() {
 
             echo -n "  Restoring $package_name@$original_version... "
 
-            # Update package.json directly using jq instead of npm install
+            # Update package.json directly using jq instead of pnpm install
             # Use the correct dependency section based on target mode
             local tmp=$(mktemp)
             if jq ".$DEP_SECTION[\"$package_name\"] = \"$original_version\"" "$external_package_json" > "$tmp" 2>/dev/null; then
@@ -516,7 +516,7 @@ do_unlink() {
         fi
     done
 
-    # Check if all packages are unlinked, then restore lockfile and run npm install
+    # Check if all packages are unlinked, then restore lockfile and run pnpm install
     if [[ "$unlinked_any" == true ]]; then
         local all_unlinked=true
         for workspace in "${WORKSPACE_PACKAGES[@]}"; do
@@ -532,14 +532,14 @@ do_unlink() {
 
         if [[ "$all_unlinked" == true ]]; then
             rm -f "$backup_path"
-            # Restore package-lock.json if backup exists and run npm install from lock root
+            # Restore pnpm-lock.yaml if backup exists and run pnpm install from lock root
             if [[ -f "$backup_lock_path" ]]; then
-                echo "  Restoring package-lock.json..."
+                echo "  Restoring pnpm-lock.yaml..."
                 cp "$backup_lock_path" "$external_package_lock"
                 rm -f "$backup_lock_path"
             fi
-            echo "  Running npm install from workspace root..."
-            (cd "$lock_path" && npm install --silent 2>/dev/null)
+            echo "  Running pnpm install from workspace root..."
+            (cd "$lock_path" && pnpm install --silent 2>/dev/null)
         fi
     fi
 
@@ -547,7 +547,7 @@ do_unlink() {
     if [[ ${#missing_backups[@]} -gt 0 ]]; then
         echo ""
         log_warning "Missing backup for: ${missing_backups[*]}"
-        echo "  Manually restore: cd $package_json_path && npm install <package>@<version>"
+        echo "  Manually restore: cd $package_json_path && pnpm add <package>@<version>"
     fi
 
     # Show status

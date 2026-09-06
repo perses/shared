@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { formatWithTimeZone } from '@perses-dev/components';
+import { formatWithTimeZone } from '../utils/format';
 
 const DAY_MS = 1000 * 60 * 60 * 24;
 const MONTH_MS = DAY_MS * 30;

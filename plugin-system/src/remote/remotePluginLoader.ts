@@ -13,9 +13,10 @@
 
 import { fetch as defaultFetch } from '@perses-dev/client';
 import type { FetchFn } from '@perses-dev/client';
-import type { PluginLoader, PluginMetadata, PluginModuleResource, PluginType } from '@perses-dev/plugin-system';
-import { getPluginModuleCompoundKey } from '@perses-dev/plugin-system';
 
+import type { PluginLoader } from '../model/plugin-loading';
+import type { PluginMetadata, PluginModuleResource, PluginType } from '../model/plugins';
+import { getPluginModuleCompoundKey } from '../model/plugins';
 import type { RemotePluginModule } from './PersesPlugin.types';
 import { loadPlugin } from './PluginRuntime';
 

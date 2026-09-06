@@ -13,7 +13,6 @@
 
 import { Grid, Typography } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
-import { PanelEditorContext, PanelPreview } from '@perses-dev/dashboards';
 import type { PanelEditorValues } from '@perses-dev/plugin-system';
 import {
   DataQueriesProvider,
@@ -29,8 +28,10 @@ import type { Control } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
 
 import { useListPanelGroups } from '../../context';
+import { PanelEditorContext } from '../../context/PanelEditorProvider/PanelEditorProvider';
 import { useAllVariableDefinitions } from '../../context/VariableProvider';
 import { FixedValueVariableProvider } from '../Variables';
+import { PanelPreview } from './PanelPreview';
 
 export interface PanelQueriesSharedControlsProps {
   control: Control<PanelEditorValues>;

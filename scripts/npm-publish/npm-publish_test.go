@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -40,25 +41,22 @@ func TestPublishPackageWithOutput(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			workspacePath := createWorkspace(t, test.version)
-			installFakeNPM(t, fmt.Sprintf(`#!/bin/sh
-printf 'npm stdout: %%s\n' "$*"
-printf 'npm stderr from: %%s\n' "$PWD" >&2
-exit %d
-`, test.exitCode))
+			installFakePNPM(t, test.exitCode)
 
 			wantArgs := "publish --access public --tag " + test.wantDistTag
 			if test.dryRun {
 				wantArgs += " --dry-run"
 			}
+			wantArgs += " --no-git-checks"
 
 			var stdout bytes.Buffer
 			var stderr bytes.Buffer
 			err := publishPackageWithOutput(workspacePath, test.dryRun, &stdout, &stderr)
 
-			if got, want := stdout.String(), "npm stdout: "+wantArgs+"\n"; got != want {
+			if got, want := normalizeOutput(stdout.String()), "pnpm stdout: "+wantArgs+"\n"; got != want {
 				t.Errorf("stdout = %q, want %q", got, want)
 			}
-			if got, want := stderr.String(), "npm stderr from: "+filepath.Join(workspacePath, "dist")+"\n"; got != want {
+			if got, want := normalizeOutput(stderr.String()), "pnpm stderr from: "+workspacePath+"\n"; got != want {
 				t.Errorf("stderr = %q, want %q", got, want)
 			}
 
@@ -70,12 +68,12 @@ exit %d
 			}
 
 			if err == nil {
-				t.Fatal("publishPackageWithOutput() error = nil, want an npm failure")
+				t.Fatal("publishPackageWithOutput() error = nil, want a pnpm failure")
 			}
 			for _, detail := range []string{
-				"npm " + wantArgs + " failed",
+				"pnpm " + wantArgs + " failed",
 				"@perses-dev/test@" + test.version,
-				filepath.Join(workspacePath, "dist"),
+				workspacePath,
 				fmt.Sprintf("exit status %d", test.exitCode),
 			} {
 				if !strings.Contains(err.Error(), detail) {
@@ -99,11 +97,25 @@ func createWorkspace(t *testing.T, version string) string {
 	return workspacePath
 }
 
-func installFakeNPM(t *testing.T, script string) {
+func installFakePNPM(t *testing.T, exitCode int) {
 	t.Helper()
 	binDir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(binDir, "npm"), []byte(script), 0755); err != nil {
+	name := "pnpm"
+	script := fmt.Sprintf(`#!/bin/sh
+printf 'pnpm stdout: %%s\n' "$*"
+printf 'pnpm stderr from: %%s\n' "$PWD" >&2
+exit %d
+`, exitCode)
+	if runtime.GOOS == "windows" {
+		name = "pnpm.cmd"
+		script = fmt.Sprintf("@echo off\r\necho pnpm stdout: %%*\r\n>&2 echo pnpm stderr from: %%CD%%\r\nexit /b %d\r\n", exitCode)
+	}
+	if err := os.WriteFile(filepath.Join(binDir, name), []byte(script), 0755); err != nil {
 		t.Fatal(err)
 	}
 	t.Setenv("PATH", binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+}
+
+func normalizeOutput(output string) string {
+	return strings.ReplaceAll(output, "\r\n", "\n")
 }

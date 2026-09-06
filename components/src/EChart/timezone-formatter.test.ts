@@ -13,8 +13,7 @@
 
 import { createTimezoneAwareAxisFormatter } from './timezone-formatter';
 
-// Mock formatWithTimeZone since it's from @perses-dev/components
-vi.mock('@perses-dev/components', () => ({
+vi.mock('../utils/format', () => ({
   formatWithTimeZone: vi.fn((date: Date, format: string, timeZone: string) => {
     // Simple mock that returns format pattern with timezone
     return `${format}[${timeZone}]`;
