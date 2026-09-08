@@ -16,25 +16,25 @@ import { z } from 'zod';
 import type { NativeProvider, OAuthProvider, UserResource, UserSpec } from '../model';
 import { metadataSchema } from './metadata';
 
-export const nativeProviderSchema: z.ZodType<NativeProvider> = z.object({
+export const nativeProviderSchema: z.ZodType<NativeProvider, NativeProvider> = z.object({
   password: z.string().optional(),
 });
 
-export const oauthProvidersSchema: z.ZodType<OAuthProvider> = z.object({
+export const oauthProvidersSchema: z.ZodType<OAuthProvider, OAuthProvider> = z.object({
   issuer: z.string().optional(),
   email: z.string().optional(),
   subject: z.string().optional(),
 });
 
 // TODO: handle exclusion native / oauth?
-export const userSpecSchema: z.ZodType<UserSpec> = z.object({
+export const userSpecSchema: z.ZodType<UserSpec, UserSpec> = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   nativeProvider: nativeProviderSchema.optional(),
   oauthProviders: z.array(oauthProvidersSchema).optional(),
 });
 
-export const userSchema: z.ZodType<UserResource> = z.object({
+export const userSchema: z.ZodType<UserResource, UserResource> = z.object({
   kind: z.literal('User'),
   metadata: metadataSchema,
   spec: userSpecSchema,

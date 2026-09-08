@@ -30,7 +30,7 @@ export const globalDatasourceSchema = z.object({
   spec: datasourceSpecSchema,
 });
 
-export const datasourcesSchema: z.ZodType<Datasource> = z.discriminatedUnion('kind', [
+export const datasourcesSchema: z.ZodType<Datasource, Datasource> = z.discriminatedUnion('kind', [
   datasourceSchema,
   globalDatasourceSchema,
 ]);

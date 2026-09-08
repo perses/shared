@@ -16,12 +16,12 @@ import { z } from 'zod';
 import type { RoleBinding, RoleBindingSpec, Subject } from '../model';
 import { nameSchema, metadataSchema, projectMetadataSchema } from './metadata';
 
-export const subjectSchema: z.ZodType<Subject> = z.object({
+export const subjectSchema: z.ZodType<Subject, Subject> = z.object({
   kind: z.enum(['User']),
   name: nameSchema,
 });
 
-export const roleBindingSpecSchema: z.ZodType<RoleBindingSpec> = z.object({
+export const roleBindingSpecSchema: z.ZodType<RoleBindingSpec, RoleBindingSpec> = z.object({
   role: nameSchema,
   subjects: z.array(subjectSchema).nonempty(),
 });
@@ -38,7 +38,7 @@ export const globalRoleBindingSchema = z.object({
   spec: roleBindingSpecSchema,
 });
 
-export const roleBindingsEditorSchema: z.ZodType<RoleBinding> = z.discriminatedUnion('kind', [
+export const roleBindingsEditorSchema: z.ZodType<RoleBinding, RoleBinding> = z.discriminatedUnion('kind', [
   roleBindingSchema,
   globalRoleBindingSchema,
 ]);
