@@ -20,9 +20,16 @@ export interface TimeOption {
   display: string;
 }
 
-export function buildRelativeTimeOption(duration: DurationString): TimeOption {
+export type RelativeTimeOptionPrefixString = 'Last' | 'Every' | '';
+
+export function buildRelativeTimeOption(
+  duration: DurationString,
+  prefixString: RelativeTimeOptionPrefixString = 'Last',
+): TimeOption {
+  const spacedPrefix = prefixString ? `${prefixString} ` : '';
+
   return {
     value: { pastDuration: duration },
-    display: `Last ${formatDuration(parseDurationString(duration), { delimiter: ', ' })}`,
+    display: `${spacedPrefix}${formatDuration(parseDurationString(duration), { delimiter: ', ' })}`,
   };
 }
