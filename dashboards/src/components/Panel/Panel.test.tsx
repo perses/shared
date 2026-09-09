@@ -153,6 +153,7 @@ describe('Panel', () => {
     definition?: PanelDefinition,
     editHandlers?: PanelProps['editHandlers'],
     panelOptions?: PanelProps['panelOptions'],
+    className?: string,
   ): Promise<void> => {
     definition ??= createTestPanel();
 
@@ -171,7 +172,12 @@ describe('Panel', () => {
             ]}
           >
             <DataQueriesProvider definitions={[]}>
-              <Panel definition={definition} editHandlers={editHandlers} panelOptions={panelOptions} />
+              <Panel
+                definition={definition}
+                editHandlers={editHandlers}
+                panelOptions={panelOptions}
+                className={className}
+              />
             </DataQueriesProvider>
           </VariableProvider>
         </TimeRangeProviderBasic>
@@ -185,6 +191,18 @@ describe('Panel', () => {
   };
 
   const getPanel = (): HTMLElement => screen.getByTestId('panel');
+
+  it('applies the ps-Panel class', async () => {
+    await renderPanel();
+    expect(getPanel()).toHaveClass('ps-Panel');
+  });
+
+  it('merges additional className', async () => {
+    await renderPanel(undefined, undefined, undefined, 'custom');
+    const panel = getPanel();
+    expect(panel).toHaveClass('ps-Panel');
+    expect(panel).toHaveClass('custom');
+  });
 
   it('should render plugin actions in header', async () => {
     await renderPanel();
