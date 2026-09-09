@@ -32,6 +32,7 @@ export interface PanelHeaderProps extends Omit<CardHeaderProps, OmittedProps> {
   id: string;
   title?: string;
   description?: string;
+  hideHeader?: boolean;
   links?: Link[];
   extra?: ReactNode;
   queryResults: QueryData[];
@@ -49,6 +50,7 @@ export function PanelHeader({
   id,
   title: rawTitle,
   description: rawDescription,
+  hideHeader,
   links,
   queryResults,
   readHandlers,
@@ -81,9 +83,14 @@ export function PanelHeader({
     disabledWithEmptySelection: true,
   });
 
+  // `hideHeader` is an explicit override on top of the implicit empty-title rule:
+  // true always collapses to the icon-only overlay, false always keeps the full header,
+  // and leaving it unset preserves today's behavior of deriving visibility from the title.
+  const isHidden = hideHeader === true || (hideHeader === undefined && !title);
+
   return (
     <>
-      {title ? (
+      {!isHidden ? (
         <CardHeader
           id={id}
           component="header"
