@@ -20,6 +20,7 @@ interface UsePanelEditorResult {
   setPlugin: (value: Definition<UnknownSpec>) => void;
   setLinks: (value?: Link[]) => void;
   setDescription: (value?: string) => void;
+  setHideHeader: (value?: boolean) => void;
   setPanelDefinition: (panelDefinition: PanelDefinition) => void;
   setQueries: (queries?: QueryDefinition[], hideQueryEditor?: boolean) => void;
   setAnnotations: (annotations?: AnnotationSpec[]) => void;
@@ -40,9 +41,10 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
     annotations: initialAnnotations,
   } = panelDefinition.spec;
   // Provide default display object if undefined
-  const displayData = display ?? { name: undefined, description: undefined };
+  const displayData = display ?? { name: undefined, description: undefined, hideHeader: undefined };
   const [name, setName] = useState(displayData.name);
   const [description, setDescription] = useState(displayData.description);
+  const [hideHeader, setHideHeader] = useState(displayData.hideHeader);
   const [links, setLinks] = useState(initialLinks);
   const [plugin, setPlugin] = useState(pluginDefinition);
   const [annotations, setAnnotations] = useState(initialAnnotations);
@@ -73,12 +75,13 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
       const { display, plugin, queries, links, annotations } = panelDefinition.spec;
       setName(display?.name);
       setDescription(display?.description);
+      setHideHeader(display?.hideHeader);
       setLinks(links);
       setPlugin(plugin);
       setQueries(queries);
       setAnnotations(annotations);
     },
-    [setName, setDescription, setLinks, setPlugin, setQueries, setAnnotations],
+    [setName, setDescription, setHideHeader, setLinks, setPlugin, setQueries, setAnnotations],
   );
 
   return useMemo(
@@ -86,7 +89,10 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
       panelDefinition: {
         kind: 'Panel',
         spec: {
-          display: name !== undefined || description !== undefined ? { name, description } : undefined,
+          display:
+            name !== undefined || description !== undefined || hideHeader !== undefined
+              ? { name, description, hideHeader }
+              : undefined,
           plugin,
           queries: currentQueries,
           links,
@@ -95,12 +101,24 @@ export const usePanelEditor: (panelDefinition: PanelDefinition) => UsePanelEdito
       } as PanelDefinition,
       setName,
       setDescription,
+      setHideHeader,
       setLinks,
       setQueries,
       setPlugin,
       setAnnotations,
       setPanelDefinition,
     }),
-    [name, description, links, plugin, currentQueries, annotations, setQueries, setAnnotations, setPanelDefinition],
+    [
+      name,
+      description,
+      hideHeader,
+      links,
+      plugin,
+      currentQueries,
+      annotations,
+      setQueries,
+      setAnnotations,
+      setPanelDefinition,
+    ],
   );
 };

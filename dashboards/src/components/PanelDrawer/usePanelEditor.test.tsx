@@ -94,4 +94,33 @@ describe('usePanelEditor', () => {
       });
     });
   });
+
+  describe('setHideHeader', () => {
+    it('should set hideHeader to true', () => {
+      const { result } = renderHook(() => {
+        return usePanelEditor(TEST_PANEL_DEFINITION);
+      });
+      act(() => {
+        result.current.setHideHeader(true);
+      });
+      expect(result.current.panelDefinition.spec.display?.hideHeader).toBe(true);
+    });
+
+    it('should set hideHeader to false, distinct from unset', () => {
+      const { result } = renderHook(() => {
+        return usePanelEditor(TEST_PANEL_DEFINITION);
+      });
+      act(() => {
+        result.current.setHideHeader(false);
+      });
+      expect(result.current.panelDefinition.spec.display?.hideHeader).toBe(false);
+    });
+
+    it('should leave hideHeader unset by default', () => {
+      const { result } = renderHook(() => {
+        return usePanelEditor(TEST_PANEL_DEFINITION);
+      });
+      expect(result.current.panelDefinition.spec.display?.hideHeader).toBeUndefined();
+    });
+  });
 });

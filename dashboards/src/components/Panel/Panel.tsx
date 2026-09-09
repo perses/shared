@@ -221,6 +221,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
               title={definition.spec.display?.name ?? ''}
               description={definition.spec.display?.description}
               informationTooltip={informationTooltip}
+              hideHeader={definition.spec.display?.hideHeader}
               queryResults={queryResults}
               readHandlers={readHandlers}
               editHandlers={editHandlers}

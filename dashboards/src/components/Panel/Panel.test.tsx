@@ -393,4 +393,46 @@ describe('Panel', () => {
     await renderPanel();
     expect(screen.queryAllByLabelText('panel errors').length).toBeGreaterThan(0);
   });
+
+  describe('display.hideHeader precedence', () => {
+    it('hides the header when hideHeader is explicitly true, even with a name set', async () => {
+      const definition = createTestPanel();
+      if (definition.spec.display === undefined) {
+        throw new Error('Test setup error: display should be defined');
+      }
+      definition.spec.display.hideHeader = true;
+
+      await renderPanel(definition);
+      expect(screen.queryByRole('banner')).not.toBeInTheDocument();
+    });
+
+    it('shows the header when hideHeader is explicitly false, even with an empty name', async () => {
+      const definition = createTestPanel();
+      if (definition.spec.display === undefined) {
+        throw new Error('Test setup error: display should be defined');
+      }
+      definition.spec.display.name = '';
+      definition.spec.display.hideHeader = false;
+
+      await renderPanel(definition);
+      expect(screen.getByRole('banner')).toBeInTheDocument();
+    });
+
+    it('falls back to the implicit empty-name rule when hideHeader is unset', async () => {
+      const withName = createTestPanel();
+      await renderPanel(withName);
+      expect(screen.getByRole('banner')).toBeInTheDocument();
+    });
+
+    it('falls back to hiding the header when hideHeader is unset and name is empty', async () => {
+      const withoutName = createTestPanel();
+      if (withoutName.spec.display === undefined) {
+        throw new Error('Test setup error: display should be defined');
+      }
+      withoutName.spec.display.name = '';
+
+      await renderPanel(withoutName);
+      expect(screen.queryByRole('banner')).not.toBeInTheDocument();
+    });
+  });
 });

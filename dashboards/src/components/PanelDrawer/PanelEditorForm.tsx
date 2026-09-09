@@ -33,6 +33,20 @@ import { PanelEditorProvider } from '../../context/PanelEditorProvider/PanelEdit
 import { PanelQueriesSharedControls } from './PanelQueriesSharedControls';
 import { usePanelEditor } from './usePanelEditor';
 
+type HideHeaderOption = 'default' | 'show' | 'hide';
+
+function hideHeaderToOption(hideHeader?: boolean): HideHeaderOption {
+  if (hideHeader === true) return 'hide';
+  if (hideHeader === false) return 'show';
+  return 'default';
+}
+
+function optionToHideHeader(option: HideHeaderOption): boolean | undefined {
+  if (option === 'hide') return true;
+  if (option === 'show') return false;
+  return undefined;
+}
+
 export interface PanelEditorFormProps {
   initialValues: PanelEditorValues;
   initialAction: Action;
@@ -47,6 +61,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
     panelDefinition,
     setName,
     setDescription,
+    setHideHeader,
     setLinks,
     setQueries,
     setPlugin,
@@ -101,11 +116,12 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
   function handleCancel(): void {
     const currentValues = form.getValues();
 
-    // Normalize display: if both name and description are undefined, set display to undefined
+    // Normalize display: if name, description and hideHeader are all undefined, set display to undefined
     const normalizeDisplay = (values: PanelEditorValues): PanelEditorValues => {
       if (
         values.panelDefinition.spec.display?.name === undefined &&
-        values.panelDefinition.spec.display?.description === undefined
+        values.panelDefinition.spec.display?.description === undefined &&
+        values.panelDefinition.spec.display?.hideHeader === undefined
       ) {
         values.panelDefinition.spec.display = undefined;
       }
@@ -137,6 +153,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
 
   const watchedName = useWatch({ control: form.control, name: 'panelDefinition.spec.display.name' });
   const watchedDescription = useWatch({ control: form.control, name: 'panelDefinition.spec.display.description' });
+  const watchedHideHeader = useWatch({ control: form.control, name: 'panelDefinition.spec.display.hideHeader' });
   const watchedPluginKind = useWatch({ control: form.control, name: 'panelDefinition.spec.plugin.kind' });
 
   const handleSubmit = useCallback(() => {
@@ -206,6 +223,32 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                       setDescription(event.target.value);
                     }}
                   />
+                )}
+              />
+            </Grid>
+            <Grid item xs={4}>
+              <Controller
+                control={form.control}
+                name="panelDefinition.spec.display.hideHeader"
+                render={({ field, fieldState }) => (
+                  <TextField
+                    select
+                    {...field}
+                    fullWidth
+                    label="Header"
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                    value={hideHeaderToOption(watchedHideHeader)}
+                    onChange={(event) => {
+                      const nextHideHeader = optionToHideHeader(event.target.value as HideHeaderOption);
+                      field.onChange(nextHideHeader);
+                      setHideHeader(nextHideHeader);
+                    }}
+                  >
+                    <MenuItem value="default">Default (follow name)</MenuItem>
+                    <MenuItem value="show">Show</MenuItem>
+                    <MenuItem value="hide">Hide</MenuItem>
+                  </TextField>
                 )}
               />
             </Grid>
