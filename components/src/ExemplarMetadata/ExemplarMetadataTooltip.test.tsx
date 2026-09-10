@@ -84,4 +84,13 @@ describe('ExemplarMetadataTooltip', () => {
     expect(screen.queryByText('Series labels')).not.toBeInTheDocument();
     expect(screen.getByText('Exemplar labels')).toBeVisible();
   });
+
+  it('does not render a divider for empty label sets', () => {
+    render(<ExemplarMetadataTooltip exemplar={{ ...exemplar, labels: {} }} seriesLabels={{}} pinnedPos={pinnedPos} />);
+    expect(screen.queryByText('Series labels')).not.toBeInTheDocument();
+    expect(screen.queryByText('Exemplar labels')).not.toBeInTheDocument();
+    expect(screen.getByText('Value')).toBeVisible();
+    // Only the header divider remains: no separator is left for the hidden label sections.
+    expect(document.body.querySelectorAll('hr')).toHaveLength(1);
+  });
 });

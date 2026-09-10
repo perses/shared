@@ -10,11 +10,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Divider, Portal, Stack, Typography } from '@mui/material';
+import { Box, Divider, IconButton, Portal, Stack, Typography } from '@mui/material';
 import type { Exemplar, Labels } from '@perses-dev/spec';
 import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import type { ReactElement } from 'react';
+import { Fragment } from 'react';
 import useResizeObserver from 'use-resize-observer';
 
 import { useTimeZone } from '../context/TimeZoneProvider';
@@ -35,7 +36,8 @@ export interface ExemplarMetadataTooltipProps {
   exemplar: Exemplar;
   seriesLabels?: Labels;
   /**
-   * Id of the element the tooltip should be portaled into (e.g. the dashboard element).
+   * CSS selector of the element the tooltip should be portaled into (e.g. `#dashboard`).
+   * Passed as-is to `document.querySelector`, so it must be a selector and not a bare element id.
    */
   containerId?: string;
   format?: FormatOptions;
@@ -70,13 +72,35 @@ export function ExemplarMetadataTooltip({
 
   const containerElement = containerId ? document.querySelector(containerId) : undefined;
   const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
-  const transform = assembleTransform(mousePos, pinnedPos, height ?? 0, width ?? 0, containerElement);
+  // Fall back to the pinned position: a pinned tooltip can render before any mousemove happened.
+  const transform = assembleTransform(mousePos ?? pinnedPos, pinnedPos, height ?? 0, width ?? 0, containerElement);
 
   const { labels, value, timestamp } = exemplar;
   const formattedValue = formatValue(value, format);
   const date = new Date(timestamp);
   const formattedDate = formatWithUserTimeZone(date, 'MMM dd, yyyy - ');
   const formattedTime = formatWithUserTimeZone(date, 'HH:mm:ss');
+
+  // Only sections with content take part in the layout, so no divider is left dangling
+  // when a label set is empty.
+  const sections: Array<{ key: string; content: ReactElement }> = [];
+  if (seriesLabels && Object.keys(seriesLabels).length > 0) {
+    sections.push({ key: 'series-labels', content: <LabelGrid title="Series labels" labels={seriesLabels} /> });
+  }
+  if (Object.keys(labels).length > 0) {
+    sections.push({ key: 'exemplar-labels', content: <LabelGrid title="Exemplar labels" labels={labels} /> });
+  }
+  sections.push({
+    key: 'value',
+    content: (
+      <Box>
+        <Typography variant="overline" component="div">
+          Value
+        </Typography>
+        <Typography fontWeight={700}>{formattedValue}</Typography>
+      </Box>
+    ),
+  });
 
   return (
     <Portal container={containerElement}>
@@ -113,12 +137,15 @@ export function ExemplarMetadataTooltip({
                     {isPinned ? UNPIN_TOOLTIP_HELP_TEXT : PIN_TOOLTIP_HELP_TEXT}
                   </Typography>
                   {isPinned ? (
-                    <Pin
+                    <IconButton
+                      aria-label={UNPIN_TOOLTIP_HELP_TEXT}
                       onClick={() => {
                         if (onUnpinClick !== undefined) onUnpinClick();
                       }}
-                      sx={{ fontSize: 16, cursor: 'pointer' }}
-                    />
+                      sx={{ padding: 0, color: 'inherit' }}
+                    >
+                      <Pin sx={{ fontSize: 16 }} />
+                    </IconButton>
                   ) : (
                     <PinOutline sx={{ fontSize: 16 }} />
                   )}
@@ -128,20 +155,12 @@ export function ExemplarMetadataTooltip({
             <Divider sx={(theme) => ({ width: '100%', borderColor: theme.palette.grey['500'] })} />
           </Box>
           <Box sx={(theme) => ({ padding: theme.spacing(0.5, 2, 1.5, 2) })}>
-            {seriesLabels && (
-              <>
-                <LabelGrid title="Series labels" labels={seriesLabels} />
-                <Divider />
-              </>
-            )}
-            <LabelGrid title="Exemplar labels" labels={labels} />
-            <Divider />
-            <Box>
-              <Typography variant="overline" component="div">
-                Value
-              </Typography>
-              <Typography fontWeight={700}>{formattedValue}</Typography>
-            </Box>
+            {sections.map((section, index) => (
+              <Fragment key={section.key}>
+                {index > 0 && <Divider />}
+                {section.content}
+              </Fragment>
+            ))}
           </Box>
         </Stack>
       </Box>
@@ -149,9 +168,8 @@ export function ExemplarMetadataTooltip({
   );
 }
 
-function LabelGrid({ title, labels }: { title: string; labels: Labels }): ReactElement | null {
+function LabelGrid({ title, labels }: { title: string; labels: Labels }): ReactElement {
   const entries = Object.entries(labels);
-  if (entries.length === 0) return null;
   return (
     <Box>
       <Typography variant="overline" component="div">
