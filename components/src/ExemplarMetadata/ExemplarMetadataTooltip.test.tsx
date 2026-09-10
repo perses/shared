@@ -53,8 +53,10 @@ describe('ExemplarMetadataTooltip', () => {
     vi.clearAllMocks();
   });
 
-  it('renders exemplar labels, series labels, value and timestamp when pinned', () => {
+  it('renders exemplar labels, series labels, value and date-time header when pinned', () => {
     renderComponent();
+    expect(screen.getByText('Nov 14, 2023 -')).toBeVisible();
+    expect(screen.getByText('22:13:20')).toBeVisible();
     expect(screen.getByText('Exemplar labels')).toBeVisible();
     expect(screen.getByText('trace_id:')).toBeVisible();
     expect(screen.getByText('abc-123')).toBeVisible();

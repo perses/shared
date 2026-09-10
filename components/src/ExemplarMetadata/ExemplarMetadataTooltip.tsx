@@ -17,6 +17,7 @@ import PinOutline from 'mdi-material-ui/PinOutline';
 import type { ReactElement } from 'react';
 import useResizeObserver from 'use-resize-observer';
 
+import { useTimeZone } from '../context/TimeZoneProvider';
 import type { FormatOptions } from '../model/units';
 import { formatValue } from '../model/units';
 import {
@@ -60,6 +61,7 @@ export function ExemplarMetadataTooltip({
   enablePinning = true,
   onUnpinClick,
 }: ExemplarMetadataTooltipProps): ReactElement | null {
+  const { formatWithUserTimeZone } = useTimeZone();
   const mousePos = useMousePosition();
   const { height, width, ref: tooltipRef } = useResizeObserver<HTMLDivElement>();
 
@@ -72,7 +74,9 @@ export function ExemplarMetadataTooltip({
 
   const { labels, value, timestamp } = exemplar;
   const formattedValue = formatValue(value, format);
-  const formattedTimestamp = new Date(timestamp).toLocaleString();
+  const date = new Date(timestamp);
+  const formattedDate = formatWithUserTimeZone(date, 'MMM dd, yyyy - ');
+  const formattedTime = formatWithUserTimeZone(date, 'HH:mm:ss');
 
   return (
     <Portal container={containerElement}>
@@ -91,8 +95,16 @@ export function ExemplarMetadataTooltip({
           >
             <Box sx={{ display: 'flex', alignItems: 'center', paddingBottom: 0.5, width: '100%' }}>
               <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                <Typography variant="caption" sx={{ display: 'block', fontWeight: 'bold' }}>
-                  Exemplar
+                <Typography
+                  variant="caption"
+                  sx={(theme) => ({
+                    color: theme.palette.common.white,
+                  })}
+                >
+                  {formattedDate}
+                </Typography>
+                <Typography variant="caption">
+                  <strong>{formattedTime}</strong>
                 </Typography>
               </Box>
               {enablePinning && (
@@ -124,20 +136,12 @@ export function ExemplarMetadataTooltip({
             )}
             <LabelGrid title="Exemplar labels" labels={labels} />
             <Divider />
-            <Stack direction="row" spacing={4}>
-              <Box>
-                <Typography variant="overline" component="div">
-                  Value
-                </Typography>
-                <Typography fontWeight={700}>{formattedValue}</Typography>
-              </Box>
-              <Box>
-                <Typography variant="overline" component="div">
-                  Timestamp
-                </Typography>
-                <Typography fontWeight={700}>{formattedTimestamp}</Typography>
-              </Box>
-            </Stack>
+            <Box>
+              <Typography variant="overline" component="div">
+                Value
+              </Typography>
+              <Typography fontWeight={700}>{formattedValue}</Typography>
+            </Box>
           </Box>
         </Stack>
       </Box>
