@@ -26,7 +26,9 @@ type TimeUnits =
   | 'days'
   | 'weeks'
   | 'months'
-  | 'years';
+  | 'years'
+  /** Duration in seconds → `D d HH:MM:SS` (no month/year auto-scale). */
+  | 'dtdhms';
 export type TimeFormatOptions = {
   unit?: TimeUnits;
   decimalPlaces?: number;
@@ -76,6 +78,10 @@ export const TIME_UNIT_CONFIG: Readonly<Record<TimeUnits, UnitConfig>> = {
   years: {
     group: TIME_GROUP,
     label: 'Years',
+  },
+  dtdhms: {
+    group: TIME_GROUP,
+    label: 'Duration (d HH:MM:SS)',
   },
 };
 
@@ -152,7 +158,36 @@ function isMonthOrYear(unit: TimeUnits): boolean {
   return unit === 'months' || unit === 'years';
 }
 
+/**
+ * Format a duration given in **seconds** as `D d HH:MM:SS`
+ * (or `HH:MM:SS` when under one day). Does not auto-scale to months/years.
+ */
+export function formatDtdhms(totalSeconds: number): string {
+  if (!Number.isFinite(totalSeconds)) {
+    return String(totalSeconds);
+  }
+  const sign = totalSeconds < 0 ? '-' : '';
+  let s = Math.floor(Math.abs(totalSeconds));
+  const days = Math.floor(s / 86400);
+  s %= 86400;
+  const hours = Math.floor(s / 3600);
+  s %= 3600;
+  const minutes = Math.floor(s / 60);
+  const secs = s % 60;
+  const hh = String(hours).padStart(2, '0');
+  const mm = String(minutes).padStart(2, '0');
+  const ss = String(secs).padStart(2, '0');
+  if (days > 0) {
+    return `${sign}${days} d ${hh}:${mm}:${ss}`;
+  }
+  return `${sign}${hh}:${mm}:${ss}`;
+}
+
 export function formatTime(value: number, { unit, decimalPlaces }: TimeFormatOptions): string {
+  if (unit === 'dtdhms') {
+    return formatDtdhms(value);
+  }
+
   if (value === 0) return '0s';
 
   const results = getValueAndKindForNaturalNumbers(value, unit ?? 'seconds');

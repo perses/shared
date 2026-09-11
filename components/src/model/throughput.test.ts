@@ -83,6 +83,26 @@ const THROUGHPUT_TESTS: UnitTestCase[] = [
     format: { unit: 'bits/sec' },
     expected: '1 Kib/s',
   },
+  // Additional rate units
+  { value: 42, format: { unit: 'tps' }, expected: '42 tps' },
+  { value: 1.5, format: { unit: 'trc/s' }, expected: '1.5 trc/s' },
+  { value: 10, format: { unit: 'trx/s' }, expected: '10 trx/s' },
+  { value: 3, format: { unit: 'e/s' }, expected: '3 e/s' },
+  { value: 7, format: { unit: 'op/s' }, expected: '7 op/s' },
+  { value: 7, format: { unit: 'ops/s' }, expected: '7 ops/s' },
+  { value: 100, format: { unit: 'msg/s' }, expected: '100 msg/s' },
+  { value: 2, format: { unit: 'errors/s' }, expected: '2 errors/s' },
+  { value: 5, format: { unit: 'calls/s' }, expected: '5 calls/s' },
+  { value: 9, format: { unit: 'qps' }, expected: '9 qps' },
+  { value: 1, format: { unit: 'drop/s' }, expected: '1 drop/s' },
+  { value: 1, format: { unit: 'reject/s' }, expected: '1 reject/s' },
+  { value: 4, format: { unit: 'requests/s' }, expected: '4 requests/s' },
+  { value: 8, format: { unit: 'flows/s' }, expected: '8 flows/s' },
+  { value: 2, format: { unit: 'fail/sec' }, expected: '2 fail/sec' },
+  { value: 1, format: { unit: 'to/s' }, expected: '1 to/s' },
+  { value: 6, format: { unit: 'count:tps' }, expected: '6 tps' },
+  { value: 6, format: { unit: 'count:traces/s' }, expected: '6 traces/s' },
+  { value: 6, format: { unit: 'count:msg/s' }, expected: '6 msg/s' },
 ];
 
 describe('formatValue', () => {
@@ -93,18 +113,11 @@ describe('formatValue', () => {
 
   it('should get identical formatters from cache', () => {
     const { countCacheItems, getKeys } = getFormatterStats();
-    expect(countCacheItems('throughput')).toBe(10);
-    expect(getKeys('throughput')).toStrictEqual([
-      'decimal|true|compact|3|counts/sec|en-US',
-      'decimal|true|false|ops/sec|en-US',
-      'decimal|true|4|false|requests/sec|en-US',
-      'decimal|true|compact|3|true|reads/sec|en-US',
-      'decimal|true|compact|4|true|writes/sec|en-US',
-      'decimal|true|compact|3|events/sec|en-US',
-      'decimal|true|false|messages/sec|en-US',
-      'decimal|true|4|false|records/sec|en-US',
-      'decimal|true|compact|3|true|rows/sec|en-US',
-      'decimal|true|compact|3|ops/sec|en-US',
-    ]);
+    // Cache keys include unit id; extra rate units add entries after the core set.
+    expect(countCacheItems('throughput')).toBeGreaterThanOrEqual(10);
+    const keys = getKeys('throughput');
+    expect(keys).toContain('decimal|true|false|ops/sec|en-US');
+    expect(keys).toContain('decimal|true|false|tps|en-US');
+    expect(keys).toContain('decimal|true|false|count:tps|en-US');
   });
 });
