@@ -11,28 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TimeRangeParam } from '@perses-dev/plugin-system';
-import { stringify } from 'qs';
-import { encodeQueryParams, JsonParam, StringParam, useQueryParams } from 'use-query-params';
-
-export const explorerQueryConfig = {
-  refresh: TimeRangeParam,
-  start: TimeRangeParam,
-  end: TimeRangeParam,
-  explorer: StringParam,
-  data: JsonParam,
-};
-
-interface ExplorerQueryData {
-  refresh?: Date;
-  start?: Date;
-  end?: Date;
-  explorer?: string;
-  data?: Record<string, unknown>;
-}
-
-// Provide a query string for the explorer page using the given inputs, but also including any existing query params
-export function useExplorerQueryParams(inputs: ExplorerQueryData): string {
-  const [query] = useQueryParams(explorerQueryConfig, { updateType: 'replaceIn' });
-  return stringify(encodeQueryParams(explorerQueryConfig, { ...query, ...inputs }));
-}
+// These moved to plugin-system so the dashboards package can build an explorer link
+// without importing explore, which depends on dashboards. Re-exported here to keep
+// the existing entry point working.
+export { explorerQueryConfig, useExplorerQueryParams, type ExplorerQueryData } from '@perses-dev/plugin-system';
