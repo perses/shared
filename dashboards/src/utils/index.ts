@@ -13,3 +13,4 @@
 
 export * from './panelUtils';
 export * from './repeatLayoutUtils';
+export * from './replaceVariablesInUrl';
