@@ -154,14 +154,14 @@ export function ExemplarMetadataTooltip({
             </Box>
             <Divider sx={(theme) => ({ width: '100%', borderColor: theme.palette.grey['500'] })} />
           </Box>
-          <Box sx={(theme) => ({ padding: theme.spacing(0.5, 2, 1.5, 2) })}>
+          <Stack spacing={1} sx={(theme) => ({ padding: theme.spacing(0.5, 2, 1.5, 2) })}>
             {sections.map((section, index) => (
               <Fragment key={section.key}>
-                {index > 0 && <Divider />}
+                {index > 0 && <Divider sx={(theme) => ({ borderColor: theme.palette.grey['500'] })} />}
                 {section.content}
               </Fragment>
             ))}
-          </Box>
+          </Stack>
         </Stack>
       </Box>
     </Portal>
@@ -175,16 +175,25 @@ function LabelGrid({ title, labels }: { title: string; labels: Labels }): ReactE
       <Typography variant="overline" component="div">
         {title}
       </Typography>
-      <Stack spacing={0.25}>
+      <Box
+        sx={{
+          display: 'grid',
+          // The first column is sized by the longest label name, so all values line up
+          // at the same horizontal position.
+          gridTemplateColumns: 'minmax(0, max-content) minmax(0, 1fr)',
+          columnGap: 0.5,
+          rowGap: 0.25,
+        }}
+      >
         {entries.map(([labelName, labelValue]) => (
-          <Box key={labelName} sx={{ display: 'flex', gap: '4px' }}>
+          <Fragment key={labelName}>
             <Typography sx={{ wordBreak: 'break-all' }}>{labelName}:</Typography>
             <Typography fontWeight={700} sx={{ wordBreak: 'break-all' }}>
               {labelValue}
             </Typography>
-          </Box>
+          </Fragment>
         ))}
-      </Stack>
+      </Box>
     </Box>
   );
 }
