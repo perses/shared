@@ -16,6 +16,7 @@ export * from './ColorPicker';
 export * from './ContentWithLegend';
 export * from './controls';
 export * from './Dialog';
+export * from './ExemplarMetadata';
 export * from './DensitySelector';
 export * from './DragAndDrop';
 export * from './Drawer';
