@@ -32,7 +32,32 @@ type ThroughputUnit =
   | 'records/sec'
   | 'requests/sec'
   | 'rows/sec'
-  | 'writes/sec';
+  | 'writes/sec'
+  // Additional rate units (unit id = display suffix)
+  | 'tps'
+  | 'trc/s'
+  | 'trx/s'
+  | 'e/s'
+  | 'op/s'
+  | 'ops/s'
+  | 'msg/s'
+  | 'msg/sec'
+  | 'errors/s'
+  | 'calls/s'
+  | 'qps'
+  | 'drop/s'
+  | 'reject/s'
+  | 'requests/s'
+  | 'flows/s'
+  | 'fail/sec'
+  | 'to/s'
+  | 'c/s'
+  | 'gc/s'
+  | 'tk/s'
+  | 'cxn/s'
+  | 'count:tps'
+  | 'count:traces/s'
+  | 'count:msg/s';
 export type ThroughputFormatOptions = {
   unit?: ThroughputUnit;
   decimalPlaces?: number;
@@ -101,7 +126,43 @@ export const THROUGHPUT_UNIT_CONFIG: Readonly<Record<ThroughputUnit, UnitConfig>
     group: THROUGHPUT_GROUP,
     label: 'Writes/sec',
   },
+
+  tps: { group: THROUGHPUT_GROUP, label: 'Transactions/sec (tps)' },
+  'trc/s': { group: THROUGHPUT_GROUP, label: 'Traces/sec' },
+  'trx/s': { group: THROUGHPUT_GROUP, label: 'Transactions/sec (trx/s)' },
+  'e/s': { group: THROUGHPUT_GROUP, label: 'Events/sec (e/s)' },
+  'op/s': { group: THROUGHPUT_GROUP, label: 'Ops/sec (op/s)' },
+  'ops/s': { group: THROUGHPUT_GROUP, label: 'Ops/sec (ops/s)' },
+  'msg/s': { group: THROUGHPUT_GROUP, label: 'Messages/sec (msg/s)' },
+  'msg/sec': { group: THROUGHPUT_GROUP, label: 'Messages/sec (msg/sec)' },
+  'errors/s': { group: THROUGHPUT_GROUP, label: 'Errors/sec' },
+  'calls/s': { group: THROUGHPUT_GROUP, label: 'Calls/sec' },
+  qps: { group: THROUGHPUT_GROUP, label: 'Queries/sec (qps)' },
+  'drop/s': { group: THROUGHPUT_GROUP, label: 'Drops/sec' },
+  'reject/s': { group: THROUGHPUT_GROUP, label: 'Rejects/sec' },
+  'requests/s': { group: THROUGHPUT_GROUP, label: 'Requests/sec (requests/s)' },
+  'flows/s': { group: THROUGHPUT_GROUP, label: 'Flows/sec' },
+  'fail/sec': { group: THROUGHPUT_GROUP, label: 'Failures/sec' },
+  'to/s': { group: THROUGHPUT_GROUP, label: 'Timeouts/sec' },
+  'c/s': { group: THROUGHPUT_GROUP, label: 'Contentions/sec' },
+  'gc/s': { group: THROUGHPUT_GROUP, label: 'GC/sec' },
+  'tk/s': { group: THROUGHPUT_GROUP, label: 'Tokens/sec' },
+  'cxn/s': { group: THROUGHPUT_GROUP, label: 'Connections/sec' },
+  'count:tps': { group: THROUGHPUT_GROUP, label: 'Count tps' },
+  'count:traces/s': { group: THROUGHPUT_GROUP, label: 'Count traces/sec' },
+  'count:msg/s': { group: THROUGHPUT_GROUP, label: 'Count msg/sec' },
 };
+
+/** Display suffix for axis/stat (strip leading `count:` when present). */
+function throughputSuffix(unit: ThroughputUnit | undefined): string {
+  if (!unit) {
+    return '';
+  }
+  if (unit.startsWith('count:')) {
+    return unit.slice('count:'.length);
+  }
+  return unit;
+}
 
 export function formatThroughput(value: number, { unit, shortValues, decimalPlaces }: ThroughputFormatOptions): string {
   // special case for data throughput
@@ -153,5 +214,6 @@ export function formatThroughput(value: number, { unit, shortValues, decimalPlac
     unit,
   ];
 
-  return `${getFormatterFromCache(key, 'throughput', formatterOptions, 'en-US')(value)} ${unit}`;
+  const suffix = throughputSuffix(unit);
+  return `${getFormatterFromCache(key, 'throughput', formatterOptions, 'en-US')(value)} ${suffix}`;
 }

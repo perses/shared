@@ -220,6 +220,27 @@ const TIME_TESTS: UnitTestCase[] = [
     format: { unit: 'years' },
     expected: '100 years',
   },
+  // dtdhms — value is seconds; fixed D d HH:MM:SS (no month/year scale)
+  {
+    value: 0,
+    format: { unit: 'dtdhms' },
+    expected: '00:00:00',
+  },
+  {
+    value: 3661,
+    format: { unit: 'dtdhms' },
+    expected: '01:01:01',
+  },
+  {
+    value: 86400 + 3723, // 1d 01:02:03
+    format: { unit: 'dtdhms' },
+    expected: '1 d 01:02:03',
+  },
+  {
+    value: 14093232, // network uptime style
+    format: { unit: 'dtdhms' },
+    expected: '163 d 02:47:12',
+  },
 ];
 describe('formatValue', () => {
   it.each(TIME_TESTS)('returns $expected when $value formatted as $format', (args: UnitTestCase) => {
