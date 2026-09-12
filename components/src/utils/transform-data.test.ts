@@ -346,4 +346,45 @@ describe('Join By Column Transform', () => {
     const output = transformData(input, [joinTransform]);
     expect(output).toEqual(result);
   });
+
+  it('applies PivotByLabel to build a time × label matrix', () => {
+    const input: Array<Record<string, unknown>> = [
+      { timestamp: 100, farm_short: 'FARM_B', value: 0 },
+      { timestamp: 100, farm_short: 'FARM_A', value: 3 },
+      { timestamp: 200, farm_short: 'FARM_A', value: 7 },
+      { timestamp: 200, farm_short: 'FARM_B', value: 1 },
+      { timestamp: 300, farm_short: 'FARM_A', value: 12 },
+      // FARM_B missing at t=300 → sparse cell
+    ];
+
+    const pivot: Transform = {
+      kind: 'PivotByLabel',
+      spec: {
+        columnLabel: 'farm_short',
+        rowField: 'timestamp',
+        valueField: 'value',
+        rowColumnName: 'Time',
+      },
+    };
+
+    const output = transformData(input, [pivot]);
+    // Newest timestamp first
+    expect(output).toEqual([
+      { Time: 300, FARM_A: 12 },
+      { Time: 200, FARM_A: 7, FARM_B: 1 },
+      { Time: 100, FARM_A: 3, FARM_B: 0 },
+    ]);
+  });
+
+  it('PivotByLabel disabled is a no-op', () => {
+    const input: Array<Record<string, unknown>> = [
+      { timestamp: 1, farm_short: 'A', value: 5 },
+    ];
+    const pivot: Transform = {
+      kind: 'PivotByLabel',
+      spec: { columnLabel: 'farm_short', disabled: true },
+    };
+    const output = transformData(input, [pivot]);
+    expect(output).toEqual([{ farm_short: 'A', timestamp: 1, value: 5 }]);
+  });
 });

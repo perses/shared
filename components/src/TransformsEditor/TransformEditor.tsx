@@ -29,6 +29,7 @@ import type {
   MergeColumnsTransform,
   MergeIndexedColumnsTransform,
   MergeSeriesTransform,
+  PivotByLabelTransform,
   Transform,
 } from '../model';
 
@@ -245,11 +246,69 @@ export function TransformEditor({ value, onChange, ...props }: TransformEditorPr
             <Typography variant="caption">Series will be merged by their labels</Typography>
           </Stack>
         </MenuItem>
+        <MenuItem value="PivotByLabel">
+          <Stack>
+            <Typography>Pivot by label</Typography>
+            <Typography variant="caption">Time × label matrix (rows = time, columns = label values)</Typography>
+          </Stack>
+        </MenuItem>
       </TextField>
       {value.kind === 'JoinByColumnValue' && <JoinByColumnValueTransformEditor value={value} onChange={onChange} />}
       {value.kind === 'MergeColumns' && <MergeColumnsTransformEditor value={value} onChange={onChange} />}
       {value.kind === 'MergeIndexedColumns' && <MergeIndexedColumnsTransformEditor value={value} onChange={onChange} />}
       {value.kind === 'MergeSeries' && <MergeSeriesTransformEditor value={value} onChange={onChange} />}
+      {value.kind === 'PivotByLabel' && <PivotByLabelTransformEditor value={value} onChange={onChange} />}
+    </Stack>
+  );
+}
+
+function PivotByLabelTransformEditor({
+  value,
+  onChange,
+}: TransformSpecEditorProps<PivotByLabelTransform>): ReactElement {
+  return (
+    <Stack gap={2}>
+      <MuiTextField
+        label="Column label"
+        fullWidth
+        value={value.spec.columnLabel ?? ''}
+        onChange={(e) => onChange({ ...value, spec: { ...value.spec, columnLabel: e.target.value } })}
+        helperText="Label that becomes dynamic column headers (e.g. farm_short)"
+      />
+      <MuiTextField
+        label="Row field"
+        fullWidth
+        value={value.spec.rowField ?? 'timestamp'}
+        onChange={(e) => onChange({ ...value, spec: { ...value.spec, rowField: e.target.value } })}
+        helperText="Field used for row identity (default: timestamp)"
+      />
+      <MuiTextField
+        label="Value field"
+        fullWidth
+        value={value.spec.valueField ?? 'value'}
+        onChange={(e) => onChange({ ...value, spec: { ...value.spec, valueField: e.target.value } })}
+      />
+      <MuiTextField
+        label="Row column name"
+        fullWidth
+        value={value.spec.rowColumnName ?? ''}
+        onChange={(e) =>
+          onChange({
+            ...value,
+            spec: { ...value.spec, rowColumnName: e.target.value || undefined },
+          })
+        }
+        helperText="Optional display name for the row column (default: row field)"
+      />
+      <FormControlLabel
+        control={
+          <Switch
+            checked={!!value.spec.disabled}
+            onChange={(_, checked) => onChange({ ...value, spec: { ...value.spec, disabled: checked } })}
+          />
+        }
+        label="Disabled"
+      />
     </Stack>
   );
 }

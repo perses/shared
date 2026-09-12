@@ -58,4 +58,16 @@ import (
 	}
 }
 
-#transform: #joinByColumnValueTransform | #mergeColumnsTransform | #mergeIndexedColumnsTransform | #mergeSeries | #extractColumnFieldsTransform
+// Pivot multi-series samples into time × label matrix (Grafana groupingToMatrix parity).
+#pivotByLabelTransform: {
+	kind: "PivotByLabel"
+	spec: {
+		columnLabel:    strings.MinRunes(1)
+		rowField?:      string
+		valueField?:    string
+		rowColumnName?: string
+		disabled?:      bool
+	}
+}
+
+#transform: #joinByColumnValueTransform | #mergeColumnsTransform | #mergeIndexedColumnsTransform | #mergeSeries | #extractColumnFieldsTransform | #pivotByLabelTransform

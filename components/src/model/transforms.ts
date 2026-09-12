@@ -51,12 +51,34 @@ export interface MergeSeriesTransform {
   spec: TransformCommonSpec;
 }
 
+/**
+ * Pivot multi-series table rows into a time × label matrix
+ * (Grafana groupingToMatrix parity).
+ *
+ * Example: columnLabel=farm_short, rowField=timestamp
+ * → one row per timestamp, one column per farm_short value.
+ */
+export interface PivotByLabelTransform {
+  kind: 'PivotByLabel';
+  spec: TransformCommonSpec & {
+    /** Label/column that becomes dynamic column headers (e.g. farm_short). */
+    columnLabel: string;
+    /** Field for row identity (default: timestamp). */
+    rowField?: string;
+    /** Value field name (default: value). */
+    valueField?: string;
+    /** Name of the row column after pivot (default: rowField). */
+    rowColumnName?: string;
+  };
+}
+
 export type Transform =
   | JoinByColumnValueTransform
   | MergeColumnsTransform
   | MergeIndexedColumnsTransform
   | MergeSeriesTransform
-  | ExtractColumnFieldsTransform;
+  | ExtractColumnFieldsTransform
+  | PivotByLabelTransform;
 
 // Can be moved somewhere else
 export const TRANSFORM_TEXT = {
@@ -65,4 +87,5 @@ export const TRANSFORM_TEXT = {
   MergeIndexedColumns: 'Merge indexed columns',
   MergeSeries: 'Merge series',
   ExtractColumnFields: 'Extract column fields',
+  PivotByLabel: 'Pivot by label',
 };
