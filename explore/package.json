@@ -34,7 +34,7 @@
     "@perses-dev/dashboards": "0.55.0-beta.10",
     "@perses-dev/plugin-system": "0.55.0-beta.10",
     "mdi-material-ui": "^7.9.2",
-    "qs": "^6.14.0",
+    "qs": "6.16.0",
     "react-virtuoso": "^4.12.2",
     "use-query-params": "^2.2.1",
     "use-resize-observer": "^9.0.0"
