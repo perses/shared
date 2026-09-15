@@ -16,7 +16,7 @@ import type { QueryDefinition, QueryPluginType } from '@perses-dev/spec';
 import { produce } from 'immer';
 import AddIcon from 'mdi-material-ui/Plus';
 import type { ReactElement } from 'react';
-import { forwardRef, useState } from 'react';
+import { forwardRef, useEffect, useState } from 'react';
 
 import type { QueryData } from '../../runtime';
 import { useListPluginMetadata, usePlugin, usePluginRegistry } from '../../runtime';
@@ -88,6 +88,15 @@ export const MultiQueryEditor = forwardRef<PluginEditorRef, MultiQueryEditorProp
   const { defaultInitialQueryDefinition, isLoading } = useDefaultQueryDefinition(queryTypes, filteredQueryPlugins);
   // State for which queries are collapsed
   const [queriesCollapsed, setQueriesCollapsed] = useState(queries.map(() => false));
+
+  // When a panel has no queries, MultiQueryEditor displays a default query (see queryDefinitions below), but that
+  // default is only visual until the user interacts with it. Persist it so panels whose default query needs no user
+  // input (e.g. alerts/silences) still have a query saved, and therefore run in view mode.
+  useEffect(() => {
+    if (queries.length === 0 && !isLoading && defaultInitialQueryDefinition.spec.plugin.kind !== '') {
+      onChange([defaultInitialQueryDefinition]);
+    }
+  }, [queries.length, isLoading, defaultInitialQueryDefinition, onChange]);
 
   // Query handlers
   const handleQueryChange = (index: number, queryDef: QueryDefinition): void => {
