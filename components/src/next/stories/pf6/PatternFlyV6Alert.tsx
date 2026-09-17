@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { CSSProperties, FC, forwardRef, ReactElement, ReactNode, SVGProps, useRef } from 'react';
+import { forwardRef, useRef } from 'react';
+import type { CSSProperties, FC, ReactElement, ReactNode, SVGProps } from 'react';
 
 import { useComponents } from '../../contexts/ComponentsProvider';
 import type { AlertProps } from '../../primitives/Alert';

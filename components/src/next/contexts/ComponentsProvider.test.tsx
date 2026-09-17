@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
-import { FC, forwardRef, ReactElement, SVGProps } from 'react';
+import { forwardRef } from 'react';
+import type { FC, ReactElement, SVGProps } from 'react';
 
 import type { ButtonProps } from '../primitives';
 import { defaultComponents, defaultIcons } from '../primitives/defaults';

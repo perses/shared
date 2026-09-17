@@ -13,7 +13,8 @@
 
 import { Button as BaseButton } from '@base-ui/react/button';
 import clsx from 'clsx';
-import { ButtonHTMLAttributes, forwardRef } from 'react';
+import { forwardRef } from 'react';
+import type { ButtonHTMLAttributes } from 'react';
 
 import { useComponents } from '../../contexts/ComponentsProvider';
 import { Icon } from '../Icon/Icon';

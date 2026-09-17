@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useEffect, useState, MutableRefObject, ForwardedRef, ReactElement, ReactNode, RefObject } from 'react';
+import { useEffect, useState } from 'react';
+import type { MutableRefObject, ForwardedRef, ReactElement, ReactNode, RefObject } from 'react';
 
 export const PF_FONT =
   '"RedHatText", "Red Hat Text", "Overpass", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif';

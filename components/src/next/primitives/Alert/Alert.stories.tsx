@@ -13,7 +13,8 @@
 
 import type { Story } from '@ladle/react';
 
-import { Alert, AlertSeverity } from './Alert';
+import { Alert } from './Alert';
+import type { AlertSeverity } from './Alert';
 
 const severities: AlertSeverity[] = ['error', 'warning', 'success', 'info'];
 
