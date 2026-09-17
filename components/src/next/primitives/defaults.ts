@@ -16,8 +16,9 @@ import { Alert } from './Alert';
 import { Button } from './Button';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon';
 import { Spinner } from './Spinner';
+import { Stack } from './Stack';
 
-export const defaultComponents: PersesComponents = { Button, Alert, Spinner };
+export const defaultComponents: PersesComponents = { Button, Alert, Spinner, Box, Stack };
 
 export const defaultIcons: PersesIcons = {
   Error: ErrorIcon,
