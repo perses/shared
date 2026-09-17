@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext, ComponentType, ReactNode, SVGProps } from 'react';
+import { createContext } from 'react';
+import type { ComponentType, ReactNode, SVGProps } from 'react';
 
 import type { AlertProps } from '../primitives/Alert';
 import type { ButtonProps } from '../primitives/Button';
