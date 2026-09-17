@@ -13,7 +13,7 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import { ComponentsProvider } from '../../contexts/ComponentsProvider';
 import { defaultComponents, defaultIcons } from '../defaults';
