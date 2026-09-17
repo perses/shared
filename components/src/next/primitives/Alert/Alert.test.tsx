@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
-import { ReactElement, ReactNode, SVGProps } from 'react';
+import type { ReactElement, ReactNode, SVGProps } from 'react';
 
 import { ComponentsProvider } from '../../contexts/ComponentsProvider';
 import { defaultComponents, defaultIcons } from '../defaults';
