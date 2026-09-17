@@ -19,6 +19,7 @@ import type { BoxProps } from '../primitives/Box';
 import type { ButtonProps } from '../primitives/Button';
 import type { DividerProps } from '../primitives/Divider';
 import type { SpinnerProps } from '../primitives/Spinner';
+import type { StackProps } from '../primitives/Stack';
 
 export interface PersesComponents {
   Button: ComponentType<ButtonProps>;
@@ -26,6 +27,7 @@ export interface PersesComponents {
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;
   Box: ComponentType<BoxProps>;
+  Stack: ComponentType<StackProps>;
 }
 
 export interface PersesIcons {

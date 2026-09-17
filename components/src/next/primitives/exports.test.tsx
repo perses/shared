@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Box, Button, Divider, Icon, Spinner } from './index';
+import { Alert, Box, Button, Divider, Icon, Spinner, Stack } from './index';
 import type {
   AlertProps,
   AlertSeverity,
@@ -24,6 +24,7 @@ import type {
   IconProps,
   SpacingToken,
   SpinnerProps,
+  StackProps,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -34,6 +35,7 @@ describe('primitives barrel exports', () => {
     expect(Divider).toBeDefined();
     expect(Icon).toBeDefined();
     expect(Spinner).toBeDefined();
+    expect(Stack).toBeDefined();
   });
 
   it('exports their prop types', () => {
@@ -48,6 +50,7 @@ describe('primitives barrel exports', () => {
     const dividerProps: DividerProps = {};
     const iconProps: IconProps = {};
     const spinnerProps: SpinnerProps = {};
+    const stackProps: StackProps = {};
 
     expect(alertProps).toBeDefined();
     expect(severity).toBe('info');
@@ -60,5 +63,6 @@ describe('primitives barrel exports', () => {
     expect(dividerProps).toBeDefined();
     expect(iconProps).toBeDefined();
     expect(spinnerProps).toBeDefined();
+    expect(stackProps).toBeDefined();
   });
 });
