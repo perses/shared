@@ -13,11 +13,12 @@
 
 import type { PersesComponents, PersesIcons } from '../contexts/ComponentsContext';
 import { Alert } from './Alert';
+import { Box } from './Box';
 import { Button } from './Button';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon';
 import { Spinner } from './Spinner';
 
-export const defaultComponents: PersesComponents = { Button, Alert, Spinner };
+export const defaultComponents: PersesComponents = { Button, Alert, Spinner, Box };
 
 export const defaultIcons: PersesIcons = {
   Error: ErrorIcon,
