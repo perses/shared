@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { forwardRef, HTMLAttributes, ReactNode } from 'react';
+import { forwardRef } from 'react';
+import type { HTMLAttributes, ReactNode } from 'react';
 
 import './icon.css';
 

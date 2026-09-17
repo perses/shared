@@ -13,7 +13,8 @@
 
 import type { Story } from '@ladle/react';
 
-import { Button, ButtonVariant, ButtonColor, ButtonSize } from './Button';
+import { Button } from './Button';
+import type { ButtonVariant, ButtonColor, ButtonSize } from './Button';
 
 const variants: ButtonVariant[] = ['solid', 'outline', 'ghost'];
 const colors: ButtonColor[] = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];

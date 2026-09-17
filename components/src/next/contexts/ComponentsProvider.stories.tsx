@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
-import { forwardRef, ReactElement } from 'react';
+import { forwardRef } from 'react';
+import type { ReactElement } from 'react';
 
 import type { ButtonProps } from '../primitives';
 import { defaultComponents, defaultIcons } from '../primitives/defaults';

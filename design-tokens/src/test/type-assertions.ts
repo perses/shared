@@ -15,7 +15,7 @@
 // PersesTokenVar, `npm run type-check` will fail here.
 // This file is never executed — it only needs to pass tsc.
 
-import { tokens } from '../tokens';
+import type { tokens } from '../tokens';
 import type { PersesTokenVar } from '../types';
 
 type ExtractVar<T extends string> = T extends `var(${infer V})` ? V : never;

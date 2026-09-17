@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { ReactElement, SVGProps } from 'react';
+import type { ReactElement, SVGProps } from 'react';
 
 import './spinner.css';
 

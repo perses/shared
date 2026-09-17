@@ -12,7 +12,8 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { ComponentType, forwardRef, HTMLAttributes, ReactElement, ReactNode, SVGProps } from 'react';
+import { forwardRef } from 'react';
+import type { ComponentType, HTMLAttributes, ReactElement, ReactNode, SVGProps } from 'react';
 
 import type { PersesIcons } from '../../contexts/ComponentsContext';
 import { useComponents } from '../../contexts/ComponentsProvider';
