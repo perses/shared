@@ -63,6 +63,7 @@
     "@mui/x-date-pickers": "^7.23.1",
     "@perses-dev/spec": "0.3.0-beta.9",
     "@perses-dev/client": "0.55.0-beta.13",
+    "@perses-dev/design-tokens": "0.54.0",
     "numbro": "^2.3.6",
     "@tanstack/match-sorter-utils": "^8.19.4",
     "@tanstack/react-table": "^8.20.5",
