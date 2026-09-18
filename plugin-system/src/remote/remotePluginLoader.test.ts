@@ -27,6 +27,7 @@ import { remotePluginLoader } from './remotePluginLoader';
 // Mock the loadPlugin function
 vi.mock('./PluginRuntime', () => ({
   loadPlugin: vi.fn(),
+  setPluginsAssetsBaseURL: vi.fn(),
 }));
 
 const mockLoadPlugin = vi.mocked(loadPlugin);

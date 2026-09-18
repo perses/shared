@@ -17,7 +17,7 @@ import type { PluginLoader, PluginMetadata, PluginModuleResource, PluginType } f
 import { getPluginModuleCompoundKey } from '@perses-dev/plugin-system';
 
 import type { RemotePluginModule } from './PersesPlugin.types';
-import { loadPlugin } from './PluginRuntime';
+import { loadPlugin, setPluginsAssetsBaseURL } from './PluginRuntime';
 
 const isPluginMetadata = (plugin: unknown): plugin is PluginMetadata => {
   return (
@@ -91,6 +91,8 @@ const paramToOptions = (options?: RemotePluginLoaderOptions): ParsedPluginOption
 export function remotePluginLoader(options?: RemotePluginLoaderOptions): PluginLoader {
   const { pluginsApiPath, pluginsAssetsPath } = paramToOptions(options);
   const fetchFn = options?.fetchFn ?? defaultFetch;
+
+  setPluginsAssetsBaseURL(pluginsAssetsPath);
 
   return {
     getInstalledPlugins: async (): Promise<PluginModuleResource[]> => {

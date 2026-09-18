@@ -25,6 +25,16 @@ import type { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 
 let instance: ModuleFederation | null = null;
 
+let pluginsAssetsBaseURL = '/plugins';
+
+/**
+ * Sets the base URL used to resolve plugin assets for plugins that don't carry their own `baseURL`. The plugin loader
+ * registers the path it was configured with, so plugins keep resolving when Perses is served behind a sub-path.
+ */
+export function setPluginsAssetsBaseURL(baseURL: string): void {
+  pluginsAssetsBaseURL = baseURL;
+}
+
 function createSharedModuleLoader<TModule>(loadModule: () => Promise<TModule>): () => Promise<() => TModule> {
   return async () => {
     const module = await loadModule();
@@ -263,7 +273,7 @@ const registerRemote = (name: string, registry?: string, version?: string, baseU
   const existingRemote = pluginRuntime.options.remotes.find((remote) => remote.name === registryName);
   if (!existingRemote) {
     const nameVersionRegistry = [name, version, registry].filter(Boolean).join('~');
-    const prefix = baseURL || '/plugins';
+    const prefix = baseURL || pluginsAssetsBaseURL;
     const remoteEntryURL = `${prefix}/${nameVersionRegistry}/mf-manifest.json`;
 
     pluginRuntime.registerRemotes([

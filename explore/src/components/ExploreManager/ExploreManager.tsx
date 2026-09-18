@@ -118,6 +118,8 @@ export function ExploreManager(props: ExploreManagerProps): ReactElement {
               plugin={{
                 name: currentPlugin.spec.name,
                 moduleName: currentPlugin.module.name,
+                version: currentPlugin.module.version,
+                registry: currentPlugin.module.registry,
               }}
             />
           )}
