@@ -30,6 +30,8 @@ import { usePanelGroupActions, useEditMode, useDeletePanelGroupDialog } from '..
 export interface GridTitleProps {
   panelGroupId: PanelGroupId;
   title: string;
+  /** Number of panels in the group (shown when the group is collapsed). */
+  panelCount?: number;
   collapse?: {
     isOpen: boolean;
     onToggleOpen: () => void;
@@ -41,7 +43,7 @@ export interface GridTitleProps {
  * and collapsing
  */
 export function GridTitle(props: GridTitleProps): ReactElement {
-  const { panelGroupId, title: rawTitle, collapse } = props;
+  const { panelGroupId, title: rawTitle, panelCount, collapse } = props;
 
   const title = useReplaceVariablesInString(rawTitle) as string;
 
@@ -49,7 +51,11 @@ export function GridTitle(props: GridTitleProps): ReactElement {
   const { openDeletePanelGroupDialog } = useDeletePanelGroupDialog();
   const { isEditMode } = useEditMode();
 
-  const text = <Typography variant="h2">{title}</Typography>;
+  // When collapsed, append panel count (e.g. "Dashboard Info (3 panels)").
+  const showCount = collapse !== undefined && !collapse.isOpen && panelCount !== undefined && panelCount > 0;
+  const displayTitle = showCount ? `${title} (${panelCount} ${panelCount === 1 ? 'panel' : 'panels'})` : title;
+
+  const text = <Typography variant="h2">{displayTitle}</Typography>;
 
   return (
     <Box
@@ -65,7 +71,10 @@ export function GridTitle(props: GridTitleProps): ReactElement {
     >
       {collapse ? (
         <>
-          <IconButton sx={{ marginRight: 1 }} aria-label={`${collapse.isOpen ? 'collapse' : 'expand'} group ${title}`}>
+          <IconButton
+            sx={{ marginRight: 1 }}
+            aria-label={`${collapse.isOpen ? 'collapse' : 'expand'} group ${displayTitle}`}
+          >
             {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
           </IconButton>
           {text}

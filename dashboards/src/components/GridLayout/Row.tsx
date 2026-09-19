@@ -184,7 +184,12 @@ export function Row({
   return (
     <GridContainer sx={containerSx}>
       {groupDefinition.title && (
-        <GridTitle panelGroupId={panelGroupId} title={groupDefinition.title} collapse={collapse} />
+        <GridTitle
+          panelGroupId={panelGroupId}
+          title={groupDefinition.title}
+          panelCount={groupDefinition.itemLayouts.length}
+          collapse={collapse}
+        />
       )}
       <Collapse in={isOpen || hasViewPanel} unmountOnExit appear={false} data-testid="panel-group-content">
         <div ref={containerRef}>
