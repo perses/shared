@@ -11,11 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 import type { SwitchProps } from '@mui/material';
-import { Switch } from '@mui/material';
+import { Switch, TextField } from '@mui/material';
 import type { ReactElement } from 'react';
 
 import type { FormatOptions } from '../model';
-import { isUnitWithDecimalPlaces, isUnitWithShortValues, shouldShortenValues } from '../model';
+import { isUnitWithDecimalPlaces, isUnitWithShortValues, shouldShortenValues, supportsCustomLabel } from '../model';
 import { OptionsEditorControl } from '../OptionsEditorLayout';
 import { SettingsAutocomplete } from '../SettingsAutocomplete';
 import { UnitSelector } from './UnitSelector';
@@ -46,8 +46,17 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
   const hasShortValues = isUnitWithShortValues(value);
 
   const handleUnitChange = (newValue: FormatOptions | undefined): void => {
-    onChange(newValue || { unit: 'decimal' }); // Fallback to 'decimal' if undefined
+    const next = newValue || { unit: 'decimal' };
+    const customLabel = value.customLabel?.trim();
+    // Keep label only when the new unit supports customLabel (whitelist).
+    if (customLabel && supportsCustomLabel(next.unit)) {
+      onChange({ ...next, customLabel: value.customLabel });
+      return;
+    }
+    onChange(next);
   };
+
+  const showCustomLabel = supportsCustomLabel(value.unit);
 
   const handleDecimalPlacesChange = ({
     decimalPlaces,
@@ -73,6 +82,16 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
     }
   };
 
+  const handleCustomLabelChange = (raw: string): void => {
+    // Keep raw input while typing (spaces allowed). Trim only when clearing / display.
+    if (raw === '') {
+      const { customLabel: _removed, ...rest } = value;
+      onChange(rest as FormatOptions);
+      return;
+    }
+    onChange({ ...value, customLabel: raw });
+  };
+
   return (
     <>
       <OptionsEditorControl
@@ -89,6 +108,22 @@ export function FormatControls({ value, onChange, disabled = false }: FormatCont
         label="Unit"
         control={<UnitSelector value={value} onChange={handleUnitChange} disabled={disabled} />}
       />
+      {showCustomLabel && (
+        <OptionsEditorControl
+          label="Custom label"
+          control={
+            <TextField
+              size="small"
+              fullWidth
+              value={value.customLabel ?? ''}
+              onChange={(e) => handleCustomLabelChange(e.target.value)}
+              placeholder="Optional display override (e.g. pnr/mn)"
+              disabled={disabled}
+              inputProps={{ 'aria-label': 'custom unit label', maxLength: 32 }}
+            />
+          }
+        />
+      )}
       <OptionsEditorControl
         label="Decimals"
         control={

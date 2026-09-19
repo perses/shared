@@ -13,19 +13,27 @@
 
 package common
 
-#format: #simpleFormat | #floatFormat | #shortenableFormat
+import "strings"
+
+// Shared optional fields once; unit is refined by each format branch.
+#format: {
+	unit?: string
+	// Optional display override (axis / legend / tooltip). unit stays the stable key.
+	customLabel?: strings.MinRunes(1)
+	#simpleFormat | #floatFormat | #shortenableFormat
+}
 
 #simpleFormat: {
-    unit?: #dateFormat.unit
+	unit?: #dateFormat.unit
 }
 
 #floatFormat: {
-    unit?: #timeFormat.unit | #percentFormat.unit | #currencyFormat.unit | #temperatureFormat.unit
-    decimalPlaces?: number
+	unit?:          #timeFormat.unit | #percentFormat.unit | #currencyFormat.unit | #temperatureFormat.unit
+	decimalPlaces?: number
 }
 
 #shortenableFormat: {
-    unit?: #decimalFormat.unit | #bitsFormat.unit | #bytesFormat.unit | #throughputFormat.unit
+	unit?:          #decimalFormat.unit | #bitsFormat.unit | #bytesFormat.unit | #throughputFormat.unit
 	decimalPlaces?: number
 	shortValues?:   bool
 }

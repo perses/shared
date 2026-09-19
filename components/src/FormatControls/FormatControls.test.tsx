@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import type { FormatOptions } from '../model';
@@ -38,6 +38,10 @@ describe('FormatControls', () => {
     return screen.getByRole('checkbox', { name: 'Short values' });
   };
 
+  const getCustomLabelInput = (): HTMLElement => {
+    return screen.getByRole('textbox', { name: 'custom unit label' });
+  };
+
   it('can change the unit by clicking', () => {
     const onChange = vi.fn();
     renderFormatControls({ unit: 'minutes' }, onChange);
@@ -59,6 +63,7 @@ describe('FormatControls', () => {
     renderFormatControls({ unit: 'bytes' }, onChange);
 
     const unitSelector = getUnitSelector();
+    // Tab: Short values → Unit (Custom label present for bytes)
     userEvent.tab();
     userEvent.tab();
     expect(unitSelector).toHaveFocus();
@@ -73,6 +78,23 @@ describe('FormatControls', () => {
 
     expect(onChange).toHaveBeenCalledWith({
       unit: 'years',
+    });
+  });
+
+  it('shows custom label for data-size units (bytes)', () => {
+    renderFormatControls({ unit: 'bytes' });
+    expect(screen.getByRole('textbox', { name: 'custom unit label' })).toBeInTheDocument();
+  });
+
+  it('preserves customLabel when switching to bytes', () => {
+    const onChange = vi.fn();
+    renderFormatControls({ unit: 'ops/sec', customLabel: 'pnr/mn' }, onChange);
+
+    userEvent.click(getUnitSelector());
+    userEvent.click(screen.getByRole('option', { name: 'Bytes (IEC)' }));
+    expect(onChange).toHaveBeenCalledWith({
+      unit: 'bytes',
+      customLabel: 'pnr/mn',
     });
   });
 
@@ -98,8 +120,8 @@ describe('FormatControls', () => {
     renderFormatControls({ unit: 'percent' }, onChange);
 
     const decimalPlacesSelector = getDecimalPlacesSelector();
-    userEvent.tab();
-    userEvent.tab();
+    // Focus Decimals directly (tab order includes Custom label after Unit).
+    decimalPlacesSelector.focus();
     expect(decimalPlacesSelector).toHaveFocus();
 
     userEvent.clear(decimalPlacesSelector);
@@ -112,6 +134,40 @@ describe('FormatControls', () => {
     expect(onChange).toHaveBeenCalledWith({
       unit: 'percent',
       decimalPlaces: 3,
+    });
+  });
+
+  it('can set a custom label (spaces allowed in raw onChange)', () => {
+    const onChange = vi.fn();
+    renderFormatControls({ unit: 'ops/sec' }, onChange);
+
+    const input = getCustomLabelInput();
+    // Controlled field + mock onChange does not re-render; fire a full value change.
+    fireEvent.change(input, { target: { value: 'pnr / mn' } });
+    expect(onChange).toHaveBeenCalledWith({
+      unit: 'ops/sec',
+      customLabel: 'pnr / mn',
+    });
+  });
+
+  it('clears customLabel when the field is emptied', () => {
+    const onChange = vi.fn();
+    renderFormatControls({ unit: 'ops/sec', customLabel: 'pnr/mn' }, onChange);
+
+    const input = getCustomLabelInput();
+    fireEvent.change(input, { target: { value: '' } });
+    expect(onChange).toHaveBeenCalledWith({ unit: 'ops/sec' });
+  });
+
+  it('preserves customLabel when changing unit', () => {
+    const onChange = vi.fn();
+    renderFormatControls({ unit: 'ops/sec', customLabel: 'pnr/mn' }, onChange);
+
+    userEvent.click(getUnitSelector());
+    userEvent.click(screen.getByRole('option', { name: 'Decimal' }));
+    expect(onChange).toHaveBeenCalledWith({
+      unit: 'decimal',
+      customLabel: 'pnr/mn',
     });
   });
 

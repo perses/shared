@@ -14,6 +14,15 @@
 package common
 
 myFormat: #format & {
+	unit:          "decimal"
 	decimalPlaces: 0
 	shortValues:   false
+}
+
+// Standard unit key + org display label (multi-axis still keys on unit).
+myFormatWithCustomLabel: #format & {
+	unit:          "ops/sec"
+	customLabel:   "pnr/mn"
+	shortValues:   true
+	decimalPlaces: 1
 }

@@ -25,6 +25,7 @@ export * from './percent';
 export * from './temperature';
 export * from './decimal';
 export * from './throughput';
+export * from './custom';
 export * from './formatterCache';
 export * from './units';
 export * from './utils';

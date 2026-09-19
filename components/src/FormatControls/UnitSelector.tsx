@@ -45,9 +45,9 @@ export function UnitSelector({ value, onChange, disabled = false, ...otherProps 
   const handleChange = (_: unknown, newValue: AutocompleteUnitOption | null): void => {
     if (newValue === null) {
       onChange(undefined);
-    } else {
-      onChange({ unit: newValue.id } as FormatOptions);
+      return;
     }
+    onChange({ unit: newValue.id } as FormatOptions);
   };
 
   return (

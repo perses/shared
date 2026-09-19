@@ -17,6 +17,8 @@ import type { BytesFormatOptions } from './bytes';
 import { formatBytes, BYTES_GROUP_CONFIG, BYTES_UNIT_CONFIG } from './bytes';
 import type { CurrencyFormatOptions } from './currency';
 import { formatCurrency, CURRENCY_GROUP_CONFIG, CURRENCY_UNIT_CONFIG } from './currency';
+import type { WithCustomLabel } from './custom';
+import { applyCustomLabel, supportsCustomLabel } from './custom';
 import type { DateFormatOptions } from './date';
 import { formatDate, DATE_GROUP_CONFIG, DATE_UNIT_CONFIG } from './date';
 import type { DecimalFormatOptions } from './decimal';
@@ -62,7 +64,8 @@ export const UNIT_CONFIG = {
   ...DATE_UNIT_CONFIG,
 } as const;
 
-export type FormatOptions =
+/** Standard unit options plus optional display override (customLabel). */
+export type FormatOptions = (
   | TimeFormatOptions
   | PercentFormatOptions
   | DecimalFormatOptions
@@ -71,7 +74,9 @@ export type FormatOptions =
   | ThroughputFormatOptions
   | CurrencyFormatOptions
   | TemperatureFormatOptions
-  | DateFormatOptions;
+  | DateFormatOptions
+) &
+  WithCustomLabel;
 
 type HasDecimalPlaces<UnitOpt> = UnitOpt extends { decimalPlaces?: number } ? UnitOpt : never;
 type HasShortValues<UnitOpt> = UnitOpt extends { shortValues?: boolean } ? UnitOpt : never;
@@ -81,49 +86,42 @@ export function formatValue(value: number, formatOptions?: FormatOptions): strin
     return value.toString();
   }
 
+  let formatted: string;
   if (isBytesUnit(formatOptions)) {
-    return formatBytes(value, formatOptions);
+    formatted = formatBytes(value, formatOptions);
+  } else if (isBitsUnit(formatOptions)) {
+    formatted = formatBits(value, formatOptions);
+  } else if (isDecimalUnit(formatOptions)) {
+    formatted = formatDecimal(value, formatOptions);
+  } else if (isPercentUnit(formatOptions)) {
+    formatted = formatPercent(value, formatOptions);
+  } else if (isTimeUnit(formatOptions)) {
+    formatted = formatTime(value, formatOptions);
+  } else if (isThroughputUnit(formatOptions)) {
+    formatted = formatThroughput(value, formatOptions);
+  } else if (isCurrencyUnit(formatOptions)) {
+    formatted = formatCurrency(value, formatOptions);
+  } else if (isDateUnit(formatOptions)) {
+    formatted = formatDate(value, formatOptions);
+  } else if (isTemperatureUnit(formatOptions)) {
+    formatted = formatTemperature(value, formatOptions);
+  } else {
+    const exhaustive: never = formatOptions;
+    throw new Error(`Unknown unit options ${exhaustive}`);
   }
 
-  if (isBitsUnit(formatOptions)) {
-    return formatBits(value, formatOptions);
-  }
-
-  if (isDecimalUnit(formatOptions)) {
-    return formatDecimal(value, formatOptions);
-  }
-
-  if (isPercentUnit(formatOptions)) {
-    return formatPercent(value, formatOptions);
-  }
-
-  if (isTimeUnit(formatOptions)) {
-    return formatTime(value, formatOptions);
-  }
-
-  if (isThroughputUnit(formatOptions)) {
-    return formatThroughput(value, formatOptions);
-  }
-
-  if (isCurrencyUnit(formatOptions)) {
-    return formatCurrency(value, formatOptions);
-  }
-
-  if (isDateUnit(formatOptions)) {
-    return formatDate(value, formatOptions);
-  }
-
-  if (isTemperatureUnit(formatOptions)) {
-    return formatTemperature(value, formatOptions);
-  }
-
-  const exhaustive: never = formatOptions;
-  throw new Error(`Unknown unit options ${exhaustive}`);
+  return applyCustomLabel(formatted, formatOptions.customLabel, formatOptions.unit);
 }
 
 export function getUnitConfig(formatOptions: FormatOptions): UnitConfig {
   const unit = formatOptions.unit ?? 'decimal';
-  return UNIT_CONFIG[unit];
+  const config = UNIT_CONFIG[unit];
+  const customLabel = formatOptions.customLabel?.trim();
+  // Only override display name when customLabel is supported for this unit key.
+  if (customLabel && supportsCustomLabel(unit)) {
+    return { ...config, label: customLabel };
+  }
+  return config;
 }
 
 export function getUnitGroup(formatOptions: FormatOptions): UnitGroup {
@@ -136,23 +134,23 @@ export function getUnitGroupConfig(formatOptions: FormatOptions): UnitGroupConfi
 }
 
 // Type guards
-export function isTimeUnit(formatOptions: FormatOptions): formatOptions is TimeFormatOptions {
+export function isTimeUnit(formatOptions: FormatOptions): formatOptions is TimeFormatOptions & WithCustomLabel {
   return getUnitGroup(formatOptions) === 'Time';
 }
 
-export function isPercentUnit(formatOptions: FormatOptions): formatOptions is PercentFormatOptions {
+export function isPercentUnit(formatOptions: FormatOptions): formatOptions is PercentFormatOptions & WithCustomLabel {
   return getUnitGroup(formatOptions) === 'Percent';
 }
 
-export function isDecimalUnit(formatOptions: FormatOptions): formatOptions is DecimalFormatOptions {
+export function isDecimalUnit(formatOptions: FormatOptions): formatOptions is DecimalFormatOptions & WithCustomLabel {
   return getUnitGroup(formatOptions) === 'Decimal';
 }
 
-export function isBytesUnit(formatOptions: FormatOptions): formatOptions is BytesFormatOptions {
+export function isBytesUnit(formatOptions: FormatOptions): formatOptions is BytesFormatOptions & WithCustomLabel {
   return getUnitGroup(formatOptions) === 'Bytes';
 }
 
-export function isBitsUnit(formatOptions: FormatOptions): formatOptions is BitsFormatOptions {
+export function isBitsUnit(formatOptions: FormatOptions): formatOptions is BitsFormatOptions & WithCustomLabel {
   return getUnitGroup(formatOptions) === 'Bits';
 }
 
@@ -170,18 +168,22 @@ export function isUnitWithShortValues(formatOptions: FormatOptions): formatOptio
   return !!groupConfig.shortValues;
 }
 
-export function isThroughputUnit(formatOptions: FormatOptions): formatOptions is ThroughputFormatOptions {
+export function isThroughputUnit(
+  formatOptions: FormatOptions,
+): formatOptions is ThroughputFormatOptions & WithCustomLabel {
   return getUnitGroup(formatOptions) === 'Throughput';
 }
 
-export function isCurrencyUnit(formatOptions: FormatOptions): formatOptions is CurrencyFormatOptions {
+export function isCurrencyUnit(formatOptions: FormatOptions): formatOptions is CurrencyFormatOptions & WithCustomLabel {
   return getUnitGroup(formatOptions) === 'Currency';
 }
 
-export function isDateUnit(formatOptions: FormatOptions): formatOptions is DateFormatOptions {
+export function isDateUnit(formatOptions: FormatOptions): formatOptions is DateFormatOptions & WithCustomLabel {
   return getUnitGroup(formatOptions) === 'Date';
 }
 
-export function isTemperatureUnit(formatOptions: FormatOptions): formatOptions is TemperatureFormatOptions {
+export function isTemperatureUnit(
+  formatOptions: FormatOptions,
+): formatOptions is TemperatureFormatOptions & WithCustomLabel {
   return getUnitGroup(formatOptions) === 'Temperature';
 }
