@@ -13,7 +13,7 @@
 
 import type { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
-import { createContext, useCallback, useContext, useMemo } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
 
 import type { AlertsQueryDefinition } from '../alerts-queries';
 import { useAlertsQueries } from '../alerts-queries';
@@ -123,18 +123,6 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
       ...transformQueryResults(jsonResults, jsonQueries),
     ];
 
-    if (queryOptions?.enabled) {
-      for (const result of mergedQueryResults) {
-        if (!result.isLoading && !result.isFetching && !result.error) {
-          usageMetrics.markQuery(result.definition, 'success');
-        } else if (result.error) {
-          usageMetrics.markQuery(result.definition, 'error');
-        } else {
-          usageMetrics.markQuery(result.definition, 'pending');
-        }
-      }
-    }
-
     return {
       queryDefinitions: definitions,
       queryResults: mergedQueryResults,
@@ -159,10 +147,26 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
     traceQueries,
     traceResults,
     definitions,
-    queryOptions?.enabled,
     refetchAll,
-    usageMetrics,
   ]);
+
+  useEffect(() => {
+    if (queryOptions?.enabled) {
+      // Register the complete batch before completing any cached query.
+      for (const result of ctx.queryResults) {
+        usageMetrics.markQuery(result.definition, 'pending');
+      }
+      for (const result of ctx.queryResults) {
+        if (!result.isLoading && !result.isFetching && !result.error) {
+          usageMetrics.markQuery(result.definition, 'success');
+        } else if (result.error) {
+          usageMetrics.markQuery(result.definition, 'error');
+        } else {
+          usageMetrics.markQuery(result.definition, 'pending');
+        }
+      }
+    }
+  }, [ctx.queryResults, queryOptions?.enabled, usageMetrics]);
 
   return <DataQueriesContext.Provider value={ctx}>{children}</DataQueriesContext.Provider>;
 }

@@ -121,14 +121,25 @@ export function usePluginEditor(props: UsePluginEditorProps): {
 
   // When kind changes and we haven't loaded that plugin before, we will need to enter a "pending" state so that we
   // can generate proper initial spec values that match the new plugin kind
-  const [pendingSelection, setPendingSelection] = useState<PluginEditorSelection | undefined>(initPendingSelection);
+  const [requestedSelection, setPendingSelection] = useState<PluginEditorSelection | undefined>(initPendingSelection);
 
-  // Take a default kind in case user write explicitly an empty kind in the initial value
+  const selectionIsApplied =
+    requestedSelection &&
+    value.selection.type === requestedSelection.type &&
+    value.selection.kind === requestedSelection.kind &&
+    value.selection.metadata?.version === requestedSelection.metadata?.version &&
+    value.selection.metadata?.registry === requestedSelection.metadata?.registry;
+  const pendingSelection = selectionIsApplied ? undefined : requestedSelection;
+  if (selectionIsApplied) {
+    setPendingSelection(undefined);
+  }
+
+  // Notify the owner instead of mutating the selection passed by the caller.
   useEffect(() => {
-    if (value.selection.kind === '') {
-      value.selection.kind = defaultPluginKind || '';
+    if (value.selection.kind === '' && defaultPluginKind) {
+      onChange({ ...value, selection: { ...value.selection, kind: defaultPluginKind } });
     }
-  }, [value.selection, defaultPluginKind]);
+  }, [value, defaultPluginKind, onChange]);
 
   // Load the pending plugin honoring the pinned version/registry, so the initial options come from the exact
   // implementation the definition will use rather than from the latest one.
@@ -162,7 +173,6 @@ export function usePluginEditor(props: UsePluginEditorProps): {
         onHideQuery(!!panelPlugin.hideQueryEditor);
       }
     }
-    setPendingSelection(undefined);
   }, [
     pendingSelection,
     plugin,
@@ -182,6 +192,7 @@ export function usePluginEditor(props: UsePluginEditorProps): {
     // If we already have state for this plugin type/kind from a previous selection, just use it
     const previousState = prevSpecState.current[nextSelection.type]?.[nextSelection.kind];
     if (previousState !== undefined) {
+      setPendingSelection(undefined);
       rememberCurrentSpecState();
       onChange({
         selection: nextSelection,

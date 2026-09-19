@@ -9,3 +9,10 @@ To import components from the components package use the syntax below:
 ```typescript
 import { ContentWithLegend } from "@perses-dev/components";
 ```
+
+## Memoization hooks
+
+`useMemoized` and `useDeepMemo` have been removed. Use `useMemo` from React to memoize values and `useCallback` to memoize
+callbacks. React compares dependencies by identity with `Object.is`, so callers previously using `useDeepMemo` should
+keep object dependencies stable or depend on the primitive values used by the calculation. Memoization is a performance
+optimization; code must remain correct if React recalculates a value.

@@ -15,7 +15,7 @@ import type { FetchFn } from '@perses-dev/client';
 import { useFetch } from '@perses-dev/client';
 import type { QueryDefinition } from '@perses-dev/spec';
 import type { ReactElement, ReactNode } from 'react';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useCallback, useMemo, useRef, useState } from 'react';
 
 type QueryState = 'pending' | 'success' | 'error';
 
@@ -28,6 +28,8 @@ interface UsageMetrics {
   pendingQueries: Map<string, QueryState>;
   apiPrefix?: string;
   fetchFn: FetchFn;
+  /** Provider-owned updater; optional for compatibility with directly supplied context values. */
+  markQuery?: UseUsageMetricsResults['markQuery'];
 }
 
 interface UsageMetricsProps {
@@ -47,36 +49,36 @@ export const useUsageMetricsContext = (): UsageMetrics | undefined => {
   return useContext(UsageMetricsContext);
 };
 
+/** Records query transitions after commit or from an event handler. */
 export const useUsageMetrics = (): UseUsageMetricsResults => {
   const ctx = useUsageMetricsContext();
-
-  return {
-    markQuery: (definition: QueryDefinition, newState: QueryState): void => {
-      if (ctx === undefined) {
-        return;
-      }
-
-      const definitionKey = JSON.stringify(definition);
-      if (ctx.pendingQueries.has(definitionKey) && newState === 'pending') {
-        // Never allow transitions back to pending, to avoid re-sending stats on a re-render.
-        return;
-      }
-
-      if (ctx.pendingQueries.get(definitionKey) !== newState) {
-        ctx.pendingQueries.set(definitionKey, newState);
-        if (newState === 'error') {
-          ctx.renderErrorCount += 1;
-        }
-
-        const allDone = [...ctx.pendingQueries.values()].every((p) => p !== 'pending');
-        if (ctx.renderDurationMs === 0 && allDone) {
-          ctx.renderDurationMs = Date.now() - ctx.startRenderTime;
-          submitMetrics(ctx);
-        }
+  const markQuery = useCallback(
+    (definition: QueryDefinition, state: QueryState): void => {
+      if (!ctx) return;
+      if (ctx.markQuery) {
+        ctx.markQuery(definition, state);
+      } else {
+        recordLegacyQuery(ctx, definition, state);
       }
     },
-  };
+    [ctx],
+  );
+  return useMemo(() => ({ markQuery }), [markQuery]);
 };
+
+// Direct context providers historically supply an imperative metrics accumulator.
+// Keep that API working; the standard provider owns its accumulator in a ref.
+function recordLegacyQuery(stats: UsageMetrics, definition: QueryDefinition, state: QueryState): void {
+  const key = JSON.stringify(definition);
+  if (stats.pendingQueries.has(key) && state === 'pending') return;
+  if (stats.pendingQueries.get(key) === state) return;
+  stats.pendingQueries.set(key, state);
+  if (state === 'error') stats.renderErrorCount += 1;
+  if (stats.renderDurationMs === 0 && [...stats.pendingQueries.values()].every((value) => value !== 'pending')) {
+    stats.renderDurationMs = Date.now() - stats.startRenderTime;
+    void submitMetrics(stats);
+  }
+}
 
 const submitMetrics = async (stats: UsageMetrics): Promise<void> => {
   await stats.fetchFn(`${stats.apiPrefix ?? ''}/api/v1/view`, {
@@ -93,19 +95,63 @@ const submitMetrics = async (stats: UsageMetrics): Promise<void> => {
   });
 };
 
-export const UsageMetricsProvider = ({ apiPrefix, project, dashboard, children }: UsageMetricsProps): ReactElement => {
-  const { fetch } = useFetch();
+export const UsageMetricsProvider = (props: UsageMetricsProps): ReactElement => {
+  return <UsageMetricsSession key={JSON.stringify([props.project, props.dashboard])} {...props} />;
+};
 
-  const ctx: UsageMetrics = {
-    project: project,
-    dashboard: dashboard,
-    renderErrorCount: 0,
-    startRenderTime: Date.now(),
+function UsageMetricsSession({ apiPrefix, project, dashboard, children }: UsageMetricsProps): ReactElement {
+  'use no memo'; // The public metrics context exposes live getters over an imperative accumulator.
+
+  const { fetch } = useFetch();
+  const [startRenderTime] = useState(() => Date.now());
+  const metricsRef = useRef({
+    submitted: false,
     renderDurationMs: 0,
-    pendingQueries: new Map(),
-    apiPrefix,
-    fetchFn: fetch,
-  };
+    renderErrorCount: 0,
+    pendingQueries: new Map<string, QueryState>(),
+  });
+
+  const markQuery = useCallback(
+    (definition: QueryDefinition, newState: QueryState): void => {
+      const metrics = metricsRef.current;
+      const definitionKey = JSON.stringify(definition);
+      if (metrics.pendingQueries.has(definitionKey) && newState === 'pending') return;
+      if (metrics.pendingQueries.get(definitionKey) === newState) return;
+      metrics.pendingQueries.set(definitionKey, newState);
+      if (newState === 'error') metrics.renderErrorCount += 1;
+      const allDone = [...metrics.pendingQueries.values()].every((state) => state !== 'pending');
+      if (!metrics.submitted && allDone) {
+        metrics.submitted = true;
+        metrics.renderDurationMs = Date.now() - startRenderTime;
+        void submitMetrics({ project, dashboard, startRenderTime, ...metrics, apiPrefix, fetchFn: fetch });
+      }
+    },
+    [project, dashboard, startRenderTime, apiPrefix, fetch],
+  );
+  const ctx = useMemo<UsageMetrics>(
+    () => ({
+      markQuery,
+      project,
+      dashboard,
+      startRenderTime,
+      // Compiler getters are unsupported; preserve the live context API in this opted-out component.
+      // oxlint-disable-next-line react/todo
+      get renderDurationMs(): number {
+        return metricsRef.current.renderDurationMs;
+      },
+      // oxlint-disable-next-line react/todo
+      get renderErrorCount(): number {
+        return metricsRef.current.renderErrorCount;
+      },
+      // oxlint-disable-next-line react/todo
+      get pendingQueries(): Map<string, QueryState> {
+        return metricsRef.current.pendingQueries;
+      },
+      apiPrefix,
+      fetchFn: fetch,
+    }),
+    [markQuery, project, dashboard, startRenderTime, apiPrefix, fetch],
+  );
 
   return <UsageMetricsContext.Provider value={ctx}>{children}</UsageMetricsContext.Provider>;
-};
+}

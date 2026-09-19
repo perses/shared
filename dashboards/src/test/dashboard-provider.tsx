@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { DashboardResource } from '@perses-dev/client';
-import { useContext } from 'react';
+import { useContext, useLayoutEffect } from 'react';
 import type { StoreApi } from 'zustand';
 
 import type { DashboardStoreState } from '../context';
@@ -41,7 +41,9 @@ export function createDashboardProviderSpy(): {
   // Spy component just captures the store value so it can be inspected in tests
   function DashboardProviderSpy(): null {
     const ctx = useContext(DashboardContext);
-    store.value = ctx;
+    useLayoutEffect(() => {
+      store.value = ctx;
+    }, [ctx]);
     return null;
   }
 

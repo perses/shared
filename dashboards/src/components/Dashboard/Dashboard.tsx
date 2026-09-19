@@ -16,7 +16,7 @@ import { Box } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { SnapGridGroup } from '@snapgridjs/react';
 import type { ReactElement } from 'react';
-import { useRef } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 import { usePanelGroupIds, useViewPanelGroup } from '../../context';
 import type { EmptyDashboardProps } from '../EmptyDashboard';
@@ -43,10 +43,18 @@ export function Dashboard({ emptyDashboardProps, panelOptions, ...boxProps }: Da
   const viewPanelItemId = useViewPanelGroup();
   const boxRef = useRef<HTMLDivElement>(null);
   const isEmpty = !panelGroupIds.length;
-  // Only the viewed panel needs this; measuring on every render would force a reflow and re-layout every group.
-  const panelFullHeight = viewPanelItemId
-    ? window.innerHeight - (boxRef.current?.getBoundingClientRect().top ?? HEADER_HEIGHT) - window.scrollY
-    : undefined;
+  const [panelFullHeight, setPanelFullHeight] = useState<number>();
+
+  useLayoutEffect(() => {
+    if (!viewPanelItemId) return;
+    const measure = (): void => {
+      const top = boxRef.current?.getBoundingClientRect().top ?? HEADER_HEIGHT;
+      setPanelFullHeight(window.innerHeight - top - window.scrollY);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return (): void => window.removeEventListener('resize', measure);
+  }, [viewPanelItemId]);
 
   return (
     <Box {...boxProps} sx={{ height: '100%' }} ref={boxRef}>
@@ -63,7 +71,7 @@ export function Dashboard({ emptyDashboardProps, panelOptions, ...boxProps }: Da
                 key={panelGroupId}
                 panelGroupId={panelGroupId}
                 panelOptions={panelOptions}
-                panelFullHeight={panelFullHeight}
+                panelFullHeight={viewPanelItemId ? panelFullHeight : undefined}
               />
             ))}
         </SnapGridGroup>

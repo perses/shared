@@ -63,6 +63,14 @@ describe('HTTPSettingsEditor - Request Headers', () => {
     return render(<Wrapper />);
   };
 
+  it('initializes proxy settings without mutating the input', () => {
+    const value = Object.freeze({});
+    const onChange = vi.fn();
+    renderComponent(value, onChange);
+    expect(value).toEqual({});
+    expect(onChange).toHaveBeenCalledWith(initialSpecProxy);
+  });
+
   describe('Adding headers', () => {
     it('should add a new empty header when clicking the add button', async () => {
       const onChange = vi.fn();
