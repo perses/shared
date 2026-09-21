@@ -79,13 +79,13 @@ describe('Box', () => {
     expect(screen.getByTestId('box')).toHaveStyle({ margin: 'var(--perses-spacing-xl)' });
   });
 
-  it('resolves the 0 spacing token to a literal 0', () => {
+  it('resolves the 0 spacing token through the design token', () => {
     render(
-      <Box data-testid="box" p={0}>
+      <Box data-testid="box" p="0">
         Content
       </Box>,
     );
-    expect(screen.getByTestId('box')).toHaveStyle({ padding: '0' });
+    expect(screen.getByTestId('box')).toHaveStyle({ padding: 'var(--perses-spacing-0)' });
   });
 
   it('merges style prop with computed spacing styles', () => {

@@ -220,7 +220,7 @@ export const Responsive: Story = () => (
 Responsive.storyName = 'Combined Props';
 
 export const ZeroSpacing: Story = () => (
-  <Box p={0} style={{ border: '1px solid #ccc' }}>
+  <Box p="0" style={{ border: '1px solid #ccc' }}>
     This box has zero padding (no space inside border).
   </Box>
 );
