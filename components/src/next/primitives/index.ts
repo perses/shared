@@ -15,4 +15,5 @@ export * from './Alert';
 export * from './Button';
 export * from './Divider';
 export * from './Icon';
+export * from './IconButton';
 export * from './Spinner';

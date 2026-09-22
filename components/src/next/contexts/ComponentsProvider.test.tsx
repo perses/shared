@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
-import { forwardRef } from 'react';
+import { createRef, forwardRef } from 'react';
 import type { FC, ReactElement, SVGProps } from 'react';
 
 import type { ButtonProps } from '../primitives';
@@ -74,6 +74,37 @@ describe('ComponentsProvider', () => {
 
     expect(screen.getByTestId('custom-button')).toBeInTheDocument();
     expect(screen.getByText('My Alert')).toBeInTheDocument();
+  });
+
+  it('preserves ref support for primitives when consumed from the provider', () => {
+    const buttonRef = createRef<HTMLButtonElement>();
+    const iconButtonRef = createRef<HTMLButtonElement>();
+    const alertRef = createRef<HTMLDivElement>();
+
+    function TestConsumer(): ReactElement {
+      const {
+        components: { Alert, Button, IconButton },
+      } = useComponents();
+      return (
+        <>
+          <Button ref={buttonRef}>Save</Button>
+          <IconButton ref={iconButtonRef} aria-label="Close">
+            X
+          </IconButton>
+          <Alert ref={alertRef}>Saved</Alert>
+        </>
+      );
+    }
+
+    render(
+      <ComponentsProvider components={components} icons={icons}>
+        <TestConsumer />
+      </ComponentsProvider>,
+    );
+
+    expect(buttonRef.current).toBeInstanceOf(HTMLButtonElement);
+    expect(iconButtonRef.current).toBeInstanceOf(HTMLButtonElement);
+    expect(alertRef.current).toBeInstanceOf(HTMLDivElement);
   });
 
   it('throws when useComponents is called outside provider', () => {

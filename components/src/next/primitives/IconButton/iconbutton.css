@@ -1,0 +1,135 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@layer perses.components {
+  .ps-IconButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid transparent;
+    border-radius: var(--perses-radius-md);
+    cursor: pointer;
+    color: var(--perses-text-secondary);
+    background-color: transparent;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .ps-IconButton:focus-visible {
+    outline: 2px solid var(--perses-status-border-primary);
+    outline-offset: 2px;
+  }
+
+  .ps-IconButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .ps-IconButton[data-color='primary'] {
+    --icon-button-bg: var(--perses-status-solid-primary);
+    --icon-button-bg-hover: var(--perses-status-bg-primary-hover);
+    --icon-button-text: var(--perses-status-solid-primary);
+    --icon-button-border: var(--perses-status-border-primary);
+    --icon-button-bg-subtle: var(--perses-status-bg-primary);
+  }
+
+  .ps-IconButton[data-color='secondary'] {
+    --icon-button-bg: var(--perses-status-solid-secondary);
+    --icon-button-bg-hover: var(--perses-status-bg-secondary-hover);
+    --icon-button-text: var(--perses-status-solid-secondary);
+    --icon-button-border: var(--perses-status-border-secondary);
+    --icon-button-bg-subtle: var(--perses-status-bg-secondary);
+  }
+
+  .ps-IconButton[data-color='error'] {
+    --icon-button-bg: var(--perses-status-solid-error);
+    --icon-button-bg-hover: var(--perses-status-bg-error-hover);
+    --icon-button-text: var(--perses-status-solid-error);
+    --icon-button-border: var(--perses-status-border-error);
+    --icon-button-bg-subtle: var(--perses-status-bg-error);
+  }
+
+  .ps-IconButton[data-color='warning'] {
+    --icon-button-bg: var(--perses-status-solid-warning);
+    --icon-button-bg-hover: var(--perses-status-bg-warning-hover);
+    --icon-button-text: var(--perses-status-solid-warning);
+    --icon-button-border: var(--perses-status-border-warning);
+    --icon-button-bg-subtle: var(--perses-status-bg-warning);
+  }
+
+  .ps-IconButton[data-color='success'] {
+    --icon-button-bg: var(--perses-status-solid-success);
+    --icon-button-bg-hover: var(--perses-status-bg-success-hover);
+    --icon-button-text: var(--perses-status-solid-success);
+    --icon-button-border: var(--perses-status-border-success);
+    --icon-button-bg-subtle: var(--perses-status-bg-success);
+  }
+
+  .ps-IconButton[data-color='info'] {
+    --icon-button-bg: var(--perses-status-solid-info);
+    --icon-button-bg-hover: var(--perses-status-bg-info-hover);
+    --icon-button-text: var(--perses-status-solid-info);
+    --icon-button-border: var(--perses-status-border-info);
+    --icon-button-bg-subtle: var(--perses-status-bg-info);
+  }
+
+  .ps-IconButton[data-size='sm'] {
+    width: 2rem;
+    height: 2rem;
+    font-size: var(--perses-font-size-sm);
+  }
+
+  .ps-IconButton[data-size='md'] {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: var(--perses-font-size-md);
+  }
+
+  .ps-IconButton[data-size='lg'] {
+    width: 3rem;
+    height: 3rem;
+    font-size: var(--perses-font-size-lg);
+  }
+
+  .ps-IconButton[data-variant='solid'] {
+    background-color: var(--icon-button-bg);
+    color: var(--perses-text-on-solid);
+  }
+
+  .ps-IconButton[data-variant='solid']:hover:not(:disabled) {
+    background-color: var(--icon-button-bg-hover);
+  }
+
+  .ps-IconButton[data-variant='outline'] {
+    color: var(--icon-button-text);
+    background-color: transparent;
+    border-color: var(--icon-button-border);
+  }
+
+  .ps-IconButton[data-variant='outline']:hover:not(:disabled) {
+    background-color: var(--icon-button-bg-subtle);
+  }
+
+  .ps-IconButton[data-variant='ghost'] {
+    color: var(--icon-button-text);
+    background-color: transparent;
+    border-color: transparent;
+  }
+
+  .ps-IconButton[data-variant='ghost']:hover:not(:disabled) {
+    background-color: var(--icon-button-bg-subtle);
+  }
+}
