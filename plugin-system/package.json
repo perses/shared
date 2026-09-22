@@ -29,7 +29,7 @@
     "lint:fix": "oxlint --fix src"
   },
   "dependencies": {
-    "@module-federation/enhanced": "^2.9.0",
+    "@module-federation/enhanced": "^2.9.1",
     "@perses-dev/client": "0.55.0-beta.13",
     "@perses-dev/components": "0.55.0-beta.13",
     "@perses-dev/spec": "0.3.0-beta.9",
