@@ -31,9 +31,9 @@ describe('Icon', () => {
     expect(container.firstChild).toHaveClass('ps-Icon');
   });
 
-  it('is hidden from the accessibility tree', () => {
+  it('does not hide its children from the accessibility tree', () => {
     const { container } = render(<Icon>{null}</Icon>);
-    expect(container.firstChild).toHaveAttribute('aria-hidden', 'true');
+    expect(container.firstChild).not.toHaveAttribute('aria-hidden');
   });
 
   it('merges an additional className with ps-Icon', () => {
