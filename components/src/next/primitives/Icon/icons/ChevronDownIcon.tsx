@@ -11,19 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { PersesComponents, PersesIcons } from '../contexts/ComponentsContext';
-import { Alert } from './Alert';
-import { Button } from './Button';
-import { Divider } from './Divider';
-import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons';
-import { IconButton } from './IconButton';
-import { Spinner } from './Spinner';
+/*
+ * SVG path data sourced from Font Awesome Free v7.3.1.
+ * https://fontawesome.com/license/free
+ */
 
-export const defaultComponents: PersesComponents = { Button, IconButton, Alert, Divider, Spinner };
+import { createIcon } from './createIcon';
 
-export const defaultIcons: PersesIcons = {
-  Error: ErrorIcon,
-  Info: InfoIcon,
-  Success: SuccessIcon,
-  Warning: WarningIcon,
-};
+export const ChevronDownIcon = createIcon('ChevronDownIcon', 448, 512, [
+  'M201.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 338.7 54.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z',
+]);

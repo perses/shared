@@ -14,8 +14,8 @@
 import type { Story } from '@ladle/react';
 import type { ComponentType, SVGProps } from 'react';
 
+import * as Icons from '.';
 import { IconButton } from '../../IconButton/IconButton';
-import * as Icons from './FontAwesomeIcons';
 
 const icons = Object.entries(Icons) as Array<[string, ComponentType<SVGProps<SVGSVGElement>>]>;
 const galleryStyle = {

@@ -11,19 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { PersesComponents, PersesIcons } from '../contexts/ComponentsContext';
-import { Alert } from './Alert';
-import { Button } from './Button';
-import { Divider } from './Divider';
-import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons';
-import { IconButton } from './IconButton';
-import { Spinner } from './Spinner';
+/*
+ * SVG path data sourced from Font Awesome Free v7.3.1.
+ * https://fontawesome.com/license/free
+ */
 
-export const defaultComponents: PersesComponents = { Button, IconButton, Alert, Divider, Spinner };
+import { createIcon } from './createIcon';
 
-export const defaultIcons: PersesIcons = {
-  Error: ErrorIcon,
-  Info: InfoIcon,
-  Success: SuccessIcon,
-  Warning: WarningIcon,
-};
+export const PinIcon = createIcon('PinIcon', 384, 512, [
+  'M32 32C32 14.3 46.3 0 64 0L320 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-29.5 0 10.3 134.1c37.1 21.2 65.8 56.4 78.2 99.7l3.8 13.4c2.8 9.7 .8 20-5.2 28.1S362 352 352 352L32 352c-10 0-19.5-4.7-25.5-12.7s-8-18.4-5.2-28.1L5 297.8c12.4-43.3 41-78.5 78.2-99.7L93.5 64 64 64C46.3 64 32 49.7 32 32zM160 400l64 0 0 112c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-112z',
+]);

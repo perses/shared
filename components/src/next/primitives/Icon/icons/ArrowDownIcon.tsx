@@ -11,19 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { PersesComponents, PersesIcons } from '../contexts/ComponentsContext';
-import { Alert } from './Alert';
-import { Button } from './Button';
-import { Divider } from './Divider';
-import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons';
-import { IconButton } from './IconButton';
-import { Spinner } from './Spinner';
+/*
+ * SVG path data sourced from Font Awesome Free v7.3.1.
+ * https://fontawesome.com/license/free
+ */
 
-export const defaultComponents: PersesComponents = { Button, IconButton, Alert, Divider, Spinner };
+import { createIcon } from './createIcon';
 
-export const defaultIcons: PersesIcons = {
-  Error: ErrorIcon,
-  Info: InfoIcon,
-  Success: SuccessIcon,
-  Warning: WarningIcon,
-};
+export const ArrowDownIcon = createIcon('ArrowDownIcon', 384, 512, [
+  'M169.4 502.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 402.7 224 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 370.7-105.4-105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z',
+]);

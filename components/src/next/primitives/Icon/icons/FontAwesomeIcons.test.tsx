@@ -14,15 +14,7 @@
 import { render } from '@testing-library/react';
 import { createRef } from 'react';
 
-import {
-  AccountCircleIcon,
-  AddIcon,
-  ErrorIcon,
-  InfoIcon,
-  SuccessIcon,
-  TrashIcon,
-  WarningIcon,
-} from './FontAwesomeIcons';
+import { AccountCircleIcon, AddIcon, ErrorIcon, InfoIcon, SuccessIcon, TrashIcon, WarningIcon } from '.';
 
 describe('Font Awesome icons', () => {
   it('renders inline SVG path data', () => {
