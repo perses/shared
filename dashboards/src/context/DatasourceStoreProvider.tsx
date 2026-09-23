@@ -17,13 +17,14 @@ import type {
   DatasourceApi,
   DatasourceDefinition,
 } from '@perses-dev/client';
+import { useFetch } from '@perses-dev/client';
 import type {
-  DatasourceStore,
-  DatasourceSelectItemGroup,
   DatasourceClient,
   DatasourceSelectItem,
+  DatasourceSelectItemGroup,
+  DatasourceStore,
 } from '@perses-dev/plugin-system';
-import { DatasourceStoreContext, usePluginRegistry, useEvent } from '@perses-dev/plugin-system';
+import { DatasourceStoreContext, useEvent, usePluginRegistry } from '@perses-dev/plugin-system';
 import type { DashboardSpec, DatasourceSelector, DatasourceSpec } from '@perses-dev/spec';
 import type { ReactElement, ReactNode } from 'react';
 import { useCallback, useMemo, useRef, useState } from 'react';
@@ -127,6 +128,8 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
     [findDatasource],
   );
 
+  const { fetch, fetchJson } = useFetch();
+
   // Given a Datasource selector, finds the spec for it and then uses its corresponding plugin the create a client
   const getDatasourceClient = useCallback(
     async function getClient<Client extends DatasourceClient>(selector: DatasourceSelector): Promise<Client> {
@@ -140,13 +143,13 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
       });
 
       // allows extending client
-      const client = plugin.createClient(spec.plugin.spec, { proxyUrl }) as Client;
+      const client = plugin.createClient(spec.plugin.spec, { proxyUrl, fetch, fetchJson }) as Client;
       if (onCreate !== undefined) {
         return onCreate(client) as Client;
       }
       return client;
     },
-    [findDatasource, getPlugin, onCreate],
+    [findDatasource, getPlugin, onCreate, fetch, fetchJson],
   );
 
   const listDatasourceSelectItems = useEvent(

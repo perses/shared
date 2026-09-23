@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { fetch, fetchJson } from '@perses-dev/client';
 import type { BuiltinVariableDefinition, UnknownSpec } from '@perses-dev/spec';
 
 import type { OptionsEditorProps, Plugin } from './plugin-base';
@@ -31,6 +32,8 @@ export interface DatasourcePlugin<
 
 export interface DatasourceClientOptions {
   proxyUrl?: string;
+  fetch?: typeof fetch;
+  fetchJson?: typeof fetchJson;
 }
 
 /**

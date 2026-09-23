@@ -11,10 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { DashboardResource, Datasource, DatasourceResource, GlobalDatasourceResource } from '@perses-dev/client';
+import type {
+  DashboardResource,
+  Datasource,
+  DatasourceResource,
+  FetchFn,
+  GlobalDatasourceResource,
+} from '@perses-dev/client';
+import { FetchProvider } from '@perses-dev/client';
 import { DatasourceStoreProvider } from '@perses-dev/dashboards';
 import type { DatasourcePlugin, DatasourceSelectItemGroup, MockPlugin } from '@perses-dev/plugin-system';
-import { mockPluginRegistry, PluginRegistry, useListDatasourceSelectItems } from '@perses-dev/plugin-system';
+import {
+  mockPluginRegistry,
+  PluginRegistry,
+  useDatasourceClient,
+  useListDatasourceSelectItems,
+} from '@perses-dev/plugin-system';
 import type { DashboardSpec, DatasourceSpec, UnknownSpec } from '@perses-dev/spec';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react';
@@ -495,5 +507,51 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
 
     await waitFor(() => expect(result.current.data).toBeDefined());
     expect(result.current.data).toEqual(data.expected.result);
+  });
+});
+
+describe('DatasourceStoreProvider::useDatasourceClient', () => {
+  test('passes fetch and fetchJson from the fetch provider to createClient', async () => {
+    const createClient = vi.fn().mockReturnValue({});
+    const plugin: MockPlugin = {
+      kind: 'Datasource',
+      spec: { name: FAKE_PLUGIN_NAME },
+      plugin: { ...FakeDataSourcePlugin, createClient },
+    };
+    const customFetch: FetchFn = vi.fn();
+    const datasourceApiMock = {
+      buildProxyUrl: vi.fn().mockReturnValue('http://proxy'),
+      getDatasource: vi.fn().mockReturnValue(Promise.resolve(undefined)),
+      getGlobalDatasource: vi
+        .fn()
+        .mockReturnValue(Promise.resolve(definedGlobally({ name: 'datasourceA', default: true }))),
+      listDatasources: vi.fn().mockReturnValue(Promise.resolve([])),
+      listGlobalDatasources: vi.fn().mockReturnValue(Promise.resolve([])),
+    };
+    const queryClient = new QueryClient();
+    const wrapper = ({ children }: PropsWithChildren): ReactElement => {
+      return (
+        <PluginRegistry {...mockPluginRegistry(plugin)}>
+          <QueryClientProvider client={queryClient}>
+            <FetchProvider fetchFn={customFetch}>
+              <DatasourceStoreProvider datasourceApi={datasourceApiMock}>{children}</DatasourceStoreProvider>
+            </FetchProvider>
+          </QueryClientProvider>
+        </PluginRegistry>
+      );
+    };
+    renderHook(() => useDatasourceClient({ kind: FAKE_PLUGIN_NAME, name: 'datasourceA' }), {
+      wrapper,
+    });
+
+    await waitFor(() => expect(createClient).toHaveBeenCalled());
+    expect(createClient).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        proxyUrl: 'http://proxy',
+        fetch: customFetch,
+        fetchJson: expect.any(Function),
+      }),
+    );
   });
 });
