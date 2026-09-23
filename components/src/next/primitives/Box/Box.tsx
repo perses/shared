@@ -15,7 +15,7 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 import type { CSSProperties, HTMLAttributes } from 'react';
 
-import { axisSpacing, resolveSpacing } from '../system/spacing';
+import { spacingClassName } from '../system/spacing';
 import type { SpacingToken } from '../system/spacing';
 
 import './box.css';
@@ -77,23 +77,25 @@ export const Box = forwardRef<HTMLDivElement, BoxProps>(function Box(
   if (height !== undefined) computedStyle.height = height;
   if (overflow !== undefined) computedStyle.overflow = overflow;
 
-  const padding = resolveSpacing(p);
-  if (padding !== undefined) computedStyle.padding = padding;
-  const margin = resolveSpacing(m);
-  if (margin !== undefined) computedStyle.margin = margin;
-  const gapValue = resolveSpacing(gap);
-  if (gapValue !== undefined) computedStyle.gap = gapValue;
-
-  Object.assign(computedStyle, {
-    ...axisSpacing(px, ['paddingLeft', 'paddingRight']),
-    ...axisSpacing(py, ['paddingTop', 'paddingBottom']),
-    ...axisSpacing(mx, ['marginLeft', 'marginRight']),
-    ...axisSpacing(my, ['marginTop', 'marginBottom']),
-    ...style,
-  });
+  Object.assign(computedStyle, style);
 
   return (
-    <div ref={ref} {...rest} className={clsx('ps-Box', className)} style={computedStyle}>
+    <div
+      ref={ref}
+      {...rest}
+      className={clsx(
+        'ps-Box',
+        spacingClassName('p', p),
+        spacingClassName('px', px),
+        spacingClassName('py', py),
+        spacingClassName('m', m),
+        spacingClassName('mx', mx),
+        spacingClassName('my', my),
+        spacingClassName('gap', gap),
+        className,
+      )}
+      style={computedStyle}
+    >
       {children}
     </div>
   );

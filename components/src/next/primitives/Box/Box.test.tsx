@@ -50,24 +50,23 @@ describe('Box', () => {
     expect(screen.getByTestId('box')).toHaveStyle({ display: 'flex' });
   });
 
-  it('resolves spacing tokens to CSS variables for padding', () => {
+  it('applies a spacing class for padding', () => {
     render(
       <Box data-testid="box" p="md">
         Content
       </Box>,
     );
-    expect(screen.getByTestId('box')).toHaveStyle({ padding: 'var(--perses-spacing-md)' });
+    expect(screen.getByTestId('box')).toHaveClass('ps-spacing-p-md');
   });
 
-  it('resolves directional spacing shorthands', () => {
+  it('applies spacing classes for directional shorthands', () => {
     render(
       <Box data-testid="box" px="lg" py="sm">
         Content
       </Box>,
     );
     const box = screen.getByTestId('box');
-    expect(box).toHaveStyle({ paddingLeft: 'var(--perses-spacing-lg)', paddingRight: 'var(--perses-spacing-lg)' });
-    expect(box).toHaveStyle({ paddingTop: 'var(--perses-spacing-sm)', paddingBottom: 'var(--perses-spacing-sm)' });
+    expect(box).toHaveClass('ps-spacing-px-lg', 'ps-spacing-py-sm');
   });
 
   it('resolves margin tokens', () => {
@@ -76,7 +75,7 @@ describe('Box', () => {
         Content
       </Box>,
     );
-    expect(screen.getByTestId('box')).toHaveStyle({ margin: 'var(--perses-spacing-xl)' });
+    expect(screen.getByTestId('box')).toHaveClass('ps-spacing-m-xl');
   });
 
   it('resolves the 0 spacing token through the design token', () => {
@@ -85,25 +84,27 @@ describe('Box', () => {
         Content
       </Box>,
     );
-    expect(screen.getByTestId('box')).toHaveStyle({ padding: 'var(--perses-spacing-0)' });
+    expect(screen.getByTestId('box')).toHaveClass('ps-spacing-p-0');
   });
 
-  it('merges style prop with computed spacing styles', () => {
+  it('merges style prop with computed styles', () => {
     render(
       <Box data-testid="box" p="sm" style={{ color: 'red' }}>
         Content
       </Box>,
     );
     const box = screen.getByTestId('box');
-    expect(box).toHaveStyle({ padding: 'var(--perses-spacing-sm)', color: 'rgb(255, 0, 0)' });
+    expect(box).toHaveClass('ps-spacing-p-sm');
+    expect(box).toHaveStyle({ color: 'rgb(255, 0, 0)' });
   });
 
-  it('lets the style prop override a computed spacing prop', () => {
+  it('lets the style prop override a spacing class', () => {
     render(
       <Box data-testid="box" p="md" style={{ padding: '99px' }}>
         Content
       </Box>,
     );
+    expect(screen.getByTestId('box')).toHaveClass('ps-spacing-p-md');
     expect(screen.getByTestId('box')).toHaveStyle({ padding: '99px' });
   });
 

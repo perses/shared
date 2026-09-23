@@ -11,20 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { tokens } from '@perses-dev/design-tokens';
 import type { SpacingScale } from '@perses-dev/design-tokens';
-import type { CSSProperties } from 'react';
-
 export type SpacingToken = SpacingScale;
 
-export function resolveSpacing(token?: SpacingToken): string | undefined {
-  return token === undefined ? undefined : tokens.spacing[token];
-}
+export type SpacingProperty = 'p' | 'px' | 'py' | 'm' | 'mx' | 'my' | 'gap';
 
-export function axisSpacing(
-  token: SpacingToken | undefined,
-  [start, end]: readonly [keyof CSSProperties, keyof CSSProperties],
-): CSSProperties {
-  const value = resolveSpacing(token);
-  return value === undefined ? {} : { [start]: value, [end]: value };
+export function spacingClassName(property: SpacingProperty, token?: SpacingToken): string | undefined {
+  return token === undefined ? undefined : `ps-spacing-${property}-${token}`;
 }
