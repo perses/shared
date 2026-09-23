@@ -16,7 +16,7 @@ import { Alert } from './Alert';
 import { Box } from './Box';
 import { Button } from './Button';
 import { Divider } from './Divider';
-import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons/FontAwesomeIcons';
+import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons';
 import { IconButton } from './IconButton';
 import { Spinner } from './Spinner';
 

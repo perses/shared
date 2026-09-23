@@ -18,7 +18,7 @@ import type { ComponentType, HTMLAttributes, ReactElement, ReactNode, SVGProps }
 import type { PersesIcons } from '../../contexts/ComponentsContext';
 import { useComponents } from '../../contexts/ComponentsProvider';
 import { Icon } from '../Icon/Icon';
-import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../Icon/icons/FontAwesomeIcons';
+import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../Icon/icons';
 
 import './alert.css';
 
