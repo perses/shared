@@ -12,16 +12,19 @@
 // limitations under the License.
 
 import { createContext } from 'react';
-import type { ComponentType, ReactNode, SVGProps } from 'react';
+import type { ComponentType, ReactNode, RefAttributes, SVGProps } from 'react';
 
 import type { AlertProps } from '../primitives/Alert';
 import type { ButtonProps } from '../primitives/Button';
 import type { SpinnerProps } from '../primitives/Spinner';
+import type { StackProps } from '../primitives/Stack';
 
 export interface PersesComponents {
   Button: ComponentType<ButtonProps>;
   Alert: ComponentType<AlertProps>;
   Spinner: ComponentType<SpinnerProps>;
+  Box: ComponentType<BoxProps & RefAttributes<HTMLDivElement>>;
+  Stack: ComponentType<StackProps>;
 }
 
 export interface PersesIcons {
