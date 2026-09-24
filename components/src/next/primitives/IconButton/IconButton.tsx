@@ -20,7 +20,8 @@ import type { ButtonColor, ButtonSize, ButtonVariant } from '../Button/Button';
 
 import './iconbutton.css';
 
-export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'color'> {
+export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'aria-label' | 'color'> {
+  'aria-label': string;
   variant?: ButtonVariant;
   color?: ButtonColor;
   size?: ButtonSize;
@@ -34,7 +35,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(functio
     <BaseButton
       {...rest}
       ref={ref}
-      className={clsx('ps-IconButton', className)}
+      className={clsx('ps-ButtonBase', 'ps-IconButton', className)}
       data-variant={variant}
       data-color={color}
       data-size={size}

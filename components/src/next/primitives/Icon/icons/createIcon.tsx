@@ -17,6 +17,8 @@ import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from 'react';
 export type IconComponent = ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>>;
 
 export function createIcon(name: string, width: number, height: number, paths: string[]): IconComponent {
+  const iconPaths = paths.map((path, index) => ({ key: `${name}-${index}`, path }));
+
   const Component = forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(function FontAwesomeIcon(props, ref) {
     return (
       <svg
@@ -29,8 +31,8 @@ export function createIcon(name: string, width: number, height: number, paths: s
         focusable="false"
         {...props}
       >
-        {paths.map((path) => (
-          <path key={path} d={path} />
+        {iconPaths.map(({ key, path }) => (
+          <path key={key} d={path} />
         ))}
       </svg>
     );

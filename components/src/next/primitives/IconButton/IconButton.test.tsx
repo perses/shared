@@ -22,9 +22,11 @@ describe('IconButton', () => {
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument();
   });
 
-  it('applies the ps-IconButton class', () => {
+  it('applies the button classes', () => {
     render(<IconButton aria-label="Close">X</IconButton>);
-    expect(screen.getByRole('button')).toHaveClass('ps-IconButton');
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('ps-ButtonBase');
+    expect(button).toHaveClass('ps-IconButton');
   });
 
   it('uses default variant, color, and size', () => {
