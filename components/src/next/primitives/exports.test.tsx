@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Button, Divider, Icon, Spinner } from './index';
+import { Alert, Button, Chip, Divider, Icon, Spinner } from './index';
 import type {
   AlertProps,
   AlertSeverity,
@@ -19,6 +19,10 @@ import type {
   ButtonProps,
   ButtonSize,
   ButtonVariant,
+  ChipColor,
+  ChipProps,
+  ChipSize,
+  ChipVariant,
   DividerProps,
   IconProps,
   SpinnerProps,
@@ -28,6 +32,7 @@ describe('primitives barrel exports', () => {
   it('exports the concrete component implementations', () => {
     expect(Alert).toBeDefined();
     expect(Button).toBeDefined();
+    expect(Chip).toBeDefined();
     expect(Divider).toBeDefined();
     expect(Icon).toBeDefined();
     expect(Spinner).toBeDefined();
@@ -40,6 +45,10 @@ describe('primitives barrel exports', () => {
     const variant: ButtonVariant = 'solid';
     const color: ButtonColor = 'primary';
     const size: ButtonSize = 'md';
+    const chipProps: ChipProps = { label: 'Production' };
+    const chipColor: ChipColor = 'success';
+    const chipSize: ChipSize = 'small';
+    const chipVariant: ChipVariant = 'outlined';
     const dividerProps: DividerProps = {};
     const iconProps: IconProps = {};
     const spinnerProps: SpinnerProps = {};
@@ -50,6 +59,10 @@ describe('primitives barrel exports', () => {
     expect(variant).toBe('solid');
     expect(color).toBe('primary');
     expect(size).toBe('md');
+    expect(chipProps).toBeDefined();
+    expect(chipColor).toBe('success');
+    expect(chipSize).toBe('small');
+    expect(chipVariant).toBe('outlined');
     expect(dividerProps).toBeDefined();
     expect(iconProps).toBeDefined();
     expect(spinnerProps).toBeDefined();
