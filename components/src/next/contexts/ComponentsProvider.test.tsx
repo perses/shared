@@ -15,7 +15,7 @@ import { render, screen } from '@testing-library/react';
 import { forwardRef } from 'react';
 import type { FC, ReactElement, SVGProps } from 'react';
 
-import type { ButtonProps } from '../primitives';
+import type { ButtonProps, ChipProps } from '../primitives';
 import { defaultComponents, defaultIcons } from '../primitives/defaults';
 import { ComponentsProvider, useComponents } from './ComponentsProvider';
 import type { ComponentsContextValue, PersesComponents } from './ComponentsProvider';
@@ -74,6 +74,30 @@ describe('ComponentsProvider', () => {
 
     expect(screen.getByTestId('custom-button')).toBeInTheDocument();
     expect(screen.getByText('My Alert')).toBeInTheDocument();
+  });
+
+  it('supports overriding Chip', () => {
+    const CustomChip = forwardRef<HTMLDivElement, ChipProps>(function CustomChip({ label, ...rest }, ref) {
+      return (
+        <div ref={ref} {...rest} data-testid="custom-chip">
+          Custom: {label}
+        </div>
+      );
+    });
+
+    function TestConsumer(): ReactElement {
+      const { components } = useComponents();
+      const { Chip } = components;
+      return <Chip label="Production" />;
+    }
+
+    render(
+      <ComponentsProvider components={{ ...components, Chip: CustomChip }} icons={icons}>
+        <TestConsumer />
+      </ComponentsProvider>,
+    );
+
+    expect(screen.getByTestId('custom-chip')).toHaveTextContent('Custom: Production');
   });
 
   it('throws when useComponents is called outside provider', () => {
