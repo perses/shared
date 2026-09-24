@@ -13,35 +13,29 @@
  * limitations under the License.
  */
 
-@import './buttonBase.css';
+@import '../Button/buttonBase.css';
 
 @layer perses.components {
-  .ps-Button {
-    gap: var(--perses-spacing-xs);
-    font-family: var(--perses-font-family);
-    font-weight: var(--perses-font-weight-medium);
-    line-height: var(--perses-line-height-relaxed);
+  .ps-IconButton {
+    color: var(--perses-text-secondary);
+    background-color: transparent;
   }
 
-  /* ---- Sizes ---- */
-  .ps-Button[data-size='sm'] {
-    padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
-    font-size: var(--perses-font-size-xs);
-  }
-
-  .ps-Button[data-size='md'] {
-    padding: var(--perses-spacing-sm) var(--perses-spacing-lg);
+  .ps-IconButton[data-size='sm'] {
+    width: 2rem;
+    height: 2rem;
     font-size: var(--perses-font-size-sm);
   }
 
-  .ps-Button[data-size='lg'] {
-    padding: var(--perses-spacing-md) var(--perses-spacing-xl);
+  .ps-IconButton[data-size='md'] {
+    width: 2.5rem;
+    height: 2.5rem;
     font-size: var(--perses-font-size-md);
   }
 
-  /* ---- Loading state ---- */
-  .ps-Button[data-loading]:disabled {
-    opacity: 1;
-    cursor: wait;
+  .ps-IconButton[data-size='lg'] {
+    width: 3rem;
+    height: 3rem;
+    font-size: var(--perses-font-size-lg);
   }
 }

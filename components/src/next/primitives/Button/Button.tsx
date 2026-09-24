@@ -39,7 +39,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const {
     components: { Spinner },
   } = useComponents();
-  const classes = clsx('ps-Button', className);
+  const classes = clsx('ps-ButtonBase', 'ps-Button', className);
   const isDisabled = disabled || loading;
 
   return (
