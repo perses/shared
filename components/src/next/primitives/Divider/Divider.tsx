@@ -11,8 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './Alert';
-export * from './Button';
-export * from './Divider';
-export * from './Icon';
-export * from './Spinner';
+import { Separator as BaseSeparator } from '@base-ui/react/separator';
+import clsx from 'clsx';
+import type { ReactElement } from 'react';
+
+import './divider.css';
+
+export interface DividerProps {
+  orientation?: 'horizontal' | 'vertical';
+  className?: string;
+}
+
+export function Divider({ orientation = 'horizontal', className }: DividerProps): ReactElement {
+  return <BaseSeparator orientation={orientation} className={clsx('ps-Divider', className)} />;
+}

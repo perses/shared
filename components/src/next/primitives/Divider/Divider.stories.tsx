@@ -11,8 +11,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './Alert';
-export * from './Button';
-export * from './Divider';
-export * from './Icon';
-export * from './Spinner';
+import type { Story } from '@ladle/react';
+
+import { Divider } from './Divider';
+
+export const Horizontal: Story = () => (
+  <div style={{ width: '20rem' }}>
+    <span>Content above the divider</span>
+    <Divider />
+    <span>Content below the divider</span>
+  </div>
+);
+
+export const Vertical: Story = () => (
+  <div style={{ display: 'flex', height: '5rem', alignItems: 'center' }}>
+    <span>Content on the left</span>
+    <Divider orientation="vertical" />
+    <span>Content on the right</span>
+  </div>
+);
