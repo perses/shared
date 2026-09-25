@@ -19,7 +19,6 @@ import { Divider } from './Divider';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon';
 import { Spinner } from './Spinner';
 
-<<<<<<< HEAD
 export const defaultComponents: PersesComponents = { Button, Alert, Box, Divider, Spinner };
 
 export const defaultIcons: PersesIcons = {

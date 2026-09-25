@@ -15,30 +15,35 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 import type { CSSProperties, HTMLAttributes } from 'react';
 
-import { spacingClassName } from '../system/spacing';
+import { responsiveClassName, responsiveStyle } from '../system/responsive';
+import type { Responsive } from '../system/responsive';
+import { responsiveSpacingStyle, spacingClassName } from '../system/spacing';
 import type { SpacingToken } from '../system/spacing';
 
 import './box.css';
+import '../system/responsive.css';
+import '../system/spacing.css';
 
 export type { SpacingToken } from '../system/spacing';
+export type { Breakpoint, Responsive, ResponsiveObject } from '../system/responsive';
 
 export interface BoxProps extends HTMLAttributes<HTMLDivElement> {
-  display?: CSSProperties['display'];
-  p?: SpacingToken;
-  px?: SpacingToken;
-  py?: SpacingToken;
-  m?: SpacingToken;
-  mx?: SpacingToken;
-  my?: SpacingToken;
-  gap?: SpacingToken;
-  flexDirection?: CSSProperties['flexDirection'];
-  alignItems?: CSSProperties['alignItems'];
-  justifyContent?: CSSProperties['justifyContent'];
-  flexWrap?: CSSProperties['flexWrap'];
-  flex?: CSSProperties['flex'];
-  width?: CSSProperties['width'];
-  height?: CSSProperties['height'];
-  overflow?: CSSProperties['overflow'];
+  display?: Responsive<CSSProperties['display']>;
+  p?: Responsive<SpacingToken>;
+  px?: Responsive<SpacingToken>;
+  py?: Responsive<SpacingToken>;
+  m?: Responsive<SpacingToken>;
+  mx?: Responsive<SpacingToken>;
+  my?: Responsive<SpacingToken>;
+  gap?: Responsive<SpacingToken>;
+  flexDirection?: Responsive<CSSProperties['flexDirection']>;
+  alignItems?: Responsive<CSSProperties['alignItems']>;
+  justifyContent?: Responsive<CSSProperties['justifyContent']>;
+  flexWrap?: Responsive<CSSProperties['flexWrap']>;
+  flex?: Responsive<CSSProperties['flex']>;
+  width?: Responsive<CSSProperties['width']>;
+  height?: Responsive<CSSProperties['height']>;
+  overflow?: Responsive<CSSProperties['overflow']>;
 }
 
 export const Box = forwardRef<HTMLDivElement, BoxProps>(function Box(
@@ -67,17 +72,36 @@ export const Box = forwardRef<HTMLDivElement, BoxProps>(function Box(
   ref,
 ) {
   const computedStyle: CSSProperties = {};
-  if (display !== undefined) computedStyle.display = display;
-  if (flexDirection !== undefined) computedStyle.flexDirection = flexDirection;
-  if (alignItems !== undefined) computedStyle.alignItems = alignItems;
-  if (justifyContent !== undefined) computedStyle.justifyContent = justifyContent;
-  if (flexWrap !== undefined) computedStyle.flexWrap = flexWrap;
-  if (flex !== undefined) computedStyle.flex = flex;
-  if (width !== undefined) computedStyle.width = width;
-  if (height !== undefined) computedStyle.height = height;
-  if (overflow !== undefined) computedStyle.overflow = overflow;
+  if (typeof display !== 'object') computedStyle.display = display;
+  if (typeof flexDirection !== 'object') computedStyle.flexDirection = flexDirection;
+  if (typeof alignItems !== 'object') computedStyle.alignItems = alignItems;
+  if (typeof justifyContent !== 'object') computedStyle.justifyContent = justifyContent;
+  if (typeof flexWrap !== 'object') computedStyle.flexWrap = flexWrap;
+  if (typeof flex !== 'object') computedStyle.flex = flex;
+  if (typeof width !== 'object') computedStyle.width = width;
+  if (typeof height !== 'object') computedStyle.height = height;
+  if (typeof overflow !== 'object') computedStyle.overflow = overflow;
 
-  Object.assign(computedStyle, style);
+  Object.assign(
+    computedStyle,
+    responsiveStyle('display', display),
+    responsiveStyle('flex-direction', flexDirection),
+    responsiveStyle('align-items', alignItems),
+    responsiveStyle('justify-content', justifyContent),
+    responsiveStyle('flex-wrap', flexWrap),
+    responsiveStyle('flex', flex),
+    responsiveStyle('width', width),
+    responsiveStyle('height', height),
+    responsiveStyle('overflow', overflow),
+    responsiveSpacingStyle('p', p),
+    responsiveSpacingStyle('px', px),
+    responsiveSpacingStyle('py', py),
+    responsiveSpacingStyle('m', m),
+    responsiveSpacingStyle('mx', mx),
+    responsiveSpacingStyle('my', my),
+    responsiveSpacingStyle('gap', gap),
+    style,
+  );
 
   return (
     <div
@@ -92,6 +116,15 @@ export const Box = forwardRef<HTMLDivElement, BoxProps>(function Box(
         spacingClassName('mx', mx),
         spacingClassName('my', my),
         spacingClassName('gap', gap),
+        responsiveClassName('display', display),
+        responsiveClassName('flex-direction', flexDirection),
+        responsiveClassName('align-items', alignItems),
+        responsiveClassName('justify-content', justifyContent),
+        responsiveClassName('flex-wrap', flexWrap),
+        responsiveClassName('flex', flex),
+        responsiveClassName('width', width),
+        responsiveClassName('height', height),
+        responsiveClassName('overflow', overflow),
         className,
       )}
       style={computedStyle}

@@ -32,6 +32,7 @@
       "require": "./dist/cjs/next/primitives/index.js"
     },
     "./next/css": "./dist/next/css/index.css",
+    "./next/primitives/system/spacing.css": "./dist/next/primitives/system/spacing.css",
     "./next/primitives/defaults": {
       "types": "./dist/next/primitives/defaults.d.ts",
       "import": "./dist/next/primitives/defaults.js",

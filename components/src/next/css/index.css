@@ -14,3 +14,6 @@
  */
 
 @layer perses.reset, perses.tokens, perses.semantic, perses.components;
+
+@import '../primitives/system/responsive.css';
+@import '../primitives/system/spacing.css';

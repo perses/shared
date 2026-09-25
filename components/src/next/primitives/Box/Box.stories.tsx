@@ -180,10 +180,10 @@ export const Responsive: Story = () => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
     <h3>Combining Multiple Props</h3>
     <Box
-      display="flex"
+      display={{ default: 'flex', xs: 'block' }}
       flexDirection="column"
       gap="lg"
-      p="lg"
+      p={{ default: 'lg', xs: 'sm' }}
       m="md"
       style={{
         border: '2px solid #0066cc',

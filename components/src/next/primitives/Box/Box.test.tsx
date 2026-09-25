@@ -87,6 +87,29 @@ describe('Box', () => {
     expect(screen.getByTestId('box')).toHaveClass('ps-spacing-p-0');
   });
 
+  it('creates responsive spacing variables', () => {
+    render(
+      <Box data-testid="box" p={{ default: 'lg', xs: 'sm' }}>
+        Content
+      </Box>,
+    );
+    const box = screen.getByTestId('box');
+    expect(box).toHaveClass('ps-spacing-p');
+    expect(box).toHaveStyle({ '--ps-spacing-p-default': 'var(--perses-spacing-lg)' });
+    expect(box).toHaveStyle({ '--ps-spacing-p-xs': 'var(--perses-spacing-sm)' });
+  });
+
+  it('creates responsive layout variables', () => {
+    render(
+      <Box data-testid="box" display={{ default: 'flex', sm: 'block' }}>
+        Content
+      </Box>,
+    );
+    const box = screen.getByTestId('box');
+    expect(box).toHaveClass('ps-responsive-display');
+    expect(box).toHaveStyle({ '--ps-box-display-default': 'flex', '--ps-box-display-sm': 'block' });
+  });
+
   it('merges style prop with computed styles', () => {
     render(
       <Box data-testid="box" p="sm" style={{ color: 'red' }}>

@@ -12,10 +12,30 @@
 // limitations under the License.
 
 import type { SpacingScale } from '@perses-dev/design-tokens';
+import type { CSSProperties } from 'react';
+
+import { isResponsiveValue } from './responsive';
+import type { Responsive } from './responsive';
+
 export type SpacingToken = SpacingScale;
 
 export type SpacingProperty = 'p' | 'px' | 'py' | 'm' | 'mx' | 'my' | 'gap';
 
-export function spacingClassName(property: SpacingProperty, token?: SpacingToken): string | undefined {
-  return token === undefined ? undefined : `ps-spacing-${property}-${token}`;
+export function spacingClassName(property: SpacingProperty, value?: Responsive<SpacingToken>): string | undefined {
+  if (value === undefined) return undefined;
+  return isResponsiveValue(value) ? `ps-spacing-${property}` : `ps-spacing-${property} ps-spacing-${property}-${value}`;
+}
+
+export function responsiveSpacingStyle(
+  property: SpacingProperty,
+  value?: Responsive<SpacingToken>,
+): CSSProperties | undefined {
+  if (!isResponsiveValue(value)) return undefined;
+
+  return Object.fromEntries(
+    Object.entries(value).map(([breakpoint, token]) => [
+      `--ps-spacing-${property}-${breakpoint}`,
+      `var(--perses-spacing-${token})`,
+    ]),
+  ) as CSSProperties;
 }

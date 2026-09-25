@@ -1,0 +1,426 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@layer perses.components {
+  .ps-spacing-p {
+    padding: var(--ps-spacing-p-default, initial);
+  }
+  .ps-spacing-px {
+    padding-inline: var(--ps-spacing-px-default, initial);
+  }
+  .ps-spacing-py {
+    padding-block: var(--ps-spacing-py-default, initial);
+  }
+  .ps-spacing-m {
+    margin: var(--ps-spacing-m-default, initial);
+  }
+  .ps-spacing-mx {
+    margin-inline: var(--ps-spacing-mx-default, initial);
+  }
+  .ps-spacing-my {
+    margin-block: var(--ps-spacing-my-default, initial);
+  }
+  .ps-spacing-gap {
+    gap: var(--ps-spacing-gap-default, initial);
+  }
+
+  .ps-spacing-p-0,
+  .ps-spacing-px-0,
+  .ps-spacing-py-0,
+  .ps-spacing-m-0,
+  .ps-spacing-mx-0,
+  .ps-spacing-my-0,
+  .ps-spacing-gap-0 {
+    --ps-spacing-value-0: var(--perses-spacing-0);
+  }
+  .ps-spacing-p-xs,
+  .ps-spacing-px-xs,
+  .ps-spacing-py-xs,
+  .ps-spacing-m-xs,
+  .ps-spacing-mx-xs,
+  .ps-spacing-my-xs,
+  .ps-spacing-gap-xs {
+    --ps-spacing-value-xs: var(--perses-spacing-xs);
+  }
+  .ps-spacing-p-sm,
+  .ps-spacing-px-sm,
+  .ps-spacing-py-sm,
+  .ps-spacing-m-sm,
+  .ps-spacing-mx-sm,
+  .ps-spacing-my-sm,
+  .ps-spacing-gap-sm {
+    --ps-spacing-value-sm: var(--perses-spacing-sm);
+  }
+  .ps-spacing-p-md,
+  .ps-spacing-px-md,
+  .ps-spacing-py-md,
+  .ps-spacing-m-md,
+  .ps-spacing-mx-md,
+  .ps-spacing-my-md,
+  .ps-spacing-gap-md {
+    --ps-spacing-value-md: var(--perses-spacing-md);
+  }
+  .ps-spacing-p-lg,
+  .ps-spacing-px-lg,
+  .ps-spacing-py-lg,
+  .ps-spacing-m-lg,
+  .ps-spacing-mx-lg,
+  .ps-spacing-my-lg,
+  .ps-spacing-gap-lg {
+    --ps-spacing-value-lg: var(--perses-spacing-lg);
+  }
+  .ps-spacing-p-xl,
+  .ps-spacing-px-xl,
+  .ps-spacing-py-xl,
+  .ps-spacing-m-xl,
+  .ps-spacing-mx-xl,
+  .ps-spacing-my-xl,
+  .ps-spacing-gap-xl {
+    --ps-spacing-value-xl: var(--perses-spacing-xl);
+  }
+  .ps-spacing-p-2xl,
+  .ps-spacing-px-2xl,
+  .ps-spacing-py-2xl,
+  .ps-spacing-m-2xl,
+  .ps-spacing-mx-2xl,
+  .ps-spacing-my-2xl,
+  .ps-spacing-gap-2xl {
+    --ps-spacing-value-2xl: var(--perses-spacing-2xl);
+  }
+  .ps-spacing-p-3xl,
+  .ps-spacing-px-3xl,
+  .ps-spacing-py-3xl,
+  .ps-spacing-m-3xl,
+  .ps-spacing-mx-3xl,
+  .ps-spacing-my-3xl,
+  .ps-spacing-gap-3xl {
+    --ps-spacing-value-3xl: var(--perses-spacing-3xl);
+  }
+  .ps-spacing-p-4xl,
+  .ps-spacing-px-4xl,
+  .ps-spacing-py-4xl,
+  .ps-spacing-m-4xl,
+  .ps-spacing-mx-4xl,
+  .ps-spacing-my-4xl,
+  .ps-spacing-gap-4xl {
+    --ps-spacing-value-4xl: var(--perses-spacing-4xl);
+  }
+
+  .ps-spacing-p-0 {
+    --ps-spacing-p-default: var(--ps-spacing-value-0);
+  }
+  .ps-spacing-p-xs {
+    --ps-spacing-p-default: var(--ps-spacing-value-xs);
+  }
+  .ps-spacing-p-sm {
+    --ps-spacing-p-default: var(--ps-spacing-value-sm);
+  }
+  .ps-spacing-p-md {
+    --ps-spacing-p-default: var(--ps-spacing-value-md);
+  }
+  .ps-spacing-p-lg {
+    --ps-spacing-p-default: var(--ps-spacing-value-lg);
+  }
+  .ps-spacing-p-xl {
+    --ps-spacing-p-default: var(--ps-spacing-value-xl);
+  }
+  .ps-spacing-p-2xl {
+    --ps-spacing-p-default: var(--ps-spacing-value-2xl);
+  }
+  .ps-spacing-p-3xl {
+    --ps-spacing-p-default: var(--ps-spacing-value-3xl);
+  }
+  .ps-spacing-p-4xl {
+    --ps-spacing-p-default: var(--ps-spacing-value-4xl);
+  }
+  .ps-spacing-px-0 {
+    --ps-spacing-px-default: var(--ps-spacing-value-0);
+  }
+  .ps-spacing-px-xs {
+    --ps-spacing-px-default: var(--ps-spacing-value-xs);
+  }
+  .ps-spacing-px-sm {
+    --ps-spacing-px-default: var(--ps-spacing-value-sm);
+  }
+  .ps-spacing-px-md {
+    --ps-spacing-px-default: var(--ps-spacing-value-md);
+  }
+  .ps-spacing-px-lg {
+    --ps-spacing-px-default: var(--ps-spacing-value-lg);
+  }
+  .ps-spacing-px-xl {
+    --ps-spacing-px-default: var(--ps-spacing-value-xl);
+  }
+  .ps-spacing-px-2xl {
+    --ps-spacing-px-default: var(--ps-spacing-value-2xl);
+  }
+  .ps-spacing-px-3xl {
+    --ps-spacing-px-default: var(--ps-spacing-value-3xl);
+  }
+  .ps-spacing-px-4xl {
+    --ps-spacing-px-default: var(--ps-spacing-value-4xl);
+  }
+  .ps-spacing-py-0 {
+    --ps-spacing-py-default: var(--ps-spacing-value-0);
+  }
+  .ps-spacing-py-xs {
+    --ps-spacing-py-default: var(--ps-spacing-value-xs);
+  }
+  .ps-spacing-py-sm {
+    --ps-spacing-py-default: var(--ps-spacing-value-sm);
+  }
+  .ps-spacing-py-md {
+    --ps-spacing-py-default: var(--ps-spacing-value-md);
+  }
+  .ps-spacing-py-lg {
+    --ps-spacing-py-default: var(--ps-spacing-value-lg);
+  }
+  .ps-spacing-py-xl {
+    --ps-spacing-py-default: var(--ps-spacing-value-xl);
+  }
+  .ps-spacing-py-2xl {
+    --ps-spacing-py-default: var(--ps-spacing-value-2xl);
+  }
+  .ps-spacing-py-3xl {
+    --ps-spacing-py-default: var(--ps-spacing-value-3xl);
+  }
+  .ps-spacing-py-4xl {
+    --ps-spacing-py-default: var(--ps-spacing-value-4xl);
+  }
+  .ps-spacing-m-0 {
+    --ps-spacing-m-default: var(--ps-spacing-value-0);
+  }
+  .ps-spacing-m-xs {
+    --ps-spacing-m-default: var(--ps-spacing-value-xs);
+  }
+  .ps-spacing-m-sm {
+    --ps-spacing-m-default: var(--ps-spacing-value-sm);
+  }
+  .ps-spacing-m-md {
+    --ps-spacing-m-default: var(--ps-spacing-value-md);
+  }
+  .ps-spacing-m-lg {
+    --ps-spacing-m-default: var(--ps-spacing-value-lg);
+  }
+  .ps-spacing-m-xl {
+    --ps-spacing-m-default: var(--ps-spacing-value-xl);
+  }
+  .ps-spacing-m-2xl {
+    --ps-spacing-m-default: var(--ps-spacing-value-2xl);
+  }
+  .ps-spacing-m-3xl {
+    --ps-spacing-m-default: var(--ps-spacing-value-3xl);
+  }
+  .ps-spacing-m-4xl {
+    --ps-spacing-m-default: var(--ps-spacing-value-4xl);
+  }
+  .ps-spacing-mx-0 {
+    --ps-spacing-mx-default: var(--ps-spacing-value-0);
+  }
+  .ps-spacing-mx-xs {
+    --ps-spacing-mx-default: var(--ps-spacing-value-xs);
+  }
+  .ps-spacing-mx-sm {
+    --ps-spacing-mx-default: var(--ps-spacing-value-sm);
+  }
+  .ps-spacing-mx-md {
+    --ps-spacing-mx-default: var(--ps-spacing-value-md);
+  }
+  .ps-spacing-mx-lg {
+    --ps-spacing-mx-default: var(--ps-spacing-value-lg);
+  }
+  .ps-spacing-mx-xl {
+    --ps-spacing-mx-default: var(--ps-spacing-value-xl);
+  }
+  .ps-spacing-mx-2xl {
+    --ps-spacing-mx-default: var(--ps-spacing-value-2xl);
+  }
+  .ps-spacing-mx-3xl {
+    --ps-spacing-mx-default: var(--ps-spacing-value-3xl);
+  }
+  .ps-spacing-mx-4xl {
+    --ps-spacing-mx-default: var(--ps-spacing-value-4xl);
+  }
+  .ps-spacing-my-0 {
+    --ps-spacing-my-default: var(--ps-spacing-value-0);
+  }
+  .ps-spacing-my-xs {
+    --ps-spacing-my-default: var(--ps-spacing-value-xs);
+  }
+  .ps-spacing-my-sm {
+    --ps-spacing-my-default: var(--ps-spacing-value-sm);
+  }
+  .ps-spacing-my-md {
+    --ps-spacing-my-default: var(--ps-spacing-value-md);
+  }
+  .ps-spacing-my-lg {
+    --ps-spacing-my-default: var(--ps-spacing-value-lg);
+  }
+  .ps-spacing-my-xl {
+    --ps-spacing-my-default: var(--ps-spacing-value-xl);
+  }
+  .ps-spacing-my-2xl {
+    --ps-spacing-my-default: var(--ps-spacing-value-2xl);
+  }
+  .ps-spacing-my-3xl {
+    --ps-spacing-my-default: var(--ps-spacing-value-3xl);
+  }
+  .ps-spacing-my-4xl {
+    --ps-spacing-my-default: var(--ps-spacing-value-4xl);
+  }
+  .ps-spacing-gap-0 {
+    --ps-spacing-gap-default: var(--ps-spacing-value-0);
+  }
+  .ps-spacing-gap-xs {
+    --ps-spacing-gap-default: var(--ps-spacing-value-xs);
+  }
+  .ps-spacing-gap-sm {
+    --ps-spacing-gap-default: var(--ps-spacing-value-sm);
+  }
+  .ps-spacing-gap-md {
+    --ps-spacing-gap-default: var(--ps-spacing-value-md);
+  }
+  .ps-spacing-gap-lg {
+    --ps-spacing-gap-default: var(--ps-spacing-value-lg);
+  }
+  .ps-spacing-gap-xl {
+    --ps-spacing-gap-default: var(--ps-spacing-value-xl);
+  }
+  .ps-spacing-gap-2xl {
+    --ps-spacing-gap-default: var(--ps-spacing-value-2xl);
+  }
+  .ps-spacing-gap-3xl {
+    --ps-spacing-gap-default: var(--ps-spacing-value-3xl);
+  }
+  .ps-spacing-gap-4xl {
+    --ps-spacing-gap-default: var(--ps-spacing-value-4xl);
+  }
+
+  @media (max-width: 599.98px) {
+    .ps-spacing-p {
+      padding: var(--ps-spacing-p-xs, var(--ps-spacing-p-default, initial));
+    }
+    .ps-spacing-px {
+      padding-inline: var(--ps-spacing-px-xs, var(--ps-spacing-px-default, initial));
+    }
+    .ps-spacing-py {
+      padding-block: var(--ps-spacing-py-xs, var(--ps-spacing-py-default, initial));
+    }
+    .ps-spacing-m {
+      margin: var(--ps-spacing-m-xs, var(--ps-spacing-m-default, initial));
+    }
+    .ps-spacing-mx {
+      margin-inline: var(--ps-spacing-mx-xs, var(--ps-spacing-mx-default, initial));
+    }
+    .ps-spacing-my {
+      margin-block: var(--ps-spacing-my-xs, var(--ps-spacing-my-default, initial));
+    }
+    .ps-spacing-gap {
+      gap: var(--ps-spacing-gap-xs, var(--ps-spacing-gap-default, initial));
+    }
+  }
+  @media (min-width: 600px) and (max-width: 899.98px) {
+    .ps-spacing-p {
+      padding: var(--ps-spacing-p-sm, var(--ps-spacing-p-default, initial));
+    }
+    .ps-spacing-px {
+      padding-inline: var(--ps-spacing-px-sm, var(--ps-spacing-px-default, initial));
+    }
+    .ps-spacing-py {
+      padding-block: var(--ps-spacing-py-sm, var(--ps-spacing-py-default, initial));
+    }
+    .ps-spacing-m {
+      margin: var(--ps-spacing-m-sm, var(--ps-spacing-m-default, initial));
+    }
+    .ps-spacing-mx {
+      margin-inline: var(--ps-spacing-mx-sm, var(--ps-spacing-mx-default, initial));
+    }
+    .ps-spacing-my {
+      margin-block: var(--ps-spacing-my-sm, var(--ps-spacing-my-default, initial));
+    }
+    .ps-spacing-gap {
+      gap: var(--ps-spacing-gap-sm, var(--ps-spacing-gap-default, initial));
+    }
+  }
+  @media (min-width: 900px) and (max-width: 1199.98px) {
+    .ps-spacing-p {
+      padding: var(--ps-spacing-p-md, var(--ps-spacing-p-default, initial));
+    }
+    .ps-spacing-px {
+      padding-inline: var(--ps-spacing-px-md, var(--ps-spacing-px-default, initial));
+    }
+    .ps-spacing-py {
+      padding-block: var(--ps-spacing-py-md, var(--ps-spacing-py-default, initial));
+    }
+    .ps-spacing-m {
+      margin: var(--ps-spacing-m-md, var(--ps-spacing-m-default, initial));
+    }
+    .ps-spacing-mx {
+      margin-inline: var(--ps-spacing-mx-md, var(--ps-spacing-mx-default, initial));
+    }
+    .ps-spacing-my {
+      margin-block: var(--ps-spacing-my-md, var(--ps-spacing-my-default, initial));
+    }
+    .ps-spacing-gap {
+      gap: var(--ps-spacing-gap-md, var(--ps-spacing-gap-default, initial));
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1535.98px) {
+    .ps-spacing-p {
+      padding: var(--ps-spacing-p-lg, var(--ps-spacing-p-default, initial));
+    }
+    .ps-spacing-px {
+      padding-inline: var(--ps-spacing-px-lg, var(--ps-spacing-px-default, initial));
+    }
+    .ps-spacing-py {
+      padding-block: var(--ps-spacing-py-lg, var(--ps-spacing-py-default, initial));
+    }
+    .ps-spacing-m {
+      margin: var(--ps-spacing-m-lg, var(--ps-spacing-m-default, initial));
+    }
+    .ps-spacing-mx {
+      margin-inline: var(--ps-spacing-mx-lg, var(--ps-spacing-mx-default, initial));
+    }
+    .ps-spacing-my {
+      margin-block: var(--ps-spacing-my-lg, var(--ps-spacing-my-default, initial));
+    }
+    .ps-spacing-gap {
+      gap: var(--ps-spacing-gap-lg, var(--ps-spacing-gap-default, initial));
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-spacing-p {
+      padding: var(--ps-spacing-p-xl, var(--ps-spacing-p-default, initial));
+    }
+    .ps-spacing-px {
+      padding-inline: var(--ps-spacing-px-xl, var(--ps-spacing-px-default, initial));
+    }
+    .ps-spacing-py {
+      padding-block: var(--ps-spacing-py-xl, var(--ps-spacing-py-default, initial));
+    }
+    .ps-spacing-m {
+      margin: var(--ps-spacing-m-xl, var(--ps-spacing-m-default, initial));
+    }
+    .ps-spacing-mx {
+      margin-inline: var(--ps-spacing-mx-xl, var(--ps-spacing-mx-default, initial));
+    }
+    .ps-spacing-my {
+      margin-block: var(--ps-spacing-my-xl, var(--ps-spacing-my-default, initial));
+    }
+    .ps-spacing-gap {
+      gap: var(--ps-spacing-gap-xl, var(--ps-spacing-gap-default, initial));
+    }
+  }
+}
