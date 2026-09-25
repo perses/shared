@@ -13,7 +13,7 @@
 
 import { Box } from '@mui/material';
 import type { ReactElement } from 'react';
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 
 import { SeriesInfo } from './SeriesInfo';
 import type { NearbySeriesArray } from './types';
@@ -23,7 +23,7 @@ export interface TooltipContentProps {
   wrapLabels?: boolean;
 }
 
-export function TooltipContent(props: TooltipContentProps): ReactElement | null {
+export const TooltipContent = memo(function TooltipContent(props: TooltipContentProps): ReactElement | null {
   const { series, wrapLabels } = props;
 
   const sortedFocusedSeries = useMemo(() => {
@@ -44,7 +44,7 @@ export function TooltipContent(props: TooltipContentProps): ReactElement | null 
     >
       {sortedFocusedSeries.map(({ datumIdx, seriesIdx, seriesName, y, formattedY, markerColor, isClosestToCursor }) => {
         if (datumIdx === null || seriesIdx === null) return null;
-        const key = seriesIdx.toString() + datumIdx.toString();
+        const key = seriesIdx;
 
         return (
           <SeriesInfo
@@ -61,4 +61,4 @@ export function TooltipContent(props: TooltipContentProps): ReactElement | null 
       })}
     </Box>
   );
-}
+});

@@ -13,6 +13,7 @@
 
 import { render, screen, act, renderHook, fireEvent } from '@testing-library/react';
 import type { ReactElement } from 'react';
+import { Profiler } from 'react';
 
 import { PanelFocusProvider, useFocusedPanel, usePanelFocusHandlers } from './PanelFocusProvider';
 
@@ -38,6 +39,15 @@ function PanelFocusTest({ panelKey }: { panelKey: string }): ReactElement {
   );
 }
 
+function HandlersOnlyPanel(): ReactElement {
+  const handlers = usePanelFocusHandlers('handlers-only');
+  return (
+    <div {...handlers} tabIndex={-1}>
+      Handlers only
+    </div>
+  );
+}
+
 describe('PanelFocusProvider', () => {
   describe('useFocusedPanel', () => {
     it('should return null when no panel is focused', () => {
@@ -57,6 +67,27 @@ describe('PanelFocusProvider', () => {
 
     afterEach(() => {
       vi.useRealTimers();
+    });
+
+    it('does not rerender handler-only panels when hover focus changes', () => {
+      const onRender = vi.fn();
+      render(
+        <PanelFocusProvider>
+          <Profiler id="handlers" onRender={onRender}>
+            <HandlersOnlyPanel />
+          </Profiler>
+          <PanelFocusTest panelKey="panel-1" />
+        </PanelFocusProvider>,
+      );
+      const initialCommits = onRender.mock.calls.length;
+      fireEvent.mouseEnter(screen.getByText('Handlers only'));
+      act(() => {
+        vi.advanceTimersByTime(50);
+      });
+      expect(screen.getByTestId('focused-panel')).toHaveTextContent('handlers-only');
+      fireEvent.mouseLeave(screen.getByText('Handlers only'));
+      expect(screen.getByTestId('focused-panel')).toHaveTextContent('none');
+      expect(onRender).toHaveBeenCalledTimes(initialCommits);
     });
 
     it('should set focused panel on mouse enter after debounce', () => {

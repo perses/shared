@@ -14,7 +14,8 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import { useEffect } from 'react';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 
 import type { PanelEditorValues } from '../../model';
 import { VariableContext } from '../../runtime';
@@ -107,7 +108,10 @@ describe('LayoutEditor', () => {
     let capturedGroupId: number | undefined;
     const Component = (): ReactElement => {
       const form = useForm<PanelEditorValues>({ defaultValues: { groupId: 1 } });
-      capturedGroupId = form.watch('groupId');
+      const groupId = useWatch({ control: form.control, name: 'groupId' });
+      useEffect(() => {
+        capturedGroupId = groupId;
+      }, [groupId]);
       return (
         <FormProvider {...form}>
           <VariableContext.Provider value={{ state: {} }}>

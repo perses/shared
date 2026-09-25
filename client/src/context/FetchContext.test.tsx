@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, renderHook, screen, waitFor } from '@testing-library/react';
 
 import type { FetchFn } from './FetchContext';
 import { FetchProvider, useFetch } from './FetchContext';
@@ -38,15 +38,9 @@ function TestJsonConsumer({ url }: { url: string }): React.ReactElement {
 describe('FetchContext', () => {
   describe('useFetch without provider', () => {
     it('returns the default fetch wrapper from @perses-dev/client', () => {
-      let hookResult: ReturnType<typeof useFetch> | undefined;
-      function Capture(): React.ReactNode {
-        hookResult = useFetch();
-        return null;
-      }
-      render(<Capture />);
-      expect(hookResult).toBeDefined();
-      expect(typeof hookResult!.fetch).toBe('function');
-      expect(typeof hookResult!.fetchJson).toBe('function');
+      const { result } = renderHook(() => useFetch());
+      expect(typeof result.current.fetch).toBe('function');
+      expect(typeof result.current.fetchJson).toBe('function');
     });
   });
 

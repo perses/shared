@@ -81,12 +81,13 @@ export function useListVariableState(
   const loading = useMemo(() => variablesOptionsQuery.isFetching ?? false, [variablesOptionsQuery.isFetching]);
   const options = useMemo(() => variablesOptionsQuery.data ?? [], [variablesOptionsQuery.data]);
 
-  let value = state?.value;
-
-  // Make sure value is an array if allowMultiple is true
-  if (allowMultiple && !Array.isArray(value)) {
-    value = typeof value === 'string' ? [value] : [];
-  }
+  const initialValue = useMemo(() => {
+    const currentValue = state?.value;
+    if (allowMultiple && !Array.isArray(currentValue)) {
+      return typeof currentValue === 'string' ? [currentValue] : [];
+    }
+    return currentValue;
+  }, [allowMultiple, state?.value]);
 
   // Sort the provided list of options according to the method defined
   const sortedOptions = useMemo((): VariableOption[] => {
@@ -94,7 +95,7 @@ export function useListVariableState(
 
     if (!sort || sort === 'none') return opts;
     const sortMethod = SORT_METHODS[sort as SortMethodName];
-    // oxlint-disable-next-line unicorn/no-array-sort Calling sort of object, not the built-in array sort function
+    // oxlint-disable-next-line unicorn/no-array-sort -- Calling sort of object, not the built-in array sort function
     return !sortMethod ? opts : sortMethod.sort(opts);
   }, [options, sort]);
 
@@ -108,39 +109,38 @@ export function useListVariableState(
     return computedOptions;
   }, [allowAllValue, sortedOptions]);
 
-  const valueIsInOptions = useMemo(
+  const initialValueIsInOptions = useMemo(
     () =>
       Boolean(
         viewOptions.find((v) => {
           if (allowMultiple) {
-            return (value as string[]).includes(v.value);
+            return (initialValue as string[]).includes(v.value);
           }
-          return value === v.value;
+          return initialValue === v.value;
         }),
       ),
-    [viewOptions, value, allowMultiple],
+    [viewOptions, initialValue, allowMultiple],
   );
 
-  value = useMemo(() => {
+  const value = useMemo(() => {
     const firstOptionValue = viewOptions?.[allowAllValue ? 1 : 0]?.value;
 
-    // If there is no value but there are options, or the value is not in options, we set the value to the first option.
+    // If the value is missing or not in the options, default to the first option.
     if (firstOptionValue) {
-      if (!valueIsInOptions || !value || value.length === 0) {
+      if (!initialValueIsInOptions || !initialValue || initialValue.length === 0) {
         return allowMultiple ? [firstOptionValue] : firstOptionValue;
       }
     }
 
-    return value;
-  }, [viewOptions, value, valueIsInOptions, allowMultiple, allowAllValue]);
+    return initialValue;
+  }, [viewOptions, initialValue, initialValueIsInOptions, allowMultiple, allowAllValue]);
 
   const selectedOptions = useMemo(() => {
     // In the case Autocomplete.multiple equals false, Autocomplete.value expects a single object, not
     // an array, hence this conditional
     if (Array.isArray(value)) {
-      return viewOptions.filter((o) => {
-        return value?.includes(o.value);
-      });
+      const selectedValues = new Set(value);
+      return viewOptions.filter((option) => selectedValues.has(option.value));
     } else {
       return (
         viewOptions.find((o) => {
@@ -156,6 +156,8 @@ export function useListVariableState(
 const StyledPopper = (props: PopperProps): ReactElement => (
   <Popper {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
 );
+
+const filterOptions = createFilterOptions<VariableOption>();
 
 const LETTER_HSIZE = 8; // approximation
 const ARROW_OFFSET = 40; // right offset for list variables (= take into account the dropdown toggle size)
@@ -188,11 +190,9 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
   const allowMultiple = definition?.spec.allowMultiple === true;
   const allowAllValue = definition?.spec.allowAllValue === true;
 
-  const filterOptions = createFilterOptions<VariableOption>({});
-
   const filteredOptions = useMemo(
     () => filterOptions(viewOptions, { inputValue, getOptionLabel: (o) => o.label }),
-    [inputValue, viewOptions, filterOptions],
+    [inputValue, viewOptions],
   );
 
   // Update value when changed
@@ -320,7 +320,6 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
   }, [
     allowAllValue,
     allowMultiple,
-    filterOptions,
     inputValue,
     inputWidth,
     loading,
@@ -346,12 +345,14 @@ function TextVariable({ name, source }: VariableProps): ReactElement {
   const state = ctx.state;
   const definition = ctx.definition as TextVariableDefinition;
   const [tempValue, setTempValue] = useState(state?.value ?? '');
-  const [inputWidth, setInputWidth] = useState(getWidthPx(tempValue as string, 'text'));
+  const inputWidth = getWidthPx(tempValue as string, 'text');
+  const [previousValue, setPreviousValue] = useState(state?.value);
   const { setVariableValue } = useVariableDefinitionActions();
 
-  useEffect(() => {
+  if (previousValue !== state?.value) {
+    setPreviousValue(state?.value);
     setTempValue(state?.value ?? '');
-  }, [state?.value]);
+  }
 
   return (
     <TextField
@@ -359,7 +360,6 @@ function TextVariable({ name, source }: VariableProps): ReactElement {
       value={tempValue}
       onChange={(e) => {
         setTempValue(e.target.value);
-        setInputWidth(getWidthPx(e.target.value, 'text'));
       }}
       onBlur={() => setVariableValue(name, tempValue, source)}
       placeholder={name}

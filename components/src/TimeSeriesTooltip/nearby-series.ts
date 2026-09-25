@@ -53,19 +53,6 @@ function gatherCandidates(
 
   const stackTotals = new Map<string, number>();
 
-  let sortedTimestamps: number[] = [];
-  const firstValues = data[0]?.values;
-  if (firstValues && firstValues.length > 0) {
-    const seen = new Set<number>();
-    for (const [ts] of firstValues) {
-      if (!seen.has(ts)) {
-        seen.add(ts);
-        sortedTimestamps.push(ts);
-      }
-    }
-    sortedTimestamps = sortedTimestamps.toSorted((a, b) => a - b);
-  }
-
   // Bar-only indexes: ECharts groups bars independently of lines, so bar-relative index and count must exclude line series.
   const barSeriesIndexes: number[] = [];
   for (let i = 0; i < totalSeries; i++) {
@@ -76,6 +63,18 @@ function gatherCandidates(
   let barBandwidth: number | null = null;
   let barCenterPixelX: number | null = null;
   if (barSeriesIndexes.length > 0 && cursorXPixel !== null) {
+    let sortedTimestamps: number[] = [];
+    const firstValues = data[0]?.values;
+    if (firstValues && firstValues.length > 0) {
+      const seen = new Set<number>();
+      for (const [ts] of firstValues) {
+        if (!seen.has(ts)) {
+          seen.add(ts);
+          sortedTimestamps.push(ts);
+        }
+      }
+      sortedTimestamps = sortedTimestamps.toSorted((a, b) => a - b);
+    }
     barBandwidth = calculateBarBandwidth(closestTimestamp, sortedTimestamps, chart);
     barCenterPixelX = getPixelXFromGrid(closestTimestamp, chart);
   }

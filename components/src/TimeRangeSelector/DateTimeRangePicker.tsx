@@ -46,7 +46,7 @@ export const DateTimeRangePicker = ({
   timeZone,
 }: AbsoluteTimeFormProps): ReactElement => {
   const stdTimeZone = ['local', 'browser'].includes(timeZone.toLowerCase())
-    ? Intl.DateTimeFormat().resolvedOptions().timeZone
+    ? new Intl.DateTimeFormat().resolvedOptions().timeZone
     : timeZone;
   const [timeRange, setTimeRange] = useState<AbsoluteTimeRange>(initialTimeRange);
   const [showStartCalendar, setShowStartCalendar] = useState<boolean>(true);

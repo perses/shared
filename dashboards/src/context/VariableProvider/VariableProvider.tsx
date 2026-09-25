@@ -30,7 +30,7 @@ import type {
 import { DEFAULT_ALL_VALUE as ALL_VALUE, formatDuration, intervalToDuration } from '@perses-dev/spec';
 import { produce } from 'immer';
 import type { ReactElement, ReactNode } from 'react';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useDeferredValue, useEffect, useMemo, useState } from 'react';
 import type { StoreApi } from 'zustand';
 import { createStore, useStore } from 'zustand';
 import { devtools } from 'zustand/middleware';
@@ -150,9 +150,7 @@ export function useVariableDefinitionStates(variableNames?: string[]): VariableS
 
       return varStates;
     },
-    (left, right) => {
-      return JSON.stringify(left) === JSON.stringify(right);
-    },
+    shallow,
   );
 }
 
@@ -201,15 +199,19 @@ export function useVariableDefinitionAndState(
   state: VariableState | undefined;
 } {
   const store = useVariableDefinitionStoreCtx();
-  return useStore(store, (s) => {
-    const state = s.variableState.get({ name, source });
-    const definitions = source
-      ? s.externalVariableDefinitions.find((v) => v.source === source)?.definitions
-      : s.variableDefinitions;
-    const definition = (definitions || []).find((v) => v.spec.name === name);
+  return useStoreWithEqualityFn(
+    store,
+    (s) => {
+      const state = s.variableState.get({ name, source });
+      const definitions = source
+        ? s.externalVariableDefinitions.find((v) => v.source === source)?.definitions
+        : s.variableDefinitions;
+      const definition = (definitions || []).find((v) => v.spec.name === name);
 
-    return { state, definition };
-  });
+      return { state, definition };
+    },
+    shallow,
+  );
 }
 
 export function useVariableDefinitionActions(): {
@@ -253,7 +255,8 @@ interface PluginProviderProps {
 }
 
 function PluginProvider({ children, builtinVariables }: PluginProviderProps): ReactElement {
-  const originalValues = useVariableDefinitionStates();
+  // Inputs read the store immediately; chart and query consumers can render in the background.
+  const originalValues = useDeferredValue(useVariableDefinitionStates());
   const definitions = useVariableDefinitions();
   const externalDefinitions = useExternalVariableDefinitions();
   const { absoluteTimeRange } = useTimeRange();
@@ -356,9 +359,12 @@ function PluginProvider({ children, builtinVariables }: PluginProviderProps): Re
     return result;
   }, [absoluteTimeRange, builtinVariables]);
 
+  const builtinContext = useMemo(() => ({ variables: allBuiltinVariables }), [allBuiltinVariables]);
+  const variableContext = useMemo(() => ({ state: values }), [values]);
+
   return (
-    <BuiltinVariableContext.Provider value={{ variables: allBuiltinVariables }}>
-      <VariableContext.Provider value={{ state: values }}>{children}</VariableContext.Provider>
+    <BuiltinVariableContext.Provider value={builtinContext}>
+      <VariableContext.Provider value={variableContext}>{children}</VariableContext.Provider>
     </BuiltinVariableContext.Provider>
   );
 }
@@ -423,6 +429,16 @@ function createVariableDefinitionStore({
           );
         },
         setVariableOptions(name, options, source?: string): void {
+          const currentOptions = get().variableState.get({ name, source })?.options;
+          if (currentOptions === options) return;
+          if (
+            currentOptions?.length === options.length &&
+            currentOptions.every(
+              (option, index) => option.value === options[index]?.value && option.label === options[index]?.label,
+            )
+          ) {
+            return;
+          }
           set(
             (state) => {
               const varState = state.variableState.get({ name, source });
@@ -436,6 +452,7 @@ function createVariableDefinitionStore({
           );
         },
         setVariableLoading(name, loading, source?: string): void {
+          if (get().variableState.get({ name, source })?.loading === loading) return;
           set(
             (state) => {
               const varState = state.variableState.get({ name, source });
@@ -448,32 +465,31 @@ function createVariableDefinitionStore({
             '[Variables] setVariableLoading',
           );
         },
-        setVariableValue: (name, value, source?: string): void =>
+        setVariableValue: (name, value, source?: string): void => {
+          const currentState = get().variableState.get({ name, source });
+          if (!currentState) return;
+
+          let nextValue = value;
+          // Normalize the All option before comparing, including repeated multi-select updates.
+          if (Array.isArray(nextValue) && nextValue.includes(ALL_VALUE)) {
+            nextValue = nextValue.at(-1) === ALL_VALUE ? ALL_VALUE : nextValue.filter((v) => v !== ALL_VALUE);
+          }
+          if (areVariableValuesEqual(currentState.value, nextValue)) return;
+
           set(
             (state) => {
-              let val = value;
               const varState = state.variableState.get({ name, source });
               if (!varState) {
                 return;
               }
 
-              // Make sure there is only one all value
-              if (Array.isArray(val) && val.includes(ALL_VALUE)) {
-                if (val.at(-1) === ALL_VALUE) {
-                  val = ALL_VALUE;
-                } else {
-                  val = val.filter((v) => v !== ALL_VALUE);
-                }
-              }
-              if (queryParams) {
-                const setQueryParams = queryParams[1];
-                setQueryParams({ [getURLQueryParamName(name)]: val });
-              }
-              varState.value = val;
+              varState.value = nextValue;
             },
             false,
             '[Variables] setVariableValue',
-          ),
+          );
+          queryParams?.[1]({ [getURLQueryParamName(name)]: nextValue });
+        },
         setVariableDefaultValues: (): VariableDefinition[] => {
           const variableDefinitions = get().variableDefinitions;
           const variableState = get().variableState;
@@ -543,12 +559,14 @@ export interface VariableProviderProps {
   initialVariableValues?: Record<string, VariableValue>;
 }
 
+const EMPTY_BUILTIN_VARIABLE_DEFINITIONS: BuiltinVariableDefinition[] = [];
+
 // TODO: merge the different providers related to Variables under a single one (and keep "VariableProvider" as a name)
 export function VariableProvider({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
-  builtinVariableDefinitions = [],
+  builtinVariableDefinitions = EMPTY_BUILTIN_VARIABLE_DEFINITIONS,
   initialVariableValues,
 }: VariableProviderProps): ReactElement {
   const [store] = useState(() =>
@@ -566,7 +584,7 @@ export function VariableProviderWithQueryParams({
   children,
   initialVariableDefinitions = [],
   externalVariableDefinitions = [],
-  builtinVariableDefinitions: builtinVariables = [],
+  builtinVariableDefinitions: builtinVariables = EMPTY_BUILTIN_VARIABLE_DEFINITIONS,
 }: VariableProviderProps): ReactElement {
   const allVariableDefs = mergeVariableDefinitions(initialVariableDefinitions, externalVariableDefinitions);
   const queryParams = useVariableQueryParams(allVariableDefs);

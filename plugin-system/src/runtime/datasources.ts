@@ -17,6 +17,11 @@ import { useQuery } from '@tanstack/react-query';
 import { createContext, useContext } from 'react';
 
 export interface DatasourceStore {
+  /**
+   * Project whose datasources are listed alongside global ones. Undefined for a global-only scope.
+   */
+  project?: string;
+
   // TODO: Do we even need this method?
   getDatasource(selector: DatasourceSelector): Promise<DatasourceSpec>;
 
@@ -101,10 +106,11 @@ export function useListDatasourceSelectItems(
   datasourcePluginName: string,
   project?: string,
 ): UseQueryResult<DatasourceSelectItemGroup[]> {
-  const { listDatasourceSelectItems } = useDatasourceStore();
+  const store = useDatasourceStore();
+  // Results are scoped by the store's project; the explicit parameter only remains as a fallback discriminator.
   return useQuery<DatasourceSelectItemGroup[]>({
-    queryKey: ['listDatasourceSelectItems', datasourcePluginName, project],
-    queryFn: () => listDatasourceSelectItems(datasourcePluginName),
+    queryKey: ['listDatasourceSelectItems', datasourcePluginName, store.project ?? project],
+    queryFn: () => store.listDatasourceSelectItems(datasourcePluginName),
   });
 }
 

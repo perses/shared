@@ -19,11 +19,10 @@ import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 
 import type { FormatOptions, TimeChartSeriesMapping } from '../model';
-import { getNearbySeriesData } from './nearby-series';
 import type { CursorCoordinates } from './tooltip-model';
-import { useMousePosition } from './tooltip-model';
 import { TooltipContent } from './TooltipContent';
 import { TooltipHeader } from './TooltipHeader';
+import { useChartTooltipData } from './useChartTooltipData';
 import { assembleTransform, getTooltipStyles } from './utils';
 
 export interface TimeChartTooltipProps {
@@ -59,10 +58,17 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   pinnedPos,
 }: TimeChartTooltipProps) {
   const [showAllSeries, setShowAllSeries] = useState(false);
-  const transform = useRef<string | undefined>();
   const tooltipElementRef = useRef<HTMLDivElement | null>(null);
 
-  const mousePos = useMousePosition();
+  const { mousePos, nearbySeries } = useChartTooltipData({
+    chartRef,
+    data,
+    seriesMapping,
+    pinnedPos,
+    format,
+    seriesFormatMap,
+    showAllSeries,
+  });
   const { height, width, ref: tooltipRef } = useResizeObserver();
 
   const isTooltipPinned = pinnedPos !== null && enablePinning;
@@ -86,8 +92,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
     const rect = node.getBoundingClientRect();
     if (rect.height === 0 || rect.width === 0) return;
     const nextTransform = assembleTransform(mousePos, pinnedPos, rect.height, rect.width, containerElement);
-    if (nextTransform && nextTransform !== transform.current) {
-      transform.current = nextTransform;
+    if (nextTransform && nextTransform !== node.style.transform) {
       node.style.transform = nextTransform;
     }
   });
@@ -96,23 +101,11 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
 
   if (pinnedPos === null && (mousePos.target as HTMLElement).tagName !== 'CANVAS') return null;
 
-  const chart = chartRef.current;
-
   // Cap height to container so the tooltip is not cut off.
   const maxHeight = containerElement ? containerElement.getBoundingClientRect().height : undefined;
 
-  transform.current = assembleTransform(mousePos, pinnedPos, height ?? 0, width ?? 0, containerElement);
+  const transform = assembleTransform(mousePos, pinnedPos, height ?? 0, width ?? 0, containerElement);
 
-  const nearbySeries = getNearbySeriesData({
-    mousePos,
-    data,
-    seriesMapping,
-    pinnedPos,
-    chart,
-    format,
-    seriesFormatMap,
-    showAllSeries,
-  });
   if (nearbySeries.length === 0) {
     return null;
   }
@@ -125,7 +118,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
         ref={setTooltipRef}
         sx={(theme) => getTooltipStyles(theme, pinnedPos, maxHeight)}
         style={{
-          transform: transform.current,
+          transform,
         }}
       >
         <Stack spacing={0.5}>
@@ -135,7 +128,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
             enablePinning={enablePinning}
             isTooltipPinned={isTooltipPinned}
             showAllSeries={showAllSeries}
-            onShowAllClick={(checked) => setShowAllSeries(checked)}
+            onShowAllClick={setShowAllSeries}
             onUnpinClick={onUnpinClick}
           />
           <TooltipContent series={nearbySeries} wrapLabels={wrapLabels} />

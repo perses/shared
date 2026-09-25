@@ -11,10 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { QueryDefinition } from '@perses-dev/spec';
+import type { QueryDefinition, QueryType } from '@perses-dev/spec';
 import { renderHook } from '@testing-library/react';
 import type { ReactElement } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import {
   MOCK_TIME_SERIES_DATA,
@@ -25,7 +25,8 @@ import {
   MOCK_SILENCES_DATA,
   MOCK_JSON_DATA,
 } from '../../test';
-import { DataQueriesProvider, useDataQueries } from './DataQueriesProvider';
+import { DataQueriesContext, DataQueriesProvider, useDataQueries } from './DataQueriesProvider';
+import type { DataQueriesContextType } from './model';
 
 vi.mock('../time-series-queries', () => ({
   useTimeSeriesQueries: vi.fn().mockImplementation(() => [{ data: MOCK_TIME_SERIES_DATA }]),
@@ -99,7 +100,85 @@ vi.mock('../plugin-registry', () => ({
   })),
 }));
 
+function createQueryContext(): DataQueriesContextType {
+  const timeSeriesDefinition: QueryDefinition = {
+    kind: 'TimeSeriesQuery',
+    spec: { plugin: { kind: 'PrometheusTimeSeriesQuery', spec: {} } },
+  };
+  const traceDefinition: QueryDefinition = {
+    kind: 'TraceQuery',
+    spec: { plugin: { kind: 'TempoTraceQuery', spec: {} } },
+  };
+  const traceError = new Error('Trace failed');
+  return {
+    queryDefinitions: [timeSeriesDefinition, traceDefinition],
+    queryResults: [
+      {
+        definition: timeSeriesDefinition,
+        data: MOCK_TIME_SERIES_DATA,
+        isFetching: false,
+        isLoading: false,
+        error: new Error('Time series failed'),
+      },
+      {
+        definition: traceDefinition,
+        data: MOCK_TRACE_DATA,
+        isFetching: true,
+        isLoading: false,
+        error: traceError,
+      },
+    ],
+    errors: [new Error('Time series failed'), traceError],
+    isFetching: true,
+    isLoading: false,
+    refetchAll: vi.fn(),
+  };
+}
+
 describe('useDataQueries', (): void => {
+  it('reuses chart transformations on local rerenders and updates them when query type or data changes', () => {
+    let context = createQueryContext();
+    const traceDefinition = context.queryDefinitions[1];
+    const traceError = context.errors[1];
+    const wrapper = ({ children }: React.PropsWithChildren): ReactElement => (
+      <DataQueriesContext.Provider value={context}>{children}</DataQueriesContext.Provider>
+    );
+    const transform = vi.fn((queries: DataQueriesContextType['queryResults']) => queries.map((query) => query.data));
+    const { result, rerender } = renderHook(
+      ({ queryType }: { queryType: keyof QueryType }) => {
+        const queries = useDataQueries(queryType);
+        const data = useMemo(() => transform(queries.queryResults), [queries.queryResults]);
+        return { queries, data };
+      },
+      { wrapper, initialProps: { queryType: 'TimeSeriesQuery' as keyof QueryType } },
+    );
+    const initial = result.current.queries;
+    rerender({ queryType: 'TimeSeriesQuery' });
+    expect(result.current.queries).toBe(initial);
+    expect(transform).toHaveBeenCalledTimes(1);
+    expect(result.current.data).toEqual([MOCK_TIME_SERIES_DATA]);
+    expect(result.current.queries.isFetching).toBe(false);
+
+    rerender({ queryType: 'TraceQuery' });
+    expect(transform).toHaveBeenCalledTimes(2);
+    expect(result.current.data).toEqual([MOCK_TRACE_DATA]);
+    expect(result.current.queries.queryDefinitions).toEqual([traceDefinition]);
+    expect(result.current.queries.queryResults[0]?.data).toBe(MOCK_TRACE_DATA);
+    expect(result.current.queries.errors).toEqual([traceError]);
+    expect(result.current.queries.isFetching).toBe(true);
+
+    context = {
+      ...context,
+      queryResults: context.queryResults.map((query) => ({ ...query, isFetching: false })),
+      isFetching: false,
+    };
+    rerender({ queryType: 'TraceQuery' });
+    expect(transform).toHaveBeenCalledTimes(3);
+    expect(result.current.queries.isFetching).toBe(false);
+    result.current.queries.refetchAll();
+    expect(context.refetchAll).toHaveBeenCalledOnce();
+  });
+
   it('should return the correct data for TimeSeriesQuery', () => {
     const definitions: QueryDefinition[] = [
       {

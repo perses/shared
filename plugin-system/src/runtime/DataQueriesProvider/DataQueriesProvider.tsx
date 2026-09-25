@@ -13,7 +13,7 @@
 
 import type { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
-import { createContext, useCallback, useContext, useMemo } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
 
 import type { AlertsQueryDefinition } from '../alerts-queries';
 import { useAlertsQueries } from '../alerts-queries';
@@ -45,26 +45,26 @@ export function useDataQueriesContext(): DataQueriesContextType {
 export function useDataQueries<T extends keyof QueryType>(queryType: T): UseDataQueryResults<QueryType[T]> {
   const ctx = useDataQueriesContext();
 
-  // Filter query definitions based on the specified query type
-  const filteredQueryDefinitions = ctx.queryDefinitions.filter((definition) => definition.kind === queryType);
+  // Keep result arrays stable during local panel interactions so downstream chart
+  // transformations can reuse their memoized results.
+  return useMemo(() => {
+    const filteredQueryDefinitions = ctx.queryDefinitions.filter((definition) => definition.kind === queryType);
+    const filteredQueryResults = ctx.queryResults.filter(
+      (queryResult) => queryResult?.definition?.kind === queryType,
+    ) as Array<QueryData<QueryType[T]>>;
+    const filteredErrors = ctx.errors.filter(
+      (_error, index) => ctx.queryResults[index]?.definition?.kind === queryType,
+    );
 
-  // Filter the query results based on the specified query type
-  const filteredQueryResults = ctx.queryResults.filter(
-    (queryResult) => queryResult?.definition?.kind === queryType,
-  ) as Array<QueryData<QueryType[T]>>;
-
-  // Filter the errors based on the specified query type
-  const filteredErrors = ctx.errors.filter((errors, index) => ctx.queryResults[index]?.definition?.kind === queryType);
-
-  // Create a new context object with the filtered results and errors
-  return {
-    queryDefinitions: filteredQueryDefinitions,
-    queryResults: filteredQueryResults,
-    isFetching: filteredQueryResults.some((result) => result.isFetching),
-    isLoading: filteredQueryResults.some((result) => result.isLoading),
-    refetchAll: ctx.refetchAll,
-    errors: filteredErrors,
-  };
+    return {
+      queryDefinitions: filteredQueryDefinitions,
+      queryResults: filteredQueryResults,
+      isFetching: filteredQueryResults.some((result) => result.isFetching),
+      isLoading: filteredQueryResults.some((result) => result.isLoading),
+      refetchAll: ctx.refetchAll,
+      errors: filteredErrors,
+    };
+  }, [ctx.queryDefinitions, ctx.queryResults, ctx.errors, ctx.refetchAll, queryType]);
 }
 
 export function DataQueriesProvider(props: DataQueriesProviderProps): ReactElement {
@@ -123,18 +123,6 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
       ...transformQueryResults(jsonResults, jsonQueries),
     ];
 
-    if (queryOptions?.enabled) {
-      for (const result of mergedQueryResults) {
-        if (!result.isLoading && !result.isFetching && !result.error) {
-          usageMetrics.markQuery(result.definition, 'success');
-        } else if (result.error) {
-          usageMetrics.markQuery(result.definition, 'error');
-        } else {
-          usageMetrics.markQuery(result.definition, 'pending');
-        }
-      }
-    }
-
     return {
       queryDefinitions: definitions,
       queryResults: mergedQueryResults,
@@ -159,10 +147,26 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
     traceQueries,
     traceResults,
     definitions,
-    queryOptions?.enabled,
     refetchAll,
-    usageMetrics,
   ]);
+
+  useEffect(() => {
+    if (queryOptions?.enabled) {
+      // Register the complete batch before completing any cached query.
+      for (const result of ctx.queryResults) {
+        usageMetrics.markQuery(result.definition, 'pending');
+      }
+      for (const result of ctx.queryResults) {
+        if (!result.isLoading && !result.isFetching && !result.error) {
+          usageMetrics.markQuery(result.definition, 'success');
+        } else if (result.error) {
+          usageMetrics.markQuery(result.definition, 'error');
+        } else {
+          usageMetrics.markQuery(result.definition, 'pending');
+        }
+      }
+    }
+  }, [ctx.queryResults, queryOptions?.enabled, usageMetrics]);
 
   return <DataQueriesContext.Provider value={ctx}>{children}</DataQueriesContext.Provider>;
 }

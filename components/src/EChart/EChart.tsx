@@ -169,7 +169,7 @@ export const EChart = memo(function EChart<T>({
   sx,
   style,
   onEvents,
-  _instance,
+  _instance: instanceRef,
   syncGroup,
   onChartInitialized,
 }: EChartsProps<T>) {
@@ -185,15 +185,15 @@ export const EChart = memo(function EChart<T>({
     if (chartElement.current === undefined) return;
     chartElement.current.setOption(initialOption.current, true);
     onChartInitialized?.(chartElement.current);
-    if (_instance !== undefined) {
-      _instance.current = chartElement.current;
+    if (instanceRef !== undefined) {
+      instanceRef.current = chartElement.current;
     }
     return (): void => {
       if (chartElement.current === null) return;
       chartElement.current.dispose();
       chartElement.current = null;
     };
-  }, [_instance, onChartInitialized, theme, renderer]);
+  }, [instanceRef, onChartInitialized, theme, renderer]);
 
   // When syncGroup is explicitly set, charts within same group share interactions such as crosshair
   useEffect(() => {
@@ -210,16 +210,21 @@ export const EChart = memo(function EChart<T>({
     prevOption.current = option;
   }, [option]);
 
-  // Resize chart, cleanup listener on unmount
+  // Observe actual container size, including layout and style changes.
   useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
     const updateSize = debounce(() => {
-      if (!chartElement.current) return;
-      chartElement.current.resize();
+      chartElement.current?.resize();
     }, 200);
+    const observer = new ResizeObserver(updateSize);
+    observer.observe(container);
     window.addEventListener('resize', updateSize);
     updateSize();
     return (): void => {
+      observer.disconnect();
       window.removeEventListener('resize', updateSize);
+      updateSize.cancel();
     };
   }, []);
 
@@ -236,26 +241,6 @@ export const EChart = memo(function EChart<T>({
       }
     };
   }, [onEvents]);
-
-  // TODO: re-evaluate how this is triggered. It's technically working right
-  // now because the sx prop is an object that gets re-created, but that also
-  // means it runs unnecessarily some of the time and theoretically might
-  // not run in some other cases. Maybe it should use a resize observer?
-  useEffect(() => {
-    // TODO: fix this debouncing. This likely isn't working as intended because
-    // the debounced function is re-created every time this useEffect is called.
-    const updateSize = debounce(
-      () => {
-        if (!chartElement.current) return;
-        chartElement.current.resize();
-      },
-      200,
-      {
-        leading: true,
-      },
-    );
-    updateSize();
-  }, [sx, style]);
 
   return <Box ref={containerRef} sx={sx} style={style}></Box>;
 });

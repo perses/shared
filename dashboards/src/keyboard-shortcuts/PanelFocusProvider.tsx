@@ -14,21 +14,22 @@
 import type { ReactElement, ReactNode } from 'react';
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
-interface PanelFocusContextValue {
-  focusedPanelKey: string | null;
+interface PanelFocusActions {
   setFocusedPanel: (panelKey: string) => void;
   clearFocusedPanel: () => void;
 }
 
-const PanelFocusContext = createContext<PanelFocusContextValue | undefined>(undefined);
+const PanelFocusActionsContext = createContext<PanelFocusActions | undefined>(undefined);
 
-function usePanelFocusContext(): PanelFocusContextValue {
-  const ctx = useContext(PanelFocusContext);
+function usePanelFocusActions(): PanelFocusActions {
+  const ctx = useContext(PanelFocusActionsContext);
   if (ctx === undefined) {
     throw new Error('Panel focus hooks must be used within a PanelFocusProvider');
   }
   return ctx;
 }
+
+const FocusedPanelContext = createContext<string | null | undefined>(undefined);
 
 /** Tracks which dashboard panel is currently focused (hovered) for panel-scoped shortcuts. */
 export function PanelFocusProvider({ children }: { children: ReactNode }): ReactElement {
@@ -47,19 +48,26 @@ export function PanelFocusProvider({ children }: { children: ReactNode }): React
   }, []);
 
   const value = useMemo(
-    (): PanelFocusContextValue => ({
-      focusedPanelKey,
+    (): PanelFocusActions => ({
       setFocusedPanel,
       clearFocusedPanel,
     }),
-    [focusedPanelKey, setFocusedPanel, clearFocusedPanel],
+    [setFocusedPanel, clearFocusedPanel],
   );
 
-  return <PanelFocusContext.Provider value={value}>{children}</PanelFocusContext.Provider>;
+  return (
+    <PanelFocusActionsContext.Provider value={value}>
+      <FocusedPanelContext.Provider value={focusedPanelKey}>{children}</FocusedPanelContext.Provider>
+    </PanelFocusActionsContext.Provider>
+  );
 }
 
 export function useFocusedPanel(): string | null {
-  return usePanelFocusContext().focusedPanelKey;
+  const focusedPanelKey = useContext(FocusedPanelContext);
+  if (focusedPanelKey === undefined) {
+    throw new Error('Panel focus hooks must be used within a PanelFocusProvider');
+  }
+  return focusedPanelKey;
 }
 
 const PANEL_FOCUS_DEBOUNCE_MS = 50;
@@ -69,7 +77,7 @@ export function usePanelFocusHandlers(panelKey: string): {
   onMouseEnter: (e: React.MouseEvent<HTMLElement>) => void;
   onMouseLeave: () => void;
 } {
-  const { setFocusedPanel, clearFocusedPanel } = usePanelFocusContext();
+  const { setFocusedPanel, clearFocusedPanel } = usePanelFocusActions();
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const onMouseEnter = useCallback(

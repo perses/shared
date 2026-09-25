@@ -62,7 +62,7 @@ const COLUMNS: TableProps<MockTableData>['columns'] = [
     header: 'Color',
     headerDescription: 'Hex codes for colors',
     width: 100,
-    cell: ({ getValue }) => <div data-testid="wrapper">{getValue()}</div>,
+    cell: ({ getValue }) => <div data-testid="wrapper">{getValue<string>()}</div>,
     enableSorting: true,
   },
 ];

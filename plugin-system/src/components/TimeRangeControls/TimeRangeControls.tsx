@@ -24,9 +24,7 @@ import {
 import type { AbsoluteTimeRange, DurationString, RelativeTimeRange } from '@perses-dev/spec';
 import { parseDurationString } from '@perses-dev/spec';
 import { milliseconds } from 'date-fns';
-// eslint-disable-next-line import/no-duplicates
 import ZoomOut from 'mdi-material-ui/MinusCircleOutline';
-// eslint-disable-next-line import/no-duplicates
 import ZoomIn from 'mdi-material-ui/PlusCircleOutline';
 import RefreshIcon from 'mdi-material-ui/Refresh';
 import type { ReactElement } from 'react';

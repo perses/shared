@@ -59,6 +59,25 @@ interface TestParams {
 }
 
 describe('useListVariableState', () => {
+  it('keeps normalized All selections stable across renders', () => {
+    const spec = {
+      name: 'example',
+      plugin: { kind: 'StaticListVariable', spec: {} },
+      allowMultiple: true,
+      allowAllValue: true,
+    };
+    const state = { value: '$__all', loading: false };
+    const query = { data: [option('hello')], isFetching: false };
+    const { result, rerender } = renderHook(() => useListVariableState(spec, state, query));
+    const previous = result.current;
+
+    rerender();
+
+    expect(result.current.value).toBe(previous.value);
+    expect(result.current.selectedOptions).toBe(previous.selectedOptions);
+    expect(result.current.value).toEqual(['$__all']);
+  });
+
   it.each([
     {
       description: '[!ALL][!MULTIPLE] is fetching',

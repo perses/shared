@@ -143,8 +143,8 @@ vi.mock('@perses-dev/plugin-system', async () => {
         PanelComponent: (): JSX.Element => <div>TimeSeriesChart panel</div>,
         actions: [
           {
-            component: (): JSX.Element => (
-              <button aria-label="Export CSV" data-testid="export-action">
+            component: ({ queryResults }: PluginSystemModule.PanelProps<unknown>): JSX.Element => (
+              <button aria-label="Export CSV" data-testid="export-action" data-query-count={queryResults.length}>
                 Export
               </button>
             ),
@@ -223,6 +223,22 @@ describe('Panel', () => {
       expect(exportButtons.length).toBeGreaterThan(0);
       expect(exportButtons[0]).toBeInTheDocument();
     });
+  });
+
+  it('only passes query results with data to plugin actions', async () => {
+    vi.mocked(useDataQueriesContext).mockReturnValue(
+      makeDataQueriesContext([
+        makeQueryResult({ isLoading: true }),
+        makeQueryResult({ data: { series: [{ name: 'test', values: [[1, 2]] }] } }),
+      ]),
+    );
+
+    await renderPanel();
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Export CSV' })).toHaveAttribute('data-query-count', '1');
+    });
+    vi.mocked(useDataQueriesContext).mockReturnValue(makeDataQueriesContext());
   });
 
   it('should render panel', async () => {

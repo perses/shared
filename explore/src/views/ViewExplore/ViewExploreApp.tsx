@@ -15,7 +15,12 @@ import { Box } from '@mui/material';
 import { ChartsProvider, useChartsTheme } from '@perses-dev/components';
 import type { ReactElement, ReactNode } from 'react';
 
-import { ExploreManager, ExplorerManagerProviderWithQueryParams } from '../../components';
+import {
+  ExploreManager,
+  ExplorerManagerProviderWithQueryParams,
+  getExplorerKey,
+  useSortedExplorerPlugins,
+} from '../../components';
 
 export interface ViewAppProps {
   exploreTitleComponent?: ReactNode;
@@ -25,6 +30,8 @@ export function ViewExploreApp(props: ViewAppProps): ReactElement {
   const { exploreTitleComponent } = props;
 
   const chartsTheme = useChartsTheme();
+  const explorerPlugins = useSortedExplorerPlugins();
+  const defaultExplorer = explorerPlugins?.[0] ? getExplorerKey(explorerPlugins[0]) : undefined;
 
   return (
     <Box
@@ -37,7 +44,7 @@ export function ViewExploreApp(props: ViewAppProps): ReactElement {
       }}
     >
       <ChartsProvider chartsTheme={chartsTheme} enablePinning={false}>
-        <ExplorerManagerProviderWithQueryParams>
+        <ExplorerManagerProviderWithQueryParams defaultExplorer={defaultExplorer}>
           <ExploreManager exploreTitleComponent={exploreTitleComponent} />
         </ExplorerManagerProviderWithQueryParams>
       </ChartsProvider>
