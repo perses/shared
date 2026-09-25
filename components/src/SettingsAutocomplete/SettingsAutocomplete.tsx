@@ -11,9 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { AutocompleteProps, UseAutocompleteProps } from '@mui/material';
+import type { AutocompleteProps, AutocompleteRenderInputParams, UseAutocompleteProps } from '@mui/material';
 import { Autocomplete, TextField, Typography, createFilterOptions } from '@mui/material';
 import type { ReactElement, ReactNode } from 'react';
+
+function renderDefaultInput(params: AutocompleteRenderInputParams): ReactElement {
+  return <TextField {...params} />;
+}
 
 /**
  * Interface to extend from for `options` when using `SettingsAutocomplete`.
@@ -67,7 +71,7 @@ export function SettingsAutocomplete<
   DisableClearable extends boolean | undefined = false,
 >({
   options,
-  renderInput = (params): ReactElement => <TextField {...params} />,
+  renderInput = renderDefaultInput,
   id,
   'aria-labelledby': ariaLabelledby,
   ...otherProps

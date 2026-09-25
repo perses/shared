@@ -48,7 +48,7 @@ export function Prompt({ isBlocked, message }: LeaveDialogProps): ReactElement {
     return (): void => {
       window.removeEventListener('beforeunload', handleRouteChange);
     };
-  }, [blocker, isBlocked, isBlockedState]);
+  }, [isBlocked]);
 
   const handleDiscardChanges = (): void => blocker.proceed?.();
   const handleCancel = (): void => blocker.reset?.();

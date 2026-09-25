@@ -13,9 +13,10 @@
 
 import type { TextFieldProps as MuiTextFieldProps } from '@mui/material';
 import { TextField as MuiTextField } from '@mui/material';
+import type { DebouncedFunc } from 'lodash';
 import debounce from 'lodash/debounce';
 import type { ChangeEvent, ForwardedRef } from 'react';
-import { forwardRef, useCallback, useMemo, useState } from 'react';
+import { forwardRef, useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 type TextFieldProps = Omit<MuiTextFieldProps, 'onChange'> & { debounceMs?: number; onChange?: (value: string) => void };
 
@@ -25,19 +26,22 @@ export const TextField = forwardRef(function (
 ) {
   const [currentValue, setCurrentValue] = useState(value);
 
-  function handleChange(event: ChangeEvent<HTMLInputElement>): void {
+  const onChangeRef = useRef(onChange);
+  useLayoutEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  const debounceRef = useRef<DebouncedFunc<(inputValue: string) => void> | null>(null);
+  useLayoutEffect(() => {
+    const debounceFn = debounce((inputValue: string) => onChangeRef.current?.(inputValue), debounceMs);
+    debounceRef.current = debounceFn;
+    return (): void => debounceFn.cancel();
+  }, [debounceMs]);
+
+  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>): void => {
     setCurrentValue(event.target.value);
-    debounceFn(event.target.value);
-  }
-
-  const handleDebounceFn = useCallback(
-    (inputValue: string) => {
-      onChange?.(inputValue);
-    },
-    [onChange],
-  );
-
-  const debounceFn = useMemo(() => debounce(handleDebounceFn, debounceMs), [debounceMs, handleDebounceFn]);
+    debounceRef.current?.(event.target.value);
+  }, []);
 
   return <MuiTextField ref={ref} value={currentValue} onChange={handleChange} {...props} />;
 });

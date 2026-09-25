@@ -15,7 +15,7 @@ import type { FetchFn } from '@perses-dev/client';
 import { useFetch } from '@perses-dev/client';
 import type { QueryDefinition } from '@perses-dev/spec';
 import type { ReactElement, ReactNode } from 'react';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 type QueryState = 'pending' | 'success' | 'error';
 
@@ -55,28 +55,31 @@ export const useUsageMetrics = (): UseUsageMetricsResults => {
       if (ctx === undefined) {
         return;
       }
-
-      const definitionKey = JSON.stringify(definition);
-      if (ctx.pendingQueries.has(definitionKey) && newState === 'pending') {
-        // Never allow transitions back to pending, to avoid re-sending stats on a re-render.
-        return;
-      }
-
-      if (ctx.pendingQueries.get(definitionKey) !== newState) {
-        ctx.pendingQueries.set(definitionKey, newState);
-        if (newState === 'error') {
-          ctx.renderErrorCount += 1;
-        }
-
-        const allDone = [...ctx.pendingQueries.values()].every((p) => p !== 'pending');
-        if (ctx.renderDurationMs === 0 && allDone) {
-          ctx.renderDurationMs = Date.now() - ctx.startRenderTime;
-          submitMetrics(ctx);
-        }
-      }
+      recordQuery(ctx, definition, newState);
     },
   };
 };
+
+function recordQuery(ctx: UsageMetrics, definition: QueryDefinition, newState: QueryState): void {
+  const definitionKey = JSON.stringify(definition);
+  if (ctx.pendingQueries.has(definitionKey) && newState === 'pending') {
+    // Never allow transitions back to pending, to avoid re-sending stats on a re-render.
+    return;
+  }
+
+  if (ctx.pendingQueries.get(definitionKey) !== newState) {
+    ctx.pendingQueries.set(definitionKey, newState);
+    if (newState === 'error') {
+      ctx.renderErrorCount += 1;
+    }
+
+    const allDone = [...ctx.pendingQueries.values()].every((p) => p !== 'pending');
+    if (ctx.renderDurationMs === 0 && allDone) {
+      ctx.renderDurationMs = Date.now() - ctx.startRenderTime;
+      submitMetrics(ctx);
+    }
+  }
+}
 
 const submitMetrics = async (stats: UsageMetrics): Promise<void> => {
   await stats.fetchFn(`${stats.apiPrefix ?? ''}/api/v1/view`, {
@@ -95,12 +98,13 @@ const submitMetrics = async (stats: UsageMetrics): Promise<void> => {
 
 export const UsageMetricsProvider = ({ apiPrefix, project, dashboard, children }: UsageMetricsProps): ReactElement => {
   const { fetch } = useFetch();
+  const [startRenderTime] = useState(() => Date.now());
 
   const ctx: UsageMetrics = {
     project: project,
     dashboard: dashboard,
     renderErrorCount: 0,
-    startRenderTime: Date.now(),
+    startRenderTime,
     renderDurationMs: 0,
     pendingQueries: new Map(),
     apiPrefix,

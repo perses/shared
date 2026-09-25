@@ -102,7 +102,7 @@ export function VariableListPreview(props: VariableListPreviewProps): ReactEleme
   const { data, isFetching, error } = useListVariablePluginValues(definition);
   const errorMessage = (error as Error)?.message;
 
-  // oxlint-disable-next-line unicorn/no-array-sort Calling sort of object, not the built-in array sort function
+  // oxlint-disable-next-line unicorn/no-array-sort -- Calling sort of object, not the built-in array sort function
   const result = !sortMethod || sortMethod === 'none' || !data ? data : SORT_METHODS[sortMethod].sort(data);
 
   const variablePreview = useMemo(

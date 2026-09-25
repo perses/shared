@@ -13,18 +13,21 @@
 
 import type { Resource } from '@perses-dev/client';
 
+function getDisplayName(spec: unknown): string | undefined {
+  if (typeof spec !== 'object' || spec === null || !('display' in spec)) return undefined;
+  const { display } = spec;
+  if (typeof display !== 'object' || display === null || !('name' in display)) return undefined;
+  return typeof display.name === 'string' && display.name ? display.name : undefined;
+}
+
+function getSpecDisplayName(spec: unknown): string | undefined {
+  // Variables wrap their display settings in a nested spec.
+  const nestedSpec = typeof spec === 'object' && spec !== null && 'spec' in spec ? spec.spec : undefined;
+  return getDisplayName(nestedSpec) ?? getDisplayName(spec);
+}
+
 export function getResourceDisplayName<T extends Resource>(resource: T): string {
-  // Variables
-  if (resource.spec?.spec?.display?.name) {
-    return resource.spec.spec.display.name;
-  }
-
-  // Other resources with display
-  if (resource.spec?.display?.name) {
-    return resource.spec.display.name;
-  }
-
-  return resource.metadata.name;
+  return getSpecDisplayName(resource.spec) ?? resource.metadata.name;
 }
 
 /**
@@ -32,15 +35,6 @@ export function getResourceDisplayName<T extends Resource>(resource: T): string 
  * Else, only return the resource name
  */
 export function getResourceExtendedDisplayName<T extends Resource>(resource: T): string {
-  // Variables
-  if (resource.spec?.spec?.display?.name) {
-    return `${resource.spec.spec.display.name} (ID: ${resource.metadata.name})`;
-  }
-
-  // Other resources with display
-  if (resource.spec?.display?.name) {
-    return `${resource.spec.display.name} (ID: ${resource.metadata.name})`;
-  }
-
-  return resource.metadata.name;
+  const displayName = getSpecDisplayName(resource.spec);
+  return displayName ? `${displayName} (ID: ${resource.metadata.name})` : resource.metadata.name;
 }

@@ -80,8 +80,7 @@ export function DownloadButton(): ReactElement {
       </Menu>
 
       {/* Hidden link to download the dashboard as a JSON or YAML file */}
-      {/* eslint-disable jsx-a11y/anchor-has-content */}
-      {/* eslint-disable jsx-a11y/anchor-is-valid  */}
+      {/* oxlint-disable-next-line jsx-a11y/anchor-has-content, jsx-a11y/anchor-is-valid */}
       <a ref={hiddenLinkRef} style={{ display: 'none' }} />
     </>
   );

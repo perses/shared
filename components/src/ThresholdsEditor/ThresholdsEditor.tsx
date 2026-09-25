@@ -54,7 +54,7 @@ export function ThresholdsEditor({
     if (!recentlyAddedInputRef.current || !focusRef.current) return;
     recentlyAddedInputRef.current?.focus();
     focusRef.current = false;
-  }, [steps?.length]);
+  });
 
   const handleThresholdValueChange = (e: React.ChangeEvent<HTMLInputElement>, i: number): void => {
     if (thresholds !== undefined) {

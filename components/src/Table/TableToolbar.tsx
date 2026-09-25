@@ -86,6 +86,8 @@ export function TableToolbar<TableData>({
   isAllExpanded,
   onExpandAllChange,
 }: TableToolbarProps<TableData>): ReactElement | null {
+  'use no memo'; // TanStack Table columns retain their identity when visibility changes.
+
   const [colMenuAnchor, setColMenuAnchor] = useState<null | HTMLElement>(null);
   const colMenuOpen = Boolean(colMenuAnchor);
   const [searchResetKey, setSearchResetKey] = useState(0);

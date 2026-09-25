@@ -34,8 +34,7 @@ export interface ProjectMetadata extends Metadata {
 export interface Resource {
   kind: Kind;
   metadata: Metadata | ProjectMetadata;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  spec?: any;
+  spec?: unknown;
 }
 
 export interface ProjectResource {

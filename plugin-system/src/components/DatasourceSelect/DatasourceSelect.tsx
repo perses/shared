@@ -124,7 +124,6 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
   // We use a fake action event when we click on the action of the chip (hijack the "delete" feature).
   // This is because the href link action is on the `deleteIcon` property already, but the `onDelete` property
   // controls its visibility.
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   const fakeActionEvent = (): void => {};
 
   return (

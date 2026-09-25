@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/* eslint-disable @typescript-eslint/no-empty-function */
 // Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -59,9 +58,9 @@ export const PanelDrawer = (): ReactElement => {
     [panelEditor],
   );
 
-  const handleClose = (): void => {
+  const handleClose = useCallback((): void => {
     setIsClosing(true);
-  };
+  }, []);
 
   // Don't call closeDrawer on the store until the Drawer has completely transitioned out and reset close state
   const handleExited = useCallback(() => {
@@ -71,9 +70,9 @@ export const PanelDrawer = (): ReactElement => {
 
   // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
   // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = (): void => {
+  const handleClickOut = useCallback((): void => {
     /* do nothing */
-  };
+  }, []);
 
   const drawer = useMemo(() => {
     return (
@@ -97,7 +96,7 @@ export const PanelDrawer = (): ReactElement => {
         )}
       </Drawer>
     );
-  }, [handleExited, handleSave, isOpen, panelEditor, panelKey]);
+  }, [handleClickOut, handleClose, handleExited, handleSave, isOpen, panelEditor, panelKey]);
 
   // If the panel editor is using a repeat variable, we need to wrap the drawer in a VariableContext.Provider
   if (panelEditor?.panelGroupItemId?.repeatVariable?.group) {

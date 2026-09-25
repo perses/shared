@@ -18,7 +18,6 @@ export * from './combine-sx';
 export * from './component-ids';
 export * from './data-field-interpolation';
 export * from './format';
-export * from './memo';
 export * from './request-interpolation';
 export * from './selection-interpolation';
 export * from './theme-gen';

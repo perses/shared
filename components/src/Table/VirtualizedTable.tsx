@@ -79,14 +79,14 @@ export function VirtualizedTable<TableData>({
   rows,
   columns,
   headers,
-  columnSizing,
-  columnSizingInfo,
   cellConfigs,
   pagination,
   onPaginationChange,
   rowCount,
   toolbarConfig,
 }: VirtualizedTableProps<TableData>): ReactElement {
+  'use no memo'; // TanStack Table row and column getters read mutable state behind stable identities.
+
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
   // Use a ref for these values because they are only needed for keyboard
   // focus interactions and setting them on state will lead to a significant
@@ -133,8 +133,7 @@ export function VirtualizedTable<TableData>({
       },
       TableHead,
       TableFoot,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      TableRow: ({ item, ...props }): ReactElement | null => {
+      TableRow: ({ item: _item, ...props }): ReactElement | null => {
         const index = props['data-index'];
         const row = rows[index];
         if (!row) {
@@ -183,23 +182,18 @@ export function VirtualizedTable<TableData>({
   /**
    * Instead of calling `column.getSize()` on every render for every header
    * and especially every data cell (very expensive),
-   * we will calculate all column sizes at once at the root table level in a useMemo
+   * we calculate all column sizes once per render at the root table level
    * and pass the column sizes down as CSS variables to the <table> element.
    */
-  const columnSizeVars = useMemo(() => {
-    const colSizes: { [key: string]: number } = {};
-    headers.forEach((headerGroup) => {
-      headerGroup.headers
-        .filter((header) => header.column.getCanResize())
-        .forEach((header) => {
-          colSizes[`--header-${header.id}-size`] = header.getSize();
-          colSizes[`--col-${header.column.id}-size`] = header.column.getSize();
-        });
-    });
-    return colSizes;
-    // We want to recalculate column sizes whenever column sizes or column resizing info changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [columnSizingInfo, columnSizing, headers]);
+  const columnSizeVars: { [key: string]: number } = {};
+  headers.forEach((headerGroup) => {
+    headerGroup.headers
+      .filter((header) => header.column.getCanResize())
+      .forEach((header) => {
+        columnSizeVars[`--header-${header.id}-size`] = header.getSize();
+        columnSizeVars[`--col-${header.column.id}-size`] = header.column.getSize();
+      });
+  });
 
   return (
     <Box style={{ width, height, ...columnSizeVars }}>

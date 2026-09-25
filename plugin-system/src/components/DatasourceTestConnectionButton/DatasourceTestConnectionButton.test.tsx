@@ -81,6 +81,22 @@ describe('DatasourceTestConnectionButton', () => {
     });
   });
 
+  it('reports synchronous failures and re-enables the button', async () => {
+    const error = new Error('connection setup failed');
+    const testConnection = vi.fn(() => {
+      throw error;
+    });
+    render(<DatasourceTestConnectionButton testConnection={testConnection} />);
+    const button = screen.getByRole('button', { name: /test connection/i });
+
+    await userEvent.click(button);
+
+    await waitFor(() => {
+      expect(mockExceptionSnackbar).toHaveBeenCalledWith(error);
+      expect(button).not.toBeDisabled();
+    });
+  });
+
   it('respects the disabled prop', () => {
     render(<DatasourceTestConnectionButton testConnection={vi.fn()} disabled />);
     expect(screen.getByRole('button', { name: /test connection/i })).toBeDisabled();

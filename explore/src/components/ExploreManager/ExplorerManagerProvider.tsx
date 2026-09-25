@@ -49,10 +49,11 @@ export function ExplorerManagerProvider({
   const { explorer, data } = explorerState;
 
   function setExplorer(newExplorer: string): void {
+    if (newExplorer === explorer) return;
+
     if (explorer) {
       // store current explorer state
-      explorerStateCache[explorer] = { data };
-      setExplorerStateCache(explorerStateCache);
+      setExplorerStateCache((cache) => ({ ...cache, [explorer]: { data } }));
     }
 
     // restore previous explorer state (if any)

@@ -24,7 +24,7 @@ import {
 import type { ActionOptions } from '@perses-dev/plugin-system';
 import { useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
 import type { PanelDefinition } from '@perses-dev/spec';
-import type { ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import { memo, useEffect, useMemo, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 
@@ -159,10 +159,10 @@ export const Panel = memo(function Panel(props: PanelProps) {
         const headerActions = plugin.actions
           .filter((action) => !action.location || action.location === 'header')
           .map((action, index): ReactNode | null => {
-            const ActionComponent = action.component;
+            // Actions also receive pending or failed queries, despite PanelProps requiring data.
+            const ActionComponent = action.component as ComponentType<typeof panelPropsForActions>;
             try {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              return <ActionComponent key={`plugin-action-${index}`} {...(panelPropsForActions as any)} />;
+              return <ActionComponent key={`plugin-action-${index}`} {...panelPropsForActions} />;
             } catch (error) {
               console.warn(`Failed to render plugin action ${index}:`, error);
               return null;

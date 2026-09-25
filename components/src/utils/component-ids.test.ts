@@ -11,11 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useId as useReactId, useState } from 'react';
+import { renderHook } from '@testing-library/react';
 
-/** Generates a unique, stable React ID with the given prefix. */
-export function useId(prefix: string): string {
-  const id = useReactId();
-  const [initialPrefix] = useState(prefix);
-  return `${initialPrefix}-${id}`;
-}
+import { useId } from './component-ids';
+
+it('generates unique IDs that keep their original prefix across rerenders', () => {
+  const { result, rerender } = renderHook(({ prefix }) => [useId(prefix), useId(prefix)], {
+    initialProps: { prefix: 'control' },
+  });
+  const initialIds = result.current;
+  expect(initialIds[0]).toMatch(/^control-/);
+  expect(initialIds[0]).not.toBe(initialIds[1]);
+  rerender({ prefix: 'changed' });
+  expect(result.current).toEqual(initialIds);
+});
