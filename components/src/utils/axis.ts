@@ -25,25 +25,26 @@ export interface YAxisConfig {
   max?: number;
 }
 
-// Character width multipliers (approximate for typical UI fonts)
-const CHAR_WIDTH_BASE = 6;
-const AXIS_LABEL_PADDING = 10; // Extra padding to avoid label clipping
+const CHAR_WIDTH_BASE = 7;
+const AXIS_LABEL_PADDING = 16;
 
-/**
- * Estimate the pixel width needed for an axis label using Canvas API.
- */
 function estimateLabelWidth(format: FormatOptions | undefined, maxValue: number): number {
   const formattedLabel = formatValue(maxValue, format);
-  // Create a canvas element (reuse if possible for performance)
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-  if (!context) {
-    // Fallback to estimation if canvas not available
-    return formattedLabel.length * CHAR_WIDTH_BASE;
+  const fallback = Math.max(formattedLabel.length * CHAR_WIDTH_BASE, 28);
+  if (typeof document === 'undefined') {
+    return fallback;
   }
-  context.font = '12px sans-serif';
-  const metrics = context.measureText(formattedLabel);
-  return metrics.width;
+  try {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) {
+      return fallback;
+    }
+    context.font = '12px sans-serif';
+    return Math.max(context.measureText(formattedLabel).width, 28);
+  } catch {
+    return fallback;
+  }
 }
 
 /*
@@ -62,25 +63,19 @@ export function getFormattedAxis(axis?: YAXisComponentOption | XAXisComponentOpt
   return [merge(AXIS_DEFAULT, axis)];
 }
 
-/**
- * Create multiple Y axes configurations for ECharts
- * The first axis (index 0) is always on the left side (default axis from panel settings)
- * Additional axes are placed on the right side
- *
- * @param baseAxis - Base axis configuration from panel settings
- * @param baseFormat - Format for the base/default Y axis
- * @param additionalFormats - Array of formats for additional right-side Y axes
- * @param maxValues - Optional array of max values for each additional format (used to compute dynamic label widths)
- */
-export function getFormattedMultipleYAxes(
+export interface MultipleYAxesLayout {
+  axes: YAXisComponentOption[];
+  rightGridPadding: number;
+}
+
+export function getFormattedMultipleYAxesLayout(
   baseAxis: YAXisComponentOption | undefined,
   baseFormat: FormatOptions | undefined,
   additionalFormats: FormatOptions[],
   maxValues?: number[],
-): YAXisComponentOption[] {
+): MultipleYAxesLayout {
   const axes: YAXisComponentOption[] = [];
 
-  // Base/default Y axis (left side)
   const baseAxisConfig: YAXisComponentOption = merge(
     {
       type: 'value',
@@ -90,41 +85,45 @@ export function getFormattedMultipleYAxes(
         formatter: (value: number): string => {
           return formatValue(value, baseFormat);
         },
-        // Let ECharts handle width automatically
-        overflow: 'truncate',
       },
     },
     baseAxis,
   );
   axes.push(baseAxisConfig);
 
-  // Calculate cumulative offsets based on actual formatted label widths
   let cumulativeOffset = 0;
-
-  // Additional Y axes (right side) for each unique format
   additionalFormats.forEach((format, index) => {
-    const rightAxisConfig: YAXisComponentOption = {
+    const labelWidth = estimateLabelWidth(format, maxValues?.[index] ?? 1000) + AXIS_LABEL_PADDING;
+    axes.push({
       type: 'value',
       position: 'right',
-      // Dynamic offset based on cumulative width of preceding axis labels
       offset: cumulativeOffset,
       boundaryGap: [0, '10%'],
       axisLabel: {
         formatter: (value: number): string => {
           return formatValue(value, format);
         },
+        hideOverlap: true,
       },
       splitLine: {
-        show: false, // Hide grid lines for right-side axes to reduce visual noise
+        show: false,
       },
       show: baseAxis?.show,
-    };
-    axes.push(rightAxisConfig);
-    // For subsequent axes, add the width of the previous axis's labels
-    if (maxValues) {
-      cumulativeOffset += estimateLabelWidth(format, maxValues[index] ?? 1000) + AXIS_LABEL_PADDING;
-    }
+    });
+    cumulativeOffset += labelWidth;
   });
 
-  return axes;
+  return {
+    axes,
+    rightGridPadding: cumulativeOffset > 0 ? cumulativeOffset : 20,
+  };
+}
+
+export function getFormattedMultipleYAxes(
+  baseAxis: YAXisComponentOption | undefined,
+  baseFormat: FormatOptions | undefined,
+  additionalFormats: FormatOptions[],
+  maxValues?: number[],
+): YAXisComponentOption[] {
+  return getFormattedMultipleYAxesLayout(baseAxis, baseFormat, additionalFormats, maxValues).axes;
 }
