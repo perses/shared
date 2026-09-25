@@ -278,16 +278,19 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
 
   return (
     <>
-      {/* small panel width: move all icons except move/grab to overflow menu */}
+      {/* small: description + links outside overflow (same as medium) */}
       <ConditionalBox
         sx={(theme) => ({
           [theme.containerQueries(HEADER_ACTIONS_CONTAINER_NAME).between(0, HEADER_SMALL_WIDTH)]: { display: 'flex' },
         })}
       >
+        <OnHover>
+          {descriptionAction} {linksAction}
+        </OnHover>
         {divider}
         <OnHover>
           <OverflowMenu title={title}>
-            {descriptionAction} {linksAction} {queryStateIndicator} {noticesIndicator}
+            {queryStateIndicator} {noticesIndicator}
             {informationTooltipIcon} {extraActions} {viewQueryAction}
             {readActions} {pluginActions} {itemActions}
             {editActions}
@@ -427,7 +430,20 @@ export const OverflowMenu: React.FC<
           boxShadow: (theme) => theme.shadows[4],
         }}
       >
-        <ClickAwayListener onClickAway={handleClose}>
+        <ClickAwayListener
+          onClickAway={(event) => {
+            const target = event.target;
+            if (
+              target instanceof Element &&
+              target.closest(
+                '.MuiModal-root, .MuiPopover-root, .MuiMenu-root, .MuiTooltip-popper, [role="menu"], [role="tooltip"]',
+              )
+            ) {
+              return;
+            }
+            handleClose();
+          }}
+        >
           <Stack direction={direction} alignItems="center" sx={{ padding: 1 }} onClick={handleClose}>
             {children}
           </Stack>

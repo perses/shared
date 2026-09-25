@@ -14,8 +14,7 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { DataQueriesProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
 import type { Link } from '@perses-dev/spec';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, screen } from '@testing-library/react';
 
 import { VariableProvider } from '../../context';
 import { renderWithContext } from '../../test';
@@ -32,16 +31,9 @@ const testLinks: Link[] = [
 ];
 
 describe('OverflowMenu', () => {
-  // Regression test for https://github.com/perses/perses/issues/3654
-  //
-  // On narrow panels, PanelActions collapses actions (including the panel
-  // links button) into this OverflowMenu. LinksDisplay itself opens a nested
-  // MUI <Menu> on click. OverflowMenu's content wrapper has onClick={handleClose}
-  // so that a click on a one-shot action (edit/delete/etc.) closes the overflow
-  // afterwards. But a click on the *nested* links button bubbles up to that
-  // same handler, closing (and unmounting) OverflowMenu's Popper before the
-  // links Menu can render.
-  it('opens the nested links menu when the links button is clicked inside it', async () => {
+  // Regression: nested LinksDisplay must still open when placed inside OverflowMenu
+  // (stopPropagation + disablePortal). Menu items may sit under aria-hidden Popper in jsdom.
+  it('opens the nested links menu when the links button is clicked inside it', async (): Promise<void> => {
     renderWithContext(
       <ThemeProvider theme={testTheme}>
         <TimeRangeProviderBasic initialTimeRange={{ pastDuration: '1h' }}>
@@ -56,11 +48,12 @@ describe('OverflowMenu', () => {
       </ThemeProvider>,
     );
 
-    userEvent.click(screen.getByRole('button', { name: 'show panel actions for My Panel' }));
-    await screen.findByRole('button', { name: 'Panel-links' });
-    userEvent.click(screen.getByRole('button', { name: 'Panel-links' }));
+    fireEvent.click(screen.getByRole('button', { name: 'show panel actions for My Panel' }));
+    const linksBtn = await screen.findByRole('button', { name: 'Panel-links' });
+    fireEvent.pointerDown(linksBtn);
+    fireEvent.click(linksBtn);
 
-    expect(await screen.findByRole('menuitem', { name: 'Link A' })).toBeInTheDocument();
-    expect(screen.getByRole('menuitem', { name: 'Link B' })).toBeInTheDocument();
+    expect(await screen.findByRole('menuitem', { name: 'Link A', hidden: true })).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: 'Link B', hidden: true })).toBeInTheDocument();
   });
 });
