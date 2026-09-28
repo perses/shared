@@ -14,6 +14,7 @@
 import { Box, Grid, IconButton, MenuItem, Stack, TextField, Typography } from '@mui/material';
 import type { RequestHeaders } from '@perses-dev/client';
 import type { HTTPDatasourceSpec, HTTPProxySpec } from '@perses-dev/spec';
+import { optionalDurationValidationSchema } from '@perses-dev/spec';
 import { produce } from 'immer';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
@@ -148,6 +149,43 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
                     produce(value, (draft) => {
                       if (draft.proxy !== undefined) {
                         draft.proxy.spec.url = e.target.value;
+                      }
+                    }),
+                  );
+                }}
+                sx={{ mb: 2 }}
+              />
+            )}
+          />
+          <Controller
+            name="Connection timeout"
+            rules={{
+              validate: (timeout: string | undefined) => {
+                const result = optionalDurationValidationSchema.safeParse(timeout);
+                return result.success || result.error.issues[0]?.message;
+              },
+            }}
+            render={({ field, fieldState }) => (
+              <TextField
+                {...field}
+                fullWidth
+                label="Connection timeout"
+                placeholder="30s"
+                value={value.proxy?.spec.timeout ?? ''}
+                error={!!fieldState.error}
+                helperText={fieldState.error?.message ?? 'Leave empty to use the server-configured default.'}
+                InputProps={{
+                  readOnly: isReadonly,
+                }}
+                InputLabelProps={{ shrink: isReadonly ? true : undefined }}
+                onChange={(e) => {
+                  field.onChange(e);
+                  onChange(
+                    produce(value, (draft) => {
+                      if (draft.proxy !== undefined) {
+                        draft.proxy.spec.timeout = e.target.value
+                          ? (e.target.value as HTTPProxySpec['timeout'])
+                          : undefined;
                       }
                     }),
                   );

@@ -14,7 +14,7 @@
 import type { SnackbarContext } from '@perses-dev/components';
 import type * as ComponentsModule from '@perses-dev/components';
 import type { HTTPDatasourceSpec } from '@perses-dev/spec';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -48,7 +48,7 @@ describe('HTTPSettingsEditor - Request Headers', () => {
 
   const renderComponent = (value: HTTPDatasourceSpec, onChange = vi.fn()): ReturnType<typeof render> => {
     const Wrapper = (): ReactElement => {
-      const methods = useForm();
+      const methods = useForm({ mode: 'onChange' });
       return (
         <FormProvider {...methods}>
           <HTTPSettingsEditor
@@ -427,6 +427,91 @@ describe('HTTPSettingsEditor - Request Headers', () => {
     });
   });
 
+  describe('Connection timeout', () => {
+    it('should initialize with the configured timeout', () => {
+      const value: HTTPDatasourceSpec = {
+        proxy: {
+          kind: 'HTTPProxy',
+          spec: {
+            url: 'http://localhost:9090',
+            timeout: '1m30s',
+          },
+        },
+      };
+
+      renderComponent(value);
+
+      expect(screen.getByLabelText(/Connection timeout/i)).toHaveValue('1m30s');
+    });
+
+    it('should update the configured timeout', () => {
+      const onChange = vi.fn();
+      const value: HTTPDatasourceSpec = {
+        proxy: {
+          kind: 'HTTPProxy',
+          spec: {
+            url: 'http://localhost:9090',
+          },
+        },
+      };
+
+      renderComponent(value, onChange);
+      const input = screen.getByLabelText(/Connection timeout/i);
+
+      fireEvent.change(input, { target: { value: '45s' } });
+      expect(onChange.mock.lastCall?.[0]?.proxy?.spec.timeout).toBe('45s');
+    });
+
+    it('should clear the configured timeout', () => {
+      const onChange = vi.fn();
+      const value: HTTPDatasourceSpec = {
+        proxy: {
+          kind: 'HTTPProxy',
+          spec: {
+            url: 'http://localhost:9090',
+            timeout: '1m30s',
+          },
+        },
+      };
+
+      renderComponent(value, onChange);
+      fireEvent.change(screen.getByLabelText(/Connection timeout/i), { target: { value: '' } });
+      expect(onChange.mock.lastCall?.[0]?.proxy?.spec.timeout).toBeUndefined();
+    });
+
+    it('should reject an invalid duration', async () => {
+      const value: HTTPDatasourceSpec = {
+        proxy: {
+          kind: 'HTTPProxy',
+          spec: {
+            url: 'http://localhost:9090',
+          },
+        },
+      };
+
+      renderComponent(value);
+      fireEvent.change(screen.getByLabelText(/Connection timeout/i), { target: { value: '30 seconds' } });
+
+      expect(await screen.findByText(/Must be a valid duration string/i)).toBeInTheDocument();
+    });
+
+    it('should reject zero', async () => {
+      const value: HTTPDatasourceSpec = {
+        proxy: {
+          kind: 'HTTPProxy',
+          spec: {
+            url: 'http://localhost:9090',
+          },
+        },
+      };
+
+      renderComponent(value);
+      fireEvent.change(screen.getByLabelText(/Connection timeout/i), { target: { value: '0' } });
+
+      expect(await screen.findByText(/Must be a valid duration string/i)).toBeInTheDocument();
+    });
+  });
+
   describe('Readonly mode', () => {
     it('should disable inputs in readonly mode', () => {
       const value: HTTPDatasourceSpec = {
@@ -459,9 +544,11 @@ describe('HTTPSettingsEditor - Request Headers', () => {
 
       const nameInput = screen.getByLabelText(/Header name/i);
       const valueInput = screen.getByLabelText(/Header value/i);
+      const timeoutInput = screen.getByLabelText(/Connection timeout/i);
 
       expect(nameInput).toHaveAttribute('readonly');
       expect(valueInput).toHaveAttribute('readonly');
+      expect(timeoutInput).toHaveAttribute('readonly');
     });
 
     it('should disable add/remove buttons in readonly mode', () => {
