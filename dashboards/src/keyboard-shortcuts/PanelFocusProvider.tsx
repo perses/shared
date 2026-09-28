@@ -62,7 +62,7 @@ export function useFocusedPanel(): string | null {
   return usePanelFocusContext().focusedPanelKey;
 }
 
-const PANEL_FOCUS_DEBOUNCE_MS = 50;
+export const PANEL_FOCUS_DEBOUNCE_MS = 50;
 
 /** Debounced mouse enter/leave handlers for panel focus. Add `tabIndex={-1}` to the panel element. */
 export function usePanelFocusHandlers(panelKey: string): {
@@ -80,7 +80,20 @@ export function usePanelFocusHandlers(panelKey: string): {
       }
       timerRef.current = setTimeout(() => {
         setFocusedPanel(panelKey);
-        element.focus({ preventScroll: true });
+        const active = document.activeElement;
+
+        /**
+         * Check whether there is any OpenPopup HTMLElement
+         * If there is any, do not shift the focus by onMouseEnter
+         * Otherwise, those elements may be affected
+         */
+        const isEngaged =
+          active instanceof HTMLElement &&
+          (active.isContentEditable ||
+            active.matches('input, textarea, select, [role="combobox"], [aria-expanded="true"]'));
+        if (!isEngaged) {
+          element.focus({ preventScroll: true });
+        }
         timerRef.current = null;
       }, PANEL_FOCUS_DEBOUNCE_MS);
     },

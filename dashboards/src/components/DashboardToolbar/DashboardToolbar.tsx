@@ -12,8 +12,10 @@
 // limitations under the License.
 
 import { Typography, Stack, Button, Box, useTheme, useMediaQuery, Alert } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material';
 import { ErrorBoundary, ErrorAlert } from '@perses-dev/components';
 import { TimeRangeControls, useTimeZoneParams } from '@perses-dev/plugin-system';
+import { useMemo } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 
 import type { OnSaveDashboard } from '../../context';
@@ -88,6 +90,12 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
   );
 
   const testId = 'dashboard-toolbar';
+  const stickyToolbarSx = useMemo(
+    (): SxProps<Theme> => ({
+      backgroundColor: ({ palette }): string => palette.background.default,
+    }),
+    [],
+  );
 
   return (
     <>
@@ -147,12 +155,7 @@ export const DashboardToolbar = (props: DashboardToolbarProps): ReactElement => 
         >
           <Box width="100%">
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <DashboardStickyToolbar
-                initialVariableIsSticky={initialVariableIsSticky}
-                sx={{
-                  backgroundColor: ({ palette }) => palette.background.default,
-                }}
-              />
+              <DashboardStickyToolbar initialVariableIsSticky={initialVariableIsSticky} sx={stickyToolbarSx} />
             </ErrorBoundary>
           </Box>
           <Stack direction="row" ml="auto" flexWrap="wrap" justifyContent="end">
