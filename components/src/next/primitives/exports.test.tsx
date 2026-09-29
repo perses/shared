@@ -20,6 +20,7 @@ import type {
   ButtonSize,
   ButtonVariant,
   ChipColor,
+  ChipCloseButtonProps,
   ChipProps,
   ChipSize,
   ChipStatus,
@@ -47,6 +48,7 @@ describe('primitives barrel exports', () => {
     const color: ButtonColor = 'primary';
     const size: ButtonSize = 'md';
     const chipProps: ChipProps = { label: 'Production' };
+    const chipCloseButtonProps: ChipCloseButtonProps = { 'data-testid': 'close-button' };
     const chipColor: ChipColor = 'secondary';
     const chipStatus: ChipStatus = 'success';
     const chipSize: ChipSize = 'sm';
@@ -62,6 +64,7 @@ describe('primitives barrel exports', () => {
     expect(color).toBe('primary');
     expect(size).toBe('md');
     expect(chipProps).toBeDefined();
+    expect(chipCloseButtonProps).toBeDefined();
     expect(chipColor).toBe('secondary');
     expect(chipStatus).toBe('success');
     expect(chipSize).toBe('sm');

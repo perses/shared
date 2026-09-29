@@ -25,6 +25,28 @@ const variants: ChipVariant[] = ['filled', 'outlined'];
 const chipListStyle: CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: '0.5rem' };
 const chipColumnStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '1rem' };
 
+function TagIcon(): ReactElement {
+  return (
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
+      <path
+        d="M2.5 2.5H8l5.5 5.5-5.5 5.5-5.5-5.5V2.5Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <circle cx="5.25" cy="5.25" r="0.75" fill="currentColor" />
+    </svg>
+  );
+}
+
+function TrashIcon(): ReactElement {
+  return (
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
+      <path d="M3 4.5h10M6.5 2.5h3M5 4.5l.5 9h5l.5-9M6.5 7v4M9.5 7v4" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
 interface RemovableChipProps {
   label: string;
   onDelete: (label: string) => void;
@@ -76,3 +98,23 @@ export const Removable: Story = () => {
   );
 };
 Removable.storyName = 'Removable';
+
+export const CustomIcons: Story = () => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  return (
+    <div style={chipListStyle}>
+      <Chip label="Tagged resource" icon={<TagIcon />} color="secondary" />
+      {isVisible && (
+        <Chip
+          label="Delete with custom icon"
+          status="warning"
+          icon={<TagIcon />}
+          deleteIcon={<TrashIcon />}
+          onDelete={() => setIsVisible(false)}
+        />
+      )}
+    </div>
+  );
+};
+CustomIcons.storyName = 'Custom icons';

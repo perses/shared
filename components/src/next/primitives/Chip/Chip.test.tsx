@@ -65,6 +65,11 @@ describe('Chip', () => {
     expect(screen.getByTestId('leading-icon')).toBeInTheDocument();
   });
 
+  it('uses children when label is omitted', () => {
+    render(<Chip>Production</Chip>);
+    expect(screen.getByText('Production')).toBeInTheDocument();
+  });
+
   it('renders a delete button when onDelete is provided', () => {
     render(<Chip label="Removable" onDelete={noop} />);
     expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument();
@@ -91,6 +96,72 @@ describe('Chip', () => {
 
     expect(handleDelete).toHaveBeenCalledTimes(1);
     expect(handleClick).not.toHaveBeenCalled();
+  });
+
+  it('renders separate sibling controls when a Chip is clickable and removable', () => {
+    render(<Chip label="Removable" onClick={noop} onDelete={noop} />);
+
+    const chip = screen.getByText('Removable').closest('.ps-Chip');
+    expect(chip).not.toHaveAttribute('role', 'button');
+    expect(screen.getByRole('button', { name: 'Removable' })).toHaveClass('ps-Chip__action');
+    expect(screen.getByRole('button', { name: /remove removable/i })).toBeInTheDocument();
+  });
+
+  it('renders clickable Chips as keyboard-operable buttons', async () => {
+    const handleClick = vi.fn();
+    render(<Chip label="Show all" onClick={handleClick} />);
+
+    const chip = screen.getByRole('button', { name: 'Show all' });
+    await userEvent.click(chip);
+    await userEvent.keyboard('{Enter}');
+
+    expect(handleClick).toHaveBeenCalledTimes(2);
+  });
+
+  it('renders href Chips as links', () => {
+    render(<Chip label="Documentation" href="/docs" target="_blank" />);
+    expect(screen.getByRole('link', { name: 'Documentation' })).toHaveAttribute('href', '/docs');
+    expect(screen.getByRole('link', { name: 'Documentation' })).toHaveAttribute('target', '_blank');
+  });
+
+  it('prevents interactions when disabled', async () => {
+    const handleClick = vi.fn();
+    const handleDelete = vi.fn();
+    render(<Chip label="Disabled" disabled onClick={handleClick} onDelete={handleDelete} />);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Disabled' }));
+    await userEvent.click(screen.getByRole('button', { name: /remove/i }));
+
+    expect(handleClick).not.toHaveBeenCalled();
+    expect(handleDelete).not.toHaveBeenCalled();
+  });
+
+  it('supports a custom close-button aria label and properties', () => {
+    render(
+      <Chip
+        label="Production"
+        onDelete={noop}
+        closeBtnAriaLabel="Remove production environment"
+        closeBtnProps={{ 'data-testid': 'close-button' }}
+      />,
+    );
+
+    expect(screen.getByTestId('close-button')).toHaveAccessibleName('Remove production environment');
+  });
+
+  it('renders a custom close button without nesting it in another button', async () => {
+    const handleDelete = vi.fn();
+    render(<Chip label="Production" onDelete={handleDelete} closeBtn={<button type="button">Remove custom</button>} />);
+
+    const closeButton = screen.getByRole('button', { name: /remove production/i });
+    expect(closeButton.parentElement).toHaveClass('ps-Chip');
+    await userEvent.click(closeButton);
+    expect(handleDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it('sets a label max width for truncation', () => {
+    render(<Chip label="Production" textMaxWidth="12ch" />);
+    expect(screen.getByText('Production').closest('.ps-Chip')).toHaveStyle({ '--chip-label-max-width': '12ch' });
   });
 
   it('renders no delete button when onDelete is omitted', () => {

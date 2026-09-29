@@ -12,8 +12,18 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { forwardRef } from 'react';
-import type { HTMLAttributes, MouseEventHandler, ReactElement } from 'react';
+import { cloneElement, forwardRef } from 'react';
+import type {
+  ButtonHTMLAttributes,
+  CSSProperties,
+  ElementType,
+  HTMLAttributes,
+  KeyboardEventHandler,
+  MouseEvent as ReactMouseEvent,
+  MouseEventHandler,
+  ReactElement,
+  ReactNode,
+} from 'react';
 
 import type { ColorVariant, Size, Status } from '../types';
 
@@ -24,16 +34,46 @@ export type ChipColor = 'default' | ColorVariant;
 export type ChipStatus = Status;
 export type ChipSize = Exclude<Size, 'lg'>;
 export type ChipVariant = 'filled' | 'outlined';
+export type ChipCloseButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
+  [key: `data-${string}`]: string | undefined;
+};
+type CloseButtonElementProps = {
+  'aria-label'?: string;
+  className?: string;
+  disabled?: boolean;
+  onClick?: MouseEventHandler<HTMLElement>;
+};
 
-export interface ChipProps extends Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
-  label: string;
+export interface ChipProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'color' | 'onClick'> {
+  /** Content displayed in the Chip. `children` is used when `label` is omitted. */
+  label?: ReactNode;
+  children?: ReactNode;
   color?: ChipColor;
   status?: ChipStatus;
   size?: ChipSize;
   variant?: ChipVariant;
+  /** Optional element used for the root, such as a router link. */
+  component?: ElementType;
+  /** Makes the Chip a native link when no custom component is provided. */
+  href?: string;
+  target?: string;
+  clickable?: boolean;
+  disabled?: boolean;
+  skipFocusWhenDisabled?: boolean;
   icon?: ReactElement;
+  /** Alias for `icon`, provided for MUI Chip migration compatibility. */
+  avatar?: ReactElement;
+  onClick?: MouseEventHandler<HTMLElement>;
   deleteIcon?: ReactElement;
-  onDelete?: MouseEventHandler<HTMLButtonElement>;
+  /** Alias for `deleteIcon`, matching the PatternFly Label API. */
+  closeBtn?: ReactElement<CloseButtonElementProps>;
+  deleteAriaLabel?: string;
+  /** Alias for `deleteAriaLabel`, matching the PatternFly Label API. */
+  closeBtnAriaLabel?: string;
+  closeBtnProps?: ChipCloseButtonProps;
+  onDelete?: MouseEventHandler<HTMLElement>;
+  /** Maximum width for the label before it is visually truncated. */
+  textMaxWidth?: CSSProperties['maxWidth'];
 }
 
 const defaultDeleteIcon = (
@@ -42,43 +82,162 @@ const defaultDeleteIcon = (
   </svg>
 );
 
-export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
+function getLabelText(label: ReactNode): string {
+  return typeof label === 'string' || typeof label === 'number' ? String(label) : 'label';
+}
+
+export const Chip = forwardRef<HTMLElement, ChipProps>(function Chip(
   {
     label,
+    children,
     color = 'default',
     status,
     size = 'sm',
     variant = 'filled',
     icon,
+    avatar,
     deleteIcon = defaultDeleteIcon,
+    closeBtn,
+    deleteAriaLabel,
+    closeBtnAriaLabel,
+    closeBtnProps,
     onDelete,
+    component,
+    href,
+    target,
+    clickable,
+    disabled = false,
+    skipFocusWhenDisabled = false,
+    onClick,
+    onKeyDown,
+    role,
+    tabIndex,
+    textMaxWidth,
+    style,
     className,
     ...rest
   },
   ref,
 ): ReactElement {
-  const handleDelete: MouseEventHandler<HTMLButtonElement> = (event) => {
-    event.stopPropagation();
-    onDelete?.(event);
+  const content = label ?? children;
+  const isInteractive = Boolean(onClick || href);
+  const isClickable = clickable || isInteractive;
+  const Component = component ?? (href ? 'a' : 'div');
+  const usesSeparateAction = isInteractive && Boolean(onDelete);
+  const RootComponent = usesSeparateAction ? 'div' : Component;
+  const ActionComponent = component ?? (href ? 'a' : 'button');
+  const resolvedStyle = textMaxWidth ? ({ ...style, '--chip-label-max-width': textMaxWidth } as CSSProperties) : style;
+  const resolvedTabIndex = disabled && skipFocusWhenDisabled ? -1 : (tabIndex ?? (isInteractive ? 0 : undefined));
+
+  const handleClick: MouseEventHandler<HTMLElement> = (event) => {
+    if (disabled) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    onClick?.(event);
   };
 
+  const handleKeyDown: KeyboardEventHandler<HTMLElement> = (event) => {
+    onKeyDown?.(event);
+    if (event.defaultPrevented || disabled || !onClick || (event.key !== 'Enter' && event.key !== ' ')) return;
+
+    event.preventDefault();
+    event.currentTarget.click();
+  };
+
+  const { className: closeButtonClassName, onClick: closeButtonOnClick, ...restCloseButtonProps } = closeBtnProps ?? {};
+
+  const handleDelete: MouseEventHandler<HTMLElement> = (event) => {
+    event.stopPropagation();
+    if (disabled) return;
+
+    closeButtonOnClick?.(event as ReactMouseEvent<HTMLButtonElement>);
+    closeBtn?.props.onClick?.(event);
+    if (!event.defaultPrevented) onDelete?.(event);
+  };
+
+  const closeButtonAriaLabel = closeBtnAriaLabel ?? deleteAriaLabel ?? `Remove ${getLabelText(content)}`;
+  const deleteControl = closeBtn ? (
+    cloneElement(closeBtn, {
+      ...restCloseButtonProps,
+      className: clsx('ps-Chip__delete', closeBtn.props.className, closeButtonClassName),
+      'aria-label': closeButtonAriaLabel,
+      disabled,
+      onClick: handleDelete,
+    })
+  ) : (
+    <button
+      {...restCloseButtonProps}
+      type="button"
+      className={clsx('ps-Chip__delete', closeButtonClassName)}
+      aria-label={closeButtonAriaLabel}
+      disabled={disabled}
+      onClick={handleDelete}
+    >
+      {deleteIcon}
+    </button>
+  );
+
+  const chipContent = (
+    <>
+      {(avatar ?? icon) && <span className="ps-Chip__icon">{avatar ?? icon}</span>}
+      <span className="ps-Chip__label">{content}</span>
+    </>
+  );
+
+  if (usesSeparateAction) {
+    return (
+      <RootComponent
+        {...rest}
+        ref={ref}
+        data-color={color}
+        data-status={status}
+        data-size={size}
+        data-variant={variant}
+        data-clickable={isClickable || undefined}
+        data-disabled={disabled || undefined}
+        style={resolvedStyle}
+        className={clsx('ps-Chip', className)}
+      >
+        <ActionComponent
+          href={href}
+          target={target}
+          aria-disabled={disabled || undefined}
+          tabIndex={resolvedTabIndex}
+          onClick={handleClick}
+          onKeyDown={onKeyDown}
+          className="ps-Chip__action"
+        >
+          {chipContent}
+        </ActionComponent>
+        {deleteControl}
+      </RootComponent>
+    );
+  }
+
   return (
-    <div
+    <RootComponent
       {...rest}
       ref={ref}
+      href={href}
+      target={target}
+      role={role ?? (onClick && !href ? 'button' : undefined)}
+      tabIndex={resolvedTabIndex}
+      aria-disabled={disabled || undefined}
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
       data-color={color}
       data-status={status}
       data-size={size}
       data-variant={variant}
+      data-clickable={isClickable || undefined}
+      data-disabled={disabled || undefined}
+      style={resolvedStyle}
       className={clsx('ps-Chip', className)}
     >
-      {icon && <span className="ps-Chip__icon">{icon}</span>}
-      <span className="ps-Chip__label">{label}</span>
-      {onDelete && (
-        <button type="button" className="ps-Chip__delete" aria-label={`Remove ${label}`} onClick={handleDelete}>
-          {deleteIcon}
-        </button>
-      )}
-    </div>
+      {chipContent}
+      {onDelete && deleteControl}
+    </RootComponent>
   );
 });
