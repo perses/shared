@@ -11,11 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/** Visual color variants shared by primitives. */
 export type ColorVariant = 'primary' | 'secondary';
 
-/** Semantic statuses shared by primitives. */
 export type Status = 'error' | 'warning' | 'success' | 'info';
 
-/** Size scale shared by primitives. */
 export type Size = 'sm' | 'md' | 'lg';

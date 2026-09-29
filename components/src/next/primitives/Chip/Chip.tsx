@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { cloneElement, forwardRef } from 'react';
+import { cloneElement, forwardRef, useCallback } from 'react';
 import type {
   ButtonHTMLAttributes,
   CSSProperties,
@@ -44,37 +44,34 @@ type CloseButtonElementProps = {
   onClick?: MouseEventHandler<HTMLElement>;
 };
 
-export interface ChipProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'color' | 'onClick'> {
-  /** Content displayed in the Chip. `children` is used when `label` is omitted. */
+interface ChipBaseProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'color' | 'onClick'> {
   label?: ReactNode;
   children?: ReactNode;
   color?: ChipColor;
   status?: ChipStatus;
   size?: ChipSize;
   variant?: ChipVariant;
-  /** Optional element used for the root, such as a router link. */
   component?: ElementType;
-  /** Makes the Chip a native link when no custom component is provided. */
   href?: string;
   target?: string;
   clickable?: boolean;
   disabled?: boolean;
   skipFocusWhenDisabled?: boolean;
   icon?: ReactElement;
-  /** Alias for `icon`, provided for MUI Chip migration compatibility. */
   avatar?: ReactElement;
-  onClick?: MouseEventHandler<HTMLElement>;
   deleteIcon?: ReactElement;
-  /** Alias for `deleteIcon`, matching the PatternFly Label API. */
   closeBtn?: ReactElement<CloseButtonElementProps>;
   deleteAriaLabel?: string;
-  /** Alias for `deleteAriaLabel`, matching the PatternFly Label API. */
   closeBtnAriaLabel?: string;
   closeBtnProps?: ChipCloseButtonProps;
-  onDelete?: MouseEventHandler<HTMLElement>;
-  /** Maximum width for the label before it is visually truncated. */
   textMaxWidth?: CSSProperties['maxWidth'];
 }
+
+export type ChipProps = ChipBaseProps &
+  (
+    | { onClick?: MouseEventHandler<HTMLElement>; onDelete?: never }
+    | { onClick?: never; onDelete?: MouseEventHandler<HTMLElement> }
+  );
 
 const defaultDeleteIcon = (
   <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -119,15 +116,29 @@ export const Chip = forwardRef<HTMLElement, ChipProps>(function Chip(
   },
   ref,
 ): ReactElement {
+  if (onClick && onDelete) {
+    throw new Error('Chip accepts either onClick or onDelete, but not both.');
+  }
+
   const content = label ?? children;
   const isInteractive = Boolean(onClick || href);
   const isClickable = clickable || isInteractive;
   const Component = component ?? (href ? 'a' : 'div');
-  const usesSeparateAction = isInteractive && Boolean(onDelete);
-  const RootComponent = usesSeparateAction ? 'div' : Component;
-  const ActionComponent = component ?? (href ? 'a' : 'button');
-  const resolvedStyle = textMaxWidth ? ({ ...style, '--chip-label-max-width': textMaxWidth } as CSSProperties) : style;
+  const usesSeparateAction = Boolean(href && onDelete);
+  const labelMaxWidth = typeof textMaxWidth === 'number' ? `${textMaxWidth}px` : textMaxWidth;
+  const resolvedStyle: (CSSProperties & { '--chip-label-max-width'?: string }) | undefined =
+    textMaxWidth !== undefined ? { ...style, '--chip-label-max-width': labelMaxWidth } : style;
   const resolvedTabIndex = disabled && skipFocusWhenDisabled ? -1 : (tabIndex ?? (isInteractive ? 0 : undefined));
+  const visualProps = {
+    'data-color': color,
+    'data-status': status,
+    'data-size': size,
+    'data-variant': variant,
+    'data-clickable': isClickable || undefined,
+    'data-disabled': disabled || undefined,
+    style: resolvedStyle,
+    className: clsx('ps-Chip', className),
+  };
 
   const handleClick: MouseEventHandler<HTMLElement> = (event) => {
     if (disabled) {
@@ -138,13 +149,16 @@ export const Chip = forwardRef<HTMLElement, ChipProps>(function Chip(
     onClick?.(event);
   };
 
-  const handleKeyDown: KeyboardEventHandler<HTMLElement> = (event) => {
-    onKeyDown?.(event);
-    if (event.defaultPrevented || disabled || !onClick || (event.key !== 'Enter' && event.key !== ' ')) return;
+  const handleKeyDown = useCallback<KeyboardEventHandler<HTMLElement>>(
+    (event) => {
+      onKeyDown?.(event);
+      if (event.defaultPrevented || disabled || !onClick || (event.key !== 'Enter' && event.key !== ' ')) return;
 
-    event.preventDefault();
-    event.currentTarget.click();
-  };
+      event.preventDefault();
+      event.currentTarget.click();
+    },
+    [disabled, onClick, onKeyDown],
+  );
 
   const { className: closeButtonClassName, onClick: closeButtonOnClick, ...restCloseButtonProps } = closeBtnProps ?? {};
 
@@ -186,39 +200,10 @@ export const Chip = forwardRef<HTMLElement, ChipProps>(function Chip(
     </>
   );
 
-  if (usesSeparateAction) {
-    return (
-      <RootComponent
-        {...rest}
-        ref={ref}
-        data-color={color}
-        data-status={status}
-        data-size={size}
-        data-variant={variant}
-        data-clickable={isClickable || undefined}
-        data-disabled={disabled || undefined}
-        style={resolvedStyle}
-        className={clsx('ps-Chip', className)}
-      >
-        <ActionComponent
-          href={href}
-          target={target}
-          aria-disabled={disabled || undefined}
-          tabIndex={resolvedTabIndex}
-          onClick={handleClick}
-          onKeyDown={onKeyDown}
-          className="ps-Chip__action"
-        >
-          {chipContent}
-        </ActionComponent>
-        {deleteControl}
-      </RootComponent>
-    );
-  }
-
-  return (
-    <RootComponent
+  const mainElement = (
+    <Component
       {...rest}
+      {...(usesSeparateAction ? undefined : visualProps)}
       ref={ref}
       href={href}
       target={target}
@@ -227,17 +212,19 @@ export const Chip = forwardRef<HTMLElement, ChipProps>(function Chip(
       aria-disabled={disabled || undefined}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      data-color={color}
-      data-status={status}
-      data-size={size}
-      data-variant={variant}
-      data-clickable={isClickable || undefined}
-      data-disabled={disabled || undefined}
-      style={resolvedStyle}
-      className={clsx('ps-Chip', className)}
+      className={usesSeparateAction ? 'ps-Chip__action' : visualProps.className}
     >
       {chipContent}
-      {onDelete && deleteControl}
-    </RootComponent>
+      {!usesSeparateAction && onDelete && deleteControl}
+    </Component>
+  );
+
+  return usesSeparateAction ? (
+    <div {...visualProps}>
+      {mainElement}
+      {deleteControl}
+    </div>
+  ) : (
+    mainElement
   );
 });
