@@ -27,13 +27,13 @@
     font-weight: var(--perses-font-weight-medium);
   }
 
-  .ps-Chip[data-size='small'] {
+  .ps-Chip[data-size='sm'] {
     height: 1.5rem;
     padding: 0 var(--perses-spacing-sm);
     font-size: var(--perses-font-size-xs);
   }
 
-  .ps-Chip[data-size='medium'] {
+  .ps-Chip[data-size='md'] {
     height: 2rem;
     padding: 0 var(--perses-spacing-md);
     font-size: var(--perses-font-size-sm);
@@ -48,31 +48,37 @@
   .ps-Chip[data-color='primary'] {
     --chip-bg: var(--perses-status-bg-primary);
     --chip-border: var(--perses-status-border-primary);
-    --chip-text: var(--perses-text-primary);
+    --chip-text: var(--perses-status-text-primary);
   }
 
-  .ps-Chip[data-color='success'] {
+  .ps-Chip[data-color='secondary'] {
+    --chip-bg: var(--perses-status-bg-secondary);
+    --chip-border: var(--perses-status-border-secondary);
+    --chip-text: var(--perses-status-text-secondary);
+  }
+
+  .ps-Chip[data-status='success'] {
     --chip-bg: var(--perses-status-bg-success);
     --chip-border: var(--perses-status-border-success);
-    --chip-text: var(--perses-text-primary);
+    --chip-text: var(--perses-status-text-success);
   }
 
-  .ps-Chip[data-color='warning'] {
+  .ps-Chip[data-status='warning'] {
     --chip-bg: var(--perses-status-bg-warning);
     --chip-border: var(--perses-status-border-warning);
-    --chip-text: var(--perses-text-primary);
+    --chip-text: var(--perses-status-text-warning);
   }
 
-  .ps-Chip[data-color='error'] {
+  .ps-Chip[data-status='error'] {
     --chip-bg: var(--perses-status-bg-error);
     --chip-border: var(--perses-status-border-error);
-    --chip-text: var(--perses-text-primary);
+    --chip-text: var(--perses-status-text-error);
   }
 
-  .ps-Chip[data-color='info'] {
+  .ps-Chip[data-status='info'] {
     --chip-bg: var(--perses-status-bg-info);
     --chip-border: var(--perses-status-border-info);
-    --chip-text: var(--perses-text-primary);
+    --chip-text: var(--perses-status-text-info);
   }
 
   .ps-Chip[data-variant='outlined'] {
@@ -108,7 +114,7 @@
     height: 100%;
   }
 
-  .ps-Chip[data-size='medium'] .ps-Chip__delete {
+  .ps-Chip[data-size='md'] .ps-Chip__delete {
     width: 1rem;
     height: 1rem;
   }

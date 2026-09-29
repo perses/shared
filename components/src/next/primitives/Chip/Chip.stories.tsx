@@ -16,10 +16,11 @@ import { useCallback, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 
 import { Chip } from './Chip';
-import type { ChipColor, ChipSize, ChipVariant } from './Chip';
+import type { ChipColor, ChipSize, ChipStatus, ChipVariant } from './Chip';
 
-const colors: ChipColor[] = ['default', 'primary', 'success', 'warning', 'error', 'info'];
-const sizes: ChipSize[] = ['small', 'medium'];
+const colors: ChipColor[] = ['default', 'primary', 'secondary'];
+const statuses: ChipStatus[] = ['success', 'warning', 'error', 'info'];
+const sizes: ChipSize[] = ['sm', 'md'];
 const variants: ChipVariant[] = ['filled', 'outlined'];
 const chipListStyle: CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: '0.5rem' };
 const chipColumnStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '1rem' };
@@ -39,6 +40,9 @@ export const AllColors: Story = () => (
   <div style={chipListStyle}>
     {colors.map((color) => (
       <Chip key={color} label={color} color={color} />
+    ))}
+    {statuses.map((status) => (
+      <Chip key={status} label={status} status={status} />
     ))}
   </div>
 );

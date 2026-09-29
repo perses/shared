@@ -35,22 +35,34 @@ describe('Chip', () => {
   });
 
   it('sets data-color attribute', () => {
-    render(<Chip label="Error" color="error" />);
-    expect(screen.getByText('Error').closest('.ps-Chip')).toHaveAttribute('data-color', 'error');
+    render(<Chip label="Secondary" color="secondary" />);
+    expect(screen.getByText('Secondary').closest('.ps-Chip')).toHaveAttribute('data-color', 'secondary');
   });
 
-  it('defaults to the small filled variant', () => {
+  it('sets data-status attribute independently of color', () => {
+    render(<Chip label="Error" color="secondary" status="error" />);
+    const chip = screen.getByText('Error').closest('.ps-Chip');
+    expect(chip).toHaveAttribute('data-color', 'secondary');
+    expect(chip).toHaveAttribute('data-status', 'error');
+  });
+
+  it('defaults to the sm filled variant', () => {
     render(<Chip label="Production" />);
     const chip = screen.getByText('Production').closest('.ps-Chip');
-    expect(chip).toHaveAttribute('data-size', 'small');
+    expect(chip).toHaveAttribute('data-size', 'sm');
     expect(chip).toHaveAttribute('data-variant', 'filled');
   });
 
   it('sets data-size and data-variant attributes', () => {
-    render(<Chip label="Production" size="medium" variant="outlined" />);
+    render(<Chip label="Production" size="md" variant="outlined" />);
     const chip = screen.getByText('Production').closest('.ps-Chip');
-    expect(chip).toHaveAttribute('data-size', 'medium');
+    expect(chip).toHaveAttribute('data-size', 'md');
     expect(chip).toHaveAttribute('data-variant', 'outlined');
+  });
+
+  it('renders an optional leading icon', () => {
+    render(<Chip label="Production" icon={<svg data-testid="leading-icon" />} />);
+    expect(screen.getByTestId('leading-icon')).toBeInTheDocument();
   });
 
   it('renders a delete button when onDelete is provided', () => {
@@ -63,6 +75,22 @@ describe('Chip', () => {
     render(<Chip label="Removable" onDelete={handleDelete} />);
     await userEvent.click(screen.getByRole('button', { name: /remove/i }));
     expect(handleDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses a custom delete icon when provided', () => {
+    render(<Chip label="Removable" onDelete={noop} deleteIcon={<svg data-testid="delete-icon" />} />);
+    expect(screen.getByTestId('delete-icon')).toBeInTheDocument();
+  });
+
+  it('does not propagate delete clicks to the chip', async () => {
+    const handleClick = vi.fn();
+    const handleDelete = vi.fn();
+    render(<Chip label="Removable" onClick={handleClick} onDelete={handleDelete} />);
+
+    await userEvent.click(screen.getByRole('button', { name: /remove/i }));
+
+    expect(handleDelete).toHaveBeenCalledTimes(1);
+    expect(handleClick).not.toHaveBeenCalled();
   });
 
   it('renders no delete button when onDelete is omitted', () => {
