@@ -679,7 +679,10 @@ describe('HTTPSettingsEditor - Timeout', () => {
 
     await userEvent.clear(screen.getByLabelText(/Timeout/i));
 
-    expect(onChange.mock.lastCall?.[0]?.proxy?.spec.timeout).toBeUndefined();
+    expect(onChange).toHaveBeenCalled();
+    const lastSpec = onChange.mock.lastCall?.[0]?.proxy?.spec;
+    expect(lastSpec).toEqual(expect.objectContaining({ url: 'http://localhost:9090' }));
+    expect(lastSpec?.timeout).toBeUndefined();
   });
 
   it('should show an error for an invalid duration', async () => {
