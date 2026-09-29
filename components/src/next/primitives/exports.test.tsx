@@ -11,22 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Button, Divider, Icon, Spinner } from './index';
+import { Alert, Box, Button, Divider, Icon, Spinner } from './index';
 import type {
   AlertProps,
   AlertSeverity,
+  BoxProps,
   ButtonColor,
   ButtonProps,
   ButtonSize,
   ButtonVariant,
   DividerProps,
   IconProps,
+  SpacingToken,
   SpinnerProps,
 } from './index';
 
 describe('primitives barrel exports', () => {
   it('exports the concrete component implementations', () => {
     expect(Alert).toBeDefined();
+    expect(Box).toBeDefined();
     expect(Button).toBeDefined();
     expect(Divider).toBeDefined();
     expect(Icon).toBeDefined();
@@ -36,6 +39,8 @@ describe('primitives barrel exports', () => {
   it('exports their prop types', () => {
     const alertProps: AlertProps = {};
     const severity: AlertSeverity = 'info';
+    const boxProps: BoxProps = {};
+    const spacingToken: SpacingToken = 'md';
     const buttonProps: ButtonProps = {};
     const variant: ButtonVariant = 'solid';
     const color: ButtonColor = 'primary';
@@ -46,6 +51,8 @@ describe('primitives barrel exports', () => {
 
     expect(alertProps).toBeDefined();
     expect(severity).toBe('info');
+    expect(boxProps).toBeDefined();
+    expect(spacingToken).toBe('md');
     expect(buttonProps).toBeDefined();
     expect(variant).toBe('solid');
     expect(color).toBe('primary');
