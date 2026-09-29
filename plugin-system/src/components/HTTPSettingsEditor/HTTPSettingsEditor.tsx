@@ -25,6 +25,7 @@ import { z } from 'zod';
 import { DatasourceTestConnectionButton } from '../DatasourceTestConnectionButton';
 import { OptionsEditorRadios } from '../OptionsEditorRadios';
 import { HTTPHeaderPolicyEditor } from './HTTPHeaderPolicyEditor';
+import { HTTPProxyTimeoutEditor } from './HTTPProxyTimeoutEditor';
 
 const urlSchema = z.string().url();
 
@@ -46,7 +47,7 @@ export interface HTTPSettingsEditor {
   testConnection?: () => Promise<void>;
 }
 
-/** Edits direct URLs and proxy settings, including mutually exclusive allow/drop request header lists. */
+/** Edits direct URLs and proxy settings, including the connection timeout and mutually exclusive allow/drop request header lists. */
 export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   const { value, onChange, isReadonly, initialSpecDirect, initialSpecProxy, testConnection } = props;
   const strDirect = 'Direct access';
@@ -110,7 +111,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
     );
   };
 
-  const handleHeaderPolicyChange = useCallback(
+  const handleProxySpecChange = useCallback(
     (next: HTTPProxySpec): void => {
       onChange(
         produce(value, (draft) => {
@@ -163,6 +164,9 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
                 disabled={!urlSchema.safeParse(value.proxy?.spec.url).success}
               />
             </Box>
+          )}
+          {value.proxy && (
+            <HTTPProxyTimeoutEditor value={value.proxy.spec} isReadonly={isReadonly} onChange={handleProxySpecChange} />
           )}
           <Typography variant="h5" mb={2}>
             Allowed endpoints
@@ -408,11 +412,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
           </Grid>
 
           {value.proxy && (
-            <HTTPHeaderPolicyEditor
-              value={value.proxy.spec}
-              isReadonly={isReadonly}
-              onChange={handleHeaderPolicyChange}
-            />
+            <HTTPHeaderPolicyEditor value={value.proxy.spec} isReadonly={isReadonly} onChange={handleProxySpecChange} />
           )}
 
           <Stack spacing={1}>
