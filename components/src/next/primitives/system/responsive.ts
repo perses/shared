@@ -32,7 +32,7 @@ export function responsiveStyle(property: string, value: unknown): CSSProperties
 
   return Object.fromEntries(
     Object.entries(value).map(([breakpoint, responsiveValue]) => [
-      `--ps-box-${property}-${breakpoint}`,
+      `--ps-responsive-${property}-${breakpoint}`,
       responsiveValue,
     ]),
   ) as CSSProperties;

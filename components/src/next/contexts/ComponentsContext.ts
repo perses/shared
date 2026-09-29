@@ -58,7 +58,7 @@ export interface ComponentsProviderProps {
    *
    * @example
    * // Provide only custom components
-   * const components: PersesComponents = { Alert: MyAlert, Button: MyButton, Divider: MyDivider, Spinner: MySpinner };
+   * const components: PersesComponents = { Alert: MyAlert, Button: MyButton, Divider: MyDivider, Spinner: MySpinner, ... };
    */
   components: PersesComponents;
   /**

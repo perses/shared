@@ -107,7 +107,7 @@ describe('Box', () => {
     );
     const box = screen.getByTestId('box');
     expect(box).toHaveClass('ps-responsive-display');
-    expect(box).toHaveStyle({ '--ps-box-display-default': 'flex', '--ps-box-display-sm': 'block' });
+    expect(box).toHaveStyle({ '--ps-responsive-display-default': 'flex', '--ps-responsive-display-sm': 'block' });
   });
 
   it('merges style prop with computed styles', () => {
