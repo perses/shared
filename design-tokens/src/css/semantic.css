@@ -52,6 +52,10 @@
     --perses-text-accent: var(--perses-color-gray-700);
     --perses-text-on-solid: var(--perses-color-white);
 
+    /* Tooltip */
+    --perses-tooltip-bg: var(--perses-color-gray-900);
+    --perses-tooltip-text: var(--perses-color-white);
+
     /* Status: Primary */
     --perses-status-bg-primary: var(--perses-color-blue-50);
     --perses-status-bg-primary-hover: var(--perses-color-blue-800);
@@ -123,6 +127,10 @@
     --perses-text-navigation: var(--perses-color-white);
     --perses-text-accent: var(--perses-color-gray-400);
     --perses-text-on-solid: var(--perses-color-white);
+
+    /* Tooltip */
+    --perses-tooltip-bg: var(--perses-color-white);
+    --perses-tooltip-text: var(--perses-color-gray-900);
 
     /* Status: Primary */
     --perses-status-bg-primary: var(--perses-color-blue-900);
