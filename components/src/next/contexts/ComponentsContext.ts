@@ -18,12 +18,14 @@ import type { AlertProps } from '../primitives/Alert';
 import type { ButtonProps } from '../primitives/Button';
 import type { DividerProps } from '../primitives/Divider';
 import type { SpinnerProps } from '../primitives/Spinner';
+import type { SwitchProps } from '../primitives/Switch';
 
 export interface PersesComponents {
   Button: ComponentType<ButtonProps>;
   Alert: ComponentType<AlertProps>;
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;
+  Switch: ComponentType<SwitchProps>;
 }
 
 export interface PersesIcons {
@@ -56,7 +58,13 @@ export interface ComponentsProviderProps {
    *
    * @example
    * // Provide only custom components
-   * const components: PersesComponents = { Alert: MyAlert, Button: MyButton, Divider: MyDivider, Spinner: MySpinner };
+   * const components: PersesComponents = {
+   *   Alert: MyAlert,
+   *   Button: MyButton,
+   *   Divider: MyDivider,
+   *   Spinner: MySpinner,
+   *   ...
+   * };
    */
   components: PersesComponents;
   /**
