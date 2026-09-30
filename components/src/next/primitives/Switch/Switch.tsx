@@ -88,12 +88,14 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
   const generatedId = useId();
   const controlId = id ?? generatedId;
   const labelId = `${controlId}-label`;
+  const hiddenInputId = `${controlId}-input`;
 
   const root = (
     <BaseSwitch.Root
       {...rest}
       ref={ref}
-      id={controlId}
+      id={hiddenInputId}
+      render={<span id={controlId} />}
       checked={checked}
       defaultChecked={defaultChecked}
       onCheckedChange={onCheckedChange}
@@ -117,7 +119,7 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
   }
 
   return (
-    <label className="ps-Switch__wrapper" htmlFor={controlId}>
+    <label className="ps-Switch__wrapper" htmlFor={hiddenInputId}>
       {root}
       <span id={labelId} className="ps-Switch__label">
         {label}

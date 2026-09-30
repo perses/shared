@@ -28,7 +28,7 @@
     position: relative;
     display: inline-flex;
     align-items: center;
-    box-sizing: content-box;
+    box-sizing: border-box;
     width: calc(2 * var(--ps-switch-thumb-size) + 2 * var(--ps-switch-padding));
     height: calc(var(--ps-switch-thumb-size) + 2 * var(--ps-switch-padding));
     border: none;

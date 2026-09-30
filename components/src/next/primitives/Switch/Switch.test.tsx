@@ -146,4 +146,9 @@ describe('Switch', () => {
     render(<Switch checked={false} onCheckedChange={() => {}} ref={ref} />);
     expect(ref.current).toBe(screen.getByRole('switch'));
   });
+
+  it('applies a caller-provided id to the visible switch element', () => {
+    render(<Switch checked={false} onCheckedChange={() => {}} id="my-switch" />);
+    expect(screen.getByRole('switch')).toHaveAttribute('id', 'my-switch');
+  });
 });
