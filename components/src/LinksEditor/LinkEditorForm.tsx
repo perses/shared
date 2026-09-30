@@ -19,6 +19,7 @@ import { TextField } from '../controls';
 export interface LinkEditorFormField<T> {
   value: T;
   onChange: (value: T) => void;
+  onBlur?: () => void;
   placeholder?: string;
   label: string;
   error: { hasError?: boolean; helperText?: string };
@@ -43,6 +44,7 @@ export const LinkEditorForm = (props: LinkEditorFormProps): ReactElement => {
         error={url.error?.hasError}
         helperText={url.error?.helperText}
         onChange={url.onChange}
+        onBlur={url.onBlur}
         placeholder={url.placeholder}
         multiline
         maxRows={5}
