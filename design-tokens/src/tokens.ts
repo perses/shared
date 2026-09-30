@@ -76,6 +76,11 @@ export const tokens = {
     onSolid: 'var(--perses-text-on-solid)',
   },
 
+  tooltip: {
+    bg: 'var(--perses-tooltip-bg)',
+    text: 'var(--perses-tooltip-text)',
+  },
+
   status: {
     primary: statusRole('primary'),
     secondary: statusRole('secondary'),
