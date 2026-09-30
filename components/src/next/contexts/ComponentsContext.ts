@@ -18,12 +18,14 @@ import type { AlertProps } from '../primitives/Alert';
 import type { ButtonProps } from '../primitives/Button';
 import type { DividerProps } from '../primitives/Divider';
 import type { SpinnerProps } from '../primitives/Spinner';
+import type { TooltipProps } from '../primitives/Tooltip';
 
 export interface PersesComponents {
   Button: ComponentType<ButtonProps>;
   Alert: ComponentType<AlertProps>;
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;
+  Tooltip: ComponentType<TooltipProps>;
 }
 
 export interface PersesIcons {

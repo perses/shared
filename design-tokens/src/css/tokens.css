@@ -120,6 +120,10 @@
     --perses-spacing-3xl: 2rem;
     --perses-spacing-4xl: 3rem;
 
+    /* ---- Elevation ---- */
+    --perses-shadow-overlay: 0 2px 8px rgba(0, 0, 0, 0.2);
+    --perses-z-index-overlay: 1500;
+
     /* ---- Border Radius ---- */
     --perses-radius-none: 0;
     --perses-radius-sm: 2px;

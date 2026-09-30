@@ -76,6 +76,11 @@ export const tokens = {
     onSolid: 'var(--perses-text-on-solid)',
   },
 
+  tooltip: {
+    bg: 'var(--perses-tooltip-bg)',
+    text: 'var(--perses-tooltip-text)',
+  },
+
   status: {
     primary: statusRole('primary'),
     secondary: statusRole('secondary'),
@@ -95,6 +100,11 @@ export const tokens = {
     '2xl': 'var(--perses-spacing-2xl)',
     '3xl': 'var(--perses-spacing-3xl)',
     '4xl': 'var(--perses-spacing-4xl)',
+  },
+
+  elevation: {
+    shadowOverlay: 'var(--perses-shadow-overlay)',
+    zIndexOverlay: 'var(--perses-z-index-overlay)',
   },
 
   radius: {
