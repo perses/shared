@@ -21,10 +21,10 @@
     font-size: var(--perses-font-size-xs);
     line-height: var(--perses-line-height-compact);
     padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
-    border-radius: var(--perses-radius-sm);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    border-radius: var(--perses-radius-md);
+    box-shadow: var(--perses-shadow-overlay);
     max-width: 20rem;
-    z-index: 1500;
+    z-index: var(--perses-z-index-overlay);
   }
 
   .ps-Tooltip__arrow {

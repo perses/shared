@@ -17,6 +17,9 @@ import type { ReactElement, ReactNode } from 'react';
 
 import './tooltip.css';
 
+/** Mirrors --perses-spacing-sm (8px). */
+const SIDE_OFFSET = 8;
+
 export interface TooltipProps {
   title: ReactNode;
   children: ReactElement;
@@ -26,7 +29,7 @@ export interface TooltipProps {
 }
 
 export function Tooltip({ title, children, placement = 'top', delay = 400, className }: TooltipProps): ReactElement {
-  if (!title) {
+  if (title === '' || title == null) {
     return children;
   }
 
@@ -34,7 +37,7 @@ export function Tooltip({ title, children, placement = 'top', delay = 400, class
     <BaseTooltip.Root>
       <BaseTooltip.Trigger delay={delay} render={children} />
       <BaseTooltip.Portal>
-        <BaseTooltip.Positioner side={placement} sideOffset={6}>
+        <BaseTooltip.Positioner side={placement} sideOffset={SIDE_OFFSET}>
           <BaseTooltip.Popup className={clsx('ps-Tooltip', className)}>
             <BaseTooltip.Arrow className="ps-Tooltip__arrow" />
             {title}
