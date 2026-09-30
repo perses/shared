@@ -28,6 +28,7 @@ interface HTTPProxyTimeoutEditorProps {
 /** Edits the optional connection timeout of an HTTP proxy. An empty value unsets the timeout. */
 export function HTTPProxyTimeoutEditor({ value, onChange, isReadonly }: HTTPProxyTimeoutEditorProps): ReactElement {
   const timeout = value.timeout ?? '';
+  // TODO this thing should be handled by a form schema.
   const isInvalid = timeout !== '' && !isDurationString(timeout);
 
   const handleChange = useCallback(
