@@ -18,3 +18,7 @@ expect.extend(matchers);
 
 // Always mock e-charts during tests since we don't have a proper canvas in jsdom
 vi.mock('echarts/core');
+
+if (typeof PointerEvent !== 'function') {
+  vi.stubGlobal('PointerEvent', MouseEvent);
+}

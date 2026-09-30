@@ -59,6 +59,8 @@ describe('tokens object', () => {
 
   it('produces correct var() strings for semantic border tokens', () => {
     expect(tokens.border.default).toBe('var(--perses-border-default)');
+    expect(tokens.border.width.sm).toBe('var(--perses-border-width-sm)');
+    expect(tokens.border.width.md).toBe('var(--perses-border-width-md)');
   });
 
   it('produces correct var() strings for semantic text tokens', () => {

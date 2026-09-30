@@ -11,19 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { PersesComponents, PersesIcons } from '../contexts/ComponentsContext';
-import { Alert } from './Alert';
-import { Button } from './Button';
-import { Checkbox } from './Checkbox';
-import { Divider } from './Divider';
-import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon';
-import { Spinner } from './Spinner';
+export type ColorVariant = 'primary' | 'secondary';
 
-export const defaultComponents: PersesComponents = { Button, Alert, Checkbox, Divider, Spinner };
+export type Status = 'error' | 'warning' | 'success' | 'info';
 
-export const defaultIcons: PersesIcons = {
-  Error: ErrorIcon,
-  Info: InfoIcon,
-  Success: SuccessIcon,
-  Warning: WarningIcon,
-};
+export type Size = 'sm' | 'md' | 'lg';
