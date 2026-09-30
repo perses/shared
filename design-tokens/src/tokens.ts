@@ -102,6 +102,11 @@ export const tokens = {
     '4xl': 'var(--perses-spacing-4xl)',
   },
 
+  elevation: {
+    shadowOverlay: 'var(--perses-shadow-overlay)',
+    zIndexOverlay: 'var(--perses-z-index-overlay)',
+  },
+
   radius: {
     none: 'var(--perses-radius-none)',
     sm: 'var(--perses-radius-sm)',

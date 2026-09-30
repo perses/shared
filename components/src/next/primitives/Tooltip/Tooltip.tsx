@@ -29,7 +29,7 @@ export interface TooltipProps {
 }
 
 export function Tooltip({ title, children, placement = 'top', delay = 400, className }: TooltipProps): ReactElement {
-  if (title === '' || title == null) {
+  if (title === '' || title === null || title === undefined) {
     return children;
   }
 
