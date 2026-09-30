@@ -164,37 +164,28 @@
     cursor: not-allowed;
   }
 
+  .ps-Checkbox__field[data-size='sm'] {
+    --perses-checkbox-control-size: var(--perses-spacing-lg);
+  }
+
+  .ps-Checkbox__field[data-size='md'] {
+    --perses-checkbox-control-size: var(--perses-spacing-xl);
+  }
+
+  .ps-Checkbox__field[data-size='lg'] {
+    --perses-checkbox-control-size: var(--perses-spacing-2xl);
+  }
+
   .ps-Checkbox__supportingContent {
     display: flex;
     flex-direction: column;
     gap: var(--perses-spacing-xs);
+    padding-inline-start: calc(var(--perses-checkbox-control-size) + var(--perses-spacing-sm));
   }
 
-  .ps-Checkbox__field[data-size='sm'] .ps-Checkbox__supportingContent {
-    padding-inline-start: calc(var(--perses-spacing-lg) + var(--perses-spacing-sm));
-  }
-
-  .ps-Checkbox__field[data-size='md'] .ps-Checkbox__supportingContent {
-    padding-inline-start: calc(var(--perses-spacing-xl) + var(--perses-spacing-sm));
-  }
-
-  .ps-Checkbox__field[data-size='lg'] .ps-Checkbox__supportingContent {
-    padding-inline-start: calc(var(--perses-spacing-2xl) + var(--perses-spacing-sm));
-  }
-
-  .ps-Checkbox__field[data-label-position='start'][data-size='sm'] .ps-Checkbox__supportingContent {
+  .ps-Checkbox__field[data-label-position='start'] .ps-Checkbox__supportingContent {
     padding-inline-start: var(--perses-spacing-0);
-    padding-inline-end: calc(var(--perses-spacing-lg) + var(--perses-spacing-sm));
-  }
-
-  .ps-Checkbox__field[data-label-position='start'][data-size='md'] .ps-Checkbox__supportingContent {
-    padding-inline-start: var(--perses-spacing-0);
-    padding-inline-end: calc(var(--perses-spacing-xl) + var(--perses-spacing-sm));
-  }
-
-  .ps-Checkbox__field[data-label-position='start'][data-size='lg'] .ps-Checkbox__supportingContent {
-    padding-inline-start: var(--perses-spacing-0);
-    padding-inline-end: calc(var(--perses-spacing-2xl) + var(--perses-spacing-sm));
+    padding-inline-end: calc(var(--perses-checkbox-control-size) + var(--perses-spacing-sm));
   }
 
   .ps-Checkbox__description {

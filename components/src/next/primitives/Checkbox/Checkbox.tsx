@@ -14,13 +14,11 @@
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
 import clsx from 'clsx';
 import { forwardRef, useCallback, useId, useState } from 'react';
-import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
+import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode, Ref } from 'react';
 
 import type { ColorVariant, Size, Status } from '../types';
 
-import * as checkboxStyles from './checkbox.css';
-
-void checkboxStyles;
+import './checkbox.css';
 
 export type CheckboxColor = ColorVariant | Status;
 export type CheckboxSize = Size;
@@ -28,6 +26,14 @@ export type CheckboxLabelPosition = 'start' | 'end';
 
 export interface CheckboxChangeEventDetails {
   event: Event;
+}
+
+function presenceAttr(value: boolean): true | undefined {
+  return value || undefined;
+}
+
+function emptyAttr(value: boolean): '' | undefined {
+  return value ? '' : undefined;
 }
 
 export interface CheckboxStyle extends CSSProperties {
@@ -58,6 +64,54 @@ export interface CheckboxProps extends Omit<HTMLAttributes<HTMLElement>, 'childr
   size?: CheckboxSize;
   color?: CheckboxColor;
   style?: CheckboxStyle;
+}
+
+interface CheckboxFieldProps {
+  control: ReactNode;
+  label?: ReactNode;
+  description?: ReactNode;
+  descriptionId?: string;
+  body?: ReactNode;
+  labelPosition: CheckboxLabelPosition;
+  size: CheckboxSize;
+  disabled: boolean;
+}
+
+function CheckboxField({
+  control,
+  label,
+  description,
+  descriptionId,
+  body,
+  labelPosition,
+  size,
+  disabled,
+}: CheckboxFieldProps): ReactElement {
+  const hasSupportingContent = description !== undefined || body !== undefined;
+
+  return (
+    <div
+      className="ps-Checkbox__field"
+      data-disabled={presenceAttr(disabled)}
+      data-label-position={labelPosition}
+      data-size={size}
+    >
+      <label className="ps-Checkbox__label">
+        {control}
+        {label !== undefined && <span className="ps-Checkbox__labelText">{label}</span>}
+      </label>
+      {hasSupportingContent && (
+        <div className="ps-Checkbox__supportingContent">
+          {description !== undefined && (
+            <span id={descriptionId} className="ps-Checkbox__description">
+              {description}
+            </span>
+          )}
+          {body !== undefined && <div className="ps-Checkbox__body">{body}</div>}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox(
@@ -117,7 +171,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
       disabled={disabled}
       readOnly={readOnly}
       required={required}
-      aria-invalid={invalid || undefined}
+      aria-invalid={presenceAttr(invalid)}
       name={name}
       value={value}
       uncheckedValue={uncheckedValue}
@@ -125,13 +179,13 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
       inputRef={inputRef}
       aria-describedby={resolvedAriaDescribedBy}
       className={clsx('ps-Checkbox', className)}
-      data-checked={isChecked || undefined}
-      data-unchecked={!isChecked && !indeterminate ? '' : undefined}
-      data-indeterminate={indeterminate || undefined}
-      data-disabled={disabled || undefined}
-      data-readonly={readOnly || undefined}
-      data-required={required || undefined}
-      data-invalid={invalid || undefined}
+      data-checked={presenceAttr(isChecked)}
+      data-unchecked={emptyAttr(!isChecked && !indeterminate)}
+      data-indeterminate={presenceAttr(indeterminate)}
+      data-disabled={presenceAttr(disabled)}
+      data-readonly={presenceAttr(readOnly)}
+      data-required={presenceAttr(required)}
+      data-invalid={presenceAttr(invalid)}
       data-size={size}
       data-color={color}
     >
@@ -146,26 +200,15 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
   }
 
   return (
-    <div
-      className="ps-Checkbox__field"
-      data-disabled={disabled || undefined}
-      data-label-position={labelPosition}
-      data-size={size}
-    >
-      <label className="ps-Checkbox__label">
-        {control}
-        {label !== undefined && <span className="ps-Checkbox__labelText">{label}</span>}
-      </label>
-      {hasSupportingContent && (
-        <div className="ps-Checkbox__supportingContent">
-          {description !== undefined && (
-            <span id={descriptionId} className="ps-Checkbox__description">
-              {description}
-            </span>
-          )}
-          {body !== undefined && <div className="ps-Checkbox__body">{body}</div>}
-        </div>
-      )}
-    </div>
+    <CheckboxField
+      control={control}
+      label={label}
+      description={description}
+      descriptionId={descriptionId}
+      body={body}
+      labelPosition={labelPosition}
+      size={size}
+      disabled={disabled}
+    />
   );
 });
