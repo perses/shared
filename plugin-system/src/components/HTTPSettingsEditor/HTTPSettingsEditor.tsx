@@ -25,6 +25,7 @@ import { z } from 'zod';
 import { DatasourceTestConnectionButton } from '../DatasourceTestConnectionButton';
 import { OptionsEditorRadios } from '../OptionsEditorRadios';
 import { HTTPHeaderPolicyEditor } from './HTTPHeaderPolicyEditor';
+import { HTTPProxyOAuthPassthroughEditor } from './HTTPProxyOAuthPassthroughEditor';
 import { HTTPProxyTimeoutEditor } from './HTTPProxyTimeoutEditor';
 
 const urlSchema = z.string().url();
@@ -47,7 +48,7 @@ export interface HTTPSettingsEditor {
   testConnection?: () => Promise<void>;
 }
 
-/** Edits direct URLs and proxy settings, including the connection timeout and mutually exclusive allow/drop request header lists. */
+/** Edits direct URLs and proxy settings, including the connection timeout, mutually exclusive allow/drop request header lists, and OAuth identity forwarding. */
 export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   const { value: providedValue, onChange, isReadonly, initialSpecDirect, initialSpecProxy, testConnection } = props;
   const strDirect = 'Direct access';
@@ -450,6 +451,13 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
                 />
               )}
             />
+            {value.proxy && (
+              <HTTPProxyOAuthPassthroughEditor
+                value={value.proxy.spec}
+                isReadonly={isReadonly}
+                onChange={handleProxySpecChange}
+              />
+            )}
           </Stack>
         </>
       ),
