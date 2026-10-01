@@ -1,0 +1,203 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@layer perses.components {
+  .ps-Checkbox {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: var(--perses-spacing-0);
+    border: var(--perses-border-width-sm) solid var(--perses-checkbox-border-color, var(--perses-border-default));
+    border-radius: var(--perses-radius-sm);
+    color: var(--perses-text-on-solid);
+    background-color: var(--perses-bg-surface);
+    cursor: pointer;
+  }
+
+  .ps-Checkbox[data-size='sm'] {
+    width: var(--perses-spacing-lg);
+    height: var(--perses-spacing-lg);
+    font-size: var(--perses-font-size-xs);
+  }
+
+  .ps-Checkbox[data-size='md'] {
+    width: var(--perses-spacing-xl);
+    height: var(--perses-spacing-xl);
+    font-size: var(--perses-font-size-sm);
+  }
+
+  .ps-Checkbox[data-size='lg'] {
+    width: var(--perses-spacing-2xl);
+    height: var(--perses-spacing-2xl);
+    font-size: var(--perses-font-size-md);
+  }
+
+  .ps-Checkbox[data-color='primary'] {
+    --perses-checkbox-color: var(--perses-status-solid-primary);
+    --perses-checkbox-color-hover: var(--perses-status-bg-primary-hover);
+    --perses-checkbox-focus-color: var(--perses-status-border-primary);
+  }
+
+  .ps-Checkbox[data-color='secondary'] {
+    --perses-checkbox-color: var(--perses-status-solid-secondary);
+    --perses-checkbox-color-hover: var(--perses-status-bg-secondary-hover);
+    --perses-checkbox-focus-color: var(--perses-status-border-secondary);
+  }
+
+  .ps-Checkbox[data-color='error'] {
+    --perses-checkbox-color: var(--perses-status-solid-error);
+    --perses-checkbox-color-hover: var(--perses-status-bg-error-hover);
+    --perses-checkbox-focus-color: var(--perses-status-border-error);
+  }
+
+  .ps-Checkbox[data-color='warning'] {
+    --perses-checkbox-color: var(--perses-status-solid-warning);
+    --perses-checkbox-color-hover: var(--perses-status-bg-warning-hover);
+    --perses-checkbox-focus-color: var(--perses-status-border-warning);
+  }
+
+  .ps-Checkbox[data-color='success'] {
+    --perses-checkbox-color: var(--perses-status-solid-success);
+    --perses-checkbox-color-hover: var(--perses-status-bg-success-hover);
+    --perses-checkbox-focus-color: var(--perses-status-border-success);
+  }
+
+  .ps-Checkbox[data-color='info'] {
+    --perses-checkbox-color: var(--perses-status-solid-info);
+    --perses-checkbox-color-hover: var(--perses-status-bg-info-hover);
+    --perses-checkbox-focus-color: var(--perses-status-border-info);
+  }
+
+  .ps-Checkbox[data-checked],
+  .ps-Checkbox[data-indeterminate] {
+    border-color: var(--perses-checkbox-color);
+    background-color: var(--perses-checkbox-color);
+  }
+
+  .ps-Checkbox[data-checked]:hover:not([data-disabled]):not([data-readonly]),
+  .ps-Checkbox[data-indeterminate]:hover:not([data-disabled]):not([data-readonly]) {
+    border-color: var(--perses-checkbox-color-hover);
+    background-color: var(--perses-checkbox-color-hover);
+  }
+
+  .ps-Checkbox:hover:not([data-checked]):not([data-indeterminate]):not([data-disabled]):not([data-readonly]) {
+    border-color: var(--perses-checkbox-color);
+  }
+
+  .ps-Checkbox:focus-visible {
+    outline: var(--perses-border-width-md) solid var(--perses-checkbox-focus-color);
+    outline-offset: var(--perses-spacing-xs);
+  }
+
+  .ps-Checkbox[data-disabled] {
+    border-color: var(--perses-text-disabled);
+    color: var(--perses-bg-surface);
+    background-color: var(--perses-text-disabled);
+    cursor: not-allowed;
+  }
+
+  .ps-Checkbox[data-readonly] {
+    cursor: default;
+  }
+
+  .ps-Checkbox[data-invalid]:not([data-checked]):not([data-indeterminate]) {
+    border-color: var(--perses-status-border-error);
+  }
+
+  .ps-Checkbox__indicator {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ps-Checkbox__mark::before {
+    content: '✓';
+    font-family: var(--perses-font-family);
+    font-weight: var(--perses-font-weight-bold);
+    line-height: var(--perses-line-height-tight);
+  }
+
+  .ps-Checkbox[data-indeterminate] .ps-Checkbox__mark::before {
+    content: '−';
+  }
+
+  .ps-Checkbox__field {
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--perses-spacing-xs);
+    color: var(--perses-text-primary);
+    font-family: var(--perses-font-family);
+    font-size: var(--perses-font-size-sm);
+    line-height: var(--perses-line-height-normal);
+  }
+
+  .ps-Checkbox__label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--perses-spacing-sm);
+    cursor: pointer;
+  }
+
+  .ps-Checkbox__field[data-label-position='start'] .ps-Checkbox__label {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+  }
+
+  .ps-Checkbox__field[data-disabled] .ps-Checkbox__label {
+    color: var(--perses-text-disabled);
+    cursor: not-allowed;
+  }
+
+  .ps-Checkbox__field[data-size='sm'] {
+    --perses-checkbox-control-size: var(--perses-spacing-lg);
+  }
+
+  .ps-Checkbox__field[data-size='md'] {
+    --perses-checkbox-control-size: var(--perses-spacing-xl);
+  }
+
+  .ps-Checkbox__field[data-size='lg'] {
+    --perses-checkbox-control-size: var(--perses-spacing-2xl);
+  }
+
+  .ps-Checkbox__supportingContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--perses-spacing-xs);
+    padding-inline-start: calc(var(--perses-checkbox-control-size) + var(--perses-spacing-sm));
+  }
+
+  .ps-Checkbox__field[data-label-position='start'] .ps-Checkbox__supportingContent {
+    padding-inline-start: var(--perses-spacing-0);
+    padding-inline-end: calc(var(--perses-checkbox-control-size) + var(--perses-spacing-sm));
+  }
+
+  .ps-Checkbox__description {
+    color: var(--perses-text-secondary);
+  }
+
+  .ps-Checkbox__body {
+    color: var(--perses-text-primary);
+  }
+
+  .ps-Checkbox__field[data-disabled] .ps-Checkbox__description,
+  .ps-Checkbox__field[data-disabled] .ps-Checkbox__body {
+    color: var(--perses-text-disabled);
+  }
+}

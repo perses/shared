@@ -13,6 +13,8 @@
 
 export * from './Alert';
 export * from './Button';
+export * from './Checkbox';
 export * from './Divider';
 export * from './Icon';
 export * from './Spinner';
+export type { ColorVariant, Size, Status } from './types';
