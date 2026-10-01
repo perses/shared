@@ -1,0 +1,120 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { Story } from '@ladle/react';
+import { useCallback, useState } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
+
+import { Chip } from './Chip';
+import type { ChipColor, ChipSize, ChipStatus, ChipVariant } from './Chip';
+
+const colors: ChipColor[] = ['default', 'primary', 'secondary'];
+const statuses: ChipStatus[] = ['success', 'warning', 'error', 'info'];
+const sizes: ChipSize[] = ['sm', 'md'];
+const variants: ChipVariant[] = ['filled', 'outlined'];
+const chipListStyle: CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: '0.5rem' };
+const chipColumnStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '1rem' };
+
+function TagIcon(): ReactElement {
+  return (
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
+      <path
+        d="M2.5 2.5H8l5.5 5.5-5.5 5.5-5.5-5.5V2.5Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <circle cx="5.25" cy="5.25" r="0.75" fill="currentColor" />
+    </svg>
+  );
+}
+
+function TrashIcon(): ReactElement {
+  return (
+    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
+      <path d="M3 4.5h10M6.5 2.5h3M5 4.5l.5 9h5l.5-9M6.5 7v4M9.5 7v4" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+interface RemovableChipProps {
+  label: string;
+  onDelete: (label: string) => void;
+}
+
+function RemovableChip({ label, onDelete }: RemovableChipProps): ReactElement {
+  const handleDelete = useCallback(() => onDelete(label), [label, onDelete]);
+
+  return <Chip label={label} onDelete={handleDelete} />;
+}
+
+export const AllColors: Story = () => (
+  <div style={chipListStyle}>
+    {colors.map((color) => (
+      <Chip key={color} label={color} color={color} />
+    ))}
+    {statuses.map((status) => (
+      <Chip key={status} label={status} status={status} />
+    ))}
+  </div>
+);
+AllColors.storyName = 'All colors';
+
+export const VariantsAndSizes: Story = () => (
+  <div style={chipColumnStyle}>
+    {sizes.map((size) => (
+      <div key={size} style={chipListStyle}>
+        {variants.map((variant) => (
+          <Chip key={variant} label={`${size} ${variant}`} size={size} variant={variant} />
+        ))}
+      </div>
+    ))}
+  </div>
+);
+VariantsAndSizes.storyName = 'Variants and sizes';
+
+export const Removable: Story = () => {
+  const [labels, setLabels] = useState(['environment: production', 'region: us-east-1', 'service: api']);
+  const removeLabel = useCallback((label: string) => {
+    setLabels((current) => current.filter((item) => item !== label));
+  }, []);
+
+  return (
+    <div style={chipListStyle}>
+      {labels.map((label) => (
+        <RemovableChip key={label} label={label} onDelete={removeLabel} />
+      ))}
+    </div>
+  );
+};
+Removable.storyName = 'Removable';
+
+export const CustomIcons: Story = () => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  return (
+    <div style={chipListStyle}>
+      <Chip label="Tagged resource" icon={<TagIcon />} color="secondary" />
+      {isVisible && (
+        <Chip
+          label="Delete with custom icon"
+          status="warning"
+          icon={<TagIcon />}
+          deleteIcon={<TrashIcon />}
+          onDelete={() => setIsVisible(false)}
+        />
+      )}
+    </div>
+  );
+};
+CustomIcons.storyName = 'Custom icons';
