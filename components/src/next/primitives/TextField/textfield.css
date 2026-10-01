@@ -1,0 +1,133 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@layer perses.components {
+  .ps-TextField {
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--perses-spacing-xs);
+    font-family: var(--perses-font-family);
+  }
+
+  .ps-TextField[data-full-width] {
+    display: flex;
+    width: 100%;
+  }
+
+  .ps-TextField__label {
+    font-size: var(--perses-font-size-sm);
+    color: var(--perses-text-secondary);
+  }
+
+  /* ---- Wrapper holds adornments + control, carries the border ---- */
+  .ps-TextField__wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--perses-spacing-xs);
+    border: 1px solid var(--perses-border-default);
+    border-radius: var(--perses-radius-md);
+    background-color: var(--perses-bg-surface);
+  }
+
+  .ps-TextField__wrapper:focus-within {
+    outline: 2px solid var(--perses-status-border-primary);
+    outline-offset: 1px;
+  }
+
+  .ps-TextField[data-multiline] .ps-TextField__wrapper {
+    align-items: flex-start;
+  }
+
+  .ps-TextField__adornment {
+    display: inline-flex;
+    align-items: center;
+    color: var(--perses-text-secondary);
+  }
+
+  .ps-TextField__input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background-color: transparent;
+    color: var(--perses-text-primary);
+    font-family: var(--perses-font-family);
+    outline: none;
+  }
+
+  .ps-TextField__input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  textarea.ps-TextField__input {
+    resize: vertical;
+  }
+
+  .ps-TextField[data-size='sm'] .ps-TextField__wrapper {
+    padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
+  }
+  .ps-TextField[data-size='sm'] .ps-TextField__input {
+    font-size: var(--perses-font-size-xs);
+  }
+
+  .ps-TextField[data-size='md'] .ps-TextField__wrapper {
+    padding: var(--perses-spacing-sm) var(--perses-spacing-md);
+  }
+  .ps-TextField[data-size='md'] .ps-TextField__input {
+    font-size: var(--perses-font-size-sm);
+  }
+
+  .ps-TextField[data-size='lg'] .ps-TextField__wrapper {
+    padding: var(--perses-spacing-md) var(--perses-spacing-lg);
+  }
+  .ps-TextField[data-size='lg'] .ps-TextField__input {
+    font-size: var(--perses-font-size-md);
+  }
+
+  /* ---- Status variants ---- */
+  .ps-TextField[data-status='error'] .ps-TextField__wrapper {
+    border-color: var(--perses-status-border-error);
+  }
+  .ps-TextField[data-status='warning'] .ps-TextField__wrapper {
+    border-color: var(--perses-status-border-warning);
+  }
+  .ps-TextField[data-status='success'] .ps-TextField__wrapper {
+    border-color: var(--perses-status-border-success);
+  }
+
+  .ps-TextField__helper {
+    font-size: var(--perses-font-size-xs);
+    color: var(--perses-text-secondary);
+  }
+
+  .ps-TextField[data-status='error'] .ps-TextField__helper {
+    color: var(--perses-status-text-error);
+  }
+  .ps-TextField[data-status='warning'] .ps-TextField__helper {
+    color: var(--perses-status-text-warning);
+  }
+  .ps-TextField[data-status='success'] .ps-TextField__helper {
+    color: var(--perses-status-text-success);
+  }
+
+  /* ---- Read-only variants ---- */
+  .ps-TextField[data-readonly-variant='plain'] .ps-TextField__wrapper {
+    border-color: transparent;
+    background-color: transparent;
+  }
+  .ps-TextField[data-readonly-variant='default'] .ps-TextField__wrapper {
+    opacity: 0.7;
+  }
+}
