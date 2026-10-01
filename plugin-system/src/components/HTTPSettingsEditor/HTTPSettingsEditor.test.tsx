@@ -622,11 +622,11 @@ describe('HTTPSettingsEditor - Test Connection', () => {
   });
 });
 
-const timeoutInitialSpecDirect: HTTPDatasourceSpec = {
+const statefulInitialSpecDirect: HTTPDatasourceSpec = {
   directUrl: '',
 };
 
-const timeoutInitialSpecProxy: HTTPDatasourceSpec = {
+const statefulInitialSpecProxy: HTTPDatasourceSpec = {
   proxy: {
     kind: 'HTTPProxy',
     spec: {
@@ -653,8 +653,8 @@ const renderStateful = (
           value={value}
           onChange={handleChange}
           isReadonly={isReadonly}
-          initialSpecDirect={timeoutInitialSpecDirect}
-          initialSpecProxy={timeoutInitialSpecProxy}
+          initialSpecDirect={statefulInitialSpecDirect}
+          initialSpecProxy={statefulInitialSpecProxy}
         />
       </FormProvider>
     );
