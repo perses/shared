@@ -12,7 +12,14 @@
 // limitations under the License.
 
 import { createContext } from 'react';
-import type { ComponentType, ReactNode, SVGProps } from 'react';
+import type {
+  ComponentType,
+  ForwardRefExoticComponent,
+  PropsWithoutRef,
+  ReactNode,
+  RefAttributes,
+  SVGProps,
+} from 'react';
 
 import type { AlertProps } from '../primitives/Alert';
 import type { ButtonProps } from '../primitives/Button';
@@ -20,10 +27,12 @@ import type { CheckboxProps } from '../primitives/Checkbox';
 import type { DividerProps } from '../primitives/Divider';
 import type { SpinnerProps } from '../primitives/Spinner';
 
+type RefComponent<Props, Element> = ForwardRefExoticComponent<PropsWithoutRef<Props> & RefAttributes<Element>>;
+
 export interface PersesComponents {
   Alert: ComponentType<AlertProps>;
   Button: ComponentType<ButtonProps>;
-  Checkbox: ComponentType<CheckboxProps>;
+  Checkbox: RefComponent<CheckboxProps, HTMLElement>;
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;
 }
