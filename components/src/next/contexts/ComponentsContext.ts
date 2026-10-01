@@ -18,12 +18,26 @@ import type { AlertProps } from '../primitives/Alert';
 import type { ButtonProps } from '../primitives/Button';
 import type { DividerProps } from '../primitives/Divider';
 import type { SpinnerProps } from '../primitives/Spinner';
+import type {
+  TableProps,
+  TableHeadProps,
+  TableBodyProps,
+  TableFooterProps,
+  TableRowProps,
+  TableCellProps,
+} from '../primitives/Table';
 
 export interface PersesComponents {
   Button: ComponentType<ButtonProps>;
   Alert: ComponentType<AlertProps>;
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;
+  Table: ComponentType<TableProps>;
+  TableHead: ComponentType<TableHeadProps>;
+  TableBody: ComponentType<TableBodyProps>;
+  TableFooter: ComponentType<TableFooterProps>;
+  TableRow: ComponentType<TableRowProps>;
+  TableCell: ComponentType<TableCellProps>;
 }
 
 export interface PersesIcons {
