@@ -16,3 +16,5 @@ export * from './Button';
 export * from './Divider';
 export * from './Icon';
 export * from './Spinner';
+export * from './TextField';
+export * from './types';
