@@ -13,7 +13,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { forwardRef } from 'react';
-import type { FC, ReactElement, SVGProps } from 'react';
+import type { FC, ReactElement, Ref, SVGProps } from 'react';
 
 import type { ButtonProps, ChipProps } from '../primitives';
 import { defaultComponents, defaultIcons } from '../primitives/defaults';
@@ -77,9 +77,9 @@ describe('ComponentsProvider', () => {
   });
 
   it('supports overriding Chip', () => {
-    const CustomChip = forwardRef<HTMLDivElement, ChipProps>(function CustomChip({ label, ...rest }, ref) {
+    const CustomChip = forwardRef<HTMLElement, ChipProps>(function CustomChip({ label, ...rest }, ref) {
       return (
-        <div ref={ref} {...rest} data-testid="custom-chip">
+        <div ref={ref as Ref<HTMLDivElement>} {...rest} data-testid="custom-chip">
           Custom: {label}
         </div>
       );
