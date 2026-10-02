@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { useAnnotations } from '@perses-dev/plugin-system';
 import type { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
 import type { ReactNode } from 'react';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useMemo, useState } from 'react';
 import type { StoreApi } from 'zustand';
 import { createStore, useStore } from 'zustand';
 import { devtools } from 'zustand/middleware';
@@ -21,7 +22,7 @@ import { immer } from 'zustand/middleware/immer';
 import { shallow } from 'zustand/shallow';
 import { useStoreWithEqualityFn } from 'zustand/traditional';
 
-import { AnnotationHydrationWrapper } from './AnnotationHydrationWrapper';
+import { getAnnotationSpecsWithData } from './annotation-data';
 
 export type AnnotationState = {
   data: AnnotationData[] | null;
@@ -35,12 +36,10 @@ export type AnnotationStateMap = {
 
 type AnnotationStoreState = {
   annotationSpecs: AnnotationSpec[];
-  annotationState: AnnotationStateMap;
 };
 
 type AnnotationStoreActions = {
   setAnnotationSpecs: (definitions: AnnotationSpec[]) => void;
-  setAnnotationState: (name: string, state: AnnotationState) => void;
 };
 
 type AnnotationStore = AnnotationStoreState & AnnotationStoreActions;
@@ -49,10 +48,8 @@ const AnnotationStoreContext = createContext<StoreApi<AnnotationStore> | undefin
 
 export function useAnnotationStoreCtx(): StoreApi<AnnotationStore> {
   const context = useContext(AnnotationStoreContext);
-  if (!context) {
-    return createAnnotationStore({ initialAnnotationSpecs: [] });
-  }
-  return context;
+  const [fallbackStore] = useState(() => context ?? createAnnotationStore({}));
+  return context ?? fallbackStore;
 }
 
 export function useAnnotationSpecs(): AnnotationSpec[] {
@@ -60,28 +57,25 @@ export function useAnnotationSpecs(): AnnotationSpec[] {
   return useStore(store, (s) => s.annotationSpecs);
 }
 
+/** Returns query-backed state for the requested dashboard annotations. */
 export function useAnnotationStates(annotationNames?: string[]): AnnotationStateMap {
-  const store = useAnnotationStoreCtx();
-  return useStoreWithEqualityFn(
-    store,
-    (s) => {
-      if (annotationNames) {
-        const result: AnnotationStateMap = {};
-        annotationNames.forEach((name) => {
-          const s = store.getState().annotationState[name];
-          if (s) {
-            result[name] = s;
-          }
-        });
-        return result;
+  const specs = useAnnotationSpecs();
+  const definitions = annotationNames ? specs.filter((spec) => annotationNames.includes(spec.display.name)) : specs;
+  const queries = useAnnotations(definitions);
+  return useMemo(() => {
+    const result: AnnotationStateMap = {};
+    definitions.forEach((definition, index) => {
+      const query = queries[index];
+      if (query) {
+        result[definition.display.name] = {
+          data: query.data ?? null,
+          isPending: query.isLoading,
+          error: query.error instanceof Error ? query.error : undefined,
+        };
       }
-
-      return s.annotationState;
-    },
-    (left, right) => {
-      return JSON.stringify(left) === JSON.stringify(right);
-    },
-  );
+    });
+    return result;
+  }, [definitions, queries]);
 }
 
 export function useAnnotationActions(): AnnotationStoreActions {
@@ -90,7 +84,6 @@ export function useAnnotationActions(): AnnotationStoreActions {
     store,
     (s) => {
       return {
-        setAnnotationState: s.setAnnotationState,
         setAnnotationSpecs: s.setAnnotationSpecs,
       };
     },
@@ -98,17 +91,16 @@ export function useAnnotationActions(): AnnotationStoreActions {
   );
 }
 
+/** Returns the spec and query-backed state of a dashboard annotation. */
 export function useAnnotationSpecAndState(name: string): {
   definition: AnnotationSpec | undefined;
   state: AnnotationState | undefined;
 } {
-  const store = useAnnotationStoreCtx();
-  return useStore(store, (s) => {
-    return {
-      definition: s.annotationSpecs.find((d) => d.display.name === name),
-      state: s.annotationState[name],
-    };
-  });
+  const specs = useAnnotationSpecs();
+  const states = useAnnotationStates([name]);
+  const definition = specs.find((spec) => spec.display.name === name);
+  const state = states[name];
+  return useMemo(() => ({ definition, state }), [definition, state]);
 }
 
 export type AnnotationSpecWithData = {
@@ -116,20 +108,14 @@ export type AnnotationSpecWithData = {
   data: AnnotationData[];
 };
 
+/**
+ * Resolves dashboard annotations on demand, returning specs paired with available query data.
+ * Hidden annotations are included; `usePanelAnnotationsWithData` skips them for panels.
+ */
 export function useAnnotationsWithData(): AnnotationSpecWithData[] {
-  const store = useAnnotationStoreCtx();
-
-  return useStore(store, (s) => {
-    return s.annotationSpecs
-      .map((definition) => {
-        const state = s.annotationState[definition.display.name];
-        return {
-          definition,
-          data: state?.data,
-        };
-      })
-      .filter((annotation) => !!annotation.data) as AnnotationSpecWithData[];
-  });
+  const definitions = useAnnotationSpecs();
+  const queries = useAnnotations(definitions);
+  return getAnnotationSpecsWithData(definitions, queries);
 }
 
 interface AnnotationStoreArgs {
@@ -139,9 +125,8 @@ interface AnnotationStoreArgs {
 function createAnnotationStore({ initialAnnotationSpecs = [] }: AnnotationStoreArgs): StoreApi<AnnotationStore> {
   const store = createStore<AnnotationStore>()(
     devtools(
-      immer((set, _get) => ({
+      immer((set) => ({
         annotationSpecs: initialAnnotationSpecs,
-        annotationState: {} as Record<string, AnnotationState>,
         setAnnotationSpecs(definitions: AnnotationSpec[]): void {
           set(
             (s) => {
@@ -149,15 +134,6 @@ function createAnnotationStore({ initialAnnotationSpecs = [] }: AnnotationStoreA
             },
             false,
             '[Annotations] setAnnotationSpecs', // Used for action name in Redux devtools
-          );
-        },
-        setAnnotationState: (name: string, state: AnnotationState): void => {
-          set(
-            (s) => {
-              s.annotationState[name] = state;
-            },
-            false,
-            '[Annotations] setAnnotationState', // Used for action name in Redux devtools
           );
         },
       })),
@@ -171,12 +147,8 @@ export interface AnnotationProviderProps {
   initialAnnotationSpecs?: AnnotationSpec[];
 }
 
-export function AnnotationProvider({ children, initialAnnotationSpecs = [] }: AnnotationProviderProps): ReactNode {
+export function AnnotationProvider({ children, initialAnnotationSpecs }: AnnotationProviderProps): ReactNode {
   const [store] = useState(() => createAnnotationStore({ initialAnnotationSpecs }));
 
-  return (
-    <AnnotationStoreContext.Provider value={store}>
-      <AnnotationHydrationWrapper>{children}</AnnotationHydrationWrapper>
-    </AnnotationStoreContext.Provider>
-  );
+  return <AnnotationStoreContext.Provider value={store}>{children}</AnnotationStoreContext.Provider>;
 }

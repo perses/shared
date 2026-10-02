@@ -15,29 +15,29 @@ import { useAnnotations } from '@perses-dev/plugin-system';
 import type { AnnotationSpec } from '@perses-dev/spec';
 import { useMemo } from 'react';
 
+import { getAnnotationSpecsWithData } from './annotation-data';
 import type { AnnotationSpecWithData } from './AnnotationProvider';
-import { useAnnotationsWithData } from './AnnotationProvider';
+import { useAnnotationSpecs } from './AnnotationProvider';
+
+/** Resolves the visible annotations among the given specs. Hidden annotations are not fetched. */
+function useVisibleAnnotationsWithData(definitions: AnnotationSpec[] | undefined): AnnotationSpecWithData[] {
+  const visibleDefinitions = (definitions ?? []).filter((definition) => !definition.display.hidden);
+  const queries = useAnnotations(visibleDefinitions);
+  return getAnnotationSpecsWithData(visibleDefinitions, queries);
+}
 
 /**
  * Returns the annotations to display on a single panel:
- *  - the dashboard-level annotations from the store (every panel receives these)
- *  - the panel-local annotations, resolved on the fly through the same runtime hook that
- *    hydrates dashboard annotations
+ *  - dashboard-level annotations (every panel receives these)
+ *  - panel-local annotations from `PanelProps.definition?.spec.annotations`
+ *
+ * Hidden annotations (`display.hidden`) are skipped and never fetched.
+ * Data is fetched on demand through the shared query cache, including annotation previews.
+ * Each result pairs the complete annotation spec (`definition`) with its available `data`.
  */
 export function usePanelAnnotationsWithData(panelAnnotations?: AnnotationSpec[]): AnnotationSpecWithData[] {
-  const dashboardAnnotations = useAnnotationsWithData();
-
-  const localDefinitions = useMemo(() => panelAnnotations ?? [], [panelAnnotations]);
-  const localResults = useAnnotations(localDefinitions);
-
-  return useMemo(() => {
-    const result: AnnotationSpecWithData[] = [...dashboardAnnotations];
-    localDefinitions.forEach((definition, index) => {
-      const data = localResults[index]?.data;
-      if (data) {
-        result.push({ definition, data });
-      }
-    });
-    return result;
-  }, [dashboardAnnotations, localDefinitions, localResults]);
+  const dashboardDefinitions = useAnnotationSpecs();
+  const dashboardAnnotations = useVisibleAnnotationsWithData(dashboardDefinitions);
+  const localAnnotations = useVisibleAnnotationsWithData(panelAnnotations);
+  return useMemo(() => [...dashboardAnnotations, ...localAnnotations], [dashboardAnnotations, localAnnotations]);
 }
