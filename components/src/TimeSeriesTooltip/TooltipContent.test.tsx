@@ -17,8 +17,35 @@ import { render } from '@testing-library/react';
 import { EMPHASIZED_SERIES_DESCRIPTION, NEARBY_SERIES_DESCRIPTION } from './tooltip-model';
 import type { TooltipContentProps } from './TooltipContent';
 import { TooltipContent } from './TooltipContent';
+import type { NearbySeriesArray } from './types';
+
+const series: NearbySeriesArray = [
+  {
+    seriesIdx: 1,
+    datumIdx: 23,
+    seriesName: 'Requests',
+    date: 100,
+    x: 100,
+    y: 1,
+    formattedY: '1',
+    markerColor: 'red',
+    isClosestToCursor: false,
+  },
+];
+
+const nextSeries = series.map((item) =>
+  Object.assign({}, item, { datumIdx: 24, date: 200, x: 200, y: 2, formattedY: '2' }),
+);
 
 describe('TooltipContent', () => {
+  it('keeps series rows mounted when the hovered timestamp changes', () => {
+    const { rerender } = render(<TooltipContent series={series} />);
+    const label = screen.getByText('Requests');
+    rerender(<TooltipContent series={nextSeries} />);
+    expect(screen.getByText('Requests')).toBe(label);
+    expect(screen.getByText('2')).toBeInTheDocument();
+  });
+
   const renderComponent = (props: TooltipContentProps): void => {
     render(<TooltipContent {...props} />);
   };

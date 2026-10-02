@@ -13,6 +13,7 @@
 
 import { Box } from '@mui/material';
 import type { ReactElement } from 'react';
+import { memo } from 'react';
 
 import { SeriesLabelsStack } from './SeriesLabelsStack';
 import { SeriesMarker } from './SeriesMarker';
@@ -28,7 +29,7 @@ export interface SeriesInfoProps {
   wrapLabels?: boolean;
 }
 
-export function SeriesInfo(props: SeriesInfoProps): ReactElement {
+export const SeriesInfo = memo(function SeriesInfo(props: SeriesInfoProps): ReactElement {
   const { seriesName, formattedY, markerColor, totalSeries, emphasizeText = false, wrapLabels = true } = props;
 
   // metric __name__ comes before opening curly brace, ignore if not populated
@@ -102,4 +103,4 @@ export function SeriesInfo(props: SeriesInfoProps): ReactElement {
       </Box>
     </Box>
   );
-}
+});
