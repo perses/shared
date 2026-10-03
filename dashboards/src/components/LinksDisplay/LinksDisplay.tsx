@@ -18,7 +18,7 @@ import { useReplaceVariablesInString, useReplaceVariablesInUrl } from '@perses-d
 import type { Link } from '@perses-dev/spec';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import type { MouseEvent, ReactElement } from 'react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 type LinksVariant = 'dashboard' | 'panel';
 
@@ -27,14 +27,22 @@ interface LinksProps {
   variant: LinksVariant;
 }
 
+function stopAncestorClose(event: MouseEvent): void {
+  event.stopPropagation();
+}
+
+function linkKey(link: Link): string {
+  return `${link.name ?? ''}:${link.url}`;
+}
+
 export function LinksDisplay({ links, variant }: LinksProps): ReactElement | null {
+  const reactId = useId();
+  const buttonId = `${variant}-links-button-${reactId.replace(/:/g, '')}`;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isMenuOpened = Boolean(anchorEl);
+
   const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>): void => {
-    // Prevent this from bubbling up to an ancestor OverflowMenu's onClick={handleClose},
-    // which would close (and unmount) the overflow before this menu can open.
-    // See https://github.com/perses/perses/issues/3654
-    event.stopPropagation();
+    stopAncestorClose(event);
     setAnchorEl(event.currentTarget);
   };
 
@@ -72,42 +80,51 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
       return (
         <Stack direction="row" spacing={1}>
           {links.map((link: Link) => (
-            <LinkChip key={link.url} link={link} />
+            <LinkChip key={linkKey(link)} link={link} />
           ))}
         </Stack>
       );
     }
   }
 
-  // Default: show dropdown menu for multiple links
   return (
     <>
-      <InfoTooltip description={`${links.length} links`} enterDelay={100}>
-        <IconButton
-          aria-label={`${capitalize(variant)}-links`}
-          id={`${variant}-links-button`}
-          size="small"
-          onClick={handleOpenMenu}
-          sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
-        >
-          <LaunchIcon
-            aria-describedby="links-icon"
-            fontSize="inherit"
-            sx={{ color: (theme: Theme) => theme.palette.text.secondary }}
-          />
-        </IconButton>
-      </InfoTooltip>
+      <IconButton
+        aria-label={`${capitalize(variant)}-links`}
+        id={buttonId}
+        title={`${links.length} links`}
+        size="small"
+        onPointerDown={stopAncestorClose}
+        onMouseDown={stopAncestorClose}
+        onClick={handleOpenMenu}
+        sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
+      >
+        <LaunchIcon
+          aria-describedby="links-icon"
+          fontSize="inherit"
+          sx={{ color: (theme: Theme) => theme.palette.text.secondary }}
+        />
+      </IconButton>
 
       <Menu
         anchorEl={anchorEl}
         open={isMenuOpened}
         onClose={handleClose}
+        disablePortal
+        disableScrollLock
+        slotProps={{
+          root: {
+            sx: { zIndex: (theme: Theme) => theme.zIndex.modal },
+          },
+        }}
         MenuListProps={{
-          'aria-labelledby': `${variant}-links-button`,
+          'aria-labelledby': buttonId,
+          onPointerDown: stopAncestorClose,
+          onClick: stopAncestorClose,
         }}
       >
         {links.map((link: Link) => (
-          <LinkMenuItem key={link.url} link={link} />
+          <LinkMenuItem key={linkKey(link)} link={link} />
         ))}
       </Menu>
     </>
@@ -155,11 +172,15 @@ function LinkMenuItem({ link }: { link: Link }): ReactElement {
   const { url, name, tooltip, targetBlank } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
-      <MenuItem component={LinkComponent} href={url} target={targetBlank ? '_blank' : '_self'}>
-        {name ?? url}
-      </MenuItem>
-    </InfoTooltip>
+    <MenuItem
+      component={LinkComponent}
+      href={url}
+      target={targetBlank ? '_blank' : '_self'}
+      title={tooltip ?? url}
+      onClick={(event: MouseEvent) => event.stopPropagation()}
+    >
+      {name ?? url}
+    </MenuItem>
   );
 }
 
