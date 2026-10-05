@@ -35,7 +35,7 @@ export function responsiveClassName(property: string, value: unknown): string | 
 export function responsiveVariantClassNames(prefix: string, value: unknown): string | undefined {
   if (!isResponsiveValue(value)) return undefined;
 
-  return Object.entries(value)
+  return Object.entries(value ?? {})
     .filter(([, variant]) => variant !== undefined)
     .map(([breakpoint, variant]) => `${prefix}-${breakpoint}-${String(variant)}`)
     .join(' ');
