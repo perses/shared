@@ -27,6 +27,20 @@ export function responsiveClassName(property: string, value: unknown): string | 
   return isResponsiveValue(value) ? `ps-responsive-${property}` : undefined;
 }
 
+/**
+ * Builds breakpoint-scoped modifier classes for a discrete variant prop (e.g. `size`),
+ * producing `${prefix}-${breakpoint}-${variant}` for every defined breakpoint.
+ * Returns `undefined` for scalar values so callers can keep using data attributes.
+ */
+export function responsiveVariantClassNames(prefix: string, value: unknown): string | undefined {
+  if (!isResponsiveValue(value)) return undefined;
+
+  return Object.entries(value)
+    .filter(([, variant]) => variant !== undefined)
+    .map(([breakpoint, variant]) => `${prefix}-${breakpoint}-${String(variant)}`)
+    .join(' ');
+}
+
 export function responsiveStyle(property: string, value: unknown): CSSProperties | undefined {
   if (!isResponsiveValue(value)) return undefined;
 

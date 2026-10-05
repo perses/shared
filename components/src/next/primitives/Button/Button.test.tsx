@@ -18,6 +18,10 @@ import type { ReactElement, ReactNode } from 'react';
 import { ComponentsProvider } from '../../contexts/ComponentsProvider';
 import { defaultComponents, defaultIcons } from '../defaults';
 import { Button } from './Button';
+import type { ButtonProps } from './Button';
+
+const responsiveSize: ButtonProps['size'] = { default: 'md', lg: 'sm' };
+const responsiveSizeWithoutDefault: ButtonProps['size'] = { xs: 'lg' };
 
 function Wrapper({ children }: { children: ReactNode }): ReactElement {
   return (
@@ -57,6 +61,28 @@ describe('Button', () => {
     expect(button).toHaveAttribute('data-variant', 'solid');
     expect(button).toHaveAttribute('data-color', 'primary');
     expect(button).toHaveAttribute('data-size', 'md');
+  });
+
+  it('applies responsive size classes instead of data-size for a breakpoint object', () => {
+    render(<Button size={responsiveSize}>Test</Button>, { wrapper: Wrapper });
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('ps-Button--size-default-md');
+    expect(button).toHaveClass('ps-Button--size-lg-sm');
+    expect(button).not.toHaveAttribute('data-size');
+  });
+
+  it('falls back to the md size when a responsive object omits default', () => {
+    render(<Button size={responsiveSizeWithoutDefault}>Test</Button>, { wrapper: Wrapper });
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('ps-Button--size-default-md');
+    expect(button).toHaveClass('ps-Button--size-xs-lg');
+  });
+
+  it('does not emit responsive size classes for a scalar size', () => {
+    render(<Button size="lg">Test</Button>, { wrapper: Wrapper });
+    const button = screen.getByRole('button');
+    expect(button.className).not.toMatch(/ps-Button--size-/);
+    expect(button).toHaveAttribute('data-size', 'lg');
   });
 
   it('merges additional className', () => {

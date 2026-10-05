@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
+import type { CSSProperties } from 'react';
 
 import { Button } from './Button';
-import type { ButtonVariant, ButtonColor, ButtonSize } from './Button';
+import type { ButtonVariant, ButtonColor, ButtonSize, ButtonProps } from './Button';
 
 const variants: ButtonVariant[] = ['solid', 'outline', 'ghost'];
 const colors: ButtonColor[] = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
@@ -70,3 +71,34 @@ export const Loading: Story = () => (
     </Button>
   </div>
 );
+
+const responsiveSize: ButtonProps['size'] = { default: 'md', lg: 'sm', xl: 'sm' };
+const responsiveSizeContainerStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.5rem' };
+const responsiveSizeHintStyle: CSSProperties = { fontSize: '0.75rem', margin: 0 };
+
+// Story-only styling: tint the button and show the active breakpoint so the size change is visible.
+const responsiveSizeDemoCss = `
+  .responsive-size-demo .ps-Button { --btn-bg: #d97706; --btn-border: #d97706; --btn-bg-hover: #b45309; }
+  .responsive-size-demo .responsive-size-demo__label::after { content: ' default / xs–md → size md'; }
+  @media (min-width: 1200px) {
+    .responsive-size-demo .ps-Button { --btn-bg: #059669; --btn-border: #059669; --btn-bg-hover: #047857; }
+    .responsive-size-demo .responsive-size-demo__label::after { content: ' lg / xl → size sm'; }
+  }
+`;
+
+export const ResponsiveSize: Story = () => (
+  <div className="responsive-size-demo" style={responsiveSizeContainerStyle}>
+    <style>{responsiveSizeDemoCss}</style>
+    <p style={responsiveSizeHintStyle}>
+      Resize the viewport: <code>md</code> below 1200px (touch-friendly), <code>sm</code> from 1200px up. The button
+      turns orange at <code>md</code> and green at <code>sm</code>.
+    </p>
+    <p className="responsive-size-demo__label" style={responsiveSizeHintStyle}>
+      Active:
+    </p>
+    <div>
+      <Button size={responsiveSize}>Responsive size</Button>
+    </div>
+  </div>
+);
+ResponsiveSize.storyName = 'Responsive Size';
