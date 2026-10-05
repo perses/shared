@@ -33,6 +33,8 @@ export type AlertSize = Extract<Size, 'sm' | 'md'>;
 
 const DEFAULT_SIZE: AlertSize = 'md';
 
+const DEFAULT_CLOSE_ICON = <CloseIcon />;
+
 const SEVERITY_ICONS: Record<AlertSeverity, { key: keyof PersesIcons; icon: ComponentType<SVGProps<SVGSVGElement>> }> =
   {
     success: { key: 'Success', icon: SuccessIcon },
@@ -53,6 +55,7 @@ export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
   action?: ReactNode;
   onClose?: (event: MouseEvent<HTMLButtonElement>) => void;
   closeLabel?: string;
+  closeIcon?: ReactNode;
 }
 
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
@@ -66,6 +69,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
     action,
     onClose,
     closeLabel = 'Close',
+    closeIcon = DEFAULT_CLOSE_ICON,
     children,
     ...rest
   },
@@ -125,9 +129,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
               aria-label={closeLabel}
               onClick={handleClose}
             >
-              <Icon>
-                <CloseIcon />
-              </Icon>
+              <Icon>{closeIcon}</Icon>
             </Button>
           )}
         </div>

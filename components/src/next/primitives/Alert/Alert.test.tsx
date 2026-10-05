@@ -25,6 +25,7 @@ import type { AlertProps } from './Alert';
 const responsiveSize: AlertProps['size'] = { default: 'md', lg: 'sm' };
 const responsiveSizeWithoutDefault: AlertProps['size'] = { xs: 'sm' };
 const actionLink = <a href="/docs">Learn more</a>;
+const customCloseIcon = <svg data-testid="custom-close-icon" />;
 const CustomButton = ({ children, ...props }: ButtonProps): ReactElement => (
   <button data-testid="provider-button" {...props}>
     {children}
@@ -284,6 +285,16 @@ describe('Alert', () => {
     it('renders the built-in close icon inside the close button', () => {
       render(<Alert onClose={vi.fn()}>Test</Alert>, { wrapper: Wrapper });
       expect(screen.getByRole('button', { name: 'Close' }).querySelector('svg')).toBeInTheDocument();
+    });
+
+    it('renders a custom closeIcon when provided', () => {
+      render(
+        <Alert onClose={vi.fn()} closeIcon={customCloseIcon}>
+          Test
+        </Alert>,
+        { wrapper: Wrapper },
+      );
+      expect(screen.getByTestId('custom-close-icon')).toBeInTheDocument();
     });
   });
 });
