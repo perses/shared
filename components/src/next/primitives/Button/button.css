@@ -37,25 +37,164 @@
     outline-offset: 2px;
   }
 
-  .ps-Button:disabled {
+  .ps-Button:disabled,
+  .ps-Button[aria-disabled='true'] {
     opacity: 0.5;
     cursor: not-allowed;
   }
 
+  .ps-Button[data-full-width] {
+    display: flex;
+    width: 100%;
+  }
+
   /* ---- Sizes ---- */
+  .ps-Button {
+    padding: var(--ps-button-py) var(--ps-button-px);
+    font-size: var(--ps-button-font-size);
+  }
+
   .ps-Button[data-size='sm'] {
-    padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
-    font-size: var(--perses-font-size-xs);
+    --ps-button-py: var(--perses-spacing-xs);
+    --ps-button-px: var(--perses-spacing-sm);
+    --ps-button-font-size: var(--perses-font-size-xs);
   }
 
   .ps-Button[data-size='md'] {
-    padding: var(--perses-spacing-sm) var(--perses-spacing-lg);
-    font-size: var(--perses-font-size-sm);
+    --ps-button-py: var(--perses-spacing-sm);
+    --ps-button-px: var(--perses-spacing-lg);
+    --ps-button-font-size: var(--perses-font-size-sm);
   }
 
   .ps-Button[data-size='lg'] {
-    padding: var(--perses-spacing-md) var(--perses-spacing-xl);
-    font-size: var(--perses-font-size-md);
+    --ps-button-py: var(--perses-spacing-md);
+    --ps-button-px: var(--perses-spacing-xl);
+    --ps-button-font-size: var(--perses-font-size-md);
+  }
+
+  /* ---- Responsive sizes (size={{ default, xs, sm, md, lg, xl }}) ----
+   * Class anatomy: .ps-Button--size-<breakpoint>-<size>
+   *   <breakpoint> is the viewport bucket (default | xs | sm | md | lg | xl)
+   *   <size>       is the button size to apply there (sm | md | lg)
+   * e.g. .ps-Button--size-xs-md = "at the xs viewport, render the md size".
+   * `default` applies outside any media query; breakpoint rules below override it.
+   */
+  .ps-Button--size-default-sm {
+    --ps-button-py: var(--perses-spacing-xs);
+    --ps-button-px: var(--perses-spacing-sm);
+    --ps-button-font-size: var(--perses-font-size-xs);
+  }
+
+  .ps-Button--size-default-md {
+    --ps-button-py: var(--perses-spacing-sm);
+    --ps-button-px: var(--perses-spacing-lg);
+    --ps-button-font-size: var(--perses-font-size-sm);
+  }
+
+  .ps-Button--size-default-lg {
+    --ps-button-py: var(--perses-spacing-md);
+    --ps-button-px: var(--perses-spacing-xl);
+    --ps-button-font-size: var(--perses-font-size-md);
+  }
+
+  @media (max-width: 599.98px) {
+    .ps-Button--size-xs-sm {
+      --ps-button-py: var(--perses-spacing-xs);
+      --ps-button-px: var(--perses-spacing-sm);
+      --ps-button-font-size: var(--perses-font-size-xs);
+    }
+
+    .ps-Button--size-xs-md {
+      --ps-button-py: var(--perses-spacing-sm);
+      --ps-button-px: var(--perses-spacing-lg);
+      --ps-button-font-size: var(--perses-font-size-sm);
+    }
+
+    .ps-Button--size-xs-lg {
+      --ps-button-py: var(--perses-spacing-md);
+      --ps-button-px: var(--perses-spacing-xl);
+      --ps-button-font-size: var(--perses-font-size-md);
+    }
+  }
+
+  @media (min-width: 600px) and (max-width: 899.98px) {
+    .ps-Button--size-sm-sm {
+      --ps-button-py: var(--perses-spacing-xs);
+      --ps-button-px: var(--perses-spacing-sm);
+      --ps-button-font-size: var(--perses-font-size-xs);
+    }
+
+    .ps-Button--size-sm-md {
+      --ps-button-py: var(--perses-spacing-sm);
+      --ps-button-px: var(--perses-spacing-lg);
+      --ps-button-font-size: var(--perses-font-size-sm);
+    }
+
+    .ps-Button--size-sm-lg {
+      --ps-button-py: var(--perses-spacing-md);
+      --ps-button-px: var(--perses-spacing-xl);
+      --ps-button-font-size: var(--perses-font-size-md);
+    }
+  }
+
+  @media (min-width: 900px) and (max-width: 1199.98px) {
+    .ps-Button--size-md-sm {
+      --ps-button-py: var(--perses-spacing-xs);
+      --ps-button-px: var(--perses-spacing-sm);
+      --ps-button-font-size: var(--perses-font-size-xs);
+    }
+
+    .ps-Button--size-md-md {
+      --ps-button-py: var(--perses-spacing-sm);
+      --ps-button-px: var(--perses-spacing-lg);
+      --ps-button-font-size: var(--perses-font-size-sm);
+    }
+
+    .ps-Button--size-md-lg {
+      --ps-button-py: var(--perses-spacing-md);
+      --ps-button-px: var(--perses-spacing-xl);
+      --ps-button-font-size: var(--perses-font-size-md);
+    }
+  }
+
+  @media (min-width: 1200px) and (max-width: 1535.98px) {
+    .ps-Button--size-lg-sm {
+      --ps-button-py: var(--perses-spacing-xs);
+      --ps-button-px: var(--perses-spacing-sm);
+      --ps-button-font-size: var(--perses-font-size-xs);
+    }
+
+    .ps-Button--size-lg-md {
+      --ps-button-py: var(--perses-spacing-sm);
+      --ps-button-px: var(--perses-spacing-lg);
+      --ps-button-font-size: var(--perses-font-size-sm);
+    }
+
+    .ps-Button--size-lg-lg {
+      --ps-button-py: var(--perses-spacing-md);
+      --ps-button-px: var(--perses-spacing-xl);
+      --ps-button-font-size: var(--perses-font-size-md);
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .ps-Button--size-xl-sm {
+      --ps-button-py: var(--perses-spacing-xs);
+      --ps-button-px: var(--perses-spacing-sm);
+      --ps-button-font-size: var(--perses-font-size-xs);
+    }
+
+    .ps-Button--size-xl-md {
+      --ps-button-py: var(--perses-spacing-sm);
+      --ps-button-px: var(--perses-spacing-lg);
+      --ps-button-font-size: var(--perses-font-size-sm);
+    }
+
+    .ps-Button--size-xl-lg {
+      --ps-button-py: var(--perses-spacing-md);
+      --ps-button-px: var(--perses-spacing-xl);
+      --ps-button-font-size: var(--perses-font-size-md);
+    }
   }
 
   /* ---- Color tokens (scoped per data-color) ---- */
@@ -108,7 +247,8 @@
   }
 
   /* ---- Loading state ---- */
-  .ps-Button[data-loading]:disabled {
+  .ps-Button[data-loading]:disabled,
+  .ps-Button[data-loading][aria-disabled='true'] {
     opacity: 1;
     cursor: wait;
   }
@@ -118,7 +258,7 @@
     color: var(--perses-text-on-solid);
     background-color: var(--btn-bg);
   }
-  .ps-Button[data-variant='solid']:hover:not(:disabled) {
+  .ps-Button[data-variant='solid']:hover:not(:disabled):not([aria-disabled='true']) {
     background-color: var(--btn-bg-hover);
   }
 
@@ -128,7 +268,7 @@
     background-color: transparent;
     border-color: var(--btn-border);
   }
-  .ps-Button[data-variant='outline']:hover:not(:disabled) {
+  .ps-Button[data-variant='outline']:hover:not(:disabled):not([aria-disabled='true']) {
     background-color: var(--btn-bg-subtle);
   }
 
@@ -138,7 +278,19 @@
     background-color: transparent;
     border-color: transparent;
   }
-  .ps-Button[data-variant='ghost']:hover:not(:disabled) {
+  .ps-Button[data-variant='ghost']:hover:not(:disabled):not([aria-disabled='true']) {
     background-color: var(--btn-bg-subtle);
+  }
+
+  /* ---- Variant: link ---- */
+  .ps-Button[data-variant='link'] {
+    color: var(--btn-text);
+    background-color: transparent;
+    border-color: transparent;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .ps-Button[data-variant='link']:hover:not(:disabled):not([aria-disabled='true']) {
+    text-decoration-thickness: 2px;
   }
 }

@@ -12,17 +12,28 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { forwardRef } from 'react';
-import type { ComponentType, HTMLAttributes, ReactElement, ReactNode, SVGProps } from 'react';
+import { forwardRef, useCallback } from 'react';
+import type { ComponentType, HTMLAttributes, MouseEvent, ReactElement, ReactNode, SVGProps } from 'react';
 
 import type { PersesIcons } from '../../contexts/ComponentsContext';
 import { useComponents } from '../../contexts/ComponentsProvider';
 import { Icon } from '../Icon/Icon';
-import { SuccessIcon, InfoIcon, WarningIcon, ErrorIcon } from '../Icon/icons';
+import { CloseIcon, SuccessIcon, InfoIcon, WarningIcon, ErrorIcon } from '../Icon/icons';
+import { isResponsiveValue, responsiveVariantClassNames } from '../system/responsive';
+import type { Responsive } from '../system/responsive';
+import type { Size, Status } from '../types';
 
 import './alert.css';
 
-export type AlertSeverity = 'error' | 'warning' | 'success' | 'info';
+export type { Breakpoint, Responsive, ResponsiveObject } from '../system/responsive';
+
+export type AlertSeverity = Status;
+export type AlertVariant = 'soft' | 'outline' | 'plain';
+export type AlertSize = Extract<Size, 'sm' | 'md'>;
+
+const DEFAULT_SIZE: AlertSize = 'md';
+
+const DEFAULT_CLOSE_ICON = <CloseIcon />;
 
 const SEVERITY_ICONS: Record<AlertSeverity, { key: keyof PersesIcons; icon: ComponentType<SVGProps<SVGSVGElement>> }> =
   {
@@ -39,19 +50,50 @@ function isAlertSeverity(icon: unknown): icon is AlertSeverity {
 export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
   severity?: AlertSeverity;
   icon?: AlertSeverity | ReactElement | number | boolean | null;
+  variant?: AlertVariant;
+  size?: Responsive<AlertSize>;
+  action?: ReactNode;
+  onClose?: (event: MouseEvent<HTMLButtonElement>) => void;
+  closeLabel?: string;
+  closeIcon?: ReactNode;
 }
 
-/**
- * DOM structure: `.ps-Alert > .ps-Alert__icon? + .ps-Alert__message`
- * `.ps-Alert__icon` is only rendered when `icon` resolves to a non-empty value.
- * Consumers should target `.ps-Alert__message` for content styling.
- */
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  { severity = 'info', role = 'alert', className, icon, children, ...rest },
+  {
+    severity = 'info',
+    variant = 'soft',
+    size = DEFAULT_SIZE,
+    role = 'alert',
+    className,
+    icon,
+    action,
+    onClose,
+    closeLabel = 'Close',
+    closeIcon = DEFAULT_CLOSE_ICON,
+    children,
+    ...rest
+  },
   ref,
 ) {
-  const classes = clsx('ps-Alert', className);
-  const { icons } = useComponents();
+  const isResponsiveSize = isResponsiveValue(size);
+  const classes = clsx(
+    'ps-Alert',
+    isResponsiveSize && responsiveVariantClassNames('ps-Alert--size', { default: DEFAULT_SIZE, ...size }),
+    className,
+  );
+  const {
+    components: { Button },
+    icons,
+  } = useComponents();
+  const hasAction = Boolean(action) || Boolean(onClose);
+
+  const handleClose = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      onClose?.(event);
+    },
+    [onClose],
+  );
 
   let resolvedIcon: ReactNode;
 
@@ -64,9 +106,34 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   }
 
   return (
-    <div role={role} {...rest} ref={ref} className={classes} data-severity={severity}>
+    <div
+      role={role}
+      {...rest}
+      ref={ref}
+      className={classes}
+      data-severity={severity}
+      data-variant={variant}
+      data-size={isResponsiveSize ? undefined : size}
+    >
       {Boolean(resolvedIcon) && <Icon className="ps-Alert__icon">{resolvedIcon}</Icon>}
       <div className="ps-Alert__message">{children}</div>
+      {hasAction && (
+        <div className="ps-Alert__action">
+          {action}
+          {onClose && (
+            <Button
+              className="ps-Alert__close"
+              variant="ghost"
+              color={severity}
+              size="sm"
+              aria-label={closeLabel}
+              onClick={handleClose}
+            >
+              <Icon>{closeIcon}</Icon>
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 });

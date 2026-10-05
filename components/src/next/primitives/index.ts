@@ -12,7 +12,9 @@
 // limitations under the License.
 
 export * from './Alert';
+export * from './Box';
 export * from './Button';
 export * from './Divider';
 export * from './Icon';
 export * from './Spinner';
+export type { ColorVariant, Size, Status } from './types';

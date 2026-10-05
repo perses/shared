@@ -11,8 +11,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export { CloseIcon } from './CloseIcon';
-export { ErrorIcon } from './ErrorIcon';
-export { InfoIcon } from './InfoIcon';
-export { SuccessIcon } from './SuccessIcon';
-export { WarningIcon } from './WarningIcon';
+export * from './Box';

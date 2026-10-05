@@ -18,54 +18,178 @@
     display: flex;
     align-items: center;
     gap: var(--perses-spacing-sm);
-    padding: var(--perses-spacing-md) var(--perses-spacing-lg);
+    padding: var(--ps-alert-py) var(--ps-alert-px);
     border: 1px solid transparent;
     border-radius: var(--perses-radius-md);
     font-family: var(--perses-font-family);
-    font-size: var(--perses-font-size-sm);
+    font-size: var(--ps-alert-font-size);
     line-height: var(--perses-line-height-normal);
+    color: var(--alert-text);
   }
 
+  .ps-Alert__message {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ps-Alert__action {
+    display: flex;
+    align-items: center;
+    gap: var(--perses-spacing-xs);
+    margin-inline-start: auto;
+  }
+
+  /* ---- Sizes ---- */
+  .ps-Alert[data-size='sm'] {
+    --ps-alert-py: var(--perses-spacing-xs);
+    --ps-alert-px: var(--perses-spacing-sm);
+    --ps-alert-font-size: var(--perses-font-size-xs);
+  }
+
+  .ps-Alert[data-size='md'] {
+    --ps-alert-py: var(--perses-spacing-md);
+    --ps-alert-px: var(--perses-spacing-lg);
+    --ps-alert-font-size: var(--perses-font-size-sm);
+  }
+
+  /* ---- Responsive sizes (size={ default, xs, sm, md, lg, xl }) ----
+   * Class anatomy: .ps-Alert--size-<breakpoint>-<size>
+   *   <breakpoint> is the viewport bucket (default | xs | sm | md | lg | xl)
+   *   <size>       is the alert size to apply there (sm | md)
+   * e.g. .ps-Alert--size-xs-md = "at the xs viewport, render the md size".
+   * `default` applies outside any media query; breakpoint rules below override it.
+   */
+  .ps-Alert--size-default-sm {
+    --ps-alert-py: var(--perses-spacing-xs);
+    --ps-alert-px: var(--perses-spacing-sm);
+    --ps-alert-font-size: var(--perses-font-size-xs);
+  }
+
+  .ps-Alert--size-default-md {
+    --ps-alert-py: var(--perses-spacing-md);
+    --ps-alert-px: var(--perses-spacing-lg);
+    --ps-alert-font-size: var(--perses-font-size-sm);
+  }
+
+  @media (max-width: 599.98px) {
+    .ps-Alert--size-xs-sm {
+      --ps-alert-py: var(--perses-spacing-xs);
+      --ps-alert-px: var(--perses-spacing-sm);
+      --ps-alert-font-size: var(--perses-font-size-xs);
+    }
+
+    .ps-Alert--size-xs-md {
+      --ps-alert-py: var(--perses-spacing-md);
+      --ps-alert-px: var(--perses-spacing-lg);
+      --ps-alert-font-size: var(--perses-font-size-sm);
+    }
+  }
+
+  @media (min-width: 600px) and (max-width: 899.98px) {
+    .ps-Alert--size-sm-sm {
+      --ps-alert-py: var(--perses-spacing-xs);
+      --ps-alert-px: var(--perses-spacing-sm);
+      --ps-alert-font-size: var(--perses-font-size-xs);
+    }
+
+    .ps-Alert--size-sm-md {
+      --ps-alert-py: var(--perses-spacing-md);
+      --ps-alert-px: var(--perses-spacing-lg);
+      --ps-alert-font-size: var(--perses-font-size-sm);
+    }
+  }
+
+  @media (min-width: 900px) and (max-width: 1199.98px) {
+    .ps-Alert--size-md-sm {
+      --ps-alert-py: var(--perses-spacing-xs);
+      --ps-alert-px: var(--perses-spacing-sm);
+      --ps-alert-font-size: var(--perses-font-size-xs);
+    }
+
+    .ps-Alert--size-md-md {
+      --ps-alert-py: var(--perses-spacing-md);
+      --ps-alert-px: var(--perses-spacing-lg);
+      --ps-alert-font-size: var(--perses-font-size-sm);
+    }
+  }
+
+  @media (min-width: 1200px) and (max-width: 1535.98px) {
+    .ps-Alert--size-lg-sm {
+      --ps-alert-py: var(--perses-spacing-xs);
+      --ps-alert-px: var(--perses-spacing-sm);
+      --ps-alert-font-size: var(--perses-font-size-xs);
+    }
+
+    .ps-Alert--size-lg-md {
+      --ps-alert-py: var(--perses-spacing-md);
+      --ps-alert-px: var(--perses-spacing-lg);
+      --ps-alert-font-size: var(--perses-font-size-sm);
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .ps-Alert--size-xl-sm {
+      --ps-alert-py: var(--perses-spacing-xs);
+      --ps-alert-px: var(--perses-spacing-sm);
+      --ps-alert-font-size: var(--perses-font-size-xs);
+    }
+
+    .ps-Alert--size-xl-md {
+      --ps-alert-py: var(--perses-spacing-md);
+      --ps-alert-px: var(--perses-spacing-lg);
+      --ps-alert-font-size: var(--perses-font-size-sm);
+    }
+  }
+
+  /* ---- Severity tokens (scoped per data-severity) ---- */
   .ps-Alert[data-severity='error'] {
-    background-color: var(--perses-status-bg-error);
-    border-color: var(--perses-status-border-error);
-    color: var(--perses-status-text-error);
+    --alert-bg: var(--perses-status-bg-error);
+    --alert-border: var(--perses-status-border-error);
+    --alert-text: var(--perses-status-text-error);
+    --alert-icon: var(--perses-status-icon-error);
   }
 
   .ps-Alert[data-severity='warning'] {
-    background-color: var(--perses-status-bg-warning);
-    border-color: var(--perses-status-border-warning);
-    color: var(--perses-status-text-warning);
+    --alert-bg: var(--perses-status-bg-warning);
+    --alert-border: var(--perses-status-border-warning);
+    --alert-text: var(--perses-status-text-warning);
+    --alert-icon: var(--perses-status-icon-warning);
   }
 
   .ps-Alert[data-severity='success'] {
-    background-color: var(--perses-status-bg-success);
-    border-color: var(--perses-status-border-success);
-    color: var(--perses-status-text-success);
+    --alert-bg: var(--perses-status-bg-success);
+    --alert-border: var(--perses-status-border-success);
+    --alert-text: var(--perses-status-text-success);
+    --alert-icon: var(--perses-status-icon-success);
   }
 
   .ps-Alert[data-severity='info'] {
-    background-color: var(--perses-status-bg-info);
-    border-color: var(--perses-status-border-info);
-    color: var(--perses-status-text-info);
+    --alert-bg: var(--perses-status-bg-info);
+    --alert-border: var(--perses-status-border-info);
+    --alert-text: var(--perses-status-text-info);
+    --alert-icon: var(--perses-status-icon-info);
+  }
+
+  /* ---- Variants ---- */
+  .ps-Alert[data-variant='soft'] {
+    background-color: var(--alert-bg);
+    border-color: var(--alert-border);
+  }
+
+  .ps-Alert[data-variant='outline'] {
+    background-color: transparent;
+    border-color: var(--alert-border);
+  }
+
+  .ps-Alert[data-variant='plain'] {
+    background-color: transparent;
+    border-color: transparent;
   }
 
   /* ---- Icon ---- */
   .ps-Alert > .ps-Icon {
     width: 1.6em;
     height: 1.6em;
-  }
-
-  .ps-Alert[data-severity='error'] > .ps-Icon {
-    color: var(--perses-status-icon-error);
-  }
-  .ps-Alert[data-severity='warning'] > .ps-Icon {
-    color: var(--perses-status-icon-warning);
-  }
-  .ps-Alert[data-severity='success'] > .ps-Icon {
-    color: var(--perses-status-icon-success);
-  }
-  .ps-Alert[data-severity='info'] > .ps-Icon {
-    color: var(--perses-status-icon-info);
+    color: var(--alert-icon);
   }
 }
