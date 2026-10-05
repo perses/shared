@@ -1,0 +1,190 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@layer perses.components {
+  .ps-responsive-display {
+    display: var(--ps-responsive-display-default, revert);
+  }
+  .ps-responsive-flex-direction {
+    flex-direction: var(--ps-responsive-flex-direction-default, revert);
+  }
+  .ps-responsive-align-items {
+    align-items: var(--ps-responsive-align-items-default, revert);
+  }
+  .ps-responsive-justify-content {
+    justify-content: var(--ps-responsive-justify-content-default, revert);
+  }
+  .ps-responsive-flex-wrap {
+    flex-wrap: var(--ps-responsive-flex-wrap-default, revert);
+  }
+  .ps-responsive-flex {
+    flex: var(--ps-responsive-flex-default, revert);
+  }
+  .ps-responsive-width {
+    width: var(--ps-responsive-width-default, revert);
+  }
+  .ps-responsive-height {
+    height: var(--ps-responsive-height-default, revert);
+  }
+  .ps-responsive-overflow {
+    overflow: var(--ps-responsive-overflow-default, revert);
+  }
+
+  @media (max-width: 599.98px) {
+    .ps-responsive-display {
+      display: var(--ps-responsive-display-xs, var(--ps-responsive-display-default, revert));
+    }
+    .ps-responsive-flex-direction {
+      flex-direction: var(--ps-responsive-flex-direction-xs, var(--ps-responsive-flex-direction-default, revert));
+    }
+    .ps-responsive-align-items {
+      align-items: var(--ps-responsive-align-items-xs, var(--ps-responsive-align-items-default, revert));
+    }
+    .ps-responsive-justify-content {
+      justify-content: var(--ps-responsive-justify-content-xs, var(--ps-responsive-justify-content-default, revert));
+    }
+    .ps-responsive-flex-wrap {
+      flex-wrap: var(--ps-responsive-flex-wrap-xs, var(--ps-responsive-flex-wrap-default, revert));
+    }
+    .ps-responsive-flex {
+      flex: var(--ps-responsive-flex-xs, var(--ps-responsive-flex-default, revert));
+    }
+    .ps-responsive-width {
+      width: var(--ps-responsive-width-xs, var(--ps-responsive-width-default, revert));
+    }
+    .ps-responsive-height {
+      height: var(--ps-responsive-height-xs, var(--ps-responsive-height-default, revert));
+    }
+    .ps-responsive-overflow {
+      overflow: var(--ps-responsive-overflow-xs, var(--ps-responsive-overflow-default, revert));
+    }
+  }
+  @media (min-width: 600px) and (max-width: 899.98px) {
+    .ps-responsive-display {
+      display: var(--ps-responsive-display-sm, var(--ps-responsive-display-default, revert));
+    }
+    .ps-responsive-flex-direction {
+      flex-direction: var(--ps-responsive-flex-direction-sm, var(--ps-responsive-flex-direction-default, revert));
+    }
+    .ps-responsive-align-items {
+      align-items: var(--ps-responsive-align-items-sm, var(--ps-responsive-align-items-default, revert));
+    }
+    .ps-responsive-justify-content {
+      justify-content: var(--ps-responsive-justify-content-sm, var(--ps-responsive-justify-content-default, revert));
+    }
+    .ps-responsive-flex-wrap {
+      flex-wrap: var(--ps-responsive-flex-wrap-sm, var(--ps-responsive-flex-wrap-default, revert));
+    }
+    .ps-responsive-flex {
+      flex: var(--ps-responsive-flex-sm, var(--ps-responsive-flex-default, revert));
+    }
+    .ps-responsive-width {
+      width: var(--ps-responsive-width-sm, var(--ps-responsive-width-default, revert));
+    }
+    .ps-responsive-height {
+      height: var(--ps-responsive-height-sm, var(--ps-responsive-height-default, revert));
+    }
+    .ps-responsive-overflow {
+      overflow: var(--ps-responsive-overflow-sm, var(--ps-responsive-overflow-default, revert));
+    }
+  }
+  @media (min-width: 900px) and (max-width: 1199.98px) {
+    .ps-responsive-display {
+      display: var(--ps-responsive-display-md, var(--ps-responsive-display-default, revert));
+    }
+    .ps-responsive-flex-direction {
+      flex-direction: var(--ps-responsive-flex-direction-md, var(--ps-responsive-flex-direction-default, revert));
+    }
+    .ps-responsive-align-items {
+      align-items: var(--ps-responsive-align-items-md, var(--ps-responsive-align-items-default, revert));
+    }
+    .ps-responsive-justify-content {
+      justify-content: var(--ps-responsive-justify-content-md, var(--ps-responsive-justify-content-default, revert));
+    }
+    .ps-responsive-flex-wrap {
+      flex-wrap: var(--ps-responsive-flex-wrap-md, var(--ps-responsive-flex-wrap-default, revert));
+    }
+    .ps-responsive-flex {
+      flex: var(--ps-responsive-flex-md, var(--ps-responsive-flex-default, revert));
+    }
+    .ps-responsive-width {
+      width: var(--ps-responsive-width-md, var(--ps-responsive-width-default, revert));
+    }
+    .ps-responsive-height {
+      height: var(--ps-responsive-height-md, var(--ps-responsive-height-default, revert));
+    }
+    .ps-responsive-overflow {
+      overflow: var(--ps-responsive-overflow-md, var(--ps-responsive-overflow-default, revert));
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1535.98px) {
+    .ps-responsive-display {
+      display: var(--ps-responsive-display-lg, var(--ps-responsive-display-default, revert));
+    }
+    .ps-responsive-flex-direction {
+      flex-direction: var(--ps-responsive-flex-direction-lg, var(--ps-responsive-flex-direction-default, revert));
+    }
+    .ps-responsive-align-items {
+      align-items: var(--ps-responsive-align-items-lg, var(--ps-responsive-align-items-default, revert));
+    }
+    .ps-responsive-justify-content {
+      justify-content: var(--ps-responsive-justify-content-lg, var(--ps-responsive-justify-content-default, revert));
+    }
+    .ps-responsive-flex-wrap {
+      flex-wrap: var(--ps-responsive-flex-wrap-lg, var(--ps-responsive-flex-wrap-default, revert));
+    }
+    .ps-responsive-flex {
+      flex: var(--ps-responsive-flex-lg, var(--ps-responsive-flex-default, revert));
+    }
+    .ps-responsive-width {
+      width: var(--ps-responsive-width-lg, var(--ps-responsive-width-default, revert));
+    }
+    .ps-responsive-height {
+      height: var(--ps-responsive-height-lg, var(--ps-responsive-height-default, revert));
+    }
+    .ps-responsive-overflow {
+      overflow: var(--ps-responsive-overflow-lg, var(--ps-responsive-overflow-default, revert));
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-responsive-display {
+      display: var(--ps-responsive-display-xl, var(--ps-responsive-display-default, revert));
+    }
+    .ps-responsive-flex-direction {
+      flex-direction: var(--ps-responsive-flex-direction-xl, var(--ps-responsive-flex-direction-default, revert));
+    }
+    .ps-responsive-align-items {
+      align-items: var(--ps-responsive-align-items-xl, var(--ps-responsive-align-items-default, revert));
+    }
+    .ps-responsive-justify-content {
+      justify-content: var(--ps-responsive-justify-content-xl, var(--ps-responsive-justify-content-default, revert));
+    }
+    .ps-responsive-flex-wrap {
+      flex-wrap: var(--ps-responsive-flex-wrap-xl, var(--ps-responsive-flex-wrap-default, revert));
+    }
+    .ps-responsive-flex {
+      flex: var(--ps-responsive-flex-xl, var(--ps-responsive-flex-default, revert));
+    }
+    .ps-responsive-width {
+      width: var(--ps-responsive-width-xl, var(--ps-responsive-width-default, revert));
+    }
+    .ps-responsive-height {
+      height: var(--ps-responsive-height-xl, var(--ps-responsive-height-default, revert));
+    }
+    .ps-responsive-overflow {
+      overflow: var(--ps-responsive-overflow-xl, var(--ps-responsive-overflow-default, revert));
+    }
+  }
+}

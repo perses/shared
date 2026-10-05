@@ -33,7 +33,7 @@ const CustomButton = forwardRef<HTMLButtonElement, ButtonProps>(function CustomB
       aria-busy={loading || undefined}
       {...rest}
       style={{
-        padding: SIZE_PADDING[size] ?? '8px 16px',
+        padding: SIZE_PADDING[typeof size === 'string' ? size : (size.default ?? 'md')] ?? '8px 16px',
         borderRadius: '4px',
         border: variant === 'outline' ? '2px solid currentColor' : '1px solid transparent',
         background: variant === 'solid' ? '#1e3a5f' : 'transparent',

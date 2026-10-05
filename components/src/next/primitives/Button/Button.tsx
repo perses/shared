@@ -12,34 +12,67 @@
 // limitations under the License.
 
 import { Button as BaseButton } from '@base-ui/react/button';
+import type { ButtonProps as BaseButtonProps } from '@base-ui/react/button';
 import clsx from 'clsx';
 import { forwardRef } from 'react';
-import type { ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 import { useComponents } from '../../contexts/ComponentsProvider';
 import { Icon } from '../Icon/Icon';
+import { isResponsiveValue, responsiveVariantClassNames } from '../system/responsive';
+import type { Responsive } from '../system/responsive';
 
 import './button.css';
 
-export type ButtonVariant = 'solid' | 'outline' | 'ghost';
+export type { Breakpoint, Responsive, ResponsiveObject } from '../system/responsive';
+
+export type ButtonVariant = 'solid' | 'outline' | 'ghost' | 'link';
 export type ButtonColor = 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'color'> {
   variant?: ButtonVariant;
   color?: ButtonColor;
-  size?: ButtonSize;
+  /**
+   * Button size. Accepts a single value or a per-breakpoint object, e.g.
+   * `{ default: 'md', lg: 'sm' }` to keep a thumb-friendly target on small
+   * screens while using a denser button where a pointer is available.
+   */
+  size?: Responsive<ButtonSize>;
   loading?: boolean;
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
+  fullWidth?: boolean;
+  focusableWhenDisabled?: boolean;
+  render?: BaseButtonProps['render'];
+  nativeButton?: BaseButtonProps['nativeButton'];
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'solid', color = 'primary', size = 'md', loading = false, disabled, className, children, ...rest },
+  {
+    variant = 'solid',
+    color = 'primary',
+    size = 'md',
+    loading = false,
+    startIcon,
+    endIcon,
+    fullWidth = false,
+    disabled,
+    className,
+    children,
+    ...rest
+  },
   ref,
 ) {
   const {
     components: { Spinner },
   } = useComponents();
-  const classes = clsx('ps-Button', className);
+  const isResponsiveSize = isResponsiveValue(size);
+  const classes = clsx(
+    'ps-Button',
+    isResponsiveSize && responsiveVariantClassNames('ps-Button--size', { default: 'md', ...size }),
+    className,
+  );
   const isDisabled = disabled || loading;
 
   return (
@@ -51,15 +84,19 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       aria-busy={loading || undefined}
       data-variant={variant}
       data-color={color}
-      data-size={size}
+      data-size={isResponsiveSize ? undefined : size}
       data-loading={loading || undefined}
+      data-full-width={fullWidth || undefined}
     >
-      {loading && (
+      {loading ? (
         <Icon className="ps-Button__spinner">
           <Spinner />
         </Icon>
+      ) : (
+        startIcon && <Icon className="ps-Button__startIcon">{startIcon}</Icon>
       )}
       {children}
+      {endIcon && <Icon className="ps-Button__endIcon">{endIcon}</Icon>}
     </BaseButton>
   );
 });
