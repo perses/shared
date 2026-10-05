@@ -33,7 +33,7 @@ export function responsiveSpacingStyle(
   if (!isResponsiveValue(value)) return undefined;
 
   return Object.fromEntries(
-    Object.entries(value).map(([breakpoint, token]) => [
+    Object.entries(value ?? {}).map(([breakpoint, token]) => [
       `--ps-spacing-${property}-${breakpoint}`,
       `var(--perses-spacing-${token})`,
     ]),

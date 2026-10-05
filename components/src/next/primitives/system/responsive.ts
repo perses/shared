@@ -31,7 +31,7 @@ export function responsiveStyle(property: string, value: unknown): CSSProperties
   if (!isResponsiveValue(value)) return undefined;
 
   return Object.fromEntries(
-    Object.entries(value).map(([breakpoint, responsiveValue]) => [
+    Object.entries(value ?? {}).map(([breakpoint, responsiveValue]) => [
       `--ps-responsive-${property}-${breakpoint}`,
       responsiveValue,
     ]),
