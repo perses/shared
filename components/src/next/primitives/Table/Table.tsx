@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useRef } from 'react';
 import type { CSSProperties, HTMLAttributes, PointerEvent as ReactPointerEvent, TdHTMLAttributes } from 'react';
 
 import { responsiveClassName, responsiveStyle } from '../system/responsive';
@@ -186,6 +186,15 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
     ariaSort = 'descending';
   }
 
+  const resizeCleanupRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    return (): void => {
+      resizeCleanupRef.current?.();
+      resizeCleanupRef.current = null;
+    };
+  }, []);
+
   const handleResizePointerDown = (event: ReactPointerEvent<HTMLSpanElement>): void => {
     if (!onResize) return;
     const startX = event.pageX;
@@ -193,10 +202,15 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
     const handlePointerMove = (moveEvent: PointerEvent): void => {
       onResize(Math.max(minResizeWidth, startWidth + (moveEvent.pageX - startX)));
     };
-    const handlePointerUp = (): void => {
+    const cleanup = (): void => {
       document.removeEventListener('pointermove', handlePointerMove);
       document.removeEventListener('pointerup', handlePointerUp);
+      resizeCleanupRef.current = null;
     };
+    const handlePointerUp = (): void => {
+      cleanup();
+    };
+    resizeCleanupRef.current = cleanup;
     document.addEventListener('pointermove', handlePointerMove);
     document.addEventListener('pointerup', handlePointerUp);
   };

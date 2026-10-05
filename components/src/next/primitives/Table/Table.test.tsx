@@ -501,6 +501,30 @@ describe('Table', () => {
     expect(onResize).not.toHaveBeenCalled();
   });
 
+  it('stops reporting resize after the cell unmounts mid-drag', () => {
+    const onResize = vi.fn();
+    const { unmount } = render(
+      <Table tableLayout="fixed">
+        <TableBody>
+          <TableRow>
+            <TableCell resizable onResize={onResize}>
+              Value
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+    firePointerEvent(screen.getByRole('separator'), 'pointerdown', 100);
+    firePointerEvent(document, 'pointermove', 150);
+    expect(onResize).toHaveBeenCalledWith(50);
+
+    unmount();
+    onResize.mockClear();
+    firePointerEvent(document, 'pointermove', 200);
+    firePointerEvent(document, 'pointerup', 200);
+    expect(onResize).not.toHaveBeenCalled();
+  });
+
   it('composes a TablePagination inside a footer cell with colSpan', () => {
     render(
       <Table>
