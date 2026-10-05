@@ -11,10 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './Alert';
-export * from './Button';
-export * from './Divider';
-export * from './Icon';
-export * from './Spinner';
-export * from './Table';
-export type { ColorVariant, Size, Status } from './types';
+import { createIcon } from './createIcon';
+
+export const ChevronRightIcon = createIcon('ChevronRightIcon', 24, 24, [
+  'M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z',
+]);

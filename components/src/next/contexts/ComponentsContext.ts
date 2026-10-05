@@ -12,18 +12,51 @@
 // limitations under the License.
 
 import { createContext } from 'react';
-import type { ComponentType, ReactNode, SVGProps } from 'react';
+import type {
+  ComponentType,
+  ForwardRefExoticComponent,
+  PropsWithoutRef,
+  ReactNode,
+  RefAttributes,
+  SVGProps,
+} from 'react';
 
 import type { AlertProps } from '../primitives/Alert';
 import type { ButtonProps } from '../primitives/Button';
 import type { DividerProps } from '../primitives/Divider';
 import type { SpinnerProps } from '../primitives/Spinner';
+import type {
+  TableProps,
+  TableHeadProps,
+  TableBodyProps,
+  TableFooterProps,
+  TableRowProps,
+  TableCellProps,
+  TableContainerProps,
+  TableCheckboxProps,
+  TableRowExpandButtonProps,
+  TableSortLabelProps,
+  TablePaginationProps,
+} from '../primitives/Table';
+
+type RefComponent<Props, Element> = ForwardRefExoticComponent<PropsWithoutRef<Props> & RefAttributes<Element>>;
 
 export interface PersesComponents {
   Button: ComponentType<ButtonProps>;
   Alert: ComponentType<AlertProps>;
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;
+  Table: RefComponent<TableProps, HTMLTableElement>;
+  TableHead: RefComponent<TableHeadProps, HTMLTableSectionElement>;
+  TableBody: RefComponent<TableBodyProps, HTMLTableSectionElement>;
+  TableFooter: RefComponent<TableFooterProps, HTMLTableSectionElement>;
+  TableRow: RefComponent<TableRowProps, HTMLTableRowElement>;
+  TableCell: RefComponent<TableCellProps, HTMLTableCellElement>;
+  TableContainer: RefComponent<TableContainerProps, HTMLDivElement>;
+  TableCheckbox: RefComponent<TableCheckboxProps, HTMLInputElement>;
+  TableRowExpandButton: RefComponent<TableRowExpandButtonProps, HTMLButtonElement>;
+  TableSortLabel: RefComponent<TableSortLabelProps, HTMLButtonElement>;
+  TablePagination: RefComponent<TablePaginationProps, HTMLDivElement>;
 }
 
 export interface PersesIcons {

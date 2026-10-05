@@ -11,10 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './Alert';
-export * from './Button';
-export * from './Divider';
-export * from './Icon';
-export * from './Spinner';
-export * from './Table';
-export type { ColorVariant, Size, Status } from './types';
+import { createIcon } from './createIcon';
+
+export const SortArrowIcon = createIcon('SortArrowIcon', 24, 24, ['M7 10l5 5 5-5z']);

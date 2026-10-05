@@ -15,3 +15,6 @@ export { ErrorIcon } from './ErrorIcon';
 export { InfoIcon } from './InfoIcon';
 export { SuccessIcon } from './SuccessIcon';
 export { WarningIcon } from './WarningIcon';
+export { ChevronLeftIcon } from './ChevronLeftIcon';
+export { ChevronRightIcon } from './ChevronRightIcon';
+export { SortArrowIcon } from './SortArrowIcon';

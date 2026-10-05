@@ -17,8 +17,37 @@ import { Button } from './Button';
 import { Divider } from './Divider';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon';
 import { Spinner } from './Spinner';
+import {
+  Table,
+  TableHead,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableCell,
+  TableContainer,
+  TableCheckbox,
+  TableRowExpandButton,
+  TableSortLabel,
+  TablePagination,
+} from './Table';
 
-export const defaultComponents: PersesComponents = { Button, Alert, Divider, Spinner };
+export const defaultComponents: PersesComponents = {
+  Button,
+  Alert,
+  Divider,
+  Spinner,
+  Table,
+  TableHead,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableCell,
+  TableContainer,
+  TableCheckbox,
+  TableRowExpandButton,
+  TableSortLabel,
+  TablePagination,
+};
 
 export const defaultIcons: PersesIcons = {
   Error: ErrorIcon,
