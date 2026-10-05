@@ -12,9 +12,12 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
+import type { CSSProperties } from 'react';
+import { useCallback, useState } from 'react';
 
+import { Button } from '../Button/Button';
 import { Alert } from './Alert';
-import type { AlertSeverity } from './Alert';
+import type { AlertProps, AlertSeverity, AlertVariant } from './Alert';
 
 const severities: AlertSeverity[] = ['error', 'warning', 'success', 'info'];
 
@@ -58,3 +61,119 @@ export const FalsyIcon: Story = () => (
   </div>
 );
 FalsyIcon.storyName = 'Falsy Icon (0 / false / null / undefined)';
+
+const variants: AlertVariant[] = ['soft', 'outline', 'plain'];
+const columnStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '1rem' };
+const headingStyle: CSSProperties = { margin: '0 0 0.5rem', fontSize: '0.875rem' };
+const hintStyle: CSSProperties = { fontSize: '0.75rem', margin: 0 };
+
+export const Variants: Story = () => (
+  <div style={columnStyle}>
+    {variants.map((variant) => (
+      <div key={variant}>
+        <h3 style={headingStyle}>variant=&quot;{variant}&quot;</h3>
+        <div style={columnStyle}>
+          {severities.map((severity) => (
+            <Alert key={severity} variant={variant} severity={severity} icon={severity}>
+              A {severity} alert using the {variant} variant.
+            </Alert>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+);
+
+export const Sizes: Story = () => (
+  <div style={columnStyle}>
+    <Alert size="md" icon="info">
+      size=&quot;md&quot; (default)
+    </Alert>
+    <Alert size="sm" icon="info">
+      size=&quot;sm&quot; — compact padding and font for dense layouts.
+    </Alert>
+  </div>
+);
+
+const responsiveSize: AlertProps['size'] = { default: 'md', lg: 'sm', xl: 'sm' };
+
+// Story-only styling: tint the alert and show the active breakpoint so the size change is visible.
+const responsiveSizeDemoCss = `
+  .responsive-alert-demo .ps-Alert { --alert-border: #d97706; --alert-text: #92400e; --alert-icon: #d97706; }
+  .responsive-alert-demo .responsive-alert-demo__label::after { content: ' default / xs–md → size md'; }
+  @media (min-width: 1200px) {
+    .responsive-alert-demo .ps-Alert { --alert-border: #059669; --alert-text: #065f46; --alert-icon: #059669; }
+    .responsive-alert-demo .responsive-alert-demo__label::after { content: ' lg / xl → size sm'; }
+  }
+`;
+
+export const ResponsiveSize: Story = () => (
+  <div className="responsive-alert-demo" style={columnStyle}>
+    <style>{responsiveSizeDemoCss}</style>
+    <p style={hintStyle}>
+      This alert uses{' '}
+      <code>size=&#123;&#123; default: &apos;md&apos;, lg: &apos;sm&apos;, xl: &apos;sm&apos; &#125;&#125;</code>.
+      Resize the browser window to see it change: on viewports narrower than 1200px it renders at size <code>md</code>{' '}
+      (shown in orange); at 1200px and wider it renders at size <code>sm</code> (shown in green). The color is
+      story-only, to make the switch easy to spot.
+    </p>
+    <p className="responsive-alert-demo__label" style={hintStyle}>
+      Active:
+    </p>
+    <Alert variant="outline" icon="info" size={responsiveSize}>
+      Responsive alert
+    </Alert>
+  </div>
+);
+ResponsiveSize.storyName = 'Responsive Size';
+
+export const Closable: Story = () => {
+  const [open, setOpen] = useState(true);
+  const show = useCallback(() => setOpen(true), []);
+  const hide = useCallback(() => setOpen(false), []);
+  if (!open) {
+    return (
+      <Button variant="outline" onClick={show}>
+        Show alert again
+      </Button>
+    );
+  }
+  return (
+    <Alert severity="warning" icon="warning" onClose={hide}>
+      This dashboard has unsaved changes.
+    </Alert>
+  );
+};
+
+const noop = (): void => undefined;
+
+const learnMoreLink = (
+  <a href="https://perses.dev" target="_blank" rel="noreferrer">
+    Learn more
+  </a>
+);
+
+export const WithAction: Story = () => (
+  <div style={columnStyle}>
+    <Alert severity="info" icon="info" action={learnMoreLink}>
+      A new plugin version is available.
+    </Alert>
+    <Alert severity="error" icon="error" action={learnMoreLink} onClose={noop}>
+      Action content renders before the close button.
+    </Alert>
+  </div>
+);
+WithAction.storyName = 'With Action';
+
+export const CompactInline: Story = () => (
+  <div style={columnStyle}>
+    <p style={hintStyle}>
+      Replaces the MUI <code>sx=&#123;&#123; backgroundColor: &apos;transparent&apos;, padding: 0 &#125;&#125;</code>{' '}
+      pattern used for read-only notices.
+    </p>
+    <Alert severity="warning" icon="warning" variant="plain" size="sm">
+      Dashboard managed via code only.
+    </Alert>
+  </div>
+);
+CompactInline.storyName = 'Compact Inline (plain + sm)';
