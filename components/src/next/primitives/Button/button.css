@@ -37,9 +37,15 @@
     outline-offset: 2px;
   }
 
-  .ps-Button:disabled {
+  .ps-Button:disabled,
+  .ps-Button[aria-disabled='true'] {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .ps-Button[data-full-width] {
+    display: flex;
+    width: 100%;
   }
 
   /* ---- Sizes ---- */
@@ -241,7 +247,8 @@
   }
 
   /* ---- Loading state ---- */
-  .ps-Button[data-loading]:disabled {
+  .ps-Button[data-loading]:disabled,
+  .ps-Button[data-loading][aria-disabled='true'] {
     opacity: 1;
     cursor: wait;
   }
@@ -251,7 +258,7 @@
     color: var(--perses-text-on-solid);
     background-color: var(--btn-bg);
   }
-  .ps-Button[data-variant='solid']:hover:not(:disabled) {
+  .ps-Button[data-variant='solid']:hover:not(:disabled):not([aria-disabled='true']) {
     background-color: var(--btn-bg-hover);
   }
 
@@ -261,7 +268,7 @@
     background-color: transparent;
     border-color: var(--btn-border);
   }
-  .ps-Button[data-variant='outline']:hover:not(:disabled) {
+  .ps-Button[data-variant='outline']:hover:not(:disabled):not([aria-disabled='true']) {
     background-color: var(--btn-bg-subtle);
   }
 
@@ -271,7 +278,19 @@
     background-color: transparent;
     border-color: transparent;
   }
-  .ps-Button[data-variant='ghost']:hover:not(:disabled) {
+  .ps-Button[data-variant='ghost']:hover:not(:disabled):not([aria-disabled='true']) {
     background-color: var(--btn-bg-subtle);
+  }
+
+  /* ---- Variant: link ---- */
+  .ps-Button[data-variant='link'] {
+    color: var(--btn-text);
+    background-color: transparent;
+    border-color: transparent;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .ps-Button[data-variant='link']:hover:not(:disabled):not([aria-disabled='true']) {
+    text-decoration-thickness: 2px;
   }
 }

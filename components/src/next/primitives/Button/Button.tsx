@@ -12,9 +12,10 @@
 // limitations under the License.
 
 import { Button as BaseButton } from '@base-ui/react/button';
+import type { ButtonProps as BaseButtonProps } from '@base-ui/react/button';
 import clsx from 'clsx';
 import { forwardRef } from 'react';
-import type { ButtonHTMLAttributes } from 'react';
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 import { useComponents } from '../../contexts/ComponentsProvider';
 import { Icon } from '../Icon/Icon';
@@ -25,7 +26,7 @@ import './button.css';
 
 export type { Breakpoint, Responsive, ResponsiveObject } from '../system/responsive';
 
-export type ButtonVariant = 'solid' | 'outline' | 'ghost';
+export type ButtonVariant = 'solid' | 'outline' | 'ghost' | 'link';
 export type ButtonColor = 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
@@ -39,10 +40,28 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
    */
   size?: Responsive<ButtonSize>;
   loading?: boolean;
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
+  fullWidth?: boolean;
+  focusableWhenDisabled?: boolean;
+  render?: BaseButtonProps['render'];
+  nativeButton?: BaseButtonProps['nativeButton'];
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'solid', color = 'primary', size = 'md', loading = false, disabled, className, children, ...rest },
+  {
+    variant = 'solid',
+    color = 'primary',
+    size = 'md',
+    loading = false,
+    startIcon,
+    endIcon,
+    fullWidth = false,
+    disabled,
+    className,
+    children,
+    ...rest
+  },
   ref,
 ) {
   const {
@@ -67,13 +86,17 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       data-color={color}
       data-size={isResponsiveSize ? undefined : size}
       data-loading={loading || undefined}
+      data-full-width={fullWidth || undefined}
     >
-      {loading && (
+      {loading ? (
         <Icon className="ps-Button__spinner">
           <Spinner />
         </Icon>
+      ) : (
+        startIcon && <Icon className="ps-Button__startIcon">{startIcon}</Icon>
       )}
       {children}
+      {endIcon && <Icon className="ps-Button__endIcon">{endIcon}</Icon>}
     </BaseButton>
   );
 });

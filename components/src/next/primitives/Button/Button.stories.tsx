@@ -17,7 +17,7 @@ import type { CSSProperties } from 'react';
 import { Button } from './Button';
 import type { ButtonVariant, ButtonColor, ButtonSize, ButtonProps } from './Button';
 
-const variants: ButtonVariant[] = ['solid', 'outline', 'ghost'];
+const variants: ButtonVariant[] = ['solid', 'outline', 'ghost', 'link'];
 const colors: ButtonColor[] = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
 const sizes: ButtonSize[] = ['sm', 'md', 'lg'];
 
@@ -90,8 +90,11 @@ export const ResponsiveSize: Story = () => (
   <div className="responsive-size-demo" style={responsiveSizeContainerStyle}>
     <style>{responsiveSizeDemoCss}</style>
     <p style={responsiveSizeHintStyle}>
-      Resize the viewport: <code>md</code> below 1200px (touch-friendly), <code>sm</code> from 1200px up. The button
-      turns orange at <code>md</code> and green at <code>sm</code>.
+      This button uses{' '}
+      <code>size=&#123;&#123; default: &apos;md&apos;, lg: &apos;sm&apos;, xl: &apos;sm&apos; &#125;&#125;</code>.
+      Resize the browser window to see it change: on viewports narrower than 1200px it renders at size <code>md</code>{' '}
+      (larger touch target, shown in orange); at 1200px and wider it renders at size <code>sm</code> (denser for mouse
+      use, shown in green). The color is story-only, to make the switch easy to spot.
     </p>
     <p className="responsive-size-demo__label" style={responsiveSizeHintStyle}>
       Active:
@@ -102,3 +105,70 @@ export const ResponsiveSize: Story = () => (
   </div>
 );
 ResponsiveSize.storyName = 'Responsive Size';
+
+const rowStyle: CSSProperties = { display: 'flex', gap: '1rem', alignItems: 'center' };
+const columnStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '24rem' };
+const plusIcon = (
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z" />
+  </svg>
+);
+const chevronIcon = (
+  <svg viewBox="0 0 24 24" fill="currentColor">
+    <path d="M8.6 16.6 13.2 12 8.6 7.4 10 6l6 6-6 6z" />
+  </svg>
+);
+
+export const WithIcons: Story = () => (
+  <div style={rowStyle}>
+    <Button startIcon={plusIcon}>Add panel</Button>
+    <Button variant="outline" endIcon={chevronIcon}>
+      Next
+    </Button>
+    <Button variant="ghost" startIcon={plusIcon} endIcon={chevronIcon}>
+      Both
+    </Button>
+    <Button loading startIcon={plusIcon}>
+      Spinner replaces start icon
+    </Button>
+  </div>
+);
+WithIcons.storyName = 'With Icons';
+
+export const FullWidth: Story = () => (
+  <div style={columnStyle}>
+    <Button fullWidth>Full width solid</Button>
+    <Button fullWidth variant="outline" startIcon={plusIcon}>
+      Full width outline
+    </Button>
+  </div>
+);
+FullWidth.storyName = 'Full Width';
+
+export const FocusableWhenDisabled: Story = () => (
+  <div style={rowStyle}>
+    <Button disabled>Native disabled (skipped by Tab)</Button>
+    <Button disabled focusableWhenDisabled title="Requires edit permission">
+      aria-disabled (focusable, tooltip works)
+    </Button>
+  </div>
+);
+FocusableWhenDisabled.storyName = 'Focusable When Disabled';
+
+const anchorRender: ButtonProps['render'] = (props) => (
+  <a {...props} href="https://perses.dev" target="_blank" rel="noreferrer">
+    {props.children}
+  </a>
+);
+
+export const AsLink: Story = () => (
+  <div style={rowStyle}>
+    <Button render={anchorRender} nativeButton={false} variant="link">
+      perses.dev
+    </Button>
+    <Button render={anchorRender} nativeButton={false} variant="outline" endIcon={chevronIcon}>
+      Styled as outline
+    </Button>
+  </div>
+);
+AsLink.storyName = 'As Link (render)';
