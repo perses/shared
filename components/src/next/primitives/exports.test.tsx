@@ -15,13 +15,14 @@ import { Alert, Button, Divider, Icon, Spinner } from './index';
 import type {
   AlertProps,
   AlertSeverity,
-  ButtonColor,
   ButtonProps,
-  ButtonSize,
   ButtonVariant,
+  ColorVariant,
   DividerProps,
   IconProps,
+  Size,
   SpinnerProps,
+  Status,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -38,8 +39,8 @@ describe('primitives barrel exports', () => {
     const severity: AlertSeverity = 'info';
     const buttonProps: ButtonProps = {};
     const variant: ButtonVariant = 'solid';
-    const color: ButtonColor = 'primary';
-    const size: ButtonSize = 'md';
+    const color: ColorVariant | Status = 'primary';
+    const size: Size = 'md';
     const dividerProps: DividerProps = {};
     const iconProps: IconProps = {};
     const spinnerProps: SpinnerProps = {};

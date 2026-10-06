@@ -50,12 +50,12 @@ describe('token ↔ CSS consistency', () => {
   const tokenVars = extractTokenVarRefs(tokens as unknown as Record<string, unknown>);
 
   it('every CSS variable has a corresponding tokens entry', () => {
-    const missing = [...cssVars].filter((v) => !tokenVars.has(v)).sort();
+    const missing = [...cssVars].filter((v) => !tokenVars.has(v)).toSorted();
     expect(missing).toEqual([]);
   });
 
   it('every tokens entry references a defined CSS variable', () => {
-    const missing = [...tokenVars].filter((v) => !cssVars.has(v)).sort();
+    const missing = [...tokenVars].filter((v) => !cssVars.has(v)).toSorted();
     expect(missing).toEqual([]);
   });
 });
