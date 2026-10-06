@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-@import './buttonBase.css';
-
 @layer perses.components {
   .ps-Button {
     gap: var(--perses-spacing-xs);
@@ -24,6 +22,11 @@
   }
 
   /* ---- Sizes ---- */
+  .ps-Button[data-size='xs'] {
+    padding: var(--perses-spacing-0) var(--perses-spacing-xs);
+    font-size: var(--perses-font-size-xs);
+  }
+
   .ps-Button[data-size='sm'] {
     padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
     font-size: var(--perses-font-size-xs);

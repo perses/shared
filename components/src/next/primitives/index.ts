@@ -18,3 +18,4 @@ export * from './Divider';
 export * from './Icon';
 export * from './IconButton';
 export * from './Spinner';
+export type { ColorVariant, Size, Status } from './types';

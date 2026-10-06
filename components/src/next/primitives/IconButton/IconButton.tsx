@@ -16,15 +16,17 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
 
-import type { ButtonColor, ButtonSize, ButtonVariant } from '../Button/Button';
+import type { ButtonVariant } from '../Button/Button';
+import type { ColorVariant, Size, Status } from '../types';
 
-import './iconbutton.css';
+import '../Button/buttonBase.css';
+import './iconButton.css';
 
 export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'aria-label' | 'color'> {
   'aria-label': string;
   variant?: ButtonVariant;
-  color?: ButtonColor;
-  size?: ButtonSize;
+  color?: ColorVariant | Status;
+  size?: Size;
 }
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(

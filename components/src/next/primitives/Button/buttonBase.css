@@ -18,7 +18,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid transparent;
+    border-width: var(--perses-border-width-sm);
+    border-style: solid;
+    border-color: transparent;
     border-radius: var(--perses-radius-md);
     cursor: pointer;
     transition:
@@ -28,7 +30,9 @@
   }
 
   .ps-ButtonBase:focus-visible {
-    outline: 2px solid var(--perses-status-border-primary);
+    outline-width: var(--perses-border-width-md);
+    outline-style: solid;
+    outline-color: var(--perses-status-border-primary);
     outline-offset: 2px;
   }
 

@@ -12,15 +12,15 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
-import { useState } from 'react';
 
-import type { ButtonColor, ButtonSize, ButtonVariant } from '../Button/Button';
-import { CloseIcon, TrashIcon } from '../Icon/icons';
+import type { ButtonVariant } from '../Button/Button';
+import { CloseIcon } from '../Icon/icons';
+import type { ColorVariant, Size, Status } from '../types';
 import { IconButton } from './IconButton';
 
 const variants: ButtonVariant[] = ['solid', 'outline', 'ghost'];
-const colors: ButtonColor[] = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
-const sizes: ButtonSize[] = ['sm', 'md', 'lg'];
+const colors: Array<ColorVariant | Status> = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
+const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
 
 export const AllVariantsAndColors: Story = () => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -64,18 +64,3 @@ export const Disabled: Story = () => (
     </IconButton>
   </div>
 );
-
-export const WithClickHandler: Story = () => {
-  const [deleteCount, setDeleteCount] = useState(0);
-  const onDelete = (): void => setDeleteCount((count) => count + 1);
-
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-      <IconButton aria-label="Delete item" onClick={onDelete}>
-        <TrashIcon />
-      </IconButton>
-      <span>Deleted {deleteCount} times</span>
-    </div>
-  );
-};
-WithClickHandler.storyName = 'Nested Icon with onClick';
