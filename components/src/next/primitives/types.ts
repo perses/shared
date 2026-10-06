@@ -11,10 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './Alert';
-export * from './Button';
-export * from './Divider';
-export * from './Icon';
-export * from './IconButton';
-export * from './Spinner';
-export type { ColorVariant, Size, Status } from './types';
+export type ColorVariant = 'primary' | 'secondary';
+
+export type Status = 'error' | 'warning' | 'success' | 'info';
+
+export type Size = 'xs' | 'sm' | 'md' | 'lg';

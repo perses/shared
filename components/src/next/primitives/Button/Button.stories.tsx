@@ -13,12 +13,13 @@
 
 import type { Story } from '@ladle/react';
 
+import type { ColorVariant, Size, Status } from '../types';
 import { Button } from './Button';
-import type { ButtonVariant, ButtonColor, ButtonSize } from './Button';
+import type { ButtonVariant } from './Button';
 
 const variants: ButtonVariant[] = ['solid', 'outline', 'ghost'];
-const colors: ButtonColor[] = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
-const sizes: ButtonSize[] = ['sm', 'md', 'lg'];
+const colors: Array<ColorVariant | Status> = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
+const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
 
 export const AllVariantsAndColors: Story = () => (
   <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
