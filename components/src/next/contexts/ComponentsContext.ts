@@ -12,15 +12,26 @@
 // limitations under the License.
 
 import { createContext } from 'react';
-import type { ComponentType, ReactNode, SVGProps } from 'react';
+import type {
+  ComponentType,
+  ForwardRefExoticComponent,
+  PropsWithoutRef,
+  ReactNode,
+  RefAttributes,
+  SVGProps,
+} from 'react';
 
 import type { AlertProps } from '../primitives/Alert';
 import type { ButtonProps } from '../primitives/Button';
+import type { ChipProps } from '../primitives/Chip';
 import type { DividerProps } from '../primitives/Divider';
 import type { SpinnerProps } from '../primitives/Spinner';
 
+type RefComponent<Props, Element> = ForwardRefExoticComponent<PropsWithoutRef<Props> & RefAttributes<Element>>;
+
 export interface PersesComponents {
   Button: ComponentType<ButtonProps>;
+  Chip: RefComponent<ChipProps, HTMLDivElement>;
   Alert: ComponentType<AlertProps>;
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;
@@ -56,7 +67,13 @@ export interface ComponentsProviderProps {
    *
    * @example
    * // Provide only custom components
-   * const components: PersesComponents = { Alert: MyAlert, Button: MyButton, Divider: MyDivider, Spinner: MySpinner };
+   * const components: PersesComponents = {
+   *   Alert: MyAlert,
+   *   Button: MyButton,
+   *   Chip: MyChip,
+   *   Divider: MyDivider,
+   *   Spinner: MySpinner,
+   * };
    */
   components: PersesComponents;
   /**

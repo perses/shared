@@ -18,12 +18,13 @@ import type { ButtonHTMLAttributes } from 'react';
 
 import { useComponents } from '../../contexts/ComponentsProvider';
 import { Icon } from '../Icon/Icon';
+import type { ColorVariant, Size, Status } from '../types';
 
 import './button.css';
 
 export type ButtonVariant = 'solid' | 'outline' | 'ghost';
-export type ButtonColor = 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+export type ButtonColor = ColorVariant | Status;
+export type ButtonSize = Size;
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'color'> {
   variant?: ButtonVariant;
