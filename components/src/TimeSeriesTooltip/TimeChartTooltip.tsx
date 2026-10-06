@@ -19,12 +19,10 @@ import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
 import useResizeObserver from 'use-resize-observer';
 
 import type { FormatOptions, TimeChartSeriesMapping } from '../model';
-import type { NearbySeriesArray } from './nearby-series';
-import { getNearbySeriesData } from './nearby-series';
 import type { CursorCoordinates } from './tooltip-model';
-import { useMousePosition } from './tooltip-model';
 import { TooltipContent } from './TooltipContent';
 import { TooltipHeader } from './TooltipHeader';
+import { useChartTooltipData } from './useChartTooltipData';
 import { assembleTransform, getTooltipStyles } from './utils';
 
 export interface TimeChartTooltipProps {
@@ -60,10 +58,17 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   pinnedPos,
 }: TimeChartTooltipProps) {
   const [showAllSeries, setShowAllSeries] = useState(false);
-  const [nearbySeries, setNearbySeries] = useState<NearbySeriesArray>([]);
   const tooltipElementRef = useRef<HTMLDivElement | null>(null);
 
-  const mousePos = useMousePosition();
+  const { mousePos, nearbySeries } = useChartTooltipData({
+    chartRef,
+    data,
+    seriesMapping,
+    pinnedPos,
+    format,
+    seriesFormatMap,
+    showAllSeries,
+  });
   const { height, width, ref: tooltipRef } = useResizeObserver();
 
   const isTooltipPinned = pinnedPos !== null && enablePinning;
@@ -78,23 +83,6 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
   );
 
   const containerElement = containerId ? document.querySelector(containerId) : undefined;
-
-  // Chart reads and highlight actions synchronize with ECharts after commit.
-  useLayoutEffect(() => {
-    const chart = chartRef.current;
-    setNearbySeries(
-      getNearbySeriesData({
-        mousePos,
-        data,
-        seriesMapping,
-        pinnedPos,
-        chart,
-        format,
-        seriesFormatMap,
-        showAllSeries,
-      }),
-    );
-  }, [chartRef, mousePos, data, seriesMapping, pinnedPos, format, seriesFormatMap, showAllSeries]);
 
   // Synchronously reposition after every render to prevent one-frame viewport overflow.
   useLayoutEffect(() => {
@@ -140,7 +128,7 @@ export const TimeChartTooltip = memo(function TimeChartTooltip({
             enablePinning={enablePinning}
             isTooltipPinned={isTooltipPinned}
             showAllSeries={showAllSeries}
-            onShowAllClick={(checked) => setShowAllSeries(checked)}
+            onShowAllClick={setShowAllSeries}
             onUnpinClick={onUnpinClick}
           />
           <TooltipContent series={nearbySeries} wrapLabels={wrapLabels} />
