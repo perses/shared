@@ -14,8 +14,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRef } from 'react';
-import type { CSSProperties, FocusEvent, FormEvent, KeyboardEvent } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import type { CSSProperties, FormEvent } from 'react';
 
 import { Chip } from './Chip';
 
@@ -24,296 +23,191 @@ const customChipStyle: CSSProperties & { '--chip-label-max-width': string } = {
   marginTop: 4,
   '--chip-label-max-width': '20ch',
 };
-const editableLabel = (
-  <>
-    <input aria-label="Variable label" defaultValue="production" />
-    <button type="button">Edit label</button>
-  </>
-);
+const startElement = <svg data-testid="start-element" />;
+const closeIcon = <svg data-testid="close-icon" />;
 
 describe('Chip', () => {
-  it('renders the label', () => {
-    render(<Chip label="Production" />);
+  it('renders its children', () => {
+    render(<Chip>Production</Chip>);
     expect(screen.getByText('Production')).toBeInTheDocument();
   });
 
   it('applies the ps-Chip class', () => {
-    render(<Chip label="Production" />);
+    render(<Chip>Production</Chip>);
     expect(screen.getByText('Production').closest('.ps-Chip')).toBeInTheDocument();
   });
 
   it('defaults to default color', () => {
-    render(<Chip label="Production" />);
+    render(<Chip>Production</Chip>);
     expect(screen.getByText('Production').closest('.ps-Chip')).toHaveAttribute('data-color', 'default');
   });
 
   it('sets data-color attribute', () => {
-    render(<Chip label="Secondary" color="secondary" />);
+    render(<Chip color="secondary">Secondary</Chip>);
     expect(screen.getByText('Secondary').closest('.ps-Chip')).toHaveAttribute('data-color', 'secondary');
   });
 
   it('sets data-status attribute independently of color', () => {
-    render(<Chip label="Error" color="secondary" status="error" />);
+    render(
+      <Chip color="secondary" status="error">
+        Error
+      </Chip>,
+    );
     const chip = screen.getByText('Error').closest('.ps-Chip');
     expect(chip).toHaveAttribute('data-color', 'secondary');
     expect(chip).toHaveAttribute('data-status', 'error');
   });
 
-  it('defaults to the sm filled variant', () => {
-    render(<Chip label="Production" />);
+  it('defaults to the sm solid variant', () => {
+    render(<Chip>Production</Chip>);
     const chip = screen.getByText('Production').closest('.ps-Chip');
     expect(chip).toHaveAttribute('data-size', 'sm');
-    expect(chip).toHaveAttribute('data-variant', 'filled');
+    expect(chip).toHaveAttribute('data-variant', 'solid');
   });
 
   it('sets data-size and data-variant attributes', () => {
-    render(<Chip label="Production" size="md" variant="outlined" />);
-    const chip = screen.getByText('Production').closest('.ps-Chip');
-    expect(chip).toHaveAttribute('data-size', 'md');
-    expect(chip).toHaveAttribute('data-variant', 'outlined');
-  });
-
-  it.each([
-    { mode: 'static', props: {} },
-    { mode: 'clickable', props: { onClick: noop } },
-    { mode: 'removable', props: { onDelete: noop } },
-    { mode: 'link', props: { href: '#docs' } },
-    { mode: 'removable link', props: { href: '#docs', onDelete: noop } },
-  ])('keeps visual props on the outer container for a $mode Chip', ({ props }) => {
     render(
-      <Chip
-        {...props}
-        label="Production"
-        color="secondary"
-        status="warning"
-        size="md"
-        variant="outlined"
-        disabled
-        className="custom-chip"
-        style={customChipStyle}
-        textMaxWidth={120}
-      />,
+      <Chip size="md" variant="outline">
+        Production
+      </Chip>,
     );
-
     const chip = screen.getByText('Production').closest('.ps-Chip');
-    expect(chip).toHaveClass('custom-chip');
-    expect(chip).toHaveAttribute('data-color', 'secondary');
-    expect(chip).toHaveAttribute('data-status', 'warning');
     expect(chip).toHaveAttribute('data-size', 'md');
-    expect(chip).toHaveAttribute('data-variant', 'outlined');
-    expect(chip).toHaveAttribute('data-disabled', 'true');
-    expect(chip).toHaveStyle({ '--chip-label-max-width': '120px', marginTop: '4px' });
+    expect(chip).toHaveAttribute('data-variant', 'outline');
   });
 
-  it('renders an optional leading icon', () => {
-    render(<Chip label="Production" icon={<svg data-testid="leading-icon" />} />);
-    expect(screen.getByTestId('leading-icon')).toBeInTheDocument();
+  it('renders an optional start element', () => {
+    render(<Chip startElement={startElement}>Production</Chip>);
+    expect(screen.getByTestId('start-element')).toBeInTheDocument();
   });
 
-  it('uses children when label is omitted', () => {
-    render(<Chip>Production</Chip>);
-    expect(screen.getByText('Production')).toBeInTheDocument();
-  });
-
-  it.each([false, true])('supports editing controls inside the label (removable: %s)', async (removable) => {
-    const handleDelete = vi.fn();
+  it('supports interactive elements inside children', async () => {
+    const handleClose = vi.fn();
     render(
-      <Chip label={editableLabel} onDelete={removable ? handleDelete : undefined} deleteAriaLabel="Remove variable" />,
+      <Chip onClose={handleClose} closeAriaLabel="Remove variable">
+        <input aria-label="Variable label" defaultValue="production" />
+        <button type="button">Edit label</button>
+      </Chip>,
     );
 
     const input = screen.getByRole('textbox', { name: 'Variable label' });
     const editButton = screen.getByRole('button', { name: 'Edit label' });
-    expect(input.closest('button, a, [role="button"]')).toBeNull();
-    expect(editButton.parentElement?.closest('button, a, [role="button"]')).toBeNull();
 
     await userEvent.type(input, ' west');
-    await userEvent.keyboard('{Enter}{Escape}');
     expect(input).toHaveValue('production west');
     await userEvent.tab();
     expect(editButton).toHaveFocus();
     await userEvent.keyboard('{Enter}');
-    expect(handleDelete).not.toHaveBeenCalled();
+    expect(handleClose).not.toHaveBeenCalled();
 
-    if (removable) {
-      const removeButton = screen.getByRole('button', { name: 'Remove variable' });
-      expect(removeButton.parentElement).toBe(input.closest('.ps-Chip'));
-      expect(removeButton.closest('.ps-Chip__label')).toBeNull();
-      await userEvent.tab();
-      expect(removeButton).toHaveFocus();
-      await userEvent.keyboard('{Enter}');
-      expect(handleDelete).toHaveBeenCalledTimes(1);
-    }
+    await userEvent.tab();
+    expect(screen.getByRole('button', { name: 'Remove variable' })).toHaveFocus();
+    await userEvent.keyboard('{Enter}');
+    expect(handleClose).toHaveBeenCalledTimes(1);
   });
 
-  it('renders a delete button when onDelete is provided', () => {
-    render(<Chip label="Removable" onDelete={noop} />);
-    expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument();
+  it('renders a close button when onClose is provided', () => {
+    render(<Chip onClose={noop}>Removable</Chip>);
+    expect(screen.getByRole('button', { name: 'Remove Removable' })).toBeInTheDocument();
   });
 
-  it('calls onDelete when the delete button is clicked', async () => {
-    const handleDelete = vi.fn();
-    render(<Chip label="Removable" onDelete={handleDelete} />);
+  it('calls onClose when the close button is clicked', async () => {
+    const handleClose = vi.fn();
+    render(<Chip onClose={handleClose}>Removable</Chip>);
     await userEvent.click(screen.getByRole('button', { name: /remove/i }));
-    expect(handleDelete).toHaveBeenCalledTimes(1);
+    expect(handleClose).toHaveBeenCalledTimes(1);
   });
 
-  it('uses a custom delete icon when provided', () => {
-    render(<Chip label="Removable" onDelete={noop} deleteIcon={<svg data-testid="delete-icon" />} />);
-    expect(screen.getByTestId('delete-icon')).toBeInTheDocument();
+  it('uses a custom close icon when provided', () => {
+    render(
+      <Chip onClose={noop} closeIcon={closeIcon}>
+        Removable
+      </Chip>,
+    );
+    expect(screen.getByTestId('close-icon')).toBeInTheDocument();
   });
 
-  it('does not propagate delete clicks to a parent', async () => {
+  it('supports a custom close aria label', () => {
+    render(
+      <Chip onClose={noop} closeAriaLabel="Remove production environment">
+        Production
+      </Chip>,
+    );
+    expect(screen.getByRole('button', { name: 'Remove production environment' })).toBeInTheDocument();
+  });
+
+  it('does not propagate close-button clicks to a parent', async () => {
     const handleClick = vi.fn();
-    const handleDelete = vi.fn();
+    const handleClose = vi.fn();
     render(
       <div role="presentation" onClick={handleClick}>
-        <Chip label="Removable" onDelete={handleDelete} />
+        <Chip onClose={handleClose}>Removable</Chip>
       </div>,
     );
 
     await userEvent.click(screen.getByRole('button', { name: /remove/i }));
 
-    expect(handleDelete).toHaveBeenCalledTimes(1);
+    expect(handleClose).toHaveBeenCalledTimes(1);
     expect(handleClick).not.toHaveBeenCalled();
   });
 
-  it('rejects providing onClick and onDelete together', () => {
-    // @ts-expect-error: Chips accept either onClick or onDelete, but not both.
-    const invalidChip = <Chip label="Invalid" onClick={noop} onDelete={noop} />;
-    expect(() => renderToStaticMarkup(invalidChip)).toThrow('Chip accepts either onClick or onDelete, but not both.');
-  });
-
-  it('renders separate sibling controls when a Chip is a removable link', () => {
-    render(<Chip label="Removable" href="/docs" onDelete={noop} />);
-
-    const chip = screen.getByText('Removable').closest('.ps-Chip');
-    expect(chip).not.toHaveAttribute('role', 'button');
-    const link = screen.getByRole('link', { name: 'Removable' });
-    expect(link).toHaveAttribute('href', '/docs');
-    expect(link.parentElement).toBe(chip);
-    expect(screen.getByRole('button', { name: /remove removable/i }).parentElement).toBe(chip);
-  });
-
-  it.each([false, true])('keeps the accessible name and description on the link (removable: %s)', (removable) => {
-    render(
-      <>
-        <span id="filters-description">View the remaining filters</span>
-        <Chip
-          label="+3"
-          href="#filters"
-          aria-label="Show three more filters"
-          aria-describedby="filters-description"
-          onDelete={removable ? noop : undefined}
-        />
-      </>,
-    );
-
-    const link = screen.getByRole('link', { name: 'Show three more filters' });
-    expect(link).toHaveAccessibleDescription('View the remaining filters');
-    if (removable) {
-      expect(screen.getByRole('button', { name: 'Remove +3' })).not.toHaveAttribute('aria-describedby');
-    }
-  });
-
-  it.each([false, true])('keeps aria-labelledby on the link (removable: %s)', (removable) => {
-    render(
-      <>
-        <span id="filters-label">Show three more filters</span>
-        <Chip label="+3" href="#filters" aria-labelledby="filters-label" onDelete={removable ? noop : undefined} />
-      </>,
-    );
-
-    expect(screen.getByRole('link', { name: 'Show three more filters' })).toHaveAttribute(
-      'aria-labelledby',
-      'filters-label',
-    );
-  });
-
-  it('forwards a custom role to the removable link rather than the wrapper', () => {
-    render(<Chip label="Documentation" href="#docs" role="menuitem" onDelete={noop} />);
-
-    const action = screen.getByRole('menuitem', { name: 'Documentation' });
-    expect(action).toHaveAttribute('href', '#docs');
-    expect(action.parentElement).not.toHaveAttribute('role');
-    expect(screen.getByRole('button', { name: 'Remove Documentation' }).parentElement).toBe(action.parentElement);
-  });
-
-  it('keeps focus and keyboard handlers on the link, separate from the remove button', async () => {
-    const ref = createRef<HTMLElement>();
-    const handleFocus = vi.fn((event: FocusEvent<HTMLElement>) => event.currentTarget);
-    const handleBlur = vi.fn((event: FocusEvent<HTMLElement>) => event.currentTarget);
-    const handleKeyDown = vi.fn((event: KeyboardEvent<HTMLElement>) => {
-      if (event.key === 'Enter') event.preventDefault();
-      return event.currentTarget;
-    });
-    const handleKeyUp = vi.fn((event: KeyboardEvent<HTMLElement>) => event.currentTarget);
-    const handleDelete = vi.fn();
-    render(
-      <Chip
-        ref={ref}
-        id="documentation-link"
-        label="Documentation"
-        component="a"
-        href="#docs"
-        className="custom-chip"
-        style={customChipStyle}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        onKeyUp={handleKeyUp}
-        onDelete={handleDelete}
-      />,
-    );
-
-    const link = screen.getByRole('link', { name: 'Documentation' });
-    expect(ref.current).toBe(link);
-    expect(link).toHaveAttribute('id', 'documentation-link');
-    expect(link.parentElement).toHaveClass('ps-Chip', 'custom-chip');
-    expect(link.parentElement).toHaveStyle({ marginTop: '4px' });
-
-    await userEvent.tab();
-    expect(link).toHaveFocus();
-    expect(handleFocus).toHaveLastReturnedWith(link);
-    await userEvent.keyboard('{Enter}');
-    expect(handleKeyDown).toHaveLastReturnedWith(link);
-    expect(handleKeyUp).toHaveLastReturnedWith(link);
-    expect(handleDelete).not.toHaveBeenCalled();
-
-    await userEvent.tab();
-    expect(screen.getByRole('button', { name: 'Remove Documentation' })).toHaveFocus();
-    expect(handleBlur).toHaveLastReturnedWith(link);
-    expect(handleFocus).toHaveBeenCalledTimes(1);
-    handleKeyDown.mockClear();
-    handleKeyUp.mockClear();
-
-    await userEvent.keyboard('{Enter}');
-    expect(handleDelete).toHaveBeenCalledTimes(1);
-    expect(handleKeyDown).not.toHaveBeenCalled();
-    expect(handleKeyUp).not.toHaveBeenCalled();
-  });
-
-  it.each(['{Enter}', ' '])('keeps custom clickable elements keyboard-operable with %s', async (key) => {
+  it('supports onClick and onClose together', async () => {
     const handleClick = vi.fn();
-    render(<Chip component="span" label="+3" aria-label="Show three more filters" onClick={handleClick} />);
+    const handleClose = vi.fn();
+    render(
+      <Chip onClick={handleClick} onClose={handleClose}>
+        Selectable
+      </Chip>,
+    );
 
-    await userEvent.tab();
-    expect(screen.getByRole('button', { name: 'Show three more filters' })).toHaveFocus();
-    await userEvent.keyboard(key);
-
+    await userEvent.click(screen.getByRole('button', { name: 'Selectable' }));
     expect(handleClick).toHaveBeenCalledTimes(1);
+    expect(handleClose).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remove Selectable' }));
+    expect(handleClose).toHaveBeenCalledTimes(1);
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps keyboard activation of the close button separate from onClick', async () => {
+    const handleClick = vi.fn();
+    const handleClose = vi.fn();
+    render(
+      <Chip onClick={handleClick} onClose={handleClose}>
+        Selectable
+      </Chip>,
+    );
+
+    screen.getByRole('button', { name: 'Remove Selectable' }).focus();
+    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard(' ');
+
+    expect(handleClose).toHaveBeenCalledTimes(2);
+    expect(handleClick).not.toHaveBeenCalled();
+  });
+
+  it('renders clickable Chips as keyboard-operable buttons', async () => {
+    const handleClick = vi.fn();
+    render(<Chip onClick={handleClick}>Show all</Chip>);
+
+    const chip = screen.getByRole('button', { name: 'Show all' });
+    await userEvent.click(chip);
+    chip.focus();
+    await userEvent.keyboard('{Enter}');
+    await userEvent.keyboard(' ');
+
+    expect(handleClick).toHaveBeenCalledTimes(3);
   });
 
   it('does not submit a form when selecting or removing a Chip', async () => {
     const handleSubmit = vi.fn((event: FormEvent<HTMLFormElement>): void => event.preventDefault());
     const handleClick = vi.fn();
-    const handleDelete = vi.fn();
-    const handleLinkDelete = vi.fn();
+    const handleClose = vi.fn();
 
     render(
       <form onSubmit={handleSubmit}>
-        <Chip label="Selectable" onClick={handleClick} />
-        <Chip label="Removable" onDelete={handleDelete} />
-        <Chip label="Linked" href="/docs" onDelete={handleLinkDelete} />
+        <Chip onClick={handleClick}>Selectable</Chip>
+        <Chip onClose={handleClose}>Removable</Chip>
       </form>,
     );
 
@@ -321,38 +215,23 @@ describe('Chip', () => {
     await userEvent.keyboard('{Enter}');
     await userEvent.keyboard(' ');
     await userEvent.click(screen.getByRole('button', { name: 'Remove Removable' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Remove Linked' }));
 
     expect(handleClick).toHaveBeenCalledTimes(3);
-    expect(handleDelete).toHaveBeenCalledTimes(1);
-    expect(handleLinkDelete).toHaveBeenCalledTimes(1);
+    expect(handleClose).toHaveBeenCalledTimes(1);
     expect(handleSubmit).not.toHaveBeenCalled();
-  });
-
-  it('renders clickable Chips as keyboard-operable buttons', async () => {
-    const handleClick = vi.fn();
-    render(<Chip label="Show all" onClick={handleClick} />);
-
-    const chip = screen.getByRole('button', { name: 'Show all' });
-    await userEvent.click(chip);
-    await userEvent.keyboard('{Enter}');
-
-    expect(handleClick).toHaveBeenCalledTimes(2);
-  });
-
-  it('renders href Chips as links', () => {
-    render(<Chip label="Documentation" href="/docs" target="_blank" />);
-    expect(screen.getByRole('link', { name: 'Documentation' })).toHaveAttribute('href', '/docs');
-    expect(screen.getByRole('link', { name: 'Documentation' })).toHaveAttribute('target', '_blank');
   });
 
   it.each(['clickable', 'removable'] as const)('prevents interactions on a disabled %s Chip', async (mode) => {
     const handleAction = vi.fn();
     render(
       mode === 'clickable' ? (
-        <Chip label="Disabled" disabled onClick={handleAction} />
+        <Chip disabled onClick={handleAction}>
+          Disabled
+        </Chip>
       ) : (
-        <Chip label="Disabled" disabled onDelete={handleAction} />
+        <Chip disabled onClose={handleAction}>
+          Disabled
+        </Chip>
       ),
     );
 
@@ -361,45 +240,60 @@ describe('Chip', () => {
     expect(handleAction).not.toHaveBeenCalled();
   });
 
-  it('supports a custom close-button aria label and properties', () => {
+  it('keeps visual props on the container and forwards the ref', () => {
+    const ref = createRef<HTMLDivElement>();
     render(
       <Chip
-        label="Production"
-        onDelete={noop}
-        closeBtnAriaLabel="Remove production environment"
-        closeBtnProps={{ 'data-testid': 'close-button' }}
-      />,
+        ref={ref}
+        color="secondary"
+        status="warning"
+        size="md"
+        variant="outline"
+        disabled
+        className="custom-chip"
+        style={customChipStyle}
+        maxWidth={120}
+        onClose={noop}
+      >
+        Production
+      </Chip>,
     );
 
-    expect(screen.getByTestId('close-button')).toHaveAccessibleName('Remove production environment');
-  });
-
-  it('renders a custom close button without nesting it in another button', async () => {
-    const handleDelete = vi.fn();
-    render(<Chip label="Production" onDelete={handleDelete} closeBtn={<button type="button">Remove custom</button>} />);
-
-    const closeButton = screen.getByRole('button', { name: /remove production/i });
-    expect(closeButton.parentElement).toHaveClass('ps-Chip');
-    await userEvent.click(closeButton);
-    expect(handleDelete).toHaveBeenCalledTimes(1);
+    const chip = screen.getByText('Production').closest('.ps-Chip');
+    expect(ref.current).toBe(chip);
+    expect(chip).toHaveClass('custom-chip');
+    expect(chip).toHaveAttribute('data-color', 'secondary');
+    expect(chip).toHaveAttribute('data-status', 'warning');
+    expect(chip).toHaveAttribute('data-size', 'md');
+    expect(chip).toHaveAttribute('data-variant', 'outline');
+    expect(chip).toHaveAttribute('data-disabled', 'true');
+    expect(chip).toHaveStyle({ '--chip-label-max-width': '120px', marginTop: '4px' });
   });
 
   it.each([
     [120, '120px'],
     [0, '0px'],
     ['12ch', '12ch'],
-  ])('sets textMaxWidth %s as the CSS length %s', (textMaxWidth, expected) => {
-    render(<Chip label="Production" textMaxWidth={textMaxWidth} style={customChipStyle} />);
+  ])('sets maxWidth %s as the CSS length %s', (maxWidth, expected) => {
+    render(
+      <Chip maxWidth={maxWidth} style={customChipStyle}>
+        Production
+      </Chip>,
+    );
     expect(screen.getByText('Production').closest('.ps-Chip')).toHaveStyle({
       '--chip-label-max-width': expected,
       marginTop: '4px',
     });
   });
 
-  it('restores the style-defined width when textMaxWidth is removed', () => {
-    const { rerender } = render(<Chip label="Production" textMaxWidth={120} style={customChipStyle} />);
+  it('restores the style-defined width when maxWidth is removed', () => {
+    const { rerender } = render(
+      <Chip maxWidth={120} style={customChipStyle}>
+        Production
+      </Chip>,
+    );
 
-    rerender(<Chip label="Production" style={customChipStyle} />);
+    rerender(<Chip style={customChipStyle}>Production</Chip>);
 
     expect(screen.getByText('Production').closest('.ps-Chip')).toHaveStyle({
       '--chip-label-max-width': '20ch',
@@ -407,18 +301,22 @@ describe('Chip', () => {
     });
   });
 
-  it('renders no delete button when onDelete is omitted', () => {
-    render(<Chip label="Fixed" />);
+  it('renders no close button when onClose is omitted', () => {
+    render(<Chip>Fixed</Chip>);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
   it('merges additional className', () => {
-    render(<Chip label="Production" className="custom" />);
+    render(<Chip className="custom">Production</Chip>);
     expect(screen.getByText('Production').closest('.ps-Chip')).toHaveClass('custom');
   });
 
   it('forwards div attributes', () => {
-    render(<Chip label="Production" aria-describedby="chip-description" data-testid="production-chip" />);
+    render(
+      <Chip aria-describedby="chip-description" data-testid="production-chip">
+        Production
+      </Chip>,
+    );
     expect(screen.getByTestId('production-chip')).toHaveAttribute('aria-describedby', 'chip-description');
   });
 });

@@ -12,147 +12,118 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { cloneElement, forwardRef, useCallback } from 'react';
+import { forwardRef, useCallback, useMemo } from 'react';
 import type {
-  ButtonHTMLAttributes,
   CSSProperties,
-  ElementType,
   HTMLAttributes,
   KeyboardEventHandler,
-  MouseEvent as ReactMouseEvent,
   MouseEventHandler,
   ReactElement,
   ReactNode,
 } from 'react';
 
-import type { ColorVariant, Size, Status } from '../types';
+import { CloseIcon } from '../Icon/icons/CloseIcon';
+import type { ColorVariant, Size, Status, Variant } from '../types';
 
 // oxlint-disable-next-line import/no-unassigned-import -- CSS is loaded for this component's visual contract.
 import './chip.css';
 
 export type ChipColor = 'default' | ColorVariant;
-export type ChipStatus = Status;
 export type ChipSize = Exclude<Size, 'lg'>;
-export type ChipVariant = 'filled' | 'outlined';
-export type ChipCloseButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  [key: `data-${string}`]: string | undefined;
-};
-type CloseButtonElementProps = {
-  'aria-label'?: string;
-  className?: string;
-  disabled?: boolean;
-  onClick?: MouseEventHandler<HTMLElement>;
-};
+export type ChipVariant = Exclude<Variant, 'ghost'>;
 
-interface ChipBaseProps extends Omit<HTMLAttributes<HTMLElement>, 'children' | 'color' | 'onClick'> {
-  label?: ReactNode;
-  children?: ReactNode;
+export interface ChipProps extends Omit<HTMLAttributes<HTMLDivElement>, 'color'> {
   color?: ChipColor;
-  status?: ChipStatus;
+  status?: Status;
   size?: ChipSize;
   variant?: ChipVariant;
-  component?: ElementType;
-  href?: string;
-  target?: string;
   clickable?: boolean;
   disabled?: boolean;
-  skipFocusWhenDisabled?: boolean;
-  icon?: ReactElement;
-  avatar?: ReactElement;
-  deleteIcon?: ReactElement;
-  closeBtn?: ReactElement<CloseButtonElementProps>;
-  deleteAriaLabel?: string;
-  closeBtnAriaLabel?: string;
-  closeBtnProps?: ChipCloseButtonProps;
-  textMaxWidth?: CSSProperties['maxWidth'];
+  startElement?: ReactNode;
+  closeIcon?: ReactElement;
+  closeAriaLabel?: string;
+  onClose?: MouseEventHandler<HTMLButtonElement>;
+  maxWidth?: CSSProperties['maxWidth'];
 }
 
-export type ChipProps = ChipBaseProps &
-  (
-    | { onClick?: MouseEventHandler<HTMLElement>; onDelete?: never }
-    | { onClick?: never; onDelete?: MouseEventHandler<HTMLElement> }
-  );
+const defaultCloseIcon = <CloseIcon aria-hidden="true" />;
 
-const defaultDeleteIcon = (
-  <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-  </svg>
-);
-
-function getLabelText(label: ReactNode): string {
-  return typeof label === 'string' || typeof label === 'number' ? String(label) : 'label';
+function getCloseAriaLabel(children: ReactNode): string {
+  return typeof children === 'string' || typeof children === 'number' ? `Remove ${children}` : 'Remove';
 }
 
-export const Chip = forwardRef<HTMLElement, ChipProps>(function Chip(
+/**
+ * A compact element that represents an input, attribute, or action.
+ *
+ * Content is provided through `children`. Use `startElement` for a leading
+ * icon or avatar, and `onClose` to render a close button. `onClick` and
+ * `onClose` can be combined.
+ *
+ * @example Basic chip
+ * ```tsx
+ * <Chip color="secondary">environment: production</Chip>
+ * ```
+ *
+ * @example Removable chip with a leading icon
+ * ```tsx
+ * <Chip startElement={<TagIcon />} onClose={() => removeFilter(id)}>
+ *   region: us-east-1
+ * </Chip>
+ * ```
+ */
+export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
   {
-    label,
     children,
     color = 'default',
     status,
     size = 'sm',
-    variant = 'filled',
-    icon,
-    avatar,
-    deleteIcon = defaultDeleteIcon,
-    closeBtn,
-    deleteAriaLabel,
-    closeBtnAriaLabel,
-    closeBtnProps,
-    onDelete,
-    component,
-    href,
-    target,
+    variant = 'solid',
+    startElement,
+    closeIcon = defaultCloseIcon,
+    closeAriaLabel,
+    onClose,
     clickable,
     disabled = false,
-    skipFocusWhenDisabled = false,
     onClick,
     onKeyDown,
     role,
     tabIndex,
-    textMaxWidth,
+    maxWidth,
     style,
     className,
     ...rest
   },
   ref,
 ): ReactElement {
-  if (onClick && onDelete) {
-    throw new Error('Chip accepts either onClick or onDelete, but not both.');
-  }
+  const resolvedStyle: (CSSProperties & { '--chip-label-max-width'?: string }) | undefined = useMemo(() => {
+    if (maxWidth === undefined) return style;
+    return { ...style, '--chip-label-max-width': typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth };
+  }, [maxWidth, style]);
 
-  const content = label ?? children;
-  const isInteractive = Boolean(onClick || href);
-  const isClickable = clickable || isInteractive;
-  const Component = component ?? (href ? 'a' : 'div');
-  const usesSeparateAction = Boolean(href && onDelete);
-  const labelMaxWidth = typeof textMaxWidth === 'number' ? `${textMaxWidth}px` : textMaxWidth;
-  const resolvedStyle: (CSSProperties & { '--chip-label-max-width'?: string }) | undefined =
-    textMaxWidth !== undefined ? { ...style, '--chip-label-max-width': labelMaxWidth } : style;
-  const resolvedTabIndex = disabled && skipFocusWhenDisabled ? -1 : (tabIndex ?? (isInteractive ? 0 : undefined));
-  const visualProps = {
-    'data-color': color,
-    'data-status': status,
-    'data-size': size,
-    'data-variant': variant,
-    'data-clickable': isClickable || undefined,
-    'data-disabled': disabled || undefined,
-    style: resolvedStyle,
-    className: clsx('ps-Chip', className),
-  };
+  const handleClick = useCallback<MouseEventHandler<HTMLDivElement>>(
+    (event) => {
+      if (disabled) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      onClick?.(event);
+    },
+    [disabled, onClick],
+  );
 
-  const handleClick: MouseEventHandler<HTMLElement> = (event) => {
-    if (disabled) {
-      event.preventDefault();
-      event.stopPropagation();
-      return;
-    }
-    onClick?.(event);
-  };
-
-  const handleKeyDown = useCallback<KeyboardEventHandler<HTMLElement>>(
+  const handleKeyDown = useCallback<KeyboardEventHandler<HTMLDivElement>>(
     (event) => {
       onKeyDown?.(event);
-      if (event.defaultPrevented || disabled || !onClick || (event.key !== 'Enter' && event.key !== ' ')) return;
+      if (
+        event.defaultPrevented ||
+        event.target !== event.currentTarget ||
+        disabled ||
+        !onClick ||
+        (event.key !== 'Enter' && event.key !== ' ')
+      ) {
+        return;
+      }
 
       event.preventDefault();
       event.currentTarget.click();
@@ -160,71 +131,53 @@ export const Chip = forwardRef<HTMLElement, ChipProps>(function Chip(
     [disabled, onClick, onKeyDown],
   );
 
-  const { className: closeButtonClassName, onClick: closeButtonOnClick, ...restCloseButtonProps } = closeBtnProps ?? {};
-
-  const handleDelete: MouseEventHandler<HTMLElement> = (event) => {
-    event.stopPropagation();
-    if (disabled) return;
-
-    closeButtonOnClick?.(event as ReactMouseEvent<HTMLButtonElement>);
-    closeBtn?.props.onClick?.(event);
-    if (!event.defaultPrevented) onDelete?.(event);
-  };
-
-  const closeButtonAriaLabel = closeBtnAriaLabel ?? deleteAriaLabel ?? `Remove ${getLabelText(content)}`;
-  const deleteControl = closeBtn ? (
-    cloneElement(closeBtn, {
-      ...restCloseButtonProps,
-      className: clsx('ps-Chip__delete', closeBtn.props.className, closeButtonClassName),
-      'aria-label': closeButtonAriaLabel,
-      disabled,
-      onClick: handleDelete,
-    })
-  ) : (
-    <button
-      {...restCloseButtonProps}
-      type="button"
-      className={clsx('ps-Chip__delete', closeButtonClassName)}
-      aria-label={closeButtonAriaLabel}
-      disabled={disabled}
-      onClick={handleDelete}
-    >
-      {deleteIcon}
-    </button>
+  const handleClose = useCallback<MouseEventHandler<HTMLButtonElement>>(
+    (event) => {
+      event.stopPropagation();
+      if (disabled) return;
+      onClose?.(event);
+    },
+    [disabled, onClose],
   );
 
-  const chipContent = (
-    <>
-      {(avatar ?? icon) && <span className="ps-Chip__icon">{avatar ?? icon}</span>}
-      <span className="ps-Chip__label">{content}</span>
-    </>
+  const interactionProps = useMemo(
+    () => ({
+      role: role ?? (onClick ? 'button' : undefined),
+      tabIndex: tabIndex ?? (onClick ? 0 : undefined),
+      onClick: handleClick,
+      onKeyDown: handleKeyDown,
+    }),
+    [handleClick, handleKeyDown, onClick, role, tabIndex],
   );
 
-  const mainElement = (
-    <Component
+  return (
+    <div
       {...rest}
-      {...(usesSeparateAction ? undefined : visualProps)}
+      {...interactionProps}
       ref={ref}
-      href={href}
-      target={target}
-      role={role ?? (onClick && !href ? 'button' : undefined)}
-      tabIndex={resolvedTabIndex}
+      className={clsx('ps-Chip', className)}
+      style={resolvedStyle}
+      data-color={color}
+      data-status={status}
+      data-size={size}
+      data-variant={variant}
+      data-clickable={clickable || Boolean(onClick) || undefined}
+      data-disabled={disabled || undefined}
       aria-disabled={disabled || undefined}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      className={usesSeparateAction ? 'ps-Chip__action' : visualProps.className}
     >
-      {chipContent}
-      {!usesSeparateAction && onDelete && deleteControl}
-    </Component>
-  );
-
-  return usesSeparateAction ? (
-    <div {...visualProps}>
-      {mainElement}
-      {deleteControl}
+      {startElement && <span className="ps-Chip__start">{startElement}</span>}
+      <span className="ps-Chip__label">{children}</span>
+      {onClose && (
+        <button
+          type="button"
+          className="ps-Chip__close"
+          aria-label={closeAriaLabel ?? getCloseAriaLabel(children)}
+          disabled={disabled}
+          onClick={handleClose}
+        >
+          {closeIcon}
+        </button>
+      )}
     </div>
-  ) : (
-    mainElement
   );
 });

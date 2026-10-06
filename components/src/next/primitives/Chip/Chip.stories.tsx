@@ -15,15 +15,18 @@ import type { Story } from '@ladle/react';
 import { useCallback, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 
+import type { Status } from '../types';
 import { Chip } from './Chip';
-import type { ChipColor, ChipSize, ChipStatus, ChipVariant } from './Chip';
+import type { ChipColor, ChipSize, ChipVariant } from './Chip';
 
-const colors: ChipColor[] = ['default', 'primary', 'secondary'];
-const statuses: ChipStatus[] = ['success', 'warning', 'error', 'info'];
+const colors: Array<ChipColor | Status> = ['default', 'primary', 'secondary', 'success', 'warning', 'error', 'info'];
+const statuses: Status[] = ['success', 'warning', 'error', 'info'];
 const sizes: ChipSize[] = ['sm', 'md'];
-const variants: ChipVariant[] = ['filled', 'outlined'];
-const chipListStyle: CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: '0.5rem' };
-const chipColumnStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '1rem' };
+const variants: ChipVariant[] = ['solid', 'outline'];
+
+function isStatus(value: ChipColor | Status): value is Status {
+  return (statuses as Array<ChipColor | Status>).includes(value);
+}
 
 function TagIcon(): ReactElement {
   return (
@@ -38,50 +41,70 @@ function TagIcon(): ReactElement {
     </svg>
   );
 }
+const columnStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '2rem' };
+const variantColumnStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.5rem' };
+const rowStyle: CSSProperties = { display: 'flex', gap: '0.5rem', alignItems: 'center' };
+const wrapRowStyle: CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: '0.5rem' };
+const sizeHeadingStyle: CSSProperties = { marginBottom: '0.5rem' };
+const variantLabelStyle: CSSProperties = { width: '4rem', fontSize: '0.75rem' };
+const tagIcon = <TagIcon />;
+const noop = (): void => {};
 
-function TrashIcon(): ReactElement {
-  return (
-    <svg viewBox="0 0 16 16" width="16" height="16" fill="none" aria-hidden="true">
-      <path d="M3 4.5h10M6.5 2.5h3M5 4.5l.5 9h5l.5-9M6.5 7v4M9.5 7v4" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-interface RemovableChipProps {
-  label: string;
-  onDelete: (label: string) => void;
-}
-
-function RemovableChip({ label, onDelete }: RemovableChipProps): ReactElement {
-  const handleDelete = useCallback(() => onDelete(label), [label, onDelete]);
-
-  return <Chip label={label} onDelete={handleDelete} />;
-}
-
-export const AllColors: Story = () => (
-  <div style={chipListStyle}>
-    {colors.map((color) => (
-      <Chip key={color} label={color} color={color} />
-    ))}
-    {statuses.map((status) => (
-      <Chip key={status} label={status} status={status} />
-    ))}
-  </div>
-);
-AllColors.storyName = 'All colors';
-
-export const VariantsAndSizes: Story = () => (
-  <div style={chipColumnStyle}>
+export const AllVariantsAndColors: Story = () => (
+  <div style={columnStyle}>
     {sizes.map((size) => (
-      <div key={size} style={chipListStyle}>
-        {variants.map((variant) => (
-          <Chip key={variant} label={`${size} ${variant}`} size={size} variant={variant} />
-        ))}
+      <div key={size}>
+        <h3 style={sizeHeadingStyle}>Size: {size}</h3>
+        <div style={variantColumnStyle}>
+          {variants.map((variant) => (
+            <div key={variant} style={rowStyle}>
+              <span style={variantLabelStyle}>{variant}</span>
+              {colors.map((color) => (
+                <Chip
+                  key={color}
+                  variant={variant}
+                  size={size}
+                  color={isStatus(color) ? undefined : color}
+                  status={isStatus(color) ? color : undefined}
+                >
+                  {color}
+                </Chip>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     ))}
   </div>
 );
-VariantsAndSizes.storyName = 'Variants and sizes';
+AllVariantsAndColors.storyName = 'All Variants & Colors';
+
+export const Disabled: Story = () => (
+  <div style={wrapRowStyle}>
+    <Chip disabled>Filled disabled</Chip>
+    <Chip variant="outline" disabled>
+      Outlined disabled
+    </Chip>
+    <Chip disabled onClose={noop}>
+      Removable disabled
+    </Chip>
+  </div>
+);
+
+interface RemovableChipProps {
+  label: string;
+  onClose: (label: string) => void;
+}
+
+function RemovableChip({ label, onClose }: RemovableChipProps): ReactElement {
+  const handleClose = useCallback(() => onClose(label), [label, onClose]);
+
+  return (
+    <Chip startElement={tagIcon} onClose={handleClose}>
+      {label}
+    </Chip>
+  );
+}
 
 export const Removable: Story = () => {
   const [labels, setLabels] = useState(['environment: production', 'region: us-east-1', 'service: api']);
@@ -90,31 +113,11 @@ export const Removable: Story = () => {
   }, []);
 
   return (
-    <div style={chipListStyle}>
+    <div style={wrapRowStyle}>
       {labels.map((label) => (
-        <RemovableChip key={label} label={label} onDelete={removeLabel} />
+        <RemovableChip key={label} label={label} onClose={removeLabel} />
       ))}
     </div>
   );
 };
 Removable.storyName = 'Removable';
-
-export const CustomIcons: Story = () => {
-  const [isVisible, setIsVisible] = useState(true);
-
-  return (
-    <div style={chipListStyle}>
-      <Chip label="Tagged resource" icon={<TagIcon />} color="secondary" />
-      {isVisible && (
-        <Chip
-          label="Delete with custom icon"
-          status="warning"
-          icon={<TagIcon />}
-          deleteIcon={<TrashIcon />}
-          onDelete={() => setIsVisible(false)}
-        />
-      )}
-    </div>
-  );
-};
-CustomIcons.storyName = 'Custom icons';

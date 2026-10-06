@@ -31,7 +31,7 @@ type RefComponent<Props, Element> = ForwardRefExoticComponent<PropsWithoutRef<Pr
 
 export interface PersesComponents {
   Button: ComponentType<ButtonProps>;
-  Chip: RefComponent<ChipProps, HTMLElement>;
+  Chip: RefComponent<ChipProps, HTMLDivElement>;
   Alert: ComponentType<AlertProps>;
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;

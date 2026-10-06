@@ -77,10 +77,10 @@ describe('ComponentsProvider', () => {
   });
 
   it('supports overriding Chip', () => {
-    const CustomChip = forwardRef<HTMLElement, ChipProps>(function CustomChip({ label, ...rest }, ref) {
+    const CustomChip = forwardRef<HTMLDivElement, ChipProps>(function CustomChip({ children, ...rest }, ref) {
       return (
         <div ref={ref as Ref<HTMLDivElement>} {...rest} data-testid="custom-chip">
-          Custom: {label}
+          Custom: {children}
         </div>
       );
     });
@@ -88,7 +88,7 @@ describe('ComponentsProvider', () => {
     function TestConsumer(): ReactElement {
       const { components } = useComponents();
       const { Chip } = components;
-      return <Chip label="Production" />;
+      return <Chip>Production</Chip>;
     }
 
     render(

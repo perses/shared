@@ -16,3 +16,5 @@ export type ColorVariant = 'primary' | 'secondary';
 export type Status = 'error' | 'warning' | 'success' | 'info';
 
 export type Size = 'sm' | 'md' | 'lg';
+
+export type Variant = 'solid' | 'outline' | 'ghost';

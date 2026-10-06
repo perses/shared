@@ -20,14 +20,13 @@ import type {
   ButtonSize,
   ButtonVariant,
   ChipColor,
-  ChipCloseButtonProps,
   ChipProps,
   ChipSize,
-  ChipStatus,
   ChipVariant,
   DividerProps,
   IconProps,
   SpinnerProps,
+  Status,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -47,12 +46,11 @@ describe('primitives barrel exports', () => {
     const variant: ButtonVariant = 'solid';
     const color: ButtonColor = 'primary';
     const size: ButtonSize = 'md';
-    const chipProps: ChipProps = { label: 'Production' };
-    const chipCloseButtonProps: ChipCloseButtonProps = { 'data-testid': 'close-button' };
+    const chipProps: ChipProps = { children: 'Production' };
     const chipColor: ChipColor = 'secondary';
-    const chipStatus: ChipStatus = 'success';
+    const chipStatus: Status = 'success';
     const chipSize: ChipSize = 'sm';
-    const chipVariant: ChipVariant = 'outlined';
+    const chipVariant: ChipVariant = 'outline';
     const dividerProps: DividerProps = {};
     const iconProps: IconProps = {};
     const spinnerProps: SpinnerProps = {};
@@ -64,11 +62,10 @@ describe('primitives barrel exports', () => {
     expect(color).toBe('primary');
     expect(size).toBe('md');
     expect(chipProps).toBeDefined();
-    expect(chipCloseButtonProps).toBeDefined();
     expect(chipColor).toBe('secondary');
     expect(chipStatus).toBe('success');
     expect(chipSize).toBe('sm');
-    expect(chipVariant).toBe('outlined');
+    expect(chipVariant).toBe('outline');
     expect(dividerProps).toBeDefined();
     expect(iconProps).toBeDefined();
     expect(spinnerProps).toBeDefined();
