@@ -34,7 +34,7 @@
     "@perses-dev/client": "0.55.0-beta.15",
     "@perses-dev/components": "0.55.0-beta.15",
     "@perses-dev/plugin-system": "0.55.0-beta.15",
-    "@perses-dev/spec": "0.3.0-beta.10",
+    "@perses-dev/spec": "0.3.0-rc.0",
     "@snapgridjs/react": "^0.10.0",
     "@tanstack/hotkeys": "^0.8.0",
     "@tanstack/react-hotkeys": "^0.9.1",
