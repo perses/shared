@@ -18,7 +18,7 @@ import { useReplaceVariablesInString, useReplaceVariablesInUrl } from '@perses-d
 import type { Link } from '@perses-dev/spec';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import type { MouseEvent, ReactElement } from 'react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 type LinksVariant = 'dashboard' | 'panel';
 
@@ -28,6 +28,7 @@ interface LinksProps {
 }
 
 export function LinksDisplay({ links, variant }: LinksProps): ReactElement | null {
+  const buttonId = `${variant}-links-button-${useId()}`;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isMenuOpened = Boolean(anchorEl);
   const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>): void => {
@@ -85,7 +86,7 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
       <InfoTooltip description={`${links.length} links`} enterDelay={100}>
         <IconButton
           aria-label={`${capitalize(variant)}-links`}
-          id={`${variant}-links-button`}
+          id={buttonId}
           size="small"
           onClick={handleOpenMenu}
           sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
@@ -103,7 +104,7 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
         open={isMenuOpened}
         onClose={handleClose}
         MenuListProps={{
-          'aria-labelledby': `${variant}-links-button`,
+          'aria-labelledby': buttonId,
         }}
       >
         {links.map((link: Link) => (

@@ -16,11 +16,13 @@ import { DataQueriesProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-
 import type { Link } from '@perses-dev/spec';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 
 import { VariableProvider } from '../../context';
 import { renderWithContext } from '../../test';
 import { LinksDisplay } from '../LinksDisplay';
-import { OverflowMenu } from './PanelActions';
+import { OverflowMenu, PanelActions } from './PanelActions';
 
 const testTheme = createTheme({
   transitions: { create: () => 'none' },
@@ -62,5 +64,39 @@ describe('OverflowMenu', () => {
 
     expect(await screen.findByRole('menuitem', { name: 'Link A' })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: 'Link B' })).toBeInTheDocument();
+  });
+});
+
+function renderActions(ui: ReactElement): ReturnType<typeof renderWithContext> {
+  return renderWithContext(
+    <ThemeProvider theme={testTheme}>
+      <TimeRangeProviderBasic initialTimeRange={{ pastDuration: '1h' }}>
+        <VariableProvider initialVariableDefinitions={[]}>
+          <DataQueriesProvider definitions={[]}>{ui}</DataQueriesProvider>
+        </VariableProvider>
+      </TimeRangeProviderBasic>
+    </ThemeProvider>,
+  );
+}
+
+function RerenderHarness(): ReactElement {
+  const [n, setN] = useState(0);
+  return (
+    <>
+      <button onClick={() => setN(n + 1)}>rerender</button>
+      <PanelActions title="P" descriptionTooltipId="d" links={testLinks} queryResults={[]} showIcons="always" />
+    </>
+  );
+}
+
+describe('PanelActions links menu', () => {
+  it('stays open when panel actions rerender', async () => {
+    renderActions(<RerenderHarness />);
+
+    userEvent.click(screen.getByRole('button', { name: 'Panel-links' }));
+    expect(await screen.findByRole('menuitem', { name: 'Link A' })).toBeInTheDocument();
+
+    userEvent.click(screen.getByRole('button', { name: 'rerender', hidden: true }));
+    expect(screen.getByRole('menuitem', { name: 'Link A' })).toBeInTheDocument();
   });
 });
