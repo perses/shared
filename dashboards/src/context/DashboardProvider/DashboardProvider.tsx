@@ -128,6 +128,23 @@ export function DashboardProvider(props: DashboardProviderProps): ReactElement {
     store.getState().setViewPanelFromRef(viewPanelRef);
   }, [store, viewPanelRef]);
 
+  // Bridge dashboard.spec.queryBatching.mode → plugin-system batch coalescing.
+  useEffect(() => {
+    const spec = props.initialState.dashboardResource?.spec as
+      | { queryBatching?: { mode?: string } }
+      | undefined;
+    const mode = spec?.queryBatching?.mode;
+    const w = window as unknown as { __PERSES_DASHBOARD_QUERY_BATCHING_MODE__?: string };
+    if (mode) {
+      w.__PERSES_DASHBOARD_QUERY_BATCHING_MODE__ = mode;
+    } else {
+      delete w.__PERSES_DASHBOARD_QUERY_BATCHING_MODE__;
+    }
+    return () => {
+      delete w.__PERSES_DASHBOARD_QUERY_BATCHING_MODE__;
+    };
+  }, [props.initialState.dashboardResource]);
+
   return (
     <DashboardContext.Provider value={store as StoreApi<DashboardStoreState>}>
       {props.children}
