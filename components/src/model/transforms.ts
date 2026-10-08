@@ -89,3 +89,9 @@ export const TRANSFORM_TEXT = {
   ExtractColumnFields: 'Extract column fields',
   PivotByLabel: 'Pivot by label',
 };
+
+const TRANSFORMS_REQUIRING_EACH_SAMPLE = new Set<Transform['kind']>(['PivotByLabel']);
+
+export function transformRequiresEachSample(kind: string): boolean {
+  return TRANSFORMS_REQUIRING_EACH_SAMPLE.has(kind as Transform['kind']);
+}
