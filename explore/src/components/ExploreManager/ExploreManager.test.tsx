@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type * as PluginSystemModule from '@perses-dev/plugin-system';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { ExploreManager } from './ExploreManager';
@@ -19,7 +20,8 @@ import { ExplorerManagerProvider } from './ExplorerManagerProvider';
 const pluginLoaderComponent = vi.fn<(props: unknown) => null>(() => null);
 const listPluginMetadata = vi.fn();
 
-vi.mock('@perses-dev/plugin-system', () => ({
+vi.mock('@perses-dev/plugin-system', async (importOriginal) => ({
+  ...(await importOriginal<typeof PluginSystemModule>()),
   PluginLoaderComponent: (props: unknown): null => pluginLoaderComponent(props),
   useListPluginMetadata: (): unknown => listPluginMetadata(),
   usePluginRegistry: (): unknown => ({ pluginsBaseURL: '/perses/plugins' }),
@@ -106,5 +108,62 @@ it('preserves plugin URLs and module identities when switching sorted explorer t
         baseURL: '/perses/plugins',
       },
     }),
+  );
+});
+
+it.each([
+  { order: 'older version listed first', versions: ['0.59.0', '0.60.0'] },
+  { order: 'older version listed second', versions: ['0.60.0', '0.59.0'] },
+])('shows a single tab loading the latest version when several versions are installed ($order)', ({ versions }) => {
+  listPluginMetadata.mockReturnValue({
+    data: versions.map((version) => ({
+      kind: 'Explore',
+      spec: { name: 'TempoExplorer', display: { name: 'Tempo' } },
+      module: { name: 'Tempo', version, registry: 'perses' },
+    })),
+  });
+  render(
+    <ExplorerManagerProvider defaultExplorer="Tempo-TempoExplorer">
+      <ExploreManager />
+    </ExplorerManagerProvider>,
+  );
+  expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Tempo']);
+  expect(pluginLoaderComponent).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      plugin: {
+        name: 'TempoExplorer',
+        moduleName: 'Tempo',
+        version: '0.60.0',
+        registry: 'perses',
+        baseURL: '/perses/plugins',
+      },
+    }),
+  );
+});
+
+it('shows the plugin served in dev over a newer installed version', () => {
+  listPluginMetadata.mockReturnValue({
+    data: [
+      {
+        kind: 'Explore',
+        spec: { name: 'TempoExplorer', display: { name: 'Tempo' } },
+        module: { name: 'Tempo', version: '0.60.0', registry: 'perses' },
+      },
+      {
+        kind: 'Explore',
+        spec: { name: 'TempoExplorer', display: { name: 'Tempo' } },
+        module: { name: 'Tempo', version: '0.59.0', registry: 'perses' },
+        inDev: true,
+      },
+    ],
+  });
+  render(
+    <ExplorerManagerProvider defaultExplorer="Tempo-TempoExplorer">
+      <ExploreManager />
+    </ExplorerManagerProvider>,
+  );
+  expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Tempo']);
+  expect(pluginLoaderComponent).toHaveBeenLastCalledWith(
+    expect.objectContaining({ plugin: expect.objectContaining({ version: '0.59.0' }) }),
   );
 });

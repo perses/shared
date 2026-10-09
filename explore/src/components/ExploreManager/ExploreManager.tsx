@@ -14,7 +14,12 @@
 import { Box, Button, Card, Stack, Tab, Tabs, useMediaQuery } from '@mui/material';
 import { useLocalStorage } from '@perses-dev/components';
 import type { PluginMetadataWithModule } from '@perses-dev/plugin-system';
-import { PluginLoaderComponent, useListPluginMetadata, usePluginRegistry } from '@perses-dev/plugin-system';
+import {
+  comparePluginVersions,
+  PluginLoaderComponent,
+  useListPluginMetadata,
+  usePluginRegistry,
+} from '@perses-dev/plugin-system';
 import ChevronLeft from 'mdi-material-ui/ChevronLeft';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import type { ReactElement, ReactNode } from 'react';
@@ -30,13 +35,34 @@ export function getExplorerKey(plugin: PluginMetadataWithModule): string {
   return `${plugin.module.name}-${plugin.spec.name}`;
 }
 
-/** Explore plugins sorted by display name, matching the order of the explorer tabs. */
+/** Same precedence as the plugin registry: a plugin served in dev wins over installed ones, whatever their versions. */
+function isPreferredOver(plugin: PluginMetadataWithModule, other: PluginMetadataWithModule): boolean {
+  if (Boolean(plugin.inDev) !== Boolean(other.inDev)) {
+    return Boolean(plugin.inDev);
+  }
+  return comparePluginVersions(plugin.module.version, other.module.version) > 0;
+}
+
+/**
+ * Explore plugins sorted by display name, matching the order of the explorer tabs. When several versions of the same
+ * explorer are installed, only the one served in dev, or else the latest, is kept.
+ */
 export function useSortedExplorerPlugins(): PluginMetadataWithModule[] | undefined {
   const plugins = useListPluginMetadata(['Explore']);
-  return useMemo(
-    () => plugins.data?.toSorted((a, b) => a.spec.display.name.localeCompare(b.spec.display.name)),
-    [plugins.data],
-  );
+  return useMemo(() => {
+    if (!plugins.data) {
+      return undefined;
+    }
+    const latestByKey = new Map<string, PluginMetadataWithModule>();
+    for (const plugin of plugins.data) {
+      const key = getExplorerKey(plugin);
+      const existing = latestByKey.get(key);
+      if (!existing || isPreferredOver(plugin, existing)) {
+        latestByKey.set(key, plugin);
+      }
+    }
+    return [...latestByKey.values()].toSorted((a, b) => a.spec.display.name.localeCompare(b.spec.display.name));
+  }, [plugins.data]);
 }
 
 export interface ExploreManagerProps {
