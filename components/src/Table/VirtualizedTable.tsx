@@ -38,6 +38,58 @@ type TableCellPosition = {
   column: number;
 };
 
+type TableContext<TableData> = {
+  width: number | string;
+  density: VirtualizedTableProps<TableData>['density'];
+  onTableKeyDown: React.KeyboardEventHandler<HTMLTableElement>;
+  onTableBlur: React.FocusEventHandler<HTMLTableElement>;
+  onRowClick: VirtualizedTableProps<TableData>['onRowClick'];
+  onRowMouseOver: VirtualizedTableProps<TableData>['onRowMouseOver'];
+  onRowMouseOut: VirtualizedTableProps<TableData>['onRowMouseOut'];
+};
+
+// Defined outside VirtualizedTable so the object reference is stable and
+// TableVirtuoso never remounts its internal components due to a changed prop.
+// Props that vary per-render are passed via the `context` prop instead.
+const VirtuosoTableComponents: TableComponents<Row<unknown>, TableContext<unknown>> = {
+  Scroller: VirtualizedTableContainer,
+  Table: ({ context, ...props }): ReactElement => {
+    return (
+      <InnerTable
+        {...props}
+        width={context.width}
+        density={context.density}
+        onKeyDown={context.onTableKeyDown}
+        onBlur={context.onTableBlur}
+      />
+    );
+  },
+  TableHead,
+  TableFoot,
+  TableRow: ({ item, context, ...props }): ReactElement | null => {
+    if (!item) {
+      return null;
+    }
+
+    const rowEventOpts: TableRowEventOpts = { id: item.id, index: item.index };
+
+    return (
+      <TableRow
+        {...props}
+        onClick={(e) => context.onRowClick(e, item.id)}
+        density={context.density}
+        onMouseOver={(e) => {
+          context.onRowMouseOver?.(e, rowEventOpts);
+        }}
+        onMouseOut={(e) => {
+          context.onRowMouseOut?.(e, rowEventOpts);
+        }}
+      />
+    );
+  },
+  TableBody,
+};
+
 export type VirtualizedTableProps<TableData> = Required<
   Pick<TableProps<TableData>, 'height' | 'width' | 'density' | 'defaultColumnHeight' | 'defaultColumnWidth'>
 > &
@@ -117,57 +169,18 @@ export function VirtualizedTable<TableData>({
     return 'none';
   };
 
-  const VirtuosoTableComponents: TableComponents<TableData> = useMemo(() => {
-    return {
-      Scroller: VirtualizedTableContainer,
-      Table: (props): ReactElement => {
-        return (
-          <InnerTable
-            {...props}
-            width={width}
-            density={density}
-            onKeyDown={keyboardNav.onTableKeyDown}
-            onBlur={keyboardNav.onTableBlur}
-          />
-        );
-      },
-      TableHead,
-      TableFoot,
-      TableRow: ({ item: _item, ...props }): ReactElement | null => {
-        const index = props['data-index'];
-        const row = rows[index];
-        if (!row) {
-          return null;
-        }
-
-        const rowEventOpts: TableRowEventOpts = { id: row.id, index: row.index };
-
-        return (
-          <TableRow
-            {...props}
-            onClick={(e) => onRowClick(e, row.id)}
-            density={density}
-            onMouseOver={(e) => {
-              onRowMouseOver?.(e, rowEventOpts);
-            }}
-            onMouseOut={(e) => {
-              onRowMouseOut?.(e, rowEventOpts);
-            }}
-          />
-        );
-      },
-      TableBody,
-    };
-  }, [
-    density,
-    keyboardNav.onTableKeyDown,
-    keyboardNav.onTableBlur,
-    onRowClick,
-    onRowMouseOut,
-    onRowMouseOver,
-    rows,
-    width,
-  ]);
+  const tableContext: TableContext<TableData> = useMemo(
+    () => ({
+      width,
+      density,
+      onTableKeyDown: keyboardNav.onTableKeyDown,
+      onTableBlur: keyboardNav.onTableBlur,
+      onRowClick,
+      onRowMouseOver,
+      onRowMouseOut,
+    }),
+    [width, density, keyboardNav.onTableKeyDown, keyboardNav.onTableBlur, onRowClick, onRowMouseOver, onRowMouseOut],
+  );
 
   const handleChangePage = (_event: React.MouseEvent<HTMLButtonElement> | null, newPage: number): void => {
     if (!pagination || !onPaginationChange) return;
@@ -200,8 +213,9 @@ export function VirtualizedTable<TableData>({
       <TableToolbar {...toolbarConfig} width={width} />
       <TableVirtuoso
         ref={virtuosoRef}
-        totalCount={rows.length}
-        components={VirtuosoTableComponents}
+        data={rows}
+        components={VirtuosoTableComponents as TableComponents<Row<TableData>, TableContext<TableData>>}
+        context={tableContext}
         // Note: this value is impacted by overscan. See this issue if overscan
         // is added.
         // https://github.com/petyosi/react-virtuoso/issues/118#issuecomment-642156138
