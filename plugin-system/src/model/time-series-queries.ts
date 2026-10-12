@@ -33,6 +33,16 @@ type TimeSeriesQueryPluginDependencies = {
 export interface TimeSeriesQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   getTimeSeriesData: (spec: Spec, ctx: TimeSeriesQueryContext, abortSignal?: AbortSignal) => Promise<TimeSeriesData>;
 
+  /**
+   * Optional batch path for same-panel multi-query (shared time range / step).
+   * When present, useTimeSeriesQueries may coalesce definitions into one call.
+   */
+  getTimeSeriesDataBatch?: (
+    specs: Spec[],
+    ctx: TimeSeriesQueryContext,
+    abortSignal?: AbortSignal,
+  ) => Promise<TimeSeriesData[]>;
+
   dependsOn?: (spec: Spec, ctx: TimeSeriesQueryContext) => TimeSeriesQueryPluginDependencies;
 }
 
