@@ -79,7 +79,7 @@ export function Legend({
   const onLegendItemClick = (e: React.MouseEvent<HTMLElement, MouseEvent>, seriesId: string): void => {
     const isModifiedClick = e.metaKey || e.shiftKey;
 
-    const newSelected = produce(selectedItems, (draft) => {
+    const newSelected = produce<SelectedLegendItemState>(selectedItems, (draft) => {
       if (draft === 'ALL') {
         return {
           [seriesId]: true,

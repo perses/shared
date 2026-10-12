@@ -11,19 +11,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { RowSelectionState } from '@tanstack/react-table';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
-import type { TableProps, TableColumnConfig } from '../Table';
-import { Table, DEFAULT_COLUMN_WIDTH, DEFAULT_COLUMN_MIN_WIDTH } from '../Table';
-import type { LegendItem } from './legend-model';
+import type { TableColumnConfig, TableProps } from '../Table';
+import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_COLUMN_WIDTH, Table } from '../Table';
+import type { LegendItem, SelectedLegendItemState } from './legend-model';
 
 export interface TableLegendProps extends Pick<TableProps<LegendItem>, 'sorting' | 'onSortingChange'> {
   items: LegendItem[];
   height: number;
   width: number;
-  selectedItems: TableProps<LegendItem>['rowSelection'] | 'ALL';
-  onSelectedItemsChange: TableProps<LegendItem>['onRowSelectionChange'];
+  selectedItems: SelectedLegendItemState;
+  onSelectedItemsChange?: (newSelected: SelectedLegendItemState) => void;
   onItemMouseOver?: TableProps<LegendItem>['onRowMouseOver'];
   onItemMouseOut?: TableProps<LegendItem>['onRowMouseOut'];
   columns?: TableProps<LegendItem>['columns'];
@@ -39,7 +40,10 @@ const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
     // Starting with `title` attr instead of a tooltip because it is easier to
     // implement. We should try adding a tooltip in the future, but we'll need
     // to be very careful about performance when doing so with large tables.
-    cell: ({ getValue }) => <span title={getValue<string>()}>{getValue<string>()}</span>,
+    cell: ({ cell }) => {
+      const value = cell.getValue<string>();
+      return <span title={value}>{value}</span>;
+    },
   },
 ];
 
@@ -73,16 +77,13 @@ export function TableLegend({
       : // Turn "ALL" state into a table component friendly map of all of the selected
         // items for checkboxes.
         // TODO: clean this up if we switch to also using checkboxes in list legend.
-        items.reduce(
-          (allRowSelection, item, index) => {
-            allRowSelection[getRowId(item, index)] = true;
-            return allRowSelection;
-          },
-          {} as Record<string, boolean>,
-        );
+        items.reduce<RowSelectionState>((allRowSelection, item, index) => {
+          allRowSelection[getRowId(item, index)] = true;
+          return allRowSelection;
+        }, {});
   }, [initRowSelection, items]);
 
-  const columns = useMemo(() => {
+  const columns: Array<TableColumnConfig<LegendItem>> = useMemo(() => {
     // Calculate column widths to fit the container on initial render, avoiding unnecessary horizontal scrolling.
     // Falls back to a default width if available width is too small; the user can resize columns as needed.
     const additionalColumnsLength =

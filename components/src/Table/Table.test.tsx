@@ -662,7 +662,7 @@ describe('table', () => {
         '0': true,
         '1': true,
         '2': true,
-      };
+      } as const;
 
       // Able to test the standard and legend with modified together.
       // Testing un-modified legend separately because it behaves differently.

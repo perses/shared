@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Box, TablePagination, TableRow as MuiTableRow } from '@mui/material';
-import type { Column, ColumnSizingInfoState, ColumnSizingState, HeaderGroup, Row } from '@tanstack/react-table';
+import type { Column, columnResizingState, ColumnSizingState, HeaderGroup, Row, RowData } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
 import type { ReactElement } from 'react';
 import { useMemo, useRef } from 'react';
@@ -21,7 +21,7 @@ import { TableVirtuoso } from 'react-virtuoso';
 
 import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
 import { InnerTable } from './InnerTable';
-import type { TableCellConfigs, TableProps, TableRowEventOpts } from './model/table-model';
+import type { TableCellConfigs, TableFeatures, TableProps, TableRowEventOpts } from './model/table-model';
 import { TableBody } from './TableBody';
 import type { TableCellProps } from './TableCell';
 import { TableCell } from './TableCell';
@@ -38,16 +38,16 @@ type TableCellPosition = {
   column: number;
 };
 
-export type VirtualizedTableProps<TableData> = Required<
+export type VirtualizedTableProps<TableData extends RowData> = Required<
   Pick<TableProps<TableData>, 'height' | 'width' | 'density' | 'defaultColumnHeight' | 'defaultColumnWidth'>
 > &
   Pick<TableProps<TableData>, 'onRowMouseOver' | 'onRowMouseOut' | 'pagination' | 'onPaginationChange'> & {
     onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
-    rows: Array<Row<TableData>>;
-    columns: Array<Column<TableData, unknown>>;
-    headers: Array<HeaderGroup<TableData>>;
+    rows: Array<Row<TableFeatures, TableData>>;
+    columns: Array<Column<TableFeatures, TableData, unknown>>;
+    headers: Array<HeaderGroup<TableFeatures, TableData>>;
     columnSizing: ColumnSizingState;
-    columnSizingInfo: ColumnSizingInfoState;
+    columnSizingInfo: columnResizingState;
     cellConfigs?: TableCellConfigs;
     rowCount: number;
     toolbarConfig: Pick<
@@ -67,7 +67,7 @@ export type VirtualizedTableProps<TableData> = Required<
 // Separating out the virtualized table because we may want a paginated table
 // in the future that does not need virtualization, and we'd likely lay them
 // out differently.
-export function VirtualizedTable<TableData>({
+export function VirtualizedTable<TableData extends RowData>({
   width,
   height,
   density,
@@ -117,7 +117,7 @@ export function VirtualizedTable<TableData>({
     return 'none';
   };
 
-  const VirtuosoTableComponents: TableComponents<TableData> = useMemo(() => {
+  const VirtuosoTableComponents: TableComponents<Row<TableFeatures, TableData>> = useMemo(() => {
     return {
       Scroller: VirtualizedTableContainer,
       Table: (props): ReactElement => {
