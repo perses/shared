@@ -23,15 +23,15 @@ export function isResponsiveValue<T>(value: Responsive<T> | undefined): value is
   return typeof value === 'object' && value !== null;
 }
 
-export function responsiveClassName(property: string, value: unknown): string | undefined {
+export function responsiveClassName<T>(property: string, value: Responsive<T> | undefined): string | undefined {
   return isResponsiveValue(value) ? `ps-responsive-${property}` : undefined;
 }
 
-export function responsiveStyle(property: string, value: unknown): CSSProperties | undefined {
+export function responsiveStyle<T>(property: string, value: Responsive<T> | undefined): CSSProperties | undefined {
   if (!isResponsiveValue(value)) return undefined;
 
   return Object.fromEntries(
-    Object.entries(value ?? {}).map(([breakpoint, responsiveValue]) => [
+    Object.entries(value).map(([breakpoint, responsiveValue]) => [
       `--ps-responsive-${property}-${breakpoint}`,
       responsiveValue,
     ]),
