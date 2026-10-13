@@ -52,7 +52,7 @@ const activeTabStyle: CSSProperties = {
   fontWeight: 600,
   boxShadow: 'inset 0 -2px 0 var(--perses-text-accent)',
 };
-const toggleStyle: CSSProperties = { ...tabStyle, color: 'var(--perses-text-link)', width:'100%' };
+const toggleStyle: CSSProperties = { ...tabStyle, color: 'var(--perses-text-link)', width: '100%' };
 const preStyle: CSSProperties = {
   margin: 0,
   padding: '1rem',
