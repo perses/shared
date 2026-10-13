@@ -81,11 +81,11 @@ export function useListVariableState(
   const loading = useMemo(() => variablesOptionsQuery.isFetching ?? false, [variablesOptionsQuery.isFetching]);
   const options = useMemo(() => variablesOptionsQuery.data ?? [], [variablesOptionsQuery.data]);
 
-  let value = state?.value;
+  let initialValue = state?.value;
 
-  // Make sure value is an array if allowMultiple is true
-  if (allowMultiple && !Array.isArray(value)) {
-    value = typeof value === 'string' ? [value] : [];
+  // Make sure initialValue is an array if allowMultiple is true
+  if (allowMultiple && !Array.isArray(initialValue)) {
+    initialValue = typeof initialValue === 'string' ? [initialValue] : [];
   }
 
   // Sort the provided list of options according to the method defined
@@ -94,7 +94,7 @@ export function useListVariableState(
 
     if (!sort || sort === 'none') return opts;
     const sortMethod = SORT_METHODS[sort as SortMethodName];
-    // oxlint-disable-next-line unicorn/no-array-sort Calling sort of object, not the built-in array sort function
+    // oxlint-disable-next-line unicorn/no-array-sort -- Calling sort of object, not the built-in array sort function
     return !sortMethod ? opts : sortMethod.sort(opts);
   }, [options, sort]);
 
@@ -108,31 +108,31 @@ export function useListVariableState(
     return computedOptions;
   }, [allowAllValue, sortedOptions]);
 
-  const valueIsInOptions = useMemo(
+  const initialValueIsInOptions = useMemo(
     () =>
       Boolean(
         viewOptions.find((v) => {
           if (allowMultiple) {
-            return (value as string[]).includes(v.value);
+            return (initialValue as string[]).includes(v.value);
           }
-          return value === v.value;
+          return initialValue === v.value;
         }),
       ),
-    [viewOptions, value, allowMultiple],
+    [viewOptions, initialValue, allowMultiple],
   );
 
-  value = useMemo(() => {
+  const value = useMemo(() => {
     const firstOptionValue = viewOptions?.[allowAllValue ? 1 : 0]?.value;
 
-    // If there is no value but there are options, or the value is not in options, we set the value to the first option.
+    // If the value is missing or not in the options, default to the first option.
     if (firstOptionValue) {
-      if (!valueIsInOptions || !value || value.length === 0) {
+      if (!initialValueIsInOptions || !initialValue || initialValue.length === 0) {
         return allowMultiple ? [firstOptionValue] : firstOptionValue;
       }
     }
 
-    return value;
-  }, [viewOptions, value, valueIsInOptions, allowMultiple, allowAllValue]);
+    return initialValue;
+  }, [viewOptions, initialValue, initialValueIsInOptions, allowMultiple, allowAllValue]);
 
   const selectedOptions = useMemo(() => {
     // In the case Autocomplete.multiple equals false, Autocomplete.value expects a single object, not
@@ -346,12 +346,14 @@ function TextVariable({ name, source }: VariableProps): ReactElement {
   const state = ctx.state;
   const definition = ctx.definition as TextVariableDefinition;
   const [tempValue, setTempValue] = useState(state?.value ?? '');
-  const [inputWidth, setInputWidth] = useState(getWidthPx(tempValue as string, 'text'));
+  const inputWidth = getWidthPx(tempValue as string, 'text');
+  const [previousValue, setPreviousValue] = useState(state?.value);
   const { setVariableValue } = useVariableDefinitionActions();
 
-  useEffect(() => {
+  if (previousValue !== state?.value) {
+    setPreviousValue(state?.value);
     setTempValue(state?.value ?? '');
-  }, [state?.value]);
+  }
 
   return (
     <TextField
@@ -359,7 +361,6 @@ function TextVariable({ name, source }: VariableProps): ReactElement {
       value={tempValue}
       onChange={(e) => {
         setTempValue(e.target.value);
-        setInputWidth(getWidthPx(e.target.value, 'text'));
       }}
       onBlur={() => setVariableValue(name, tempValue, source)}
       placeholder={name}

@@ -67,7 +67,7 @@ import StopIcon from 'mdi-material-ui/Stop';
 import SyncIcon from 'mdi-material-ui/Sync';
 import UploadIcon from 'mdi-material-ui/Upload';
 import type { ReactElement } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 export type ActionIcon =
   | 'play'
@@ -241,6 +241,7 @@ function EventActionEditor({
   onMoveUp,
 }: ItemActionEditorProps): ReactElement {
   const eventAction = action as EventAction;
+  const dragHandleRef = useRef<HTMLButtonElement>(null);
 
   const [isCollapsed, setIsCollapsed] = useState(true);
   const hasBodyTemplate = (eventAction.bodyTemplate ?? '').trim().length > 0;
@@ -274,7 +275,7 @@ function EventActionEditor({
   }, [eventAction.bodyTemplate]);
 
   return (
-    <DragAndDropElement data={eventAction as unknown as Record<string, unknown>}>
+    <DragAndDropElement data={eventAction as unknown as Record<string, unknown>} dragHandleRef={dragHandleRef}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" gap={4}>
         <Stack direction="row" gap={1}>
           <IconButton
@@ -309,6 +310,7 @@ function EventActionEditor({
           </InfoTooltip>
           <InfoTooltip description="Reorder action settings" placement="top">
             <DragButton
+              ref={dragHandleRef}
               onMoveUp={onMoveUp}
               onMoveDown={onMoveDown}
               menuSx={{
@@ -434,6 +436,7 @@ function WebhookActionEditor({
   onMoveDown,
 }: ItemActionEditorProps): ReactElement {
   const webhookAction = action as WebhookAction;
+  const dragHandleRef = useRef<HTMLButtonElement>(null);
   const [pendingChange, setPendingChange] = useState<
     { kind: 'contentType'; value: ContentType } | { kind: 'method'; value: HttpMethod } | null
   >(null);
@@ -521,7 +524,7 @@ function WebhookActionEditor({
   }, [webhookAction.bodyTemplate, webhookAction.contentType]);
 
   return (
-    <DragAndDropElement data={webhookAction as unknown as Record<string, unknown>}>
+    <DragAndDropElement data={webhookAction as unknown as Record<string, unknown>} dragHandleRef={dragHandleRef}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" gap={4}>
         <Stack direction="row" gap={1}>
           <IconButton
@@ -549,6 +552,7 @@ function WebhookActionEditor({
           </InfoTooltip>
           <InfoTooltip description="Reorder action settings" placement="top">
             <DragButton
+              ref={dragHandleRef}
               onMoveUp={onMoveUp}
               onMoveDown={onMoveDown}
               menuSx={{

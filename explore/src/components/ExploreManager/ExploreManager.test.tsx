@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { ExploreManager } from './ExploreManager';
 import { ExplorerManagerProvider } from './ExplorerManagerProvider';
@@ -42,7 +42,7 @@ describe('ExploreManager', () => {
     });
 
     render(
-      <ExplorerManagerProvider>
+      <ExplorerManagerProvider defaultExplorer="Tempo-TempoExplorer">
         <ExploreManager />
       </ExplorerManagerProvider>,
     );
@@ -61,4 +61,50 @@ describe('ExploreManager', () => {
       );
     });
   });
+});
+
+it('preserves plugin URLs and module identities when switching sorted explorer tabs', () => {
+  listPluginMetadata.mockReturnValue({
+    data: [
+      {
+        kind: 'Explore',
+        spec: { name: 'MetricsExplorer', display: { name: 'Metrics' } },
+        module: { name: 'metrics', version: '1.2.3', registry: 'private' },
+      },
+      {
+        kind: 'Explore',
+        spec: { name: 'LogsExplorer', display: { name: 'Logs' } },
+        module: { name: 'logs', version: '2.3.4', registry: 'community' },
+      },
+    ],
+  });
+  render(
+    <ExplorerManagerProvider defaultExplorer="metrics-MetricsExplorer">
+      <ExploreManager />
+    </ExplorerManagerProvider>,
+  );
+  expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Logs', 'Metrics']);
+  expect(pluginLoaderComponent).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      plugin: {
+        name: 'MetricsExplorer',
+        moduleName: 'metrics',
+        version: '1.2.3',
+        registry: 'private',
+        baseURL: '/perses/plugins',
+      },
+    }),
+  );
+  fireEvent.click(screen.getByRole('tab', { name: 'Logs' }));
+  expect(pluginLoaderComponent).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      plugin: {
+        name: 'LogsExplorer',
+        moduleName: 'logs',
+        version: '2.3.4',
+        registry: 'community',
+        baseURL: '/perses/plugins',
+      },
+    }),
+  );
 });

@@ -12,22 +12,31 @@
 // limitations under the License.
 
 import type { SxProps, Theme } from '@mui/material';
-import { AppBar, Box, IconButton, Stack, useMediaQuery, useScrollTrigger, useTheme } from '@mui/material';
+import { AppBar, Box, IconButton, useMediaQuery, useScrollTrigger, useTheme } from '@mui/material';
 import { useTimeZone } from '@perses-dev/components';
-import { TimeRangeControls, useTimeZoneParams } from '@perses-dev/plugin-system';
+import type { TimeZoneOption } from '@perses-dev/components';
+import { useTimeZoneParams } from '@perses-dev/plugin-system';
 import PinOffOutline from 'mdi-material-ui/PinOffOutline';
 import PinOutline from 'mdi-material-ui/PinOutline';
-import type { ReactElement } from 'react';
-import { useState } from 'react';
+import type { MouseEventHandler, ReactElement } from 'react';
+import { useMemo, useState, useCallback, memo } from 'react';
 
 import { VariableList } from '../Variables';
+import { StickyTimeRangeControls } from './StickyTimeRangeControls';
+
+const PIN_ICON_BUTTON_STYLE = {
+  width: 'fit-content',
+  height: 'fit-content',
+};
 
 interface DashboardStickyToolbarProps {
   initialVariableIsSticky?: boolean;
   sx?: SxProps<Theme>;
 }
 
-export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): ReactElement {
+export const DashboardStickyToolbar = memo(function DashboardStickyToolbar(
+  props: DashboardStickyToolbarProps,
+): ReactElement {
   const [isPin, setIsPin] = useState(props.initialVariableIsSticky);
 
   const scrollTrigger = useScrollTrigger({ disableHysteresis: true });
@@ -38,23 +47,39 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): Reac
   const { timeZone: contextTimeZone } = useTimeZone();
   const { timeZone, setTimeZone } = useTimeZoneParams(contextTimeZone);
 
+  const appBarSx = useMemo(() => ({ backgroundColor: 'inherit', ...props.sx }), [props.sx]);
+  const wrapperSx = useMemo(
+    () => ({
+      flexDirection: isBiggerThanMd ? 'row' : 'column',
+    }),
+    [isBiggerThanMd],
+  );
+
+  const variableListWrapperSx = useMemo(
+    () => ({
+      overflowX: !isSticky && isBiggerThanMd ? 'hidden' : 'auto',
+      // Firefox:
+      scrollbarWidth: 'thin',
+      // Safari and Chrome:
+      '&::-webkit-scrollbar': {
+        height: '8px',
+        backgroundColor: (theme: Theme): string => theme.palette.grey['300'],
+      },
+      '&::-webkit-scrollbar-thumb': {
+        background: (theme: Theme): string => theme.palette.grey['600'],
+      },
+    }),
+    [isSticky, isBiggerThanMd],
+  );
+
+  const pinClickHandler: MouseEventHandler<HTMLButtonElement> = useCallback(() => setIsPin((prev) => !prev), []);
+
   return (
     // marginBottom={-1} counteracts the marginBottom={1} on every variable input.
     // The margin on the inputs is for spacing between inputs, but is not meant to add space to bottom of the container.
     <Box marginBottom={-1} data-testid="variable-list">
-      <AppBar
-        color="inherit"
-        position={isSticky ? 'fixed' : 'static'}
-        elevation={isSticky ? 4 : 0}
-        sx={{ backgroundColor: 'inherit', ...props.sx }}
-      >
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          sx={{
-            flexDirection: isBiggerThanMd ? 'row' : 'column',
-          }}
-        >
+      <AppBar color="inherit" position={isSticky ? 'fixed' : 'static'} elevation={isSticky ? 4 : 0} sx={appBarSx}>
+        <Box display="flex" justifyContent="space-between" sx={wrapperSx}>
           <Box
             display="flex"
             flexWrap={!isSticky && isBiggerThanMd ? 'wrap' : 'nowrap'}
@@ -63,41 +88,27 @@ export function DashboardStickyToolbar(props: DashboardStickyToolbarProps): Reac
             pl={isSticky ? 1 : 0}
             mt={isSticky && isBiggerThanMd ? 0.5 : 0}
             ml={isSticky && isBiggerThanMd ? 0.5 : 0}
-            sx={{
-              overflowX: !isSticky && isBiggerThanMd ? 'hidden' : 'auto',
-              // Firefox:
-              scrollbarWidth: 'thin',
-              // Safari and Chrome:
-              '&::-webkit-scrollbar': {
-                height: '8px',
-                backgroundColor: (theme) => theme.palette.grey['300'],
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: (theme) => theme.palette.grey['600'],
-              },
-            }}
+            sx={variableListWrapperSx}
             gap={1}
           >
             <VariableList />
             {props.initialVariableIsSticky && (
-              <IconButton style={{ width: 'fit-content', height: 'fit-content' }} onClick={() => setIsPin(!isPin)}>
+              <IconButton style={PIN_ICON_BUTTON_STYLE} onClick={pinClickHandler}>
                 {isPin ? <PinOutline /> : <PinOffOutline />}
               </IconButton>
             )}
           </Box>
           {isSticky && (
-            <Stack
-              m={isBiggerThanMd ? 1.5 : 1}
-              mt={isBiggerThanMd ? 1.5 : 0}
-              ml={isBiggerThanMd ? 1.5 : 'auto'}
-              direction="row"
-              justifyContent="end"
-            >
-              <TimeRangeControls timeZone={timeZone} onTimeZoneChange={(tz) => setTimeZone(tz.value)} />
-            </Stack>
+            <StickyTimeRangeControls
+              changeHandler={(tz: TimeZoneOption) => {
+                setTimeZone(tz.value);
+              }}
+              isBiggerThanMd={isBiggerThanMd}
+              timeZone={timeZone}
+            />
           )}
         </Box>
       </AppBar>
     </Box>
   );
-}
+});

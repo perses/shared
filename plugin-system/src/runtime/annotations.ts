@@ -12,12 +12,12 @@
 // limitations under the License.
 
 import type { AnnotationData, AnnotationSpec } from '@perses-dev/spec';
-import type { QueryKey, UseQueryResult } from '@tanstack/react-query';
+import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQueries, useQuery } from '@tanstack/react-query';
 
 import type { AnnotationContext, AnnotationPlugin } from '../model';
 import { useDatasourceStore } from './datasources';
-import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
+import { usePlugin, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
 import { useAllVariableValues } from './variables';
@@ -44,33 +44,37 @@ function getQueryOptions({
   plugin?: AnnotationPlugin;
   definition: AnnotationSpec;
   context: AnnotationContext;
-}): {
-  queryKey: QueryKey;
-  queryEnabled: boolean;
-} {
+}): UseQueryOptions<AnnotationData[]> {
   const { variableState, absoluteTimeRange } = context;
-
-  const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.plugin.spec, context) : {};
-  const variableDependencies = dependencies?.variables;
-
-  const filteredVariableState = filterVariableStateMap(variableState, variableDependencies);
+  const dependencies = plugin?.dependsOn?.(definition.plugin.spec, context);
+  const filteredVariableState = filterVariableStateMap(variableState, dependencies?.variables);
   const variablesValueKey = getVariableValuesKey(filteredVariableState);
-  const queryKey = [ANNOTATION_KEY, definition, absoluteTimeRange, variablesValueKey] as const;
+  // Only declared variable dependencies delay the query, like other query plugins.
+  const waitToLoad = dependencies?.variables?.some((name) => variableState[name]?.loading) ?? false;
 
-  let waitToLoad = false;
-  if (variableDependencies) {
-    waitToLoad = variableDependencies.some((v) => variableState[v]?.loading);
-  }
-
-  const queryEnabled = plugin !== undefined && !waitToLoad;
   return {
-    queryKey,
-    queryEnabled,
+    // ['annotation', spec] prefix: refreshed by TimeRangeProvider and invalidated by the annotation editor preview.
+    queryKey: ['annotation', definition, absoluteTimeRange, variablesValueKey],
+    enabled: plugin !== undefined && !waitToLoad,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
+    queryFn: async ({ signal }): Promise<AnnotationData[]> => {
+      if (plugin === undefined) {
+        throw new Error('Expected annotation plugin to be loaded');
+      }
+      const data = await plugin.getAnnotationData(definition.plugin.spec, context, signal);
+      return data;
+    },
   };
 }
 
+/**
+ * Resolves annotation specs through the shared query cache. Panels requesting the same spec,
+ * absolute time range, and variable values share both in-flight requests and cached data with previews.
+ */
 export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryResult<AnnotationData[]>> {
-  const { getPlugin } = usePluginRegistry();
   const context = useAnnotationContext();
 
   const pluginLoaderResponse = usePlugins(
@@ -82,73 +86,23 @@ export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryRes
     })),
   );
 
-  // useQueries() handles data fetching from query plugins
   return useQueries({
-    queries: definitions.map((definition, idx) => {
-      const plugin = pluginLoaderResponse[idx]?.data;
-      const { queryEnabled, queryKey } = getQueryOptions({ context, definition, plugin });
-      const annotationKind = definition?.plugin?.kind;
-      return {
-        enabled: queryEnabled,
-        queryKey: queryKey,
-        refetchOnMount: false,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-        staleTime: Infinity,
-        queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<AnnotationData[]> => {
-          const plugin = await getPlugin({
-            kind: ANNOTATION_KEY,
-            name: annotationKind,
-            version: definition.plugin.metadata?.version,
-            registry: definition.plugin.metadata?.registry,
-          });
-          const data = await plugin.getAnnotationData(definition.plugin.spec, context, signal);
-          return data;
-        },
-      };
-    }),
+    queries: definitions.map((definition, index) =>
+      getQueryOptions({ context, definition, plugin: pluginLoaderResponse[index]?.data }),
+    ),
   });
 }
 
+/**
+ * Resolves one annotation spec using the same cache and fetch policy as {@link useAnnotations}.
+ * Used by annotation previews; also exposes loading, error, and refetch state to individual consumers.
+ */
 export function useAnnotationData(spec: AnnotationSpec): UseQueryResult<AnnotationData[]> {
-  const { data: annotationPlugin } = usePlugin('Annotation', spec.plugin.kind, {
+  const { data: plugin } = usePlugin(ANNOTATION_KEY, spec.plugin.kind, {
     version: spec.plugin.metadata?.version,
     registry: spec.plugin.metadata?.registry,
   });
+  const context = useAnnotationContext();
 
-  const datasourceStore = useDatasourceStore();
-  const allVariables = useAllVariableValues();
-  const { absoluteTimeRange: timeRange } = useTimeRange();
-  const variablePluginCtx = { absoluteTimeRange: timeRange, datasourceStore, variableState: allVariables };
-
-  let dependsOnVariables: string[] = Object.keys(allVariables); // Default to all variables
-  if (annotationPlugin?.dependsOn) {
-    const dependencies = annotationPlugin.dependsOn(spec.plugin.spec, variablePluginCtx);
-    dependsOnVariables = dependencies.variables ? dependencies.variables : dependsOnVariables;
-  }
-
-  const variables = useAllVariableValues(dependsOnVariables);
-
-  let waitToLoad = false;
-  if (dependsOnVariables) {
-    waitToLoad = dependsOnVariables.some((v) => variables[v]?.loading);
-  }
-
-  const variablesValueKey = getVariableValuesKey(variables);
-
-  return useQuery({
-    queryKey: ['annotation', spec, timeRange, variablesValueKey],
-    queryFn: async ({ signal }) => {
-      const resp = await annotationPlugin?.getAnnotationData(
-        spec.plugin.spec,
-        { ...variablePluginCtx, variableState: variables },
-        signal,
-      );
-      if (!resp?.length) {
-        return [];
-      }
-      return resp;
-    },
-    enabled: !!annotationPlugin || waitToLoad,
-  });
+  return useQuery(getQueryOptions({ plugin, definition: spec, context }));
 }

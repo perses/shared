@@ -39,7 +39,7 @@ const COLUMNS: Array<TableColumnConfig<LegendItem>> = [
     // Starting with `title` attr instead of a tooltip because it is easier to
     // implement. We should try adding a tooltip in the future, but we'll need
     // to be very careful about performance when doing so with large tables.
-    cell: ({ getValue }) => <span title={getValue()}>{getValue()}</span>,
+    cell: ({ getValue }) => <span title={getValue<string>()}>{getValue<string>()}</span>,
   },
 ];
 
@@ -53,6 +53,7 @@ const getCheckboxColor: TableProps<LegendItem>['getCheckboxColor'] = (data) => {
 
 // This is a rough estimate of value that needs to be subtracted from the total width to avoid horizontal scrolling on initial render
 const TABLE_PADDING = 45;
+const EMPTY_COLUMNS: Array<TableColumnConfig<LegendItem>> = [];
 
 export function TableLegend({
   items,
@@ -62,7 +63,7 @@ export function TableLegend({
   onItemMouseOut,
   height,
   width,
-  columns: additionalColumns = [],
+  columns: additionalColumns = EMPTY_COLUMNS,
   sorting,
   onSortingChange,
 }: TableLegendProps): ReactElement {

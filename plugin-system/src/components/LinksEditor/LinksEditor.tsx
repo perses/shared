@@ -73,6 +73,7 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
           <LinkEditorForm
             mode="inline"
             url={{
+              onBlur: field.onBlur,
               value: safeLink.url,
               label: 'URL',
               error: { hasError: !!fieldState.error, helperText: fieldState.error?.message },
@@ -81,6 +82,7 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
               },
             }}
             newTabOpen={{
+              onBlur: field.onBlur,
               value: !!safeLink.targetBlank,
               onChange: (targetBlank) => {
                 field.onChange({ ...link, targetBlank });
@@ -88,6 +90,7 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
               label: 'Open in new tab',
             }}
             name={{
+              onBlur: field.onBlur,
               value: safeLink.name ?? '',
               label: 'Name',
               onChange: (name) => {
@@ -95,6 +98,7 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
               },
             }}
             renderVariables={{
+              onBlur: field.onBlur,
               value: !!safeLink.renderVariables,
               label: 'Render variables',
               onChange: (renderVariables) => {
@@ -102,6 +106,7 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
               },
             }}
             tooltip={{
+              onBlur: field.onBlur,
               value: safeLink.tooltip ?? '',
               label: 'Tooltip',
               onChange: (tooltip) => {

@@ -14,7 +14,7 @@
 import { Box, useForkRef } from '@mui/material';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
 import type { ReactElement } from 'react';
-import React, { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
 
 import { useEditMode, usePanel, usePanelActions, useViewPanelGroup } from '../../context';
@@ -116,6 +116,13 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
       ? plugin?.queryOptions(panelDefinition.spec.plugin.spec)
       : plugin?.queryOptions;
 
+  const dataQueryProviderOptions = useMemo(
+    () => ({ options: { suggestedStepMs, ...pluginQueryOptions }, queryOptions: { enabled: shouldQuery } }),
+    [pluginQueryOptions, shouldQuery, suggestedStepMs],
+  );
+
+  const dialogOnCloseHandler = useCallback(() => setOpenQueryViewer(false), []);
+
   return (
     <Box
       ref={mergedRef}
@@ -130,8 +137,8 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
     >
       <DataQueriesProvider
         definitions={queries ?? []}
-        options={{ suggestedStepMs, ...pluginQueryOptions }}
-        queryOptions={{ enabled: shouldQuery }}
+        options={dataQueryProviderOptions.options}
+        queryOptions={dataQueryProviderOptions.queryOptions}
       >
         {shouldRender && (
           <Panel
@@ -145,11 +152,7 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
           />
         )}
       </DataQueriesProvider>
-      <QueryViewerDialog
-        open={openQueryViewer}
-        queryDefinitions={queries ?? []}
-        onClose={() => setOpenQueryViewer(false)}
-      />
+      <QueryViewerDialog open={openQueryViewer} queryDefinitions={queries ?? []} onClose={dialogOnCloseHandler} />
     </Box>
   );
 }

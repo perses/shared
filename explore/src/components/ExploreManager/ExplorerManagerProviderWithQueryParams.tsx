@@ -23,12 +23,18 @@ const exploreQueryConfig = {
 
 interface ExplorerManagerProviderWithQueryParamsProps {
   children: ReactNode;
+  defaultExplorer?: string;
 }
 
 export function ExplorerManagerProviderWithQueryParams({
   children,
+  defaultExplorer,
 }: ExplorerManagerProviderWithQueryParamsProps): ReactElement {
   const [queryParams, setQueryParams] = useQueryParams(exploreQueryConfig);
 
-  return <ExplorerManagerProvider store={[queryParams, setQueryParams]}>{children}</ExplorerManagerProvider>;
+  return (
+    <ExplorerManagerProvider store={[queryParams, setQueryParams]} defaultExplorer={defaultExplorer}>
+      {children}
+    </ExplorerManagerProvider>
+  );
 }

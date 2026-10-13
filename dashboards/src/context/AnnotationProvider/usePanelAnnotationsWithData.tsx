@@ -15,29 +15,26 @@ import { useAnnotations } from '@perses-dev/plugin-system';
 import type { AnnotationSpec } from '@perses-dev/spec';
 import { useMemo } from 'react';
 
+import { getAnnotationSpecsWithData, useStableAnnotations } from './annotation-data';
 import type { AnnotationSpecWithData } from './AnnotationProvider';
-import { useAnnotationsWithData } from './AnnotationProvider';
+import { useAnnotationSpecs } from './AnnotationProvider';
 
 /**
  * Returns the annotations to display on a single panel:
- *  - the dashboard-level annotations from the store (every panel receives these)
- *  - the panel-local annotations, resolved on the fly through the same runtime hook that
- *    hydrates dashboard annotations
+ *  - dashboard-level annotations (every panel receives these)
+ *  - panel-local annotations from `PanelProps.definition?.spec.annotations`
+ *
+ * Hidden annotations (`display.hidden`) are skipped and never fetched.
+ * Data is fetched on demand through the shared query cache, including annotation previews.
+ * Each result pairs the complete annotation spec (`definition`) with its available `data`.
+ * The returned array keeps its identity until an annotation spec or its data changes.
  */
 export function usePanelAnnotationsWithData(panelAnnotations?: AnnotationSpec[]): AnnotationSpecWithData[] {
-  const dashboardAnnotations = useAnnotationsWithData();
-
-  const localDefinitions = useMemo(() => panelAnnotations ?? [], [panelAnnotations]);
-  const localResults = useAnnotations(localDefinitions);
-
-  return useMemo(() => {
-    const result: AnnotationSpecWithData[] = [...dashboardAnnotations];
-    localDefinitions.forEach((definition, index) => {
-      const data = localResults[index]?.data;
-      if (data) {
-        result.push({ definition, data });
-      }
-    });
-    return result;
-  }, [dashboardAnnotations, localDefinitions, localResults]);
+  const dashboardDefinitions = useAnnotationSpecs();
+  const definitions = useMemo(
+    () => [...dashboardDefinitions, ...(panelAnnotations ?? [])].filter((definition) => !definition.display.hidden),
+    [dashboardDefinitions, panelAnnotations],
+  );
+  const queries = useAnnotations(definitions);
+  return useStableAnnotations(getAnnotationSpecsWithData(definitions, queries));
 }

@@ -18,13 +18,15 @@ import { produce } from 'immer';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import type { ReactElement } from 'react';
-import React, { Fragment, useCallback, useState } from 'react';
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 
 import { DatasourceTestConnectionButton } from '../DatasourceTestConnectionButton';
 import { OptionsEditorRadios } from '../OptionsEditorRadios';
 import { HTTPHeaderPolicyEditor } from './HTTPHeaderPolicyEditor';
+import { HTTPProxyOAuthPassthroughEditor } from './HTTPProxyOAuthPassthroughEditor';
+import { HTTPProxyTimeoutEditor } from './HTTPProxyTimeoutEditor';
 
 const urlSchema = z.string().url();
 
@@ -46,16 +48,22 @@ export interface HTTPSettingsEditor {
   testConnection?: () => Promise<void>;
 }
 
-/** Edits direct URLs and proxy settings, including mutually exclusive allow/drop request header lists. */
+/** Edits direct URLs and proxy settings, including the connection timeout, mutually exclusive allow/drop request header lists, and OAuth identity forwarding. */
 export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
-  const { value, onChange, isReadonly, initialSpecDirect, initialSpecProxy, testConnection } = props;
+  const { value: providedValue, onChange, isReadonly, initialSpecDirect, initialSpecProxy, testConnection } = props;
   const strDirect = 'Direct access';
   const strProxy = 'Proxy';
 
-  // Initialize Proxy mode by default, if neither direct nor proxy mode is selected.
-  if (value.directUrl === undefined && value.proxy === undefined) {
-    Object.assign(value, initialSpecProxy);
-  }
+  // Initialize proxy mode without mutating the caller's datasource definition.
+  const value = useMemo(() => {
+    if (providedValue.directUrl === undefined && providedValue.proxy === undefined) {
+      return { ...providedValue, ...initialSpecProxy };
+    }
+    return providedValue;
+  }, [providedValue, initialSpecProxy]);
+  useEffect(() => {
+    if (value !== providedValue) onChange(value);
+  }, [value, providedValue, onChange]);
 
   // Use local state to maintain an array of header entries during editing, instead of
   // manipulating a map directly which causes weird UX.
@@ -74,7 +82,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
   });
 
   // Watch the headers array for changes to detect duplicates
-  const watchedHeaders = headersForm.watch('headers');
+  const watchedHeaders = useWatch({ control: headersForm.control, name: 'headers' });
 
   // Check for duplicate header names
   // TODO: duplication detection logic to be replaced by proper zod schema validation in the future
@@ -110,7 +118,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
     );
   };
 
-  const handleHeaderPolicyChange = useCallback(
+  const handleProxySpecChange = useCallback(
     (next: HTTPProxySpec): void => {
       onChange(
         produce(value, (draft) => {
@@ -163,6 +171,9 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
                 disabled={!urlSchema.safeParse(value.proxy?.spec.url).success}
               />
             </Box>
+          )}
+          {value.proxy && (
+            <HTTPProxyTimeoutEditor value={value.proxy.spec} isReadonly={isReadonly} onChange={handleProxySpecChange} />
           )}
           <Typography variant="h5" mb={2}>
             Allowed endpoints
@@ -408,11 +419,7 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
           </Grid>
 
           {value.proxy && (
-            <HTTPHeaderPolicyEditor
-              value={value.proxy.spec}
-              isReadonly={isReadonly}
-              onChange={handleHeaderPolicyChange}
-            />
+            <HTTPHeaderPolicyEditor value={value.proxy.spec} isReadonly={isReadonly} onChange={handleProxySpecChange} />
           )}
 
           <Stack spacing={1}>
@@ -444,6 +451,13 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
                 />
               )}
             />
+            {value.proxy && (
+              <HTTPProxyOAuthPassthroughEditor
+                value={value.proxy.spec}
+                isReadonly={isReadonly}
+                onChange={handleProxySpecChange}
+              />
+            )}
           </Stack>
         </>
       ),
@@ -509,15 +523,13 @@ export function HTTPSettingsEditor(props: HTTPSettingsEditor): ReactElement {
       setPreviousSpecProxy(value);
 
       // Copy all settings (for example, scrapeInterval), except 'proxy'
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { proxy, ...newValue } = value;
+      const { proxy: _proxy, ...newValue } = value;
       onChange({ ...newValue, directUrl: previousSpecDirect.directUrl });
     } else if (tabs[v]?.label === strProxy) {
       setPreviousSpecDirect(value);
 
       // Copy all settings (for example, scrapeInterval), except 'directUrl'
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { directUrl, ...newValue } = value;
+      const { directUrl: _directUrl, ...newValue } = value;
       onChange({ ...newValue, proxy: previousSpecProxy.proxy });
     }
   };

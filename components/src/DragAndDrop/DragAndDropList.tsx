@@ -20,7 +20,7 @@ import {
   dropTargetForElements,
 } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 import { Stack } from '@mui/material';
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement, ReactNode, RefObject } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { DropIndicator } from './DropIndicator';
@@ -86,12 +86,17 @@ export function useDragAndDropMonitor({
 export interface DragAndDropElementProps {
   children: ReactNode;
   data: Record<string, unknown>;
+  /**
+   * Ref of the element used as drag handle (e.g. a `DragButton`). When provided, the drag can only be started from
+   * this element. Otherwise, the drag can be started from anywhere in the element.
+   */
+  dragHandleRef?: RefObject<HTMLElement | null>;
 }
 
-/*
- * This component wraps the children that should be draggable
+/**
+ * This component wraps the children that should be draggable.
  */
-export function DragAndDropElement({ children, data }: DragAndDropElementProps): ReactElement {
+export function DragAndDropElement({ children, data, dragHandleRef }: DragAndDropElementProps): ReactElement {
   const ref = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<State>(idle);
 
@@ -104,6 +109,7 @@ export function DragAndDropElement({ children, data }: DragAndDropElementProps):
     return combine(
       draggable({
         element,
+        dragHandle: dragHandleRef?.current ?? undefined,
         getInitialData() {
           return data;
         },
@@ -158,7 +164,7 @@ export function DragAndDropElement({ children, data }: DragAndDropElementProps):
         },
       }),
     );
-  }, [data]);
+  }, [data, dragHandleRef]);
 
   return (
     <Stack ref={ref} spacing={1} style={{ opacity: state.type === 'is-dragging' ? 0.5 : 'unset' }}>

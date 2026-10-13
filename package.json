@@ -1,7 +1,7 @@
 {
   "name": "perses-shared",
   "description": "Monorepo for the Perses UI shared packages",
-  "version": "0.55.0-beta.13",
+  "version": "0.55.0-rc.0",
   "private": true,
   "type": "module",
   "engines": {
@@ -48,8 +48,8 @@
     "concurrently": "^10.0.3",
     "cross-env": "^7.0.3",
     "jsdom": "^26.1.0",
-    "oxfmt": "0.55.0",
-    "oxlint": "1.70.0",
+    "oxfmt": "0.70.0",
+    "oxlint": "1.85.0",
     "oxlint-plugin-react-doctor": "0.9.12",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",

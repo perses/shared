@@ -92,6 +92,13 @@ export function assembleTransform(
 }
 
 /**
+ * Stacking level of a pinned tooltip. It must cover the table legend's sticky header, which
+ * react-virtuoso renders at z-index 2, and stay below PanelHeader (5, in @perses-dev/dashboards),
+ * the drawer and the sticky dashboard header.
+ */
+const PINNED_TOOLTIP_Z_INDEX = 3;
+
+/**
  * Helper for tooltip positioning styles
  */
 export function getTooltipStyles(
@@ -116,8 +123,7 @@ export function getTooltipStyles(
     opacity: 1,
     // Animating transform causes intermediate positions outside the viewport; animate opacity/visibility instead.
     transition: 'opacity 0.1s ease-out, visibility 0.1s ease-out',
-    // Pinned tooltip should not float above the drawer/sticky header.
-    zIndex: pinnedPos !== null ? 'auto' : theme.zIndex.tooltip,
+    zIndex: pinnedPos !== null ? PINNED_TOOLTIP_Z_INDEX : theme.zIndex.tooltip,
     overflow: 'hidden',
     '&:hover': {
       overflowY: 'auto',

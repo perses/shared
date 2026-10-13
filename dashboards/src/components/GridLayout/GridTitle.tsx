@@ -30,6 +30,8 @@ import { usePanelGroupActions, useEditMode, useDeletePanelGroupDialog } from '..
 export interface GridTitleProps {
   panelGroupId: PanelGroupId;
   title: string;
+  /** Number of panels in the group, shown next to the title when the group is collapsed. */
+  panelCount?: number;
   collapse?: {
     isOpen: boolean;
     onToggleOpen: () => void;
@@ -41,7 +43,7 @@ export interface GridTitleProps {
  * and collapsing
  */
 export function GridTitle(props: GridTitleProps): ReactElement {
-  const { panelGroupId, title: rawTitle, collapse } = props;
+  const { panelGroupId, title: rawTitle, panelCount, collapse } = props;
 
   const title = useReplaceVariablesInString(rawTitle) as string;
 
@@ -49,7 +51,18 @@ export function GridTitle(props: GridTitleProps): ReactElement {
   const { openDeletePanelGroupDialog } = useDeletePanelGroupDialog();
   const { isEditMode } = useEditMode();
 
-  const text = <Typography variant="h2">{title}</Typography>;
+  const showCount = collapse !== undefined && !collapse.isOpen && panelCount !== undefined && panelCount > 0;
+
+  const text = (
+    <>
+      <Typography variant="h2">{title}</Typography>
+      {showCount && (
+        <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+          ({panelCount} {panelCount === 1 ? 'panel' : 'panels'})
+        </Typography>
+      )}
+    </>
+  );
 
   return (
     <Box

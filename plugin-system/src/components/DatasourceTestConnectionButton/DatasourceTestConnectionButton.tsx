@@ -31,14 +31,13 @@ export const DatasourceTestConnectionButton = ({
 
   const handleClick = useCallback(async (): Promise<void> => {
     setIsTesting(true);
-    try {
-      await testConnection();
-      successSnackbar('Datasource is healthy');
-    } catch (e) {
-      exceptionSnackbar(e instanceof Error ? e : new Error('Datasource is not healthy'));
-    } finally {
-      setIsTesting(false);
-    }
+    await Promise.resolve()
+      .then(() => testConnection())
+      .then(() => successSnackbar('Datasource is healthy'))
+      .catch((e: unknown) => {
+        exceptionSnackbar(e instanceof Error ? e : new Error('Datasource is not healthy'));
+      })
+      .finally(() => setIsTesting(false));
   }, [testConnection, successSnackbar, exceptionSnackbar]);
 
   return (

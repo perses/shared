@@ -18,7 +18,7 @@ import type { ItemAction, QueryData } from '@perses-dev/plugin-system';
 import { useAllVariableValues, useReplaceVariablesInString } from '@perses-dev/plugin-system';
 import type { Link } from '@perses-dev/spec';
 import type { ReactElement, ReactNode } from 'react';
-import { useRef } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 import { HEADER_ACTIONS_CONTAINER_NAME } from '../../constants/styles';
 import type { PanelOptions } from './Panel';
@@ -72,8 +72,11 @@ export function PanelHeader({
 
   const textRef = useRef<HTMLDivElement>(null);
 
-  const isEllipsisActive =
-    textRef.current && dimension?.width ? textRef.current.scrollWidth > textRef.current.clientWidth : false;
+  const [isEllipsisActive, setIsEllipsisActive] = useState(false);
+  useLayoutEffect(() => {
+    const element = title ? textRef.current : null;
+    setIsEllipsisActive(!!element && !!dimension?.width && element.scrollWidth > element.clientWidth);
+  }, [title, dimension?.width]);
 
   const { actionButtons, confirmDialog } = useSelectionItemActions({
     actions: itemActionsListConfig,

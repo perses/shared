@@ -13,16 +13,31 @@
 
 import { Box, Button, Card, Stack, Tab, Tabs, useMediaQuery } from '@mui/material';
 import { useLocalStorage } from '@perses-dev/components';
+import type { PluginMetadataWithModule } from '@perses-dev/plugin-system';
 import { PluginLoaderComponent, useListPluginMetadata, usePluginRegistry } from '@perses-dev/plugin-system';
 import ChevronLeft from 'mdi-material-ui/ChevronLeft';
 import ChevronRight from 'mdi-material-ui/ChevronRight';
 import type { ReactElement, ReactNode } from 'react';
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { ExploreToolbar } from '../ExploreToolbar';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
 
 const EXPLORE_TABS_COLLAPSED_KEY = 'PERSES_EXPLORE_TABS_COLLAPSED';
+
+/** Identifier of an explorer plugin, as stored in the explorer manager state. */
+export function getExplorerKey(plugin: PluginMetadataWithModule): string {
+  return `${plugin.module.name}-${plugin.spec.name}`;
+}
+
+/** Explore plugins sorted by display name, matching the order of the explorer tabs. */
+export function useSortedExplorerPlugins(): PluginMetadataWithModule[] | undefined {
+  const plugins = useListPluginMetadata(['Explore']);
+  return useMemo(
+    () => plugins.data?.toSorted((a, b) => a.spec.display.name.localeCompare(b.spec.display.name)),
+    [plugins.data],
+  );
+}
 
 export interface ExploreManagerProps {
   exploreTitleComponent?: ReactNode;
@@ -32,26 +47,13 @@ export function ExploreManager(props: ExploreManagerProps): ReactElement {
   const { exploreTitleComponent } = props;
   const { explorer, setExplorer } = useExplorerManagerContext();
 
-  const plugins = useListPluginMetadata(['Explore']);
+  const plugins = useSortedExplorerPlugins();
   const { pluginsBaseURL } = usePluginRegistry();
 
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
   const [isCollapsed, setIsCollapsed] = useLocalStorage<boolean>(EXPLORE_TABS_COLLAPSED_KEY, false);
 
-  const explorerPluginsMap = useMemo(
-    () =>
-      Object.fromEntries(plugins.data?.map((plugin) => [`${plugin.module.name}-${plugin.spec.name}`, plugin]) ?? []),
-    [plugins.data],
-  );
-
-  useEffect(() => {
-    const plugins = Object.keys(explorerPluginsMap);
-    if (!explorer && plugins?.[0]) {
-      setExplorer(plugins[0]);
-    }
-  }, [explorerPluginsMap, explorer, setExplorer]);
-
-  const currentPlugin = explorer ? explorerPluginsMap[explorer] : undefined;
+  const currentPlugin = explorer ? plugins?.find((plugin) => getExplorerKey(plugin) === explorer) : undefined;
 
   if (!explorer) {
     return <div>No explorer plugin available</div>;
@@ -98,24 +100,22 @@ export function ExploreManager(props: ExploreManagerProps): ReactElement {
               display: isCollapsed ? 'none' : 'flex',
             }}
           >
-            {plugins.data
-              ?.toSorted((a, b) => a.spec.display.name.localeCompare(b.spec.display.name))
-              .map((plugin) => (
-                <Tab
-                  key={`${plugin.module.name}-${plugin.spec.name}`}
-                  value={`${plugin.module.name}-${plugin.spec.name}`}
-                  label={plugin.spec.display.name}
-                  sx={{
-                    padding: 0.5,
-                  }}
-                />
-              ))}
+            {plugins?.map((plugin) => (
+              <Tab
+                key={getExplorerKey(plugin)}
+                value={getExplorerKey(plugin)}
+                label={plugin.spec.display.name}
+                sx={{
+                  padding: 0.5,
+                }}
+              />
+            ))}
           </Tabs>
         </Stack>
         <Card sx={{ padding: '10px', width: '100%' }}>
           {currentPlugin && (
             <PluginLoaderComponent
-              key={`${currentPlugin.module.name}-${currentPlugin.spec.name}`}
+              key={getExplorerKey(currentPlugin)}
               plugin={{
                 name: currentPlugin.spec.name,
                 moduleName: currentPlugin.module.name,

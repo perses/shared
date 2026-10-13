@@ -22,7 +22,6 @@ export type OnSaveDashboard = (dashboard: DashboardResource) => Promise<unknown>
 export type Middleware = [['zustand/immer', never], ['zustand/devtools', never]];
 
 declare global {
-  // eslint-disable-next-line no-var
   var dashboardStoreId: number | undefined;
 }
 

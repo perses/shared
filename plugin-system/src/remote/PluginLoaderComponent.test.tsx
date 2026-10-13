@@ -55,21 +55,70 @@ class SimpleErrorBoundary extends React.Component<React.PropsWithChildren, { err
   }
 }
 
+const mockPlugin: PersesPlugin = {
+  name: 'test-plugin',
+  moduleName: 'test-module',
+  baseURL: 'https://example.com',
+};
+const firstProps = { label: 'First' };
+const secondProps = { label: 'Second' };
+const samePlugin = { ...mockPlugin };
+const previousPlugin = { ...mockPlugin, version: '1' };
+const nextPlugin = { ...mockPlugin, version: '2' };
+
 describe('PluginLoaderComponent', () => {
-  const mockPlugin: PersesPlugin = {
-    name: 'test-plugin',
-    moduleName: 'test-module',
-    baseURL: 'https://example.com',
-  };
+  it('keeps the loaded plugin mounted when only its props change', async () => {
+    const loadPlugin = vi.fn().mockResolvedValue({
+      'test-plugin': ({ label }: { label: string }): React.ReactNode => <div>{label}</div>,
+    });
+    vi.mocked(PluginRuntime.usePluginRuntime).mockReturnValue({
+      loadPlugin,
+      pluginRuntime: {} as ModuleFederation,
+    });
+    const { rerender } = render(<PluginLoaderComponent plugin={mockPlugin} props={firstProps} />);
+    expect(await screen.findByText('First')).toBeInTheDocument();
+
+    rerender(<PluginLoaderComponent plugin={samePlugin} props={secondProps} />);
+    expect(screen.getByText('Second')).toBeInTheDocument();
+    expect(loadPlugin).toHaveBeenCalledTimes(1);
+  });
+
+  it('reloads a changed plugin version and ignores the previous pending load', async () => {
+    let resolvePrevious!: (module: RemotePluginModule) => void;
+    const previousLoad = vi.fn(
+      () =>
+        new Promise<RemotePluginModule>((resolve) => {
+          resolvePrevious = resolve;
+        }),
+    );
+    const nextLoad = vi.fn().mockResolvedValue({
+      'test-plugin': (): React.ReactNode => <div>New version</div>,
+    });
+    vi.mocked(PluginRuntime.usePluginRuntime).mockImplementation(({ plugin }) => ({
+      loadPlugin: plugin.version === '2' ? nextLoad : previousLoad,
+      pluginRuntime: {} as ModuleFederation,
+    }));
+    const { rerender } = render(<PluginLoaderComponent plugin={previousPlugin} />);
+    rerender(<PluginLoaderComponent plugin={nextPlugin} />);
+    expect(await screen.findByText('New version')).toBeInTheDocument();
+
+    await act(async () => {
+      resolvePrevious({ 'test-plugin': (): React.ReactNode => <div>Old version</div> });
+    });
+    expect(screen.queryByText('Old version')).not.toBeInTheDocument();
+    expect(screen.getByText('New version')).toBeInTheDocument();
+    expect(previousLoad).toHaveBeenCalledTimes(1);
+    expect(nextLoad).toHaveBeenCalledTimes(1);
+  });
 
   it('should render the plugin component', async () => {
     const mockPluginModule = vi.fn(() => <div>Mock Plugin Component</div>);
 
-    vi.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
+    vi.spyOn(PluginRuntime, 'usePluginRuntime').mockReturnValue({
       loadPlugin: (): Promise<{ 'test-plugin': () => React.ReactNode }> =>
         Promise.resolve({ 'test-plugin': mockPluginModule }),
       pluginRuntime: {} as ModuleFederation,
-    }));
+    });
 
     act(() => {
       render(<PluginLoaderComponent plugin={mockPlugin} />);
@@ -85,10 +134,10 @@ describe('PluginLoaderComponent', () => {
   it('should throw an error if the plugin module does not have a named export', async () => {
     const mockPluginModule = vi.fn(() => <div>Mock Plugin Component</div>);
 
-    vi.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
+    vi.spyOn(PluginRuntime, 'usePluginRuntime').mockReturnValue({
       loadPlugin: (): Promise<RemotePluginModule> => Promise.resolve({ mockPluginModule } as RemotePluginModule),
       pluginRuntime: {} as ModuleFederation,
-    }));
+    });
 
     act(() => {
       render(
@@ -106,11 +155,11 @@ describe('PluginLoaderComponent', () => {
   });
 
   it('should throw an error if the plugin module named export is not a function', async () => {
-    vi.spyOn(PluginRuntime, 'usePluginRuntime').mockImplementation(() => ({
+    vi.spyOn(PluginRuntime, 'usePluginRuntime').mockReturnValue({
       loadPlugin: (): Promise<RemotePluginModule> =>
         Promise.resolve({ 'test-plugin': 'not a function' } as unknown as RemotePluginModule),
       pluginRuntime: {} as ModuleFederation,
-    }));
+    });
 
     act(() => {
       render(

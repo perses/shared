@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { ProjectResource } from '@perses-dev/client';
+import type { ProjectResource, Resource } from '@perses-dev/client';
 
 import { getResourceDisplayName, getResourceExtendedDisplayName } from './text';
 
@@ -31,6 +31,27 @@ const projectWithoutSpec = {
   kind: 'Project',
   metadata: { name: 'my-project' },
 } as unknown as ProjectResource;
+
+describe('resource display settings', () => {
+  test.each([
+    { spec: { spec: { display: { name: 'Variable' } } }, name: 'Variable' },
+    { spec: { display: { name: 'resource-id' } }, name: 'resource-id' },
+    { spec: { spec: {}, display: { name: 'Outer' } }, name: 'Outer' },
+  ])('reads a display name from $spec', ({ spec, name }) => {
+    const resource: Resource = { kind: 'Variable', metadata: { name: 'resource-id' }, spec };
+    expect(getResourceDisplayName(resource)).toBe(name);
+    expect(getResourceExtendedDisplayName(resource)).toBe(`${name} (ID: resource-id)`);
+  });
+
+  test.each([undefined, null, 'invalid', {}, { display: null }, { display: { name: 42 } }, { display: { name: '' } }])(
+    'falls back to the resource ID for spec %j',
+    (spec) => {
+      const resource: Resource = { kind: 'Project', metadata: { name: 'resource-id' }, spec };
+      expect(getResourceDisplayName(resource)).toBe('resource-id');
+      expect(getResourceExtendedDisplayName(resource)).toBe('resource-id');
+    },
+  );
+});
 
 describe('getResourceDisplayName', () => {
   test('returns spec.display.name when present', () => {

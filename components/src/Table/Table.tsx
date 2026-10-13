@@ -80,6 +80,8 @@ export function Table<TableData>({
   defaultColumnConfig,
   ...otherProps
 }: TableProps<TableData>): ReactElement {
+  'use no memo'; // TanStack Table v8 uses a mutable instance that automatic memoization cannot track.
+
   const theme = useTheme();
 
   const hasSubRows = !!getSubRows;
@@ -205,6 +207,8 @@ export function Table<TableData>({
     return initTableColumns;
   }, [columns, defaultColumnConfig, hasItemActions, checkboxSelection, actionsColumn, checkboxColumn]);
 
+  // Oxlint still checks incompatible APIs inside functions opted out of compilation above.
+  // oxlint-disable-next-line react/incompatible-library
   const table = useReactTable({
     data,
     columns: tableColumns,

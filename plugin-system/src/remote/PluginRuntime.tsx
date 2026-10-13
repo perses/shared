@@ -16,7 +16,7 @@ import * as EmotionStyled from '@emotion/styled';
 import type { ModuleFederation } from '@module-federation/enhanced/runtime';
 import { createInstance } from '@module-federation/enhanced/runtime';
 import * as ReactQuery from '@tanstack/react-query';
-import React from 'react';
+import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import * as ReactHookForm from 'react-hook-form';
 import * as ReactRouterDOM from 'react-router-dom';
@@ -131,51 +131,51 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         '@perses-dev/spec': {
-          version: '0.3.0-beta.9',
+          version: '0.3.0-rc.0',
           lib: () => getHostSharedModule('@perses-dev/spec'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.3.0-beta.9',
+            requiredVersion: '^0.3.0-rc.0',
           },
         },
         '@perses-dev/client': {
-          version: '0.55.0-beta.13',
+          version: '0.55.0-rc.0',
           lib: () => getHostSharedModule('@perses-dev/client'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.13',
+            requiredVersion: '^0.55.0-rc.0',
           },
         },
         '@perses-dev/components': {
-          version: '0.55.0-beta.13',
+          version: '0.55.0-rc.0',
           lib: () => getHostSharedModule('@perses-dev/components'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.13',
+            requiredVersion: '^0.55.0-rc.0',
           },
         },
         '@perses-dev/plugin-system': {
-          version: '0.55.0-beta.13',
+          version: '0.55.0-rc.0',
           lib: () => getHostSharedModule('@perses-dev/plugin-system'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.13',
+            requiredVersion: '^0.55.0-rc.0',
           },
         },
         '@perses-dev/explore': {
-          version: '0.55.0-beta.13',
+          version: '0.55.0-rc.0',
           lib: () => getHostSharedModule('@perses-dev/explore'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.13',
+            requiredVersion: '^0.55.0-rc.0',
           },
         },
         '@perses-dev/dashboards': {
-          version: '0.55.0-beta.13',
+          version: '0.55.0-rc.0',
           lib: () => getHostSharedModule('@perses-dev/dashboards'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-beta.13',
+            requiredVersion: '^0.55.0-rc.0',
           },
         },
         // Below are the shared modules that are used by the plugins and are loaded asynchronously on demand using get rather than lib.
@@ -230,6 +230,8 @@ const getPluginRuntime = (): ModuleFederation => {
         },
         'mdi-material-ui': {
           version: '7.9.4',
+          // Federation must register the package root to satisfy existing plugin shared-module requests.
+          // oxlint-disable-next-line no-restricted-imports
           get: createSharedModuleLoader(() => import('mdi-material-ui')),
           shareConfig: {
             singleton: true,
@@ -297,11 +299,14 @@ export function usePluginRuntime({ plugin }: { plugin: PersesPlugin }): {
   pluginRuntime: ModuleFederation;
   loadPlugin: () => Promise<RemotePluginModule | null>;
 } {
+  const { moduleName, name: pluginName, registry, version, baseURL } = plugin;
+  const load = useCallback(
+    () => loadPlugin({ moduleName, pluginName, registry, version, baseURL }),
+    [moduleName, pluginName, registry, version, baseURL],
+  );
+
   return {
     pluginRuntime: getPluginRuntime(),
-    loadPlugin: (): Promise<RemotePluginModule | null> => {
-      const { moduleName, name: pluginName, registry, version, baseURL } = plugin;
-      return loadPlugin({ moduleName, pluginName, registry, version, baseURL });
-    },
+    loadPlugin: load,
   };
 }

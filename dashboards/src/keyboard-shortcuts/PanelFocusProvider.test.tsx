@@ -14,7 +14,12 @@
 import { render, screen, act, renderHook, fireEvent } from '@testing-library/react';
 import type { ReactElement } from 'react';
 
-import { PanelFocusProvider, useFocusedPanel, usePanelFocusHandlers } from './PanelFocusProvider';
+import {
+  PANEL_FOCUS_DEBOUNCE_MS,
+  PanelFocusProvider,
+  useFocusedPanel,
+  usePanelFocusHandlers,
+} from './PanelFocusProvider';
 
 /**
  * Test component for panel focus handlers.
@@ -57,6 +62,51 @@ describe('PanelFocusProvider', () => {
 
     afterEach(() => {
       vi.useRealTimers();
+    });
+
+    it('should not shift focus to the panel when the active element has an open popup', () => {
+      render(
+        <PanelFocusProvider>
+          <button data-testid="popup-trigger" aria-expanded="true">
+            Popup
+          </button>
+          <PanelFocusTest panelKey="panel-1" />
+        </PanelFocusProvider>,
+      );
+      const popupTrigger = screen.getByTestId('popup-trigger');
+      const panel = screen.getByTestId('panel-target');
+
+      popupTrigger.focus();
+
+      expect(popupTrigger).toHaveFocus();
+      fireEvent.mouseEnter(panel);
+
+      act(() => {
+        vi.advanceTimersByTime(PANEL_FOCUS_DEBOUNCE_MS);
+      });
+
+      expect(popupTrigger).toHaveFocus();
+      expect(panel).not.toHaveFocus();
+    });
+
+    it('should shift focus to the panel when there is no open popup', () => {
+      render(
+        <PanelFocusProvider>
+          <button data-testid="popup-trigger" aria-expanded="false">
+            Popup
+          </button>
+          <PanelFocusTest panelKey="panel-1" />
+        </PanelFocusProvider>,
+      );
+
+      const popupTrigger = screen.getByTestId('popup-trigger');
+      const panel = screen.getByTestId('panel-target');
+      popupTrigger.focus();
+      fireEvent.mouseEnter(panel);
+      act(() => {
+        vi.advanceTimersByTime(PANEL_FOCUS_DEBOUNCE_MS);
+      });
+      expect(panel).toHaveFocus();
     });
 
     it('should set focused panel on mouse enter after debounce', () => {

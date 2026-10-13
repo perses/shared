@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { CursorData } from './tooltip-model';
+import { createTheme } from '@mui/material';
+
+import type { CursorCoordinates, CursorData } from './tooltip-model';
 import { TOOLTIP_MAX_HEIGHT, TOOLTIP_MAX_WIDTH } from './tooltip-model';
-import { assembleTransform } from './utils';
+import { assembleTransform, getTooltipStyles } from './utils';
 
 const VIEWPORT_WIDTH = 1600;
 const VIEWPORT_HEIGHT = 720;
@@ -155,5 +157,27 @@ describe('assembleTransform', () => {
       expect(result).not.toBeNull();
       expect(result!.y).toBe(4);
     });
+  });
+});
+
+describe('getTooltipStyles', () => {
+  const theme = createTheme();
+  const pinnedPos: CursorCoordinates = {
+    page: { x: 0, y: 0 },
+    client: { x: 0, y: 0 },
+    plotCanvas: { x: 0, y: 0 },
+    target: null,
+  };
+
+  it('stacks a pinned tooltip above the table legend header and below the panel header', () => {
+    const { zIndex } = getTooltipStyles(theme, pinnedPos);
+    // react-virtuoso renders the table legend's sticky header at z-index 2.
+    expect(zIndex).toBeGreaterThan(2);
+    // PanelHeader in @perses-dev/dashboards sits at z-index 5.
+    expect(zIndex).toBeLessThan(5);
+  });
+
+  it('stacks an unpinned tooltip at the theme tooltip layer', () => {
+    expect(getTooltipStyles(theme, null).zIndex).toBe(theme.zIndex.tooltip);
   });
 });

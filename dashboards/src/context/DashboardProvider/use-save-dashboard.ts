@@ -54,26 +54,27 @@ export function useSaveDashboard(onSave?: OnSaveDashboard): SaveDashboardResult 
   const { timeZone } = useTimeZoneParams();
   const { getSavedVariablesStatus, setVariableDefaultValues } = useVariableDefinitionActions();
   const { openSaveChangesConfirmationDialog, closeSaveChangesConfirmationDialog } = useSaveChangesConfirmationDialog();
-  const performSave = useCallback(async (): Promise<void> => {
-    if (!onSave) {
-      setEditMode(false);
-      return;
-    }
-
-    try {
-      setSaving(true);
-      await onSave(dashboard);
-      closeSaveChangesConfirmationDialog();
-      setEditMode(false);
-    } finally {
-      setSaving(false);
-    }
-  }, [closeSaveChangesConfirmationDialog, dashboard, onSave, setEditMode]);
 
   const saveDashboard = useCallback((): void => {
     if (isSaving) {
       return;
     }
+
+    const performSave = async (): Promise<void> => {
+      if (!onSave) {
+        setEditMode(false);
+        return;
+      }
+
+      setSaving(true);
+      await Promise.resolve()
+        .then(() => onSave(dashboard))
+        .then(() => {
+          closeSaveChangesConfirmationDialog();
+          setEditMode(false);
+        })
+        .finally(() => setSaving(false));
+    };
 
     const { isSavedVariableModified } = getSavedVariablesStatus();
     const isSavedDurationModified =
@@ -125,7 +126,8 @@ export function useSaveDashboard(onSave?: OnSaveDashboard): SaveDashboardResult 
     openSaveChangesConfirmationDialog,
     setVariableDefaultValues,
     setDashboard,
-    performSave,
+    onSave,
+    setEditMode,
     closeSaveChangesConfirmationDialog,
   ]);
 

@@ -32,11 +32,14 @@ const ExplorerManagerContext = createContext<ExplorerManagerContextType<unknown>
 interface ExplorerManagerProviderProps {
   children: ReactNode;
   store?: [ExplorerState<unknown>, (state: ExplorerState<unknown>) => void];
+  /** Explorer used while the store has none selected; committed to the store on the first state change. */
+  defaultExplorer?: string;
 }
 
 export function ExplorerManagerProvider({
   children,
   store: externalStore,
+  defaultExplorer,
 }: ExplorerManagerProviderProps): ReactElement {
   // cache the state of currently not rendered explore UIs
   const [explorerStateCache, setExplorerStateCache] = useState<
@@ -46,13 +49,15 @@ export function ExplorerManagerProvider({
   const localStore = useState<ExplorerState<unknown>>({ explorer: undefined, data: {} });
   // use store provided by 'store' prop if available, otherwise use local store
   const [explorerState, setExplorerState] = externalStore ? externalStore : localStore;
-  const { explorer, data } = explorerState;
+  const { data } = explorerState;
+  const explorer = explorerState.explorer ?? defaultExplorer;
 
   function setExplorer(newExplorer: string): void {
+    if (newExplorer === explorer) return;
+
     if (explorer) {
       // store current explorer state
-      explorerStateCache[explorer] = { data };
-      setExplorerStateCache(explorerStateCache);
+      setExplorerStateCache((cache) => ({ ...cache, [explorer]: { data } }));
     }
 
     // restore previous explorer state (if any)

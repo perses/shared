@@ -45,26 +45,26 @@ export function useDataQueriesContext(): DataQueriesContextType {
 export function useDataQueries<T extends keyof QueryType>(queryType: T): UseDataQueryResults<QueryType[T]> {
   const ctx = useDataQueriesContext();
 
-  // Filter query definitions based on the specified query type
-  const filteredQueryDefinitions = ctx.queryDefinitions.filter((definition) => definition.kind === queryType);
+  // Keep result arrays stable during local panel interactions so downstream chart
+  // transformations can reuse their memoized results.
+  return useMemo(() => {
+    const filteredQueryDefinitions = ctx.queryDefinitions.filter((definition) => definition.kind === queryType);
+    const filteredQueryResults = ctx.queryResults.filter(
+      (queryResult) => queryResult?.definition?.kind === queryType,
+    ) as Array<QueryData<QueryType[T]>>;
+    const filteredErrors = ctx.errors.filter(
+      (_error, index) => ctx.queryResults[index]?.definition?.kind === queryType,
+    );
 
-  // Filter the query results based on the specified query type
-  const filteredQueryResults = ctx.queryResults.filter(
-    (queryResult) => queryResult?.definition?.kind === queryType,
-  ) as Array<QueryData<QueryType[T]>>;
-
-  // Filter the errors based on the specified query type
-  const filteredErrors = ctx.errors.filter((errors, index) => ctx.queryResults[index]?.definition?.kind === queryType);
-
-  // Create a new context object with the filtered results and errors
-  return {
-    queryDefinitions: filteredQueryDefinitions,
-    queryResults: filteredQueryResults,
-    isFetching: filteredQueryResults.some((result) => result.isFetching),
-    isLoading: filteredQueryResults.some((result) => result.isLoading),
-    refetchAll: ctx.refetchAll,
-    errors: filteredErrors,
-  };
+    return {
+      queryDefinitions: filteredQueryDefinitions,
+      queryResults: filteredQueryResults,
+      isFetching: filteredQueryResults.some((result) => result.isFetching),
+      isLoading: filteredQueryResults.some((result) => result.isLoading),
+      refetchAll: ctx.refetchAll,
+      errors: filteredErrors,
+    };
+  }, [ctx.queryDefinitions, ctx.queryResults, ctx.errors, ctx.refetchAll, queryType]);
 }
 
 export function DataQueriesProvider(props: DataQueriesProviderProps): ReactElement {

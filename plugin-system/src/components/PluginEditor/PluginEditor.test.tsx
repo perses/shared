@@ -14,7 +14,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { MockedFunction } from 'vitest';
 
 import type { DefaultPluginKinds, PluginType } from '../../model';
@@ -41,13 +41,16 @@ describe('PluginEditor', () => {
     };
 
     // A test helper component that includes the state that's controlled from outside
-    let onChange: MockedFunction<PluginEditorProps['onChange']> = vi.fn();
+    const onChange: MockedFunction<PluginEditorProps['onChange']> = vi.fn();
     function TestHelperForm(): ReactElement {
       const [value, setValue] = useState(testValue);
-      onChange = vi.fn((v) => setValue(v));
+      const handleChange = useCallback((next: PluginEditorProps['value']): void => {
+        onChange(next);
+        setValue(next);
+      }, []);
 
       return (
-        <PluginEditor pluginTypes={pluginTypes} pluginKindLabel="Variable Type" value={value} onChange={onChange} />
+        <PluginEditor pluginTypes={pluginTypes} pluginKindLabel="Variable Type" value={value} onChange={handleChange} />
       );
     }
 
@@ -116,6 +119,11 @@ describe('PluginEditor', () => {
     // Make sure the editor from the first plugin appears and has our modified value from before the switch
     editor = await screen.findByLabelText('ErnieVariable editor');
     expect(editor).toHaveValue('MyNewValue');
+
+    // The completed request must not reactivate when another cached kind is selected.
+    await openPluginKind();
+    userEvent.click(screen.getByRole('option', { name: 'Ernie Variable 2' }));
+    expect(await screen.findByLabelText('ErnieVariable2 editor')).toHaveValue('');
   });
 
   describe('when defaultPluginKinds specified in plugin registry', () => {
@@ -126,7 +134,7 @@ describe('PluginEditor', () => {
           TimeSeriesQuery: 'PrometheusTimeSeriesQuery',
           Variable: 'ErnieVariable1',
         },
-        value: { selection: { type: 'Variable', kind: '' }, spec: {} },
+        value: Object.freeze({ selection: Object.freeze({ type: 'Variable', kind: '' }), spec: {} }),
       });
 
       // Wait for default panel kind to load.

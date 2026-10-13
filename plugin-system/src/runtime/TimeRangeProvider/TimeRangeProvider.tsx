@@ -104,11 +104,17 @@ export function TimeRangeProvider(props: TimeRangeProviderProps): ReactElement {
     queryClient
       .invalidateQueries({ queryKey: ['variable'] })
       .finally(() => queryClient.removeQueries({ queryKey: ['variable'], type: 'inactive' }));
+    queryClient
+      .invalidateQueries({ queryKey: ['annotation'] })
+      .finally(() => queryClient.removeQueries({ queryKey: ['annotation'], type: 'inactive' }));
   }, [queryClient, timeRange]);
 
-  // Auto refresh is only refreshing queries of panels
+  // Auto refresh is only refreshing queries of panels, including their annotations
   const autoRefresh = useCallback(() => {
     setAbsoluteTimeRange(isRelativeTimeRange(timeRange) ? toAbsoluteTimeRange(timeRange) : timeRange);
+    queryClient.invalidateQueries({ queryKey: ['annotation'] }).finally(() => {
+      queryClient.removeQueries({ queryKey: ['annotation'], type: 'inactive' });
+    });
     queryClient.invalidateQueries({ queryKey: ['query'] }).finally(() => {
       queryClient.removeQueries({ queryKey: ['query'], type: 'inactive' });
       queryClient.removeQueries({ queryKey: ['variable'], type: 'inactive' }); // Timerange is in queryKey, can lead to memory leak when using relative timerange

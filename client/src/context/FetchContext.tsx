@@ -14,7 +14,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { createContext, useCallback, useContext } from 'react';
 
-import { fetch as defaultFetch } from '../util/fetch';
+import { fetch as defaultFetch, FetchError } from '../util/fetch';
 
 export type FetchFn = (...args: Parameters<typeof globalThis.fetch>) => Promise<Response>;
 
@@ -38,6 +38,9 @@ export function useFetch(): {
   const fetchJson = useCallback(
     async <T,>(...args: Parameters<typeof globalThis.fetch>): Promise<T> => {
       const response = await fetch(...args);
+      if (!response.ok) {
+        throw new FetchError(response);
+      }
       return await response.json();
     },
     [fetch],

@@ -17,6 +17,7 @@ import type { HTTPDatasourceSpec } from '@perses-dev/spec';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
+import { useCallback, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { HTTPSettingsEditor } from './HTTPSettingsEditor';
@@ -62,6 +63,14 @@ describe('HTTPSettingsEditor - Request Headers', () => {
     };
     return render(<Wrapper />);
   };
+
+  it('initializes proxy settings without mutating the input', () => {
+    const value = Object.freeze({});
+    const onChange = vi.fn();
+    renderComponent(value, onChange);
+    expect(value).toEqual({});
+    expect(onChange).toHaveBeenCalledWith(initialSpecProxy);
+  });
 
   describe('Adding headers', () => {
     it('should add a new empty header when clicking the add button', async () => {
@@ -610,5 +619,176 @@ describe('HTTPSettingsEditor - Test Connection', () => {
     await waitFor(() => {
       expect(mockExceptionSnackbar).toHaveBeenCalledWith(expect.any(Error));
     });
+  });
+});
+
+const statefulInitialSpecDirect: HTTPDatasourceSpec = {
+  directUrl: '',
+};
+
+const statefulInitialSpecProxy: HTTPDatasourceSpec = {
+  proxy: {
+    kind: 'HTTPProxy',
+    spec: {
+      url: '',
+    },
+  },
+};
+
+const renderStateful = (
+  initialValue: HTTPDatasourceSpec,
+  onChange = vi.fn(),
+  isReadonly = false,
+): ReturnType<typeof render> => {
+  const Wrapper = (): ReactElement => {
+    const methods = useForm();
+    const [value, setValue] = useState(initialValue);
+    const handleChange = useCallback((next: HTTPDatasourceSpec): void => {
+      setValue(next);
+      onChange(next);
+    }, []);
+    return (
+      <FormProvider {...methods}>
+        <HTTPSettingsEditor
+          value={value}
+          onChange={handleChange}
+          isReadonly={isReadonly}
+          initialSpecDirect={statefulInitialSpecDirect}
+          initialSpecProxy={statefulInitialSpecProxy}
+        />
+      </FormProvider>
+    );
+  };
+  return render(<Wrapper />);
+};
+
+describe('HTTPSettingsEditor - Timeout', () => {
+  it('should display the existing proxy timeout', () => {
+    renderStateful({
+      proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090', timeout: '1m30s' } },
+    });
+
+    expect(screen.getByLabelText(/Timeout/i)).toHaveValue('1m30s');
+  });
+
+  it('should update the proxy timeout', async () => {
+    const onChange = vi.fn();
+    renderStateful({ proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090' } } }, onChange);
+
+    await userEvent.type(screen.getByLabelText(/Timeout/i), '45s');
+
+    expect(onChange.mock.lastCall?.[0]?.proxy?.spec.timeout).toBe('45s');
+    expect(screen.queryByText(/Must be a valid duration string/i)).not.toBeInTheDocument();
+  });
+
+  it('should unset the proxy timeout when the field is cleared', async () => {
+    const onChange = vi.fn();
+    renderStateful({ proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090', timeout: '30s' } } }, onChange);
+
+    await userEvent.clear(screen.getByLabelText(/Timeout/i));
+
+    expect(onChange).toHaveBeenCalled();
+    const lastSpec = onChange.mock.lastCall?.[0]?.proxy?.spec;
+    expect(lastSpec).toEqual(expect.objectContaining({ url: 'http://localhost:9090' }));
+    expect(lastSpec?.timeout).toBeUndefined();
+  });
+
+  it('should show an error for an invalid duration', async () => {
+    renderStateful({ proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090' } } });
+
+    const timeoutInput = screen.getByLabelText(/Timeout/i);
+    await userEvent.type(timeoutInput, '30 seconds');
+
+    expect(screen.getByText(/Must be a valid duration string/i)).toBeInTheDocument();
+    expect(timeoutInput).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('should make the timeout field read-only when isReadonly is true', () => {
+    renderStateful(
+      { proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090', timeout: '30s' } } },
+      vi.fn(),
+      true,
+    );
+
+    expect(screen.getByLabelText(/Timeout/i)).toHaveAttribute('readonly');
+  });
+
+  it('should not render the timeout field in direct mode', () => {
+    renderStateful({ directUrl: 'http://localhost:9090' });
+
+    expect(screen.queryByLabelText(/Timeout/i)).not.toBeInTheDocument();
+  });
+});
+
+const getOAuthPassthroughSwitch = (): HTMLElement => screen.getByRole('checkbox', { name: /Forward OAuth identity/i });
+
+describe('HTTPSettingsEditor - OAuth passthrough', () => {
+  it('should be unchecked by default', () => {
+    renderStateful({ proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090' } } });
+
+    expect(getOAuthPassthroughSwitch()).not.toBeChecked();
+    expect(getOAuthPassthroughSwitch()).toHaveAccessibleDescription(/access token of the logged-in user/i);
+  });
+
+  it('should display the existing OAuth passthrough setting', () => {
+    renderStateful({
+      proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090', oauthPassthrough: true } },
+    });
+
+    expect(getOAuthPassthroughSwitch()).toBeChecked();
+  });
+
+  it('should enable OAuth passthrough and preserve the other proxy settings', async () => {
+    const onChange = vi.fn();
+    renderStateful(
+      { proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090', secret: 'my-secret' } } },
+      onChange,
+    );
+
+    await userEvent.click(getOAuthPassthroughSwitch());
+
+    expect(onChange.mock.lastCall?.[0]?.proxy?.spec).toEqual({
+      url: 'http://localhost:9090',
+      secret: 'my-secret',
+      oauthPassthrough: true,
+    });
+    expect(getOAuthPassthroughSwitch()).toBeChecked();
+  });
+
+  it('should unset OAuth passthrough when disabled', async () => {
+    const onChange = vi.fn();
+    renderStateful(
+      { proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090', oauthPassthrough: true } } },
+      onChange,
+    );
+
+    await userEvent.click(getOAuthPassthroughSwitch());
+
+    const lastSpec = onChange.mock.lastCall?.[0]?.proxy?.spec;
+    expect(lastSpec).toEqual(expect.objectContaining({ url: 'http://localhost:9090' }));
+    expect(lastSpec?.oauthPassthrough).toBeUndefined();
+    expect(JSON.stringify(lastSpec)).not.toContain('oauthPassthrough');
+    expect(getOAuthPassthroughSwitch()).not.toBeChecked();
+  });
+
+  it('should not change OAuth passthrough when isReadonly is true', async () => {
+    const onChange = vi.fn();
+    renderStateful(
+      { proxy: { kind: 'HTTPProxy', spec: { url: 'http://localhost:9090', oauthPassthrough: true } } },
+      onChange,
+      true,
+    );
+
+    await userEvent.click(getOAuthPassthroughSwitch());
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(getOAuthPassthroughSwitch()).toBeChecked();
+    expect(getOAuthPassthroughSwitch()).toHaveAttribute('readonly');
+  });
+
+  it('should not render the OAuth passthrough switch in direct mode', () => {
+    renderStateful({ directUrl: 'http://localhost:9090' });
+
+    expect(screen.queryByRole('checkbox', { name: /Forward OAuth identity/i })).not.toBeInTheDocument();
   });
 });
