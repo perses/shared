@@ -17,27 +17,53 @@ import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
 
 import type { ButtonVariant } from '../Button/Button';
+import { displayProps } from '../system/display';
+import type { DisplayProps } from '../system/display';
+import { sizingProps } from '../system/sizing';
+import type { SizingProps } from '../system/sizing';
+import { spacingProps } from '../system/spacing';
+import type { SpacingProps } from '../system/spacing';
+import { applyStyleProps, compileStyleProps } from '../system/styleProps';
 import type { ColorVariant, Size, Status } from '../types';
 
 import '../Button/buttonBase.css';
 import './iconButton.css';
+import '../system/layout.css';
+import '../system/spacing.css';
 
-export interface IconButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'aria-label' | 'color'> {
+const ICON_BUTTON_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
+
+export interface IconButtonProps
+  extends
+    Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'aria-label' | 'color'>,
+    SpacingProps,
+    SizingProps,
+    DisplayProps {
   'aria-label': string;
   variant?: ButtonVariant;
   color?: ColorVariant | Status;
   size?: Size;
 }
 
+/**
+ * Spacing, sizing and display props are responsive. When you pass a responsive object, include `default`.
+ * Breakpoints with no value fall back to the browser's default, not the component's own styling.
+ */
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
-  { variant = 'ghost', color = 'primary', size = 'md', className, children, ...rest },
+  { variant = 'ghost', color = 'primary', size = 'md', className, style, children, ...props },
   ref,
 ) {
+  const {
+    className: styleClassName,
+    style: computedStyle,
+    rest,
+  } = applyStyleProps(props, ICON_BUTTON_STYLE_PROPS, style);
   return (
     <BaseButton
       {...rest}
       ref={ref}
-      className={clsx('ps-ButtonBase', 'ps-IconButton', className)}
+      className={clsx('ps-ButtonBase', 'ps-IconButton', styleClassName, className)}
+      style={computedStyle}
       data-variant={variant}
       data-color={color}
       data-size={size}

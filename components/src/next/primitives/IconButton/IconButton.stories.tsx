@@ -64,3 +64,11 @@ export const Disabled: Story = () => (
     </IconButton>
   </div>
 );
+
+const responsiveMargin = { default: 'xs', md: 'lg' } as const;
+
+export const Responsive: Story = () => (
+  <IconButton aria-label="Close" m={responsiveMargin}>
+    <CloseIcon />
+  </IconButton>
+);

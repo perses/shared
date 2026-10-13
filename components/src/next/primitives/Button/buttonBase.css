@@ -14,7 +14,7 @@
  */
 
 @layer perses.components {
-  .ps-ButtonBase {
+  :where(.ps-ButtonBase) {
     display: inline-flex;
     align-items: center;
     justify-content: center;

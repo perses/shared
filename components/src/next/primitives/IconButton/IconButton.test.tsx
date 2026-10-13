@@ -13,8 +13,12 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { CSSProperties } from 'react';
 
 import { IconButton } from './IconButton';
+
+const RESPONSIVE_WIDTH = { default: 100, md: 200 };
+const WIDTH_OVERRIDE = { '--ps-width': '50px' } as CSSProperties;
 
 describe('IconButton', () => {
   it('renders children', () => {
@@ -88,5 +92,37 @@ describe('IconButton', () => {
       </IconButton>,
     );
     expect(ref.current).toBeInstanceOf(HTMLButtonElement);
+  });
+
+  describe('style props', () => {
+    it('maps style props to classes and variables', () => {
+      render(
+        <IconButton aria-label="Close" m="md" width={RESPONSIVE_WIDTH}>
+          X
+        </IconButton>,
+      );
+      const button = screen.getByRole('button');
+      expect(button).toHaveClass('ps-m', 'ps-width');
+      expect(button.style.getPropertyValue('--ps-width')).toBe('100px');
+      expect(button.style.getPropertyValue('--ps-width-md')).toBe('200px');
+    });
+
+    it('lets the style prop override computed variables', () => {
+      render(
+        <IconButton aria-label="Close" width={100} style={WIDTH_OVERRIDE}>
+          X
+        </IconButton>,
+      );
+      expect(screen.getByRole('button')).toHaveStyle({ '--ps-width': '50px' });
+    });
+
+    it('does not leak style props to the DOM', () => {
+      render(
+        <IconButton aria-label="Close" m="sm">
+          X
+        </IconButton>,
+      );
+      expect(screen.getByRole('button')).not.toHaveAttribute('m');
+    });
   });
 });
