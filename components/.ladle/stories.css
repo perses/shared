@@ -13,6 +13,17 @@
  * limitations under the License.
  */
 
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
 [data-perses-mode='dark'] {
   min-height: 100vh;
   background: var(--perses-bg-default);
