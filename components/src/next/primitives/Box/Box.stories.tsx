@@ -15,21 +15,36 @@ import type { Story } from '@ladle/react';
 import type { CSSProperties } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
+import type { SampleFile } from '../../stories/Sample';
 import { Box } from './Box';
 import type { Responsive as ResponsiveValue, SpacingToken } from './Box';
 
-// Box-demo chrome (not part of the Box API). The Sample/Stack scaffolding lives in stories/Sample.
+// Box-demo chrome (not part of the Box API). Colors use Perses tokens so they follow Ladle's
+// light/dark toggle; the Sample/Stack scaffolding lives in stories/Sample. Each Sample's `code`
+// is the real Box markup (minus this demo styling) so readers can copy it verbatim.
 const row: CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'flex-start' };
-const outline: CSSProperties = { border: '1px solid #ccc', background: '#f5f5f5' };
-const fill: CSSProperties = { background: '#dfe7ef' };
-const panel: CSSProperties = { border: '2px solid #0066cc', background: '#f0f7ff', borderRadius: 4 };
+const outline: CSSProperties = {
+  border: '1px solid var(--perses-border-default)',
+  background: 'var(--perses-bg-surface)',
+};
+const fill: CSSProperties = { background: 'var(--perses-bg-sunken)' };
+const panel: CSSProperties = {
+  border: '1px solid var(--perses-text-accent)',
+  background: 'var(--perses-bg-surface)',
+  borderRadius: 4,
+};
 const legend: CSSProperties = {
-  background: '#f5f5f5',
+  background: 'var(--perses-bg-sunken)',
+  color: 'var(--perses-text-primary)',
   borderRadius: 4,
   padding: '1rem',
   fontSize: '0.875rem',
   lineHeight: 1.6,
 };
+const sunken: CSSProperties = { background: 'var(--perses-bg-sunken)' };
+const dashed: CSSProperties = { border: '1px dashed var(--perses-border-default)', padding: '1rem' };
+
+const basicCode = `<Box p="md">A box with md padding.</Box>`;
 
 export const Basic: Story = () => (
   <Stack>
@@ -39,7 +54,7 @@ export const Basic: Story = () => (
       <code>flexDirection</code>
       …) and display (<code>display</code>, <code>overflow</code>) — plus any native <code>div</code> attribute.
     </p>
-    <Sample title="Minimal usage" code='<Box p="md">…</Box>'>
+    <Sample title="Minimal usage" code={basicCode}>
       <Box p="md" style={outline}>
         A box with md padding.
       </Box>
@@ -50,9 +65,19 @@ Basic.storyName = 'Basic';
 
 const spacingScale: SpacingToken[] = ['0', 'xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'];
 
+const paddingScaleCode = `// p accepts any spacing token: 0, xs, sm, md, lg, xl, 2xl, 3xl, 4xl
+<Box p="md">Content</Box>`;
+const paddingDirCode = `<Box px="lg" py="sm">horizontal lg, vertical sm</Box>`;
+const marginDirCode = `<Box mx="lg" my="md">offset from its container</Box>`;
+const gapCode = `<Box display="flex" gap="md">
+  <Box p="sm">A</Box>
+  <Box p="sm">B</Box>
+  <Box p="sm">C</Box>
+</Box>`;
+
 export const Spacing: Story = () => (
   <Stack>
-    <Sample title="Padding scale (including 0)" code='p="0" | "xs" … "4xl"'>
+    <Sample title="Padding scale (0, xs … 4xl)" code={paddingScaleCode}>
       <div style={row}>
         {spacingScale.map((token) => (
           <Box key={token} p={token} style={outline}>
@@ -62,21 +87,21 @@ export const Spacing: Story = () => (
       </div>
     </Sample>
 
-    <Sample title="Directional padding" code='px="lg" py="sm"'>
+    <Sample title="Directional padding (px, py)" code={paddingDirCode}>
       <Box px="lg" py="sm" style={outline}>
         <span style={fill}>horizontal lg, vertical sm</span>
       </Box>
     </Sample>
 
-    <Sample title="Directional margin" code='mx="lg" my="md"'>
-      <div style={{ background: '#eee' }}>
+    <Sample title="Directional margin (mx, my)" code={marginDirCode}>
+      <div style={sunken}>
         <Box mx="lg" my="md" style={outline}>
           offset from its container
         </Box>
       </div>
     </Sample>
 
-    <Sample title="Gap between flex children" code='display="flex" gap="md"'>
+    <Sample title="Gap between flex children" code={gapCode}>
       <Box display="flex" gap="md" p="sm" style={outline}>
         <Box p="sm" style={fill}>
           A
@@ -93,23 +118,28 @@ export const Spacing: Story = () => (
 );
 Spacing.storyName = 'Spacing';
 
+const sizeFixedCode = `<Box width={240} height={80}>240 × 80</Box>`;
+const sizeRelativeCode = `<Box width="50%">width 50%</Box>
+<Box width="calc(100% - 2rem)">…</Box>`;
+const sizeMinMaxCode = `<Box maxWidth={320} minHeight={96} p="md">…</Box>`;
+
 export const Sizing: Story = () => (
   <Stack>
-    <Sample title="Fixed size (a number means pixels)" code="width={240} height={80}">
+    <Sample title="Fixed size — a number means pixels" code={sizeFixedCode}>
       <Box width={240} height={80} p="sm" style={outline}>
         240 × 80
       </Box>
     </Sample>
 
-    <Sample title="Relative & calc (strings carry their own units)" code='width="50%"  •  width="calc(100% - 2rem)"'>
-      <div style={{ border: '1px dashed #999', padding: '1rem' }}>
+    <Sample title="Relative & calc — strings carry their own units" code={sizeRelativeCode}>
+      <div style={dashed}>
         <Box width="50%" p="sm" style={outline}>
           width 50%
         </Box>
       </div>
     </Sample>
 
-    <Sample title="Min / max constraints" code="minWidth / maxWidth / minHeight / maxHeight">
+    <Sample title="Min / max constraints" code={sizeMinMaxCode}>
       <Box maxWidth={320} minHeight={96} p="md" style={outline}>
         maxWidth 320, minHeight 96 — text wraps within the max width and the box never shrinks below the min height.
       </Box>
@@ -118,9 +148,27 @@ export const Sizing: Story = () => (
 );
 Sizing.storyName = 'Sizing';
 
+const displayCode = `<Box display="flex" gap="sm">
+  <Box p="sm">flex</Box>
+  <Box p="sm">children</Box>
+</Box>`;
+const directionCode = `<Box display="flex" flexDirection="column" gap="sm">
+  <Box p="sm">1</Box>
+  <Box p="sm">2</Box>
+</Box>`;
+const alignCode = `<Box display="flex" alignItems="center" justifyContent="space-between" gap="sm" minHeight={80}>
+  <Box p="sm">left</Box>
+  <Box p="md">taller</Box>
+  <Box p="sm">right</Box>
+</Box>`;
+const flexCode = `<Box display="flex" gap="sm">
+  <Box flex="1" p="sm">flex 1</Box>
+  <Box flex="2" p="sm">flex 2</Box>
+</Box>`;
+
 export const Layout: Story = () => (
   <Stack>
-    <Sample title="display" code='display="flex" (also "block", "inline-block", "grid", "none")'>
+    <Sample title="display (block, flex, inline-block, grid, none)" code={displayCode}>
       <Box display="flex" gap="sm" p="sm" style={outline}>
         <Box p="sm" style={fill}>
           flex
@@ -131,7 +179,7 @@ export const Layout: Story = () => (
       </Box>
     </Sample>
 
-    <Sample title="flexDirection" code='flexDirection="column"'>
+    <Sample title="flexDirection (row, column)" code={directionCode}>
       <Box display="flex" flexDirection="column" gap="sm" p="sm" style={outline}>
         <Box p="sm" style={fill}>
           1
@@ -142,7 +190,7 @@ export const Layout: Story = () => (
       </Box>
     </Sample>
 
-    <Sample title="alignItems + justifyContent" code='alignItems="center" justifyContent="space-between"'>
+    <Sample title="alignItems + justifyContent" code={alignCode}>
       <Box
         display="flex"
         alignItems="center"
@@ -164,7 +212,7 @@ export const Layout: Story = () => (
       </Box>
     </Sample>
 
-    <Sample title="flex (grow / shrink / basis)" code='flex="1"  vs  flex="2"'>
+    <Sample title="flex (grow / shrink / basis)" code={flexCode}>
       <Box display="flex" gap="sm" p="sm" style={outline}>
         <Box flex="1" p="sm" style={fill}>
           flex 1
@@ -188,6 +236,31 @@ const responsiveDisplay: ResponsiveValue<CSSProperties['display']> = { default: 
 const responsiveDirection: ResponsiveValue<CSSProperties['flexDirection']> = { default: 'column', md: 'row' };
 const responsivePadding: ResponsiveValue<SpacingToken> = { default: 'sm', md: 'lg', xl: '4xl' };
 
+const respWidthCode = `<Box width={{ default: '100%', sm: '80%', md: 400, lg: 'calc(30em + 4px)' }} p="md">
+  I resize with the viewport.
+</Box>`;
+const respLayoutCode = `<Box
+  display={{ default: 'block', md: 'flex' }}
+  flexDirection={{ default: 'column', md: 'row' }}
+  gap="md"
+  p="md"
+>
+  <Box flex="1" p="md">Item 1</Box>
+  <Box flex="1" p="md">Item 2</Box>
+  <Box flex="1" p="md">Item 3</Box>
+</Box>`;
+const respSpacingCode = `<Box p={{ default: 'sm', md: 'lg', xl: '4xl' }}>Padding grows at wider breakpoints.</Box>`;
+
+const cardJsx = `<Box display="flex" flexDirection={direction} gap="md" p="lg" maxWidth={520}>
+  <Box flex="1" p="md">Header</Box>
+  <Box flex="2" p="md">Body content that moves from stacked to side-by-side at md.</Box>
+</Box>`;
+const cardResponsive = `const direction = { default: 'column', md: 'row' };`;
+const cardFiles: SampleFile[] = [
+  { name: 'Card.tsx', code: cardJsx },
+  { name: 'responsive.ts', code: cardResponsive },
+];
+
 export const Responsive: Story = () => (
   <Stack>
     <div style={legend}>
@@ -206,19 +279,13 @@ export const Responsive: Story = () => (
       </em>
     </div>
 
-    <Sample
-      title="Responsive width (mixes string units and numeric pixels)"
-      code="width={{ default: '100%', sm: '80%', md: 400, lg: 'calc(30em + 4px)' }}"
-    >
+    <Sample title="Responsive width (mixes string units and numeric pixels)" code={respWidthCode}>
       <Box width={responsiveWidth} p="md" style={outline}>
         I resize with the viewport.
       </Box>
     </Sample>
 
-    <Sample
-      title="Stack, then row"
-      code="display={{ default: 'block', md: 'flex' }} flexDirection={{ default: 'column', md: 'row' }}"
-    >
+    <Sample title="Stack, then row" code={respLayoutCode}>
       <Box display={responsiveDisplay} flexDirection={responsiveDirection} gap="md" p="md" style={panel}>
         <Box p="md" flex="1" style={fill}>
           Item 1
@@ -232,13 +299,13 @@ export const Responsive: Story = () => (
       </Box>
     </Sample>
 
-    <Sample title="Responsive spacing" code="p={{ default: 'sm', md: 'lg', xl: '4xl' }}">
+    <Sample title="Responsive spacing" code={respSpacingCode}>
       <Box p={responsivePadding} style={outline}>
         Padding grows at wider breakpoints.
       </Box>
     </Sample>
 
-    <Sample title="Composed — a card that reflows at md" code="several props together">
+    <Sample title="Composed — a card that reflows at md" code={cardFiles}>
       <Box display="flex" flexDirection={responsiveDirection} gap="md" p="lg" maxWidth={520} style={panel}>
         <Box p="md" flex="1" style={fill}>
           Header
