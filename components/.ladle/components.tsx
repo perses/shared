@@ -19,7 +19,7 @@ import { ThemeModeProvider } from '../src/next/contexts/ThemeModeProvider';
 import { defaultComponents, defaultIcons } from '../src/next/primitives/defaults';
 
 import '../src/next/css/index.css';
-import './theme-mode.css';
+import './stories.css';
 
 export const Provider: GlobalProvider = ({ children, globalState }) => (
   <ThemeModeProvider mode={globalState.theme === 'dark' ? 'dark' : 'light'}>

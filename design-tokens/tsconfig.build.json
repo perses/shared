@@ -2,6 +2,7 @@
   "extends": "./tsconfig.json",
   "exclude": ["**/*.stories.*", "**/*.test.*", "**/stories/*", "**/test/*"],
   "compilerOptions": {
+    "noEmit": false,
     "emitDeclarationOnly": true,
     "declaration": true,
     "preserveWatchOutput": true
