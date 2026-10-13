@@ -27,6 +27,10 @@ function Wrapper({ children }: { children: ReactNode }): ReactElement {
   );
 }
 
+const RESPONSIVE_PADDING = { default: 'sm', md: 'xl' } as const;
+const RESPONSIVE_DISPLAY = { default: 'flex', md: 'none' };
+const STYLE_OVERRIDE = { padding: '99px' };
+
 describe('Button', () => {
   it('renders children', () => {
     render(<Button>Click me</Button>, { wrapper: Wrapper });
@@ -107,5 +111,66 @@ describe('Button', () => {
   it('does not render spinner when loading is false', () => {
     const { container } = render(<Button>Save</Button>, { wrapper: Wrapper });
     expect(container.querySelector('.ps-Button__spinner')).not.toBeInTheDocument();
+  });
+
+  describe('style props', () => {
+    it('applies a spacing token through its design-token custom property', () => {
+      render(<Button p="md">Content</Button>, { wrapper: Wrapper });
+      const el = screen.getByRole('button');
+      expect(el).toHaveClass('ps-p');
+      expect(el).toHaveStyle({ '--ps-p': 'var(--perses-spacing-md)' });
+    });
+
+    it('creates responsive spacing variables', () => {
+      render(<Button p={RESPONSIVE_PADDING}>Content</Button>, { wrapper: Wrapper });
+      const el = screen.getByRole('button');
+      expect(el).toHaveClass('ps-p');
+      expect(el).toHaveStyle({ '--ps-p': 'var(--perses-spacing-sm)' });
+      expect(el).toHaveStyle({ '--ps-p-md': 'var(--perses-spacing-xl)' });
+    });
+
+    it('treats numeric sizing as pixels and passes strings through', () => {
+      render(
+        <Button width={130} maxWidth="50%">
+          Content
+        </Button>,
+        { wrapper: Wrapper },
+      );
+      const el = screen.getByRole('button');
+      expect(el).toHaveClass('ps-width', 'ps-max-width');
+      expect(el).toHaveStyle({ '--ps-width': '130px', '--ps-max-width': '50%' });
+    });
+
+    it('applies a responsive display prop', () => {
+      render(<Button display={RESPONSIVE_DISPLAY}>Content</Button>, { wrapper: Wrapper });
+      const el = screen.getByRole('button');
+      expect(el).toHaveClass('ps-display');
+      expect(el).toHaveStyle({ '--ps-display': 'flex', '--ps-display-md': 'none' });
+    });
+
+    it('lets the style prop override a style prop and keeps the component class', () => {
+      render(
+        <Button p="md" style={STYLE_OVERRIDE}>
+          Content
+        </Button>,
+        { wrapper: Wrapper },
+      );
+      const el = screen.getByRole('button');
+      expect(el).toHaveClass('ps-Button', 'ps-p');
+      expect(el).toHaveStyle({ padding: '99px' });
+    });
+
+    it('does not forward style props to the DOM element', () => {
+      render(
+        <Button p="md" width={100} id="x">
+          Content
+        </Button>,
+        { wrapper: Wrapper },
+      );
+      const el = screen.getByRole('button');
+      expect(el).toHaveAttribute('id', 'x');
+      expect(el).not.toHaveAttribute('p');
+      expect(el).not.toHaveAttribute('width');
+    });
   });
 });

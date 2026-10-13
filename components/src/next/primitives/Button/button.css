@@ -14,30 +14,28 @@
  */
 
 @layer perses.components {
-  .ps-Button {
+  /* ---- Base ---- */
+  :where(.ps-Button) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     gap: var(--perses-spacing-xs);
     font-family: var(--perses-font-family);
     font-weight: var(--perses-font-weight-medium);
     line-height: var(--perses-line-height-relaxed);
   }
-
   /* ---- Sizes ---- */
-  .ps-Button[data-size='xs'] {
-    padding: var(--perses-spacing-0) var(--perses-spacing-xs);
-    font-size: var(--perses-font-size-xs);
-  }
-
-  .ps-Button[data-size='sm'] {
+  :where(.ps-Button[data-size='sm']) {
     padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
     font-size: var(--perses-font-size-xs);
   }
 
-  .ps-Button[data-size='md'] {
+  :where(.ps-Button[data-size='md']) {
     padding: var(--perses-spacing-sm) var(--perses-spacing-lg);
     font-size: var(--perses-font-size-sm);
   }
 
-  .ps-Button[data-size='lg'] {
+  :where(.ps-Button[data-size='lg']) {
     padding: var(--perses-spacing-md) var(--perses-spacing-xl);
     font-size: var(--perses-font-size-md);
   }

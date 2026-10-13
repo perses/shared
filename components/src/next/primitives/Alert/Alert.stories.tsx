@@ -12,33 +12,79 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
+import type { CSSProperties } from 'react';
 
+import { ResponsiveBreakpointsNote } from '../../stories/ResponsiveBreakpointsNote';
+import { Sample, Stack } from '../../stories/Sample';
+import type { Responsive as ResponsiveValue } from '../system/responsive';
+import type { SpacingToken } from '../system/spacing';
 import { Alert } from './Alert';
 import type { AlertSeverity } from './Alert';
 
+const column: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '1rem' };
+const dashed: CSSProperties = { border: '1px dashed var(--perses-border-default)', padding: '1rem' };
+const dashedColumn: CSSProperties = { ...dashed, ...column };
+
 const severities: AlertSeverity[] = ['error', 'warning', 'success', 'info'];
 
-export const AllSeverities: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-    {severities.map((severity) => (
-      <Alert key={severity} severity={severity} icon={severity}>
-        This is a {severity} alert.
-      </Alert>
-    ))}
-  </div>
-);
-AllSeverities.storyName = 'All Severities';
+const responsivePadding: ResponsiveValue<SpacingToken> = { default: 'sm', md: 'lg', xl: '3xl' };
+const responsiveWidth: ResponsiveValue<CSSProperties['width']> = { default: '100%', md: 400, lg: 'calc(30em + 4px)' };
+const responsiveDisplay: ResponsiveValue<CSSProperties['display']> = {
+  default: 'none',
+  md: 'flex',
+  lg: 'flex',
+  xl: 'flex',
+};
 
-export const NoIcon: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-    {severities.map((severity) => (
-      <Alert key={severity} severity={severity}>
-        No icon by default for a {severity} alert.
+const basicCode = `<Alert severity="info" icon="info">This is an info alert.</Alert>`;
+
+export const Basic: Story = () => (
+  <Stack>
+    <p>
+      <code>Alert</code> shows a status message. It accepts responsive style props — spacing (<code>p</code>,{' '}
+      <code>m</code>, <code>gap</code>), sizing (<code>width</code>…) and display (<code>display</code>,{' '}
+      <code>overflow</code>) — plus any native <code>div</code> attribute.
+    </p>
+    <Sample title="Minimal usage" code={basicCode}>
+      <Alert severity="info" icon="info">
+        This is an info alert.
       </Alert>
-    ))}
-  </div>
+    </Sample>
+  </Stack>
 );
-NoIcon.storyName = 'No Icon (default)';
+Basic.storyName = 'Basic';
+
+const allSeveritiesCode = `<Alert severity="error" icon="error">This is a error alert.</Alert>
+<Alert severity="warning" icon="warning">This is a warning alert.</Alert>
+<Alert severity="success" icon="success">This is a success alert.</Alert>
+<Alert severity="info" icon="info">This is a info alert.</Alert>`;
+const noIconCode = `// icon is omitted by default
+<Alert severity="error">No icon by default for a error alert.</Alert>`;
+
+export const AllSeverities: Story = () => (
+  <Stack>
+    <Sample title="Severities with their default icons" code={allSeveritiesCode}>
+      <div style={column}>
+        {severities.map((severity) => (
+          <Alert key={severity} severity={severity} icon={severity}>
+            This is a {severity} alert.
+          </Alert>
+        ))}
+      </div>
+    </Sample>
+
+    <Sample title="No icon (default)" code={noIconCode}>
+      <div style={column}>
+        {severities.map((severity) => (
+          <Alert key={severity} severity={severity}>
+            No icon by default for a {severity} alert.
+          </Alert>
+        ))}
+      </div>
+    </Sample>
+  </Stack>
+);
+AllSeverities.storyName = 'Variants';
 
 const SmileyIcon = (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
@@ -46,15 +92,113 @@ const SmileyIcon = (
   </svg>
 );
 
-export const CustomIcon: Story = () => <Alert icon={SmileyIcon}>This alert uses a custom icon.</Alert>;
-CustomIcon.storyName = 'Custom Icon';
+const customIconCode = `<Alert icon={<svg viewBox="0 0 640 640">…</svg>}>This alert uses a custom icon.</Alert>`;
+const falsyIconCode = `<Alert icon={0}>renders no icon (not a literal "0").</Alert>
+<Alert icon={false}>renders no icon.</Alert>
+<Alert icon={null}>renders no icon.</Alert>
+<Alert icon={undefined}>renders no icon.</Alert>`;
 
-export const FalsyIcon: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-    <Alert icon={0}>icon={'{0}'} renders no icon (not a literal &quot;0&quot;).</Alert>
-    <Alert icon={false}>icon={'{false}'} renders no icon.</Alert>
-    <Alert icon={null}>icon={'{null}'} renders no icon.</Alert>
-    <Alert icon={undefined}>icon={'{undefined}'} (or omitted) renders no icon.</Alert>
-  </div>
+export const Icons: Story = () => (
+  <Stack>
+    <Sample title="Custom icon" code={customIconCode}>
+      <Alert icon={SmileyIcon}>This alert uses a custom icon.</Alert>
+    </Sample>
+
+    <Sample title="Falsy icon (0 / false / null / undefined)" code={falsyIconCode}>
+      <div style={column}>
+        <Alert icon={0}>icon={'{0}'} renders no icon (not a literal &quot;0&quot;).</Alert>
+        <Alert icon={false}>icon={'{false}'} renders no icon.</Alert>
+        <Alert icon={null}>icon={'{null}'} renders no icon.</Alert>
+        <Alert icon={undefined}>icon={'{undefined}'} (or omitted) renders no icon.</Alert>
+      </div>
+    </Sample>
+  </Stack>
 );
-FalsyIcon.storyName = 'Falsy Icon (0 / false / null / undefined)';
+Icons.storyName = 'Icons';
+
+const paddingCode = `// p accepts any spacing token: 0, xs, sm, md, lg, xl, 2xl, 3xl, 4xl
+<Alert severity="info" p="xl">Extra padding.</Alert>`;
+const paddingDirCode = `<Alert severity="warning" px="3xl" py="xs">horizontal 3xl, vertical xs</Alert>`;
+const marginCode = `<Alert severity="success" mx="xl" my="md">offset from its container</Alert>`;
+const gapCode = `// gap is the space between the icon and the message
+<Alert severity="error" icon="error" gap="2xl">Wide gap between icon and text.</Alert>`;
+
+export const Spacing: Story = () => (
+  <Stack>
+    <Sample title="Padding (p)" code={paddingCode}>
+      <Alert severity="info" p="xl">
+        Extra padding.
+      </Alert>
+    </Sample>
+
+    <Sample title="Directional padding (px, py)" code={paddingDirCode}>
+      <Alert severity="warning" px="3xl" py="xs">
+        horizontal 3xl, vertical xs
+      </Alert>
+    </Sample>
+
+    <Sample title="Directional margin (mx, my)" code={marginCode}>
+      <div style={dashed}>
+        <Alert severity="success" mx="xl" my="md">
+          offset from its container
+        </Alert>
+      </div>
+    </Sample>
+
+    <Sample title="Gap between icon and message" code={gapCode}>
+      <Alert severity="error" icon="error" gap="2xl">
+        Wide gap between icon and text.
+      </Alert>
+    </Sample>
+  </Stack>
+);
+Spacing.storyName = 'Spacing';
+
+const widthCode = `<Alert width={320}>Fixed 320px wide.</Alert>
+<Alert width="50%">50% of its container.</Alert>`;
+const minMaxCode = `<Alert maxWidth={360} icon="info">maxWidth 360 — long text wraps within the max width.</Alert>`;
+
+export const Sizing: Story = () => (
+  <Stack>
+    <Sample title="Fixed and relative width — a number means pixels" code={widthCode}>
+      <div style={dashedColumn}>
+        <Alert width={320}>Fixed 320px wide.</Alert>
+        <Alert width="50%">50% of its container.</Alert>
+      </div>
+    </Sample>
+
+    <Sample title="Min / max constraints" code={minMaxCode}>
+      <Alert maxWidth={360} icon="info">
+        maxWidth 360 — long text wraps within the max width instead of stretching across the whole container.
+      </Alert>
+    </Sample>
+  </Stack>
+);
+Sizing.storyName = 'Sizing';
+
+const responsiveSpacingCode = `// Resize the window: padding grows with the breakpoint.
+// Always include \`default\` — breakpoints without a value fall back to the browser default.
+<Alert p={{ default: 'sm', md: 'lg', xl: '3xl' }}>Padding changes per breakpoint.</Alert>`;
+const responsiveWidthCode = `<Alert width={{ default: '100%', md: 400, lg: 'calc(30em + 4px)' }}>
+  Width changes per breakpoint.
+</Alert>`;
+const responsiveDisplayCode = `// Hidden below md, shown (as flex) from md up.
+<Alert display={{ default: 'none', md: 'flex', lg: 'flex', xl: 'flex' }}>Visible from md up.</Alert>`;
+
+export const Responsive: Story = () => (
+  <Stack>
+    <ResponsiveBreakpointsNote />
+    <Sample title="Responsive spacing" code={responsiveSpacingCode}>
+      <Alert p={responsivePadding}>Padding changes per breakpoint.</Alert>
+    </Sample>
+
+    <Sample title="Responsive width" code={responsiveWidthCode}>
+      <Alert width={responsiveWidth}>Width changes per breakpoint.</Alert>
+    </Sample>
+
+    <Sample title="Responsive display" code={responsiveDisplayCode}>
+      <Alert display={responsiveDisplay}>Visible from md up.</Alert>
+    </Sample>
+  </Stack>
+);
+Responsive.storyName = 'Responsive';

@@ -37,12 +37,7 @@ export const Box = forwardRef<HTMLDivElement, BoxProps>(function Box({ className
   } = applyStyleProps(rest, BOX_STYLE_PROPS, style);
 
   return (
-    <div
-      ref={ref}
-      {...(domProps as HTMLAttributes<HTMLDivElement>)}
-      className={clsx('ps-Box', styleClassName, className)}
-      style={computedStyle}
-    >
+    <div ref={ref} {...domProps} className={clsx('ps-Box', styleClassName, className)} style={computedStyle}>
       {children}
     </div>
   );
