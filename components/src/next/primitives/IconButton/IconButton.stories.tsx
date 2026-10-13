@@ -12,11 +12,12 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
-import type { CSSProperties } from 'react';
+import type { ComponentType, CSSProperties, SVGProps } from 'react';
 
 import { ResponsiveBreakpointsNote } from '../../stories/ResponsiveBreakpointsNote';
 import { Sample, Stack } from '../../stories/Sample';
 import type { ButtonVariant } from '../Button/Button';
+import * as Icons from '../Icon/icons';
 import { CloseIcon } from '../Icon/icons';
 import type { Responsive as ResponsiveValue } from '../system/responsive';
 import type { SpacingToken } from '../system/spacing';
@@ -29,6 +30,16 @@ const dashed: CSSProperties = { border: '1px dashed var(--perses-border-default)
 const sizeGroups: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '2rem' };
 const variantRows: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.5rem' };
 const sizeHeading: CSSProperties = { marginBottom: '0.5rem' };
+
+const allIcons = Object.entries(Icons) as Array<[string, ComponentType<SVGProps<SVGSVGElement>>]>;
+const gallery: CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(11rem, 1fr))',
+  gap: '1rem',
+};
+const galleryItem: CSSProperties = { display: 'flex', alignItems: 'center', gap: '0.5rem' };
+const galleryIcon: CSSProperties = { fontSize: '1.25rem' };
+const galleryLabel: CSSProperties = { fontSize: '0.75rem' };
 
 const variants: ButtonVariant[] = ['solid', 'outline', 'ghost'];
 const colors: Array<ColorVariant | Status> = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
@@ -121,6 +132,29 @@ export const States: Story = () => (
   </Stack>
 );
 States.storyName = 'States';
+
+const iconsCode = `import * as Icons from '../Icon/icons';
+
+// Any icon from the icon set can be the child
+<IconButton aria-label="Add" title="AddIcon"><Icons.AddIcon /></IconButton>`;
+
+export const IconGallery: Story = () => (
+  <Stack>
+    <Sample title="All icons" code={iconsCode}>
+      <div style={gallery}>
+        {allIcons.map(([name, Icon]) => (
+          <div key={name} style={galleryItem}>
+            <IconButton aria-label={name} title={name}>
+              <Icon style={galleryIcon} />
+            </IconButton>
+            <span style={galleryLabel}>{name}</span>
+          </div>
+        ))}
+      </div>
+    </Sample>
+  </Stack>
+);
+IconGallery.storyName = 'Icons';
 
 const paddingCode = `// p accepts any spacing token: 0, xs, sm, md, lg, xl, 2xl, 3xl, 4xl
 <IconButton aria-label="Close" p="xl"><CloseIcon /></IconButton>`;
