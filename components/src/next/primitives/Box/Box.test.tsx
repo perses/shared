@@ -1,3 +1,4 @@
+// oxlint-disable react-perf/jsx-no-new-object-as-prop
 // Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +15,8 @@
 import { render, screen } from '@testing-library/react';
 
 import { Box } from './Box';
+
+const RESPONSIVE_WIDTH = { default: '100%', md: 400, lg: 'calc(30em + 4px)' };
 
 describe('Box', () => {
   it('renders children', () => {
@@ -41,32 +44,38 @@ describe('Box', () => {
     expect(screen.getByTestId('box').tagName).toBe('DIV');
   });
 
-  it('applies display style', () => {
+  it('applies a non-responsive layout prop through a custom property', () => {
     render(
       <Box data-testid="box" display="flex">
         Content
       </Box>,
     );
-    expect(screen.getByTestId('box')).toHaveStyle({ display: 'flex' });
+    const box = screen.getByTestId('box');
+    expect(box).toHaveClass('ps-display');
+    expect(box).toHaveStyle({ '--ps-display': 'flex' });
   });
 
-  it('applies a spacing class for padding', () => {
+  it('applies a spacing token through its design-token custom property', () => {
     render(
       <Box data-testid="box" p="md">
         Content
       </Box>,
     );
-    expect(screen.getByTestId('box')).toHaveClass('ps-spacing-p-md');
+    const box = screen.getByTestId('box');
+    expect(box).toHaveClass('ps-p');
+    expect(box).toHaveStyle({ '--ps-p': 'var(--perses-spacing-md)' });
   });
 
-  it('applies spacing classes for directional shorthands', () => {
+  it('applies directional spacing shorthands', () => {
     render(
       <Box data-testid="box" px="lg" py="sm">
         Content
       </Box>,
     );
     const box = screen.getByTestId('box');
-    expect(box).toHaveClass('ps-spacing-px-lg', 'ps-spacing-py-sm');
+    expect(box).toHaveClass('ps-px', 'ps-py');
+    expect(box).toHaveStyle({ '--ps-px': 'var(--perses-spacing-lg)' });
+    expect(box).toHaveStyle({ '--ps-py': 'var(--perses-spacing-sm)' });
   });
 
   it('resolves margin tokens', () => {
@@ -75,7 +84,9 @@ describe('Box', () => {
         Content
       </Box>,
     );
-    expect(screen.getByTestId('box')).toHaveClass('ps-spacing-m-xl');
+    const box = screen.getByTestId('box');
+    expect(box).toHaveClass('ps-m');
+    expect(box).toHaveStyle({ '--ps-m': 'var(--perses-spacing-xl)' });
   });
 
   it('resolves the 0 spacing token through the design token', () => {
@@ -84,7 +95,63 @@ describe('Box', () => {
         Content
       </Box>,
     );
-    expect(screen.getByTestId('box')).toHaveClass('ps-spacing-p-0');
+    const box = screen.getByTestId('box');
+    expect(box).toHaveClass('ps-p');
+    expect(box).toHaveStyle({ '--ps-p': 'var(--perses-spacing-0)' });
+  });
+
+  it('passes a string length prop through verbatim', () => {
+    render(
+      <Box data-testid="box" width="100%">
+        Content
+      </Box>,
+    );
+    const box = screen.getByTestId('box');
+    expect(box).toHaveClass('ps-width');
+    expect(box).toHaveStyle({ '--ps-width': '100%' });
+  });
+
+  it('treats a numeric length prop as pixels', () => {
+    render(
+      <Box data-testid="box" width={130}>
+        Content
+      </Box>,
+    );
+    expect(screen.getByTestId('box')).toHaveStyle({ '--ps-width': '130px' });
+  });
+
+  it('keeps unitless numeric props unitless', () => {
+    render(
+      <Box data-testid="box" flex={1}>
+        Content
+      </Box>,
+    );
+    expect(screen.getByTestId('box')).toHaveStyle({ '--ps-flex': '1' });
+  });
+
+  it('kebab-cases multi-word sizing props', () => {
+    render(
+      <Box data-testid="box" minWidth={200} maxWidth="50%">
+        Content
+      </Box>,
+    );
+    const box = screen.getByTestId('box');
+    expect(box).toHaveClass('ps-min-width', 'ps-max-width');
+    expect(box).toHaveStyle({ '--ps-min-width': '200px' });
+    expect(box).toHaveStyle({ '--ps-max-width': '50%' });
+  });
+
+  it('mixes string and numeric values across breakpoints', () => {
+    render(
+      <Box data-testid="box" width={RESPONSIVE_WIDTH}>
+        Content
+      </Box>,
+    );
+    const box = screen.getByTestId('box');
+    expect(box).toHaveClass('ps-width');
+    expect(box).toHaveStyle({ '--ps-width': '100%' });
+    expect(box).toHaveStyle({ '--ps-width-md': '400px' });
+    expect(box).toHaveStyle({ '--ps-width-lg': 'calc(30em + 4px)' });
   });
 
   it('creates responsive spacing variables', () => {
@@ -94,9 +161,9 @@ describe('Box', () => {
       </Box>,
     );
     const box = screen.getByTestId('box');
-    expect(box).toHaveClass('ps-spacing-p');
-    expect(box).toHaveStyle({ '--ps-spacing-p-default': 'var(--perses-spacing-lg)' });
-    expect(box).toHaveStyle({ '--ps-spacing-p-xs': 'var(--perses-spacing-sm)' });
+    expect(box).toHaveClass('ps-p');
+    expect(box).toHaveStyle({ '--ps-p': 'var(--perses-spacing-lg)' });
+    expect(box).toHaveStyle({ '--ps-p-xs': 'var(--perses-spacing-sm)' });
   });
 
   it('creates responsive layout variables', () => {
@@ -106,8 +173,8 @@ describe('Box', () => {
       </Box>,
     );
     const box = screen.getByTestId('box');
-    expect(box).toHaveClass('ps-responsive-display');
-    expect(box).toHaveStyle({ '--ps-responsive-display-default': 'flex', '--ps-responsive-display-sm': 'block' });
+    expect(box).toHaveClass('ps-display');
+    expect(box).toHaveStyle({ '--ps-display': 'flex', '--ps-display-sm': 'block' });
   });
 
   it('merges style prop with computed styles', () => {
@@ -117,17 +184,18 @@ describe('Box', () => {
       </Box>,
     );
     const box = screen.getByTestId('box');
-    expect(box).toHaveClass('ps-spacing-p-sm');
+    expect(box).toHaveClass('ps-p');
+    expect(box).toHaveStyle({ '--ps-p': 'var(--perses-spacing-sm)' });
     expect(box).toHaveStyle({ color: 'rgb(255, 0, 0)' });
   });
 
-  it('lets the style prop override a spacing class', () => {
+  it('lets the style prop override a spacing utility', () => {
     render(
       <Box data-testid="box" p="md" style={{ padding: '99px' }}>
         Content
       </Box>,
     );
-    expect(screen.getByTestId('box')).toHaveClass('ps-spacing-p-md');
+    expect(screen.getByTestId('box')).toHaveClass('ps-p');
     expect(screen.getByTestId('box')).toHaveStyle({ padding: '99px' });
   });
 

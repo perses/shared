@@ -1,3 +1,4 @@
+// oxlint-disable react-perf/jsx-no-new-object-as-prop
 // Copyright The Perses Authors
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,244 +13,242 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
+import type { CSSProperties } from 'react';
 
+import { Sample, Stack } from '../../stories/Sample';
 import { Box } from './Box';
-import type { SpacingToken } from './Box';
+import type { Responsive as ResponsiveValue, SpacingToken } from './Box';
 
-export const BasicBox: Story = () => (
-  <Box p="md" style={{ border: '1px solid #ccc' }}>
-    This is a basic box with padding.
-  </Box>
-);
-BasicBox.storyName = 'Basic Box';
-
-export const DisplayVariations: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-    <div>
-      <h3>Display: block</h3>
-      <Box display="block" p="md" style={{ border: '1px solid #ccc' }}>
-        Block box
-      </Box>
-    </div>
-    <div>
-      <h3>Display: flex</h3>
-      <Box display="flex" gap="md" p="md" style={{ border: '1px solid #ccc' }}>
-        <Box p="md" style={{ backgroundColor: '#eee' }}>
-          Item 1
-        </Box>
-        <Box p="md" style={{ backgroundColor: '#eee' }}>
-          Item 2
-        </Box>
-      </Box>
-    </div>
-    <div>
-      <h3>Display: inline-block</h3>
-      <Box display="inline-block" p="md" style={{ border: '1px solid #ccc', marginRight: '1rem' }}>
-        Inline 1
-      </Box>
-      <Box display="inline-block" p="md" style={{ border: '1px solid #ccc' }}>
-        Inline 2
-      </Box>
-    </div>
-  </div>
-);
-DisplayVariations.storyName = 'Display Variations';
-
-export const SpacingTokens: Story = () => {
-  const tokens: SpacingToken[] = ['xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'];
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <div>
-        <h3>Padding Tokens</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {tokens.map((token) => (
-            <Box key={`p-${token}`} p={token} style={{ border: '1px solid #ccc', backgroundColor: '#f5f5f5' }}>
-              p={'{token}'}: {token}
-            </Box>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3>Margin Tokens</h3>
-        <div style={{ backgroundColor: '#f0f0f0', padding: '1rem' }}>
-          {tokens.map((token) => (
-            <Box key={`m-${token}`} m={token} style={{ border: '1px solid #ccc', backgroundColor: '#fff' }}>
-              m={'{token}'}: {token}
-            </Box>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+// Box-demo chrome (not part of the Box API). The Sample/Stack scaffolding lives in stories/Sample.
+const row: CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'flex-start' };
+const outline: CSSProperties = { border: '1px solid #ccc', background: '#f5f5f5' };
+const fill: CSSProperties = { background: '#dfe7ef' };
+const panel: CSSProperties = { border: '2px solid #0066cc', background: '#f0f7ff', borderRadius: 4 };
+const legend: CSSProperties = {
+  background: '#f5f5f5',
+  borderRadius: 4,
+  padding: '1rem',
+  fontSize: '0.875rem',
+  lineHeight: 1.6,
 };
-SpacingTokens.storyName = 'Spacing Tokens';
 
-export const DirectionalSpacing: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-    <div>
-      <h3>Horizontal Padding (px)</h3>
-      <Box px="lg" py="sm" style={{ border: '1px solid #ccc' }}>
-        Large horizontal, small vertical padding
+export const Basic: Story = () => (
+  <Stack>
+    <p>
+      <code>Box</code> is a layout primitive. It accepts responsive style props grouped into categories — spacing (
+      <code>p</code>, <code>m</code>, <code>gap</code>), sizing (<code>width</code>…), flexbox (
+      <code>flexDirection</code>
+      …) and display (<code>display</code>, <code>overflow</code>) — plus any native <code>div</code> attribute.
+    </p>
+    <Sample title="Minimal usage" code='<Box p="md">…</Box>'>
+      <Box p="md" style={outline}>
+        A box with md padding.
       </Box>
-    </div>
+    </Sample>
+  </Stack>
+);
+Basic.storyName = 'Basic';
 
-    <div>
-      <h3>Vertical Padding (py)</h3>
-      <Box px="sm" py="lg" style={{ border: '1px solid #ccc' }}>
-        Small horizontal, large vertical padding
+const spacingScale: SpacingToken[] = ['0', 'xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'];
+
+export const Spacing: Story = () => (
+  <Stack>
+    <Sample title="Padding scale (including 0)" code='p="0" | "xs" … "4xl"'>
+      <div style={row}>
+        {spacingScale.map((token) => (
+          <Box key={token} p={token} style={outline}>
+            <span style={fill}>p={token}</span>
+          </Box>
+        ))}
+      </div>
+    </Sample>
+
+    <Sample title="Directional padding" code='px="lg" py="sm"'>
+      <Box px="lg" py="sm" style={outline}>
+        <span style={fill}>horizontal lg, vertical sm</span>
       </Box>
-    </div>
+    </Sample>
 
-    <div>
-      <h3>Directional Margins (mx, my)</h3>
-      <div style={{ backgroundColor: '#f0f0f0', padding: '1rem' }}>
-        <Box mx="lg" my="md" style={{ border: '1px solid #ccc', backgroundColor: '#fff' }}>
-          Large horizontal, medium vertical margin
+    <Sample title="Directional margin" code='mx="lg" my="md"'>
+      <div style={{ background: '#eee' }}>
+        <Box mx="lg" my="md" style={outline}>
+          offset from its container
         </Box>
       </div>
-    </div>
-  </div>
+    </Sample>
+
+    <Sample title="Gap between flex children" code='display="flex" gap="md"'>
+      <Box display="flex" gap="md" p="sm" style={outline}>
+        <Box p="sm" style={fill}>
+          A
+        </Box>
+        <Box p="sm" style={fill}>
+          B
+        </Box>
+        <Box p="sm" style={fill}>
+          C
+        </Box>
+      </Box>
+    </Sample>
+  </Stack>
 );
-DirectionalSpacing.storyName = 'Directional Spacing';
-
-export const FlexLayout: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-    <div>
-      <h3>Flex Direction: row (default)</h3>
-      <Box display="flex" flexDirection="row" gap="md" p="md" style={{ border: '1px solid #ccc' }}>
-        <Box p="md" style={{ backgroundColor: '#eee', flex: '1' }}>
-          Item 1
-        </Box>
-        <Box p="md" style={{ backgroundColor: '#eee', flex: '1' }}>
-          Item 2
-        </Box>
-        <Box p="md" style={{ backgroundColor: '#eee', flex: '1' }}>
-          Item 3
-        </Box>
-      </Box>
-    </div>
-
-    <div>
-      <h3>Flex Direction: column</h3>
-      <Box display="flex" flexDirection="column" gap="md" p="md" style={{ border: '1px solid #ccc' }}>
-        <Box p="md" style={{ backgroundColor: '#eee' }}>
-          Item 1
-        </Box>
-        <Box p="md" style={{ backgroundColor: '#eee' }}>
-          Item 2
-        </Box>
-        <Box p="md" style={{ backgroundColor: '#eee' }}>
-          Item 3
-        </Box>
-      </Box>
-    </div>
-
-    <div>
-      <h3>Align Items: center</h3>
-      <Box display="flex" gap="md" alignItems="center" p="md" style={{ border: '1px solid #ccc', minHeight: '100px' }}>
-        <Box style={{ backgroundColor: '#eee', width: '80px' }}>Short</Box>
-        <Box style={{ backgroundColor: '#eee', padding: '1rem' }}>
-          This is taller
-          <br />
-          content
-        </Box>
-      </Box>
-    </div>
-
-    <div>
-      <h3>Justify Content: space-between</h3>
-      <Box display="flex" justifyContent="space-between" p="md" style={{ border: '1px solid #ccc' }}>
-        <Box p="md" style={{ backgroundColor: '#eee' }}>
-          Left
-        </Box>
-        <Box p="md" style={{ backgroundColor: '#eee' }}>
-          Center
-        </Box>
-        <Box p="md" style={{ backgroundColor: '#eee' }}>
-          Right
-        </Box>
-      </Box>
-    </div>
-  </div>
-);
-FlexLayout.storyName = 'Flex Layout';
-
-export const Responsive: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-    <h3>Combining Multiple Props</h3>
-    <Box
-      display={{ default: 'flex', xs: 'block' }}
-      flexDirection="column"
-      gap="lg"
-      p={{ default: 'lg', xs: 'sm' }}
-      m="md"
-      style={{
-        border: '2px solid #0066cc',
-        backgroundColor: '#f0f7ff',
-        borderRadius: '4px',
-        maxWidth: '500px',
-      }}
-    >
-      <Box display="flex" gap="md" alignItems="center">
-        <Box p="md" style={{ backgroundColor: '#fff', flex: '1' }}>
-          Header
-        </Box>
-        <Box p="md" style={{ backgroundColor: '#fff' }}>
-          Badge
-        </Box>
-      </Box>
-
-      <Box p="md" style={{ backgroundColor: '#fff' }}>
-        <p>This is the main content of the box component.</p>
-        <p>It demonstrates how multiple props work together.</p>
-      </Box>
-
-      <Box display="flex" gap="md">
-        <Box p="md" style={{ backgroundColor: '#fff', flex: '1' }}>
-          Cancel
-        </Box>
-        <Box p="md" style={{ backgroundColor: '#fff', flex: '1' }}>
-          Submit
-        </Box>
-      </Box>
-    </Box>
-  </div>
-);
-Responsive.storyName = 'Combined Props';
-
-export const ZeroSpacing: Story = () => (
-  <Box p="0" style={{ border: '1px solid #ccc' }}>
-    This box has zero padding (no space inside border).
-  </Box>
-);
-ZeroSpacing.storyName = 'Zero Spacing';
+Spacing.storyName = 'Spacing';
 
 export const Sizing: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-    <div>
-      <h3>Fixed Width and Height</h3>
-      <Box width="200px" height="100px" style={{ border: '1px solid #ccc', backgroundColor: '#f5f5f5' }}>
-        200px x 100px
+  <Stack>
+    <Sample title="Fixed size (a number means pixels)" code="width={240} height={80}">
+      <Box width={240} height={80} p="sm" style={outline}>
+        240 × 80
       </Box>
-    </div>
+    </Sample>
 
-    <div>
-      <h3>Percentage Width</h3>
+    <Sample title="Relative & calc (strings carry their own units)" code='width="50%"  •  width="calc(100% - 2rem)"'>
       <div style={{ border: '1px dashed #999', padding: '1rem' }}>
-        <Box width="50%" height="60px" style={{ border: '1px solid #ccc', backgroundColor: '#eee' }}>
-          50% width
+        <Box width="50%" p="sm" style={outline}>
+          width 50%
         </Box>
       </div>
-    </div>
+    </Sample>
 
-    <div>
-      <h3>Width Only (height determined by content)</h3>
-      <Box width="300px" p="md" style={{ border: '1px solid #ccc', backgroundColor: '#f5f5f5' }}>
-        This box has a fixed width of 300px, but its height grows to fit the content inside it.
+    <Sample title="Min / max constraints" code="minWidth / maxWidth / minHeight / maxHeight">
+      <Box maxWidth={320} minHeight={96} p="md" style={outline}>
+        maxWidth 320, minHeight 96 — text wraps within the max width and the box never shrinks below the min height.
       </Box>
-    </div>
-  </div>
+    </Sample>
+  </Stack>
 );
 Sizing.storyName = 'Sizing';
+
+export const Layout: Story = () => (
+  <Stack>
+    <Sample title="display" code='display="flex" (also "block", "inline-block", "grid", "none")'>
+      <Box display="flex" gap="sm" p="sm" style={outline}>
+        <Box p="sm" style={fill}>
+          flex
+        </Box>
+        <Box p="sm" style={fill}>
+          children
+        </Box>
+      </Box>
+    </Sample>
+
+    <Sample title="flexDirection" code='flexDirection="column"'>
+      <Box display="flex" flexDirection="column" gap="sm" p="sm" style={outline}>
+        <Box p="sm" style={fill}>
+          1
+        </Box>
+        <Box p="sm" style={fill}>
+          2
+        </Box>
+      </Box>
+    </Sample>
+
+    <Sample title="alignItems + justifyContent" code='alignItems="center" justifyContent="space-between"'>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        gap="sm"
+        p="sm"
+        minHeight={80}
+        style={outline}
+      >
+        <Box p="sm" style={fill}>
+          left
+        </Box>
+        <Box p="md" style={fill}>
+          taller
+        </Box>
+        <Box p="sm" style={fill}>
+          right
+        </Box>
+      </Box>
+    </Sample>
+
+    <Sample title="flex (grow / shrink / basis)" code='flex="1"  vs  flex="2"'>
+      <Box display="flex" gap="sm" p="sm" style={outline}>
+        <Box flex="1" p="sm" style={fill}>
+          flex 1
+        </Box>
+        <Box flex="2" p="sm" style={fill}>
+          flex 2
+        </Box>
+      </Box>
+    </Sample>
+  </Stack>
+);
+Layout.storyName = 'Layout';
+
+const responsiveWidth: ResponsiveValue<CSSProperties['width']> = {
+  default: '100%',
+  sm: '80%',
+  md: 400,
+  lg: 'calc(30em + 4px)',
+};
+const responsiveDisplay: ResponsiveValue<CSSProperties['display']> = { default: 'block', md: 'flex' };
+const responsiveDirection: ResponsiveValue<CSSProperties['flexDirection']> = { default: 'column', md: 'row' };
+const responsivePadding: ResponsiveValue<SpacingToken> = { default: 'sm', md: 'lg', xl: '4xl' };
+
+export const Responsive: Story = () => (
+  <Stack>
+    <div style={legend}>
+      <strong>Every style prop accepts a responsive object. Resize the viewport to see the values change.</strong>
+      <ul>
+        <li>
+          <code>default</code> — base / fallback
+        </li>
+        <li>
+          <code>xs</code> ≤ 599 · <code>sm</code> 600–899 · <code>md</code> 900–1199 · <code>lg</code> 1200–1535 ·{' '}
+          <code>xl</code> ≥ 1536 (px)
+        </li>
+      </ul>
+      <em>
+        A breakpoint with no value falls back to <code>default</code>, not the next-smaller one.
+      </em>
+    </div>
+
+    <Sample
+      title="Responsive width (mixes string units and numeric pixels)"
+      code="width={{ default: '100%', sm: '80%', md: 400, lg: 'calc(30em + 4px)' }}"
+    >
+      <Box width={responsiveWidth} p="md" style={outline}>
+        I resize with the viewport.
+      </Box>
+    </Sample>
+
+    <Sample
+      title="Stack, then row"
+      code="display={{ default: 'block', md: 'flex' }} flexDirection={{ default: 'column', md: 'row' }}"
+    >
+      <Box display={responsiveDisplay} flexDirection={responsiveDirection} gap="md" p="md" style={panel}>
+        <Box p="md" flex="1" style={fill}>
+          Item 1
+        </Box>
+        <Box p="md" flex="1" style={fill}>
+          Item 2
+        </Box>
+        <Box p="md" flex="1" style={fill}>
+          Item 3
+        </Box>
+      </Box>
+    </Sample>
+
+    <Sample title="Responsive spacing" code="p={{ default: 'sm', md: 'lg', xl: '4xl' }}">
+      <Box p={responsivePadding} style={outline}>
+        Padding grows at wider breakpoints.
+      </Box>
+    </Sample>
+
+    <Sample title="Composed — a card that reflows at md" code="several props together">
+      <Box display="flex" flexDirection={responsiveDirection} gap="md" p="lg" maxWidth={520} style={panel}>
+        <Box p="md" flex="1" style={fill}>
+          Header
+        </Box>
+        <Box p="md" flex="2" style={fill}>
+          Body content that moves from stacked to side-by-side at md.
+        </Box>
+      </Box>
+    </Sample>
+  </Stack>
+);
+Responsive.storyName = 'Responsive';

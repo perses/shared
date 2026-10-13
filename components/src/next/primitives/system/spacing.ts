@@ -11,31 +11,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { tokens } from '@perses-dev/design-tokens';
 import type { SpacingScale } from '@perses-dev/design-tokens';
-import type { CSSProperties } from 'react';
 
-import { isResponsiveValue } from './responsive';
 import type { Responsive } from './responsive';
+import type { StyleValueTransform } from './styleProps';
 
 export type SpacingToken = SpacingScale;
 
-export type SpacingProperty = 'p' | 'px' | 'py' | 'm' | 'mx' | 'my' | 'gap';
+export const spacingTransform: StyleValueTransform<SpacingToken> = (token) => tokens.spacing[token];
 
-export function spacingClassName(property: SpacingProperty, value?: Responsive<SpacingToken>): string | undefined {
-  if (value === undefined) return undefined;
-  return isResponsiveValue(value) ? `ps-spacing-${property}` : `ps-spacing-${property} ps-spacing-${property}-${value}`;
+export interface SpacingProps {
+  p?: Responsive<SpacingToken>;
+  px?: Responsive<SpacingToken>;
+  py?: Responsive<SpacingToken>;
+  m?: Responsive<SpacingToken>;
+  mx?: Responsive<SpacingToken>;
+  my?: Responsive<SpacingToken>;
+  gap?: Responsive<SpacingToken>;
 }
 
-export function responsiveSpacingStyle(
-  property: SpacingProperty,
-  value?: Responsive<SpacingToken>,
-): CSSProperties | undefined {
-  if (!isResponsiveValue(value)) return undefined;
-
-  return Object.fromEntries(
-    Object.entries(value).map(([breakpoint, token]) => [
-      `--ps-spacing-${property}-${breakpoint}`,
-      `var(--perses-spacing-${token})`,
-    ]),
-  ) as CSSProperties;
-}
+export const spacingProps: Record<keyof SpacingProps, StyleValueTransform<SpacingToken>> = {
+  p: spacingTransform,
+  px: spacingTransform,
+  py: spacingTransform,
+  m: spacingTransform,
+  mx: spacingTransform,
+  my: spacingTransform,
+  gap: spacingTransform,
+};

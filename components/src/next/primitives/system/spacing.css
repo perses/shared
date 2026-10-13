@@ -13,332 +13,147 @@
  * limitations under the License.
  */
 
+/*
+ * Spacing style props. `.ps-<prop>` reads `--ps-<prop>`; each breakpoint prefers
+ * `--ps-<prop>-<breakpoint>` and falls back to the base. styleProps.ts sets these inline to a
+ * `var(--perses-spacing-<token>)` reference (design tokens stay the source of truth).
+ */
 @layer perses.components {
-  .ps-spacing-p {
-    padding: var(--ps-spacing-p-default, initial);
+  .ps-p {
+    padding: var(--ps-p, initial);
   }
-  .ps-spacing-px {
-    padding-inline: var(--ps-spacing-px-default, initial);
+  .ps-px {
+    padding-inline: var(--ps-px, initial);
   }
-  .ps-spacing-py {
-    padding-block: var(--ps-spacing-py-default, initial);
+  .ps-py {
+    padding-block: var(--ps-py, initial);
   }
-  .ps-spacing-m {
-    margin: var(--ps-spacing-m-default, initial);
+  .ps-m {
+    margin: var(--ps-m, initial);
   }
-  .ps-spacing-mx {
-    margin-inline: var(--ps-spacing-mx-default, initial);
+  .ps-mx {
+    margin-inline: var(--ps-mx, initial);
   }
-  .ps-spacing-my {
-    margin-block: var(--ps-spacing-my-default, initial);
+  .ps-my {
+    margin-block: var(--ps-my, initial);
   }
-  .ps-spacing-gap {
-    gap: var(--ps-spacing-gap-default, initial);
-  }
-
-  .ps-spacing-p-0 {
-    --ps-spacing-p-default: var(--perses-spacing-0);
-  }
-  .ps-spacing-p-xs {
-    --ps-spacing-p-default: var(--perses-spacing-xs);
-  }
-  .ps-spacing-p-sm {
-    --ps-spacing-p-default: var(--perses-spacing-sm);
-  }
-  .ps-spacing-p-md {
-    --ps-spacing-p-default: var(--perses-spacing-md);
-  }
-  .ps-spacing-p-lg {
-    --ps-spacing-p-default: var(--perses-spacing-lg);
-  }
-  .ps-spacing-p-xl {
-    --ps-spacing-p-default: var(--perses-spacing-xl);
-  }
-  .ps-spacing-p-2xl {
-    --ps-spacing-p-default: var(--perses-spacing-2xl);
-  }
-  .ps-spacing-p-3xl {
-    --ps-spacing-p-default: var(--perses-spacing-3xl);
-  }
-  .ps-spacing-p-4xl {
-    --ps-spacing-p-default: var(--perses-spacing-4xl);
-  }
-  .ps-spacing-px-0 {
-    --ps-spacing-px-default: var(--perses-spacing-0);
-  }
-  .ps-spacing-px-xs {
-    --ps-spacing-px-default: var(--perses-spacing-xs);
-  }
-  .ps-spacing-px-sm {
-    --ps-spacing-px-default: var(--perses-spacing-sm);
-  }
-  .ps-spacing-px-md {
-    --ps-spacing-px-default: var(--perses-spacing-md);
-  }
-  .ps-spacing-px-lg {
-    --ps-spacing-px-default: var(--perses-spacing-lg);
-  }
-  .ps-spacing-px-xl {
-    --ps-spacing-px-default: var(--perses-spacing-xl);
-  }
-  .ps-spacing-px-2xl {
-    --ps-spacing-px-default: var(--perses-spacing-2xl);
-  }
-  .ps-spacing-px-3xl {
-    --ps-spacing-px-default: var(--perses-spacing-3xl);
-  }
-  .ps-spacing-px-4xl {
-    --ps-spacing-px-default: var(--perses-spacing-4xl);
-  }
-  .ps-spacing-py-0 {
-    --ps-spacing-py-default: var(--perses-spacing-0);
-  }
-  .ps-spacing-py-xs {
-    --ps-spacing-py-default: var(--perses-spacing-xs);
-  }
-  .ps-spacing-py-sm {
-    --ps-spacing-py-default: var(--perses-spacing-sm);
-  }
-  .ps-spacing-py-md {
-    --ps-spacing-py-default: var(--perses-spacing-md);
-  }
-  .ps-spacing-py-lg {
-    --ps-spacing-py-default: var(--perses-spacing-lg);
-  }
-  .ps-spacing-py-xl {
-    --ps-spacing-py-default: var(--perses-spacing-xl);
-  }
-  .ps-spacing-py-2xl {
-    --ps-spacing-py-default: var(--perses-spacing-2xl);
-  }
-  .ps-spacing-py-3xl {
-    --ps-spacing-py-default: var(--perses-spacing-3xl);
-  }
-  .ps-spacing-py-4xl {
-    --ps-spacing-py-default: var(--perses-spacing-4xl);
-  }
-  .ps-spacing-m-0 {
-    --ps-spacing-m-default: var(--perses-spacing-0);
-  }
-  .ps-spacing-m-xs {
-    --ps-spacing-m-default: var(--perses-spacing-xs);
-  }
-  .ps-spacing-m-sm {
-    --ps-spacing-m-default: var(--perses-spacing-sm);
-  }
-  .ps-spacing-m-md {
-    --ps-spacing-m-default: var(--perses-spacing-md);
-  }
-  .ps-spacing-m-lg {
-    --ps-spacing-m-default: var(--perses-spacing-lg);
-  }
-  .ps-spacing-m-xl {
-    --ps-spacing-m-default: var(--perses-spacing-xl);
-  }
-  .ps-spacing-m-2xl {
-    --ps-spacing-m-default: var(--perses-spacing-2xl);
-  }
-  .ps-spacing-m-3xl {
-    --ps-spacing-m-default: var(--perses-spacing-3xl);
-  }
-  .ps-spacing-m-4xl {
-    --ps-spacing-m-default: var(--perses-spacing-4xl);
-  }
-  .ps-spacing-mx-0 {
-    --ps-spacing-mx-default: var(--perses-spacing-0);
-  }
-  .ps-spacing-mx-xs {
-    --ps-spacing-mx-default: var(--perses-spacing-xs);
-  }
-  .ps-spacing-mx-sm {
-    --ps-spacing-mx-default: var(--perses-spacing-sm);
-  }
-  .ps-spacing-mx-md {
-    --ps-spacing-mx-default: var(--perses-spacing-md);
-  }
-  .ps-spacing-mx-lg {
-    --ps-spacing-mx-default: var(--perses-spacing-lg);
-  }
-  .ps-spacing-mx-xl {
-    --ps-spacing-mx-default: var(--perses-spacing-xl);
-  }
-  .ps-spacing-mx-2xl {
-    --ps-spacing-mx-default: var(--perses-spacing-2xl);
-  }
-  .ps-spacing-mx-3xl {
-    --ps-spacing-mx-default: var(--perses-spacing-3xl);
-  }
-  .ps-spacing-mx-4xl {
-    --ps-spacing-mx-default: var(--perses-spacing-4xl);
-  }
-  .ps-spacing-my-0 {
-    --ps-spacing-my-default: var(--perses-spacing-0);
-  }
-  .ps-spacing-my-xs {
-    --ps-spacing-my-default: var(--perses-spacing-xs);
-  }
-  .ps-spacing-my-sm {
-    --ps-spacing-my-default: var(--perses-spacing-sm);
-  }
-  .ps-spacing-my-md {
-    --ps-spacing-my-default: var(--perses-spacing-md);
-  }
-  .ps-spacing-my-lg {
-    --ps-spacing-my-default: var(--perses-spacing-lg);
-  }
-  .ps-spacing-my-xl {
-    --ps-spacing-my-default: var(--perses-spacing-xl);
-  }
-  .ps-spacing-my-2xl {
-    --ps-spacing-my-default: var(--perses-spacing-2xl);
-  }
-  .ps-spacing-my-3xl {
-    --ps-spacing-my-default: var(--perses-spacing-3xl);
-  }
-  .ps-spacing-my-4xl {
-    --ps-spacing-my-default: var(--perses-spacing-4xl);
-  }
-  .ps-spacing-gap-0 {
-    --ps-spacing-gap-default: var(--perses-spacing-0);
-  }
-  .ps-spacing-gap-xs {
-    --ps-spacing-gap-default: var(--perses-spacing-xs);
-  }
-  .ps-spacing-gap-sm {
-    --ps-spacing-gap-default: var(--perses-spacing-sm);
-  }
-  .ps-spacing-gap-md {
-    --ps-spacing-gap-default: var(--perses-spacing-md);
-  }
-  .ps-spacing-gap-lg {
-    --ps-spacing-gap-default: var(--perses-spacing-lg);
-  }
-  .ps-spacing-gap-xl {
-    --ps-spacing-gap-default: var(--perses-spacing-xl);
-  }
-  .ps-spacing-gap-2xl {
-    --ps-spacing-gap-default: var(--perses-spacing-2xl);
-  }
-  .ps-spacing-gap-3xl {
-    --ps-spacing-gap-default: var(--perses-spacing-3xl);
-  }
-  .ps-spacing-gap-4xl {
-    --ps-spacing-gap-default: var(--perses-spacing-4xl);
+  .ps-gap {
+    gap: var(--ps-gap, initial);
   }
 
   @media (max-width: 599.98px) {
-    .ps-spacing-p {
-      padding: var(--ps-spacing-p-xs, var(--ps-spacing-p-default, initial));
+    .ps-p {
+      padding: var(--ps-p-xs, var(--ps-p, initial));
     }
-    .ps-spacing-px {
-      padding-inline: var(--ps-spacing-px-xs, var(--ps-spacing-px-default, initial));
+    .ps-px {
+      padding-inline: var(--ps-px-xs, var(--ps-px, initial));
     }
-    .ps-spacing-py {
-      padding-block: var(--ps-spacing-py-xs, var(--ps-spacing-py-default, initial));
+    .ps-py {
+      padding-block: var(--ps-py-xs, var(--ps-py, initial));
     }
-    .ps-spacing-m {
-      margin: var(--ps-spacing-m-xs, var(--ps-spacing-m-default, initial));
+    .ps-m {
+      margin: var(--ps-m-xs, var(--ps-m, initial));
     }
-    .ps-spacing-mx {
-      margin-inline: var(--ps-spacing-mx-xs, var(--ps-spacing-mx-default, initial));
+    .ps-mx {
+      margin-inline: var(--ps-mx-xs, var(--ps-mx, initial));
     }
-    .ps-spacing-my {
-      margin-block: var(--ps-spacing-my-xs, var(--ps-spacing-my-default, initial));
+    .ps-my {
+      margin-block: var(--ps-my-xs, var(--ps-my, initial));
     }
-    .ps-spacing-gap {
-      gap: var(--ps-spacing-gap-xs, var(--ps-spacing-gap-default, initial));
+    .ps-gap {
+      gap: var(--ps-gap-xs, var(--ps-gap, initial));
     }
   }
   @media (min-width: 600px) and (max-width: 899.98px) {
-    .ps-spacing-p {
-      padding: var(--ps-spacing-p-sm, var(--ps-spacing-p-default, initial));
+    .ps-p {
+      padding: var(--ps-p-sm, var(--ps-p, initial));
     }
-    .ps-spacing-px {
-      padding-inline: var(--ps-spacing-px-sm, var(--ps-spacing-px-default, initial));
+    .ps-px {
+      padding-inline: var(--ps-px-sm, var(--ps-px, initial));
     }
-    .ps-spacing-py {
-      padding-block: var(--ps-spacing-py-sm, var(--ps-spacing-py-default, initial));
+    .ps-py {
+      padding-block: var(--ps-py-sm, var(--ps-py, initial));
     }
-    .ps-spacing-m {
-      margin: var(--ps-spacing-m-sm, var(--ps-spacing-m-default, initial));
+    .ps-m {
+      margin: var(--ps-m-sm, var(--ps-m, initial));
     }
-    .ps-spacing-mx {
-      margin-inline: var(--ps-spacing-mx-sm, var(--ps-spacing-mx-default, initial));
+    .ps-mx {
+      margin-inline: var(--ps-mx-sm, var(--ps-mx, initial));
     }
-    .ps-spacing-my {
-      margin-block: var(--ps-spacing-my-sm, var(--ps-spacing-my-default, initial));
+    .ps-my {
+      margin-block: var(--ps-my-sm, var(--ps-my, initial));
     }
-    .ps-spacing-gap {
-      gap: var(--ps-spacing-gap-sm, var(--ps-spacing-gap-default, initial));
+    .ps-gap {
+      gap: var(--ps-gap-sm, var(--ps-gap, initial));
     }
   }
   @media (min-width: 900px) and (max-width: 1199.98px) {
-    .ps-spacing-p {
-      padding: var(--ps-spacing-p-md, var(--ps-spacing-p-default, initial));
+    .ps-p {
+      padding: var(--ps-p-md, var(--ps-p, initial));
     }
-    .ps-spacing-px {
-      padding-inline: var(--ps-spacing-px-md, var(--ps-spacing-px-default, initial));
+    .ps-px {
+      padding-inline: var(--ps-px-md, var(--ps-px, initial));
     }
-    .ps-spacing-py {
-      padding-block: var(--ps-spacing-py-md, var(--ps-spacing-py-default, initial));
+    .ps-py {
+      padding-block: var(--ps-py-md, var(--ps-py, initial));
     }
-    .ps-spacing-m {
-      margin: var(--ps-spacing-m-md, var(--ps-spacing-m-default, initial));
+    .ps-m {
+      margin: var(--ps-m-md, var(--ps-m, initial));
     }
-    .ps-spacing-mx {
-      margin-inline: var(--ps-spacing-mx-md, var(--ps-spacing-mx-default, initial));
+    .ps-mx {
+      margin-inline: var(--ps-mx-md, var(--ps-mx, initial));
     }
-    .ps-spacing-my {
-      margin-block: var(--ps-spacing-my-md, var(--ps-spacing-my-default, initial));
+    .ps-my {
+      margin-block: var(--ps-my-md, var(--ps-my, initial));
     }
-    .ps-spacing-gap {
-      gap: var(--ps-spacing-gap-md, var(--ps-spacing-gap-default, initial));
+    .ps-gap {
+      gap: var(--ps-gap-md, var(--ps-gap, initial));
     }
   }
   @media (min-width: 1200px) and (max-width: 1535.98px) {
-    .ps-spacing-p {
-      padding: var(--ps-spacing-p-lg, var(--ps-spacing-p-default, initial));
+    .ps-p {
+      padding: var(--ps-p-lg, var(--ps-p, initial));
     }
-    .ps-spacing-px {
-      padding-inline: var(--ps-spacing-px-lg, var(--ps-spacing-px-default, initial));
+    .ps-px {
+      padding-inline: var(--ps-px-lg, var(--ps-px, initial));
     }
-    .ps-spacing-py {
-      padding-block: var(--ps-spacing-py-lg, var(--ps-spacing-py-default, initial));
+    .ps-py {
+      padding-block: var(--ps-py-lg, var(--ps-py, initial));
     }
-    .ps-spacing-m {
-      margin: var(--ps-spacing-m-lg, var(--ps-spacing-m-default, initial));
+    .ps-m {
+      margin: var(--ps-m-lg, var(--ps-m, initial));
     }
-    .ps-spacing-mx {
-      margin-inline: var(--ps-spacing-mx-lg, var(--ps-spacing-mx-default, initial));
+    .ps-mx {
+      margin-inline: var(--ps-mx-lg, var(--ps-mx, initial));
     }
-    .ps-spacing-my {
-      margin-block: var(--ps-spacing-my-lg, var(--ps-spacing-my-default, initial));
+    .ps-my {
+      margin-block: var(--ps-my-lg, var(--ps-my, initial));
     }
-    .ps-spacing-gap {
-      gap: var(--ps-spacing-gap-lg, var(--ps-spacing-gap-default, initial));
+    .ps-gap {
+      gap: var(--ps-gap-lg, var(--ps-gap, initial));
     }
   }
   @media (min-width: 1536px) {
-    .ps-spacing-p {
-      padding: var(--ps-spacing-p-xl, var(--ps-spacing-p-default, initial));
+    .ps-p {
+      padding: var(--ps-p-xl, var(--ps-p, initial));
     }
-    .ps-spacing-px {
-      padding-inline: var(--ps-spacing-px-xl, var(--ps-spacing-px-default, initial));
+    .ps-px {
+      padding-inline: var(--ps-px-xl, var(--ps-px, initial));
     }
-    .ps-spacing-py {
-      padding-block: var(--ps-spacing-py-xl, var(--ps-spacing-py-default, initial));
+    .ps-py {
+      padding-block: var(--ps-py-xl, var(--ps-py, initial));
     }
-    .ps-spacing-m {
-      margin: var(--ps-spacing-m-xl, var(--ps-spacing-m-default, initial));
+    .ps-m {
+      margin: var(--ps-m-xl, var(--ps-m, initial));
     }
-    .ps-spacing-mx {
-      margin-inline: var(--ps-spacing-mx-xl, var(--ps-spacing-mx-default, initial));
+    .ps-mx {
+      margin-inline: var(--ps-mx-xl, var(--ps-mx, initial));
     }
-    .ps-spacing-my {
-      margin-block: var(--ps-spacing-my-xl, var(--ps-spacing-my-default, initial));
+    .ps-my {
+      margin-block: var(--ps-my-xl, var(--ps-my, initial));
     }
-    .ps-spacing-gap {
-      gap: var(--ps-spacing-gap-xl, var(--ps-spacing-gap-default, initial));
+    .ps-gap {
+      gap: var(--ps-gap-xl, var(--ps-gap, initial));
     }
   }
 }

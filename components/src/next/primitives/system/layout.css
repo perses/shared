@@ -1,0 +1,266 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * Layout style props (display, flexbox, sizing). `.ps-<prop>` reads `--ps-<prop>`; each breakpoint
+ * prefers `--ps-<prop>-<breakpoint>` and falls back to the base. Values set inline by styleProps.ts.
+ */
+@layer perses.components {
+  .ps-display {
+    display: var(--ps-display, revert);
+  }
+  .ps-flex-direction {
+    flex-direction: var(--ps-flex-direction, revert);
+  }
+  .ps-align-items {
+    align-items: var(--ps-align-items, revert);
+  }
+  .ps-justify-content {
+    justify-content: var(--ps-justify-content, revert);
+  }
+  .ps-flex-wrap {
+    flex-wrap: var(--ps-flex-wrap, revert);
+  }
+  .ps-flex {
+    flex: var(--ps-flex, revert);
+  }
+  .ps-width {
+    width: var(--ps-width, revert);
+  }
+  .ps-height {
+    height: var(--ps-height, revert);
+  }
+  .ps-min-width {
+    min-width: var(--ps-min-width, revert);
+  }
+  .ps-max-width {
+    max-width: var(--ps-max-width, revert);
+  }
+  .ps-min-height {
+    min-height: var(--ps-min-height, revert);
+  }
+  .ps-max-height {
+    max-height: var(--ps-max-height, revert);
+  }
+  .ps-overflow {
+    overflow: var(--ps-overflow, revert);
+  }
+
+  @media (max-width: 599.98px) {
+    .ps-display {
+      display: var(--ps-display-xs, var(--ps-display, revert));
+    }
+    .ps-flex-direction {
+      flex-direction: var(--ps-flex-direction-xs, var(--ps-flex-direction, revert));
+    }
+    .ps-align-items {
+      align-items: var(--ps-align-items-xs, var(--ps-align-items, revert));
+    }
+    .ps-justify-content {
+      justify-content: var(--ps-justify-content-xs, var(--ps-justify-content, revert));
+    }
+    .ps-flex-wrap {
+      flex-wrap: var(--ps-flex-wrap-xs, var(--ps-flex-wrap, revert));
+    }
+    .ps-flex {
+      flex: var(--ps-flex-xs, var(--ps-flex, revert));
+    }
+    .ps-width {
+      width: var(--ps-width-xs, var(--ps-width, revert));
+    }
+    .ps-height {
+      height: var(--ps-height-xs, var(--ps-height, revert));
+    }
+    .ps-min-width {
+      min-width: var(--ps-min-width-xs, var(--ps-min-width, revert));
+    }
+    .ps-max-width {
+      max-width: var(--ps-max-width-xs, var(--ps-max-width, revert));
+    }
+    .ps-min-height {
+      min-height: var(--ps-min-height-xs, var(--ps-min-height, revert));
+    }
+    .ps-max-height {
+      max-height: var(--ps-max-height-xs, var(--ps-max-height, revert));
+    }
+    .ps-overflow {
+      overflow: var(--ps-overflow-xs, var(--ps-overflow, revert));
+    }
+  }
+  @media (min-width: 600px) and (max-width: 899.98px) {
+    .ps-display {
+      display: var(--ps-display-sm, var(--ps-display, revert));
+    }
+    .ps-flex-direction {
+      flex-direction: var(--ps-flex-direction-sm, var(--ps-flex-direction, revert));
+    }
+    .ps-align-items {
+      align-items: var(--ps-align-items-sm, var(--ps-align-items, revert));
+    }
+    .ps-justify-content {
+      justify-content: var(--ps-justify-content-sm, var(--ps-justify-content, revert));
+    }
+    .ps-flex-wrap {
+      flex-wrap: var(--ps-flex-wrap-sm, var(--ps-flex-wrap, revert));
+    }
+    .ps-flex {
+      flex: var(--ps-flex-sm, var(--ps-flex, revert));
+    }
+    .ps-width {
+      width: var(--ps-width-sm, var(--ps-width, revert));
+    }
+    .ps-height {
+      height: var(--ps-height-sm, var(--ps-height, revert));
+    }
+    .ps-min-width {
+      min-width: var(--ps-min-width-sm, var(--ps-min-width, revert));
+    }
+    .ps-max-width {
+      max-width: var(--ps-max-width-sm, var(--ps-max-width, revert));
+    }
+    .ps-min-height {
+      min-height: var(--ps-min-height-sm, var(--ps-min-height, revert));
+    }
+    .ps-max-height {
+      max-height: var(--ps-max-height-sm, var(--ps-max-height, revert));
+    }
+    .ps-overflow {
+      overflow: var(--ps-overflow-sm, var(--ps-overflow, revert));
+    }
+  }
+  @media (min-width: 900px) and (max-width: 1199.98px) {
+    .ps-display {
+      display: var(--ps-display-md, var(--ps-display, revert));
+    }
+    .ps-flex-direction {
+      flex-direction: var(--ps-flex-direction-md, var(--ps-flex-direction, revert));
+    }
+    .ps-align-items {
+      align-items: var(--ps-align-items-md, var(--ps-align-items, revert));
+    }
+    .ps-justify-content {
+      justify-content: var(--ps-justify-content-md, var(--ps-justify-content, revert));
+    }
+    .ps-flex-wrap {
+      flex-wrap: var(--ps-flex-wrap-md, var(--ps-flex-wrap, revert));
+    }
+    .ps-flex {
+      flex: var(--ps-flex-md, var(--ps-flex, revert));
+    }
+    .ps-width {
+      width: var(--ps-width-md, var(--ps-width, revert));
+    }
+    .ps-height {
+      height: var(--ps-height-md, var(--ps-height, revert));
+    }
+    .ps-min-width {
+      min-width: var(--ps-min-width-md, var(--ps-min-width, revert));
+    }
+    .ps-max-width {
+      max-width: var(--ps-max-width-md, var(--ps-max-width, revert));
+    }
+    .ps-min-height {
+      min-height: var(--ps-min-height-md, var(--ps-min-height, revert));
+    }
+    .ps-max-height {
+      max-height: var(--ps-max-height-md, var(--ps-max-height, revert));
+    }
+    .ps-overflow {
+      overflow: var(--ps-overflow-md, var(--ps-overflow, revert));
+    }
+  }
+  @media (min-width: 1200px) and (max-width: 1535.98px) {
+    .ps-display {
+      display: var(--ps-display-lg, var(--ps-display, revert));
+    }
+    .ps-flex-direction {
+      flex-direction: var(--ps-flex-direction-lg, var(--ps-flex-direction, revert));
+    }
+    .ps-align-items {
+      align-items: var(--ps-align-items-lg, var(--ps-align-items, revert));
+    }
+    .ps-justify-content {
+      justify-content: var(--ps-justify-content-lg, var(--ps-justify-content, revert));
+    }
+    .ps-flex-wrap {
+      flex-wrap: var(--ps-flex-wrap-lg, var(--ps-flex-wrap, revert));
+    }
+    .ps-flex {
+      flex: var(--ps-flex-lg, var(--ps-flex, revert));
+    }
+    .ps-width {
+      width: var(--ps-width-lg, var(--ps-width, revert));
+    }
+    .ps-height {
+      height: var(--ps-height-lg, var(--ps-height, revert));
+    }
+    .ps-min-width {
+      min-width: var(--ps-min-width-lg, var(--ps-min-width, revert));
+    }
+    .ps-max-width {
+      max-width: var(--ps-max-width-lg, var(--ps-max-width, revert));
+    }
+    .ps-min-height {
+      min-height: var(--ps-min-height-lg, var(--ps-min-height, revert));
+    }
+    .ps-max-height {
+      max-height: var(--ps-max-height-lg, var(--ps-max-height, revert));
+    }
+    .ps-overflow {
+      overflow: var(--ps-overflow-lg, var(--ps-overflow, revert));
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-display {
+      display: var(--ps-display-xl, var(--ps-display, revert));
+    }
+    .ps-flex-direction {
+      flex-direction: var(--ps-flex-direction-xl, var(--ps-flex-direction, revert));
+    }
+    .ps-align-items {
+      align-items: var(--ps-align-items-xl, var(--ps-align-items, revert));
+    }
+    .ps-justify-content {
+      justify-content: var(--ps-justify-content-xl, var(--ps-justify-content, revert));
+    }
+    .ps-flex-wrap {
+      flex-wrap: var(--ps-flex-wrap-xl, var(--ps-flex-wrap, revert));
+    }
+    .ps-flex {
+      flex: var(--ps-flex-xl, var(--ps-flex, revert));
+    }
+    .ps-width {
+      width: var(--ps-width-xl, var(--ps-width, revert));
+    }
+    .ps-height {
+      height: var(--ps-height-xl, var(--ps-height, revert));
+    }
+    .ps-min-width {
+      min-width: var(--ps-min-width-xl, var(--ps-min-width, revert));
+    }
+    .ps-max-width {
+      max-width: var(--ps-max-width-xl, var(--ps-max-width, revert));
+    }
+    .ps-min-height {
+      min-height: var(--ps-min-height-xl, var(--ps-min-height, revert));
+    }
+    .ps-max-height {
+      max-height: var(--ps-max-height-xl, var(--ps-max-height, revert));
+    }
+    .ps-overflow {
+      overflow: var(--ps-overflow-xl, var(--ps-overflow, revert));
+    }
+  }
+}

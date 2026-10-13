@@ -11,8 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { CSSProperties } from 'react';
-
 export type Breakpoint = 'default' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 export type ResponsiveObject<T> = Partial<Record<Breakpoint, T>>;
@@ -21,19 +19,4 @@ export type Responsive<T> = T | ResponsiveObject<T>;
 
 export function isResponsiveValue<T>(value: Responsive<T> | undefined): value is ResponsiveObject<T> {
   return typeof value === 'object' && value !== null;
-}
-
-export function responsiveClassName<T>(property: string, value: Responsive<T> | undefined): string | undefined {
-  return isResponsiveValue(value) ? `ps-responsive-${property}` : undefined;
-}
-
-export function responsiveStyle<T>(property: string, value: Responsive<T> | undefined): CSSProperties | undefined {
-  if (!isResponsiveValue(value)) return undefined;
-
-  return Object.fromEntries(
-    Object.entries(value).map(([breakpoint, responsiveValue]) => [
-      `--ps-responsive-${property}-${breakpoint}`,
-      responsiveValue,
-    ]),
-  ) as CSSProperties;
 }
