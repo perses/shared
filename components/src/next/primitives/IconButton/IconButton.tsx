@@ -17,13 +17,8 @@ import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
 
 import type { ButtonVariant } from '../Button/Button';
-import { displayProps } from '../system/display';
-import type { DisplayProps } from '../system/display';
-import { sizingProps } from '../system/sizing';
-import type { SizingProps } from '../system/sizing';
-import { spacingProps } from '../system/spacing';
-import type { SpacingProps } from '../system/spacing';
-import { applyStyleProps, compileStyleProps } from '../system/styleProps';
+import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
+import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import type { ColorVariant, Size, Status } from '../types';
 
 import '../Button/buttonBase.css';
