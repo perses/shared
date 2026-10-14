@@ -34,6 +34,7 @@ import {
   TableSortLabel,
   Tooltip,
 } from './index';
+import { Alert, Box, Button, Checkbox, Chip, Divider, Icon, Spinner, Stack, Switch, TextField } from './index';
 import type {
   AlertProps,
   AlertSeverity,
@@ -59,6 +60,7 @@ import type {
   TableCellProps,
   TableProps,
   TableRowProps,
+  TextFieldProps,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -84,6 +86,7 @@ describe('primitives barrel exports', () => {
     expect(TableRow).toBeDefined();
     expect(TableRowExpandButton).toBeDefined();
     expect(TableSortLabel).toBeDefined();
+    expect(TextField).toBeDefined();
   });
 
   it('exports their prop types', () => {
@@ -114,6 +117,7 @@ describe('primitives barrel exports', () => {
     const sortDirection: SortDirection = 'asc';
     const sharedSize: Size = 'md';
     const sharedStatus: Status = 'error';
+    const textFieldProps: TextFieldProps = {};
 
     expect(alertProps).toBeDefined();
     expect(severity).toBe('info');
@@ -142,5 +146,6 @@ describe('primitives barrel exports', () => {
     expect(sortDirection).toBe('asc');
     expect(sharedSize).toBe('md');
     expect(sharedStatus).toBe('error');
+    expect(textFieldProps).toBeDefined();
   });
 });

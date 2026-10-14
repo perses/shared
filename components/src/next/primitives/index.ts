@@ -24,4 +24,5 @@ export * from './Stack';
 export * from './Switch';
 export * from './Tooltip';
 export * from './Table';
+export * from './TextField';
 export type { ColorVariant, Size, Status } from './types';
