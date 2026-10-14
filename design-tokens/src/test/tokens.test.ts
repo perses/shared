@@ -126,9 +126,16 @@ describe('tokens object', () => {
     expect(tokens.font.lineHeight.relaxed).toBe('var(--perses-line-height-relaxed)');
   });
 
+  it('produces correct var() strings for control size tokens', () => {
+    expect(tokens.size.control.xs).toBe('var(--perses-size-control-xs)');
+    expect(tokens.size.control.sm).toBe('var(--perses-size-control-sm)');
+    expect(tokens.size.control.md).toBe('var(--perses-size-control-md)');
+    expect(tokens.size.control.lg).toBe('var(--perses-size-control-lg)');
+  });
+
   it('has all expected top-level categories', () => {
     expect(Object.keys(tokens)).toEqual(
-      expect.arrayContaining(['color', 'bg', 'border', 'text', 'status', 'spacing', 'radius', 'font']),
+      expect.arrayContaining(['color', 'bg', 'border', 'text', 'status', 'spacing', 'size', 'radius', 'font']),
     );
   });
 });

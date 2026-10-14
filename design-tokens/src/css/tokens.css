@@ -120,6 +120,13 @@
     --perses-spacing-3xl: 2rem;
     --perses-spacing-4xl: 3rem;
 
+    /* ---- Size: Control (rem) ---- */
+    /* Outer height of interactive controls (Button, IconButton, TextField, Chip). Not for gaps or padding. */
+    --perses-size-control-xs: 1.5rem;
+    --perses-size-control-sm: 2rem;
+    --perses-size-control-md: 2.5rem;
+    --perses-size-control-lg: 3rem;
+
     /* ---- Border Width ---- */
     --perses-border-width-sm: 1px;
     --perses-border-width-md: 2px;
