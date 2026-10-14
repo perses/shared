@@ -18,14 +18,21 @@ import type { ButtonHTMLAttributes } from 'react';
 
 import { useComponents } from '../../contexts/ComponentsProvider';
 import { Icon } from '../Icon/Icon';
+import type { DisplayProps, SizingProps, SpacingProps } from '../system';
+import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
 import type { ColorVariant, Size, Status } from '../types';
 
-import './buttonBase.css';
+import '../system/layout.css';
+import '../system/spacing.css';
 import './button.css';
+import './buttonBase.css';
 
 export type ButtonVariant = 'solid' | 'outline' | 'ghost';
 
-export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'color'> {
+const BUTTON_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
+
+export interface ButtonProps
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'color'>, SpacingProps, SizingProps, DisplayProps {
   variant?: ButtonVariant;
   color?: ColorVariant | Status;
   size?: Size;
@@ -33,21 +40,35 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'solid', color = 'primary', size = 'md', loading = false, disabled, className, children, ...rest },
+  {
+    variant = 'solid',
+    color = 'primary',
+    size = 'md',
+    loading = false,
+    disabled,
+    className,
+    style,
+    children,
+    ...props
+  },
   ref,
 ) {
   const {
     components: { Spinner },
   } = useComponents();
-  const classes = clsx('ps-ButtonBase', 'ps-Button', className);
+  const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, BUTTON_STYLE_PROPS, style);
+  const classes = clsx('ps-ButtonBase', 'ps-Button', styleClassName, className);
   const isDisabled = disabled || loading;
+  const focusableWhenDisabled = loading && !disabled;
 
   return (
     <BaseButton
       {...rest}
       ref={ref}
       className={classes}
+      style={computedStyle}
       disabled={isDisabled}
+      focusableWhenDisabled={focusableWhenDisabled}
       aria-busy={loading || undefined}
       data-variant={variant}
       data-color={color}
