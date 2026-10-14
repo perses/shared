@@ -15,6 +15,7 @@ import type { PersesComponents, PersesIcons } from '../contexts/ComponentsContex
 import { Alert } from './Alert';
 import { Box } from './Box';
 import { Button } from './Button';
+import { Chip } from './Chip';
 import { Divider } from './Divider';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons';
 import { IconButton } from './IconButton';
@@ -26,6 +27,7 @@ export const defaultComponents: PersesComponents = {
   Button,
   Alert,
   Box,
+  Chip,
   IconButton,
   Divider,
   Spinner,
