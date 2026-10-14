@@ -16,15 +16,18 @@
 @layer perses.components {
   /* ---- Base ---- */
   :where(.ps-Button) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
     gap: var(--perses-spacing-xs);
     font-family: var(--perses-font-family);
     font-weight: var(--perses-font-weight-medium);
     line-height: var(--perses-line-height-relaxed);
   }
   /* ---- Sizes ---- */
+  :where(.ps-Button[data-size='xs']) {
+    padding-right: var(--perses-spacing-xs);
+    padding-left: var(--perses-spacing-xs);
+    font-size: var(--perses-font-size-xs);
+  }
+
   :where(.ps-Button[data-size='sm']) {
     padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
     font-size: var(--perses-font-size-xs);
