@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Box, Button, Divider, Icon, Spinner, Stack, Switch } from './index';
+import { Alert, Box, Button, Divider, Icon, Spinner, Stack, Switch, TextField } from './index';
 import type {
   AlertProps,
   AlertSeverity,
@@ -27,6 +27,7 @@ import type {
   StackProps,
   Status,
   SwitchProps,
+  TextFieldProps,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -39,6 +40,7 @@ describe('primitives barrel exports', () => {
     expect(Spinner).toBeDefined();
     expect(Stack).toBeDefined();
     expect(Switch).toBeDefined();
+    expect(TextField).toBeDefined();
   });
 
   it('exports their prop types', () => {
@@ -55,6 +57,7 @@ describe('primitives barrel exports', () => {
     const spinnerProps: SpinnerProps = {};
     const stackProps: StackProps = {};
     const switchProps: SwitchProps = {};
+    const textFieldProps: TextFieldProps = {};
 
     expect(alertProps).toBeDefined();
     expect(severity).toBe('info');
@@ -69,5 +72,6 @@ describe('primitives barrel exports', () => {
     expect(spinnerProps).toBeDefined();
     expect(stackProps).toBeDefined();
     expect(switchProps).toBeDefined();
+    expect(textFieldProps).toBeDefined();
   });
 });

@@ -21,6 +21,7 @@ import { IconButton } from './IconButton';
 import { Spinner } from './Spinner';
 import { Stack } from './Stack';
 import { Switch } from './Switch';
+import { TextField } from './TextField';
 
 export const defaultComponents: PersesComponents = {
   Button,
@@ -31,6 +32,7 @@ export const defaultComponents: PersesComponents = {
   Spinner,
   Stack,
   Switch,
+  TextField,
 };
 
 export const defaultIcons: PersesIcons = {

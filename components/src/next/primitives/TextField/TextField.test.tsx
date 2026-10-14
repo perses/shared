@@ -1,0 +1,339 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { createRef } from 'react';
+
+import type { Size, Status } from '../types';
+import { TextField } from './TextField';
+
+const responsiveWidth = { default: '100%', md: '20rem' };
+const STYLE_OVERRIDE = { width: '99px' };
+const DOLLAR = <span>$</span>;
+const PERCENT = <span>%</span>;
+const START_ICON = <span data-testid="start-icon" />;
+const END_ICON = <span data-testid="end-icon" />;
+
+describe('TextField', () => {
+  it('renders an input associated with its label', () => {
+    render(<TextField label="Name" />);
+    expect(screen.getByLabelText('Name')).toBeInTheDocument();
+  });
+
+  it('applies the ps-TextField class to the root', () => {
+    render(<TextField label="Name" data-testid="field" />);
+    expect(screen.getByTestId('field')).toHaveClass('ps-TextField');
+  });
+
+  it('renders helper text', () => {
+    render(<TextField label="Name" helperText="Required" />);
+    expect(screen.getByText('Required')).toBeInTheDocument();
+  });
+
+  it('sets data-status="error" when status is error', () => {
+    render(<TextField label="Name" status="error" data-testid="field" />);
+    expect(screen.getByTestId('field')).toHaveAttribute('data-status', 'error');
+  });
+
+  it('sets data-status="warning" when status is warning', () => {
+    render(<TextField label="Name" status="warning" data-testid="field" />);
+    expect(screen.getByTestId('field')).toHaveAttribute('data-status', 'warning');
+  });
+
+  it('sets data-status="success" when status is success', () => {
+    render(<TextField label="Name" status="success" data-testid="field" />);
+    expect(screen.getByTestId('field')).toHaveAttribute('data-status', 'success');
+  });
+
+  it('sets data-full-width when fullWidth is true', () => {
+    render(<TextField label="Name" fullWidth data-testid="field" />);
+    expect(screen.getByTestId('field')).toHaveAttribute('data-full-width');
+  });
+
+  it('sets data-size on the root', () => {
+    render(<TextField label="Name" size="lg" data-testid="field" />);
+    expect(screen.getByTestId('field')).toHaveAttribute('data-size', 'lg');
+  });
+
+  it('accepts a value and calls onChange', async () => {
+    const handleChange = vi.fn();
+    render(<TextField label="Name" value="" onChange={handleChange} />);
+    await userEvent.type(screen.getByLabelText('Name'), 'a');
+    expect(handleChange).toHaveBeenCalled();
+  });
+
+  it('supports disabled state', () => {
+    render(<TextField label="Name" disabled />);
+    expect(screen.getByLabelText('Name')).toBeDisabled();
+  });
+
+  it('forwards a ref to the underlying input', () => {
+    const ref = createRef<HTMLInputElement | HTMLTextAreaElement>();
+    render(<TextField label="Name" ref={ref} />);
+    expect(ref.current).toBeInstanceOf(HTMLInputElement);
+  });
+
+  it('renders without a label', () => {
+    render(<TextField placeholder="Search" />);
+    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+  });
+
+  it('renders a textarea when multiline is true', () => {
+    render(<TextField label="Comment" multiline />);
+    expect(screen.getByLabelText('Comment').tagName).toBe('TEXTAREA');
+  });
+
+  it('sets rows on the textarea when multiline', () => {
+    render(<TextField label="Comment" multiline rows={5} />);
+    expect(screen.getByLabelText('Comment')).toHaveAttribute('rows', '5');
+  });
+
+  it('sets data-multiline on the root when multiline is true', () => {
+    render(<TextField label="Comment" multiline data-testid="field" />);
+    expect(screen.getByTestId('field')).toHaveAttribute('data-multiline');
+  });
+
+  it('forwards a ref to the underlying textarea when multiline', () => {
+    const ref = createRef<HTMLInputElement | HTMLTextAreaElement>();
+    render(<TextField label="Comment" multiline ref={ref} />);
+    expect(ref.current).toBeInstanceOf(HTMLTextAreaElement);
+  });
+
+  it('renders startAdornment', () => {
+    render(<TextField label="Search" startAdornment={START_ICON} />);
+    expect(screen.getByTestId('start-icon')).toBeInTheDocument();
+  });
+
+  it('renders endAdornment', () => {
+    render(<TextField label="Search" endAdornment={END_ICON} />);
+    expect(screen.getByTestId('end-icon')).toBeInTheDocument();
+  });
+
+  it('applies a plain width through a custom property', () => {
+    render(<TextField label="Name" width="20rem" data-testid="field" />);
+    const root = screen.getByTestId('field');
+    expect(root).toHaveClass('ps-width');
+    expect(root).toHaveStyle({ '--ps-width': '20rem' });
+  });
+
+  it('applies responsive width via the style-prop class and CSS variables', () => {
+    render(<TextField label="Name" width={responsiveWidth} data-testid="field" />);
+    const root = screen.getByTestId('field');
+    expect(root).toHaveClass('ps-width');
+    expect(root).toHaveStyle({
+      '--ps-width': '100%',
+      '--ps-width-md': '20rem',
+    });
+  });
+
+  it('applies spacing and display props to the root', () => {
+    render(<TextField label="Name" m="md" display="block" data-testid="field" />);
+    const root = screen.getByTestId('field');
+    expect(root).toHaveClass('ps-m', 'ps-display');
+    expect(root).toHaveStyle({
+      '--ps-m': 'var(--perses-spacing-md)',
+      '--ps-display': 'block',
+    });
+  });
+
+  it('merges the style prop and lets it override computed styles', () => {
+    render(<TextField label="Name" width="20rem" style={STYLE_OVERRIDE} data-testid="field" />);
+    expect(screen.getByTestId('field')).toHaveStyle({ width: '99px' });
+  });
+
+  it('does not forward style props to the input', () => {
+    render(<TextField label="Name" m="md" width="20rem" id="x" />);
+    const input = screen.getByLabelText('Name');
+    expect(input).toHaveAttribute('id', 'x');
+    expect(input).not.toHaveAttribute('m');
+    expect(input).not.toHaveAttribute('width');
+  });
+
+  it('sets readonly on the input when readOnly', () => {
+    render(<TextField label="Name" readOnly data-testid="field" />);
+    expect(screen.getByLabelText('Name')).toHaveAttribute('readonly');
+  });
+
+  it('applies every size and status combination', () => {
+    const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
+    const statuses: Array<Status | undefined> = [undefined, 'error', 'warning', 'success', 'info'];
+    for (const size of sizes) {
+      for (const status of statuses) {
+        const { unmount } = render(<TextField label="Name" size={size} status={status} data-testid="field" />);
+        const root = screen.getByTestId('field');
+        expect(root).toHaveAttribute('data-size', size);
+        if (status) {
+          expect(root).toHaveAttribute('data-status', status);
+        } else {
+          expect(root).not.toHaveAttribute('data-status');
+        }
+        unmount();
+      }
+    }
+  });
+
+  it('defaults to the md size', () => {
+    render(<TextField label="Name" data-testid="field" />);
+    expect(screen.getByTestId('field')).toHaveAttribute('data-size', 'md');
+  });
+
+  describe('accessibility', () => {
+    it('names the input from the label via htmlFor/id, with a generated id', () => {
+      render(<TextField label="Name" />);
+      const input = screen.getByRole('textbox', { name: 'Name' });
+      expect(input.id).not.toBe('');
+      expect(screen.getByText('Name')).toHaveAttribute('for', input.id);
+    });
+
+    it('uses a provided id for both the input and the label', () => {
+      render(<TextField label="Name" id="custom" />);
+      expect(screen.getByRole('textbox', { name: 'Name' })).toHaveAttribute('id', 'custom');
+      expect(screen.getByText('Name')).toHaveAttribute('for', 'custom');
+    });
+
+    it('generates distinct ids for multiple fields', () => {
+      render(
+        <>
+          <TextField label="First" />
+          <TextField label="Second" />
+        </>,
+      );
+      expect(screen.getByLabelText('First').id).not.toBe(screen.getByLabelText('Second').id);
+    });
+
+    it('supports aria-label when there is no visible label', () => {
+      render(<TextField aria-label="Search" />);
+      expect(screen.getByRole('textbox', { name: 'Search' })).toBeInTheDocument();
+    });
+
+    it('supports aria-labelledby', () => {
+      render(
+        <>
+          <span id="lbl">External label</span>
+          <TextField aria-labelledby="lbl" />
+        </>,
+      );
+      expect(screen.getByRole('textbox', { name: 'External label' })).toBeInTheDocument();
+    });
+
+    it('does not include adornments or helper text in the accessible name', () => {
+      render(<TextField label="Amount" helperText="In dollars" startAdornment={DOLLAR} endAdornment={PERCENT} />);
+      expect(screen.getByRole('textbox', { name: 'Amount' })).toBeInTheDocument();
+    });
+
+    it('links helper text through aria-describedby', () => {
+      render(<TextField label="Name" helperText="Shown to your team" />);
+      const input = screen.getByRole('textbox', { name: 'Name' });
+      expect(input).toHaveAccessibleDescription('Shown to your team');
+    });
+
+    it('has no aria-describedby without helper text', () => {
+      render(<TextField label="Name" />);
+      expect(screen.getByRole('textbox')).not.toHaveAttribute('aria-describedby');
+    });
+
+    it('keeps a consumer aria-describedby alongside the helper text', () => {
+      render(
+        <>
+          <span id="extra">Extra hint</span>
+          <TextField label="Name" helperText="Helper" aria-describedby="extra" />
+        </>,
+      );
+      expect(screen.getByRole('textbox')).toHaveAccessibleDescription('Extra hint Helper');
+    });
+
+    it('sets aria-invalid for the error status only', () => {
+      const statuses: Array<Status | undefined> = [undefined, 'warning', 'success', 'info'];
+      const { rerender } = render(<TextField label="Name" status="error" helperText="Required" />);
+      expect(screen.getByRole('textbox')).toBeInvalid();
+      expect(screen.getByRole('textbox')).toHaveAccessibleDescription('Required');
+      for (const status of statuses) {
+        rerender(<TextField label="Name" status={status} />);
+        expect(screen.getByRole('textbox')).not.toHaveAttribute('aria-invalid', 'true');
+      }
+    });
+
+    it('honors an explicit aria-invalid', () => {
+      render(<TextField label="Name" aria-invalid="true" />);
+      expect(screen.getByRole('textbox')).toBeInvalid();
+    });
+
+    it('marks required fields natively', () => {
+      render(<TextField label="Name" required />);
+      expect(screen.getByRole('textbox', { name: 'Name' })).toBeRequired();
+    });
+
+    it('exposes the disabled state and prevents typing', async () => {
+      const handleChange = vi.fn();
+      render(<TextField label="Name" disabled onChange={handleChange} />);
+      const input = screen.getByRole('textbox', { name: 'Name' });
+      expect(input).toBeDisabled();
+      await userEvent.type(input, 'a');
+      expect(handleChange).not.toHaveBeenCalled();
+    });
+
+    it('exposes the read-only state', () => {
+      render(<TextField label="Name" readOnly />);
+      expect(screen.getByRole('textbox')).toHaveAttribute('readonly');
+    });
+
+    it('is reachable and operable by keyboard', () => {
+      render(<TextField label="Name" />);
+      userEvent.tab();
+      const input = screen.getByRole('textbox', { name: 'Name' });
+      expect(input).toHaveFocus();
+      userEvent.keyboard('abc');
+      expect(input).toHaveValue('abc');
+    });
+
+    it('focuses the control when the label is clicked', async () => {
+      render(<TextField label="Name" />);
+      await userEvent.click(screen.getByText('Name'));
+      expect(screen.getByRole('textbox')).toHaveFocus();
+    });
+
+    it('skips disabled fields in the tab order', async () => {
+      render(
+        <>
+          <TextField label="First" disabled />
+          <TextField label="Second" />
+        </>,
+      );
+      userEvent.tab();
+      expect(screen.getByLabelText('Second')).toHaveFocus();
+    });
+
+    it('gives a multiline textarea the same name, description and invalid wiring', () => {
+      render(<TextField label="Comment" multiline status="error" helperText="Too short" required />);
+      const textarea = screen.getByRole('textbox', { name: 'Comment' });
+      expect(textarea.tagName).toBe('TEXTAREA');
+      expect(textarea).toHaveAccessibleDescription('Too short');
+      expect(textarea).toBeInvalid();
+      expect(textarea).toBeRequired();
+    });
+
+    it('lets a multiline textarea be typed into by keyboard', async () => {
+      render(<TextField label="Comment" multiline />);
+      userEvent.tab();
+      userEvent.keyboard('a{enter}b');
+      expect(screen.getByRole('textbox')).toHaveValue('a\nb');
+    });
+
+    it('forwards a function ref', () => {
+      const ref = vi.fn();
+      render(<TextField label="Name" ref={ref} />);
+      expect(ref).toHaveBeenCalledWith(expect.any(HTMLInputElement));
+    });
+  });
+});

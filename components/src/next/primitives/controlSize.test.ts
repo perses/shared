@@ -43,4 +43,12 @@ describe('control size tokens', () => {
     const rule = ruleFor(readCss('./Button/button.css'), `.ps-Button[data-size='${size}']`);
     expect(rule).toContain(`min-height: var(--perses-control-size-${size});`);
   });
+
+  it.each(SIZES)('TextField size %s wrapper has min-height --perses-control-size-%s', (size) => {
+    const rule = ruleFor(
+      readCss('./TextField/textField.css'),
+      `.ps-TextField[data-size='${size}'] .ps-TextField__wrapper`,
+    );
+    expect(rule).toContain(`min-height: var(--perses-control-size-${size});`);
+  });
 });
