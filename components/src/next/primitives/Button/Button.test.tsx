@@ -33,9 +33,11 @@ describe('Button', () => {
     expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
   });
 
-  it('applies the ps-Button class', () => {
+  it('applies the button classes', () => {
     render(<Button>Test</Button>, { wrapper: Wrapper });
-    expect(screen.getByRole('button')).toHaveClass('ps-Button');
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('ps-ButtonBase');
+    expect(button).toHaveClass('ps-Button');
   });
 
   it('sets data-variant, data-color, and data-size attributes', () => {

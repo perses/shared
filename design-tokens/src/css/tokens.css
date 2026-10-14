@@ -120,6 +120,10 @@
     --perses-spacing-3xl: 2rem;
     --perses-spacing-4xl: 3rem;
 
+    /* ---- Border Width ---- */
+    --perses-border-width-sm: 1px;
+    --perses-border-width-md: 2px;
+
     /* ---- Border Radius ---- */
     --perses-radius-none: 0;
     --perses-radius-sm: 2px;

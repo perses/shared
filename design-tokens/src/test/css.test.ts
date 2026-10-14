@@ -73,6 +73,15 @@ describe('CSS primitive color variables', () => {
   });
 });
 
+describe('CSS primitive dimension variables', () => {
+  const tokensCss = readCss('tokens.css');
+
+  it('defines border width variables', () => {
+    expect(tokensCss).toContain('--perses-border-width-sm');
+    expect(tokensCss).toContain('--perses-border-width-md');
+  });
+});
+
 describe('CSS semantic variables', () => {
   const semanticCss = readCss('semantic.css');
 
