@@ -13,9 +13,9 @@
 
 import { render, screen } from '@testing-library/react';
 import { createRef, forwardRef } from 'react';
-import type { FC, ReactElement, SVGProps } from 'react';
+import type { FC, ReactElement, Ref, SVGProps } from 'react';
 
-import type { ButtonProps } from '../primitives';
+import type { ButtonProps, ChipProps } from '../primitives';
 import { defaultComponents, defaultIcons } from '../primitives/defaults';
 import { ComponentsProvider, useComponents } from './ComponentsProvider';
 import type { ComponentsContextValue, PersesComponents } from './ComponentsProvider';
@@ -107,6 +107,30 @@ describe('ComponentsProvider', () => {
     expect(buttonRef.current).toBeInstanceOf(HTMLButtonElement);
     expect(iconButtonRef.current).toBeInstanceOf(HTMLButtonElement);
     expect(alertRef.current).toBeInstanceOf(HTMLDivElement);
+  });
+
+  it('supports overriding Chip', () => {
+    const CustomChip = forwardRef<HTMLDivElement, ChipProps>(function CustomChip({ children }, ref) {
+      return (
+        <div ref={ref as Ref<HTMLDivElement>} data-testid="custom-chip">
+          Custom: {children}
+        </div>
+      );
+    });
+
+    function TestConsumer(): ReactElement {
+      const { components } = useComponents();
+      const { Chip } = components;
+      return <Chip>Production</Chip>;
+    }
+
+    render(
+      <ComponentsProvider components={{ ...components, Chip: CustomChip }} icons={icons}>
+        <TestConsumer />
+      </ComponentsProvider>,
+    );
+
+    expect(screen.getByTestId('custom-chip')).toHaveTextContent('Custom: Production');
   });
 
   it('throws when useComponents is called outside provider', () => {
