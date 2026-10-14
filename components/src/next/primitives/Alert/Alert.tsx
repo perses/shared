@@ -52,10 +52,6 @@ export interface AlertProps extends HTMLAttributes<HTMLDivElement>, SpacingProps
   icon?: AlertSeverity | ReactElement | number | boolean | null;
 }
 
-/**
- * Spacing, sizing and display props are responsive. When you pass a responsive object, include `default`.
- * Breakpoints with no value fall back to the browser's default, not the component's own styling.
- */
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   { severity = 'info', role = 'alert', className, style, icon, children, ...props },
   ref,
