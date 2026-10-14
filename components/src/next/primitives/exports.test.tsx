@@ -16,14 +16,15 @@ import type {
   AlertProps,
   AlertSeverity,
   BoxProps,
-  ButtonColor,
   ButtonProps,
-  ButtonSize,
   ButtonVariant,
+  ColorVariant,
   DividerProps,
   IconProps,
   SpacingToken,
+  Size,
   SpinnerProps,
+  Status,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -43,8 +44,8 @@ describe('primitives barrel exports', () => {
     const spacingToken: SpacingToken = 'md';
     const buttonProps: ButtonProps = {};
     const variant: ButtonVariant = 'solid';
-    const color: ButtonColor = 'primary';
-    const size: ButtonSize = 'md';
+    const color: ColorVariant | Status = 'primary';
+    const size: Size = 'md';
     const dividerProps: DividerProps = {};
     const iconProps: IconProps = {};
     const spinnerProps: SpinnerProps = {};

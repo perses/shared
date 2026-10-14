@@ -15,22 +15,14 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 
-import { displayProps } from '../system/display';
-import type { DisplayProps } from '../system/display';
-import { flexboxProps } from '../system/flexbox';
-import type { FlexboxProps } from '../system/flexbox';
-import { sizingProps } from '../system/sizing';
-import type { SizingProps } from '../system/sizing';
-import { spacingProps } from '../system/spacing';
-import type { SpacingProps } from '../system/spacing';
-import { applyStyleProps, compileStyleProps } from '../system/styleProps';
+import { applyStyleProps, compileStyleProps, displayProps, flexboxProps, sizingProps, spacingProps } from '../system';
+import type { DisplayProps, FlexboxProps, SizingProps, SpacingProps } from '../system';
 
 import './box.css';
 import '../system/layout.css';
 import '../system/spacing.css';
 
-export type { SpacingToken } from '../system/spacing';
-export type { Breakpoint, Responsive, ResponsiveObject } from '../system/responsive';
+export type { Breakpoint, Responsive, ResponsiveObject, SpacingToken } from '../system';
 
 export interface BoxProps
   extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, FlexboxProps, DisplayProps {}
