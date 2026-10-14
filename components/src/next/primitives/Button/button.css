@@ -44,7 +44,8 @@
   }
 
   /* ---- Loading state ---- */
-  .ps-Button[data-loading]:disabled {
+  .ps-Button[data-loading]:disabled,
+  .ps-Button[data-loading][aria-disabled='true'] {
     opacity: 1;
     cursor: wait;
   }

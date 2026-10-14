@@ -59,6 +59,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, BUTTON_STYLE_PROPS, style);
   const classes = clsx('ps-ButtonBase', 'ps-Button', styleClassName, className);
   const isDisabled = disabled || loading;
+  const focusableWhenDisabled = loading && !disabled;
 
   return (
     <BaseButton
@@ -67,6 +68,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       className={classes}
       style={computedStyle}
       disabled={isDisabled}
+      focusableWhenDisabled={focusableWhenDisabled}
       aria-busy={loading || undefined}
       data-variant={variant}
       data-color={color}

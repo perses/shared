@@ -36,7 +36,8 @@
     outline-offset: 2px;
   }
 
-  .ps-ButtonBase:disabled {
+  .ps-ButtonBase:disabled,
+  .ps-ButtonBase[aria-disabled='true'] {
     opacity: 0.5;
     cursor: not-allowed;
   }
@@ -94,7 +95,7 @@
     background-color: var(--ps-btn-bg);
   }
 
-  .ps-ButtonBase[data-variant='solid']:hover:not(:disabled) {
+  .ps-ButtonBase[data-variant='solid']:hover:not(:disabled):not([aria-disabled='true']) {
     background-color: var(--ps-btn-bg-hover);
   }
 
@@ -104,8 +105,8 @@
     border-color: var(--ps-btn-border);
   }
 
-  .ps-ButtonBase[data-variant='outline']:hover:not(:disabled),
-  .ps-ButtonBase[data-variant='ghost']:hover:not(:disabled) {
+  .ps-ButtonBase[data-variant='outline']:hover:not(:disabled):not([aria-disabled='true']),
+  .ps-ButtonBase[data-variant='ghost']:hover:not(:disabled):not([aria-disabled='true']) {
     background-color: var(--ps-btn-bg-subtle);
   }
 

@@ -91,14 +91,22 @@ export const AllVariantsAndColors: Story = () => (
 );
 AllVariantsAndColors.storyName = 'Variants';
 
-const loadingCode = `// loading shows a spinner, sets aria-busy and disables the button
+const loadingCode = `// loading shows a spinner and sets aria-busy. The button stops responding to
+// clicks and keys, but stays focusable (aria-disabled) so keyboard focus is not
+// lost when a focused button starts loading. Use \`disabled\` for a truly inert button.
 <Button variant="solid" loading>Saving…</Button>
 <Button variant="outline" loading>Submitting…</Button>
-<Button variant="ghost" loading>Loading…</Button>`;
+<Button variant="ghost" loading>Loading…</Button>
+<Button disabled>Disabled</Button>`;
 
 export const States: Story = () => (
   <Stack>
-    <Sample title="Loading" code={loadingCode}>
+    <p>
+      A <code>loading</code> button shows a spinner, sets <code>aria-busy</code>, and blocks activation while staying{' '}
+      <strong>focusable</strong> (via <code>aria-disabled</code>) so keyboard focus survives the transition. A plain{' '}
+      <code>disabled</code> button is natively disabled and inert.
+    </p>
+    <Sample title="Loading and disabled" code={loadingCode}>
       <div style={row}>
         <Button variant="solid" color="primary" loading>
           Saving…
@@ -108,6 +116,12 @@ export const States: Story = () => (
         </Button>
         <Button variant="ghost" color="primary" loading>
           Loading…
+        </Button>
+        <Button color="primary" size="xs" loading>
+          Loading…
+        </Button>
+        <Button color="primary" size="xs" disabled>
+          Disabled
         </Button>
       </div>
     </Sample>

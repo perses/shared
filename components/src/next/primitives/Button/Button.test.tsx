@@ -96,8 +96,34 @@ describe('Button', () => {
     expect(spinnerContainer).toHaveClass('ps-Icon');
   });
 
-  it('disables button when loading is true', () => {
+  it('keeps a loading button focusable via aria-disabled instead of native disabled', () => {
     render(<Button loading>Save</Button>, { wrapper: Wrapper });
+    const button = screen.getByRole('button');
+    expect(button).not.toBeDisabled();
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    button.focus();
+    expect(button).toHaveFocus();
+  });
+
+  it('does not fire onClick while loading', async () => {
+    const handleClick = vi.fn();
+    render(
+      <Button loading onClick={handleClick}>
+        Save
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    await userEvent.click(screen.getByRole('button'));
+    expect(handleClick).not.toHaveBeenCalled();
+  });
+
+  it('uses native disabled when explicitly disabled while loading', () => {
+    render(
+      <Button loading disabled>
+        Save
+      </Button>,
+      { wrapper: Wrapper },
+    );
     expect(screen.getByRole('button')).toBeDisabled();
   });
 
