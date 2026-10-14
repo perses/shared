@@ -60,15 +60,27 @@ interface CompiledStyleProp {
   transform: (value: unknown) => string;
 }
 
+// Combines all the prop names from a list of registries into one type, e.g. combining
+// SpacingProps and SizingProps gives 'p' | 'width' | 'maxWidth'. This is what lets `rest` below
+// know exactly which props were registered, with no manual list and no casts needed.
+type RegistryKeys<Registries extends readonly StylePropRegistry[]> = {
+  [Index in keyof Registries]: keyof Registries[Index];
+}[number] &
+  string;
+
 // The portion of a component's style-prop setup that is fixed (class names, kebab-casing, the key
 // set) rather than per-render. Built once per component via {@link compileStyleProps}.
-export interface CompiledStyleProps {
+// `K` is the set of prop names it knows about, used later so `applyStyleProps` can type `rest`
+// correctly.
+export interface CompiledStyleProps<K extends string = string> {
   props: CompiledStyleProp[];
-  keys: Set<string>;
+  keys: Set<K>;
 }
 
 /** Precomputes the per-render-invariant lookup for a set of categories. Call once, at module scope. */
-export function compileStyleProps(registries: StylePropRegistry[]): CompiledStyleProps {
+export function compileStyleProps<const Registries extends readonly StylePropRegistry[]>(
+  registries: Registries,
+): CompiledStyleProps<RegistryKeys<Registries>> {
   const props: CompiledStyleProp[] = [];
   const keys = new Set<string>();
   for (const registry of registries) {
@@ -84,18 +96,18 @@ export function compileStyleProps(registries: StylePropRegistry[]): CompiledStyl
       });
     }
   }
-  return { props, keys };
+  return { props, keys: keys as Set<RegistryKeys<Registries>> };
 }
 
 /**
  * Builds the `className` and custom-property `style` for every compiled prop (caller `style` merged
  * last so it wins); unregistered props are returned in `rest` for the host element.
  */
-export function applyStyleProps(
-  props: Record<string, unknown>,
-  compiled: CompiledStyleProps,
+export function applyStyleProps<Props extends Record<string, unknown>, K extends string>(
+  props: Props,
+  compiled: CompiledStyleProps<K>,
   style?: CSSProperties,
-): { className: string; style: CSSProperties; rest: Record<string, unknown> } {
+): { className: string; style: CSSProperties; rest: Omit<Props, K> } {
   const classNames: string[] = [];
   const computed: Record<string, string> = {};
 
@@ -108,10 +120,11 @@ export function applyStyleProps(
 
   if (style) Object.assign(computed, style);
 
+  const keys = compiled.keys as Set<string>;
   const rest: Record<string, unknown> = {};
   for (const prop in props) {
-    if (!compiled.keys.has(prop)) rest[prop] = props[prop];
+    if (!keys.has(prop)) rest[prop] = props[prop];
   }
 
-  return { className: clsx(classNames), style: computed as CSSProperties, rest };
+  return { className: clsx(classNames), style: computed as CSSProperties, rest: rest as Omit<Props, K> };
 }

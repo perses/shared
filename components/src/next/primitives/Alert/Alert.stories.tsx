@@ -12,33 +12,15 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
+import type { CSSProperties } from 'react';
 
+import { Sample, Stack } from '../../stories/Sample';
 import { Alert } from './Alert';
 import type { AlertSeverity } from './Alert';
 
+const column: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '1rem' };
+
 const severities: AlertSeverity[] = ['error', 'warning', 'success', 'info'];
-
-export const AllSeverities: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-    {severities.map((severity) => (
-      <Alert key={severity} severity={severity} icon={severity}>
-        This is a {severity} alert.
-      </Alert>
-    ))}
-  </div>
-);
-AllSeverities.storyName = 'All Severities';
-
-export const NoIcon: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-    {severities.map((severity) => (
-      <Alert key={severity} severity={severity}>
-        No icon by default for a {severity} alert.
-      </Alert>
-    ))}
-  </div>
-);
-NoIcon.storyName = 'No Icon (default)';
 
 const SmileyIcon = (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
@@ -46,15 +28,58 @@ const SmileyIcon = (
   </svg>
 );
 
-export const CustomIcon: Story = () => <Alert icon={SmileyIcon}>This alert uses a custom icon.</Alert>;
-CustomIcon.storyName = 'Custom Icon';
+const basicCode = `<Alert severity="info" icon="info">This is an info alert.</Alert>`;
+const customIconCode = `<Alert icon={<svg viewBox="0 0 640 640">…</svg>}>This alert uses a custom icon.</Alert>`;
 
-export const FalsyIcon: Story = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-    <Alert icon={0}>icon={'{0}'} renders no icon (not a literal &quot;0&quot;).</Alert>
-    <Alert icon={false}>icon={'{false}'} renders no icon.</Alert>
-    <Alert icon={null}>icon={'{null}'} renders no icon.</Alert>
-    <Alert icon={undefined}>icon={'{undefined}'} (or omitted) renders no icon.</Alert>
-  </div>
+export const Basic: Story = () => (
+  <Stack>
+    <p>
+      <code>Alert</code> shows a status message. It accepts responsive style props — spacing (<code>p</code>,{' '}
+      <code>m</code>, <code>gap</code>), sizing (<code>width</code>…) and display (<code>display</code>,{' '}
+      <code>overflow</code>) — plus any native <code>div</code> attribute. Those style props behave exactly as
+      documented on <code>Box</code>. Pass a custom icon via <code>icon</code>.
+    </p>
+    <Sample title="Minimal usage" code={basicCode}>
+      <Alert severity="info" icon="info">
+        This is an info alert.
+      </Alert>
+    </Sample>
+
+    <Sample title="Custom icon" code={customIconCode}>
+      <Alert icon={SmileyIcon}>This alert uses a custom icon.</Alert>
+    </Sample>
+  </Stack>
 );
-FalsyIcon.storyName = 'Falsy Icon (0 / false / null / undefined)';
+Basic.storyName = 'Basic';
+
+const allSeveritiesCode = `<Alert severity="error" icon="error">This is a error alert.</Alert>
+<Alert severity="warning" icon="warning">This is a warning alert.</Alert>
+<Alert severity="success" icon="success">This is a success alert.</Alert>
+<Alert severity="info" icon="info">This is a info alert.</Alert>`;
+const noIconCode = `// icon is omitted by default
+<Alert severity="error">No icon by default for a error alert.</Alert>`;
+
+export const AllSeverities: Story = () => (
+  <Stack>
+    <Sample title="Severities with their default icons" code={allSeveritiesCode}>
+      <div style={column}>
+        {severities.map((severity) => (
+          <Alert key={severity} severity={severity} icon={severity}>
+            This is a {severity} alert.
+          </Alert>
+        ))}
+      </div>
+    </Sample>
+
+    <Sample title="No icon (default)" code={noIconCode}>
+      <div style={column}>
+        {severities.map((severity) => (
+          <Alert key={severity} severity={severity}>
+            No icon by default for a {severity} alert.
+          </Alert>
+        ))}
+      </div>
+    </Sample>
+  </Stack>
+);
+AllSeverities.storyName = 'Variants';

@@ -26,6 +26,10 @@ function Wrapper({ children }: { children: ReactNode }): ReactElement {
   );
 }
 
+const RESPONSIVE_PADDING = { default: 'sm', md: 'xl' } as const;
+const RESPONSIVE_DISPLAY = { default: 'flex', md: 'none' };
+const STYLE_OVERRIDE = { padding: '99px' };
+
 describe('Alert', () => {
   it('renders children', () => {
     render(<Alert>Something happened</Alert>, { wrapper: Wrapper });
@@ -138,5 +142,66 @@ describe('Alert', () => {
       'No ComponentsContext found. Did you forget a ComponentsProvider?',
     );
     consoleSpy.mockRestore();
+  });
+
+  describe('style props', () => {
+    it('applies a spacing token through its design-token custom property', () => {
+      render(<Alert p="md">Content</Alert>, { wrapper: Wrapper });
+      const el = screen.getByRole('alert');
+      expect(el).toHaveClass('ps-p');
+      expect(el).toHaveStyle({ '--ps-p': 'var(--perses-spacing-md)' });
+    });
+
+    it('creates responsive spacing variables', () => {
+      render(<Alert p={RESPONSIVE_PADDING}>Content</Alert>, { wrapper: Wrapper });
+      const el = screen.getByRole('alert');
+      expect(el).toHaveClass('ps-p');
+      expect(el).toHaveStyle({ '--ps-p': 'var(--perses-spacing-sm)' });
+      expect(el).toHaveStyle({ '--ps-p-md': 'var(--perses-spacing-xl)' });
+    });
+
+    it('treats numeric sizing as pixels and passes strings through', () => {
+      render(
+        <Alert width={130} maxWidth="50%">
+          Content
+        </Alert>,
+        { wrapper: Wrapper },
+      );
+      const el = screen.getByRole('alert');
+      expect(el).toHaveClass('ps-width', 'ps-max-width');
+      expect(el).toHaveStyle({ '--ps-width': '130px', '--ps-max-width': '50%' });
+    });
+
+    it('applies a responsive display prop', () => {
+      render(<Alert display={RESPONSIVE_DISPLAY}>Content</Alert>, { wrapper: Wrapper });
+      const el = screen.getByRole('alert');
+      expect(el).toHaveClass('ps-display');
+      expect(el).toHaveStyle({ '--ps-display': 'flex', '--ps-display-md': 'none' });
+    });
+
+    it('lets the style prop override a style prop and keeps the component class', () => {
+      render(
+        <Alert p="md" style={STYLE_OVERRIDE}>
+          Content
+        </Alert>,
+        { wrapper: Wrapper },
+      );
+      const el = screen.getByRole('alert');
+      expect(el).toHaveClass('ps-Alert', 'ps-p');
+      expect(el).toHaveStyle({ padding: '99px' });
+    });
+
+    it('does not forward style props to the DOM element', () => {
+      render(
+        <Alert p="md" width={100} id="x">
+          Content
+        </Alert>,
+        { wrapper: Wrapper },
+      );
+      const el = screen.getByRole('alert');
+      expect(el).toHaveAttribute('id', 'x');
+      expect(el).not.toHaveAttribute('p');
+      expect(el).not.toHaveAttribute('width');
+    });
   });
 });

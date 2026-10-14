@@ -12,14 +12,23 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { forwardRef } from 'react';
 import type { ComponentType, HTMLAttributes, ReactElement, ReactNode, SVGProps } from 'react';
+import { forwardRef } from 'react';
 
 import type { PersesIcons } from '../../contexts/ComponentsContext';
 import { useComponents } from '../../contexts/ComponentsProvider';
 import { Icon } from '../Icon/Icon';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../Icon/icons';
+import type { DisplayProps } from '../system/display';
+import { displayProps } from '../system/display';
+import type { SizingProps } from '../system/sizing';
+import { sizingProps } from '../system/sizing';
+import type { SpacingProps } from '../system/spacing';
+import { spacingProps } from '../system/spacing';
+import { applyStyleProps, compileStyleProps } from '../system/styleProps';
 
+import '../system/layout.css';
+import '../system/spacing.css';
 import './alert.css';
 
 export type AlertSeverity = 'error' | 'warning' | 'success' | 'info';
@@ -36,21 +45,19 @@ function isAlertSeverity(icon: unknown): icon is AlertSeverity {
   return typeof icon === 'string' && icon in SEVERITY_ICONS;
 }
 
-export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
+const ALERT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
+
+export interface AlertProps extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, DisplayProps {
   severity?: AlertSeverity;
   icon?: AlertSeverity | ReactElement | number | boolean | null;
 }
 
-/**
- * DOM structure: `.ps-Alert > .ps-Alert__icon? + .ps-Alert__message`
- * `.ps-Alert__icon` is only rendered when `icon` resolves to a non-empty value.
- * Consumers should target `.ps-Alert__message` for content styling.
- */
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  { severity = 'info', role = 'alert', className, icon, children, ...rest },
+  { severity = 'info', role = 'alert', className, style, icon, children, ...props },
   ref,
 ) {
-  const classes = clsx('ps-Alert', className);
+  const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, ALERT_STYLE_PROPS, style);
+  const classes = clsx('ps-Alert', styleClassName, className);
   const { icons } = useComponents();
 
   let resolvedIcon: ReactNode;
@@ -64,7 +71,7 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
   }
 
   return (
-    <div role={role} {...rest} ref={ref} className={classes} data-severity={severity}>
+    <div role={role} {...rest} ref={ref} className={classes} style={computedStyle} data-severity={severity}>
       {Boolean(resolvedIcon) && <Icon className="ps-Alert__icon">{resolvedIcon}</Icon>}
       <div className="ps-Alert__message">{children}</div>
     </div>

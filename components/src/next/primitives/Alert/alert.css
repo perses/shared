@@ -14,7 +14,7 @@
  */
 
 @layer perses.components {
-  .ps-Alert {
+  :where(.ps-Alert) {
     display: flex;
     align-items: center;
     gap: var(--perses-spacing-sm);
