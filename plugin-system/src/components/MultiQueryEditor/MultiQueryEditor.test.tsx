@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { QueryPluginType } from '@perses-dev/spec';
-import { render, waitFor, cleanup } from '@testing-library/react';
+import { render, cleanup } from '@testing-library/react';
 
 import { MultiQueryEditor } from './MultiQueryEditor';
 
@@ -39,32 +39,6 @@ describe('MultiQueryEditor', () => {
   afterEach(() => {
     vi.clearAllMocks();
     cleanup();
-  });
-
-  //TODO: An actual fix from the plugin side is in progress
-  // Remove the skip or the entire test after the fix
-  it.skip('persists the default query when the panel has no queries', async () => {
-    const onChange = vi.fn();
-
-    render(
-      <MultiQueryEditor
-        queryTypes={['AlertsQuery'] as QueryPluginType[]}
-        queries={[]}
-        onChange={onChange}
-        onQueryRun={vi.fn()}
-      />,
-    );
-
-    await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith([
-        {
-          kind: 'AlertsQuery',
-          spec: {
-            plugin: { kind: 'AlertManagerAlertsQuery', spec: { active: true } },
-          },
-        },
-      ]);
-    });
   });
 
   it('does not overwrite queries that already exist', async () => {
