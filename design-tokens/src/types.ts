@@ -67,6 +67,10 @@ export type BorderWidthVar = `--perses-border-width-${BorderWidthScale}`;
 
 export type RadiusVar = `--perses-radius-${'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'}`;
 
+export type ShadowVar = '--perses-shadow-overlay';
+
+export type ZIndexVar = '--perses-z-index-overlay';
+
 export type FontSizeScale = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 
 export type FontSizeVar = `--perses-font-size-${FontSizeScale}`;
@@ -96,6 +100,8 @@ export type PersesTokenVar =
   | ControlSizeVar
   | BorderWidthVar
   | RadiusVar
+  | ShadowVar
+  | ZIndexVar
   | FontVar;
 
 export type PersesMode = 'light' | 'dark';
