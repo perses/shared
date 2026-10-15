@@ -18,6 +18,7 @@ import { createRef } from 'react';
 import { Stack } from './Stack';
 
 const RESPONSIVE_DIRECTION = { default: 'column', md: 'row' } as const;
+const PARTIAL_RESPONSIVE_DIRECTION = { md: 'row' } as const;
 const RESPONSIVE_SPACING = { default: 'sm', md: 'xl' } as const;
 const STYLE_OVERRIDE = { gap: '99px' };
 
@@ -106,6 +107,18 @@ describe('Stack', () => {
   it('creates responsive direction variables', () => {
     render(
       <Stack data-testid="stack" direction={RESPONSIVE_DIRECTION}>
+        Content
+      </Stack>,
+    );
+    expect(screen.getByTestId('stack')).toHaveStyle({
+      '--ps-flex-direction': 'column',
+      '--ps-flex-direction-md': 'row',
+    });
+  });
+
+  it('seeds a column base for a responsive direction that omits the default breakpoint', () => {
+    render(
+      <Stack data-testid="stack" direction={PARTIAL_RESPONSIVE_DIRECTION}>
         Content
       </Stack>,
     );

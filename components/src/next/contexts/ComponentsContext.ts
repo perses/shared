@@ -37,7 +37,7 @@ export interface PersesComponents {
   Alert: RefComponent<AlertProps, HTMLDivElement>;
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;
-  Box: ComponentType<BoxProps>;
+  Box: RefComponent<BoxProps, HTMLDivElement>;
   Stack: RefComponent<StackProps, HTMLDivElement>;
 }
 
