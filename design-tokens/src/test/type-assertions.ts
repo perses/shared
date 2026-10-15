@@ -51,6 +51,9 @@ type _ControlSizeLg = AssertAssignable<ExtractVar<typeof tokens.control.size.lg>
 type _RadiusMd = AssertAssignable<ExtractVar<typeof tokens.radius.md>, PersesTokenVar>;
 type _RadiusFull = AssertAssignable<ExtractVar<typeof tokens.radius.full>, PersesTokenVar>;
 
+type _ShadowOverlay = AssertAssignable<ExtractVar<typeof tokens.shadow.overlay>, PersesTokenVar>;
+type _ZIndexOverlay = AssertAssignable<ExtractVar<typeof tokens.zIndex.overlay>, PersesTokenVar>;
+
 type _FontFamily = AssertAssignable<ExtractVar<typeof tokens.font.family>, PersesTokenVar>;
 type _FontWeightBold = AssertAssignable<ExtractVar<typeof tokens.font.weight.bold>, PersesTokenVar>;
 type _FontSizeSm = AssertAssignable<ExtractVar<typeof tokens.font.size.sm>, PersesTokenVar>;
