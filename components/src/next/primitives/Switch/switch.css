@@ -48,7 +48,7 @@
   }
 
   .ps-Switch:focus-visible {
-    outline: 2px solid var(--perses-status-border-primary);
+    outline: var(--perses-border-width-md) solid var(--perses-status-border-primary);
     outline-offset: 2px;
   }
 
