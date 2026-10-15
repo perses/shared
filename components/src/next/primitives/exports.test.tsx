@@ -57,7 +57,7 @@ describe('primitives barrel exports', () => {
     const spinnerProps: SpinnerProps = {};
     const stackProps: StackProps = {};
     const switchProps: SwitchProps = {};
-    const textFieldProps: TextFieldProps = {};
+    const textFieldProps: TextFieldProps = { label: 'Name' };
 
     expect(alertProps).toBeDefined();
     expect(severity).toBe('info');
