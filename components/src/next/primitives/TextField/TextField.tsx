@@ -27,14 +27,12 @@ import './textField.css';
 const TEXTAREA = <textarea />;
 const TEXT_FIELD_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
 
-export interface TextFieldProps
+interface TextFieldBaseProps
   extends
-    Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'width' | 'height'>,
+    Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'width' | 'height' | 'aria-label' | 'aria-labelledby'>,
     SpacingProps,
     SizingProps,
     DisplayProps {
-  /** Visible label. Without it, provide `aria-label` or `aria-labelledby` so the field has an accessible name. */
-  label?: ReactNode;
   /** Hint or validation message, linked to the control through `aria-describedby`. */
   helperText?: ReactNode;
   /** Visual status. `error` also sets `aria-invalid` on the control. */
@@ -50,6 +48,32 @@ export interface TextFieldProps
   endAdornment?: ReactNode;
   'data-testid'?: string;
 }
+
+/**
+ * Accessible-name contract: at least one of `label`, `aria-label` or `aria-labelledby` is required so the control
+ * always has an accessible name.
+ */
+type TextFieldAccessibleName =
+  | {
+      /** Visible label, associated with the control through `htmlFor`/`id`. */
+      label: ReactNode;
+      'aria-label'?: string;
+      'aria-labelledby'?: string;
+    }
+  | {
+      label?: undefined;
+      /** Accessible name when there is no visible label. */
+      'aria-label': string;
+      'aria-labelledby'?: string;
+    }
+  | {
+      label?: undefined;
+      'aria-label'?: string;
+      /** Id of an external element that labels the control when there is no visible label. */
+      'aria-labelledby': string;
+    };
+
+export type TextFieldProps = TextFieldBaseProps & TextFieldAccessibleName;
 
 /**
  * Text input with label, helper text and adornments. Spacing, sizing and display style props apply to the root

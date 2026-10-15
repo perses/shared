@@ -105,7 +105,8 @@
 
   .ps-TextField[data-size='lg'] .ps-TextField__wrapper {
     min-height: var(--perses-control-size-lg);
-    padding: var(--perses-spacing-md) var(--perses-spacing-lg);
+    /* sm vertical padding so the md font + border stay inside min-height instead of overflowing it */
+    padding: var(--perses-spacing-sm) var(--perses-spacing-lg);
   }
   .ps-TextField[data-size='lg'] .ps-TextField__input {
     font-size: var(--perses-font-size-md);

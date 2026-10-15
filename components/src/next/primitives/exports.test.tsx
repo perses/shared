@@ -118,6 +118,7 @@ describe('primitives barrel exports', () => {
     const sharedSize: Size = 'md';
     const sharedStatus: Status = 'error';
     const textFieldProps: TextFieldProps = {};
+    const textFieldProps: TextFieldProps = { label: 'Name' };
 
     expect(alertProps).toBeDefined();
     expect(severity).toBe('info');

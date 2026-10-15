@@ -73,6 +73,16 @@ describe('TextField', () => {
     expect(handleChange).toHaveBeenCalled();
   });
 
+  it('works uncontrolled with defaultValue and still reports onChange', async () => {
+    const handleChange = vi.fn();
+    render(<TextField label="Name" defaultValue="a" onChange={handleChange} />);
+    const input = screen.getByLabelText('Name');
+    expect(input).toHaveValue('a');
+    await userEvent.type(input, 'bc');
+    expect(input).toHaveValue('abc');
+    expect(handleChange).toHaveBeenCalledTimes(2);
+  });
+
   it('supports disabled state', () => {
     render(<TextField label="Name" disabled />);
     expect(screen.getByLabelText('Name')).toBeDisabled();
@@ -84,9 +94,18 @@ describe('TextField', () => {
     expect(ref.current).toBeInstanceOf(HTMLInputElement);
   });
 
-  it('renders without a label', () => {
-    render(<TextField placeholder="Search" />);
+  it('renders without a visible label when aria-label is provided', () => {
+    render(<TextField aria-label="Search" placeholder="Search" />);
     expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
+  });
+
+  it('requires an accessible name at the type level', () => {
+    // @ts-expect-error -- one of label, aria-label or aria-labelledby is required
+    const missingName = <TextField placeholder="Search" />;
+    const withLabel = <TextField label="Name" />;
+    const withAriaLabel = <TextField aria-label="Name" />;
+    const withAriaLabelledBy = <TextField aria-labelledby="name-id" />;
+    expect([missingName, withLabel, withAriaLabel, withAriaLabelledBy]).toHaveLength(4);
   });
 
   it('renders a textarea when multiline is true', () => {

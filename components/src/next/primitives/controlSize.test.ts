@@ -78,4 +78,9 @@ describe('control size tokens', () => {
     );
     expect(rule).toContain(`min-height: var(--perses-control-size-${size});`);
   });
+
+  it('TextField size lg keeps vertical padding at --perses-spacing-sm so content fits inside the min-height', () => {
+    const rule = ruleFor(readCss('./TextField/textField.css'), `.ps-TextField[data-size='lg'] .ps-TextField__wrapper`);
+    expect(rule).toContain('padding: var(--perses-spacing-sm) var(--perses-spacing-lg);');
+  });
 });
