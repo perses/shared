@@ -45,6 +45,9 @@ type _TextAccent = AssertAssignable<ExtractVar<typeof tokens.text.accent>, Perse
 type _SpacingXs = AssertAssignable<ExtractVar<typeof tokens.spacing.xs>, PersesTokenVar>;
 type _SpacingLg = AssertAssignable<ExtractVar<typeof tokens.spacing.lg>, PersesTokenVar>;
 
+type _ControlSizeXs = AssertAssignable<ExtractVar<typeof tokens.control.size.xs>, PersesTokenVar>;
+type _ControlSizeLg = AssertAssignable<ExtractVar<typeof tokens.control.size.lg>, PersesTokenVar>;
+
 type _RadiusMd = AssertAssignable<ExtractVar<typeof tokens.radius.md>, PersesTokenVar>;
 type _RadiusFull = AssertAssignable<ExtractVar<typeof tokens.radius.full>, PersesTokenVar>;
 

@@ -19,26 +19,26 @@
   }
 
   :where(.ps-IconButton[data-size='xs']) {
-    width: 1rem;
-    height: 1rem;
+    width: var(--perses-control-size-xs);
+    height: var(--perses-control-size-xs);
     font-size: var(--perses-font-size-xs);
   }
 
   :where(.ps-IconButton[data-size='sm']) {
-    width: 2rem;
-    height: 2rem;
+    width: var(--perses-control-size-sm);
+    height: var(--perses-control-size-sm);
     font-size: var(--perses-font-size-sm);
   }
 
   :where(.ps-IconButton[data-size='md']) {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: var(--perses-control-size-md);
+    height: var(--perses-control-size-md);
     font-size: var(--perses-font-size-md);
   }
 
   :where(.ps-IconButton[data-size='lg']) {
-    width: 3rem;
-    height: 3rem;
+    width: var(--perses-control-size-lg);
+    height: var(--perses-control-size-lg);
     font-size: var(--perses-font-size-lg);
   }
 }
