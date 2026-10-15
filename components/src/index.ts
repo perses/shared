@@ -51,3 +51,4 @@ export * from './TransformsEditor';
 export * from './RefreshIntervalPicker';
 export * from './RepeatGrid';
 export * from './ValueMappingEditor';
+export * from './YAMLEditor';
