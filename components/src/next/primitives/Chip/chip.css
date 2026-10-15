@@ -27,16 +27,17 @@
     color: var(--chip-text);
     font-family: var(--perses-font-family);
     font-weight: var(--perses-font-weight-medium);
+    line-height: var(--perses-line-height-normal);
   }
 
   :where(.ps-Chip[data-size='xs']) {
-    height: var(--perses-control-size-xs);
+    min-height: var(--perses-control-size-xs);
     padding: var(--perses-spacing-0) var(--perses-spacing-sm);
     font-size: var(--perses-font-size-xs);
   }
 
   :where(.ps-Chip[data-size='sm']) {
-    height: var(--perses-control-size-sm);
+    min-height: var(--perses-control-size-sm);
     padding: var(--perses-spacing-0) var(--perses-spacing-md);
     font-size: var(--perses-font-size-sm);
   }
@@ -59,25 +60,25 @@
     --chip-text: var(--perses-status-text-secondary);
   }
 
-  .ps-Chip[data-status='success'] {
+  .ps-Chip[data-color='success'] {
     --chip-bg: var(--perses-status-bg-success);
     --chip-border: var(--perses-status-border-success);
     --chip-text: var(--perses-status-text-success);
   }
 
-  .ps-Chip[data-status='warning'] {
+  .ps-Chip[data-color='warning'] {
     --chip-bg: var(--perses-status-bg-warning);
     --chip-border: var(--perses-status-border-warning);
     --chip-text: var(--perses-status-text-warning);
   }
 
-  .ps-Chip[data-status='error'] {
+  .ps-Chip[data-color='error'] {
     --chip-bg: var(--perses-status-bg-error);
     --chip-border: var(--perses-status-border-error);
     --chip-text: var(--perses-status-text-error);
   }
 
-  .ps-Chip[data-status='info'] {
+  .ps-Chip[data-color='info'] {
     --chip-bg: var(--perses-status-bg-info);
     --chip-border: var(--perses-status-border-info);
     --chip-text: var(--perses-status-text-info);
