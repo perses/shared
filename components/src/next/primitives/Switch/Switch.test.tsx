@@ -16,7 +16,7 @@ import userEvent from '@testing-library/user-event';
 import { createRef } from 'react';
 import type { CSSProperties } from 'react';
 
-import type { Size } from '../types';
+import type { ColorVariant, Size, Status } from '../types';
 import { Switch } from './Switch';
 
 const noop = (): void => {};
@@ -98,6 +98,19 @@ describe('Switch', () => {
   it('defaults size to md when not provided', () => {
     render(<Switch checked={false} onCheckedChange={noop} />);
     expect(screen.getByRole('switch')).toHaveAttribute('data-size', 'md');
+  });
+
+  it.each<ColorVariant | Status>(['primary', 'secondary', 'error', 'warning', 'success', 'info'])(
+    'sets data-color to %s',
+    (color) => {
+      render(<Switch checked onCheckedChange={noop} color={color} aria-label="Feature" />);
+      expect(screen.getByRole('switch')).toHaveAttribute('data-color', color);
+    },
+  );
+
+  it('defaults color to primary when not provided', () => {
+    render(<Switch checked={false} onCheckedChange={noop} />);
+    expect(screen.getByRole('switch')).toHaveAttribute('data-color', 'primary');
   });
 
   it('renders a label wired to the control via a wrapping label element', () => {
