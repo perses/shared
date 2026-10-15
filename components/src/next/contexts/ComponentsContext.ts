@@ -28,6 +28,7 @@ import type { DividerProps } from '../primitives/Divider';
 import type { IconButtonProps } from '../primitives/IconButton';
 import type { SpinnerProps } from '../primitives/Spinner';
 import type { StackProps } from '../primitives/Stack';
+import type { SwitchProps } from '../primitives/Switch';
 
 type RefComponent<Props, Element> = ForwardRefExoticComponent<PropsWithoutRef<Props> & RefAttributes<Element>>;
 
@@ -39,6 +40,7 @@ export interface PersesComponents {
   Spinner: ComponentType<SpinnerProps>;
   Box: RefComponent<BoxProps, HTMLDivElement>;
   Stack: RefComponent<StackProps, HTMLDivElement>;
+  Switch: RefComponent<SwitchProps, HTMLElement>;
 }
 
 export interface PersesIcons {
@@ -76,6 +78,7 @@ export interface ComponentsProviderProps {
    *   Box: MyBox,
    *   Button: MyButton,
    *   IconButton: MyIconButton,
+   *   Switch: MySwitch,
    *   Divider: MyDivider,
    *   Spinner: MySpinner,
    *   Stack: MyStack,
