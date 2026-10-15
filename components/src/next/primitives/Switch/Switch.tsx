@@ -67,10 +67,6 @@ export interface SwitchProps
  * plus Base UI's own `data-checked`/`data-unchecked`/`data-disabled`/`data-readonly`/
  * `data-required`) so a host application can restyle or replace this primitive.
  *
- * Spacing, sizing and display props are responsive. They apply to the outermost element: the `<label>` wrapper when
- * `label` is set, otherwise the switch itself. When you pass a responsive object, include `default`. Breakpoints with
- * no value fall back to the browser's default, not the component's own styling.
- *
  * @example
  * // Controlled, no label
  * <Switch checked={enabled} onCheckedChange={setEnabled} />
@@ -97,19 +93,18 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
     style,
     id,
     'aria-labelledby': ariaLabelledBy,
+    'aria-label': ariaLabel,
     ...props
   },
   ref,
 ): ReactElement {
-  const {
-    className: styleClassName,
-    style: computedStyle,
-    rest,
-  } = applyStyleProps(props, SWITCH_STYLE_PROPS, label ? undefined : style);
+  const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, SWITCH_STYLE_PROPS, style);
   const generatedId = useId();
   const controlId = id ?? generatedId;
   const labelId = `${controlId}-label`;
   const hiddenInputId = `${controlId}-input`;
+  const hasLabel = Boolean(label);
+  const callerClassName = clsx(styleClassName, className);
   const rootElement = useMemo(() => <span id={controlId} />, [controlId]);
 
   const root = (
@@ -128,23 +123,24 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
       form={form}
       value={value}
       uncheckedValue={uncheckedValue}
-      aria-labelledby={ariaLabelledBy ?? (label ? labelId : undefined)}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledBy ?? (hasLabel && ariaLabel === undefined ? labelId : undefined)}
       data-size={size}
-      className={clsx('ps-Switch', !label && styleClassName, className)}
-      style={label ? style : computedStyle}
+      className={clsx('ps-Switch', !hasLabel && callerClassName)}
+      style={hasLabel ? undefined : computedStyle}
     >
       <BaseSwitch.Thumb className="ps-Switch__thumb" />
     </BaseSwitch.Root>
   );
 
-  if (!label) {
+  if (!hasLabel) {
     return root;
   }
 
   return (
-    <label className={clsx('ps-Switch__wrapper', styleClassName)} style={computedStyle} htmlFor={hiddenInputId}>
+    <label className={clsx('ps-Switch__wrapper', callerClassName)} style={computedStyle} htmlFor={hiddenInputId}>
       {root}
-      <span id={labelId} className="ps-Switch__label">
+      <span id={labelId} className="ps-Switch__label" aria-hidden={ariaLabel !== undefined || undefined}>
         {label}
       </span>
     </label>

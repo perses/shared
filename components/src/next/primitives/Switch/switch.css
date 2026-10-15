@@ -21,6 +21,14 @@
     cursor: pointer;
   }
 
+  .ps-Switch__wrapper:has(.ps-Switch[data-disabled]) {
+    cursor: not-allowed;
+  }
+
+  .ps-Switch__wrapper:has(.ps-Switch[data-readonly]) {
+    cursor: default;
+  }
+
   :where(.ps-Switch) {
     --ps-switch-padding: 2px;
     --ps-switch-thumb-size: 1.125rem;

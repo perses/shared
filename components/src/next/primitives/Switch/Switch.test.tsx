@@ -169,6 +169,12 @@ describe('Switch', () => {
       expect(screen.getByRole('switch', { name: 'Enable feature' })).toBeInTheDocument();
     });
 
+    it('prefers a caller-provided aria-label over the generated visible label', () => {
+      render(<Switch checked={false} onCheckedChange={noop} label="Visible" aria-label="Override" />);
+      expect(screen.getByRole('switch', { name: 'Override' })).toBeInTheDocument();
+      expect(screen.getByText('Visible')).toHaveAttribute('aria-hidden', 'true');
+    });
+
     it('prefers a caller-provided aria-labelledby over the generated label', () => {
       render(
         <>
@@ -294,6 +300,22 @@ describe('Switch', () => {
     it('lets the style prop override computed variables', () => {
       render(<Switch aria-label="Feature" width={100} style={WIDTH_OVERRIDE} />);
       expect(screen.getByRole('switch')).toHaveStyle({ '--ps-width': '50px' });
+    });
+
+    it('lets the style prop override computed variables on the wrapper when a label is rendered', () => {
+      render(<Switch label="Feature" width={100} style={WIDTH_OVERRIDE} />);
+
+      const wrapper = screen.getByRole('switch').closest('.ps-Switch__wrapper') as HTMLElement;
+      expect(wrapper).toHaveStyle({ '--ps-width': '50px' });
+      expect(screen.getByRole('switch')).not.toHaveStyle({ '--ps-width': '50px' });
+    });
+
+    it('applies a caller className to the wrapper, not the switch, when a label is rendered', () => {
+      render(<Switch label="Feature" className="custom" />);
+
+      const control = screen.getByRole('switch');
+      expect(control).not.toHaveClass('custom');
+      expect(control.closest('.ps-Switch__wrapper')).toHaveClass('custom');
     });
 
     it('does not leak style props to the DOM', () => {
