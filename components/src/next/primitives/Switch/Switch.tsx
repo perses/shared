@@ -18,7 +18,7 @@ import type { HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
-import type { Size } from '../types';
+import type { ColorVariant, Size, Status } from '../types';
 
 import '../system/layout.css';
 import '../system/spacing.css';
@@ -54,6 +54,8 @@ export interface SwitchProps
   uncheckedValue?: string;
   /** Visual size of the track and thumb. @default 'md' */
   size?: Size;
+  /** Color of the track when the switch is on. @default 'primary' */
+  color?: ColorVariant | Status;
   /** Renders a clickable label next to the switch, wrapping both in a single `<label>`. */
   label?: ReactNode;
 }
@@ -63,7 +65,7 @@ export interface SwitchProps
  * `role="switch"` element (never a native `<button>`) plus a visually-hidden
  * checkbox input that Base UI uses internally for form semantics.
  *
- * Visual and state variants are exposed as `data-*` attributes (`data-size`,
+ * Visual and state variants are exposed as `data-*` attributes (`data-size`, `data-color`,
  * plus Base UI's own `data-checked`/`data-unchecked`/`data-disabled`/`data-readonly`/
  * `data-required`) so a host application can restyle or replace this primitive.
  *
@@ -88,6 +90,7 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
     value,
     uncheckedValue,
     size = 'md',
+    color = 'primary',
     label,
     className,
     style,
@@ -126,6 +129,7 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
       aria-label={ariaLabel}
       aria-labelledby={ariaLabelledBy ?? (hasLabel && ariaLabel === undefined ? labelId : undefined)}
       data-size={size}
+      data-color={color}
       className={clsx('ps-Switch', !hasLabel && callerClassName)}
       style={hasLabel ? undefined : computedStyle}
     >

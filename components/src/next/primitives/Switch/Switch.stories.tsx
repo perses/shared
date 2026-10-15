@@ -16,10 +16,11 @@ import { useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
-import type { Size } from '../types';
+import type { ColorVariant, Size, Status } from '../types';
 import { Switch } from './Switch';
 
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
+const colors: Array<ColorVariant | Status> = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
 const noop = (): void => {};
 const row: CSSProperties = {
   display: 'flex',
@@ -43,6 +44,12 @@ function ControlledSwitch(): ReactElement {
   return <Switch checked={checked} onCheckedChange={setChecked} label="Enable feature" />;
 }
 
+// Starts on so the color is visible, but stays toggleable to show the off state.
+function ToggleableSwitch({ color }: { color: ColorVariant | Status }): ReactElement {
+  const [checked, setChecked] = useState(true);
+  return <Switch color={color} checked={checked} onCheckedChange={setChecked} label={color} />;
+}
+
 export const Basic: Story = () => (
   <Stack>
     <p>
@@ -57,10 +64,10 @@ export const Basic: Story = () => (
 );
 Basic.storyName = 'Basic';
 
-const variantsCode = `// size: 'xs' | 'sm' | 'md' | 'lg'
-// Columns: off, on, and without a visible label (aria-label)
+const variantsCode = `// size:  'xs' | 'sm' | 'md' | 'lg'
+// color: 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info' (applies to the on track)
 <Switch size="lg" checked onCheckedChange={setChecked} label="lg" />
-<Switch size="lg" aria-label="Enable feature" checked={checked} onCheckedChange={setChecked} />`;
+<Switch color="success" checked onCheckedChange={setChecked} label="success" />`;
 
 export const Variants: Story = () => (
   <Stack>
@@ -73,6 +80,13 @@ export const Variants: Story = () => (
             <Switch size={size} checked onCheckedChange={noop} label="On" />
             <Switch size={size} checked aria-label={`${size} switch without label`} onCheckedChange={noop} />
           </div>
+        ))}
+      </div>
+    </Sample>
+    <Sample title="Colors — toggle to compare the on and off track">
+      <div style={row}>
+        {colors.map((color) => (
+          <ToggleableSwitch key={color} color={color} />
         ))}
       </div>
     </Sample>
