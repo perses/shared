@@ -419,10 +419,10 @@ describe('Chip', () => {
       render(
         <>
           <Chip onClose={noop}>
-            <svg aria-label="icon" />
+            <svg aria-label="Online" />
           </Chip>
           <Chip onClose={noop} closeAriaLabel="Delete filter">
-            <svg aria-label="icon" />
+            <svg aria-label="Online" />
           </Chip>
         </>,
       );
