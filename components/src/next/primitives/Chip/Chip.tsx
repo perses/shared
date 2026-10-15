@@ -32,7 +32,7 @@ import '../system/layout.css';
 import '../system/spacing.css';
 import './chip.css';
 
-export type ChipColor = 'default' | ColorVariant;
+export type ChipColor = 'default' | ColorVariant | Status;
 export type ChipSize = 'xs' | 'sm';
 export type ChipVariant = 'solid' | 'outline';
 
@@ -40,10 +40,12 @@ export type ChipVariant = 'solid' | 'outline';
 const { maxWidth: _labelMaxWidth, ...chipSizingProps } = sizingProps;
 const CHIP_STYLE_PROPS = compileStyleProps([spacingProps, chipSizingProps, displayProps]);
 
-export interface ChipProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'color'>, SpacingProps, Omit<SizingProps, 'maxWidth'>, DisplayProps {
+// Event handlers are typed against `HTMLElement` because, with `onClick` and `onClose` combined, the action (and so
+// `event.currentTarget`) is the label span rather than the root div.
+interface ChipBaseProps
+  extends Omit<HTMLAttributes<HTMLElement>, 'color'>, SpacingProps, Omit<SizingProps, 'maxWidth'>, DisplayProps {
+  /** Palette of the chip. Status values are visual only; convey state through the label too. */
   color?: ChipColor;
-  status?: Status;
   size?: ChipSize;
   variant?: ChipVariant;
   disabled?: boolean;
@@ -57,13 +59,25 @@ export interface ChipProps
   maxWidth?: CSSProperties['maxWidth'];
 }
 
+/**
+ * Visible `children` give the chip its accessible name. A chip without children (for example, `startElement` only)
+ * must provide `aria-label` instead so it is never exposed as an unnamed element or button.
+ */
+type ChipAccessibleName =
+  | { children: ReactNode; 'aria-label'?: string }
+  | { children?: undefined; 'aria-label': string };
+
+export type ChipProps = ChipBaseProps & ChipAccessibleName;
+
+type ChipStyle = CSSProperties & { '--chip-label-max-width'?: string };
+
 function withLabelMaxWidth(
   style: CSSProperties | undefined,
   maxWidth: CSSProperties['maxWidth'],
-): CSSProperties | undefined {
+): ChipStyle | undefined {
   if (maxWidth === undefined) return style;
   const labelMaxWidth = typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth;
-  return { ...style, '--chip-label-max-width': labelMaxWidth } as CSSProperties;
+  return { ...style, '--chip-label-max-width': labelMaxWidth };
 }
 
 const defaultCloseIcon = <CloseIcon aria-hidden="true" />;
@@ -76,6 +90,8 @@ function getCloseAriaLabel(children: ReactNode): string {
  * A compact element that represents an input, attribute, or action.
  *
  * Spacing, sizing (except `maxWidth`, which limits the label) and display props behave as documented on `Box`.
+ *
+ * `children` is the normal case and names the chip; an icon-only chip (no children) requires `aria-label`.
  *
  * With `onClick`, the chip is exposed as a button. When `onClose` is also set, only the label acts as the button so
  * the close button is never nested inside another interactive element.
@@ -91,7 +107,6 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
   {
     children,
     color = 'default',
-    status,
     size = 'xs',
     variant = 'solid',
     startElement,
@@ -100,6 +115,7 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
     onClose,
     disabled = false,
     onClick,
+    onKeyDown,
     role,
     tabIndex,
     maxWidth,
@@ -109,8 +125,11 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
   },
   ref,
 ): ReactElement {
-  const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, CHIP_STYLE_PROPS, style);
-  const { onKeyDown, ...domProps } = rest as HTMLAttributes<HTMLDivElement>;
+  const {
+    className: styleClassName,
+    style: computedStyle,
+    rest: domProps,
+  } = applyStyleProps(props, CHIP_STYLE_PROPS, style);
   const resolvedStyle = withLabelMaxWidth(computedStyle, maxWidth);
 
   const interactive = Boolean(onClick);
@@ -128,11 +147,11 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
             event.stopPropagation();
             return;
           }
-          onClick?.(event as MouseEvent<HTMLDivElement>);
+          onClick?.(event);
         },
         onKeyDown: (event: KeyboardEvent<HTMLElement>): void => {
           if (event.target !== event.currentTarget) return;
-          if (!actionOnLabel) onKeyDown?.(event as KeyboardEvent<HTMLDivElement>);
+          if (!actionOnLabel) onKeyDown?.(event);
           if (event.defaultPrevented || disabled) return;
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault();
@@ -158,7 +177,6 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
       className={clsx('ps-Chip', styleClassName, className)}
       style={resolvedStyle}
       data-color={color}
-      data-status={status}
       data-size={size}
       data-variant={variant}
       data-clickable={interactive || undefined}

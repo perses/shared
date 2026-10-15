@@ -16,7 +16,6 @@ import userEvent from '@testing-library/user-event';
 import { createRef } from 'react';
 import type { CSSProperties, FormEvent, KeyboardEvent } from 'react';
 
-import type { Status } from '../types';
 import { Chip } from './Chip';
 import type { ChipColor, ChipSize, ChipVariant } from './Chip';
 
@@ -53,15 +52,9 @@ describe('Chip', () => {
     expect(screen.getByText('Secondary').closest('.ps-Chip')).toHaveAttribute('data-color', 'secondary');
   });
 
-  it('sets data-status attribute independently of color', () => {
-    render(
-      <Chip color="secondary" status="error">
-        Error
-      </Chip>,
-    );
-    const chip = screen.getByText('Error').closest('.ps-Chip');
-    expect(chip).toHaveAttribute('data-color', 'secondary');
-    expect(chip).toHaveAttribute('data-status', 'error');
+  it('accepts status palettes through color', () => {
+    render(<Chip color="error">Error</Chip>);
+    expect(screen.getByText('Error').closest('.ps-Chip')).toHaveAttribute('data-color', 'error');
   });
 
   it('defaults to the xs solid variant', () => {
@@ -251,8 +244,7 @@ describe('Chip', () => {
     render(
       <Chip
         ref={ref}
-        color="secondary"
-        status="warning"
+        color="warning"
         size="sm"
         variant="outline"
         disabled
@@ -268,8 +260,7 @@ describe('Chip', () => {
     const chip = screen.getByText('Production').closest('.ps-Chip');
     expect(ref.current).toBe(chip);
     expect(chip).toHaveClass('custom-chip');
-    expect(chip).toHaveAttribute('data-color', 'secondary');
-    expect(chip).toHaveAttribute('data-status', 'warning');
+    expect(chip).toHaveAttribute('data-color', 'warning');
     expect(chip).toHaveAttribute('data-size', 'sm');
     expect(chip).toHaveAttribute('data-variant', 'outline');
     expect(chip).toHaveAttribute('data-disabled', 'true');
@@ -368,20 +359,15 @@ describe('Chip', () => {
   });
 
   describe('combinations', () => {
-    const colors: ChipColor[] = ['default', 'primary', 'secondary'];
-    const statuses: Array<Status | undefined> = [undefined, 'error', 'warning', 'success', 'info'];
+    const colors: ChipColor[] = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
     const sizes: ChipSize[] = ['xs', 'sm'];
     const variants: ChipVariant[] = ['solid', 'outline'];
 
     it.each(
-      colors.flatMap((color) =>
-        statuses.flatMap((status) =>
-          sizes.flatMap((size) => variants.map((variant) => [color, status, size, variant] as const)),
-        ),
-      ),
-    )('renders color=%s status=%s size=%s variant=%s', (color, status, size, variant) => {
+      colors.flatMap((color) => sizes.flatMap((size) => variants.map((variant) => [color, size, variant] as const))),
+    )('renders color=%s size=%s variant=%s', (color, size, variant) => {
       render(
-        <Chip color={color} status={status} size={size} variant={variant}>
+        <Chip color={color} size={size} variant={variant}>
           Chip
         </Chip>,
       );
@@ -389,8 +375,6 @@ describe('Chip', () => {
       expect(chip).toHaveAttribute('data-color', color);
       expect(chip).toHaveAttribute('data-size', size);
       expect(chip).toHaveAttribute('data-variant', variant);
-      if (status) expect(chip).toHaveAttribute('data-status', status);
-      else expect(chip).not.toHaveAttribute('data-status');
     });
 
     it.each([
@@ -555,9 +539,22 @@ describe('Chip', () => {
       expect(screen.getByText('Static').closest('.ps-Chip')).toHaveAttribute('tabindex', '0');
     });
 
-    it('conveys status in the data attribute and keeps the text label as the accessible content', () => {
-      render(<Chip status="error">Failed</Chip>);
+    it('conveys a status color in the data attribute and keeps the text label as the accessible content', () => {
+      render(<Chip color="error">Failed</Chip>);
       expect(screen.getByText('Failed')).toBeVisible();
+    });
+
+    it('names an icon-only clickable chip from aria-label', () => {
+      render(<Chip startElement={startElement} aria-label="Filter by tag" onClick={noop} />);
+      const chip = screen.getByRole('button', { name: 'Filter by tag' });
+      expect(chip).toHaveClass('ps-Chip');
+      expect(chip).toContainElement(screen.getByTestId('start-element'));
+    });
+
+    it('requires aria-label when there are no children', () => {
+      // @ts-expect-error -- an icon-only chip without aria-label would be an unnamed element
+      render(<Chip startElement={startElement} onClick={noop} />);
+      expect(screen.getByTestId('start-element')).toBeInTheDocument();
     });
   });
 });

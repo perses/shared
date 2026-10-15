@@ -16,18 +16,12 @@ import { useCallback, useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
-import type { Status } from '../types';
 import { Chip } from './Chip';
 import type { ChipColor, ChipSize, ChipVariant } from './Chip';
 
-const colors: Array<ChipColor | Status> = ['default', 'primary', 'secondary', 'success', 'warning', 'error', 'info'];
-const statuses: Status[] = ['success', 'warning', 'error', 'info'];
+const colors: ChipColor[] = ['default', 'primary', 'secondary', 'success', 'warning', 'error', 'info'];
 const sizes: ChipSize[] = ['xs', 'sm'];
 const variants: ChipVariant[] = ['solid', 'outline'];
-
-function isStatus(value: ChipColor | Status): value is Status {
-  return (statuses as Array<ChipColor | Status>).includes(value);
-}
 
 function TagIcon(): ReactElement {
   return (
@@ -93,11 +87,11 @@ export const Basic: Story = () => (
 Basic.storyName = 'Basic';
 
 const variantsCode = `<Chip color="secondary" variant="outline" size="sm">Label</Chip>
-<Chip status="error">Label</Chip>`;
+<Chip color="error">Label</Chip>`;
 
 export const Variants: Story = () => (
   <Stack>
-    <Sample title="Colors, statuses, variants and sizes" code={variantsCode}>
+    <Sample title="Colors, variants and sizes" code={variantsCode}>
       <div style={sizeGroups}>
         {sizes.map((size) => (
           <div key={size}>
@@ -108,13 +102,7 @@ export const Variants: Story = () => (
                   <span style={rowLabel}>{variant}</span>
                   <div style={wrapRow}>
                     {colors.map((color) => (
-                      <Chip
-                        key={color}
-                        size={size}
-                        variant={variant}
-                        color={isStatus(color) ? undefined : color}
-                        status={isStatus(color) ? color : undefined}
-                      >
+                      <Chip key={color} size={size} variant={variant} color={color}>
                         {color}
                       </Chip>
                     ))}
