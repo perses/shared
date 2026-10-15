@@ -33,14 +33,14 @@ function ruleFor(css: string, selector: string): string {
 }
 
 describe('control size tokens', () => {
-  it.each(SIZES)('IconButton size %s is a square driven by --perses-size-control-%s', (size) => {
+  it.each(SIZES)('IconButton size %s is a square driven by --perses-control-size-%s', (size) => {
     const rule = ruleFor(readCss('./IconButton/iconButton.css'), `.ps-IconButton[data-size='${size}']`);
-    expect(rule).toContain(`width: var(--perses-size-control-${size});`);
-    expect(rule).toContain(`height: var(--perses-size-control-${size});`);
+    expect(rule).toContain(`width: var(--perses-control-size-${size});`);
+    expect(rule).toContain(`height: var(--perses-control-size-${size});`);
   });
 
-  it.each(SIZES)('Button size %s has min-height --perses-size-control-%s', (size) => {
+  it.each(SIZES)('Button size %s has min-height --perses-control-size-%s', (size) => {
     const rule = ruleFor(readCss('./Button/button.css'), `.ps-Button[data-size='${size}']`);
-    expect(rule).toContain(`min-height: var(--perses-size-control-${size});`);
+    expect(rule).toContain(`min-height: var(--perses-control-size-${size});`);
   });
 });

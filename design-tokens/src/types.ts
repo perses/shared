@@ -59,7 +59,7 @@ export type SpacingVar = `--perses-spacing-${SpacingScale}`;
 
 export type ControlSizeScale = 'xs' | 'sm' | 'md' | 'lg';
 
-export type ControlSizeVar = `--perses-size-control-${ControlSizeScale}`;
+export type ControlSizeVar = `--perses-control-size-${ControlSizeScale}`;
 
 export type BorderWidthScale = 'sm' | 'md';
 

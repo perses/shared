@@ -127,15 +127,15 @@ describe('tokens object', () => {
   });
 
   it('produces correct var() strings for control size tokens', () => {
-    expect(tokens.control.size.xs).toBe('var(--perses-size-control-xs)');
-    expect(tokens.control.size.sm).toBe('var(--perses-size-control-sm)');
-    expect(tokens.control.size.md).toBe('var(--perses-size-control-md)');
-    expect(tokens.control.size.lg).toBe('var(--perses-size-control-lg)');
+    expect(tokens.control.size.xs).toBe('var(--perses-control-size-xs)');
+    expect(tokens.control.size.sm).toBe('var(--perses-control-size-sm)');
+    expect(tokens.control.size.md).toBe('var(--perses-control-size-md)');
+    expect(tokens.control.size.lg).toBe('var(--perses-control-size-lg)');
   });
 
   it('has all expected top-level categories', () => {
     expect(Object.keys(tokens)).toEqual(
-      expect.arrayContaining(['color', 'bg', 'border', 'text', 'status', 'spacing', 'size', 'radius', 'font']),
+      expect.arrayContaining(['color', 'bg', 'border', 'text', 'status', 'spacing', 'control', 'radius', 'font']),
     );
   });
 });

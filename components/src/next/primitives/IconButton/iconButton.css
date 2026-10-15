@@ -19,26 +19,26 @@
   }
 
   :where(.ps-IconButton[data-size='xs']) {
-    width: var(--perses-size-control-xs);
-    height: var(--perses-size-control-xs);
+    width: var(--perses-control-size-xs);
+    height: var(--perses-control-size-xs);
     font-size: var(--perses-font-size-xs);
   }
 
   :where(.ps-IconButton[data-size='sm']) {
-    width: var(--perses-size-control-sm);
-    height: var(--perses-size-control-sm);
+    width: var(--perses-control-size-sm);
+    height: var(--perses-control-size-sm);
     font-size: var(--perses-font-size-sm);
   }
 
   :where(.ps-IconButton[data-size='md']) {
-    width: var(--perses-size-control-md);
-    height: var(--perses-size-control-md);
+    width: var(--perses-control-size-md);
+    height: var(--perses-control-size-md);
     font-size: var(--perses-font-size-md);
   }
 
   :where(.ps-IconButton[data-size='lg']) {
-    width: var(--perses-size-control-lg);
-    height: var(--perses-size-control-lg);
+    width: var(--perses-control-size-lg);
+    height: var(--perses-control-size-lg);
     font-size: var(--perses-font-size-lg);
   }
 }

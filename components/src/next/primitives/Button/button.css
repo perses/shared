@@ -23,26 +23,26 @@
   }
   /* ---- Sizes ---- */
   :where(.ps-Button[data-size='xs']) {
-    min-height: var(--perses-size-control-xs);
+    min-height: var(--perses-control-size-xs);
     padding-right: var(--perses-spacing-sm);
     padding-left: var(--perses-spacing-sm);
     font-size: var(--perses-font-size-xs);
   }
 
   :where(.ps-Button[data-size='sm']) {
-    min-height: var(--perses-size-control-sm);
+    min-height: var(--perses-control-size-sm);
     padding: var(--perses-spacing-xs) var(--perses-spacing-md);
     font-size: var(--perses-font-size-xs);
   }
 
   :where(.ps-Button[data-size='md']) {
-    min-height: var(--perses-size-control-md);
+    min-height: var(--perses-control-size-md);
     padding: var(--perses-spacing-sm) var(--perses-spacing-lg);
     font-size: var(--perses-font-size-sm);
   }
 
   :where(.ps-Button[data-size='lg']) {
-    min-height: var(--perses-size-control-lg);
+    min-height: var(--perses-control-size-lg);
     padding: var(--perses-spacing-sm) var(--perses-spacing-xl);
     font-size: var(--perses-font-size-md);
   }
