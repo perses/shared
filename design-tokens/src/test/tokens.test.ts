@@ -127,10 +127,10 @@ describe('tokens object', () => {
   });
 
   it('produces correct var() strings for control size tokens', () => {
-    expect(tokens.size.control.xs).toBe('var(--perses-size-control-xs)');
-    expect(tokens.size.control.sm).toBe('var(--perses-size-control-sm)');
-    expect(tokens.size.control.md).toBe('var(--perses-size-control-md)');
-    expect(tokens.size.control.lg).toBe('var(--perses-size-control-lg)');
+    expect(tokens.control.size.xs).toBe('var(--perses-size-control-xs)');
+    expect(tokens.control.size.sm).toBe('var(--perses-size-control-sm)');
+    expect(tokens.control.size.md).toBe('var(--perses-size-control-md)');
+    expect(tokens.control.size.lg).toBe('var(--perses-size-control-lg)');
   });
 
   it('has all expected top-level categories', () => {

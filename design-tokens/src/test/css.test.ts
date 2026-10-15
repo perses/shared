@@ -84,7 +84,8 @@ describe('CSS primitive dimension variables', () => {
   it('defines control size variables in rem', () => {
     const expected = { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '3rem' };
     for (const [name, value] of Object.entries(expected)) {
-      expect(tokensCss).toMatch(new RegExp(`--perses-size-control-${name}:\\s*${value};`));
+      const escapedValue = value.replace(/\./g, '\\.');
+      expect(tokensCss).toMatch(new RegExp(`--perses-size-control-${name}:\\s*${escapedValue};`));
     }
   });
 });

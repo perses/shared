@@ -22,7 +22,14 @@ const SIZES = ['xs', 'sm', 'md', 'lg'] as const;
 function ruleFor(css: string, selector: string): string {
   const start = css.indexOf(selector);
   if (start < 0) throw new Error(`missing rule ${selector}`);
-  return css.slice(start, css.indexOf('}', start));
+  const open = css.indexOf('{', start);
+  if (open < 0) throw new Error(`missing rule body for ${selector}`);
+  let depth = 0;
+  for (let i = open; i < css.length; i++) {
+    if (css[i] === '{') depth++;
+    else if (css[i] === '}' && --depth === 0) return css.slice(open + 1, i);
+  }
+  throw new Error(`unterminated rule for ${selector}`);
 }
 
 describe('control size tokens', () => {

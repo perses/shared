@@ -24,14 +24,14 @@
   /* ---- Sizes ---- */
   :where(.ps-Button[data-size='xs']) {
     min-height: var(--perses-size-control-xs);
-    padding-right: var(--perses-spacing-xs);
-    padding-left: var(--perses-spacing-xs);
+    padding-right: var(--perses-spacing-sm);
+    padding-left: var(--perses-spacing-sm);
     font-size: var(--perses-font-size-xs);
   }
 
   :where(.ps-Button[data-size='sm']) {
     min-height: var(--perses-size-control-sm);
-    padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
+    padding: var(--perses-spacing-xs) var(--perses-spacing-md);
     font-size: var(--perses-font-size-xs);
   }
 
@@ -43,7 +43,7 @@
 
   :where(.ps-Button[data-size='lg']) {
     min-height: var(--perses-size-control-lg);
-    padding: var(--perses-spacing-md) var(--perses-spacing-xl);
+    padding: var(--perses-spacing-sm) var(--perses-spacing-xl);
     font-size: var(--perses-font-size-md);
   }
 
