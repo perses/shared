@@ -24,6 +24,7 @@ import type {
 import type { AlertProps } from '../primitives/Alert';
 import type { BoxProps } from '../primitives/Box';
 import type { ButtonProps } from '../primitives/Button';
+import type { ChipProps } from '../primitives/Chip';
 import type { DividerProps } from '../primitives/Divider';
 import type { IconButtonProps } from '../primitives/IconButton';
 import type { SpinnerProps } from '../primitives/Spinner';
@@ -36,6 +37,7 @@ export interface PersesComponents {
   Button: RefComponent<ButtonProps, HTMLButtonElement>;
   IconButton: RefComponent<IconButtonProps, HTMLButtonElement>;
   Alert: RefComponent<AlertProps, HTMLDivElement>;
+  Chip: RefComponent<ChipProps, HTMLDivElement>;
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;
   Box: RefComponent<BoxProps, HTMLDivElement>;
@@ -77,6 +79,7 @@ export interface ComponentsProviderProps {
    *   Alert: MyAlert,
    *   Box: MyBox,
    *   Button: MyButton,
+   *   Chip: MyChip,
    *   IconButton: MyIconButton,
    *   Switch: MySwitch,
    *   Divider: MyDivider,

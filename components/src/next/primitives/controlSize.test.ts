@@ -43,4 +43,9 @@ describe('control size tokens', () => {
     const rule = ruleFor(readCss('./Button/button.css'), `.ps-Button[data-size='${size}']`);
     expect(rule).toContain(`min-height: var(--perses-control-size-${size});`);
   });
+
+  it.each(['xs', 'sm'] as const)('Chip size %s has min-height --perses-control-size-%s', (size) => {
+    const rule = ruleFor(readCss('./Chip/chip.css'), `.ps-Chip[data-size='${size}']`);
+    expect(rule).toContain(`min-height: var(--perses-control-size-${size});`);
+  });
 });

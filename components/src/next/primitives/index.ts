@@ -14,6 +14,7 @@
 export * from './Alert';
 export * from './Box';
 export * from './Button';
+export * from './Chip';
 export * from './Divider';
 export * from './Icon';
 export * from './IconButton';
