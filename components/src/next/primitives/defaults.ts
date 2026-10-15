@@ -20,6 +20,7 @@ import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons';
 import { IconButton } from './IconButton';
 import { Spinner } from './Spinner';
 import { Stack } from './Stack';
+import { Switch } from './Switch';
 
 export const defaultComponents: PersesComponents = {
   Button,
@@ -29,6 +30,7 @@ export const defaultComponents: PersesComponents = {
   Divider,
   Spinner,
   Stack,
+  Switch,
 };
 
 export const defaultIcons: PersesIcons = {
