@@ -101,6 +101,15 @@ export const tokens = {
     '4xl': 'var(--perses-spacing-4xl)',
   },
 
+  control: {
+    size: {
+      xs: 'var(--perses-control-size-xs)',
+      sm: 'var(--perses-control-size-sm)',
+      md: 'var(--perses-control-size-md)',
+      lg: 'var(--perses-control-size-lg)',
+    },
+  },
+
   radius: {
     none: 'var(--perses-radius-none)',
     sm: 'var(--perses-radius-sm)',

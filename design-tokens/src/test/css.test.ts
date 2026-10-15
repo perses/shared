@@ -80,6 +80,14 @@ describe('CSS primitive dimension variables', () => {
     expect(tokensCss).toContain('--perses-border-width-sm');
     expect(tokensCss).toContain('--perses-border-width-md');
   });
+
+  it('defines control size variables in rem', () => {
+    const expected = { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '3rem' };
+    for (const [name, value] of Object.entries(expected)) {
+      const escapedValue = value.replace(/\./g, '\\.');
+      expect(tokensCss).toMatch(new RegExp(`--perses-control-size-${name}:\\s*${escapedValue};`));
+    }
+  });
 });
 
 describe('CSS semantic variables', () => {
