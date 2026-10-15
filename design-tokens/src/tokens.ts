@@ -121,9 +121,12 @@ export const tokens = {
     },
   },
 
-  elevation: {
-    shadowOverlay: 'var(--perses-shadow-overlay)',
-    zIndexOverlay: 'var(--perses-z-index-overlay)',
+  shadow: {
+    overlay: 'var(--perses-shadow-overlay)',
+  },
+
+  zIndex: {
+    overlay: 'var(--perses-z-index-overlay)',
   },
 
   radius: {

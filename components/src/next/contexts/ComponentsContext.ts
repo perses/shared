@@ -46,7 +46,8 @@ export interface PersesComponents {
   Box: RefComponent<BoxProps, HTMLDivElement>;
   Stack: RefComponent<StackProps, HTMLDivElement>;
   Switch: RefComponent<SwitchProps, HTMLElement>;
-  Tooltip: ComponentType<TooltipProps>;
+  /** The ref targets the tooltip popup `div`, not the trigger element. */
+  Tooltip: RefComponent<TooltipProps, HTMLDivElement>;
 }
 
 export interface PersesIcons {

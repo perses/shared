@@ -28,12 +28,16 @@ export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
  * (spacing, sizing, display); style the trigger directly. Extra props and `ref` are applied to the popup.
  */
 export interface TooltipProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
-  /** Popup content. It supplements, and should not replace, the trigger's accessible name. */
+  /**
+   * Popup content. It supplements, and should not replace, the trigger's accessible name.
+   * `''`, `false`, `null`, or `undefined` disables the tooltip and renders only the trigger,
+   * so conditional titles like `title={cond && 'text'}` work.
+   */
   title: ReactNode;
   /** The trigger. It must be a single element that can receive a ref and focus (e.g. a button or link). */
   children: ReactElement;
   placement?: TooltipPlacement;
-  /** Hover delay in milliseconds before the popup opens. */
+  /** Hover delay in milliseconds before the popup opens. Defaults to 400. */
   delay?: number;
 }
 
@@ -44,7 +48,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip
   const popupId = useId();
   const [open, setOpen] = useState(false);
 
-  if (title === '' || title === null || title === undefined) {
+  if (title === '' || title === false || title === null || title === undefined) {
     return children;
   }
 

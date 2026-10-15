@@ -140,9 +140,27 @@ describe('tokens object', () => {
     expect(tokens.control.selectionSize.lg).toBe('var(--perses-selection-control-size-lg)');
   });
 
+  it('mirrors the CSS variable path for overlay shadow and z-index tokens', () => {
+    expect(tokens.shadow.overlay).toBe('var(--perses-shadow-overlay)');
+    expect(tokens.zIndex.overlay).toBe('var(--perses-z-index-overlay)');
+    expect(tokens).not.toHaveProperty('elevation');
+  });
+
   it('has all expected top-level categories', () => {
     expect(Object.keys(tokens)).toEqual(
-      expect.arrayContaining(['color', 'bg', 'border', 'text', 'status', 'spacing', 'control', 'radius', 'font']),
+      expect.arrayContaining([
+        'color',
+        'bg',
+        'border',
+        'text',
+        'status',
+        'spacing',
+        'control',
+        'shadow',
+        'zIndex',
+        'radius',
+        'font',
+      ]),
     );
   });
 });
