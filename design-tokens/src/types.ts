@@ -57,6 +57,10 @@ export type SpacingScale = '0' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl
 
 export type SpacingVar = `--perses-spacing-${SpacingScale}`;
 
+export type ControlSizeScale = 'xs' | 'sm' | 'md' | 'lg';
+
+export type ControlSizeVar = `--perses-control-size-${ControlSizeScale}`;
+
 export type BorderWidthScale = 'sm' | 'md';
 
 export type BorderWidthVar = `--perses-border-width-${BorderWidthScale}`;
@@ -89,6 +93,7 @@ export type PersesTokenVar =
   | StatusIconVar
   | StatusSolidVar
   | SpacingVar
+  | ControlSizeVar
   | BorderWidthVar
   | RadiusVar
   | FontVar;

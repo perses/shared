@@ -15,7 +15,7 @@ import type { Story } from '@ladle/react';
 import type { ComponentType, CSSProperties, SVGProps } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
-import type { ButtonVariant } from '../Button/Button';
+import type { ButtonVariant } from '../Button';
 import * as Icons from '../Icon/icons';
 import { CloseIcon } from '../Icon/icons';
 import type { ColorVariant, Size, Status } from '../types';
