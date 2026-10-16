@@ -54,22 +54,34 @@ export function assembleTransform(
 
   let x = mousePos.page.x + cursorPaddingX; // Default to right side of the cursor
   let y = mousePos.page.y + cursorPaddingY;
+  let cursorBaseY = mousePos.page.y;
 
   // If containerElement is defined, adjust coordinates relative to the container
   if (containerElement) {
     const containerRect = containerElement.getBoundingClientRect();
     x = x - containerRect.left + containerElement.scrollLeft;
     y = y - containerRect.top + containerElement.scrollTop;
+    cursorBaseY = cursorBaseY - containerRect.top + containerElement.scrollTop;
 
-    // Ensure tooltip does not go out of the container's bottom
+    // Ensure tooltip does not go out of the container's bottom: flip it above the
+    // cursor so it keeps pointing at the hovered marker instead of covering it.
     const containerBottom = containerRect.top + containerElement.scrollHeight;
     if (y + effectiveHeight > containerBottom) {
-      y = Math.max(containerBottom - effectiveHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
+      y = Math.max(cursorBaseY - effectiveHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
+      // When it does not fit above the cursor either, fall back to the container bottom.
+      if (y + effectiveHeight > containerBottom) {
+        y = Math.max(containerBottom - effectiveHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
+      }
     }
   } else {
-    // Ensure tooltip does not go out of the screen on the bottom
+    // Ensure tooltip does not go out of the screen on the bottom: flip it above the
+    // cursor so it keeps pointing at the hovered marker instead of covering it.
     if (y + effectiveHeight > window.innerHeight + window.scrollY) {
-      y = Math.max(window.innerHeight + window.scrollY - effectiveHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
+      y = Math.max(cursorBaseY - effectiveHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
+      // When it does not fit above the cursor either, fall back to the screen bottom.
+      if (y + effectiveHeight > window.innerHeight + window.scrollY) {
+        y = Math.max(window.innerHeight + window.scrollY - effectiveHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
+      }
     }
   }
 
