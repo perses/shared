@@ -166,8 +166,30 @@ export function TimeRangeControls({
     return { start: newStart, end: newEnd };
   };
 
-  const setHalfTimeRange = (): void => setTimeRange(halfTimeRange());
-  const setDoubleTimeRange = (): void => setTimeRange(doubleTimeRange());
+  // For a "last X" range, zoom to the neighbouring "last Y" preset instead of freezing it into absolute timestamps.
+  // Returns undefined when the range is not a "last X" one or when there is no preset left in that direction.
+  const neighbourRelativeTimeRange = (direction: 'in' | 'out'): RelativeTimeRange | undefined => {
+    if (!('pastDuration' in timeRange) || timeRange.end !== undefined) {
+      return undefined;
+    }
+    const currentMs = fromDurationToMillis(timeRange.pastDuration);
+    let best: { value: RelativeTimeRange; ms: number } | undefined;
+    for (const option of timePresetsValue) {
+      if (option.value.end !== undefined) {
+        continue;
+      }
+      const ms = fromDurationToMillis(option.value.pastDuration);
+      const isCandidate = direction === 'out' ? ms > currentMs : ms < currentMs;
+      const isCloser = best === undefined || (direction === 'out' ? ms < best.ms : ms > best.ms);
+      if (isCandidate && isCloser) {
+        best = { value: option.value, ms };
+      }
+    }
+    return best?.value;
+  };
+
+  const setHalfTimeRange = (): void => setTimeRange(neighbourRelativeTimeRange('in') ?? halfTimeRange());
+  const setDoubleTimeRange = (): void => setTimeRange(neighbourRelativeTimeRange('out') ?? doubleTimeRange());
 
   const handleTimeZoneChange = useCallback(
     (tz: TimeZoneOption) => {
