@@ -108,6 +108,12 @@ export const tokens = {
       md: 'var(--perses-control-size-md)',
       lg: 'var(--perses-control-size-lg)',
     },
+    selectionSize: {
+      xs: 'var(--perses-selection-control-size-xs)',
+      sm: 'var(--perses-selection-control-size-sm)',
+      md: 'var(--perses-selection-control-size-md)',
+      lg: 'var(--perses-selection-control-size-lg)',
+    },
   },
 
   radius: {

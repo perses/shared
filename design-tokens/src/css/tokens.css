@@ -125,7 +125,14 @@
     --perses-control-size-xs: 1.5rem;
     --perses-control-size-sm: 2rem;
     --perses-control-size-md: 2.5rem;
-    --perses-control-size-lg: 3rem;
+    --perses-control-size-lg: 2.75rem;
+
+    /* ---- Control: Selection size (rem) ---- */
+    /* Outer box/height of selection controls (Switch, Checkbox, Radio), on a 4px grid. Not for gaps or padding. */
+    --perses-selection-control-size-xs: 1rem;
+    --perses-selection-control-size-sm: 1.25rem;
+    --perses-selection-control-size-md: 1.5rem;
+    --perses-selection-control-size-lg: 2rem;
 
     /* ---- Border Width ---- */
     --perses-border-width-sm: 1px;
