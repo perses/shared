@@ -14,7 +14,7 @@
 import { Switch as BaseSwitch } from '@base-ui/react/switch';
 import clsx from 'clsx';
 import { forwardRef, useId, useMemo } from 'react';
-import type { HTMLAttributes, ReactElement, ReactNode } from 'react';
+import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
@@ -26,9 +26,17 @@ import './switch.css';
 
 const SWITCH_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
 
+export interface SwitchStyle extends CSSProperties {
+  /** Per-step size override; falls back to the shared selection-control scale. */
+  '--perses-switch-size-xs'?: string;
+  '--perses-switch-size-sm'?: string;
+  '--perses-switch-size-md'?: string;
+  '--perses-switch-size-lg'?: string;
+}
+
 export interface SwitchProps
   extends
-    Omit<HTMLAttributes<HTMLElement>, 'onChange' | 'children' | 'defaultChecked'>,
+    Omit<HTMLAttributes<HTMLElement>, 'onChange' | 'children' | 'defaultChecked' | 'style'>,
     SpacingProps,
     SizingProps,
     DisplayProps {
@@ -58,6 +66,8 @@ export interface SwitchProps
   color?: ColorVariant | Status;
   /** Renders a clickable label next to the switch, wrapping both in a single `<label>`. */
   label?: ReactNode;
+  /** Inline style, extended with typed selection-control size override custom properties. */
+  style?: SwitchStyle;
 }
 
 /**

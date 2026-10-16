@@ -18,6 +18,7 @@ import type { CSSProperties } from 'react';
 
 import type { ColorVariant, Size, Status } from '../types';
 import { Switch } from './Switch';
+import type { SwitchStyle } from './Switch';
 
 const noop = (): void => {};
 const RESPONSIVE_WIDTH = { default: 100, md: 200 };
@@ -98,6 +99,19 @@ describe('Switch', () => {
   it('defaults size to md when not provided', () => {
     render(<Switch checked={false} onCheckedChange={noop} />);
     expect(screen.getByRole('switch')).toHaveAttribute('data-size', 'md');
+  });
+
+  it('applies a per-size override custom property to the control', () => {
+    const style: SwitchStyle = { '--perses-switch-size-md': '48px' };
+    render(<Switch aria-label="Toggle" size="md" style={style} />);
+    expect(screen.getByRole('switch').style.getPropertyValue('--perses-switch-size-md')).toBe('48px');
+  });
+
+  it('places a per-size override on the wrapper so it inherits to the control when labeled', () => {
+    const style: SwitchStyle = { '--perses-switch-size-md': '48px' };
+    const { container } = render(<Switch size="md" label="Toggle" style={style} />);
+    const wrapper = container.querySelector<HTMLElement>('.ps-Switch__wrapper');
+    expect(wrapper?.style.getPropertyValue('--perses-switch-size-md')).toBe('48px');
   });
 
   it.each<ColorVariant | Status>(['primary', 'secondary', 'error', 'warning', 'success', 'info'])(

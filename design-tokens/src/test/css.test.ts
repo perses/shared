@@ -82,10 +82,18 @@ describe('CSS primitive dimension variables', () => {
   });
 
   it('defines control size variables in rem', () => {
-    const expected = { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '3rem' };
+    const expected = { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '2.75rem' };
     for (const [name, value] of Object.entries(expected)) {
       const escapedValue = value.replace(/\./g, '\\.');
       expect(tokensCss).toMatch(new RegExp(`--perses-control-size-${name}:\\s*${escapedValue};`));
+    }
+  });
+
+  it('defines selection control size variables in rem', () => {
+    const expected = { xs: '1rem', sm: '1.25rem', md: '1.5rem', lg: '2rem' };
+    for (const [name, value] of Object.entries(expected)) {
+      const escapedValue = value.replace(/\./g, '\\.');
+      expect(tokensCss).toMatch(new RegExp(`--perses-selection-control-size-${name}:\\s*${escapedValue};`));
     }
   });
 });

@@ -27,12 +27,13 @@ describe('ComponentsProvider', () => {
   it('renders components passed in via props', () => {
     function TestConsumer(): ReactElement {
       const {
-        components: { Button, Alert },
+        components: { Button, Alert, Checkbox },
       } = useComponents();
       return (
         <div>
           <Button>Default Button</Button>
           <Alert>Default Alert</Alert>
+          <Checkbox label="Default Checkbox" />
         </div>
       );
     }
@@ -45,6 +46,7 @@ describe('ComponentsProvider', () => {
 
     expect(screen.getByText('Default Button')).toBeInTheDocument();
     expect(screen.getByText('Default Alert')).toBeInTheDocument();
+    expect(screen.getByRole('checkbox', { name: 'Default Checkbox' })).toBeInTheDocument();
   });
 
   it('supports overriding an individual component by spreading the defaults', () => {

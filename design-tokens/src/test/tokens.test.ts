@@ -133,6 +133,13 @@ describe('tokens object', () => {
     expect(tokens.control.size.lg).toBe('var(--perses-control-size-lg)');
   });
 
+  it('produces correct var() strings for selection control size tokens', () => {
+    expect(tokens.control.selectionSize.xs).toBe('var(--perses-selection-control-size-xs)');
+    expect(tokens.control.selectionSize.sm).toBe('var(--perses-selection-control-size-sm)');
+    expect(tokens.control.selectionSize.md).toBe('var(--perses-selection-control-size-md)');
+    expect(tokens.control.selectionSize.lg).toBe('var(--perses-selection-control-size-lg)');
+  });
+
   it('has all expected top-level categories', () => {
     expect(Object.keys(tokens)).toEqual(
       expect.arrayContaining(['color', 'bg', 'border', 'text', 'status', 'spacing', 'control', 'radius', 'font']),
