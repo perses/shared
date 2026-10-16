@@ -58,11 +58,13 @@ describe('assembleTransform', () => {
   });
 
   describe('when tooltip size is unknown (first render)', () => {
-    it('uses TOOLTIP_MAX_HEIGHT as fallback and clamps against the viewport bottom', () => {
+    it('uses TOOLTIP_MAX_HEIGHT as fallback and flips above the cursor when it does not fit below', () => {
       const mousePos = makeMousePos(800, 400);
       const result = parseTransform(assembleTransform(mousePos, null, 0, 0));
       expect(result).not.toBeNull();
-      expect(result!.y).toBe(VIEWPORT_HEIGHT - TOOLTIP_MAX_HEIGHT - 16);
+      // The tooltip (650 tall at the fallback max size) does not fit below the cursor nor
+      // above it, so it falls back to the top of the viewport.
+      expect(result!.y).toBe(4);
       // Worst-case bottom (y + max height) must still fit inside the viewport.
       expect(result!.y + TOOLTIP_MAX_HEIGHT).toBeLessThanOrEqual(VIEWPORT_HEIGHT);
     });
@@ -82,12 +84,21 @@ describe('assembleTransform', () => {
       expect(result).toEqual({ x: 400 + 32, y: 100 + 16 });
     });
 
-    it('clamps y so the tooltip does not extend past the viewport bottom', () => {
+    it('flips the tooltip above the cursor when it would extend past the viewport bottom', () => {
       const mousePos = makeMousePos(400, 600);
       const result = parseTransform(assembleTransform(mousePos, null, 400, 300));
       expect(result).not.toBeNull();
-      expect(result!.y).toBe(VIEWPORT_HEIGHT - 400 - 16);
+      expect(result!.y).toBe(600 - 400 - 16);
       expect(result!.y + 400).toBeLessThanOrEqual(VIEWPORT_HEIGHT);
+    });
+
+    it('flips above without covering the hovered marker when the cursor is low in the viewport', () => {
+      const mousePos = makeMousePos(400, 650);
+      const result = parseTransform(assembleTransform(mousePos, null, 400, 300));
+      expect(result).not.toBeNull();
+      // The whole tooltip ends above the cursor, so it never covers the hovered marker.
+      expect(result!.y + 400).toBeLessThanOrEqual(650);
+      expect(result!.y).toBe(650 - 400 - 16);
     });
 
     it('flips the tooltip to the left of the cursor when it would overflow the right edge', () => {
