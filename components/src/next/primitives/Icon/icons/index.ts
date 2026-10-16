@@ -56,3 +56,5 @@ export { UnfoldLessHorizontalIcon } from './UnfoldLessHorizontalIcon';
 export { UnfoldMoreIcon } from './UnfoldMoreIcon';
 export { UnfoldMoreHorizontalIcon } from './UnfoldMoreHorizontalIcon';
 export { ViewColumnIcon } from './ViewColumnIcon';
+export { ChevronLeftIcon } from './ChevronLeftIcon';
+export { SortArrowIcon } from './SortArrowIcon';

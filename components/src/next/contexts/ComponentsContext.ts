@@ -32,6 +32,19 @@ import type { SpinnerProps } from '../primitives/Spinner';
 import type { StackProps } from '../primitives/Stack';
 import type { SwitchProps } from '../primitives/Switch';
 import type { TooltipProps } from '../primitives/Tooltip';
+import type {
+  TableProps,
+  TableHeadProps,
+  TableBodyProps,
+  TableFooterProps,
+  TableRowProps,
+  TableCellProps,
+  TableContainerProps,
+  TableCheckboxProps,
+  TableRowExpandButtonProps,
+  TableSortLabelProps,
+  TablePaginationProps,
+} from '../primitives/Table';
 
 type RefComponent<Props, Element> = ForwardRefExoticComponent<PropsWithoutRef<Props> & RefAttributes<Element>>;
 
@@ -46,8 +59,18 @@ export interface PersesComponents {
   Box: RefComponent<BoxProps, HTMLDivElement>;
   Stack: RefComponent<StackProps, HTMLDivElement>;
   Switch: RefComponent<SwitchProps, HTMLElement>;
-  /** The ref targets the tooltip popup `div`, not the trigger element. */
   Tooltip: RefComponent<TooltipProps, HTMLDivElement>;
+  Table: RefComponent<TableProps, HTMLTableElement>;
+  TableHead: RefComponent<TableHeadProps, HTMLTableSectionElement>;
+  TableBody: RefComponent<TableBodyProps, HTMLTableSectionElement>;
+  TableFooter: RefComponent<TableFooterProps, HTMLTableSectionElement>;
+  TableRow: RefComponent<TableRowProps, HTMLTableRowElement>;
+  TableCell: RefComponent<TableCellProps, HTMLTableCellElement>;
+  TableContainer: RefComponent<TableContainerProps, HTMLDivElement>;
+  TableCheckbox: RefComponent<TableCheckboxProps, HTMLInputElement>;
+  TableRowExpandButton: RefComponent<TableRowExpandButtonProps, HTMLButtonElement>;
+  TableSortLabel: RefComponent<TableSortLabelProps, HTMLButtonElement>;
+  TablePagination: RefComponent<TablePaginationProps, HTMLDivElement>;
 }
 
 export interface PersesIcons {
