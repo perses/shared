@@ -24,6 +24,7 @@ import type {
 import type { AlertProps } from '../primitives/Alert';
 import type { BoxProps } from '../primitives/Box';
 import type { ButtonProps } from '../primitives/Button';
+import type { CheckboxProps } from '../primitives/Checkbox';
 import type { DividerProps } from '../primitives/Divider';
 import type { IconButtonProps } from '../primitives/IconButton';
 import type { SpinnerProps } from '../primitives/Spinner';
@@ -36,6 +37,7 @@ export interface PersesComponents {
   Button: RefComponent<ButtonProps, HTMLButtonElement>;
   IconButton: RefComponent<IconButtonProps, HTMLButtonElement>;
   Alert: RefComponent<AlertProps, HTMLDivElement>;
+  Checkbox: RefComponent<CheckboxProps, HTMLElement>;
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;
   Box: RefComponent<BoxProps, HTMLDivElement>;
@@ -78,6 +80,7 @@ export interface ComponentsProviderProps {
    *   Box: MyBox,
    *   Button: MyButton,
    *   IconButton: MyIconButton,
+   *   Checkbox: MyCheckbox,
    *   Switch: MySwitch,
    *   Divider: MyDivider,
    *   Spinner: MySpinner,

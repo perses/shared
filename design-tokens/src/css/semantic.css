@@ -40,7 +40,7 @@
     --perses-bg-navigation: var(--perses-color-blue-150);
 
     /* Border */
-    --perses-border-default: var(--perses-color-gray-100);
+    --perses-border-default: var(--perses-color-gray-200);
 
     /* Text */
     --perses-text-primary: var(--perses-color-gray-800);
