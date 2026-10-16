@@ -136,7 +136,7 @@ function convertPanelGroupsToLayouts(
     if (group === undefined) {
       throw new Error('panel group not found');
     }
-    const { title, isCollapsed, repeatVariable, itemLayouts, itemPanelKeys } = group;
+    const { title, isCollapsed, repeatVariable, visibility, itemLayouts, itemPanelKeys } = group;
     let display = undefined;
     if (title || isCollapsed !== undefined) {
       display = {
@@ -144,6 +144,7 @@ function convertPanelGroupsToLayouts(
         collapse: {
           open: !isCollapsed,
         },
+        visibility,
       };
     }
     const layout: GridDefinition = {

@@ -18,6 +18,7 @@ import { useCallback } from 'react';
 
 import { useEditMode, usePanelGroup, usePanelGroupActions, useViewPanelGroup } from '../../context';
 import type { PanelGroupDefinition, PanelGroupItemLayout } from '../../model';
+import { isPanelGroupVisible } from '../../utils';
 import type { PanelOptions } from '../Panel';
 import { FixedValueVariableProvider } from '../Variables';
 import type { RowProps } from './Row';
@@ -32,12 +33,13 @@ export interface GridLayoutProps {
 /**
  * Layout component that arranges children in a Grid based on the definition.
  */
-export function GridLayout(props: GridLayoutProps): ReactElement {
+export function GridLayout(props: GridLayoutProps): ReactElement | null {
   const { panelGroupId, panelOptions, panelFullHeight } = props;
   const groupDefinition: PanelGroupDefinition = usePanelGroup(panelGroupId);
   const { updatePanelGroupLayouts } = usePanelGroupActions(panelGroupId);
   const viewPanelItemId = useViewPanelGroup();
   const { isEditMode } = useEditMode();
+  const variableValues = useVariableValues();
 
   const hasViewPanel = viewPanelItemId?.panelGroupId === panelGroupId; // current panelGroup contains the panel extended?
 
@@ -49,6 +51,11 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
     },
     [hasViewPanel, isEditMode, updatePanelGroupLayouts],
   );
+
+  // Edit mode keeps hidden groups reachable.
+  if (!isEditMode && !isPanelGroupVisible(groupDefinition.visibility, variableValues)) {
+    return null;
+  }
 
   return (
     <>
