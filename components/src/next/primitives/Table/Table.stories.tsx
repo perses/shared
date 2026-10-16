@@ -12,80 +12,200 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
-import { Fragment, useMemo, useState } from 'react';
-import type { ReactElement } from 'react';
+import { Fragment, useCallback, useMemo, useState } from 'react';
+import type { CSSProperties, ReactElement } from 'react';
 
+import { Sample, Stack } from '../../stories/Sample';
+import { Checkbox } from '../Checkbox';
+import type { Size } from '../types';
 import { Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow } from './Table';
 import type { SortDirection } from './Table';
-import { TableCheckbox } from './TableCheckbox';
 import { TablePagination } from './TablePagination';
 import { TableRowExpandButton } from './TableRowExpandButton';
 import { TableSortLabel } from './TableSortLabel';
 
-const rows = [
+interface MetricRow {
+  name: string;
+  value: number;
+  unit: string;
+}
+
+const rows: MetricRow[] = [
   { name: 'cpu_usage', value: 42.1, unit: '%' },
   { name: 'memory_usage', value: 78.4, unit: '%' },
   { name: 'disk_io', value: 12.9, unit: 'MB/s' },
 ];
 
-const columnStack = { display: 'flex', flexDirection: 'column' as const, gap: '1rem' };
-const shortContainer = { maxHeight: '16rem' };
-const narrowContainer = { maxWidth: '24rem' };
+const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
+const grid: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.75rem' };
+const sizeLabel: CSSProperties = { fontSize: '0.75rem', color: 'var(--perses-text-secondary)' };
+const shortContainer: CSSProperties = { maxHeight: '16rem' };
+const narrowContainer: CSSProperties = { maxWidth: '24rem' };
+const noPadding: CSSProperties = { padding: 0 };
 const paginationRowsPerPageOptions = [1, 2, 3];
-const noPadding = { padding: 0 };
 
-export const Density: Story = () => (
-  <div style={columnStack}>
-    <h3>Compare row padding and font size across the four cell sizes.</h3>
-    {(['xs', 'sm', 'md', 'lg'] as const).map((size) => (
-      <div key={size}>
-        <h3>
-          size=&quot;{size}&quot;{size === 'md' ? ' (default)' : ''}
-        </h3>
-        <Table size={size}>
-          <TableHead>
-            <TableRow>
-              <TableCell header>Name</TableCell>
-              <TableCell header align="right">
-                Value
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row) => (
-              <TableRow key={row.name}>
-                <TableCell>{row.name}</TableCell>
-                <TableCell align="right">{row.value}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+function MetricRows(): ReactElement {
+  return (
+    <>
+      {rows.map((row) => (
+        <TableRow key={row.name}>
+          <TableCell>{row.name}</TableCell>
+          <TableCell align="right">{row.value}</TableCell>
+          <TableCell>{row.unit}</TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+}
+
+const basicCode = `<Table>
+  <TableHead>
+    <TableRow>
+      <TableCell header>Name</TableCell>
+      <TableCell header align="right">Value</TableCell>
+      <TableCell header>Unit</TableCell>
+    </TableRow>
+  </TableHead>
+  <TableBody>
+    {rows.map((row) => (
+      <TableRow key={row.name}>
+        <TableCell>{row.name}</TableCell>
+        <TableCell align="right">{row.value}</TableCell>
+        <TableCell>{row.unit}</TableCell>
+      </TableRow>
     ))}
-  </div>
-);
+  </TableBody>
+</Table>`;
 
-const sortableColumns = [
+const densityCode = `// size: 'xs' | 'sm' | 'md' | 'lg' — set on Table for every cell, or on a single TableCell
+<Table size="sm">
+  <TableBody>
+    <TableRow>
+      <TableCell>Inherits sm</TableCell>
+      <TableCell size="lg">Overrides to lg</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>`;
+
+export const Basic: Story = () => (
+  <Stack>
+    <p>
+      <code>Table</code> renders a native <code>&lt;table&gt;</code>. Compose it from <code>TableHead</code>,{' '}
+      <code>TableBody</code>, <code>TableFooter</code>, <code>TableRow</code> and <code>TableCell</code>; pass{' '}
+      <code>header</code> to a cell to render a <code>&lt;th scope=&quot;col&quot;&gt;</code>. Wrap it in{' '}
+      <code>TableContainer</code> when it needs to scroll.
+    </p>
+    <Sample title="Minimal usage" code={basicCode}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell header>Name</TableCell>
+            <TableCell header align="right">
+              Value
+            </TableCell>
+            <TableCell header>Unit</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <MetricRows />
+        </TableBody>
+      </Table>
+    </Sample>
+    <Sample title="Density — size on the table, overridden on one cell" code={densityCode}>
+      <div style={grid}>
+        {sizes.map((size) => (
+          <div key={size}>
+            <span style={sizeLabel}>
+              size=&quot;{size}&quot;{size === 'md' ? ' (default)' : ''}
+            </span>
+            <Table size={size}>
+              <TableHead>
+                <TableRow>
+                  <TableCell header>Name</TableCell>
+                  <TableCell header align="right">
+                    Value
+                  </TableCell>
+                  <TableCell header>Unit</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <TableRow>
+                  <TableCell>cpu_usage</TableCell>
+                  <TableCell align="right">42.1</TableCell>
+                  <TableCell size="lg">overrides to lg</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>memory_usage</TableCell>
+                  <TableCell align="right">78.4</TableCell>
+                  <TableCell>%</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        ))}
+      </div>
+    </Sample>
+  </Stack>
+);
+Basic.storyName = 'Basic';
+
+type SortKey = keyof MetricRow;
+
+const sortableColumns: Array<{ key: SortKey; label: string }> = [
   { key: 'name', label: 'Name' },
   { key: 'value', label: 'Value' },
   { key: 'unit', label: 'Unit' },
-] as const;
+];
 
-export const SortableHeader: Story = () => {
-  const [sortBy, setSortBy] = useState<(typeof sortableColumns)[number]['key']>('value');
+const sortingCode = `const [sortBy, setSortBy] = useState<'name' | 'value' | 'unit'>('value');
+const [direction, setDirection] = useState<SortDirection>('asc');
+
+<TableCell header sortDirection={sortBy === 'name' ? direction : false}>
+  <TableSortLabel active={sortBy === 'name'} direction={direction} onClick={() => toggleSort('name')}>
+    Name
+  </TableSortLabel>
+</TableCell>`;
+
+function SortableHeaderCell({
+  column,
+  sortBy,
+  direction,
+  onSort,
+}: {
+  column: (typeof sortableColumns)[number];
+  sortBy: SortKey;
+  direction: SortDirection;
+  onSort: (key: SortKey) => void;
+}): ReactElement {
+  const active = sortBy === column.key;
+  const handleClick = useCallback(() => onSort(column.key), [onSort, column.key]);
+  return (
+    <TableCell header align={column.key === 'value' ? 'right' : 'left'} sortDirection={active ? direction : false}>
+      <TableSortLabel active={active} direction={active ? direction : 'asc'} onClick={handleClick}>
+        {column.label}
+      </TableSortLabel>
+    </TableCell>
+  );
+}
+
+function SortableTable(): ReactElement {
+  const [sortBy, setSortBy] = useState<SortKey>('value');
   const [direction, setDirection] = useState<SortDirection>('asc');
 
-  const handleSort = (key: typeof sortBy): void => {
-    if (key === sortBy) {
-      setDirection(direction === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(key);
-      setDirection('asc');
-    }
-  };
+  const handleSort = useCallback(
+    (key: SortKey): void => {
+      if (key === sortBy) {
+        setDirection((current) => (current === 'asc' ? 'desc' : 'asc'));
+      } else {
+        setSortBy(key);
+        setDirection('asc');
+      }
+    },
+    [sortBy],
+  );
 
   const sorted = useMemo(() => {
-    const compare = (a: (typeof rows)[number], b: (typeof rows)[number]): number => {
+    const compare = (a: MetricRow, b: MetricRow): number => {
       const left = a[sortBy];
       const right = b[sortBy];
       const order =
@@ -98,110 +218,115 @@ export const SortableHeader: Story = () => {
   }, [sortBy, direction]);
 
   return (
-    <div>
-      <h3>Click a header to sort by that column; click it again to reverse the sort order.</h3>
-      <Table>
-        <TableHead>
-          <TableRow>
-            {sortableColumns.map((column) => (
-              <TableCell
-                key={column.key}
-                header
-                align={column.key === 'value' ? 'right' : 'left'}
-                sortDirection={sortBy === column.key ? direction : false}
-              >
-                <TableSortLabel
-                  active={sortBy === column.key}
-                  direction={sortBy === column.key ? direction : 'asc'}
-                  onClick={() => handleSort(column.key)}
-                >
-                  {column.label}
-                </TableSortLabel>
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {sorted.map((row) => (
-            <TableRow key={row.name}>
-              <TableCell>{row.name}</TableCell>
-              <TableCell align="right">{row.value}</TableCell>
-              <TableCell>{row.unit}</TableCell>
-            </TableRow>
+    <Table>
+      <TableHead>
+        <TableRow>
+          {sortableColumns.map((column) => (
+            <SortableHeaderCell
+              key={column.key}
+              column={column}
+              sortBy={sortBy}
+              direction={direction}
+              onSort={handleSort}
+            />
           ))}
-        </TableBody>
-      </Table>
-    </div>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {sorted.map((row) => (
+          <TableRow key={row.name}>
+            <TableCell>{row.name}</TableCell>
+            <TableCell align="right">{row.value}</TableCell>
+            <TableCell>{row.unit}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
-};
+}
 
-const denseTable = { minWidth: 0 };
+export const Sorting: Story = () => (
+  <Stack>
+    <p>
+      <code>TableSortLabel</code> is a button for a sortable column header. Pass <code>sortDirection</code> to the
+      header cell so it exposes <code>aria-sort</code>, and <code>active</code>/<code>direction</code> to the label so
+      the arrow reflects the current sort. Click a header to sort by it; click again to reverse.
+    </p>
+    <Sample title="Sortable headers" code={sortingCode}>
+      <SortableTable />
+    </Sample>
+  </Stack>
+);
+Sorting.storyName = 'Sorting';
 
-export const ResizableColumns: Story = () => {
-  const [widths, setWidths] = useState({ name: 80, value: 56, unit: 48 });
+const selectionCode = `const [selected, setSelected] = useState<string[]>([]);
+const allSelected = selected.length === rows.length;
+const someSelected = selected.length > 0 && !allSelected;
 
-  const resize =
-    (key: keyof typeof widths) =>
-    (width: number): void =>
-      setWidths((current) => ({ ...current, [key]: width }));
+<TableCell header>
+  <Checkbox
+    aria-label="Select all rows"
+    checked={allSelected}
+    indeterminate={someSelected}
+    onCheckedChange={toggleAll}
+  />
+</TableCell>
+...
+<TableRow selected={selected.includes(row.name)} hover>
+  <TableCell>
+    <Checkbox
+      aria-label={\`Select \${row.name}\`}
+      checked={selected.includes(row.name)}
+      onCheckedChange={() => toggleRow(row.name)}
+    />
+  </TableCell>
+</TableRow>`;
 
+function SelectableRow({
+  row,
+  selected,
+  onToggle,
+}: {
+  row: MetricRow;
+  selected: boolean;
+  onToggle: (name: string) => void;
+}): ReactElement {
+  const handleChange = useCallback(() => onToggle(row.name), [onToggle, row.name]);
   return (
-    <div>
-      <h3>Drag the right edge of any header left or right to resize that column.</h3>
-      <Table tableLayout="fixed" style={denseTable}>
-        <TableHead>
-          <TableRow>
-            <TableCell header resizable onResize={resize('name')} style={{ width: widths.name }}>
-              Name
-            </TableCell>
-            <TableCell header align="right" resizable onResize={resize('value')} style={{ width: widths.value }}>
-              Value
-            </TableCell>
-            <TableCell header resizable onResize={resize('unit')} style={{ width: widths.unit }}>
-              Unit
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.name}>
-              <TableCell>{row.name}</TableCell>
-              <TableCell align="right">{row.value}</TableCell>
-              <TableCell>{row.unit}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    <TableRow selected={selected} hover>
+      <TableCell>
+        <Checkbox aria-label={`Select ${row.name}`} checked={selected} onCheckedChange={handleChange} />
+      </TableCell>
+      <TableCell>{row.name}</TableCell>
+      <TableCell align="right">{row.value}</TableCell>
+    </TableRow>
   );
-};
+}
 
-const SelectionExample = ({ selectAll }: { selectAll?: boolean }): ReactElement => {
+function SelectableTable(): ReactElement {
   const [selected, setSelected] = useState<string[]>([]);
   const allSelected = selected.length === rows.length;
   const someSelected = selected.length > 0 && !allSelected;
 
-  const toggleAll = (): void => {
+  const toggleAll = useCallback((): void => {
     setSelected(allSelected ? [] : rows.map((row) => row.name));
-  };
+  }, [allSelected]);
 
-  const toggleRow = (name: string): void => {
+  const toggleRow = useCallback((name: string): void => {
     setSelected((current) => (current.includes(name) ? current.filter((n) => n !== name) : [...current, name]));
-  };
+  }, []);
 
   return (
     <Table>
       <TableHead>
         <TableRow>
           <TableCell header>
-            {selectAll && (
-              <TableCheckbox
-                aria-label="Select all rows"
-                checked={allSelected}
-                indeterminate={someSelected}
-                onChange={toggleAll}
-              />
-            )}
+            <Checkbox
+              aria-label="Select all rows"
+              checked={allSelected}
+              indeterminate={someSelected}
+              onCheckedChange={toggleAll}
+            />
           </TableCell>
           <TableCell header>Name</TableCell>
           <TableCell header align="right">
@@ -211,115 +336,98 @@ const SelectionExample = ({ selectAll }: { selectAll?: boolean }): ReactElement 
       </TableHead>
       <TableBody>
         {rows.map((row) => (
-          <TableRow key={row.name} selected={selected.includes(row.name)}>
-            <TableCell>
-              <TableCheckbox
-                aria-label={`Select ${row.name}`}
-                checked={selected.includes(row.name)}
-                onChange={() => toggleRow(row.name)}
-              />
-            </TableCell>
-            <TableCell>{row.name}</TableCell>
-            <TableCell align="right">{row.value}</TableCell>
-          </TableRow>
+          <SelectableRow key={row.name} row={row} selected={selected.includes(row.name)} onToggle={toggleRow} />
         ))}
       </TableBody>
     </Table>
   );
-};
+}
 
-export const RowSelection: Story = () => (
-  <div style={columnStack}>
-    <h3>
-      Click checkboxes to select rows. In the first table, the header checkbox selects all rows and shows an
-      indeterminate state while only some rows are selected.
-    </h3>
-    <h3>With &quot;select all&quot; header (indeterminate state)</h3>
-    <SelectionExample selectAll />
-    <h3>Per-row checkboxes only</h3>
-    <SelectionExample />
-  </div>
-);
+const expandCode = `const [expanded, setExpanded] = useState<string | null>(null);
 
-export const ExpandableRows: Story = () => {
-  const [expanded, setExpanded] = useState<string | null>(null);
+<TableCell>
+  <TableRowExpandButton
+    aria-label={isExpanded ? \`Collapse \${row.name}\` : \`Expand \${row.name}\`}
+    expanded={isExpanded}
+    onClick={() => setExpanded(isExpanded ? null : row.name)}
+  />
+</TableCell>`;
+
+function ExpandableRow({
+  row,
+  expanded,
+  onToggle,
+}: {
+  row: MetricRow;
+  expanded: boolean;
+  onToggle: (name: string) => void;
+}): ReactElement {
+  const handleClick = useCallback(() => onToggle(row.name), [onToggle, row.name]);
   return (
-    <div>
-      <h3>Click a chevron button to expand a row and reveal its detail row below.</h3>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell header />
-            <TableCell header>Name</TableCell>
-            <TableCell header align="right">
-              Value
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => {
-            const isExpanded = expanded === row.name;
-            return (
-              <Fragment key={row.name}>
-                <TableRow>
-                  <TableCell>
-                    <TableRowExpandButton
-                      aria-label={isExpanded ? `Collapse ${row.name}` : `Expand ${row.name}`}
-                      expanded={isExpanded}
-                      onClick={() => setExpanded(isExpanded ? null : row.name)}
-                    />
-                  </TableCell>
-                  <TableCell>{row.name}</TableCell>
-                  <TableCell align="right">{row.value}</TableCell>
-                </TableRow>
-                {isExpanded && (
-                  <TableRow>
-                    <TableCell />
-                    <TableCell colSpan={2}>Unit: {row.unit}</TableCell>
-                  </TableRow>
-                )}
-              </Fragment>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </div>
+    <Fragment>
+      <TableRow>
+        <TableCell>
+          <TableRowExpandButton
+            aria-label={expanded ? `Collapse ${row.name}` : `Expand ${row.name}`}
+            expanded={expanded}
+            onClick={handleClick}
+          />
+        </TableCell>
+        <TableCell>{row.name}</TableCell>
+        <TableCell align="right">{row.value}</TableCell>
+      </TableRow>
+      {expanded && (
+        <TableRow>
+          <TableCell />
+          <TableCell colSpan={2}>Unit: {row.unit}</TableCell>
+        </TableRow>
+      )}
+    </Fragment>
   );
-};
+}
 
-export const ResponsiveOverflow: Story = () => (
-  <div>
-    <h3>Resize the browser narrower than the table to see the container scroll horizontally.</h3>
-    <TableContainer>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell header>Name</TableCell>
-            <TableCell header>CPU</TableCell>
-            <TableCell header>Memory</TableCell>
-            <TableCell header>Status</TableCell>
-            <TableCell header>Disk</TableCell>
-            <TableCell header>Network</TableCell>
-            <TableCell header>Region</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {manyRows.slice(0, 5).map((row) => (
-            <TableRow key={row.name}>
-              <TableCell>{row.name}</TableCell>
-              <TableCell>{row.cpu}</TableCell>
-              <TableCell>{row.memory}</TableCell>
-              <TableCell>{row.status}</TableCell>
-              <TableCell>{row.disk}</TableCell>
-              <TableCell>{row.network}</TableCell>
-              <TableCell>{row.region}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </div>
+function ExpandableTable(): ReactElement {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const toggle = useCallback((name: string): void => {
+    setExpanded((current) => (current === name ? null : name));
+  }, []);
+  return (
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell header />
+          <TableCell header>Name</TableCell>
+          <TableCell header align="right">
+            Value
+          </TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {rows.map((row) => (
+          <ExpandableRow key={row.name} row={row} expanded={expanded === row.name} onToggle={toggle} />
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
+export const Selection: Story = () => (
+  <Stack>
+    <p>
+      Row selection is composed from the <code>Checkbox</code> primitive inside a <code>TableCell</code>; the header
+      checkbox uses <code>indeterminate</code> while only some rows are selected. <code>TableRow</code> accepts{' '}
+      <code>selected</code> to highlight a row and <code>hover</code> to tint it on pointer hover.{' '}
+      <code>TableRowExpandButton</code> toggles a detail row and exposes <code>aria-expanded</code>.
+    </p>
+    <Sample title="Selectable rows with a select-all header" code={selectionCode}>
+      <SelectableTable />
+    </Sample>
+    <Sample title="Expandable rows" code={expandCode}>
+      <ExpandableTable />
+    </Sample>
+  </Stack>
 );
+Selection.storyName = 'Selection';
 
 const manyRows = Array.from({ length: 50 }, (_, index) => ({
   name: `server-${index + 1}`,
@@ -331,111 +439,216 @@ const manyRows = Array.from({ length: 50 }, (_, index) => ({
   status: index % 7 === 0 ? 'Degraded' : 'Healthy',
 }));
 
-export const StickyHeaderAndColumns: Story = () => (
-  <div style={columnStack}>
-    <h3>Scroll the first table vertically and the second table horizontally to verify the pinned header and column.</h3>
-    <h3>Sticky header — scroll vertically to see it stay pinned</h3>
-    <TableContainer style={shortContainer}>
-      <Table stickyHeader>
-        <TableHead>
-          <TableRow>
-            <TableCell header>Name</TableCell>
-            <TableCell header>CPU</TableCell>
-            <TableCell header>Memory</TableCell>
-            <TableCell header>Status</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {manyRows.map((row) => (
-            <TableRow key={row.name} hover>
-              <TableCell>{row.name}</TableCell>
-              <TableCell>{row.cpu}</TableCell>
-              <TableCell>{row.memory}</TableCell>
-              <TableCell>{row.status}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-    <h3>Sticky column — scroll horizontally to see Name stay pinned</h3>
-    <TableContainer style={narrowContainer}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell header sticky="left">
-              Name
-            </TableCell>
-            <TableCell header>CPU</TableCell>
-            <TableCell header>Memory</TableCell>
-            <TableCell header>Status</TableCell>
-            <TableCell header>Disk</TableCell>
-            <TableCell header>Network</TableCell>
-            <TableCell header>Region</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {manyRows.slice(0, 5).map((row) => (
-            <TableRow key={row.name} hover>
-              <TableCell sticky="left">{row.name}</TableCell>
-              <TableCell>{row.cpu}</TableCell>
-              <TableCell>{row.memory}</TableCell>
-              <TableCell>{row.status}</TableCell>
-              <TableCell>{row.disk}</TableCell>
-              <TableCell>{row.network}</TableCell>
-              <TableCell>{row.region}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </div>
-);
+const stickyCode = `<TableContainer style={{ maxHeight: '16rem' }}>
+  <Table stickyHeader>
+    <TableHead>
+      <TableRow>
+        <TableCell header sticky="left">Name</TableCell>
+        <TableCell header>CPU</TableCell>
+        ...
+      </TableRow>
+    </TableHead>
+    <TableBody>
+      <TableRow hover>
+        <TableCell sticky="left">server-1</TableCell>
+        ...
+      </TableRow>
+    </TableBody>
+  </Table>
+</TableContainer>`;
 
-// Mirrors MUI's pattern of rendering TablePagination inside a <tr>/<td colSpan> footer row.
-export const Paginated: Story = () => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(1);
-  const pageRows = rows.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+const resizableCode = `const [widths, setWidths] = useState({ name: 80, value: 56, unit: 48 });
+
+<Table tableLayout="fixed">
+  <TableHead>
+    <TableRow>
+      <TableCell header resizable onResize={(width) => setWidths({ ...widths, name: width })} style={{ width: widths.name }}>
+        Name
+      </TableCell>
+      ...
+    </TableRow>
+  </TableHead>
+</Table>`;
+
+const stickyColumnContainer: CSSProperties = { ...shortContainer, ...narrowContainer };
+
+function ResizableHeaderCell({
+  column,
+  width,
+  align,
+  onResize,
+  children,
+}: {
+  column: 'name' | 'value' | 'unit';
+  width: number;
+  align?: 'left' | 'right';
+  onResize: (column: 'name' | 'value' | 'unit', width: number) => void;
+  children: string;
+}): ReactElement {
+  const handleResize = useCallback((next: number) => onResize(column, next), [onResize, column]);
+  const style = useMemo(() => ({ width }), [width]);
   return (
-    <div>
-      <h3>Use the chevron buttons to move between pages and the select to change how many rows are shown per page.</h3>
-      <TableContainer>
-        <Table>
+    <TableCell header align={align} resizable onResize={handleResize} style={style}>
+      {children}
+    </TableCell>
+  );
+}
+
+const fitContent: CSSProperties = { minWidth: 0 };
+
+function ResizableTable(): ReactElement {
+  const [widths, setWidths] = useState({ name: 80, value: 56, unit: 48 });
+  const handleResize = useCallback((column: 'name' | 'value' | 'unit', width: number): void => {
+    setWidths((current) => ({ ...current, [column]: width }));
+  }, []);
+
+  return (
+    <Table tableLayout="fixed" style={fitContent}>
+      <TableHead>
+        <TableRow>
+          <ResizableHeaderCell column="name" width={widths.name} onResize={handleResize}>
+            Name
+          </ResizableHeaderCell>
+          <ResizableHeaderCell column="value" width={widths.value} align="right" onResize={handleResize}>
+            Value
+          </ResizableHeaderCell>
+          <ResizableHeaderCell column="unit" width={widths.unit} onResize={handleResize}>
+            Unit
+          </ResizableHeaderCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        <MetricRows />
+      </TableBody>
+    </Table>
+  );
+}
+
+export const Layout: Story = () => (
+  <Stack>
+    <p>
+      <code>TableContainer</code> gives the table a scrolling viewport. Inside it, <code>stickyHeader</code> pins the
+      header row while scrolling vertically and <code>sticky=&quot;left&quot;</code>/<code>&quot;right&quot;</code> on a
+      cell pins a column while scrolling horizontally. With <code>tableLayout=&quot;fixed&quot;</code>, header cells can
+      be <code>resizable</code>; drag the handle at a header&apos;s right edge to resize that column.
+    </p>
+    <Sample title="Sticky header and sticky first column — scroll both ways" code={stickyCode}>
+      <TableContainer style={stickyColumnContainer}>
+        <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell header>Name</TableCell>
-              <TableCell header align="right">
-                Value
+              <TableCell header sticky="left">
+                Name
               </TableCell>
+              <TableCell header>CPU</TableCell>
+              <TableCell header>Memory</TableCell>
+              <TableCell header>Status</TableCell>
+              <TableCell header>Disk</TableCell>
+              <TableCell header>Network</TableCell>
+              <TableCell header>Region</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {pageRows.map((row) => (
-              <TableRow key={row.name}>
-                <TableCell>{row.name}</TableCell>
-                <TableCell align="right">{row.value}</TableCell>
+            {manyRows.map((row) => (
+              <TableRow key={row.name} hover>
+                <TableCell sticky="left">{row.name}</TableCell>
+                <TableCell>{row.cpu}</TableCell>
+                <TableCell>{row.memory}</TableCell>
+                <TableCell>{row.status}</TableCell>
+                <TableCell>{row.disk}</TableCell>
+                <TableCell>{row.network}</TableCell>
+                <TableCell>{row.region}</TableCell>
               </TableRow>
             ))}
           </TableBody>
-          <TableFooter>
-            <TableRow>
-              <TableCell colSpan={2} style={noPadding}>
-                <TablePagination
-                  count={rows.length}
-                  page={page}
-                  rowsPerPage={rowsPerPage}
-                  rowsPerPageOptions={paginationRowsPerPageOptions}
-                  onPageChange={setPage}
-                  onRowsPerPageChange={(value) => {
-                    setRowsPerPage(value);
-                    setPage(0);
-                  }}
-                />
-              </TableCell>
-            </TableRow>
-          </TableFooter>
         </Table>
       </TableContainer>
-    </div>
+    </Sample>
+    <Sample title="Resizable columns" code={resizableCode}>
+      <ResizableTable />
+    </Sample>
+  </Stack>
+);
+Layout.storyName = 'Layout';
+
+const paginationCode = `const [page, setPage] = useState(0);
+const [rowsPerPage, setRowsPerPage] = useState(1);
+
+<TableFooter>
+  <TableRow>
+    <TableCell colSpan={3} style={{ padding: 0 }}>
+      <TablePagination
+        count={rows.length}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        rowsPerPageOptions={[1, 2, 3]}
+        onPageChange={setPage}
+        onRowsPerPageChange={(value) => {
+          setRowsPerPage(value);
+          setPage(0);
+        }}
+      />
+    </TableCell>
+  </TableRow>
+</TableFooter>`;
+
+function PaginatedTable(): ReactElement {
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(1);
+  const pageRows = rows.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+  const handleRowsPerPageChange = useCallback((value: number): void => {
+    setRowsPerPage(value);
+    setPage(0);
+  }, []);
+
+  return (
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell header>Name</TableCell>
+          <TableCell header align="right">
+            Value
+          </TableCell>
+          <TableCell header>Unit</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {pageRows.map((row) => (
+          <TableRow key={row.name}>
+            <TableCell>{row.name}</TableCell>
+            <TableCell align="right">{row.value}</TableCell>
+            <TableCell>{row.unit}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+      <TableFooter>
+        <TableRow>
+          <TableCell colSpan={3} style={noPadding}>
+            <TablePagination
+              count={rows.length}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              rowsPerPageOptions={paginationRowsPerPageOptions}
+              onPageChange={setPage}
+              onRowsPerPageChange={handleRowsPerPageChange}
+            />
+          </TableCell>
+        </TableRow>
+      </TableFooter>
+    </Table>
   );
-};
+}
+
+export const Pagination: Story = () => (
+  <Stack>
+    <p>
+      <code>TablePagination</code> is a fully controlled footer: you own <code>page</code> and <code>rowsPerPage</code>{' '}
+      and slice the rows yourself. The rows-per-page select only renders when <code>onRowsPerPageChange</code> is
+      provided. Its navigation buttons use the provider&apos;s <code>IconButton</code>.
+    </p>
+    <Sample title="Paginated table" code={paginationCode}>
+      <PaginatedTable />
+    </Sample>
+  </Stack>
+);
+Pagination.storyName = 'Pagination';

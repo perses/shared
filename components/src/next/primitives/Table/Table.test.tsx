@@ -15,6 +15,7 @@ import { render, screen } from '@testing-library/react';
 import type { ReactElement, ReactNode } from 'react';
 
 import { ComponentsProvider } from '../../contexts/ComponentsProvider';
+import { Checkbox } from '../Checkbox';
 import { defaultComponents, defaultIcons } from '../defaults';
 import { Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow } from './Table';
 import { TablePagination } from './TablePagination';
@@ -522,6 +523,22 @@ describe('Table', () => {
     firePointerEvent(document, 'pointermove', 200);
     firePointerEvent(document, 'pointerup', 200);
     expect(onResize).not.toHaveBeenCalled();
+  });
+
+  it('composes a Checkbox inside a cell for row selection', () => {
+    render(
+      <Table>
+        <TableBody>
+          <TableRow>
+            <TableCell>
+              <Checkbox aria-label="Select cpu_usage" />
+            </TableCell>
+            <TableCell>cpu_usage</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+    expect(screen.getByRole('checkbox', { name: 'Select cpu_usage' })).toBeInTheDocument();
   });
 
   it('composes a TablePagination inside a footer cell with colSpan', () => {

@@ -12,7 +12,6 @@
 // limitations under the License.
 
 export * from './Table';
-export * from './TableCheckbox';
 export * from './TablePagination';
 export * from './TableRowExpandButton';
 export * from './TableSortLabel';

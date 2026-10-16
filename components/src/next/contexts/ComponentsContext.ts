@@ -40,7 +40,6 @@ import type {
   TableRowProps,
   TableCellProps,
   TableContainerProps,
-  TableCheckboxProps,
   TableRowExpandButtonProps,
   TableSortLabelProps,
   TablePaginationProps,
@@ -67,7 +66,6 @@ export interface PersesComponents {
   TableRow: RefComponent<TableRowProps, HTMLTableRowElement>;
   TableCell: RefComponent<TableCellProps, HTMLTableCellElement>;
   TableContainer: RefComponent<TableContainerProps, HTMLDivElement>;
-  TableCheckbox: RefComponent<TableCheckboxProps, HTMLInputElement>;
   TableRowExpandButton: RefComponent<TableRowExpandButtonProps, HTMLButtonElement>;
   TableSortLabel: RefComponent<TableSortLabelProps, HTMLButtonElement>;
   TablePagination: RefComponent<TablePaginationProps, HTMLDivElement>;

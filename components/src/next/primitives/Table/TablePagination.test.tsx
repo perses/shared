@@ -37,6 +37,14 @@ describe('TablePagination', () => {
     expect(screen.getByText('41-42 of 42')).toBeInTheDocument();
   });
 
+  it('renders the navigation buttons as small ghost IconButtons', () => {
+    render(<TablePagination count={42} page={0} rowsPerPage={10} onPageChange={vi.fn()} />, { wrapper: Wrapper });
+    const previous = screen.getByRole('button', { name: 'Previous page' });
+    expect(previous).toHaveClass('ps-IconButton');
+    expect(previous).toHaveAttribute('data-variant', 'ghost');
+    expect(previous).toHaveAttribute('data-size', 'sm');
+  });
+
   it('disables the previous button on the first page', () => {
     render(<TablePagination count={42} page={0} rowsPerPage={10} onPageChange={vi.fn()} />, { wrapper: Wrapper });
     expect(screen.getByRole('button', { name: 'Previous page' })).toBeDisabled();

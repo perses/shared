@@ -25,7 +25,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableCheckbox,
   TableContainer,
   TableFooter,
   TableHead,
@@ -79,7 +78,6 @@ describe('primitives barrel exports', () => {
     expect(Table).toBeDefined();
     expect(TableBody).toBeDefined();
     expect(TableCell).toBeDefined();
-    expect(TableCheckbox).toBeDefined();
     expect(TableContainer).toBeDefined();
     expect(TableFooter).toBeDefined();
     expect(TableHead).toBeDefined();

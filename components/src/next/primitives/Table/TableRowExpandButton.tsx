@@ -13,16 +13,26 @@
 
 import clsx from 'clsx';
 import { forwardRef } from 'react';
-import type { ButtonHTMLAttributes, ReactElement } from 'react';
+import type { ButtonHTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import { Icon } from '../Icon/Icon';
 import { ChevronRightIcon } from '../Icon/icons';
 
+import '../Button/buttonBase.css';
 import './table.css';
+
+interface TableRowExpandButtonBaseProps extends Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  'children' | 'aria-label'
+> {
+  expanded?: boolean;
+  icon?: ReactElement;
+}
 
 /**
  * A clickable button that toggles a row's expanded state, showing a rotating chevron.
- * Place inside a `TableCell`.
+ * Place inside a `TableCell`. The button must have an accessible name: either visible `children`
+ * or an `aria-label`.
  *
  * @example
  * <TableCell>
@@ -31,12 +41,10 @@ import './table.css';
  *
  * @example
  * // Override the expand icon
- * <TableRowExpandButton expanded={isExpanded} icon={<CustomChevronIcon />} onClick={toggleExpanded} />
+ * <TableRowExpandButton expanded={isExpanded} icon={<CustomChevronIcon />} onClick={toggleExpanded} aria-label="Expand row" />
  */
-export interface TableRowExpandButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  expanded?: boolean;
-  icon?: ReactElement;
-}
+export type TableRowExpandButtonProps = TableRowExpandButtonBaseProps &
+  ({ children: ReactNode; 'aria-label'?: string } | { children?: undefined; 'aria-label': string });
 
 const defaultExpandIcon = <ChevronRightIcon />;
 
@@ -49,8 +57,9 @@ export const TableRowExpandButton = forwardRef<HTMLButtonElement, TableRowExpand
       <button
         ref={ref}
         type={type}
+        aria-expanded={expanded ?? false}
         data-expanded={expanded || undefined}
-        className={clsx('ps-TableRowExpandButton', className)}
+        className={clsx('ps-ButtonBase', 'ps-TableRowExpandButton', className)}
         {...props}
       >
         <Icon className="ps-TableRowExpandButton__icon">{icon}</Icon>

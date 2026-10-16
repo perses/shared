@@ -16,9 +16,10 @@ import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes, ReactElement } from 'react';
 
 import { Icon } from '../Icon/Icon';
-import { SortArrowIcon } from '../Icon/icons';
+import { ArrowDownIcon } from '../Icon/icons';
 import type { SortDirection } from './Table';
 
+import '../Button/buttonBase.css';
 import './table.css';
 
 /**
@@ -44,7 +45,7 @@ export interface TableSortLabelProps extends ButtonHTMLAttributes<HTMLButtonElem
   icon?: ReactElement;
 }
 
-const defaultSortIcon = <SortArrowIcon />;
+const defaultSortIcon = <ArrowDownIcon />;
 
 export const TableSortLabel = forwardRef<HTMLButtonElement, TableSortLabelProps>(function TableSortLabel(
   { active, direction = 'asc', icon = defaultSortIcon, className, type = 'button', children, ...props },
@@ -56,7 +57,7 @@ export const TableSortLabel = forwardRef<HTMLButtonElement, TableSortLabelProps>
       type={type}
       data-active={active || undefined}
       data-direction={direction}
-      className={clsx('ps-TableSortLabel', className)}
+      className={clsx('ps-ButtonBase', 'ps-TableSortLabel', className)}
       {...props}
     >
       {children}

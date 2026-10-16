@@ -13,7 +13,7 @@
 
 import clsx from 'clsx';
 import { forwardRef, useCallback, useEffect, useRef } from 'react';
-import type { HTMLAttributes, PointerEvent as ReactPointerEvent, TdHTMLAttributes } from 'react';
+import type { HTMLAttributes, PointerEventHandler, TdHTMLAttributes } from 'react';
 
 import type { DisplayProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps } from '../system';
@@ -24,8 +24,13 @@ import './table.css';
 
 const TABLE_CELL_STYLE_PROPS = compileStyleProps([displayProps]);
 
+export type SortDirection = 'asc' | 'desc';
+
 /**
  * Root table element. Renders a native `<table>`.
+ *
+ * Row selection is composed from the `Checkbox` primitive rather than a table-specific control:
+ * `<TableCell><Checkbox aria-label="Select row" /></TableCell>`.
  *
  * @example
  * <Table>
@@ -33,8 +38,6 @@ const TABLE_CELL_STYLE_PROPS = compileStyleProps([displayProps]);
  *   <TableBody>...</TableBody>
  * </Table>
  */
-export type SortDirection = 'asc' | 'desc';
-
 export interface TableProps extends HTMLAttributes<HTMLTableElement> {
   size?: Size;
   stickyHeader?: boolean;
@@ -141,6 +144,9 @@ export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(function 
 /**
  * A single cell. Renders `<th scope="col">` when `header` is true, otherwise `<td>`.
  *
+ * `display`/`overflow` style props behave as documented on `Box`; use a responsive `display` object to hide a column
+ * per breakpoint, e.g. `display={{ default: 'none', md: 'table-cell' }}`.
+ *
  * @example
  * <TableCell header align="right">Value</TableCell>
  */
@@ -175,7 +181,6 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
   },
   ref,
 ) {
-  const Component = header ? 'th' : 'td';
   let ariaSort: 'ascending' | 'descending' | undefined;
   if (sortDirection === 'asc') {
     ariaSort = 'ascending';
@@ -192,8 +197,8 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
     };
   }, []);
 
-  const handleResizePointerDown = useCallback(
-    (event: ReactPointerEvent<HTMLSpanElement>): void => {
+  const handleResizePointerDown = useCallback<PointerEventHandler<HTMLSpanElement>>(
+    (event) => {
       if (!onResize) return;
       event.preventDefault();
       const startX = event.pageX;
@@ -219,19 +224,20 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
 
   const { className: styleClassName, style: cellStyle, rest } = applyStyleProps(props, TABLE_CELL_STYLE_PROPS, style);
 
-  return (
-    <Component
-      ref={ref as never}
-      scope={header ? 'col' : undefined}
-      data-align={align}
-      data-size={size}
-      data-sticky={sticky}
-      data-resizable={resizable || undefined}
-      aria-sort={ariaSort}
-      className={clsx('ps-Table__cell', styleClassName, className)}
-      style={cellStyle}
-      {...rest}
-    >
+  const cellProps = {
+    scope: header ? 'col' : undefined,
+    'data-align': align,
+    'data-size': size,
+    'data-sticky': sticky,
+    'data-resizable': resizable || undefined,
+    'aria-sort': ariaSort,
+    className: clsx('ps-Table__cell', styleClassName, className),
+    style: cellStyle,
+    ...rest,
+  };
+
+  const content = (
+    <>
       {children}
       {resizable && (
         <span
@@ -243,6 +249,16 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
           tabIndex={-1}
         />
       )}
-    </Component>
+    </>
+  );
+
+  return header ? (
+    <th ref={ref} {...cellProps}>
+      {content}
+    </th>
+  ) : (
+    <td ref={ref} {...cellProps}>
+      {content}
+    </td>
   );
 });

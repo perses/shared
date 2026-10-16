@@ -26,6 +26,29 @@ describe('TableRowExpandButton', () => {
     expect(screen.getByRole('button')).not.toHaveAttribute('data-expanded');
   });
 
+  it('sets aria-expanded to false by default', () => {
+    render(<TableRowExpandButton aria-label="Expand row" />);
+    expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('toggles aria-expanded with the expanded prop', () => {
+    const { rerender } = render(<TableRowExpandButton aria-label="Expand row" expanded={false} />);
+    expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'false');
+    rerender(<TableRowExpandButton aria-label="Collapse row" expanded />);
+    expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('accepts visible children as the accessible name', () => {
+    render(<TableRowExpandButton>Details</TableRowExpandButton>);
+    expect(screen.getByRole('button', { name: 'Details' })).toBeInTheDocument();
+  });
+
+  it('rejects a button with neither children nor aria-label at the type level', () => {
+    // @ts-expect-error -- an accessible name (children or aria-label) is required
+    render(<TableRowExpandButton expanded />);
+    expect(screen.getByRole('button')).toBeInTheDocument();
+  });
+
   it('reflects the expanded prop', () => {
     render(<TableRowExpandButton aria-label="Collapse row" expanded />);
     expect(screen.getByRole('button')).toHaveAttribute('data-expanded', 'true');

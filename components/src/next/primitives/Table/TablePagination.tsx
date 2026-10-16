@@ -80,7 +80,7 @@ export const TablePagination = forwardRef<HTMLDivElement, TablePaginationProps>(
   ref,
 ) {
   const {
-    components: { Button },
+    components: { IconButton },
   } = useComponents();
   const start = count === 0 ? 0 : page * rowsPerPage + 1;
   const end = Math.min(count, (page + 1) * rowsPerPage);
@@ -110,12 +110,18 @@ export const TablePagination = forwardRef<HTMLDivElement, TablePaginationProps>(
       <span className="ps-TablePagination__range">
         {start}-{end} of {count}
       </span>
-      <Button variant="ghost" size="sm" aria-label="Previous page" disabled={page === 0} onClick={handlePreviousPage}>
+      <IconButton
+        variant="ghost"
+        size="sm"
+        aria-label="Previous page"
+        disabled={page === 0}
+        onClick={handlePreviousPage}
+      >
         <Icon>{previousIcon}</Icon>
-      </Button>
-      <Button variant="ghost" size="sm" aria-label="Next page" disabled={page >= lastPage} onClick={handleNextPage}>
+      </IconButton>
+      <IconButton variant="ghost" size="sm" aria-label="Next page" disabled={page >= lastPage} onClick={handleNextPage}>
         <Icon>{nextIcon}</Icon>
-      </Button>
+      </IconButton>
     </div>
   );
 });

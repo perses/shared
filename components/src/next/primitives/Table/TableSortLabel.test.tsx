@@ -48,6 +48,18 @@ describe('TableSortLabel', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
+  it('renders the default sort icon with the icon class', () => {
+    render(<TableSortLabel>Name</TableSortLabel>);
+    const icon = screen.getByRole('button').querySelector('.ps-TableSortLabel__icon');
+    expect(icon).toBeInTheDocument();
+    expect(icon?.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('layers on the shared button base class', () => {
+    render(<TableSortLabel>Name</TableSortLabel>);
+    expect(screen.getByRole('button')).toHaveClass('ps-ButtonBase', 'ps-TableSortLabel');
+  });
+
   it('renders a custom icon when the icon prop is provided', () => {
     render(<TableSortLabel icon={<svg data-testid="custom-icon" />}>Name</TableSortLabel>);
     expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
