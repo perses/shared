@@ -13,8 +13,8 @@
 
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
 import clsx from 'clsx';
-import { forwardRef } from 'react';
 import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
+import { forwardRef, useCallback } from 'react';
 
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
@@ -24,8 +24,6 @@ import '../system/layout.css';
 import '../system/spacing.css';
 import './checkbox.css';
 
-export type CheckboxColor = ColorVariant | Status;
-export type CheckboxSize = Size;
 export type CheckboxLabelPosition = 'start' | 'end';
 
 export interface CheckboxChangeEventDetails {
@@ -76,8 +74,8 @@ interface CheckboxBaseProps
   inputRef?: Ref<HTMLInputElement>;
   label?: ReactNode;
   labelPosition?: CheckboxLabelPosition;
-  size?: CheckboxSize;
-  color?: CheckboxColor;
+  size?: Size;
+  color?: ColorVariant | Status;
   style?: CheckboxStyle;
 }
 
@@ -117,9 +115,12 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
   const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, CHECKBOX_STYLE_PROPS, style);
   const domProps = rest as HTMLAttributes<HTMLElement>;
   const callerClassName = clsx(styleClassName, className);
-  const handleCheckedChange = (nextChecked: boolean, eventDetails: BaseCheckbox.Root.ChangeEventDetails): void => {
-    onCheckedChange?.(nextChecked, { event: eventDetails.event });
-  };
+  const handleCheckedChange = useCallback(
+    (nextChecked: boolean, eventDetails: BaseCheckbox.Root.ChangeEventDetails): void => {
+      onCheckedChange?.(nextChecked, { event: eventDetails.event });
+    },
+    [onCheckedChange],
+  );
 
   const control = (
     <BaseCheckbox.Root

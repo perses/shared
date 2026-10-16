@@ -16,15 +16,16 @@ import userEvent from '@testing-library/user-event';
 import { createRef } from 'react';
 import type { CSSProperties } from 'react';
 
+import type { ColorVariant, Size, Status } from '../types';
 import { Checkbox } from './Checkbox';
-import type { CheckboxColor, CheckboxSize, CheckboxStyle } from './Checkbox';
+import type { CheckboxStyle } from './Checkbox';
 
 const POSITION_STYLE: CSSProperties = { position: 'absolute' };
 const RESPONSIVE_WIDTH = { default: 100, md: 200 };
 const WIDTH_OVERRIDE = { '--ps-width': '50px' } as CSSProperties;
 const MARGIN_STYLE = { marginTop: '8px' };
-const SIZES: CheckboxSize[] = ['xs', 'sm', 'md', 'lg'];
-const COLORS: CheckboxColor[] = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
+const SIZES: Size[] = ['xs', 'sm', 'md', 'lg'];
+const COLORS: Array<ColorVariant | Status> = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
 const handleKeyboardInteraction = (): void => undefined;
 describe('Checkbox', () => {
   it('renders an unchecked checkbox with default variants', () => {

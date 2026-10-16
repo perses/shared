@@ -18,9 +18,7 @@ import type {
   BoxProps,
   ButtonProps,
   ButtonVariant,
-  CheckboxColor,
   CheckboxProps,
-  CheckboxSize,
   ColorVariant,
   DividerProps,
   IconProps,
@@ -55,8 +53,8 @@ describe('primitives barrel exports', () => {
     const color: ColorVariant | Status = 'primary';
     const size: Size = 'md';
     const checkboxProps: CheckboxProps = { 'aria-label': 'Select' };
-    const checkboxColor: CheckboxColor = 'primary';
-    const checkboxSize: CheckboxSize = 'md';
+    const checkboxColor: ColorVariant = 'primary';
+    const checkboxSize: Size = 'md';
     const dividerProps: DividerProps = {};
     const iconProps: IconProps = {};
     const spinnerProps: SpinnerProps = {};
