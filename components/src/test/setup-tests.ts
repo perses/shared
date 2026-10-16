@@ -18,3 +18,9 @@ expect.extend(matchers);
 
 // Always mock e-charts during tests since we don't have a proper canvas in jsdom
 vi.mock('echarts/core');
+
+// base-ui primitives dispatch pointer events, which jsdom does not implement. Alias PointerEvent to
+// MouseEvent so userEvent interactions work across the suite (harmless: only applied when absent).
+if (typeof PointerEvent !== 'function') {
+  vi.stubGlobal('PointerEvent', MouseEvent);
+}

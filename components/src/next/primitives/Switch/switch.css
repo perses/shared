@@ -31,7 +31,8 @@
 
   :where(.ps-Switch) {
     --ps-switch-padding: 2px;
-    --ps-switch-thumb-size: 1.125rem;
+    --ps-switch-size: var(--perses-switch-size-md, var(--perses-selection-control-size-md));
+    --ps-switch-thumb-size: calc(var(--ps-switch-size) - 2 * var(--ps-switch-padding));
     --ps-switch-checked-bg: var(--perses-status-solid-primary);
 
     position: relative;
@@ -39,7 +40,7 @@
     align-items: center;
     box-sizing: border-box;
     width: calc(2 * var(--ps-switch-thumb-size) + 2 * var(--ps-switch-padding));
-    height: calc(var(--ps-switch-thumb-size) + 2 * var(--ps-switch-padding));
+    height: var(--ps-switch-size);
     border: none;
     border-radius: var(--perses-radius-full);
     background-color: var(--perses-color-gray-300);
@@ -83,13 +84,13 @@
   }
 
   .ps-Switch[data-size='xs'] {
-    --ps-switch-thumb-size: 0.75rem;
+    --ps-switch-size: var(--perses-switch-size-xs, var(--perses-selection-control-size-xs));
   }
   .ps-Switch[data-size='sm'] {
-    --ps-switch-thumb-size: 0.875rem;
+    --ps-switch-size: var(--perses-switch-size-sm, var(--perses-selection-control-size-sm));
   }
   .ps-Switch[data-size='lg'] {
-    --ps-switch-thumb-size: 1.375rem;
+    --ps-switch-size: var(--perses-switch-size-lg, var(--perses-selection-control-size-lg));
   }
 
   .ps-Switch__thumb {
