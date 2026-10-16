@@ -33,6 +33,10 @@ export interface PluginModuleSpec {
 
 export interface PluginMetadataWithModule extends PluginMetadata {
   module: PluginModuleMetadata;
+  /**
+   * True when the module is served by a local dev server (`percli plugin start`) instead of an installed archive.
+   */
+  inDev?: boolean;
 }
 
 /**
