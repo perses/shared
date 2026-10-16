@@ -26,7 +26,7 @@
     border: var(--perses-border-width-sm) solid var(--perses-checkbox-border-color, var(--perses-border-default));
     border-radius: var(--perses-radius-sm);
     color: var(--perses-text-on-solid);
-    background-color: var(--perses-bg-surface);
+    background-color: var(--perses-bg-sunken);
     cursor: pointer;
   }
 
