@@ -18,6 +18,7 @@
   "sideEffects": false,
   "dependencies": {
     "@perses-dev/spec": "0.3.0-rc.1",
+    "react-compiler-runtime": "^1.0.0",
     "zod": "^4.5.4"
   },
   "peerDependencies": {
