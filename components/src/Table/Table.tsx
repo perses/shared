@@ -74,6 +74,8 @@ export function Table<TableData>({
   onPaginationChange,
   rowSelectionVariant = 'standard',
   getSubRows,
+  expanded,
+  onExpandedChange,
   hiddenColumns,
   tableToolbarConfig,
   columnResizeMode = 'onChange',
@@ -86,14 +88,32 @@ export function Table<TableData>({
 
   const hasSubRows = !!getSubRows;
 
-  const [expanded, setExpanded] = useState<ExpandedState>({});
+  const [uncontrolledExpanded, setUncontrolledExpanded] = useState<ExpandedState>({});
+  // While a search is active every row starts expanded so matches are visible. That expansion is kept apart from the
+  // regular one, which reappears unchanged once the search is cleared and is the only one reported to consumers.
+  const [searchExpanded, setSearchExpanded] = useState<ExpandedState>(true);
 
   const { globalFilter, setGlobalFilter, fuzzySearchOptions } = useFuzzySearch<TableData>(
     tableToolbarConfig?.isSearchEnabled,
     tableToolbarConfig?.fuzzyMatchThreshold ?? 'CONTAINS',
-    expanded,
-    setExpanded,
+    () => setSearchExpanded(true),
   );
+
+  const isSearchActive = !!tableToolbarConfig?.isSearchEnabled && globalFilter !== '';
+  const regularExpanded = expanded ?? uncontrolledExpanded;
+  const currentExpanded = isSearchActive ? searchExpanded : regularExpanded;
+
+  const handleExpandedChange: OnChangeFn<ExpandedState> = (expandedUpdater) => {
+    const newExpanded = typeof expandedUpdater === 'function' ? expandedUpdater(currentExpanded) : expandedUpdater;
+    if (isSearchActive) {
+      setSearchExpanded(newExpanded);
+      return;
+    }
+    if (expanded === undefined) {
+      setUncontrolledExpanded(newExpanded);
+    }
+    onExpandedChange?.(newExpanded);
+  };
 
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
     hiddenColumns?.reduce((acc, columnId) => ({ ...acc, [columnId]: false }), {}) ?? {},
@@ -230,14 +250,14 @@ export function Table<TableData>({
     // to customize it if/when we have use cases for it.
     sortDescFirst: true,
     columnResizeMode,
-    onExpandedChange: setExpanded,
+    onExpandedChange: handleExpandedChange,
     state: {
       rowSelection,
       sorting,
       globalFilter: tableToolbarConfig?.isSearchEnabled ? globalFilter : undefined,
       columnVisibility,
       ...(pagination ? { pagination } : {}),
-      expanded,
+      expanded: currentExpanded,
     },
   });
 

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { RenderResult } from '@testing-library/react';
-import { render, screen, getAllByRole, within } from '@testing-library/react';
+import { render, screen, getAllByRole, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { VirtuosoMockContext } from 'react-virtuoso';
 
@@ -1164,5 +1164,94 @@ describe('table', () => {
     expect(cell4).not.toHaveTextContent('test');
     expect(cell4.firstChild).not.toHaveStyle({ 'background-color': 'rgb(255, 0, 0)' });
     expect(cell4.firstChild).not.toHaveStyle({ color: 'green' });
+  });
+});
+
+type TreeRow = { id: string; label: string; children?: TreeRow[] };
+
+const TREE_DATA: TreeRow[] = [
+  { id: 'team-a', label: 'Team A', children: [{ id: 'team-a/overview', label: 'A overview' }] },
+  { id: 'team-b', label: 'Team B', children: [{ id: 'team-b/overview', label: 'B overview' }] },
+];
+
+const TREE_COLUMNS: Array<TableColumnConfig<TreeRow>> = [
+  {
+    accessorKey: 'label',
+    header: 'Label',
+    cell: ({ row, getValue }) =>
+      row.getCanExpand() ? (
+        <button onClick={row.getToggleExpandedHandler()}>{`toggle ${getValue<string>()}`}</button>
+      ) : (
+        getValue<string>()
+      ),
+  },
+];
+
+const TREE_VIRTUOSO_CONTEXT = { viewportHeight: 600, itemHeight: MOCK_ITEM_HEIGHT };
+const TREE_TOOLBAR_CONFIG = { isSearchEnabled: true };
+const getTreeRowId = (row: TreeRow): string => row.id;
+const getTreeSubRows = (row: TreeRow): TreeRow[] | undefined => row.children;
+
+const renderTreeTable = (props: Partial<Pick<TableProps<TreeRow>, 'expanded' | 'onExpandedChange'>> = {}): void => {
+  render(
+    <VirtuosoMockContext.Provider value={TREE_VIRTUOSO_CONTEXT}>
+      <Table
+        data={TREE_DATA}
+        columns={TREE_COLUMNS}
+        height={600}
+        width={300}
+        getRowId={getTreeRowId}
+        getSubRows={getTreeSubRows}
+        tableToolbarConfig={TREE_TOOLBAR_CONFIG}
+        {...props}
+      />
+    </VirtuosoMockContext.Provider>,
+  );
+};
+
+describe('table with sub rows', () => {
+  test('starts collapsed and expands a row on toggle when uncontrolled', async () => {
+    renderTreeTable();
+    expect(screen.queryByText('A overview')).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'toggle Team A' }));
+
+    expect(screen.getByText('A overview')).toBeInTheDocument();
+    expect(screen.queryByText('B overview')).not.toBeInTheDocument();
+  });
+
+  test('renders the rows given by a controlled `expanded`', () => {
+    renderTreeTable({ expanded: { 'team-b': true } });
+
+    expect(screen.queryByText('A overview')).not.toBeInTheDocument();
+    expect(screen.getByText('B overview')).toBeInTheDocument();
+  });
+
+  test('reports toggles through `onExpandedChange`', async () => {
+    const onExpandedChange = vi.fn();
+    renderTreeTable({ expanded: { 'team-b': true }, onExpandedChange });
+
+    await userEvent.click(screen.getByRole('button', { name: 'toggle Team A' }));
+
+    expect(onExpandedChange).toHaveBeenCalledWith({ 'team-a': true, 'team-b': true });
+  });
+
+  test('expands every row during a search without reporting it, and restores the previous rows when cleared', async () => {
+    const onExpandedChange = vi.fn();
+    renderTreeTable({ expanded: { 'team-a': true }, onExpandedChange });
+    const searchInput = screen.getByRole('textbox', { name: 'search table' });
+
+    await userEvent.type(searchInput, 'overview');
+    expect(await screen.findByText('B overview')).toBeInTheDocument();
+    expect(screen.getByText('A overview')).toBeInTheDocument();
+
+    // toggling during the search only affects the search view
+    await userEvent.click(screen.getByRole('button', { name: 'toggle Team A' }));
+    expect(screen.queryByText('A overview')).not.toBeInTheDocument();
+
+    await userEvent.clear(searchInput);
+    await waitFor(() => expect(screen.queryByText('B overview')).not.toBeInTheDocument());
+    expect(screen.getByText('A overview')).toBeInTheDocument();
+    expect(onExpandedChange).not.toHaveBeenCalled();
   });
 });
