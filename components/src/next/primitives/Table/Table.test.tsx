@@ -12,12 +12,14 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
-import type { ReactElement, ReactNode } from 'react';
+import userEvent from '@testing-library/user-event';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
 
 import { ComponentsProvider } from '../../contexts/ComponentsProvider';
 import { Checkbox } from '../Checkbox';
 import { defaultComponents, defaultIcons } from '../defaults';
 import { Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow } from './Table';
+import type { TableCellProps } from './Table';
 import { TablePagination } from './TablePagination';
 
 function Wrapper({ children }: { children: ReactNode }): ReactElement {
@@ -30,11 +32,15 @@ function Wrapper({ children }: { children: ReactNode }): ReactElement {
 
 // jsdom has no PointerEvent constructor, so pointer interactions are simulated with a
 // MouseEvent whose `pageX` is overridden (pageX is otherwise a read-only computed property).
-function firePointerEvent(target: EventTarget, type: string, pageX: number): void {
+function firePointerEvent(target: EventTarget, type: string, pageX: number, pointerId = 1): void {
   const event = new MouseEvent(type, { bubbles: true, cancelable: true });
   Object.defineProperty(event, 'pageX', { value: pageX, configurable: true });
+  Object.defineProperty(event, 'pointerId', { value: pointerId, configurable: true });
   target.dispatchEvent(event);
 }
+
+const resizableCellStyle: CSSProperties = { width: 160 };
+const responsiveCellDisplay: TableCellProps['display'] = { default: 'table-cell', xs: 'none' };
 
 describe('Table', () => {
   it('renders a table element', () => {
@@ -341,7 +347,7 @@ describe('Table', () => {
       <Table>
         <TableBody>
           <TableRow>
-            <TableCell display={{ default: 'table-cell', xs: 'none' }}>Value</TableCell>
+            <TableCell display={responsiveCellDisplay}>Value</TableCell>
           </TableRow>
         </TableBody>
       </Table>,
@@ -421,12 +427,89 @@ describe('Table', () => {
       <Table tableLayout="fixed">
         <TableBody>
           <TableRow>
-            <TableCell resizable>Value</TableCell>
+            <TableCell resizable onResize={vi.fn()} maxResizeWidth={200} resizeHandleAriaLabel="Resize Value column">
+              Value
+            </TableCell>
           </TableRow>
         </TableBody>
       </Table>,
     );
     expect(screen.getByRole('separator')).toBeInTheDocument();
+  });
+
+  it('resizes a column with the keyboard and exposes its current width', async () => {
+    const onResize = vi.fn();
+    render(
+      <Table tableLayout="fixed">
+        <TableBody>
+          <TableRow>
+            <TableCell
+              resizable
+              onResize={onResize}
+              minResizeWidth={60}
+              maxResizeWidth={165}
+              resizeHandleAriaLabel="Resize Value column"
+              style={resizableCellStyle}
+            >
+              Value
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+
+    const separator = screen.getByRole('separator');
+    expect(separator).toHaveAttribute('aria-valuemin', '60');
+    expect(separator).toHaveAttribute('aria-valuemax', '165');
+    expect(separator).toHaveAttribute('aria-valuenow', '160');
+    expect(separator).toHaveAttribute('aria-valuetext', '160 pixels');
+
+    await userEvent.tab();
+    expect(separator).toHaveFocus();
+    await userEvent.keyboard('{arrowright}');
+    expect(onResize).toHaveBeenLastCalledWith(165);
+    expect(separator).toHaveAttribute('aria-valuenow', '165');
+
+    await userEvent.keyboard('{shift}{arrowleft}');
+    expect(onResize).toHaveBeenLastCalledWith(164);
+    expect(separator).toHaveAttribute('aria-valuetext', '164 pixels');
+  });
+
+  it('gives each resizable column a distinct accessible name', () => {
+    render(
+      <Table tableLayout="fixed">
+        <TableHead>
+          <TableRow>
+            <TableCell
+              header
+              resizable
+              onResize={vi.fn()}
+              maxResizeWidth={200}
+              resizeHandleAriaLabel="Resize Name column"
+            >
+              Name
+            </TableCell>
+            <TableCell
+              header
+              resizable
+              onResize={vi.fn()}
+              maxResizeWidth={200}
+              resizeHandleAriaLabel="Resize Value column"
+            >
+              Value
+            </TableCell>
+          </TableRow>
+        </TableHead>
+      </Table>,
+    );
+    expect(screen.getByRole('separator', { name: 'Resize Name column' })).toBeInTheDocument();
+    expect(screen.getByRole('separator', { name: 'Resize Value column' })).toBeInTheDocument();
+  });
+
+  it('requires a callback, maximum and accessible name for resizable cells at the type level', () => {
+    // @ts-expect-error -- a resizable cell must provide its complete interaction contract
+    const invalidProps: TableCellProps = { resizable: true };
+    expect(invalidProps.resizable).toBe(true);
   });
 
   it('does not render a resize handle when resizable is omitted', () => {
@@ -448,7 +531,7 @@ describe('Table', () => {
       <Table tableLayout="fixed">
         <TableBody>
           <TableRow>
-            <TableCell resizable onResize={onResize}>
+            <TableCell resizable onResize={onResize} maxResizeWidth={200} resizeHandleAriaLabel="Resize Value column">
               Value
             </TableCell>
           </TableRow>
@@ -457,7 +540,7 @@ describe('Table', () => {
     );
     firePointerEvent(screen.getByRole('separator'), 'pointerdown', 100);
     firePointerEvent(document, 'pointermove', 150);
-    expect(onResize).toHaveBeenCalledWith(50);
+    expect(onResize).toHaveBeenCalledWith(90);
     firePointerEvent(document, 'pointerup', 150);
   });
 
@@ -467,7 +550,7 @@ describe('Table', () => {
       <Table tableLayout="fixed">
         <TableBody>
           <TableRow>
-            <TableCell resizable onResize={onResize}>
+            <TableCell resizable onResize={onResize} maxResizeWidth={200} resizeHandleAriaLabel="Resize Value column">
               Value
             </TableCell>
           </TableRow>
@@ -486,7 +569,7 @@ describe('Table', () => {
       <Table tableLayout="fixed">
         <TableBody>
           <TableRow>
-            <TableCell resizable onResize={onResize}>
+            <TableCell resizable onResize={onResize} maxResizeWidth={200} resizeHandleAriaLabel="Resize Value column">
               Value
             </TableCell>
           </TableRow>
@@ -501,13 +584,42 @@ describe('Table', () => {
     expect(onResize).not.toHaveBeenCalled();
   });
 
+  it('only follows the initiating pointer and cleans up when it is canceled', () => {
+    const onResize = vi.fn();
+    render(
+      <Table tableLayout="fixed">
+        <TableBody>
+          <TableRow>
+            <TableCell resizable onResize={onResize} maxResizeWidth={200} resizeHandleAriaLabel="Resize Value column">
+              Value
+            </TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+    firePointerEvent(screen.getByRole('separator'), 'pointerdown', 100, 7);
+    firePointerEvent(document, 'pointermove', 150, 8);
+    expect(onResize).not.toHaveBeenCalled();
+
+    firePointerEvent(document, 'pointermove', 150, 7);
+    expect(onResize).toHaveBeenLastCalledWith(90);
+    firePointerEvent(document, 'pointercancel', 150, 8);
+    firePointerEvent(document, 'pointermove', 160, 7);
+    expect(onResize).toHaveBeenLastCalledWith(100);
+
+    firePointerEvent(document, 'pointercancel', 160, 7);
+    onResize.mockClear();
+    firePointerEvent(document, 'pointermove', 200, 7);
+    expect(onResize).not.toHaveBeenCalled();
+  });
+
   it('stops reporting resize after the cell unmounts mid-drag', () => {
     const onResize = vi.fn();
     const { unmount } = render(
       <Table tableLayout="fixed">
         <TableBody>
           <TableRow>
-            <TableCell resizable onResize={onResize}>
+            <TableCell resizable onResize={onResize} maxResizeWidth={200} resizeHandleAriaLabel="Resize Value column">
               Value
             </TableCell>
           </TableRow>
@@ -516,7 +628,7 @@ describe('Table', () => {
     );
     firePointerEvent(screen.getByRole('separator'), 'pointerdown', 100);
     firePointerEvent(document, 'pointermove', 150);
-    expect(onResize).toHaveBeenCalledWith(50);
+    expect(onResize).toHaveBeenCalledWith(90);
 
     unmount();
     onResize.mockClear();

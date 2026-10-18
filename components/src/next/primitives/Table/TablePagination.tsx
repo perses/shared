@@ -11,14 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 import { forwardRef, useCallback } from 'react';
 import type { ChangeEvent, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import { useComponents } from '../../contexts/ComponentsProvider';
-import { Icon } from '../Icon/Icon';
-import { ChevronLeftIcon, ChevronRightIcon } from '../Icon/icons';
+import { ChevronLeftIcon, ChevronRightIcon, Icon } from '../Icon';
 
+// oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the table styles.
 import './table.css';
 
 /**

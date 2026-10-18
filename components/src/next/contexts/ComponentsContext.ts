@@ -47,6 +47,13 @@ import type {
 
 type RefComponent<Props, Element> = ForwardRefExoticComponent<PropsWithoutRef<Props> & RefAttributes<Element>>;
 
+/**
+ * Complete set of replaceable Perses primitives. Every entry is required so consumers can rely on a component being
+ * available. Applications that only override some primitives should spread `defaultComponents` into their map.
+ *
+ * Table primitives were added to this contract with the Table primitive API. Existing complete custom maps must add
+ * the Table entries below or spread `defaultComponents` when adopting that release.
+ */
 export interface PersesComponents {
   Button: RefComponent<ButtonProps, HTMLButtonElement>;
   IconButton: RefComponent<IconButtonProps, HTMLButtonElement>;
@@ -113,6 +120,16 @@ export interface ComponentsProviderProps {
    *   Spinner: MySpinner,
    *   Stack: MyStack,
    *   Tooltip: MyTooltip,
+   *   Table: MyTable,
+   *   TableHead: MyTableHead,
+   *   TableBody: MyTableBody,
+   *   TableFooter: MyTableFooter,
+   *   TableRow: MyTableRow,
+   *   TableCell: MyTableCell,
+   *   TableContainer: MyTableContainer,
+   *   TableRowExpandButton: MyTableRowExpandButton,
+   *   TableSortLabel: MyTableSortLabel,
+   *   TablePagination: MyTablePagination,
    * };
    */
   components: PersesComponents;

@@ -462,7 +462,14 @@ const resizableCode = `const [widths, setWidths] = useState({ name: 80, value: 5
 <Table tableLayout="fixed">
   <TableHead>
     <TableRow>
-      <TableCell header resizable onResize={(width) => setWidths({ ...widths, name: width })} style={{ width: widths.name }}>
+      <TableCell
+        header
+        resizable
+        onResize={(width) => setWidths({ ...widths, name: width })}
+        maxResizeWidth={320}
+        resizeHandleAriaLabel="Resize Name column"
+        style={{ width: widths.name }}
+      >
         Name
       </TableCell>
       ...
@@ -488,7 +495,15 @@ function ResizableHeaderCell({
   const handleResize = useCallback((next: number) => onResize(column, next), [onResize, column]);
   const style = useMemo(() => ({ width }), [width]);
   return (
-    <TableCell header align={align} resizable onResize={handleResize} style={style}>
+    <TableCell
+      header
+      align={align}
+      resizable
+      onResize={handleResize}
+      maxResizeWidth={320}
+      resizeHandleAriaLabel={`Resize ${children} column`}
+      style={style}
+    >
       {children}
     </TableCell>
   );
@@ -530,7 +545,8 @@ export const Layout: Story = () => (
       <code>TableContainer</code> gives the table a scrolling viewport. Inside it, <code>stickyHeader</code> pins the
       header row while scrolling vertically and <code>sticky=&quot;left&quot;</code>/<code>&quot;right&quot;</code> on a
       cell pins a column while scrolling horizontally. With <code>tableLayout=&quot;fixed&quot;</code>, header cells can
-      be <code>resizable</code>; drag the handle at a header&apos;s right edge to resize that column.
+      be <code>resizable</code>; drag the handle at a header&apos;s right edge or focus it and press Left/Right to
+      resize that column.
     </p>
     <Sample title="Sticky header and sticky first column — scroll both ways" code={stickyCode}>
       <TableContainer style={stickyColumnContainer}>

@@ -11,14 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes, ReactElement, ReactNode } from 'react';
 
-import { Icon } from '../Icon/Icon';
-import { ChevronRightIcon } from '../Icon/icons';
+import { ChevronRightIcon, Icon } from '../Icon';
 
+// oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared button styles.
 import '../Button/buttonBase.css';
+// oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the table styles.
 import './table.css';
 
 interface TableRowExpandButtonBaseProps extends Omit<

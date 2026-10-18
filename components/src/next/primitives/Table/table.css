@@ -65,6 +65,7 @@
   }
 
   .ps-Table[data-table-layout='fixed'] {
+    width: 100%;
     table-layout: fixed;
   }
 
@@ -147,7 +148,8 @@
   }
 
   .ps-Table__resizeHandle:hover::before,
-  .ps-Table__resizeHandle:active::before {
+  .ps-Table__resizeHandle:active::before,
+  .ps-Table__resizeHandle:focus-visible::before {
     left: 3px;
     width: 4px;
     background-color: var(--perses-text-secondary);

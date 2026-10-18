@@ -15,6 +15,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 import { TableRowExpandButton } from './TableRowExpandButton';
 
+const customIcon = <svg data-testid="custom-icon" />;
+
 describe('TableRowExpandButton', () => {
   it('renders a button', () => {
     render(<TableRowExpandButton aria-label="Expand row" />);
@@ -62,7 +64,7 @@ describe('TableRowExpandButton', () => {
   });
 
   it('renders a custom icon when the icon prop is provided', () => {
-    render(<TableRowExpandButton aria-label="Expand row" icon={<svg data-testid="custom-icon" />} />);
+    render(<TableRowExpandButton aria-label="Expand row" icon={customIcon} />);
     expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
   });
 });

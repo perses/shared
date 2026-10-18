@@ -11,18 +11,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 import { forwardRef, useCallback, useEffect, useRef } from 'react';
-import type { HTMLAttributes, PointerEventHandler, TdHTMLAttributes } from 'react';
+import type {
+  FocusEventHandler,
+  HTMLAttributes,
+  KeyboardEventHandler,
+  PointerEventHandler,
+  TdHTMLAttributes,
+} from 'react';
 
 import type { DisplayProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps } from '../system';
 import type { Size } from '../types';
 
+// oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared layout styles.
 import '../system/layout.css';
+// oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the table styles.
 import './table.css';
 
 const TABLE_CELL_STYLE_PROPS = compileStyleProps([displayProps]);
+const KEYBOARD_RESIZE_STEP = 10;
+
+function getStyleWidth(width: string | number | undefined): number | undefined {
+  if (typeof width === 'number') return width;
+  if (typeof width !== 'string' || !width.endsWith('px')) return undefined;
+  const parsedWidth = Number.parseFloat(width);
+  return Number.isNaN(parsedWidth) ? undefined : parsedWidth;
+}
+
+function getRenderedWidth(handle: HTMLSpanElement, fallback: number): number {
+  const cell = handle.parentElement;
+  if (!cell) return fallback;
+  return cell.offsetWidth || getStyleWidth(cell.style.width) || fallback;
+}
+
+function clampResizeWidth(width: number, minWidth: number, maxWidth: number): number {
+  return Math.min(maxWidth, Math.max(minWidth, width));
+}
+
+function updateResizeAriaValue(handle: HTMLSpanElement, width: number): void {
+  handle.setAttribute('aria-valuenow', String(width));
+  handle.setAttribute('aria-valuetext', `${width} pixels`);
+}
 
 export type SortDirection = 'asc' | 'desc';
 
@@ -150,19 +181,42 @@ export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(function 
  * @example
  * <TableCell header align="right">Value</TableCell>
  */
-export interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement>, DisplayProps {
+interface TableCellBaseProps extends Omit<TdHTMLAttributes<HTMLTableCellElement>, 'onResize'>, DisplayProps {
   header?: boolean;
   align?: 'left' | 'center' | 'right';
   size?: Size;
   sortDirection?: SortDirection | false;
   /** Pins the cell to the left or right edge of a horizontally scrolling table. */
   sticky?: 'left' | 'right';
-  /** Renders a drag handle that reports the cell's new width via `onResize`. Requires `Table`'s `tableLayout="fixed"`. */
-  resizable?: boolean;
-  onResize?: (width: number) => void;
-  /** Minimum width, in pixels, enforced while dragging the resize handle. @default 40 */
-  minResizeWidth?: number;
 }
+
+type ResizeHandleAccessibleName =
+  | { resizeHandleAriaLabel: string; resizeHandleAriaLabelledBy?: never }
+  | { resizeHandleAriaLabel?: never; resizeHandleAriaLabelledBy: string };
+
+type TableCellResizeProps =
+  | ({
+      /**
+       * Renders a handle that reports the cell's new width via `onResize`. Supports pointer dragging and Left/Right
+       * arrow keys; hold Shift for one-pixel keyboard adjustments. Requires `Table`'s `tableLayout="fixed"`.
+       */
+      resizable: true;
+      onResize: (width: number) => void;
+      /** Minimum resize width in pixels. @default 40 */
+      minResizeWidth?: number;
+      /** Maximum resize width in pixels. */
+      maxResizeWidth: number;
+    } & ResizeHandleAccessibleName)
+  | {
+      resizable?: false;
+      onResize?: never;
+      minResizeWidth?: never;
+      maxResizeWidth?: never;
+      resizeHandleAriaLabel?: never;
+      resizeHandleAriaLabelledBy?: never;
+    };
+
+export type TableCellProps = TableCellBaseProps & TableCellResizeProps;
 
 export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(function TableCell(
   {
@@ -175,6 +229,9 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
     resizable,
     onResize,
     minResizeWidth = 40,
+    maxResizeWidth,
+    resizeHandleAriaLabel,
+    resizeHandleAriaLabelledBy,
     style,
     children,
     ...props
@@ -197,29 +254,78 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
     };
   }, []);
 
+  const resolvedMaxResizeWidth = Math.max(minResizeWidth, maxResizeWidth ?? minResizeWidth);
+  const initialResizeWidth = clampResizeWidth(
+    getStyleWidth(style?.width) ?? minResizeWidth,
+    minResizeWidth,
+    resolvedMaxResizeWidth,
+  );
+
+  const handleResizeFocus = useCallback<FocusEventHandler<HTMLSpanElement>>(
+    (event) => {
+      const renderedWidth = getRenderedWidth(event.currentTarget, initialResizeWidth);
+      updateResizeAriaValue(
+        event.currentTarget,
+        clampResizeWidth(renderedWidth, minResizeWidth, resolvedMaxResizeWidth),
+      );
+    },
+    [initialResizeWidth, minResizeWidth, resolvedMaxResizeWidth],
+  );
+
+  const handleResizeKeyDown = useCallback<KeyboardEventHandler<HTMLSpanElement>>(
+    (event) => {
+      if (!onResize || (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight')) return;
+      event.preventDefault();
+      const currentWidth = Number(event.currentTarget.getAttribute('aria-valuenow'));
+      const renderedWidth = getRenderedWidth(event.currentTarget, initialResizeWidth);
+      const width = Number.isNaN(currentWidth) ? renderedWidth : currentWidth;
+      const step = event.shiftKey ? 1 : KEYBOARD_RESIZE_STEP;
+      const direction = event.key === 'ArrowLeft' ? -1 : 1;
+      const nextWidth = clampResizeWidth(width + direction * step, minResizeWidth, resolvedMaxResizeWidth);
+      updateResizeAriaValue(event.currentTarget, nextWidth);
+      onResize(nextWidth);
+    },
+    [initialResizeWidth, minResizeWidth, onResize, resolvedMaxResizeWidth],
+  );
+
   const handleResizePointerDown = useCallback<PointerEventHandler<HTMLSpanElement>>(
     (event) => {
       if (!onResize) return;
       event.preventDefault();
+      resizeCleanupRef.current?.();
       const startX = event.pageX;
-      const startWidth = event.currentTarget.parentElement?.offsetWidth ?? 0;
+      const handle = event.currentTarget;
+      const startWidth = clampResizeWidth(getRenderedWidth(handle, 0), minResizeWidth, resolvedMaxResizeWidth);
+      const pointerId = event.pointerId;
+      updateResizeAriaValue(handle, startWidth);
       // Listen on the cell's own document: when the table is rendered through a
       // portal into another document (e.g. an iframe), the global `document` is
       // the wrong one and drag events would never arrive.
-      const ownerDocument = event.currentTarget.ownerDocument;
+      const ownerDocument = handle.ownerDocument;
       const handlePointerMove = (moveEvent: PointerEvent): void => {
-        onResize(Math.max(minResizeWidth, startWidth + (moveEvent.pageX - startX)));
+        if (moveEvent.pointerId !== pointerId) return;
+        const nextWidth = clampResizeWidth(
+          startWidth + (moveEvent.pageX - startX),
+          minResizeWidth,
+          resolvedMaxResizeWidth,
+        );
+        updateResizeAriaValue(handle, nextWidth);
+        onResize(nextWidth);
       };
       const controller = new AbortController();
       const cleanup = (): void => {
         controller.abort();
         resizeCleanupRef.current = null;
       };
+      const handlePointerEnd = (endEvent: PointerEvent): void => {
+        if (endEvent.pointerId === pointerId) cleanup();
+      };
       resizeCleanupRef.current = cleanup;
       ownerDocument.addEventListener('pointermove', handlePointerMove, { signal: controller.signal });
-      ownerDocument.addEventListener('pointerup', cleanup, { signal: controller.signal });
+      ownerDocument.addEventListener('pointerup', handlePointerEnd, { signal: controller.signal });
+      ownerDocument.addEventListener('pointercancel', handlePointerEnd, { signal: controller.signal });
     },
-    [onResize, minResizeWidth],
+    [minResizeWidth, onResize, resolvedMaxResizeWidth],
   );
 
   const { className: styleClassName, style: cellStyle, rest } = applyStyleProps(props, TABLE_CELL_STYLE_PROPS, style);
@@ -242,11 +348,18 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
       {resizable && (
         <span
           className="ps-Table__resizeHandle"
+          onFocus={handleResizeFocus}
+          onKeyDown={handleResizeKeyDown}
           onPointerDown={handleResizePointerDown}
           role="separator" /* oxlint-disable-line jsx-a11y/prefer-tag-over-role */
           aria-orientation="vertical"
-          aria-label="Resize column"
-          tabIndex={-1}
+          aria-label={resizeHandleAriaLabel}
+          aria-labelledby={resizeHandleAriaLabelledBy}
+          aria-valuemin={minResizeWidth}
+          aria-valuemax={resolvedMaxResizeWidth}
+          aria-valuenow={initialResizeWidth}
+          aria-valuetext={`${initialResizeWidth} pixels`}
+          tabIndex={0}
         />
       )}
     </>

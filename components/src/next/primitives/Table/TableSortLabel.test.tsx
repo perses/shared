@@ -15,6 +15,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 import { TableSortLabel } from './TableSortLabel';
 
+const customIcon = <svg data-testid="custom-icon" />;
+
 describe('TableSortLabel', () => {
   it('renders its children inside a button', () => {
     render(<TableSortLabel>Name</TableSortLabel>);
@@ -61,7 +63,18 @@ describe('TableSortLabel', () => {
   });
 
   it('renders a custom icon when the icon prop is provided', () => {
-    render(<TableSortLabel icon={<svg data-testid="custom-icon" />}>Name</TableSortLabel>);
+    render(<TableSortLabel icon={customIcon}>Name</TableSortLabel>);
     expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
+  });
+
+  it('accepts aria-label as the accessible name', () => {
+    render(<TableSortLabel aria-label="Sort by name" />);
+    expect(screen.getByRole('button', { name: 'Sort by name' })).toBeInTheDocument();
+  });
+
+  it('rejects a sort button without an accessible name at the type level', () => {
+    // @ts-expect-error -- visible children, aria-label or aria-labelledby is required
+    render(<TableSortLabel />);
+    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 });

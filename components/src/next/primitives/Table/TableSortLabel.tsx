@@ -11,15 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 import { forwardRef } from 'react';
-import type { ButtonHTMLAttributes, ReactElement } from 'react';
+import type { ButtonHTMLAttributes, ReactElement, ReactNode } from 'react';
 
-import { Icon } from '../Icon/Icon';
-import { ArrowDownIcon } from '../Icon/icons';
+import { ArrowDownIcon, Icon } from '../Icon';
 import type { SortDirection } from './Table';
 
+// oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared button styles.
 import '../Button/buttonBase.css';
+// oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the table styles.
 import './table.css';
 
 /**
@@ -39,11 +40,21 @@ import './table.css';
  *   Name
  * </TableSortLabel>
  */
-export interface TableSortLabelProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+interface TableSortLabelBaseProps extends Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  'children' | 'aria-label' | 'aria-labelledby'
+> {
   active?: boolean;
   direction?: SortDirection;
   icon?: ReactElement;
 }
+
+type TableSortLabelAccessibleName =
+  | { children: ReactNode; 'aria-label'?: string; 'aria-labelledby'?: string }
+  | { children?: never; 'aria-label': string; 'aria-labelledby'?: string }
+  | { children?: never; 'aria-label'?: never; 'aria-labelledby': string };
+
+export type TableSortLabelProps = TableSortLabelBaseProps & TableSortLabelAccessibleName;
 
 const defaultSortIcon = <ArrowDownIcon />;
 
