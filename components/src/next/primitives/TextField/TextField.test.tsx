@@ -17,9 +17,12 @@ import { createRef } from 'react';
 
 import type { Size, Status } from '../types';
 import { TextField } from './TextField';
+import type { TextFieldStyle } from './TextField';
 
 const responsiveWidth = { default: '100%', md: '20rem' };
 const STYLE_OVERRIDE = { width: '99px' };
+const COLOR_STYLE = { color: 'red' };
+const SIZE_OVERRIDE_STYLE: TextFieldStyle = { '--perses-textfield-size-md': '40px' };
 const DOLLAR = <span>$</span>;
 const PERCENT = <span>%</span>;
 const START_ICON = <span data-testid="start-icon" />;
@@ -156,14 +159,40 @@ describe('TextField', () => {
     });
   });
 
-  it('applies spacing and display props to the root', () => {
-    render(<TextField label="Name" m="md" display="block" data-testid="field" />);
+  it('applies spacing and overflow props to the root', () => {
+    render(<TextField label="Name" m="md" overflow="hidden" data-testid="field" />);
     const root = screen.getByTestId('field');
-    expect(root).toHaveClass('ps-m', 'ps-display');
+    expect(root).toHaveClass('ps-m', 'ps-overflow');
     expect(root).toHaveStyle({
       '--ps-m': 'var(--perses-spacing-md)',
-      '--ps-display': 'block',
+      '--ps-overflow': 'hidden',
     });
+  });
+
+  it('does not accept a display prop because the stylesheet fixes display', () => {
+    // @ts-expect-error display is fixed by the TextField stylesheet
+    render(<TextField label="Name" display="block" data-testid="field" />);
+    const root = screen.getByTestId('field');
+    expect(root).not.toHaveClass('ps-display');
+    expect(root.style.getPropertyValue('--ps-display')).toBe('');
+  });
+
+  it('places className and style on the root, not the input', () => {
+    const { container } = render(<TextField label="Name" className="custom" style={COLOR_STYLE} />);
+    const root = container.querySelector<HTMLElement>('.ps-TextField');
+    expect(root).toHaveClass('custom');
+    expect(root?.style.color).toBe('red');
+
+    const input = screen.getByRole('textbox');
+    expect(input).not.toHaveClass('custom');
+    expect(input.style.color).toBe('');
+  });
+
+  it('applies a per-size override custom property to the root', () => {
+    const { container } = render(<TextField label="Name" style={SIZE_OVERRIDE_STYLE} />);
+
+    const root = container.querySelector<HTMLElement>('.ps-TextField');
+    expect(root?.style.getPropertyValue('--perses-textfield-size-md')).toBe('40px');
   });
 
   it('merges the style prop and lets it override computed styles', () => {

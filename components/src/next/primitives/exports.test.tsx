@@ -34,6 +34,7 @@ import type {
   Status,
   SwitchProps,
   TextFieldProps,
+  TextFieldStyle,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -74,6 +75,7 @@ describe('primitives barrel exports', () => {
     const stackProps: StackProps = {};
     const switchProps: SwitchProps = {};
     const textFieldProps: TextFieldProps = { label: 'Name' };
+    const textFieldStyle: TextFieldStyle = { '--perses-textfield-size-md': '2.5rem' };
 
     expect(alertProps).toBeDefined();
     expect(severity).toBe('info');
@@ -97,5 +99,6 @@ describe('primitives barrel exports', () => {
     expect(stackProps).toBeDefined();
     expect(switchProps).toBeDefined();
     expect(textFieldProps).toBeDefined();
+    expect(textFieldStyle).toBeDefined();
   });
 });
