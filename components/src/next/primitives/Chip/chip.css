@@ -18,7 +18,7 @@
     display: inline-flex;
     align-items: center;
     gap: var(--perses-spacing-xs);
-    box-sizing: border-box;
+    min-height: var(--ps-chip-size);
     border-width: var(--perses-border-width-sm);
     border-style: solid;
     border-color: transparent;
@@ -30,14 +30,15 @@
     line-height: var(--perses-line-height-normal);
   }
 
+  /* Sized via --ps-chip-size: per-component --perses-chip-size-<step>, else the shared control-size token. */
   :where(.ps-Chip[data-size='xs']) {
-    min-height: var(--perses-control-size-xs);
+    --ps-chip-size: var(--perses-chip-size-xs, var(--perses-control-size-xs));
     padding: var(--perses-spacing-0) var(--perses-spacing-sm);
     font-size: var(--perses-font-size-xs);
   }
 
   :where(.ps-Chip[data-size='sm']) {
-    min-height: var(--perses-control-size-sm);
+    --ps-chip-size: var(--perses-chip-size-sm, var(--perses-control-size-sm));
     padding: var(--perses-spacing-0) var(--perses-spacing-md);
     font-size: var(--perses-font-size-sm);
   }
@@ -119,7 +120,7 @@
   .ps-Chip__label {
     min-width: 0;
     overflow: hidden;
-    max-width: var(--chip-label-max-width);
+    max-width: var(--perses-chip-label-max-width);
     text-overflow: ellipsis;
     white-space: nowrap;
   }

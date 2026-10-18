@@ -17,17 +17,17 @@ import { createRef } from 'react';
 import type { CSSProperties, FormEvent, KeyboardEvent } from 'react';
 
 import { Chip } from './Chip';
-import type { ChipColor, ChipSize, ChipVariant } from './Chip';
+import type { ChipColor, ChipSize, ChipStyle, ChipVariant } from './Chip';
 
 const noop = (): void => {};
 const preventDefault = (event: KeyboardEvent): void => event.preventDefault();
-const customChipStyle: CSSProperties & { '--chip-label-max-width': string } = {
+const customChipStyle: ChipStyle = {
   marginTop: 4,
-  '--chip-label-max-width': '20ch',
+  '--perses-chip-label-max-width': '20ch',
 };
 const responsiveWidth = { default: 100, md: 200 };
 const responsiveDisplay = { default: 'flex', md: 'inline-flex' } as const;
-const widthOverride = { '--ps-width': '50px' } as CSSProperties;
+const widthOverride: CSSProperties & { '--ps-width': string } = { '--ps-width': '50px' };
 const startElement = <svg data-testid="start-element" />;
 const closeIcon = <svg data-testid="close-icon" />;
 
@@ -265,7 +265,7 @@ describe('Chip', () => {
     expect(chip).toHaveAttribute('data-variant', 'outline');
     expect(chip).toHaveAttribute('data-disabled', 'true');
     expect(chip).toHaveStyle({
-      '--chip-label-max-width': '120px',
+      '--perses-chip-label-max-width': '120px',
       marginTop: '4px',
     });
   });
@@ -281,7 +281,7 @@ describe('Chip', () => {
       </Chip>,
     );
     expect(screen.getByText('Production').closest('.ps-Chip')).toHaveStyle({
-      '--chip-label-max-width': expected,
+      '--perses-chip-label-max-width': expected,
       marginTop: '4px',
     });
   });
@@ -296,7 +296,7 @@ describe('Chip', () => {
     rerender(<Chip style={customChipStyle}>Production</Chip>);
 
     expect(screen.getByText('Production').closest('.ps-Chip')).toHaveStyle({
-      '--chip-label-max-width': '20ch',
+      '--perses-chip-label-max-width': '20ch',
       marginTop: '4px',
     });
   });
@@ -322,16 +322,16 @@ describe('Chip', () => {
 
   describe('style props', () => {
     it('maps spacing, sizing and display props to classes and variables', () => {
-      render(
+      const { container } = render(
         <Chip p="md" width={responsiveWidth} display={responsiveDisplay}>
           Production
         </Chip>,
       );
-      const chip = screen.getByText('Production').closest('.ps-Chip') as HTMLElement;
+      const chip = container.querySelector<HTMLElement>('.ps-Chip');
       expect(chip).toHaveClass('ps-p', 'ps-width', 'ps-display');
-      expect(chip.style.getPropertyValue('--ps-width')).toBe('100px');
-      expect(chip.style.getPropertyValue('--ps-width-md')).toBe('200px');
-      expect(chip.style.getPropertyValue('--ps-display')).toBe('flex');
+      expect(chip?.style.getPropertyValue('--ps-width')).toBe('100px');
+      expect(chip?.style.getPropertyValue('--ps-width-md')).toBe('200px');
+      expect(chip?.style.getPropertyValue('--ps-display')).toBe('flex');
     });
 
     it('lets the style prop override computed variables', () => {
@@ -346,10 +346,21 @@ describe('Chip', () => {
     });
 
     it('keeps maxWidth as the label limit rather than a style prop', () => {
-      render(<Chip maxWidth={120}>Production</Chip>);
-      const chip = screen.getByText('Production').closest('.ps-Chip') as HTMLElement;
+      const { container } = render(<Chip maxWidth={120}>Production</Chip>);
+      const chip = container.querySelector<HTMLElement>('.ps-Chip');
       expect(chip).not.toHaveClass('ps-max-width');
-      expect(chip.style.getPropertyValue('--chip-label-max-width')).toBe('120px');
+      expect(chip?.style.getPropertyValue('--perses-chip-label-max-width')).toBe('120px');
+    });
+
+    it('applies a per-size override custom property to the chip', () => {
+      const style: ChipStyle = { '--perses-chip-size-sm': '40px' };
+      const { container } = render(
+        <Chip size="sm" style={style}>
+          Tag
+        </Chip>,
+      );
+      const chip = container.querySelector<HTMLElement>('.ps-Chip');
+      expect(chip?.style.getPropertyValue('--perses-chip-size-sm')).toBe('40px');
     });
 
     it('does not leak style props to the DOM', () => {

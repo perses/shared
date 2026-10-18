@@ -57,6 +57,7 @@ interface ChipBaseProps
   onClose?: MouseEventHandler<HTMLButtonElement>;
   /** Maximum width of the label; longer text is truncated with an ellipsis. */
   maxWidth?: CSSProperties['maxWidth'];
+  style?: ChipStyle;
 }
 
 /**
@@ -69,15 +70,17 @@ type ChipAccessibleName =
 
 export type ChipProps = ChipBaseProps & ChipAccessibleName;
 
-type ChipStyle = CSSProperties & { '--chip-label-max-width'?: string };
+export interface ChipStyle extends CSSProperties {
+  '--perses-chip-label-max-width'?: string;
+  /** Per-step height override; falls back to the shared control-size scale. */
+  '--perses-chip-size-xs'?: string;
+  '--perses-chip-size-sm'?: string;
+}
 
-function withLabelMaxWidth(
-  style: CSSProperties | undefined,
-  maxWidth: CSSProperties['maxWidth'],
-): ChipStyle | undefined {
+function withLabelMaxWidth(style: ChipStyle | undefined, maxWidth: CSSProperties['maxWidth']): ChipStyle | undefined {
   if (maxWidth === undefined) return style;
   const labelMaxWidth = typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth;
-  return { ...style, '--chip-label-max-width': labelMaxWidth };
+  return { ...style, '--perses-chip-label-max-width': labelMaxWidth };
 }
 
 const defaultCloseIcon = <CloseIcon aria-hidden="true" />;

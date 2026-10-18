@@ -22,6 +22,7 @@ import type {
   ChipColor,
   ChipProps,
   ChipSize,
+  ChipStyle,
   ChipVariant,
   ColorVariant,
   DividerProps,
@@ -64,6 +65,7 @@ describe('primitives barrel exports', () => {
     const chipColor: ChipColor = 'secondary';
     const chipSize: ChipSize = 'xs';
     const chipVariant: ChipVariant = 'outline';
+    const chipStyle: ChipStyle = { '--perses-chip-size-sm': '2.5rem' };
     const dividerProps: DividerProps = {};
     const iconProps: IconProps = {};
     const spinnerProps: SpinnerProps = {};
@@ -85,6 +87,7 @@ describe('primitives barrel exports', () => {
     expect(chipColor).toBe('secondary');
     expect(chipSize).toBe('xs');
     expect(chipVariant).toBe('outline');
+    expect(chipStyle).toBeDefined();
     expect(dividerProps).toBeDefined();
     expect(iconProps).toBeDefined();
     expect(spinnerProps).toBeDefined();

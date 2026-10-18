@@ -44,8 +44,16 @@ describe('control size tokens', () => {
     expect(rule).toContain(`min-height: var(--perses-control-size-${size});`);
   });
 
-  it.each(['xs', 'sm'] as const)('Chip size %s has min-height --perses-control-size-%s', (size) => {
-    const rule = ruleFor(readCss('./Chip/chip.css'), `.ps-Chip[data-size='${size}']`);
-    expect(rule).toContain(`min-height: var(--perses-control-size-${size});`);
+  it('Chip min-height is driven by --ps-chip-size', () => {
+    const rule = ruleFor(readCss('./Chip/chip.css'), ':where(.ps-Chip)');
+    expect(rule).toContain('min-height: var(--ps-chip-size);');
   });
+
+  it.each(['xs', 'sm'] as const)(
+    'Chip size %s sets --ps-chip-size from --perses-chip-size-%s, else --perses-control-size-%s',
+    (size) => {
+      const rule = ruleFor(readCss('./Chip/chip.css'), `.ps-Chip[data-size='${size}']`);
+      expect(rule).toContain(`--ps-chip-size: var(--perses-chip-size-${size}, var(--perses-control-size-${size}));`);
+    },
+  );
 });
