@@ -30,7 +30,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import type { ReactElement } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 
 import { useFuzzySearch } from './hooks/useFuzzySearch';
 import type { TableProps } from './model/table-model';
@@ -103,8 +103,18 @@ export function Table<TableData>({
   const regularExpanded = expanded ?? uncontrolledExpanded;
   const currentExpanded = isSearchActive ? searchExpanded : regularExpanded;
 
+  // Several expansion updates can happen in the same event (e.g. toggling two rows), before the table re-renders with
+  // the new state. Chain them on the latest value instead of the rendered one, so none of them is lost.
+  const pendingExpandedRef = useRef<ExpandedState | null>(null);
   const handleExpandedChange: OnChangeFn<ExpandedState> = (expandedUpdater) => {
-    const newExpanded = typeof expandedUpdater === 'function' ? expandedUpdater(currentExpanded) : expandedUpdater;
+    const baseExpanded = pendingExpandedRef.current ?? currentExpanded;
+    const newExpanded = typeof expandedUpdater === 'function' ? expandedUpdater(baseExpanded) : expandedUpdater;
+    if (pendingExpandedRef.current === null) {
+      queueMicrotask(() => {
+        pendingExpandedRef.current = null;
+      });
+    }
+    pendingExpandedRef.current = newExpanded;
     if (isSearchActive) {
       setSearchExpanded(newExpanded);
       return;

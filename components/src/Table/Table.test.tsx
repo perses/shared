@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { Table as TanstackTable } from '@tanstack/react-table';
 import type { RenderResult } from '@testing-library/react';
 import { render, screen, getAllByRole, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -1174,13 +1175,23 @@ const TREE_DATA: TreeRow[] = [
   { id: 'team-b', label: 'Team B', children: [{ id: 'team-b/overview', label: 'B overview' }] },
 ];
 
+const TREE_ROW_IDS = ['team-a', 'team-b'];
+const openBothTeams = (table: TanstackTable<TreeRow>) => (): void =>
+  TREE_ROW_IDS.forEach((id) => table.getRow(id).toggleExpanded(true));
+
 const TREE_COLUMNS: Array<TableColumnConfig<TreeRow>> = [
   {
     accessorKey: 'label',
     header: 'Label',
-    cell: ({ row, getValue }) =>
+    cell: ({ row, table, getValue }) =>
       row.getCanExpand() ? (
-        <button onClick={row.getToggleExpandedHandler()}>{`toggle ${getValue<string>()}`}</button>
+        <>
+          <button onClick={row.getToggleExpandedHandler()}>{`toggle ${getValue<string>()}`}</button>
+          {row.id === 'team-a' && (
+            // expands two rows in the same event
+            <button onClick={openBothTeams(table)}>open both teams</button>
+          )}
+        </>
       ) : (
         getValue<string>()
       ),
@@ -1253,5 +1264,23 @@ describe('table with sub rows', () => {
     await waitFor(() => expect(screen.queryByText('B overview')).not.toBeInTheDocument());
     expect(screen.getByText('A overview')).toBeInTheDocument();
     expect(onExpandedChange).not.toHaveBeenCalled();
+  });
+
+  test('keeps every row expanded in the same event when uncontrolled', async () => {
+    renderTreeTable();
+
+    await userEvent.click(screen.getByRole('button', { name: 'open both teams' }));
+
+    expect(screen.getByText('A overview')).toBeInTheDocument();
+    expect(screen.getByText('B overview')).toBeInTheDocument();
+  });
+
+  test('reports every row expanded in the same event when controlled', async () => {
+    const onExpandedChange = vi.fn();
+    renderTreeTable({ expanded: {}, onExpandedChange });
+
+    await userEvent.click(screen.getByRole('button', { name: 'open both teams' }));
+
+    expect(onExpandedChange).toHaveBeenLastCalledWith({ 'team-a': true, 'team-b': true });
   });
 });
