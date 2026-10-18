@@ -37,7 +37,7 @@ const richTitle = (
 );
 
 const basicCode = `<Tooltip title="Helpful text">
-  <button>Hover me</button>
+  <button type="button">Hover me</button>
 </Tooltip>`;
 
 export const Basic: Story = () => (
@@ -51,7 +51,7 @@ export const Basic: Story = () => (
     </p>
     <Sample title="Minimal usage" code={basicCode}>
       <Tooltip title="Helpful text">
-        <button>Hover me</button>
+        <button type="button">Hover me</button>
       </Tooltip>
     </Sample>
   </Stack>
@@ -59,12 +59,12 @@ export const Basic: Story = () => (
 Basic.storyName = 'Basic';
 
 const placementsCode = `// placement: 'top' (default) | 'bottom' | 'left' | 'right'
-<Tooltip title="Top tooltip" placement="top"><button>Top</button></Tooltip>
-<Tooltip title="Bottom tooltip" placement="bottom"><button>Bottom</button></Tooltip>
-<Tooltip title="Left tooltip" placement="left"><button>Left</button></Tooltip>
-<Tooltip title="Right tooltip" placement="right"><button>Right</button></Tooltip>`;
+<Tooltip title="Top tooltip" placement="top"><button type="button">Top</button></Tooltip>
+<Tooltip title="Bottom tooltip" placement="bottom"><button type="button">Bottom</button></Tooltip>
+<Tooltip title="Left tooltip" placement="left"><button type="button">Left</button></Tooltip>
+<Tooltip title="Right tooltip" placement="right"><button type="button">Right</button></Tooltip>`;
 const richCode = `<Tooltip title={<span><strong>Bold text</strong> and <em>italic text</em></span>}>
-  <button>Rich tooltip</button>
+  <button type="button">Rich tooltip</button>
 </Tooltip>`;
 
 export const Placements: Story = () => (
@@ -72,23 +72,23 @@ export const Placements: Story = () => (
     <Sample title="Placements" code={placementsCode}>
       <div style={placementsRow}>
         <Tooltip title="Top tooltip" placement="top">
-          <button>Top</button>
+          <button type="button">Top</button>
         </Tooltip>
         <Tooltip title="Bottom tooltip" placement="bottom">
-          <button>Bottom</button>
+          <button type="button">Bottom</button>
         </Tooltip>
         <Tooltip title="Left tooltip" placement="left">
-          <button>Left</button>
+          <button type="button">Left</button>
         </Tooltip>
         <Tooltip title="Right tooltip" placement="right">
-          <button>Right</button>
+          <button type="button">Right</button>
         </Tooltip>
       </div>
     </Sample>
 
     <Sample title="Rich content" code={richCode}>
       <Tooltip title={richTitle}>
-        <button>Rich tooltip</button>
+        <button type="button">Rich tooltip</button>
       </Tooltip>
     </Sample>
   </Stack>
@@ -96,23 +96,23 @@ export const Placements: Story = () => (
 Placements.storyName = 'Variants';
 
 const noDelayCode = `// delay is in milliseconds (default 400)
-<Tooltip title="Instant tooltip" delay={0}><button>No delay</button></Tooltip>`;
+<Tooltip title="Instant tooltip" delay={0}><button type="button">No delay</button></Tooltip>`;
 const emptyCode = `// An empty title renders only the child, with no popup
-<Tooltip title=""><button>No tooltip rendered</button></Tooltip>`;
+<Tooltip title=""><button type="button">No tooltip rendered</button></Tooltip>`;
 
 export const Behavior: Story = () => (
   <Stack>
     <Sample title="No delay" code={noDelayCode}>
       <div style={column}>
         <Tooltip title="Instant tooltip" delay={0}>
-          <button>No delay</button>
+          <button type="button">No delay</button>
         </Tooltip>
       </div>
     </Sample>
 
     <Sample title="Empty title" code={emptyCode}>
       <Tooltip title="">
-        <button>No tooltip rendered</button>
+        <button type="button">No tooltip rendered</button>
       </Tooltip>
     </Sample>
   </Stack>

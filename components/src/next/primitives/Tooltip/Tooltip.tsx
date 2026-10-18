@@ -35,7 +35,7 @@ export interface TooltipProps extends Omit<HTMLAttributes<HTMLDivElement>, 'titl
    */
   title: ReactNode;
   /** The trigger. It must be a single element that can receive a ref and focus (e.g. a button or link). */
-  children: ReactElement;
+  children: ReactElement<{ 'aria-describedby'?: string }>;
   placement?: TooltipPlacement;
   /** Hover delay in milliseconds before the popup opens. Defaults to 400. */
   delay?: number;
@@ -53,7 +53,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip
   }
 
   // Base UI does not link the trigger to the popup, so expose the tooltip as the trigger's description while open.
-  const existing = (children.props as { 'aria-describedby'?: string })['aria-describedby'];
+  const existing = children.props['aria-describedby'];
   const describedBy = existing ? `${existing} ${popupId}` : popupId;
 
   return (
