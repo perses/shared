@@ -43,6 +43,7 @@
     border: 1px solid var(--perses-border-default);
     border-radius: var(--perses-radius-md);
     background-color: var(--perses-bg-surface);
+    min-height: var(--ps-textfield-size);
   }
 
   .ps-TextField__wrapper:focus-within {
@@ -79,8 +80,9 @@
     resize: vertical;
   }
 
+  /* Sized via --ps-textfield-size: per-component --perses-textfield-size-<step>, else the shared control-size token. */
   .ps-TextField[data-size='xs'] .ps-TextField__wrapper {
-    min-height: var(--perses-control-size-xs);
+    --ps-textfield-size: var(--perses-textfield-size-xs, var(--perses-control-size-xs));
     padding: var(--perses-spacing-0) var(--perses-spacing-xs);
   }
   .ps-TextField[data-size='xs'] .ps-TextField__input {
@@ -88,7 +90,7 @@
   }
 
   .ps-TextField[data-size='sm'] .ps-TextField__wrapper {
-    min-height: var(--perses-control-size-sm);
+    --ps-textfield-size: var(--perses-textfield-size-sm, var(--perses-control-size-sm));
     padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
   }
   .ps-TextField[data-size='sm'] .ps-TextField__input {
@@ -96,7 +98,7 @@
   }
 
   .ps-TextField[data-size='md'] .ps-TextField__wrapper {
-    min-height: var(--perses-control-size-md);
+    --ps-textfield-size: var(--perses-textfield-size-md, var(--perses-control-size-md));
     padding: var(--perses-spacing-sm) var(--perses-spacing-md);
   }
   .ps-TextField[data-size='md'] .ps-TextField__input {
@@ -104,7 +106,7 @@
   }
 
   .ps-TextField[data-size='lg'] .ps-TextField__wrapper {
-    min-height: var(--perses-control-size-lg);
+    --ps-textfield-size: var(--perses-textfield-size-lg, var(--perses-control-size-lg));
     /* sm vertical padding so the md font + border stay inside min-height instead of overflowing it */
     padding: var(--perses-spacing-sm) var(--perses-spacing-lg);
   }

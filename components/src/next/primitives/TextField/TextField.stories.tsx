@@ -48,8 +48,8 @@ export const Basic: Story = () => (
   <Stack>
     <p>
       <code>TextField</code> is a text input with a label and helper text. Native input attributes go to the input.
-      Responsive spacing, sizing and display style props apply to the root element; they are not repeated here, see the{' '}
-      <code>Box</code> story for how they behave.
+      Responsive spacing, sizing and <code>overflow</code> style props apply to the root element; they are not repeated
+      here, see the <code>Box</code> story for how they behave.
     </p>
     <Sample title="Minimal usage" code={basicCode}>
       <TextField label="Name" placeholder="Type here" />

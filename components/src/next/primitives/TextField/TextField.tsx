@@ -14,7 +14,7 @@
 import { Field } from '@base-ui/react/field';
 import clsx from 'clsx';
 import { forwardRef, useId } from 'react';
-import type { InputHTMLAttributes, ReactNode } from 'react';
+import type { CSSProperties, InputHTMLAttributes, ReactNode } from 'react';
 
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
@@ -25,14 +25,30 @@ import '../system/spacing.css';
 import './textField.css';
 
 const TEXTAREA = <textarea />;
-const TEXT_FIELD_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
+
+export interface TextFieldStyle extends CSSProperties {
+  /** Per-step height override; falls back to the shared control-size scale. */
+  '--perses-textfield-size-xs'?: string;
+  '--perses-textfield-size-sm'?: string;
+  '--perses-textfield-size-md'?: string;
+  '--perses-textfield-size-lg'?: string;
+}
+
+// Only `overflow` from the display category: `display` stays fixed to inline-flex/flex by the stylesheet, so
+// compiling it would strip a `display` value from the DOM and let `.ps-display` override the default.
+const TEXT_FIELD_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
 
 interface TextFieldBaseProps
   extends
-    Omit<InputHTMLAttributes<HTMLInputElement>, 'size' | 'width' | 'height' | 'aria-label' | 'aria-labelledby'>,
+    Omit<
+      InputHTMLAttributes<HTMLInputElement>,
+      'size' | 'width' | 'height' | 'style' | 'aria-label' | 'aria-labelledby'
+    >,
     SpacingProps,
     SizingProps,
-    DisplayProps {
+    Pick<DisplayProps, 'overflow'> {
+  /** Inline styles for the root; accepts the `--perses-textfield-size-<step>` override custom properties. */
+  style?: TextFieldStyle;
   /** Hint or validation message, linked to the control through `aria-describedby`. */
   helperText?: ReactNode;
   /** Visual status. `error` also sets `aria-invalid` on the control. */
@@ -76,8 +92,9 @@ type TextFieldAccessibleName =
 export type TextFieldProps = TextFieldBaseProps & TextFieldAccessibleName;
 
 /**
- * Text input with label, helper text and adornments. Spacing, sizing and display style props apply to the root
- * element and behave as documented on `Box`; native input attributes go to the control.
+ * Text input with label, helper text and adornments. Spacing, sizing and `overflow` style props apply to the root
+ * element and behave as documented on `Box`; `display` is fixed by the stylesheet. Native input attributes go to the
+ * control.
  */
 export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldProps>(function TextField(
   {

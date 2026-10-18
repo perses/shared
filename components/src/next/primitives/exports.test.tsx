@@ -61,6 +61,7 @@ import type {
   TableProps,
   TableRowProps,
   TextFieldProps,
+  TextFieldStyle,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -119,6 +120,7 @@ describe('primitives barrel exports', () => {
     const sharedStatus: Status = 'error';
     const textFieldProps: TextFieldProps = {};
     const textFieldProps: TextFieldProps = { label: 'Name' };
+    const textFieldStyle: TextFieldStyle = { '--perses-textfield-size-md': '2.5rem' };
 
     expect(alertProps).toBeDefined();
     expect(severity).toBe('info');
@@ -148,5 +150,6 @@ describe('primitives barrel exports', () => {
     expect(sharedSize).toBe('md');
     expect(sharedStatus).toBe('error');
     expect(textFieldProps).toBeDefined();
+    expect(textFieldStyle).toBeDefined();
   });
 });
