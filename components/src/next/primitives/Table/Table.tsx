@@ -58,41 +58,7 @@ function updateResizeAriaValue(handle: HTMLSpanElement, width: number): void {
 export type SortDirection = 'asc' | 'desc';
 
 /**
- * Root table element. Renders a native `<table>`.
- *
- * Row selection is composed from the `Checkbox` primitive rather than a table-specific control:
- * `<TableCell><Checkbox aria-label="Select row" /></TableCell>`.
- *
- * @example
- * <Table>
- *   <TableHead>...</TableHead>
- *   <TableBody>...</TableBody>
- * </Table>
- */
-export interface TableProps extends HTMLAttributes<HTMLTableElement> {
-  size?: Size;
-  stickyHeader?: boolean;
-  tableLayout?: 'auto' | 'fixed';
-}
-
-export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
-  { className, size = 'md', stickyHeader, tableLayout, ...props },
-  ref,
-) {
-  return (
-    <table
-      ref={ref}
-      data-size={size}
-      data-sticky-header={stickyHeader || undefined}
-      data-table-layout={tableLayout === 'fixed' ? 'fixed' : undefined}
-      className={clsx('ps-Table', className)}
-      {...props}
-    />
-  );
-});
-
-/**
- * Scrollable wrapper for a `Table`. Renders a native `<div>` with `overflow: auto`.
+ * Scrollable wrapper for a `Table`.
  *
  * @example
  * <TableContainer>
@@ -109,8 +75,38 @@ export const TableContainer = forwardRef<HTMLDivElement, TableContainerProps>(fu
 });
 
 /**
- * Groups header rows. Renders a native `<thead>`.
+ * Root table element.
+ *
+ * @example
+ * <Table>
+ *   <TableHead>...</TableHead>
+ *   <TableBody>...</TableBody>
+ *   <TableFooter>...</TableFooter>
+ * </Table>
  */
+export interface TableProps extends HTMLAttributes<HTMLTableElement> {
+  size?: Size;
+  stickyHeader?: boolean;
+  /** @default 'auto' */
+  tableLayout?: 'auto' | 'fixed';
+}
+
+export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
+  { className, size = 'md', stickyHeader, tableLayout = 'auto', ...props },
+  ref,
+) {
+  return (
+    <table
+      ref={ref}
+      data-size={size}
+      data-sticky-header={stickyHeader || undefined}
+      data-table-layout={tableLayout}
+      className={clsx('ps-Table', className)}
+      {...props}
+    />
+  );
+});
+
 export type TableHeadProps = HTMLAttributes<HTMLTableSectionElement>;
 
 export const TableHead = forwardRef<HTMLTableSectionElement, TableHeadProps>(function TableHead(
@@ -120,9 +116,6 @@ export const TableHead = forwardRef<HTMLTableSectionElement, TableHeadProps>(fun
   return <thead ref={ref} className={clsx('ps-Table__head', className)} {...props} />;
 });
 
-/**
- * Groups data rows. Renders a native `<tbody>`.
- */
 export type TableBodyProps = HTMLAttributes<HTMLTableSectionElement>;
 
 export const TableBody = forwardRef<HTMLTableSectionElement, TableBodyProps>(function TableBody(
@@ -132,9 +125,6 @@ export const TableBody = forwardRef<HTMLTableSectionElement, TableBodyProps>(fun
   return <tbody ref={ref} className={clsx('ps-Table__body', className)} {...props} />;
 });
 
-/**
- * Groups summary rows. Renders a native `<tfoot>`.
- */
 export type TableFooterProps = HTMLAttributes<HTMLTableSectionElement>;
 
 export const TableFooter = forwardRef<HTMLTableSectionElement, TableFooterProps>(function TableFooter(
@@ -145,7 +135,7 @@ export const TableFooter = forwardRef<HTMLTableSectionElement, TableFooterProps>
 });
 
 /**
- * A single row. Renders a native `<tr>`.
+ * A single row.
  *
  * @example
  * <TableRow selected>
@@ -186,7 +176,6 @@ interface TableCellBaseProps extends Omit<TdHTMLAttributes<HTMLTableCellElement>
   align?: 'left' | 'center' | 'right';
   size?: Size;
   sortDirection?: SortDirection | false;
-  /** Pins the cell to the left or right edge of a horizontally scrolling table. */
   sticky?: 'left' | 'right';
 }
 
@@ -196,15 +185,9 @@ type ResizeHandleAccessibleName =
 
 type TableCellResizeProps =
   | ({
-      /**
-       * Renders a handle that reports the cell's new width via `onResize`. Supports pointer dragging and Left/Right
-       * arrow keys; hold Shift for one-pixel keyboard adjustments. Requires `Table`'s `tableLayout="fixed"`.
-       */
       resizable: true;
       onResize: (width: number) => void;
-      /** Minimum resize width in pixels. @default 40 */
       minResizeWidth?: number;
-      /** Maximum resize width in pixels. */
       maxResizeWidth: number;
     } & ResizeHandleAccessibleName)
   | {
@@ -298,9 +281,6 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
       const startWidth = clampResizeWidth(getRenderedWidth(handle, 0), minResizeWidth, resolvedMaxResizeWidth);
       const pointerId = event.pointerId;
       updateResizeAriaValue(handle, startWidth);
-      // Listen on the cell's own document: when the table is rendered through a
-      // portal into another document (e.g. an iframe), the global `document` is
-      // the wrong one and drag events would never arrive.
       const ownerDocument = handle.ownerDocument;
       const handlePointerMove = (moveEvent: PointerEvent): void => {
         if (moveEvent.pointerId !== pointerId) return;

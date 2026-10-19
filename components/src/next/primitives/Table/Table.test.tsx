@@ -383,7 +383,7 @@ describe('Table', () => {
     expect(screen.getByRole('table')).toHaveAttribute('data-table-layout', 'fixed');
   });
 
-  it('omits data-table-layout when tableLayout is not fixed', () => {
+  it('defaults tableLayout to auto', () => {
     render(
       <Table>
         <TableBody>
@@ -393,7 +393,7 @@ describe('Table', () => {
         </TableBody>
       </Table>,
     );
-    expect(screen.getByRole('table')).not.toHaveAttribute('data-table-layout');
+    expect(screen.getByRole('table')).toHaveAttribute('data-table-layout', 'auto');
   });
 
   it('pins a cell via the sticky prop', () => {
