@@ -188,9 +188,11 @@ export const Clickable: Story = () => {
           <Chip variant={selected ? 'solid' : 'outline'} color="primary" onClick={toggle}>
             {selected ? 'Selected' : 'Not selected'}
           </Chip>
-          {!isRemoved && <Chip variant={removableSelected ? 'solid' : 'outline'} onClick={toggleRemovable} onClose={remove}>
-            {removableSelected ? 'Selected (not removed)' : 'Not selected (not removed)'}
-          </Chip>}
+          {!isRemoved && (
+            <Chip variant={removableSelected ? 'solid' : 'outline'} onClick={toggleRemovable} onClose={remove}>
+              {removableSelected ? 'Selected (not removed)' : 'Not selected (not removed)'}
+            </Chip>
+          )}
         </div>
       </Sample>
     </Stack>

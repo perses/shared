@@ -12,18 +12,9 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { forwardRef, useCallback, useRef } from 'react';
-import type {
-  CSSProperties,
-  HTMLAttributes,
-  KeyboardEvent,
-  MouseEvent,
-  MouseEventHandler,
-  ReactElement,
-  ReactNode,
-} from 'react';
+import { forwardRef } from 'react';
+import type { CSSProperties, HTMLAttributes, MouseEventHandler, ReactElement, ReactNode } from 'react';
 
-import { CloseIcon } from '../Icon/icons';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import {
   applyStyleProps,
@@ -34,6 +25,8 @@ import {
   spacingProps,
 } from '../system';
 import type { ColorVariant, Size, Status } from '../types';
+import { ChipCloseButton } from './ChipCloseButton';
+import { useChipAction } from './useChipAction';
 
 import '../system/layout.css';
 import '../system/spacing.css';
@@ -94,10 +87,24 @@ function withLabelMaxWidth(style: ChipStyle | undefined, maxWidth: CSSProperties
   return { ...style, '--perses-chip-label-max-width': lengthTransform(maxWidth) };
 }
 
-const defaultCloseIcon = <CloseIcon aria-hidden="true" />;
+interface ChipAriaProps {
+  rootProps: Record<string, unknown>;
+  actionAriaProps: Record<string, unknown>;
+}
 
-function getCloseAriaLabel(children: ReactNode): string {
-  return typeof children === 'string' || typeof children === 'number' ? `Remove ${children}` : 'Remove';
+function splitChipAriaProps(domProps: Record<string, unknown>, actionOnLabel: boolean): ChipAriaProps {
+  const actionAriaProps: Record<string, unknown> = {};
+  if (!actionOnLabel) return { rootProps: domProps, actionAriaProps };
+
+  const rootProps: Record<string, unknown> = {};
+  for (const [name, value] of Object.entries(domProps)) {
+    if (name.startsWith('aria-') && !CONTAINER_ARIA_PROPS.has(name)) {
+      actionAriaProps[name] = value;
+    } else {
+      rootProps[name] = value;
+    }
+  }
+  return { rootProps, actionAriaProps };
 }
 
 /**
@@ -128,7 +135,7 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
     size = 'xs',
     variant = 'solid',
     startElement,
-    closeIcon = defaultCloseIcon,
+    closeIcon,
     closeAriaLabel,
     onClose,
     disabled = false,
@@ -143,7 +150,6 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
   },
   ref,
 ): ReactElement {
-  const labelRef = useRef<HTMLSpanElement>(null);
   const {
     className: styleClassName,
     style: computedStyle,
@@ -153,67 +159,18 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
 
   const interactive = Boolean(onClick);
   const actionOnLabel = interactive && Boolean(onClose);
-  // Only when the label is the action do we peel action aria-* off the container; otherwise every prop stays on the root.
-  let rootProps: Record<string, unknown> = domProps;
-  const actionAriaProps: Record<string, unknown> = {};
-  if (actionOnLabel) {
-    rootProps = {};
-    for (const [name, value] of Object.entries(domProps)) {
-      if (name.startsWith('aria-') && !CONTAINER_ARIA_PROPS.has(name)) {
-        actionAriaProps[name] = value;
-      } else {
-        rootProps[name] = value;
-      }
-    }
-  }
+  const { rootProps, actionAriaProps } = splitChipAriaProps(domProps, actionOnLabel);
+  const { labelRef, actionProps, handleKeyDown } = useChipAction({
+    actionOnLabel,
+    disabled,
+    onClick,
+    onKeyDown,
+    tabIndex,
+  });
 
-  // The element exposed as the button: the root, or only the label when a close button is also rendered.
-  const actionProps = interactive
-    ? {
-        ...actionAriaProps,
-        role: 'button',
-        tabIndex: tabIndex ?? (disabled ? -1 : 0),
-        'aria-disabled': disabled || undefined,
-        onClick: (event: MouseEvent<HTMLElement>): void => {
-          if (disabled) {
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-          }
-          onClick?.(event);
-        },
-      }
-    : undefined;
-
-  // What the root contributes to the action: it IS the button, unless the label took that role (close button present),
-  // in which case the root only carries the consumer's own role and no tab stop.
-  let rootActionProps: Record<string, unknown> | undefined = { role, tabIndex };
-  if (interactive) {
-    rootActionProps = actionOnLabel ? { role, tabIndex: undefined } : actionProps;
-  }
-
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLElement>): void => {
-      const action = actionOnLabel ? labelRef.current : event.currentTarget;
-      const onAction = event.target === action;
-      if (interactive && !actionOnLabel && !onAction) return;
-      onKeyDown?.(event);
-      if (!interactive || !action || !onAction || event.defaultPrevented || disabled) return;
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        action.click();
-      }
-    },
-    [actionOnLabel, disabled, interactive, onKeyDown],
-  );
-
-  const closeProps = {
-    onClick: (event: MouseEvent<HTMLButtonElement>): void => {
-      event.stopPropagation();
-      if (disabled) return;
-      onClose?.(event);
-    },
-  };
+  // With a close button, only the label is the action; the root retains the consumer's role without a tab stop.
+  const rootActionProps = actionOnLabel ? { role, tabIndex: undefined } : (actionProps ?? { role, tabIndex });
+  const labelActionProps = actionOnLabel ? { ...actionAriaProps, ...actionProps } : undefined;
 
   return (
     // oxlint-disable-next-line jsx-a11y/no-static-element-interactions -- The container delegates keyboard events to its action and close button without becoming another control.
@@ -231,19 +188,13 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
       data-disabled={disabled || undefined}
     >
       {startElement && <span className="ps-Chip__start">{startElement}</span>}
-      <span ref={labelRef} className="ps-Chip__label" {...(actionOnLabel ? actionProps : undefined)}>
+      <span ref={labelRef} className="ps-Chip__label" {...labelActionProps}>
         {children}
       </span>
       {onClose && (
-        <button
-          type="button"
-          className="ps-Chip__close"
-          aria-label={closeAriaLabel ?? getCloseAriaLabel(children)}
-          disabled={disabled}
-          {...closeProps}
-        >
-          {closeIcon}
-        </button>
+        <ChipCloseButton closeIcon={closeIcon} closeAriaLabel={closeAriaLabel} disabled={disabled} onClose={onClose}>
+          {children}
+        </ChipCloseButton>
       )}
     </div>
   );

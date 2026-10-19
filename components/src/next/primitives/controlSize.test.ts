@@ -65,7 +65,9 @@ describe('control size tokens', () => {
     'Chip size %s sets --ps-chip-size from --perses-chip-size-%s, else --perses-control-size-%s',
     (size) => {
       const rule = ruleFor(readCss('./Chip/chip.css'), `.ps-Chip[data-size='${size}']`);
-      expect(rule).toContain(`--ps-chip-size: var(--perses-chip-size-${size}, var(--perses-selection-control-size-${size}));`);
+      expect(rule).toContain(
+        `--ps-chip-size: var(--perses-chip-size-${size}, var(--perses-selection-control-size-${size}));`,
+      );
     },
   );
 });

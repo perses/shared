@@ -35,6 +35,7 @@ const responsiveDisplay = { default: 'flex', md: 'inline-flex' } as const;
 const widthOverride: CSSProperties & { '--ps-width': string } = { '--ps-width': '50px' };
 const startElement = <svg data-testid="start-element" />;
 const closeIcon = <svg data-testid="close-icon" />;
+const filterInput = <input aria-label="Filter value" />;
 
 describe('Chip', () => {
   it('renders its children', () => {
@@ -504,6 +505,110 @@ describe('Chip', () => {
       await userEvent.keyboard('{Enter}');
       expect(handleClose).toHaveBeenCalledTimes(1);
       expect(handleClick).toHaveBeenCalledTimes(2);
+    });
+
+    it.each([
+      [false, 0],
+      [true, 2],
+    ] as const)(
+      'does not synthesize chip clicks from nested-control keys in %s removable mode',
+      async (removable, keyDownCalls) => {
+        const handleClick = vi.fn();
+        const handleKeyDown = vi.fn();
+        render(
+          <Chip
+            onClick={handleClick}
+            onClose={removable ? noop : undefined}
+            onKeyDown={handleKeyDown}
+            startElement={filterInput}
+          >
+            Pick
+          </Chip>,
+        );
+
+        screen.getByRole('textbox', { name: 'Filter value' }).focus();
+        await userEvent.keyboard('{Enter} ');
+
+        expect(handleClick).not.toHaveBeenCalled();
+        expect(handleKeyDown).toHaveBeenCalledTimes(keyDownCalls);
+      },
+    );
+
+    it.each([false, true])(
+      'moves action semantics and keyboard activation when removable changes from %s',
+      async (removable) => {
+        const ref = createRef<HTMLDivElement>();
+        const handleClick = vi.fn();
+        const { rerender } = render(
+          <Chip
+            ref={ref}
+            role="note"
+            tabIndex={-1}
+            aria-label="Environment filter"
+            aria-live="polite"
+            onClick={handleClick}
+            onClose={removable ? noop : undefined}
+          >
+            Production
+          </Chip>,
+        );
+        const firstAction = screen.getByRole('button', { name: 'Environment filter' });
+        expect(firstAction === ref.current).toBe(!removable);
+        firstAction.focus();
+        await userEvent.keyboard('{Enter}');
+        expect(handleClick).toHaveBeenCalledTimes(1);
+
+        rerender(
+          <Chip
+            ref={ref}
+            role="note"
+            tabIndex={-1}
+            aria-label="Environment filter"
+            aria-live="polite"
+            onClick={handleClick}
+            onClose={removable ? undefined : noop}
+          >
+            Production
+          </Chip>,
+        );
+
+        const action = screen.getByRole('button', { name: 'Environment filter' });
+        expect(action === ref.current).toBe(removable);
+        expect(action).toHaveAttribute('tabindex', '-1');
+        expect(ref.current).toHaveAttribute('aria-live', 'polite');
+        if (!removable) {
+          expect(ref.current).toHaveAttribute('role', 'note');
+          expect(ref.current).not.toHaveAttribute('tabindex');
+          expect(ref.current).not.toHaveAttribute('aria-label');
+        }
+        action.focus();
+        await userEvent.keyboard(' ');
+        expect(handleClick).toHaveBeenCalledTimes(2);
+      },
+    );
+
+    it('removes action semantics and activation when onClick is removed', async () => {
+      const handleClick = vi.fn();
+      const handleKeyDown = vi.fn();
+      const { rerender } = render(
+        <Chip onClick={handleClick} onClose={noop}>
+          Pick
+        </Chip>,
+      );
+
+      rerender(
+        <Chip role="note" tabIndex={0} onKeyDown={handleKeyDown} onClose={noop}>
+          Pick
+        </Chip>,
+      );
+
+      const chip = screen.getByRole('note');
+      expect(screen.queryByRole('button', { name: 'Pick' })).not.toBeInTheDocument();
+      expect(chip).toHaveAttribute('tabindex', '0');
+      chip.focus();
+      await userEvent.keyboard('{Enter} ');
+      expect(handleClick).not.toHaveBeenCalled();
+      expect(handleKeyDown).toHaveBeenCalledTimes(2);
     });
 
     it('does not activate on other keys', async () => {
