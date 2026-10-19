@@ -55,6 +55,7 @@
 
   /* ---- Layout ---- */
   .ps-Table[data-table-layout='fixed'] {
+    min-width: 0;
     width: 100%;
     table-layout: fixed;
   }

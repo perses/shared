@@ -30,8 +30,9 @@ function ruleFor(css: string, selector: string): string {
 }
 
 describe('Table CSS contracts', () => {
-  it('gives fixed-layout tables an explicit width', () => {
+  it('gives fixed-layout tables an explicit, overridable width', () => {
     const rule = ruleFor(tableCss, ".ps-Table[data-table-layout='fixed']");
+    expect(rule).toContain('min-width: 0;');
     expect(rule).toContain('width: 100%;');
     expect(rule).toContain('table-layout: fixed;');
   });

@@ -522,32 +522,33 @@ const stickyCode = `<TableContainer style={{ maxHeight: '16rem' }}>
 
 const resizableCode = `
 const [widths, setWidths] = useState({ name: 160, value: 96, unit: 96 });
+// The table is exactly as wide as its columns, so each one keeps the width it was dragged to.
+const tableWidth = widths.name + widths.value + widths.unit;
 
 <TableContainer>
-  <Table tableLayout="fixed">
+  <Table tableLayout="fixed" style={{ width: tableWidth }}>
     <TableHead>
       <TableRow>
-      <TableCell
-        header
-        resizable
-        onResize={(width) => setWidths({ ...widths, name: width })}
-        minResizeWidth={80}
-        maxResizeWidth={320}
-        resizeHandleAriaLabel="Resize Name column"
-        style={{ width: widths.name }}
-      >
-        Name
-      </TableCell>
-      <TableCell header resizable onResize={...} minResizeWidth={80} maxResizeWidth={320} resizeHandleAriaLabel="Resize Value column" style={{ width: widths.value }}>
-        Value
-      </TableCell>
-      <TableCell header resizable onResize={...} minResizeWidth={80} maxResizeWidth={320} resizeHandleAriaLabel="Resize Unit column" style={{ width: widths.unit }}>
-        Unit
-      </TableCell>
-      <TableCell header aria-hidden />
-    </TableRow>
-  </TableHead>
-</Table>
+        <TableCell
+          header
+          resizable
+          onResize={(width) => setWidths({ ...widths, name: width })}
+          minResizeWidth={80}
+          maxResizeWidth={320}
+          resizeHandleAriaLabel="Resize Name column"
+          style={{ width: widths.name }}
+        >
+          Name
+        </TableCell>
+        <TableCell header resizable onResize={...} minResizeWidth={80} maxResizeWidth={320} resizeHandleAriaLabel="Resize Value column" style={{ width: widths.value }}>
+          Value
+        </TableCell>
+        <TableCell header resizable onResize={...} minResizeWidth={80} maxResizeWidth={320} resizeHandleAriaLabel="Resize Unit column" style={{ width: widths.unit }}>
+          Unit
+        </TableCell>
+      </TableRow>
+    </TableHead>
+  </Table>
 </TableContainer>`;
 
 const stickyColumnContainer: CSSProperties = {
@@ -593,10 +594,11 @@ function ResizableTable(): ReactElement {
   const handleResize = useCallback((column: ResizableColumn, width: number): void => {
     setWidths((current) => ({ ...current, [column]: width }));
   }, []);
+  const tableStyle = useMemo(() => ({ width: widths.name + widths.value + widths.unit }), [widths]);
 
   return (
     <TableContainer>
-      <Table tableLayout="fixed">
+      <Table tableLayout="fixed" style={tableStyle}>
         <TableHead>
           <TableRow>
             <ResizableHeaderCell column="name" width={widths.name} onResize={handleResize}>
@@ -608,7 +610,6 @@ function ResizableTable(): ReactElement {
             <ResizableHeaderCell column="unit" width={widths.unit} onResize={handleResize}>
               Unit
             </ResizableHeaderCell>
-            <TableCell header aria-hidden />
           </TableRow>
         </TableHead>
         <TableBody>
