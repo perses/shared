@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Box, Button, Checkbox, Divider, Icon, Spinner, Stack, Switch } from './index';
+import { Alert, Box, Button, Checkbox, Chip, Divider, Icon, Spinner, Stack, Switch } from './index';
 import type {
   AlertProps,
   AlertSeverity,
@@ -19,6 +19,11 @@ import type {
   ButtonProps,
   ButtonVariant,
   CheckboxProps,
+  ChipColor,
+  ChipProps,
+  ChipSize,
+  ChipStyle,
+  ChipVariant,
   ColorVariant,
   DividerProps,
   IconProps,
@@ -36,6 +41,7 @@ describe('primitives barrel exports', () => {
     expect(Box).toBeDefined();
     expect(Button).toBeDefined();
     expect(Checkbox).toBeDefined();
+    expect(Chip).toBeDefined();
     expect(Divider).toBeDefined();
     expect(Icon).toBeDefined();
     expect(Spinner).toBeDefined();
@@ -55,6 +61,11 @@ describe('primitives barrel exports', () => {
     const checkboxProps: CheckboxProps = { 'aria-label': 'Select' };
     const checkboxColor: ColorVariant = 'primary';
     const checkboxSize: Size = 'md';
+    const chipProps: ChipProps = { children: 'Production' };
+    const chipColor: ChipColor = 'secondary';
+    const chipSize: ChipSize = 'xs';
+    const chipVariant: ChipVariant = 'outline';
+    const chipStyle: ChipStyle = { '--perses-chip-size-sm': '2.5rem' };
     const dividerProps: DividerProps = {};
     const iconProps: IconProps = {};
     const spinnerProps: SpinnerProps = {};
@@ -72,6 +83,11 @@ describe('primitives barrel exports', () => {
     expect(checkboxProps).toBeDefined();
     expect(checkboxColor).toBe('primary');
     expect(checkboxSize).toBe('md');
+    expect(chipProps).toBeDefined();
+    expect(chipColor).toBe('secondary');
+    expect(chipSize).toBe('xs');
+    expect(chipVariant).toBe('outline');
+    expect(chipStyle).toBeDefined();
     expect(dividerProps).toBeDefined();
     expect(iconProps).toBeDefined();
     expect(spinnerProps).toBeDefined();

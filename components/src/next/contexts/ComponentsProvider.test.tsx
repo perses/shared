@@ -15,13 +15,29 @@ import { render, screen } from '@testing-library/react';
 import { createRef, forwardRef } from 'react';
 import type { FC, ReactElement, SVGProps } from 'react';
 
-import type { ButtonProps } from '../primitives';
+import type { ButtonProps, ChipProps } from '../primitives';
 import { defaultComponents, defaultIcons } from '../primitives/defaults';
 import { ComponentsProvider, useComponents } from './ComponentsProvider';
 import type { ComponentsContextValue, PersesComponents } from './ComponentsProvider';
 
 const components = defaultComponents;
 const icons = defaultIcons;
+
+const CustomChip = forwardRef<HTMLDivElement, ChipProps>(function CustomChip({ children }, ref) {
+  return (
+    <div ref={ref} data-testid="custom-chip">
+      Custom: {children}
+    </div>
+  );
+});
+const chipOverrides: PersesComponents = { ...components, Chip: CustomChip };
+
+function ChipOverrideConsumer(): ReactElement {
+  const {
+    components: { Chip },
+  } = useComponents();
+  return <Chip>Production</Chip>;
+}
 
 describe('ComponentsProvider', () => {
   it('renders components passed in via props', () => {
@@ -107,6 +123,16 @@ describe('ComponentsProvider', () => {
     expect(buttonRef.current).toBeInstanceOf(HTMLButtonElement);
     expect(iconButtonRef.current).toBeInstanceOf(HTMLButtonElement);
     expect(alertRef.current).toBeInstanceOf(HTMLDivElement);
+  });
+
+  it('supports overriding Chip', () => {
+    render(
+      <ComponentsProvider components={chipOverrides} icons={icons}>
+        <ChipOverrideConsumer />
+      </ComponentsProvider>,
+    );
+
+    expect(screen.getByTestId('custom-chip')).toHaveTextContent('Custom: Production');
   });
 
   it('throws when useComponents is called outside provider', () => {
