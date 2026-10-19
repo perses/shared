@@ -20,7 +20,7 @@ import { Chip } from './Chip';
 import type { ChipColor, ChipSize, ChipVariant } from './Chip';
 
 const colors: ChipColor[] = ['default', 'primary', 'secondary', 'success', 'warning', 'error', 'info'];
-const sizes: ChipSize[] = ['xs', 'sm'];
+const sizes: ChipSize[] = ['xs', 'sm', 'md'];
 const variants: ChipVariant[] = ['solid', 'outline'];
 
 function TagIcon(): ReactElement {
@@ -155,36 +155,19 @@ function RemovableChip({ label, onRemove }: RemovableChipProps): ReactElement {
   return <Chip onClose={handleClose}>{label}</Chip>;
 }
 
-export const Removable: Story = () => {
-  const [labels, setLabels] = useState(['production', 'staging', 'development']);
-  const remove = useCallback((label: string) => setLabels((prev) => prev.filter((l) => l !== label)), []);
-
-  return (
-    <Stack>
-      <p>
-        The close button is a real <code>button</code> named <code>Remove &lt;label&gt;</code>. Provide{' '}
-        <code>closeAriaLabel</code> when the children are not plain text.
-      </p>
-      <Sample title="Removable chips" code={removableCode}>
-        <div style={wrapRow}>
-          {labels.map((label) => (
-            <RemovableChip key={label} label={label} onRemove={remove} />
-          ))}
-          {labels.length === 0 && <span>All chips removed — reload the story to reset.</span>}
-        </div>
-      </Sample>
-    </Stack>
-  );
-};
-Removable.storyName = 'Removable';
-
 const clickableCode = `<Chip onClick={() => toggle()}>Selectable</Chip>
 // With onClose the label is the button, so the close button is never nested in another button
 <Chip onClick={…} onClose={…}>Selectable and removable</Chip>`;
 
 export const Clickable: Story = () => {
+  const [labels, setLabels] = useState(['production', 'staging', 'development']);
+  const removeFromList = useCallback((label: string) => setLabels((prev) => prev.filter((l) => l !== label)), []);
   const [selected, setSelected] = useState(false);
   const toggle = useCallback(() => setSelected((value) => !value), []);
+  const [removableSelected, setRemovableSelected] = useState(false);
+  const toggleRemovable = useCallback(() => setRemovableSelected((value) => !value), []);
+  const [isRemoved, setIsRemoved] = useState(false);
+  const remove = useCallback(() => setIsRemoved(true), []);
 
   return (
     <Stack>
@@ -192,17 +175,25 @@ export const Clickable: Story = () => {
         With <code>onClick</code> the chip is exposed as a button and is operable with <kbd>Enter</kbd> and{' '}
         <kbd>Space</kbd>.
       </p>
-      <Sample title="Clickable" code={clickableCode}>
+      <Sample title="Removable" code={removableCode}>
+        <div style={wrapRow}>
+          {labels.map((label) => (
+            <RemovableChip key={label} label={label} onRemove={removeFromList} />
+          ))}
+          {labels.length === 0 && <span>All chips removed — reload the story to reset.</span>}
+        </div>
+      </Sample>
+      <Sample title="Selectable" code={clickableCode}>
         <div style={wrapRow}>
           <Chip variant={selected ? 'solid' : 'outline'} color="primary" onClick={toggle}>
             {selected ? 'Selected' : 'Not selected'}
           </Chip>
-          <Chip onClick={noop} onClose={noop}>
-            Selectable and removable
-          </Chip>
+          {!isRemoved && <Chip variant={removableSelected ? 'solid' : 'outline'} onClick={toggleRemovable} onClose={remove}>
+            {removableSelected ? 'Selected (not removed)' : 'Not selected (not removed)'}
+          </Chip>}
         </div>
       </Sample>
     </Stack>
   );
 };
-Clickable.storyName = 'Clickable';
+Clickable.storyName = 'Selectable and removable';

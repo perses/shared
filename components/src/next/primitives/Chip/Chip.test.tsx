@@ -25,6 +25,11 @@ const customChipStyle: ChipStyle = {
   marginTop: 4,
   '--perses-chip-label-max-width': '20ch',
 };
+const chipSizeOverride: ChipStyle = { '--perses-chip-size-sm': '40px' };
+const chipBorderOverride: ChipStyle = {
+  '--perses-chip-border-style': 'dashed',
+  '--perses-chip-border-width': 'var(--perses-border-width-md)',
+};
 const responsiveWidth = { default: 100, md: 200 };
 const responsiveDisplay = { default: 'flex', md: 'inline-flex' } as const;
 const widthOverride: CSSProperties & { '--ps-width': string } = { '--ps-width': '50px' };
@@ -353,14 +358,27 @@ describe('Chip', () => {
     });
 
     it('applies a per-size override custom property to the chip', () => {
-      const style: ChipStyle = { '--perses-chip-size-sm': '40px' };
       const { container } = render(
-        <Chip size="sm" style={style}>
+        <Chip size="sm" style={chipSizeOverride}>
           Tag
         </Chip>,
       );
       const chip = container.querySelector<HTMLElement>('.ps-Chip');
       expect(chip?.style.getPropertyValue('--perses-chip-size-sm')).toBe('40px');
+    });
+
+    it.each(['solid', 'outline'] as const)('applies typed border tokens to the %s chip container', (variant) => {
+      const ref = createRef<HTMLDivElement>();
+      render(
+        <Chip ref={ref} variant={variant} style={chipBorderOverride} maxWidth={120} onClick={noop} onClose={noop}>
+          Production
+        </Chip>,
+      );
+      expect(ref.current).toHaveStyle({
+        '--perses-chip-border-style': 'dashed',
+        '--perses-chip-border-width': 'var(--perses-border-width-md)',
+        '--perses-chip-label-max-width': '120px',
+      });
     });
 
     it('does not leak style props to the DOM', () => {
@@ -496,16 +514,44 @@ describe('Chip', () => {
       expect(handleClick).not.toHaveBeenCalled();
     });
 
-    it('lets a consumer onKeyDown prevent activation', async () => {
+    it.each([
+      [false, '{Enter}'],
+      [false, ' '],
+      [true, '{Enter}'],
+      [true, ' '],
+    ] as const)('lets onKeyDown cancel %s removable mode activation with %s', async (removable, key) => {
       const handleClick = vi.fn();
+      const handleKeyDown = vi.fn(preventDefault);
       render(
-        <Chip onClick={handleClick} onKeyDown={preventDefault}>
+        <Chip onClick={handleClick} onClose={removable ? noop : undefined} onKeyDown={handleKeyDown}>
           Pick
         </Chip>,
       );
       await userEvent.tab();
-      await userEvent.keyboard('{Enter}');
+      await userEvent.keyboard(key);
       expect(handleClick).not.toHaveBeenCalled();
+      expect(handleKeyDown).toHaveBeenCalledTimes(1);
+    });
+
+    it('calls onKeyDown once for each action and close-button key press', async () => {
+      const handleClick = vi.fn();
+      const handleClose = vi.fn();
+      const handleKeyDown = vi.fn();
+      render(
+        <Chip onClick={handleClick} onClose={handleClose} onKeyDown={handleKeyDown}>
+          Pick
+        </Chip>,
+      );
+      screen.getByRole('button', { name: 'Pick' }).focus();
+      await userEvent.keyboard('{Enter}');
+      expect(handleKeyDown).toHaveBeenCalledTimes(1);
+      expect(handleClick).toHaveBeenCalledTimes(1);
+
+      screen.getByRole('button', { name: 'Remove Pick' }).focus();
+      await userEvent.keyboard('{Enter}');
+      expect(handleKeyDown).toHaveBeenCalledTimes(2);
+      expect(handleClose).toHaveBeenCalledTimes(1);
+      expect(handleClick).toHaveBeenCalledTimes(1);
     });
 
     it('exposes a disabled clickable chip as aria-disabled and removes it from the tab order', async () => {
@@ -560,6 +606,74 @@ describe('Chip', () => {
       const chip = screen.getByRole('button', { name: 'Filter by tag' });
       expect(chip).toHaveClass('ps-Chip');
       expect(chip).toContainElement(screen.getByTestId('start-element'));
+    });
+
+    it('names an icon-only clickable and removable action from aria-label', () => {
+      render(<Chip startElement={startElement} aria-label="Filter by tag" onClick={noop} onClose={noop} />);
+      expect(screen.getByRole('button', { name: 'Filter by tag' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Remove' })).toBeInTheDocument();
+    });
+
+    it('exposes action naming, description and state while keeping container attributes on the root', () => {
+      render(
+        <>
+          <span id="chip-name">Environment filter</span>
+          <span id="chip-hint">Show production dashboards</span>
+          <Chip
+            id="environment-chip"
+            data-testid="environment-chip"
+
+            aria-labelledby="chip-name"
+            aria-describedby="chip-hint"
+            aria-pressed
+            aria-expanded
+            aria-controls="filter-options"
+            aria-haspopup="listbox"
+            onClick={noop}
+            onClose={noop}
+          >
+            Production
+          </Chip>
+        </>,
+      );
+
+      const action = screen.getByRole('button', { name: 'Environment filter', pressed: true, expanded: true });
+      expect(action).toHaveAccessibleDescription('Show production dashboards');
+      expect(action).toHaveAttribute('aria-controls', 'filter-options');
+      expect(action).toHaveAttribute('aria-haspopup', 'listbox');
+      const container = screen.getByTestId('environment-chip');
+      expect(container).toHaveAttribute('id', 'environment-chip');
+      expect(container).not.toHaveAttribute('role');
+      expect(container).not.toHaveAttribute('aria-labelledby');
+      expect(container).not.toHaveAttribute('aria-pressed');
+    });
+
+    it('keeps aria-hidden on the container so both actions remain hidden', () => {
+      render(
+        <Chip aria-hidden onClick={noop} onClose={noop}>
+          Hidden
+        </Chip>,
+      );
+      expect(screen.queryByRole('button')).not.toBeInTheDocument();
+      expect(screen.getAllByRole('button', { hidden: true })).toHaveLength(2);
+    });
+
+    it.each([0, -1])('applies explicit tabIndex=%s only to the combined-mode action', async (tabIndex) => {
+      render(
+        <Chip tabIndex={tabIndex} onClick={noop} onClose={noop}>
+          Pick
+        </Chip>,
+      );
+      const action = screen.getByRole('button', { name: 'Pick' });
+      const close = screen.getByRole('button', { name: 'Remove Pick' });
+      expect(action).toHaveAttribute('tabindex', String(tabIndex));
+      expect(action.closest('.ps-Chip')).not.toHaveAttribute('tabindex');
+      await userEvent.tab();
+      expect(tabIndex === 0 ? action : close).toHaveFocus();
+      if (tabIndex === 0) {
+        await userEvent.tab();
+        expect(close).toHaveFocus();
+      }
     });
 
     it('requires aria-label when there are no children', () => {

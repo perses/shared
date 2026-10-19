@@ -16,11 +16,12 @@
 @layer perses.components {
   :where(.ps-Chip) {
     display: inline-flex;
+    width: min-content;
     align-items: center;
     gap: var(--perses-spacing-xs);
     min-height: var(--ps-chip-size);
-    border-width: var(--perses-border-width-sm);
-    border-style: solid;
+    border-width: var(--perses-chip-border-width, var(--perses-border-width-sm));
+    border-style: var(--perses-chip-border-style, solid);
     border-color: transparent;
     border-radius: var(--perses-radius-full);
     background-color: var(--chip-bg);
@@ -32,15 +33,21 @@
 
   /* Sized via --ps-chip-size: per-component --perses-chip-size-<step>, else the shared control-size token. */
   :where(.ps-Chip[data-size='xs']) {
-    --ps-chip-size: var(--perses-chip-size-xs, var(--perses-control-size-xs));
+    --ps-chip-size: var(--perses-chip-size-xs, var(--perses-selection-control-size-xs));
     padding: var(--perses-spacing-0) var(--perses-spacing-sm);
     font-size: var(--perses-font-size-xs);
   }
 
   :where(.ps-Chip[data-size='sm']) {
-    --ps-chip-size: var(--perses-chip-size-sm, var(--perses-control-size-sm));
+    --ps-chip-size: var(--perses-chip-size-sm, var(--perses-selection-control-size-sm));
     padding: var(--perses-spacing-0) var(--perses-spacing-md);
     font-size: var(--perses-font-size-sm);
+  }
+
+  :where(.ps-Chip[data-size='md']) {
+    --ps-chip-size: var(--perses-chip-size-md, var(--perses-selection-control-size-md));
+    padding: var(--perses-spacing-0) var(--perses-spacing-md);
+    font-size: var(--perses-font-size-md);
   }
 
   .ps-Chip[data-color='default'] {
@@ -95,7 +102,8 @@
   }
 
   .ps-Chip[data-clickable='true']:focus-visible,
-  .ps-Chip__label[role='button']:focus-visible {
+  .ps-Chip__label[role='button']:focus-visible,
+  .ps-Chip__close:focus-visible {
     outline-width: var(--perses-border-width-md);
     outline-style: solid;
     outline-color: var(--perses-status-border-primary);
@@ -141,13 +149,6 @@
 
   .ps-Chip__close:hover {
     opacity: 1;
-  }
-
-  .ps-Chip__close:focus-visible {
-    outline-width: var(--perses-border-width-md);
-    outline-style: solid;
-    outline-color: var(--perses-status-border-primary);
-    outline-offset: 2px;
   }
 
   .ps-Chip__close:disabled {

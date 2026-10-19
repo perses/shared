@@ -13,7 +13,7 @@
 
 import { render, screen } from '@testing-library/react';
 import { createRef, forwardRef } from 'react';
-import type { FC, ReactElement, Ref, SVGProps } from 'react';
+import type { FC, ReactElement, SVGProps } from 'react';
 
 import type { ButtonProps, ChipProps } from '../primitives';
 import { defaultComponents, defaultIcons } from '../primitives/defaults';
@@ -22,6 +22,22 @@ import type { ComponentsContextValue, PersesComponents } from './ComponentsProvi
 
 const components = defaultComponents;
 const icons = defaultIcons;
+
+const CustomChip = forwardRef<HTMLDivElement, ChipProps>(function CustomChip({ children }, ref) {
+  return (
+    <div ref={ref} data-testid="custom-chip">
+      Custom: {children}
+    </div>
+  );
+});
+const chipOverrides: PersesComponents = { ...components, Chip: CustomChip };
+
+function ChipOverrideConsumer(): ReactElement {
+  const {
+    components: { Chip },
+  } = useComponents();
+  return <Chip>Production</Chip>;
+}
 
 describe('ComponentsProvider', () => {
   it('renders components passed in via props', () => {
@@ -110,23 +126,9 @@ describe('ComponentsProvider', () => {
   });
 
   it('supports overriding Chip', () => {
-    const CustomChip = forwardRef<HTMLDivElement, ChipProps>(function CustomChip({ children }, ref) {
-      return (
-        <div ref={ref as Ref<HTMLDivElement>} data-testid="custom-chip">
-          Custom: {children}
-        </div>
-      );
-    });
-
-    function TestConsumer(): ReactElement {
-      const { components } = useComponents();
-      const { Chip } = components;
-      return <Chip>Production</Chip>;
-    }
-
     render(
-      <ComponentsProvider components={{ ...components, Chip: CustomChip }} icons={icons}>
-        <TestConsumer />
+      <ComponentsProvider components={chipOverrides} icons={icons}>
+        <ChipOverrideConsumer />
       </ComponentsProvider>,
     );
 

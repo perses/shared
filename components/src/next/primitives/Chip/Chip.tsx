@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useCallback, useRef } from 'react';
 import type {
   CSSProperties,
   HTMLAttributes,
@@ -25,20 +25,28 @@ import type {
 
 import { CloseIcon } from '../Icon/icons';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
-import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
-import type { ColorVariant, Status } from '../types';
+import {
+  applyStyleProps,
+  compileStyleProps,
+  displayProps,
+  lengthTransform,
+  sizingProps,
+  spacingProps,
+} from '../system';
+import type { ColorVariant, Size, Status } from '../types';
 
 import '../system/layout.css';
 import '../system/spacing.css';
 import './chip.css';
 
 export type ChipColor = 'default' | ColorVariant | Status;
-export type ChipSize = 'xs' | 'sm';
+export type ChipSize = Extract<Size, 'xs' | 'sm' | 'md'>;
 export type ChipVariant = 'solid' | 'outline';
 
 // `maxWidth` keeps its own meaning (the label's max width), so it is not a style prop here.
 const { maxWidth: _labelMaxWidth, ...chipSizingProps } = sizingProps;
 const CHIP_STYLE_PROPS = compileStyleProps([spacingProps, chipSizingProps, displayProps]);
+const CONTAINER_ARIA_PROPS = new Set(['aria-hidden', 'aria-live', 'aria-atomic', 'aria-relevant', 'aria-busy']);
 
 // Event handlers are typed against `HTMLElement` because, with `onClick` and `onClose` combined, the action (and so
 // `event.currentTarget`) is the label span rather than the root div.
@@ -71,6 +79,10 @@ type ChipAccessibleName =
 export type ChipProps = ChipBaseProps & ChipAccessibleName;
 
 export interface ChipStyle extends CSSProperties {
+  /** Border line style; defaults to `solid`. */
+  '--perses-chip-border-style'?: CSSProperties['borderStyle'];
+  /** CSS border width; defaults to `var(--perses-border-width-sm)`. */
+  '--perses-chip-border-width'?: string;
   '--perses-chip-label-max-width'?: string;
   /** Per-step height override; falls back to the shared control-size scale. */
   '--perses-chip-size-xs'?: string;
@@ -79,8 +91,7 @@ export interface ChipStyle extends CSSProperties {
 
 function withLabelMaxWidth(style: ChipStyle | undefined, maxWidth: CSSProperties['maxWidth']): ChipStyle | undefined {
   if (maxWidth === undefined) return style;
-  const labelMaxWidth = typeof maxWidth === 'number' ? `${maxWidth}px` : maxWidth;
-  return { ...style, '--perses-chip-label-max-width': labelMaxWidth };
+  return { ...style, '--perses-chip-label-max-width': lengthTransform(maxWidth) };
 }
 
 const defaultCloseIcon = <CloseIcon aria-hidden="true" />;
@@ -96,8 +107,12 @@ function getCloseAriaLabel(children: ReactNode): string {
  *
  * `children` is the normal case and names the chip; an icon-only chip (no children) requires `aria-label`.
  *
+ * Override `--perses-chip-border-style` and `--perses-chip-border-width` on the chip or an ancestor to customize its
+ * border. The `solid` variant keeps its border transparent; use `outline` for the palette's border color.
+ *
  * With `onClick`, the chip is exposed as a button. When `onClose` is also set, only the label acts as the button so
- * the close button is never nested inside another interactive element.
+ * the close button is never nested inside another interactive element. Action ARIA attributes and `tabIndex` follow
+ * the action; visibility and live-region ARIA attributes stay on the container.
  *
  * @example
  * ```tsx
@@ -128,6 +143,7 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
   },
   ref,
 ): ReactElement {
+  const labelRef = useRef<HTMLSpanElement>(null);
   const {
     className: styleClassName,
     style: computedStyle,
@@ -137,10 +153,24 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
 
   const interactive = Boolean(onClick);
   const actionOnLabel = interactive && Boolean(onClose);
+  // Only when the label is the action do we peel action aria-* off the container; otherwise every prop stays on the root.
+  let rootProps: Record<string, unknown> = domProps;
+  const actionAriaProps: Record<string, unknown> = {};
+  if (actionOnLabel) {
+    rootProps = {};
+    for (const [name, value] of Object.entries(domProps)) {
+      if (name.startsWith('aria-') && !CONTAINER_ARIA_PROPS.has(name)) {
+        actionAriaProps[name] = value;
+      } else {
+        rootProps[name] = value;
+      }
+    }
+  }
 
   // The element exposed as the button: the root, or only the label when a close button is also rendered.
   const actionProps = interactive
     ? {
+        ...actionAriaProps,
         role: 'button',
         tabIndex: tabIndex ?? (disabled ? -1 : 0),
         'aria-disabled': disabled || undefined,
@@ -152,17 +182,30 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
           }
           onClick?.(event);
         },
-        onKeyDown: (event: KeyboardEvent<HTMLElement>): void => {
-          if (event.target !== event.currentTarget) return;
-          if (!actionOnLabel) onKeyDown?.(event);
-          if (event.defaultPrevented || disabled) return;
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            event.currentTarget.click();
-          }
-        },
       }
     : undefined;
+
+  // What the root contributes to the action: it IS the button, unless the label took that role (close button present),
+  // in which case the root only carries the consumer's own role and no tab stop.
+  let rootActionProps: Record<string, unknown> | undefined = { role, tabIndex };
+  if (interactive) {
+    rootActionProps = actionOnLabel ? { role, tabIndex: undefined } : actionProps;
+  }
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>): void => {
+      const action = actionOnLabel ? labelRef.current : event.currentTarget;
+      const onAction = event.target === action;
+      if (interactive && !actionOnLabel && !onAction) return;
+      onKeyDown?.(event);
+      if (!interactive || !action || !onAction || event.defaultPrevented || disabled) return;
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        action.click();
+      }
+    },
+    [actionOnLabel, disabled, interactive, onKeyDown],
+  );
 
   const closeProps = {
     onClick: (event: MouseEvent<HTMLButtonElement>): void => {
@@ -173,9 +216,11 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
   };
 
   return (
+    // oxlint-disable-next-line jsx-a11y/no-static-element-interactions -- The container delegates keyboard events to its action and close button without becoming another control.
     <div
-      {...domProps}
-      {...(actionOnLabel ? { onKeyDown, role, tabIndex } : (actionProps ?? { onKeyDown, role, tabIndex }))}
+      {...rootProps}
+      {...rootActionProps}
+      onKeyDown={handleKeyDown}
       ref={ref}
       className={clsx('ps-Chip', styleClassName, className)}
       style={resolvedStyle}
@@ -186,7 +231,7 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
       data-disabled={disabled || undefined}
     >
       {startElement && <span className="ps-Chip__start">{startElement}</span>}
-      <span className="ps-Chip__label" {...(actionOnLabel ? actionProps : undefined)}>
+      <span ref={labelRef} className="ps-Chip__label" {...(actionOnLabel ? actionProps : undefined)}>
         {children}
       </span>
       {onClose && (
