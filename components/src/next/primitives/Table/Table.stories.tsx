@@ -395,13 +395,20 @@ function SelectableTable(): ReactElement {
   );
 }
 
-const expandCode = `const [expanded, setExpanded] = useState<string | null>(null);
+const expandCode = `// Each row toggles independently; expanded rows stay open until clicked again.
+const [expanded, setExpanded] = useState<Set<string>>(new Set());
+const toggle = (name: string) =>
+  setExpanded((current) => {
+    const next = new Set(current);
+    if (!next.delete(name)) next.add(name);
+    return next;
+  });
 
 <TableCell>
   <TableRowExpandButton
     aria-label={isExpanded ? \`Collapse \${row.name}\` : \`Expand \${row.name}\`}
     expanded={isExpanded}
-    onClick={() => setExpanded(isExpanded ? null : row.name)}
+    onClick={() => toggle(row.name)}
   />
 </TableCell>`;
 
@@ -439,9 +446,13 @@ function ExpandableRow({
 }
 
 function ExpandableTable(): ReactElement {
-  const [expanded, setExpanded] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const toggle = useCallback((name: string): void => {
-    setExpanded((current) => (current === name ? null : name));
+    setExpanded((current) => {
+      const next = new Set(current);
+      if (!next.delete(name)) next.add(name);
+      return next;
+    });
   }, []);
   return (
     <Table>
@@ -456,7 +467,7 @@ function ExpandableTable(): ReactElement {
       </TableHead>
       <TableBody>
         {rows.map((row) => (
-          <ExpandableRow key={row.name} row={row} expanded={expanded === row.name} onToggle={toggle} />
+          <ExpandableRow key={row.name} row={row} expanded={expanded.has(row.name)} onToggle={toggle} />
         ))}
       </TableBody>
     </Table>
