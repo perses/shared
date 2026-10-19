@@ -217,7 +217,7 @@
     opacity: 1;
   }
 
-  /* The default arrow points down (desc); flip it for ascending. */
+  /* Icons (default or custom) are expected to point down (desc) and are flipped for ascending. */
   .ps-TableSortLabel[data-direction='asc'] .ps-TableSortLabel__icon {
     transform: rotate(180deg);
   }

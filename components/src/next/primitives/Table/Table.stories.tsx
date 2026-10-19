@@ -17,6 +17,7 @@ import type { CSSProperties, ReactElement } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
 import { Checkbox } from '../Checkbox';
+import { ChevronDownIcon } from '../Icon';
 import type { Size } from '../types';
 import { Table, TableBody, TableCell, TableContainer, TableFooter, TableHead, TableRow } from './Table';
 import type { SortDirection } from './Table';
@@ -204,29 +205,38 @@ const [direction, setDirection] = useState<SortDirection>('asc');
   </TableSortLabel>
 </TableCell>`;
 
+const chevronSortIcon = <ChevronDownIcon />;
+
+const customSortIconCode = `// The icon must point down: it is shown as-is for desc and rotated 180° for asc.
+<TableSortLabel active direction={direction} icon={<ChevronDownIcon />} onClick={toggleSort}>
+  Name
+</TableSortLabel>`;
+
 function SortableHeaderCell({
   column,
   sortBy,
   direction,
   onSort,
+  icon,
 }: {
   column: (typeof sortableColumns)[number];
   sortBy: SortKey;
   direction: SortDirection;
   onSort: (key: SortKey) => void;
+  icon?: ReactElement;
 }): ReactElement {
   const active = sortBy === column.key;
   const handleClick = useCallback(() => onSort(column.key), [onSort, column.key]);
   return (
     <TableCell header align={column.key === 'value' ? 'right' : 'left'} sortDirection={active ? direction : false}>
-      <TableSortLabel active={active} direction={active ? direction : 'asc'} onClick={handleClick}>
+      <TableSortLabel active={active} direction={active ? direction : 'asc'} icon={icon} onClick={handleClick}>
         {column.label}
       </TableSortLabel>
     </TableCell>
   );
 }
 
-function SortableTable(): ReactElement {
+function SortableTable({ icon }: { icon?: ReactElement }): ReactElement {
   const [sortBy, setSortBy] = useState<SortKey>('value');
   const [direction, setDirection] = useState<SortDirection>('asc');
 
@@ -266,6 +276,7 @@ function SortableTable(): ReactElement {
               sortBy={sortBy}
               direction={direction}
               onSort={handleSort}
+              icon={icon}
             />
           ))}
         </TableRow>
@@ -292,6 +303,9 @@ export const Sorting: Story = () => (
     </p>
     <Sample title="Sortable headers" code={sortingCode}>
       <SortableTable />
+    </Sample>
+    <Sample title="Custom icon" code={customSortIconCode}>
+      <SortableTable icon={chevronSortIcon} />
     </Sample>
   </Stack>
 );

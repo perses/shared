@@ -35,8 +35,9 @@ import './table.css';
  * </TableCell>
  *
  * @example
- * // Override the sort-direction icon
- * <TableSortLabel active direction={direction} icon={<CustomSortIcon />} onClick={toggleSort}>
+ * // Override the sort-direction icon. The icon must point down: it is shown as-is for
+ * // `desc` and rotated 180° for `asc`, exactly like the default arrow.
+ * <TableSortLabel active direction={direction} icon={<ChevronDownIcon />} onClick={toggleSort}>
  *   Name
  * </TableSortLabel>
  */
@@ -46,6 +47,10 @@ interface TableSortLabelBaseProps extends Omit<
 > {
   active?: boolean;
   direction?: SortDirection;
+  /**
+   * Sort-direction indicator. Must point down; it is rendered as-is for `desc` and rotated 180° for `asc`.
+   * @default <ArrowDownIcon />
+   */
   icon?: ReactElement;
 }
 
