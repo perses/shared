@@ -14,7 +14,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-// jsdom does not apply stylesheets, so the size contract is asserted on the CSS source.
+// jsdom does not apply stylesheets, so the token contracts are asserted on the CSS source.
 const readCss = (relativePath: string): string => readFileSync(resolve(__dirname, relativePath), 'utf-8');
 
 const SIZES = ['xs', 'sm', 'md', 'lg'] as const;
@@ -32,6 +32,18 @@ function ruleFor(css: string, selector: string): string {
   throw new Error(`unterminated rule for ${selector}`);
 }
 
+describe('Chip border tokens', () => {
+  it('uses the chip border width override with the shared width as fallback', () => {
+    const rule = ruleFor(readCss('./Chip/chip.css'), ':where(.ps-Chip)');
+    expect(rule).toContain('border-width: var(--perses-chip-border-width, var(--perses-border-width-sm));');
+  });
+
+  it('uses the chip border style override with solid as fallback', () => {
+    const rule = ruleFor(readCss('./Chip/chip.css'), ':where(.ps-Chip)');
+    expect(rule).toContain('border-style: var(--perses-chip-border-style, solid);');
+  });
+});
+
 describe('control size tokens', () => {
   it.each(SIZES)('IconButton size %s is a square driven by --perses-control-size-%s', (size) => {
     const rule = ruleFor(readCss('./IconButton/iconButton.css'), `.ps-IconButton[data-size='${size}']`);
@@ -43,4 +55,19 @@ describe('control size tokens', () => {
     const rule = ruleFor(readCss('./Button/button.css'), `.ps-Button[data-size='${size}']`);
     expect(rule).toContain(`min-height: var(--perses-control-size-${size});`);
   });
+
+  it('Chip min-height is driven by --ps-chip-size', () => {
+    const rule = ruleFor(readCss('./Chip/chip.css'), ':where(.ps-Chip)');
+    expect(rule).toContain('min-height: var(--ps-chip-size);');
+  });
+
+  it.each(['xs', 'sm', 'md'] as const)(
+    'Chip size %s sets --ps-chip-size from --perses-chip-size-%s, else --perses-control-size-%s',
+    (size) => {
+      const rule = ruleFor(readCss('./Chip/chip.css'), `.ps-Chip[data-size='${size}']`);
+      expect(rule).toContain(
+        `--ps-chip-size: var(--perses-chip-size-${size}, var(--perses-selection-control-size-${size}));`,
+      );
+    },
+  );
 });
