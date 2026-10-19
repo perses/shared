@@ -37,8 +37,46 @@ const rows: MetricRow[] = [
 ];
 
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
-const grid: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.75rem' };
-const sizeLabel: CSSProperties = { fontSize: '0.75rem', color: 'var(--perses-text-secondary)' };
+const grid: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 'var(--perses-spacing-xl)',
+};
+
+const panelBackgrounds: Record<Size, string> = {
+  xs: 'var(--perses-status-bg-info)',
+  sm: 'var(--perses-status-bg-success)',
+  md: 'var(--perses-status-bg-secondary)',
+  lg: 'var(--perses-status-bg-warning)',
+};
+const panel = (size: Size): CSSProperties => ({
+  backgroundColor: panelBackgrounds[size],
+  borderRadius: 'var(--perses-radius-md)',
+  padding: 'var(--perses-spacing-sm)',
+});
+const sizeLabelColor = 'var(--perses-text-secondary)';
+const sizeLabels: Record<Size, CSSProperties> = {
+  xs: {
+    fontSize: 'var(--perses-font-size-xs)',
+    paddingInline: 'var(--perses-spacing-xs)',
+    color: sizeLabelColor,
+  },
+  sm: {
+    fontSize: 'var(--perses-font-size-xs)',
+    paddingInline: 'var(--perses-spacing-sm)',
+    color: sizeLabelColor,
+  },
+  md: {
+    fontSize: 'var(--perses-font-size-sm)',
+    paddingInline: 'var(--perses-spacing-md)',
+    color: sizeLabelColor,
+  },
+  lg: {
+    fontSize: 'var(--perses-font-size-md)',
+    paddingInline: 'var(--perses-spacing-lg)',
+    color: sizeLabelColor,
+  },
+};
 const shortContainer: CSSProperties = { maxHeight: '16rem' };
 const narrowContainer: CSSProperties = { maxWidth: '24rem' };
 const noPadding: CSSProperties = { padding: 0 };
@@ -77,12 +115,12 @@ const basicCode = `<Table>
   </TableBody>
 </Table>`;
 
-const densityCode = `// size: 'xs' | 'sm' | 'md' | 'lg' — set on Table for every cell, or on a single TableCell
+const tableSize = `// size: 'xs' | 'sm' | 'md' | 'lg' — set on Table for every cell, or on a single TableCell
 <Table size="sm">
   <TableBody>
     <TableRow>
       <TableCell>Inherits sm</TableCell>
-      <TableCell size="lg">Overrides to lg</TableCell>
+      <TableCell size="lg">MB/s</TableCell>
     </TableRow>
   </TableBody>
 </Table>`;
@@ -111,11 +149,11 @@ export const Basic: Story = () => (
         </TableBody>
       </Table>
     </Sample>
-    <Sample title="Density — size on the table, overridden on one cell" code={densityCode}>
+    <Sample title="Table Size" code={tableSize}>
       <div style={grid}>
         {sizes.map((size) => (
-          <div key={size}>
-            <span style={sizeLabel}>
+          <div key={size} style={panel(size)}>
+            <span style={sizeLabels[size]}>
               size=&quot;{size}&quot;{size === 'md' ? ' (default)' : ''}
             </span>
             <Table size={size}>
@@ -132,7 +170,7 @@ export const Basic: Story = () => (
                 <TableRow>
                   <TableCell>cpu_usage</TableCell>
                   <TableCell align="right">42.1</TableCell>
-                  <TableCell size="lg">overrides to lg</TableCell>
+                  <TableCell>MB/s</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>memory_usage</TableCell>
@@ -457,27 +495,42 @@ const stickyCode = `<TableContainer style={{ maxHeight: '16rem' }}>
   </Table>
 </TableContainer>`;
 
-const resizableCode = `const [widths, setWidths] = useState({ name: 80, value: 56, unit: 48 });
+const resizableCode = `
+const [widths, setWidths] = useState({ name: 160, value: 96, unit: 96 });
 
-<Table tableLayout="fixed">
-  <TableHead>
-    <TableRow>
+<TableContainer>
+  <Table tableLayout="fixed">
+    <TableHead>
+      <TableRow>
       <TableCell
         header
         resizable
         onResize={(width) => setWidths({ ...widths, name: width })}
+        minResizeWidth={80}
         maxResizeWidth={320}
         resizeHandleAriaLabel="Resize Name column"
         style={{ width: widths.name }}
       >
         Name
       </TableCell>
-      ...
+      <TableCell header resizable onResize={...} minResizeWidth={80} maxResizeWidth={320} resizeHandleAriaLabel="Resize Value column" style={{ width: widths.value }}>
+        Value
+      </TableCell>
+      <TableCell header resizable onResize={...} minResizeWidth={80} maxResizeWidth={320} resizeHandleAriaLabel="Resize Unit column" style={{ width: widths.unit }}>
+        Unit
+      </TableCell>
+      <TableCell header aria-hidden />
     </TableRow>
   </TableHead>
-</Table>`;
+</Table>
+</TableContainer>`;
 
-const stickyColumnContainer: CSSProperties = { ...shortContainer, ...narrowContainer };
+const stickyColumnContainer: CSSProperties = {
+  ...shortContainer,
+  ...narrowContainer,
+};
+
+type ResizableColumn = 'name' | 'value' | 'unit';
 
 function ResizableHeaderCell({
   column,
@@ -486,10 +539,10 @@ function ResizableHeaderCell({
   onResize,
   children,
 }: {
-  column: 'name' | 'value' | 'unit';
+  column: ResizableColumn;
   width: number;
   align?: 'left' | 'right';
-  onResize: (column: 'name' | 'value' | 'unit', width: number) => void;
+  onResize: (column: ResizableColumn, width: number) => void;
   children: string;
 }): ReactElement {
   const handleResize = useCallback((next: number) => onResize(column, next), [onResize, column]);
@@ -500,6 +553,7 @@ function ResizableHeaderCell({
       align={align}
       resizable
       onResize={handleResize}
+      minResizeWidth={80}
       maxResizeWidth={320}
       resizeHandleAriaLabel={`Resize ${children} column`}
       style={style}
@@ -509,33 +563,34 @@ function ResizableHeaderCell({
   );
 }
 
-const fitContent: CSSProperties = { minWidth: 0 };
-
 function ResizableTable(): ReactElement {
-  const [widths, setWidths] = useState({ name: 80, value: 56, unit: 48 });
-  const handleResize = useCallback((column: 'name' | 'value' | 'unit', width: number): void => {
+  const [widths, setWidths] = useState<Record<ResizableColumn, number>>({ name: 160, value: 96, unit: 96 });
+  const handleResize = useCallback((column: ResizableColumn, width: number): void => {
     setWidths((current) => ({ ...current, [column]: width }));
   }, []);
 
   return (
-    <Table tableLayout="fixed" style={fitContent}>
-      <TableHead>
-        <TableRow>
-          <ResizableHeaderCell column="name" width={widths.name} onResize={handleResize}>
-            Name
-          </ResizableHeaderCell>
-          <ResizableHeaderCell column="value" width={widths.value} align="right" onResize={handleResize}>
-            Value
-          </ResizableHeaderCell>
-          <ResizableHeaderCell column="unit" width={widths.unit} onResize={handleResize}>
-            Unit
-          </ResizableHeaderCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        <MetricRows />
-      </TableBody>
-    </Table>
+    <TableContainer>
+      <Table tableLayout="fixed">
+        <TableHead>
+          <TableRow>
+            <ResizableHeaderCell column="name" width={widths.name} onResize={handleResize}>
+              Name
+            </ResizableHeaderCell>
+            <ResizableHeaderCell column="value" width={widths.value} align="right" onResize={handleResize}>
+              Value
+            </ResizableHeaderCell>
+            <ResizableHeaderCell column="unit" width={widths.unit} onResize={handleResize}>
+              Unit
+            </ResizableHeaderCell>
+            <TableCell header aria-hidden />
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <MetricRows />
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
 

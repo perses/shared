@@ -14,6 +14,7 @@
  */
 
 @layer perses.components {
+  /* ---- Table base ---- */
   .ps-Table {
     --ps-table-cell-padding-y: var(--perses-spacing-sm);
     --ps-table-cell-padding-x: var(--perses-spacing-md);
@@ -25,6 +26,7 @@
     color: var(--perses-text-primary);
   }
 
+  /* ---- Sizes (table-level) ---- */
   .ps-Table[data-size='xs'] {
     --ps-table-cell-padding-y: var(--perses-spacing-0);
     --ps-table-cell-padding-x: var(--perses-spacing-xs);
@@ -41,6 +43,25 @@
     --ps-table-cell-font-size: var(--perses-font-size-md);
   }
 
+  /* ---- Layout ---- */
+  .ps-Table[data-table-layout='fixed'] {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  /* Fixed columns do not grow to fit content, so truncate instead of letting text spill into the next cell. */
+  .ps-Table[data-table-layout='fixed'] .ps-Table__cell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ps-TableContainer {
+    width: 100%;
+    overflow: auto;
+  }
+
+  /* ---- Sections: head, footer, rows ---- */
   .ps-Table__head .ps-Table__cell {
     font-weight: var(--perses-font-weight-medium);
     color: var(--perses-text-secondary);
@@ -64,12 +85,10 @@
     background-color: var(--perses-bg-sunken);
   }
 
-  .ps-Table[data-table-layout='fixed'] {
-    width: 100%;
-    table-layout: fixed;
-  }
-
+  /* ---- Cells ---- */
   .ps-Table__cell {
+    /* Border-box so a resized `width` is the rendered width the resize handle measures. */
+    box-sizing: border-box;
     padding: var(--ps-table-cell-padding-y) var(--ps-table-cell-padding-x);
     font-size: var(--ps-table-cell-font-size);
   }
@@ -106,53 +125,12 @@
     text-align: right;
   }
 
-  .ps-TableContainer {
-    width: 100%;
-    overflow: auto;
-  }
-
+  /* ---- Sticky header and columns ---- */
   .ps-Table[data-sticky-header='true'] .ps-Table__head .ps-Table__cell {
     position: sticky;
     top: 0;
     z-index: 1;
     background-color: var(--perses-bg-default);
-  }
-
-  .ps-Table__cell[data-resizable='true'] {
-    position: relative;
-  }
-
-  .ps-Table__resizeHandle {
-    position: absolute;
-    top: 0;
-    /* Straddle the column border to give a comfortably wide hit target. */
-    right: -5px;
-    bottom: 0;
-    width: 10px;
-    cursor: col-resize;
-    touch-action: none;
-    user-select: none;
-    z-index: 1;
-    background-color: transparent;
-  }
-
-  .ps-Table__resizeHandle::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 4px;
-    width: 2px;
-    /* Always visible so resizable columns are discoverable. */
-    background-color: var(--perses-border-default);
-  }
-
-  .ps-Table__resizeHandle:hover::before,
-  .ps-Table__resizeHandle:active::before,
-  .ps-Table__resizeHandle:focus-visible::before {
-    left: 3px;
-    width: 4px;
-    background-color: var(--perses-text-secondary);
   }
 
   .ps-Table__cell[data-sticky='left'],
@@ -170,10 +148,12 @@
     right: 0;
   }
 
+  /* A cell that is both in a sticky header and a sticky column sits above both. */
   .ps-Table[data-sticky-header='true'] .ps-Table__head .ps-Table__cell[data-sticky] {
     z-index: 2;
   }
 
+  /* Sticky cells paint their own background, so repeat the row states on them. */
   .ps-Table__row[data-selected='true'] .ps-Table__cell[data-sticky] {
     background-color: var(--perses-status-bg-primary);
   }
@@ -182,9 +162,45 @@
     background-color: var(--perses-bg-sunken);
   }
 
-  /* Layered on .ps-ButtonBase, which provides the flex layout, border, cursor and focus ring. */
+  /* ---- Column resizing ---- */
+  .ps-Table__cell[data-resizable='true'] {
+    position: relative;
+  }
+
+  .ps-Table__resizeHandle {
+    position: absolute;
+    top: 0;
+    right: -5px;
+    bottom: 0;
+    width: 10px;
+    cursor: col-resize;
+    touch-action: none;
+    user-select: none;
+    z-index: 1;
+    background-color: transparent;
+  }
+
+  .ps-Table__resizeHandle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 4px;
+    width: 2px;
+    background-color: var(--perses-text-disabled);
+  }
+
+  .ps-Table__resizeHandle:hover::before,
+  .ps-Table__resizeHandle:active::before,
+  .ps-Table__resizeHandle:focus-visible::before {
+    left: 3px;
+    width: 4px;
+    background-color: var(--perses-text-secondary);
+  }
+
+  /* ---- Sort label ---- */
   .ps-TableSortLabel {
-    gap: var(--perses-spacing-xs);
+    gap: var(--perses-spacing-sm);
     padding: 0;
     background: none;
     border-color: transparent;
@@ -193,7 +209,7 @@
   }
 
   .ps-TableSortLabel__icon {
-    /* Dimmed on inactive columns so every sortable header is visibly sortable. */
+    font-size: 0.75em;
     opacity: 0.35;
     transition: opacity 0.15s ease;
   }
@@ -208,6 +224,7 @@
     transform: rotate(180deg);
   }
 
+  /* ---- Pagination ---- */
   .ps-TablePagination {
     display: flex;
     align-items: center;
@@ -225,7 +242,7 @@
     gap: var(--perses-spacing-xs);
   }
 
-  /* Layered on .ps-ButtonBase, which provides the flex layout, border, cursor and focus ring. */
+  /* ---- Row expand button ---- */
   .ps-TableRowExpandButton {
     padding: 0;
     background: none;
