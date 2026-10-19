@@ -24,7 +24,8 @@ import '../system/layout.css';
 import '../system/spacing.css';
 import './textField.css';
 
-const TEXTAREA = <textarea />;
+// Render function rather than a bare element so the label/aria props Base UI merges in are visible to lint.
+const renderTextarea: NonNullable<Field.Control.Props['render']> = (props) => <textarea {...props} />;
 
 export interface TextFieldStyle extends CSSProperties {
   /** Per-step height override; falls back to the shared control-size scale. */
@@ -150,7 +151,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
           ref={ref}
           id={inputId}
           className="ps-TextField__input"
-          render={multiline ? TEXTAREA : undefined}
+          render={multiline ? renderTextarea : undefined}
           {...(multiline && { rows })}
         />
         {endAdornment && <span className="ps-TextField__adornment ps-TextField__adornment--end">{endAdornment}</span>}
