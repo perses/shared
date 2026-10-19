@@ -57,6 +57,8 @@ function updateResizeAriaValue(handle: HTMLSpanElement, width: number): void {
 
 export type SortDirection = 'asc' | 'desc';
 
+const ARIA_SORT: Record<SortDirection, 'ascending' | 'descending'> = { asc: 'ascending', desc: 'descending' };
+
 /**
  * Scrollable wrapper for a `Table`.
  *
@@ -221,12 +223,7 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
   },
   ref,
 ) {
-  let ariaSort: 'ascending' | 'descending' | undefined;
-  if (sortDirection === 'asc') {
-    ariaSort = 'ascending';
-  } else if (sortDirection === 'desc') {
-    ariaSort = 'descending';
-  }
+  const ariaSort = sortDirection ? ARIA_SORT[sortDirection] : undefined;
 
   const resizeCleanupRef = useRef<(() => void) | null>(null);
 

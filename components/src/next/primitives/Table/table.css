@@ -26,18 +26,27 @@
     color: var(--perses-text-primary);
   }
 
-  /* ---- Sizes (table-level) ---- */
-  .ps-Table[data-size='xs'] {
+  /* ---- Sizes ---- */
+  /* The table sets the size; a cell-level size overrides it by redefining the same custom properties on the cell. */
+  .ps-Table[data-size='xs'],
+  .ps-Table__cell[data-size='xs'] {
     --ps-table-cell-padding-y: var(--perses-spacing-0);
     --ps-table-cell-padding-x: var(--perses-spacing-xs);
     --ps-table-cell-font-size: var(--perses-font-size-xs);
   }
-  .ps-Table[data-size='sm'] {
+  .ps-Table[data-size='sm'],
+  .ps-Table__cell[data-size='sm'] {
     --ps-table-cell-padding-y: var(--perses-spacing-xs);
     --ps-table-cell-padding-x: var(--perses-spacing-sm);
     --ps-table-cell-font-size: var(--perses-font-size-xs);
   }
-  .ps-Table[data-size='lg'] {
+  .ps-Table__cell[data-size='md'] {
+    --ps-table-cell-padding-y: var(--perses-spacing-sm);
+    --ps-table-cell-padding-x: var(--perses-spacing-md);
+    --ps-table-cell-font-size: var(--perses-font-size-sm);
+  }
+  .ps-Table[data-size='lg'],
+  .ps-Table__cell[data-size='lg'] {
     --ps-table-cell-padding-y: var(--perses-spacing-md);
     --ps-table-cell-padding-x: var(--perses-spacing-lg);
     --ps-table-cell-font-size: var(--perses-font-size-md);
@@ -91,28 +100,6 @@
     box-sizing: border-box;
     padding: var(--ps-table-cell-padding-y) var(--ps-table-cell-padding-x);
     font-size: var(--ps-table-cell-font-size);
-  }
-
-  /* A cell-level size overrides the table-level one by redefining the same custom properties on the cell. */
-  .ps-Table__cell[data-size='xs'] {
-    --ps-table-cell-padding-y: var(--perses-spacing-0);
-    --ps-table-cell-padding-x: var(--perses-spacing-xs);
-    --ps-table-cell-font-size: var(--perses-font-size-xs);
-  }
-  .ps-Table__cell[data-size='sm'] {
-    --ps-table-cell-padding-y: var(--perses-spacing-xs);
-    --ps-table-cell-padding-x: var(--perses-spacing-sm);
-    --ps-table-cell-font-size: var(--perses-font-size-xs);
-  }
-  .ps-Table__cell[data-size='md'] {
-    --ps-table-cell-padding-y: var(--perses-spacing-sm);
-    --ps-table-cell-padding-x: var(--perses-spacing-md);
-    --ps-table-cell-font-size: var(--perses-font-size-sm);
-  }
-  .ps-Table__cell[data-size='lg'] {
-    --ps-table-cell-padding-y: var(--perses-spacing-md);
-    --ps-table-cell-padding-x: var(--perses-spacing-lg);
-    --ps-table-cell-font-size: var(--perses-font-size-md);
   }
 
   .ps-Table__cell[data-align='left'] {
@@ -198,14 +185,19 @@
     background-color: var(--perses-text-secondary);
   }
 
-  /* ---- Sort label ---- */
-  .ps-TableSortLabel {
-    gap: var(--perses-spacing-sm);
+  /* ---- Sort label / row expand button (shared reset on top of ps-ButtonBase) ---- */
+  .ps-TableSortLabel,
+  .ps-TableRowExpandButton {
     padding: var(--perses-spacing-0);
     background: none;
     border-color: transparent;
     font: inherit;
     color: inherit;
+  }
+
+  /* ---- Sort label ---- */
+  .ps-TableSortLabel {
+    gap: var(--perses-spacing-sm);
   }
 
   .ps-TableSortLabel__icon {
@@ -244,14 +236,6 @@
   }
 
   /* ---- Row expand button ---- */
-  .ps-TableRowExpandButton {
-    padding: var(--perses-spacing-0);
-    background: none;
-    border-color: transparent;
-    font: inherit;
-    color: inherit;
-  }
-
   .ps-TableRowExpandButton__icon {
     transition: transform 0.15s ease;
   }

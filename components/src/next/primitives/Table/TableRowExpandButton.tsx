@@ -45,7 +45,7 @@ interface TableRowExpandButtonBaseProps extends Omit<
  * <TableRowExpandButton expanded={isExpanded} icon={<CustomChevronIcon />} onClick={toggleExpanded} aria-label="Expand row" />
  */
 export type TableRowExpandButtonProps = TableRowExpandButtonBaseProps &
-  ({ children: ReactNode; 'aria-label'?: string } | { children?: undefined; 'aria-label': string });
+  ({ children: ReactNode; 'aria-label'?: string } | { children?: never; 'aria-label': string });
 
 const defaultExpandIcon = <ChevronRightIcon />;
 
