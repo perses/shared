@@ -170,9 +170,9 @@
   .ps-Table__resizeHandle {
     position: absolute;
     top: 0;
-    right: -5px;
+    right: -0.3125rem;
     bottom: 0;
-    width: 10px;
+    width: 0.625rem;
     cursor: col-resize;
     touch-action: none;
     user-select: none;
@@ -185,23 +185,23 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 4px;
-    width: 2px;
+    left: 0.25rem;
+    width: var(--perses-border-width-md);
     background-color: var(--perses-text-disabled);
   }
 
   .ps-Table__resizeHandle:hover::before,
   .ps-Table__resizeHandle:active::before,
   .ps-Table__resizeHandle:focus-visible::before {
-    left: 3px;
-    width: 4px;
+    left: 0.1875rem;
+    width: 0.25rem;
     background-color: var(--perses-text-secondary);
   }
 
   /* ---- Sort label ---- */
   .ps-TableSortLabel {
     gap: var(--perses-spacing-sm);
-    padding: 0;
+    padding: var(--perses-spacing-0);
     background: none;
     border-color: transparent;
     font: inherit;
@@ -215,6 +215,7 @@
   }
 
   .ps-TableSortLabel:hover .ps-TableSortLabel__icon,
+  .ps-TableSortLabel:focus-visible .ps-TableSortLabel__icon,
   .ps-TableSortLabel[data-active='true'] .ps-TableSortLabel__icon {
     opacity: 1;
   }
@@ -244,7 +245,7 @@
 
   /* ---- Row expand button ---- */
   .ps-TableRowExpandButton {
-    padding: 0;
+    padding: var(--perses-spacing-0);
     background: none;
     border-color: transparent;
     font: inherit;

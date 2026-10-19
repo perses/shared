@@ -331,7 +331,8 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
           onFocus={handleResizeFocus}
           onKeyDown={handleResizeKeyDown}
           onPointerDown={handleResizePointerDown}
-          role="separator" /* oxlint-disable-line jsx-a11y/prefer-tag-over-role */
+          /* oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- an <hr> cannot be a focusable, draggable handle inside a <th> */
+          role="separator"
           aria-orientation="vertical"
           aria-label={resizeHandleAriaLabel}
           aria-labelledby={resizeHandleAriaLabelledBy}
