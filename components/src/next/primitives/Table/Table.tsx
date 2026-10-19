@@ -228,18 +228,17 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
   const resizeCleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
+    if (!resizable) return;
     return (): void => {
       resizeCleanupRef.current?.();
       resizeCleanupRef.current = null;
     };
-  }, []);
+  }, [resizable]);
 
-  const resolvedMaxResizeWidth = Math.max(minResizeWidth, maxResizeWidth ?? minResizeWidth);
-  const initialResizeWidth = clampResizeWidth(
-    getStyleWidth(style?.width) ?? minResizeWidth,
-    minResizeWidth,
-    resolvedMaxResizeWidth,
-  );
+  const resolvedMaxResizeWidth = resizable ? Math.max(minResizeWidth, maxResizeWidth) : 0;
+  const initialResizeWidth = resizable
+    ? clampResizeWidth(getStyleWidth(style?.width) ?? minResizeWidth, minResizeWidth, resolvedMaxResizeWidth)
+    : 0;
 
   const handleResizeFocus = useCallback<FocusEventHandler<HTMLSpanElement>>(
     (event) => {

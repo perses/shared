@@ -40,6 +40,7 @@
     --ps-table-cell-padding-x: var(--perses-spacing-sm);
     --ps-table-cell-font-size: var(--perses-font-size-xs);
   }
+  .ps-Table[data-size='md'],
   .ps-Table__cell[data-size='md'] {
     --ps-table-cell-padding-y: var(--perses-spacing-sm);
     --ps-table-cell-padding-x: var(--perses-spacing-md);
@@ -183,6 +184,10 @@
     left: 0.1875rem;
     width: 0.25rem;
     background-color: var(--perses-text-secondary);
+  }
+
+  .ps-Table__cell[data-sticky] .ps-Table__resizeHandle {
+    z-index: 2;
   }
 
   /* ---- Sort label / row expand button (shared reset on top of ps-ButtonBase) ---- */

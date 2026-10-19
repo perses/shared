@@ -82,10 +82,11 @@ export const TablePagination = forwardRef<HTMLDivElement, TablePaginationProps>(
   const {
     components: { IconButton },
   } = useComponents();
-  const firstRow = page * rowsPerPage;
+  const safeRowsPerPage = Math.max(1, rowsPerPage);
+  const firstRow = page * safeRowsPerPage;
   const start = count === 0 ? 0 : firstRow + 1;
-  const end = Math.min(count, firstRow + rowsPerPage);
-  const lastPage = Math.max(0, Math.ceil(count / rowsPerPage) - 1);
+  const end = Math.min(count, firstRow + safeRowsPerPage);
+  const lastPage = Math.max(0, Math.ceil(count / safeRowsPerPage) - 1);
 
   const handleRowsPerPageChange = useCallback(
     (event: ChangeEvent<HTMLSelectElement>) => onRowsPerPageChange?.(Number(event.target.value)),
