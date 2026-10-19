@@ -16,6 +16,7 @@ import { Alert } from './Alert';
 import { Box } from './Box';
 import { Button } from './Button';
 import { Checkbox } from './Checkbox';
+import { Chip } from './Chip';
 import { Divider } from './Divider';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons';
 import { IconButton } from './IconButton';
@@ -28,6 +29,7 @@ export const defaultComponents: PersesComponents = {
   Alert,
   Box,
   Checkbox,
+  Chip,
   IconButton,
   Divider,
   Spinner,
