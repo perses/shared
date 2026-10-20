@@ -23,7 +23,20 @@ import { IconButton } from './IconButton';
 import { Spinner } from './Spinner';
 import { Stack } from './Stack';
 import { Switch } from './Switch';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableFooter,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableRowExpandButton,
+  TableSortLabel,
+} from './Table';
 import { TextField } from './TextField';
+import { Tooltip } from './Tooltip';
 
 export const defaultComponents: PersesComponents = {
   Button,
@@ -36,6 +49,17 @@ export const defaultComponents: PersesComponents = {
   Spinner,
   Stack,
   Switch,
+  Tooltip,
+  Table,
+  TableHead,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableCell,
+  TableContainer,
+  TableRowExpandButton,
+  TableSortLabel,
+  TablePagination,
   TextField,
 };
 

@@ -16,6 +16,7 @@
 @layer perses.components {
   :where(.ps-Checkbox) {
     display: inline-flex;
+    vertical-align: middle;
     flex: none;
     align-items: center;
     justify-content: center;
@@ -23,7 +24,8 @@
     width: var(--ps-checkbox-size);
     height: var(--ps-checkbox-size);
     padding: var(--perses-spacing-0);
-    border: var(--perses-border-width-sm) solid var(--perses-checkbox-border-color, var(--perses-border-default));
+    border: var(--perses-border-width-sm) solid
+      var(--perses-checkbox-border-color, var(--perses-border-control, var(--perses-border-default)));
     border-radius: var(--perses-radius-sm);
     color: var(--perses-text-on-solid);
     background-color: var(--perses-bg-sunken);

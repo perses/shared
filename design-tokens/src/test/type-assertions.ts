@@ -33,6 +33,7 @@ type _BgBackdrop = AssertAssignable<ExtractVar<typeof tokens.bg.backdrop>, Perse
 type _BgNav = AssertAssignable<ExtractVar<typeof tokens.bg.navigation>, PersesTokenVar>;
 
 type _BorderDefault = AssertAssignable<ExtractVar<typeof tokens.border.default>, PersesTokenVar>;
+type _BorderControl = AssertAssignable<ExtractVar<typeof tokens.border.control>, PersesTokenVar>;
 type _FocusRingWidth = AssertAssignable<ExtractVar<typeof tokens.focusRing.width>, PersesTokenVar>;
 type _FocusRingOffset = AssertAssignable<ExtractVar<typeof tokens.focusRing.offset>, PersesTokenVar>;
 type _FocusRingColor = AssertAssignable<ExtractVar<typeof tokens.focusRing.color>, PersesTokenVar>;
@@ -45,6 +46,9 @@ type _TextLinkHover = AssertAssignable<ExtractVar<typeof tokens.text.linkHover>,
 type _TextNav = AssertAssignable<ExtractVar<typeof tokens.text.navigation>, PersesTokenVar>;
 type _TextAccent = AssertAssignable<ExtractVar<typeof tokens.text.accent>, PersesTokenVar>;
 
+type _TooltipBg = AssertAssignable<ExtractVar<typeof tokens.tooltip.bg>, PersesTokenVar>;
+type _TooltipText = AssertAssignable<ExtractVar<typeof tokens.tooltip.text>, PersesTokenVar>;
+
 type _SpacingXs = AssertAssignable<ExtractVar<typeof tokens.spacing.xs>, PersesTokenVar>;
 type _SpacingLg = AssertAssignable<ExtractVar<typeof tokens.spacing.lg>, PersesTokenVar>;
 
@@ -53,6 +57,9 @@ type _ControlSizeLg = AssertAssignable<ExtractVar<typeof tokens.control.size.lg>
 
 type _RadiusMd = AssertAssignable<ExtractVar<typeof tokens.radius.md>, PersesTokenVar>;
 type _RadiusFull = AssertAssignable<ExtractVar<typeof tokens.radius.full>, PersesTokenVar>;
+
+type _ShadowOverlay = AssertAssignable<ExtractVar<typeof tokens.shadow.overlay>, PersesTokenVar>;
+type _ZIndexOverlay = AssertAssignable<ExtractVar<typeof tokens.zIndex.overlay>, PersesTokenVar>;
 
 type _FontFamily = AssertAssignable<ExtractVar<typeof tokens.font.family>, PersesTokenVar>;
 type _FontWeightBold = AssertAssignable<ExtractVar<typeof tokens.font.weight.bold>, PersesTokenVar>;

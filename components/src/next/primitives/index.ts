@@ -22,5 +22,7 @@ export * from './IconButton';
 export * from './Spinner';
 export * from './Stack';
 export * from './Switch';
+export * from './Table';
 export * from './TextField';
+export * from './Tooltip';
 export type { ColorVariant, Size, Status } from './types';

@@ -29,7 +29,7 @@ export type SemanticBgVar =
   | '--perses-bg-backdrop'
   | '--perses-bg-navigation';
 
-export type SemanticBorderVar = '--perses-border-default';
+export type SemanticBorderVar = '--perses-border-default' | '--perses-border-control';
 
 export type SemanticTextVar =
   | '--perses-text-primary'
@@ -40,6 +40,8 @@ export type SemanticTextVar =
   | '--perses-text-navigation'
   | '--perses-text-accent'
   | '--perses-text-on-solid';
+
+export type TooltipVar = '--perses-tooltip-bg' | '--perses-tooltip-text';
 
 export type StatusRole = 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info';
 
@@ -69,6 +71,10 @@ export type FocusRingVar = '--perses-focus-ring-width' | '--perses-focus-ring-of
 
 export type RadiusVar = `--perses-radius-${'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'}`;
 
+export type ShadowVar = '--perses-shadow-overlay';
+
+export type ZIndexVar = '--perses-z-index-overlay';
+
 export type FontSizeScale = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 
 export type FontSizeVar = `--perses-font-size-${FontSizeScale}`;
@@ -89,6 +95,7 @@ export type PersesTokenVar =
   | SemanticBgVar
   | SemanticBorderVar
   | SemanticTextVar
+  | TooltipVar
   | StatusBgVar
   | StatusTextVar
   | StatusBorderVar
@@ -99,6 +106,8 @@ export type PersesTokenVar =
   | BorderWidthVar
   | FocusRingVar
   | RadiusVar
+  | ShadowVar
+  | ZIndexVar
   | FontVar;
 
 export type PersesMode = 'light' | 'dark';

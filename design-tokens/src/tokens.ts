@@ -63,6 +63,7 @@ export const tokens = {
 
   border: {
     default: 'var(--perses-border-default)',
+    control: 'var(--perses-border-control)',
     width: {
       sm: 'var(--perses-border-width-sm)',
       md: 'var(--perses-border-width-md)',
@@ -84,6 +85,11 @@ export const tokens = {
     navigation: 'var(--perses-text-navigation)',
     accent: 'var(--perses-text-accent)',
     onSolid: 'var(--perses-text-on-solid)',
+  },
+
+  tooltip: {
+    bg: 'var(--perses-tooltip-bg)',
+    text: 'var(--perses-tooltip-text)',
   },
 
   status: {
@@ -120,6 +126,14 @@ export const tokens = {
       md: 'var(--perses-selection-control-size-md)',
       lg: 'var(--perses-selection-control-size-lg)',
     },
+  },
+
+  shadow: {
+    overlay: 'var(--perses-shadow-overlay)',
+  },
+
+  zIndex: {
+    overlay: 'var(--perses-z-index-overlay)',
   },
 
   radius: {
