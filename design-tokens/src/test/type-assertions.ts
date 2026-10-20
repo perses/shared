@@ -42,6 +42,9 @@ type _TextLinkHover = AssertAssignable<ExtractVar<typeof tokens.text.linkHover>,
 type _TextNav = AssertAssignable<ExtractVar<typeof tokens.text.navigation>, PersesTokenVar>;
 type _TextAccent = AssertAssignable<ExtractVar<typeof tokens.text.accent>, PersesTokenVar>;
 
+type _TooltipBg = AssertAssignable<ExtractVar<typeof tokens.tooltip.bg>, PersesTokenVar>;
+type _TooltipText = AssertAssignable<ExtractVar<typeof tokens.tooltip.text>, PersesTokenVar>;
+
 type _SpacingXs = AssertAssignable<ExtractVar<typeof tokens.spacing.xs>, PersesTokenVar>;
 type _SpacingLg = AssertAssignable<ExtractVar<typeof tokens.spacing.lg>, PersesTokenVar>;
 

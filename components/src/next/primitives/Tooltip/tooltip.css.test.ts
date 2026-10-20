@@ -14,15 +14,47 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-// jsdom does not apply stylesheets, so the token contract is asserted on the CSS source.
+// jsdom does not apply these layered styles, so assert selector-scoped CSS contracts.
+// Browser validation of stacking and arrow placement remains an integration check.
 const css = readFileSync(resolve(__dirname, './tooltip.css'), 'utf-8');
 
+function getRule(selector: string): string {
+  const rule = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].find(
+    ([, ruleSelector]) => ruleSelector?.trim() === selector,
+  )?.[2];
+  expect(rule).toBeDefined();
+  return rule ?? '';
+}
+
 describe('tooltip.css', () => {
-  it('consumes the overlay shadow token', () => {
-    expect(css).toContain('box-shadow: var(--perses-shadow-overlay);');
+  it('consumes the overlay shadow token on the popup', () => {
+    expect(getRule('.ps-Tooltip')).toContain('box-shadow: var(--perses-shadow-overlay);');
   });
 
-  it('consumes the overlay z-index token', () => {
-    expect(css).toContain('z-index: var(--perses-z-index-overlay);');
+  it('consumes the overlay z-index token on the transformed positioner', () => {
+    expect(getRule('.ps-Tooltip__positioner')).toContain('z-index: var(--perses-z-index-overlay);');
+  });
+
+  it('does not confine the overlay z-index to the popup stacking context', () => {
+    expect(getRule('.ps-Tooltip')).not.toMatch(/\bz-index\s*:/);
+  });
+
+  it('paints the empty arrow div as a token-filled rotated square', () => {
+    const arrow = getRule('.ps-Tooltip__arrow');
+    expect(arrow).toContain('background-color: var(--perses-tooltip-bg);');
+    expect(arrow).toContain('width: var(--perses-spacing-sm);');
+    expect(arrow).toContain('height: var(--perses-spacing-sm);');
+    expect(arrow).toContain('transform: rotate(45deg);');
+  });
+
+  it.each([
+    ['top', 'bottom'],
+    ['bottom', 'top'],
+    ['left', 'right'],
+    ['right', 'left'],
+  ])('attaches the %s arrow halfway outside the %s popup edge', (side, edge) => {
+    expect(getRule(`.ps-Tooltip__arrow[data-side='${side}']`)).toContain(
+      `${edge}: calc(var(--perses-spacing-sm) / -2);`,
+    );
   });
 });

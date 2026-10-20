@@ -12,20 +12,25 @@
 // limitations under the License.
 
 import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip';
-import clsx from 'clsx';
+import type { TooltipPositionerProps } from '@base-ui/react/tooltip';
+import { clsx } from 'clsx';
 import { cloneElement, forwardRef, useId, useState } from 'react';
-import type { HTMLAttributes, ReactElement, ReactNode } from 'react';
+import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import './tooltip.css';
 
 /** Mirrors --perses-spacing-sm (8px). */
 const SIDE_OFFSET = 8;
 
+// Base UI caches arrow measurements, so hidden arrows must stay mounted and measurable for live toggles.
+const HIDDEN_ARROW_STYLE: CSSProperties = { visibility: 'hidden' };
+
 export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
 
 /**
  * Tooltip wraps a trigger and renders a popup, so it deliberately does not accept the shared style props
  * (spacing, sizing, display); style the trigger directly. Extra props and `ref` are applied to the popup.
+ * The popup portals to document.body; ancestor-scoped themes and token overrides do not propagate to it.
  */
 export interface TooltipProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
   /**
@@ -37,41 +42,41 @@ export interface TooltipProps extends Omit<HTMLAttributes<HTMLDivElement>, 'titl
   /** The trigger. It must be a single element that can receive a ref and focus (e.g. a button or link). */
   children: ReactElement<{ 'aria-describedby'?: string }>;
   placement?: TooltipPlacement;
+  /**
+   * Distance from the trigger in pixels. Also accepts Base UI's sideOffset function, receiving the side,
+   * alignment, and anchor/positioner dimensions. Defaults to 8.
+   */
+  offset?: TooltipPositionerProps['sideOffset'];
+  /** Hide the decorative arrow. Defaults to false. */
+  hideArrow?: boolean;
   /** Hover delay in milliseconds before the popup opens. Defaults to 400. */
   delay?: number;
 }
 
 export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
-  { title, children, placement = 'top', delay = 400, className, ...rest },
+  { title, children, placement = 'top', offset = SIDE_OFFSET, delay = 400, hideArrow = false, id, className, ...rest },
   ref,
 ) {
-  const popupId = useId();
+  const generatedId = useId();
+  const popupId = id ?? generatedId;
   const [open, setOpen] = useState(false);
 
-  if (title === '' || title === false || title === null || title === undefined) {
-    return children;
-  }
+  const disabled = title === '' || title === false || title === null || title === undefined;
 
   // Base UI does not link the trigger to the popup, so expose the tooltip as the trigger's description while open.
   const existing = children.props['aria-describedby'];
   const describedBy = existing ? `${existing} ${popupId}` : popupId;
 
   return (
-    <BaseTooltip.Root onOpenChange={setOpen}>
+    <BaseTooltip.Root disabled={disabled} onOpenChange={setOpen}>
       <BaseTooltip.Trigger
         delay={delay}
-        render={open ? cloneElement(children, { 'aria-describedby': describedBy }) : children}
+        render={open && !disabled ? cloneElement(children, { 'aria-describedby': describedBy }) : children}
       />
       <BaseTooltip.Portal>
-        <BaseTooltip.Positioner side={placement} sideOffset={SIDE_OFFSET}>
-          <BaseTooltip.Popup
-            role="tooltip"
-            {...rest}
-            id={rest.id ?? popupId}
-            ref={ref}
-            className={clsx('ps-Tooltip', className)}
-          >
-            <BaseTooltip.Arrow className="ps-Tooltip__arrow" />
+        <BaseTooltip.Positioner className="ps-Tooltip__positioner" side={placement} sideOffset={offset}>
+          <BaseTooltip.Popup role="tooltip" {...rest} id={popupId} ref={ref} className={clsx('ps-Tooltip', className)}>
+            <BaseTooltip.Arrow className="ps-Tooltip__arrow" style={hideArrow ? HIDDEN_ARROW_STYLE : undefined} />
             {title}
           </BaseTooltip.Popup>
         </BaseTooltip.Positioner>

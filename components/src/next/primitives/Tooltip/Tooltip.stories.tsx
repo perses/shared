@@ -16,6 +16,7 @@ import type { CSSProperties } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
 import { Tooltip } from './Tooltip';
+import type { TooltipProps } from './Tooltip';
 
 const placementsRow: CSSProperties = {
   display: 'flex',
@@ -97,6 +98,18 @@ Placements.storyName = 'Variants';
 
 const noDelayCode = `// delay is in milliseconds (default 400)
 <Tooltip title="Instant tooltip" delay={0}><button type="button">No delay</button></Tooltip>`;
+const offsetCode = `// offset defaults to 8 pixels and also accepts Base UI's sideOffset function
+<Tooltip title="Further away" offset={16}><button type="button">16px offset</button></Tooltip>
+<Tooltip title="Dynamic distance" offset={({ side, anchor }) =>
+  side === 'top' || side === 'bottom' ? anchor.height / 2 : anchor.width / 2
+}>
+  <button type="button">Dynamic offset</button>
+</Tooltip>`;
+const dynamicOffset: Exclude<TooltipProps['offset'], number | undefined> = ({ side, anchor }) =>
+  side === 'top' || side === 'bottom' ? anchor.height / 2 : anchor.width / 2;
+const noArrowCode = `<Tooltip title="Helpful text" hideArrow>
+  <button type="button">No arrow</button>
+</Tooltip>`;
 const emptyCode = `// An empty title renders only the child, with no popup
 <Tooltip title=""><button type="button">No tooltip rendered</button></Tooltip>`;
 
@@ -108,6 +121,23 @@ export const Behavior: Story = () => (
           <button type="button">No delay</button>
         </Tooltip>
       </div>
+    </Sample>
+
+    <Sample title="Custom offset" code={offsetCode}>
+      <div style={column}>
+        <Tooltip title="Further away" offset={16}>
+          <button type="button">16px offset</button>
+        </Tooltip>
+        <Tooltip title="Dynamic distance" offset={dynamicOffset}>
+          <button type="button">Dynamic offset</button>
+        </Tooltip>
+      </div>
+    </Sample>
+
+    <Sample title="Hidden arrow" code={noArrowCode}>
+      <Tooltip title="Helpful text" hideArrow>
+        <button type="button">No arrow</button>
+      </Tooltip>
     </Sample>
 
     <Sample title="Empty title" code={emptyCode}>

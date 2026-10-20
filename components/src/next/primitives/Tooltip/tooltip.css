@@ -14,6 +14,10 @@
  */
 
 @layer perses.components {
+  .ps-Tooltip__positioner {
+    z-index: var(--perses-z-index-overlay);
+  }
+
   .ps-Tooltip {
     background-color: var(--perses-tooltip-bg);
     color: var(--perses-tooltip-text);
@@ -24,12 +28,28 @@
     border-radius: var(--perses-radius-md);
     box-shadow: var(--perses-shadow-overlay);
     max-width: 20rem;
-    z-index: var(--perses-z-index-overlay);
   }
 
   .ps-Tooltip__arrow {
-    fill: var(--perses-tooltip-bg);
-    width: 0.5rem;
-    height: 0.25rem;
+    background-color: var(--perses-tooltip-bg);
+    width: var(--perses-spacing-sm);
+    height: var(--perses-spacing-sm);
+    transform: rotate(45deg);
+  }
+
+  .ps-Tooltip__arrow[data-side='top'] {
+    bottom: calc(var(--perses-spacing-sm) / -2);
+  }
+
+  .ps-Tooltip__arrow[data-side='bottom'] {
+    top: calc(var(--perses-spacing-sm) / -2);
+  }
+
+  .ps-Tooltip__arrow[data-side='left'] {
+    right: calc(var(--perses-spacing-sm) / -2);
+  }
+
+  .ps-Tooltip__arrow[data-side='right'] {
+    left: calc(var(--perses-spacing-sm) / -2);
   }
 }
