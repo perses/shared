@@ -23,4 +23,5 @@ export * from './Spinner';
 export * from './Stack';
 export * from './Switch';
 export * from './Tooltip';
+export * from './Table';
 export type { ColorVariant, Size, Status } from './types';

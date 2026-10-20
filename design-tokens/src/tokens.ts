@@ -63,6 +63,7 @@ export const tokens = {
 
   border: {
     default: 'var(--perses-border-default)',
+    control: 'var(--perses-border-control)',
     width: {
       sm: 'var(--perses-border-width-sm)',
       md: 'var(--perses-border-width-md)',

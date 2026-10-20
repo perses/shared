@@ -11,7 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Alert, Box, Button, Checkbox, Chip, Divider, Icon, Spinner, Stack, Switch, Tooltip } from './index';
+import {
+  Alert,
+  Box,
+  Button,
+  Checkbox,
+  Chip,
+  Divider,
+  Icon,
+  Spinner,
+  Stack,
+  Switch,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableFooter,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableRowExpandButton,
+  TableSortLabel,
+  Tooltip,
+} from './index';
 import type {
   AlertProps,
   AlertSeverity,
@@ -29,11 +51,15 @@ import type {
   IconProps,
   SpacingToken,
   Size,
+  SortDirection,
   SpinnerProps,
   StackProps,
   Status,
   SwitchProps,
   TooltipProps,
+  TableCellProps,
+  TableProps,
+  TableRowProps,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -49,6 +75,16 @@ describe('primitives barrel exports', () => {
     expect(Stack).toBeDefined();
     expect(Switch).toBeDefined();
     expect(Tooltip).toBeDefined();
+    expect(Table).toBeDefined();
+    expect(TableBody).toBeDefined();
+    expect(TableCell).toBeDefined();
+    expect(TableContainer).toBeDefined();
+    expect(TableFooter).toBeDefined();
+    expect(TableHead).toBeDefined();
+    expect(TablePagination).toBeDefined();
+    expect(TableRow).toBeDefined();
+    expect(TableRowExpandButton).toBeDefined();
+    expect(TableSortLabel).toBeDefined();
   });
 
   it('exports their prop types', () => {
@@ -74,6 +110,12 @@ describe('primitives barrel exports', () => {
     const stackProps: StackProps = {};
     const switchProps: SwitchProps = {};
     const tooltipProps: TooltipProps = { title: 'tip', children: <button type="button">trigger</button> };
+    const tableProps: TableProps = {};
+    const tableRowProps: TableRowProps = {};
+    const tableCellProps: TableCellProps = {};
+    const sortDirection: SortDirection = 'asc';
+    const sharedSize: Size = 'md';
+    const sharedStatus: Status = 'error';
 
     expect(alertProps).toBeDefined();
     expect(severity).toBe('info');
@@ -97,5 +139,11 @@ describe('primitives barrel exports', () => {
     expect(stackProps).toBeDefined();
     expect(switchProps).toBeDefined();
     expect(tooltipProps).toBeDefined();
+    expect(tableProps).toBeDefined();
+    expect(tableRowProps).toBeDefined();
+    expect(tableCellProps).toBeDefined();
+    expect(sortDirection).toBe('asc');
+    expect(sharedSize).toBe('md');
+    expect(sharedStatus).toBe('error');
   });
 });
