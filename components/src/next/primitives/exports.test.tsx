@@ -17,6 +17,10 @@ import type {
   BoxProps,
   ButtonProps,
   ButtonVariant,
+  CardContentProps,
+  CardHeaderProps,
+  CardProps,
+  CardVariant,
   CheckboxProps,
   ChipProps,
   ChipSize,
@@ -45,6 +49,9 @@ import {
   Alert,
   Box,
   Button,
+  Card,
+  CardContent,
+  CardHeader,
   Checkbox,
   Chip,
   Divider,
@@ -73,6 +80,9 @@ describe('primitives barrel exports', () => {
     expect(Alert).toBeDefined();
     expect(Box).toBeDefined();
     expect(Button).toBeDefined();
+    expect(Card).toBeDefined();
+    expect(CardHeader).toBeDefined();
+    expect(CardContent).toBeDefined();
     expect(Checkbox).toBeDefined();
     expect(Chip).toBeDefined();
     expect(Divider).toBeDefined();
@@ -104,6 +114,10 @@ describe('primitives barrel exports', () => {
     const boxProps: BoxProps = { p: { default: spacingToken, md: spacingValue, xl: '50%' } };
     const buttonProps: ButtonProps = {};
     const variant: ButtonVariant = 'solid';
+    const cardProps: CardProps = {};
+    const cardHeaderProps: CardHeaderProps = {};
+    const cardContentProps: CardContentProps = {};
+    const cardVariant: CardVariant = 'outlined';
     const color: ColorVariant | Status = 'primary';
     const size: Size = 'md';
     const checkboxProps: CheckboxProps = { 'aria-label': 'Select' };
@@ -139,6 +153,10 @@ describe('primitives barrel exports', () => {
     expect(variant).toBe('solid');
     expect(color).toBe('primary');
     expect(size).toBe('md');
+    expect(cardProps).toBeDefined();
+    expect(cardHeaderProps).toBeDefined();
+    expect(cardContentProps).toBeDefined();
+    expect(cardVariant).toBe('outlined');
     expect(checkboxProps).toBeDefined();
     expect(checkboxColor).toBe('primary');
     expect(checkboxSize).toBe('md');
