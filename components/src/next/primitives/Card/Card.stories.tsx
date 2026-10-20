@@ -100,7 +100,7 @@ const panelCode = `<Card role="region" aria-labelledby="cpu-title" variant="outl
   <CardHeader py="sm" endElement={<Button size="sm" variant="ghost">⋯</Button>}>
     <h4 id="cpu-title">CPU usage</h4>
   </CardHeader>
-  <CardContent role="figure" p="0" height="100%" style={{ overflow: 'hidden' }}>
+  <CardContent role="figure" p="0" height="100%">
     {chart}
   </CardContent>
 </Card>`;
@@ -110,7 +110,7 @@ const MenuButton = (
     ⋯
   </Button>
 );
-const clipped: CSSProperties = { overflow: 'hidden', flexGrow: 1 };
+const panelContent: CSSProperties = { flexGrow: 1 };
 
 export const Panel: Story = () => (
   <Stack>
@@ -127,7 +127,7 @@ export const Panel: Story = () => (
             CPU usage
           </h4>
         </CardHeader>
-        <CardContent role="figure" p="0" style={clipped}>
+        <CardContent role="figure" p="0" style={panelContent}>
           <div style={chartPlaceholder}>chart</div>
         </CardContent>
       </Card>

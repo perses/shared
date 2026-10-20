@@ -152,6 +152,15 @@ describe('CardHeader', () => {
     expect(screen.getByTestId('header').querySelector('.ps-CardHeader__end')).toBeNull();
   });
 
+  it.each([false, true])('omits the end slot for the empty React node %s', (endElement) => {
+    render(
+      <CardHeader data-testid="header" endElement={endElement}>
+        Title
+      </CardHeader>,
+    );
+    expect(screen.getByTestId('header').querySelector('.ps-CardHeader__end')).toBeNull();
+  });
+
   it('merges className, forwards ref, id and aria attributes', () => {
     const ref = createRef<HTMLDivElement>();
     render(

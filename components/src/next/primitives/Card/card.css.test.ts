@@ -36,6 +36,7 @@ describe('card.css', () => {
     expect(root).toContain('flex-direction: column;');
     expect(root).toContain('background-color: var(--perses-bg-surface);');
     expect(root).toContain('border-radius: var(--perses-radius-lg);');
+    expect(root).toContain('overflow: hidden;');
   });
 
   it('elevated uses the overlay shadow token and outlined uses the border token', () => {
