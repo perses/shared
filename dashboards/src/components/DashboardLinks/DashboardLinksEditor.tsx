@@ -25,7 +25,7 @@ import {
   TableRow,
   Collapse,
 } from '@mui/material';
-import { InfoTooltip, LinkEditorForm } from '@perses-dev/components';
+import { InfoTooltip, LinkEditorForm, useDrawerCloseHandler } from '@perses-dev/components';
 import type { Link } from '@perses-dev/spec';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
@@ -77,6 +77,8 @@ export function DashboardLinksEditor({
       onCancel();
     }
   };
+
+  useDrawerCloseHandler(handleCancel);
 
   const handleAdd = (): void => {
     setLinks((draft) => {

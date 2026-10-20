@@ -21,6 +21,7 @@ import {
   FormActions,
   getSubmitText,
   getTitleAction,
+  useDrawerCloseHandler,
 } from '@perses-dev/components';
 import type { VariableDefinition, ListVariableDefinition } from '@perses-dev/spec';
 import { useQueryClient } from '@tanstack/react-query';
@@ -440,6 +441,8 @@ export function VariableEditorForm({
       onClose();
     }
   }
+
+  useDrawerCloseHandler(handleCancel);
 
   return (
     <FormProvider {...form}>

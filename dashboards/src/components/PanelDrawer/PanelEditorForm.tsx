@@ -20,6 +20,7 @@ import {
   ErrorBoundary,
   getSubmitText,
   getTitleAction,
+  useDrawerCloseHandler,
 } from '@perses-dev/components';
 import type { PanelEditorValues } from '@perses-dev/plugin-system';
 import { PluginKindSelect, usePluginEditor, useValidationSchemas } from '@perses-dev/plugin-system';
@@ -130,6 +131,8 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
       onClose();
     }
   }
+
+  useDrawerCloseHandler(handleCancel);
 
   const handlePanelDefinitionChange = (nextPanelDefStr: string): void => {
     const nextPanelDef: PanelDefinition = JSON.parse(nextPanelDefStr);

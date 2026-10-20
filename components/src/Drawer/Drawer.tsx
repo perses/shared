@@ -14,11 +14,18 @@
 import type { DrawerProps as MuiDrawerProps } from '@mui/material';
 import { Drawer as MuiDrawer, useMediaQuery } from '@mui/material';
 import type { ReactElement } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 import { combineSx } from '../utils';
+import type { DrawerCloseHandler, DrawerCloseHandlerContextValue } from './drawer-close-handler';
+import { DrawerCloseHandlerContext } from './drawer-close-handler';
 
 export interface DrawerProps extends MuiDrawerProps {
   isOpen: boolean;
+  /**
+   * Callback fired when the user clicks outside the drawer or presses Escape.
+   * Not called if a child registered a handler with `useDrawerCloseHandler`: that handler is called instead.
+   */
   onClose: () => void;
   anchor?: 'left' | 'right';
 }
@@ -35,11 +42,33 @@ export const Drawer = ({
 }: DrawerProps): ReactElement => {
   const isSmaller = useMediaQuery(`(max-width:${DRAWER_DEFAULT_WIDTH}px)`);
 
+  const closeHandlersRef = useRef<DrawerCloseHandler[]>([]);
+  const closeHandlerContext = useMemo<DrawerCloseHandlerContextValue>(
+    () => ({
+      registerCloseHandler: (handler) => {
+        closeHandlersRef.current.push(handler);
+        return (): void => {
+          closeHandlersRef.current = closeHandlersRef.current.filter((h) => h !== handler);
+        };
+      },
+    }),
+    [],
+  );
+
+  const handleClose = useCallback((): void => {
+    const closeHandler = closeHandlersRef.current.at(-1);
+    if (closeHandler) {
+      closeHandler();
+    } else {
+      onClose();
+    }
+  }, [onClose]);
+
   return (
     <MuiDrawer
       {...rest}
       open={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       anchor={anchor}
       PaperProps={{
         ...PaperProps,
@@ -53,7 +82,7 @@ export const Drawer = ({
       }}
       aria-hidden={!isOpen} // Ensure the drawer is not focusable when closed + disable console.error about focusable elements
     >
-      {children}
+      <DrawerCloseHandlerContext.Provider value={closeHandlerContext}>{children}</DrawerCloseHandlerContext.Provider>
     </MuiDrawer>
   );
 };

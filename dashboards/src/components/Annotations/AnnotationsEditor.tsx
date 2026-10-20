@@ -28,6 +28,7 @@ import {
   styled,
 } from '@mui/material';
 import type { Action } from '@perses-dev/client';
+import { useDrawerCloseHandler } from '@perses-dev/components';
 import { ValidationProvider, AnnotationEditorForm } from '@perses-dev/plugin-system';
 import type { AnnotationSpec, Definition, UnknownSpec } from '@perses-dev/spec';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
@@ -92,6 +93,8 @@ export function AnnotationEditor(props: {
       props.onCancel();
     }
   };
+
+  useDrawerCloseHandler(handleCancel);
 
   const removeAnnotation = (index: number): void => {
     setAnnotationSpecs((draft) => {

@@ -68,17 +68,12 @@ export const PanelDrawer = (): ReactElement => {
     setIsClosing(false);
   }, [panelEditor]);
 
-  // Disables closing on click out. This is a quick-win solution to avoid losing draft changes.
-  // -> TODO find a way to enable closing by clicking-out in edit view, with a discard confirmation modal popping up
-  const handleClickOut = useCallback((): void => {
-    /* do nothing */
-  }, []);
-
+  // Click-out and Escape are handled by PanelEditorForm, which asks for confirmation if there are unsaved changes
   const drawer = useMemo(() => {
     return (
       <Drawer
         isOpen={isOpen}
-        onClose={handleClickOut}
+        onClose={handleClose}
         slotProps={{ transition: { onExited: handleExited } }}
         data-testid="panel-editor"
       >
@@ -96,7 +91,7 @@ export const PanelDrawer = (): ReactElement => {
         )}
       </Drawer>
     );
-  }, [handleClickOut, handleClose, handleExited, handleSave, isOpen, panelEditor, panelKey]);
+  }, [handleClose, handleExited, handleSave, isOpen, panelEditor, panelKey]);
 
   // If the panel editor is using a repeat variable, we need to wrap the drawer in a VariableContext.Provider
   if (panelEditor?.panelGroupItemId?.repeatVariable?.group) {

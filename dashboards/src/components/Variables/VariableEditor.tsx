@@ -34,7 +34,7 @@ import {
   Typography,
 } from '@mui/material';
 import type { Action } from '@perses-dev/client';
-import { InfoTooltip } from '@perses-dev/components';
+import { InfoTooltip, useDrawerCloseHandler } from '@perses-dev/components';
 import type { VariableState } from '@perses-dev/plugin-system';
 import {
   ValidationProvider,
@@ -119,6 +119,8 @@ export function VariableEditor(props: {
       props.onCancel();
     }
   };
+
+  useDrawerCloseHandler(handleCancel);
 
   const removeVariable = (index: number): void => {
     setVariableDefinitions((draft) => {

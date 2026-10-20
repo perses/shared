@@ -14,7 +14,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
 import type { Action, DatasourceDefinition, DatasourceSpec } from '@perses-dev/client';
-import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
+import {
+  DiscardChangesConfirmationDialog,
+  FormActions,
+  getSubmitText,
+  getTitleAction,
+  useDrawerCloseHandler,
+} from '@perses-dev/components';
 import type { DispatchWithoutAction, ReactElement } from 'react';
 import { useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
@@ -85,6 +91,8 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps): ReactEle
       onClose();
     }
   }
+
+  useDrawerCloseHandler(handleCancel);
 
   return (
     <FormProvider {...form}>

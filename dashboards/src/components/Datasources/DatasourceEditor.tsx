@@ -26,6 +26,7 @@ import {
 } from '@mui/material';
 import type { Action, DatasourceDefinition } from '@perses-dev/client';
 import { createTestDatasourceConnection } from '@perses-dev/client';
+import { useDrawerCloseHandler } from '@perses-dev/components';
 import { DatasourceEditorForm, ValidationProvider } from '@perses-dev/plugin-system';
 import type { DatasourceSpec } from '@perses-dev/spec';
 import PencilIcon from 'mdi-material-ui/Pencil';
@@ -83,6 +84,8 @@ export function DatasourceEditor(props: {
       props.onCancel();
     }
   };
+
+  useDrawerCloseHandler(handleCancel);
 
   const removeDatasource = (name: string): void => {
     setDatasources((draft) => {

@@ -22,6 +22,7 @@ import {
   OptionsColorPicker,
   getSubmitText,
   getTitleAction,
+  useDrawerCloseHandler,
 } from '@perses-dev/components';
 import type { AnnotationSpec } from '@perses-dev/spec';
 import { useQueryClient } from '@tanstack/react-query';
@@ -143,6 +144,8 @@ export function AnnotationEditorForm({
       onClose();
     }
   }
+
+  useDrawerCloseHandler(handleCancel);
 
   return (
     <FormProvider {...form}>
