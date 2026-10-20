@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { forwardRef } from 'react';
 
@@ -21,8 +21,11 @@ import type { SpacingProps } from '../system/spacing';
 import { spacingProps } from '../system/spacing';
 import { applyStyleProps, compileStyleProps } from '../system/styleProps';
 
+// oxlint-disable-next-line import/no-unassigned-import -- Registers shared layout utility styles used by style props.
 import '../system/layout.css';
+// oxlint-disable-next-line import/no-unassigned-import -- Registers shared spacing utility styles used by style props.
 import '../system/spacing.css';
+// oxlint-disable-next-line import/no-unassigned-import -- Registers this component's styles.
 import './card.css';
 
 export type CardVariant = 'elevated' | 'outlined';
@@ -90,11 +93,12 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(function C
     style: computedStyle,
     rest,
   } = applyStyleProps(props, CARD_HEADER_STYLE_PROPS, style);
+  const hasEndElement = endElement !== undefined && endElement !== null && typeof endElement !== 'boolean';
 
   return (
     <div {...rest} ref={ref} className={clsx('ps-CardHeader', styleClassName, className)} style={computedStyle}>
       <div className="ps-CardHeader__content">{children}</div>
-      {endElement !== undefined && endElement !== null && <div className="ps-CardHeader__end">{endElement}</div>}
+      {hasEndElement && <div className="ps-CardHeader__end">{endElement}</div>}
     </div>
   );
 });

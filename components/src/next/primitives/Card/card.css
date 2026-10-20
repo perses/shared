@@ -23,6 +23,7 @@
     color: var(--perses-text-primary);
     border: 1px solid transparent;
     border-radius: var(--perses-radius-lg);
+    overflow: hidden;
     font-family: var(--perses-font-family);
   }
 
