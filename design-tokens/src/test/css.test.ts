@@ -146,6 +146,11 @@ describe('CSS primitive dimension variables', () => {
     expect(tokensCss).toContain('--perses-border-width-md');
   });
 
+  it('defines focus ring geometry variables', () => {
+    expect(tokensCss).toContain('--perses-focus-ring-width');
+    expect(tokensCss).toContain('--perses-focus-ring-offset');
+  });
+
   it('defines control size variables in rem', () => {
     const expected = { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '2.75rem' };
     for (const [name, value] of Object.entries(expected)) {
@@ -185,6 +190,10 @@ describe('CSS semantic variables', () => {
 
   it('has border semantic token', () => {
     expect(semanticCss).toContain('--perses-border-default');
+  });
+
+  it('has focus ring colour semantic token in both modes', () => {
+    expect(semanticCss.match(/--perses-focus-ring-color:/g)).toHaveLength(2);
   });
 
   it('has all text semantic tokens', () => {

@@ -67,6 +67,8 @@ export type BorderWidthScale = 'sm' | 'md';
 
 export type BorderWidthVar = `--perses-border-width-${BorderWidthScale}`;
 
+export type FocusRingVar = '--perses-focus-ring-width' | '--perses-focus-ring-offset' | '--perses-focus-ring-color';
+
 export type RadiusVar = `--perses-radius-${'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'}`;
 
 export type ShadowVar = '--perses-shadow-overlay';
@@ -102,6 +104,7 @@ export type PersesTokenVar =
   | SpacingVar
   | ControlSizeVar
   | BorderWidthVar
+  | FocusRingVar
   | RadiusVar
   | ShadowVar
   | ZIndexVar

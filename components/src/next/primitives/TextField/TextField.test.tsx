@@ -28,6 +28,10 @@ const PERCENT = <span>%</span>;
 const START_ICON = <span data-testid="start-icon" />;
 const END_ICON = <span data-testid="end-icon" />;
 
+/** Root element of the field whose control is named by `label`. */
+const getRoot = (label = 'Name'): HTMLElement =>
+  screen.getByLabelText(label).closest('.ps-TextField') as HTMLElement;
+
 describe('TextField', () => {
   it('renders an input associated with its label', () => {
     render(<TextField label="Name" />);
@@ -35,8 +39,8 @@ describe('TextField', () => {
   });
 
   it('applies the ps-TextField class to the root', () => {
-    render(<TextField label="Name" data-testid="field" />);
-    expect(screen.getByTestId('field')).toHaveClass('ps-TextField');
+    render(<TextField label="Name" />);
+    expect(getRoot()).toHaveClass('ps-TextField');
   });
 
   it('renders helper text', () => {
@@ -45,28 +49,28 @@ describe('TextField', () => {
   });
 
   it('sets data-status="error" when status is error', () => {
-    render(<TextField label="Name" status="error" data-testid="field" />);
-    expect(screen.getByTestId('field')).toHaveAttribute('data-status', 'error');
+    render(<TextField label="Name" status="error" />);
+    expect(getRoot()).toHaveAttribute('data-status', 'error');
   });
 
   it('sets data-status="warning" when status is warning', () => {
-    render(<TextField label="Name" status="warning" data-testid="field" />);
-    expect(screen.getByTestId('field')).toHaveAttribute('data-status', 'warning');
+    render(<TextField label="Name" status="warning" />);
+    expect(getRoot()).toHaveAttribute('data-status', 'warning');
   });
 
   it('sets data-status="success" when status is success', () => {
-    render(<TextField label="Name" status="success" data-testid="field" />);
-    expect(screen.getByTestId('field')).toHaveAttribute('data-status', 'success');
+    render(<TextField label="Name" status="success" />);
+    expect(getRoot()).toHaveAttribute('data-status', 'success');
   });
 
   it('sets data-full-width when fullWidth is true', () => {
-    render(<TextField label="Name" fullWidth data-testid="field" />);
-    expect(screen.getByTestId('field')).toHaveAttribute('data-full-width');
+    render(<TextField label="Name" fullWidth />);
+    expect(getRoot()).toHaveAttribute('data-full-width');
   });
 
   it('sets data-size on the root', () => {
-    render(<TextField label="Name" size="lg" data-testid="field" />);
-    expect(screen.getByTestId('field')).toHaveAttribute('data-size', 'lg');
+    render(<TextField label="Name" size="lg" />);
+    expect(getRoot()).toHaveAttribute('data-size', 'lg');
   });
 
   it('accepts a value and calls onChange', async () => {
@@ -122,8 +126,8 @@ describe('TextField', () => {
   });
 
   it('sets data-multiline on the root when multiline is true', () => {
-    render(<TextField label="Comment" multiline data-testid="field" />);
-    expect(screen.getByTestId('field')).toHaveAttribute('data-multiline');
+    render(<TextField label="Comment" multiline />);
+    expect(getRoot('Comment')).toHaveAttribute('data-multiline');
   });
 
   it('forwards a ref to the underlying textarea when multiline', () => {
@@ -143,15 +147,15 @@ describe('TextField', () => {
   });
 
   it('applies a plain width through a custom property', () => {
-    render(<TextField label="Name" width="20rem" data-testid="field" />);
-    const root = screen.getByTestId('field');
+    render(<TextField label="Name" width="20rem" />);
+    const root = getRoot();
     expect(root).toHaveClass('ps-width');
     expect(root).toHaveStyle({ '--ps-width': '20rem' });
   });
 
   it('applies responsive width via the style-prop class and CSS variables', () => {
-    render(<TextField label="Name" width={responsiveWidth} data-testid="field" />);
-    const root = screen.getByTestId('field');
+    render(<TextField label="Name" width={responsiveWidth} />);
+    const root = getRoot();
     expect(root).toHaveClass('ps-width');
     expect(root).toHaveStyle({
       '--ps-width': '100%',
@@ -160,8 +164,8 @@ describe('TextField', () => {
   });
 
   it('applies spacing and overflow props to the root', () => {
-    render(<TextField label="Name" m="md" overflow="hidden" data-testid="field" />);
-    const root = screen.getByTestId('field');
+    render(<TextField label="Name" m="md" overflow="hidden" />);
+    const root = getRoot();
     expect(root).toHaveClass('ps-m', 'ps-overflow');
     expect(root).toHaveStyle({
       '--ps-m': 'var(--perses-spacing-md)',
@@ -171,8 +175,8 @@ describe('TextField', () => {
 
   it('does not accept a display prop because the stylesheet fixes display', () => {
     // @ts-expect-error display is fixed by the TextField stylesheet
-    render(<TextField label="Name" display="block" data-testid="field" />);
-    const root = screen.getByTestId('field');
+    render(<TextField label="Name" display="block" />);
+    const root = getRoot();
     expect(root).not.toHaveClass('ps-display');
     expect(root.style.getPropertyValue('--ps-display')).toBe('');
   });
@@ -196,8 +200,8 @@ describe('TextField', () => {
   });
 
   it('merges the style prop and lets it override computed styles', () => {
-    render(<TextField label="Name" width="20rem" style={STYLE_OVERRIDE} data-testid="field" />);
-    expect(screen.getByTestId('field')).toHaveStyle({ width: '99px' });
+    render(<TextField label="Name" width="20rem" style={STYLE_OVERRIDE} />);
+    expect(getRoot()).toHaveStyle({ width: '99px' });
   });
 
   it('does not forward style props to the input', () => {
@@ -209,7 +213,7 @@ describe('TextField', () => {
   });
 
   it('sets readonly on the input when readOnly', () => {
-    render(<TextField label="Name" readOnly data-testid="field" />);
+    render(<TextField label="Name" readOnly />);
     expect(screen.getByLabelText('Name')).toHaveAttribute('readonly');
   });
 
@@ -218,8 +222,8 @@ describe('TextField', () => {
     const statuses: Array<Status | undefined> = [undefined, 'error', 'warning', 'success', 'info'];
     for (const size of sizes) {
       for (const status of statuses) {
-        const { unmount } = render(<TextField label="Name" size={size} status={status} data-testid="field" />);
-        const root = screen.getByTestId('field');
+        const { unmount } = render(<TextField label="Name" size={size} status={status} />);
+        const root = getRoot();
         expect(root).toHaveAttribute('data-size', size);
         if (status) {
           expect(root).toHaveAttribute('data-status', status);
@@ -232,8 +236,8 @@ describe('TextField', () => {
   });
 
   it('defaults to the md size', () => {
-    render(<TextField label="Name" data-testid="field" />);
-    expect(screen.getByTestId('field')).toHaveAttribute('data-size', 'md');
+    render(<TextField label="Name" />);
+    expect(getRoot()).toHaveAttribute('data-size', 'md');
   });
 
   describe('accessibility', () => {

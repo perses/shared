@@ -148,8 +148,9 @@
     border-color: var(--perses-checkbox-color);
   }
 
+  /* Colour follows the checkbox colour variant; offset is wider than the shared ring so it clears the small box. */
   .ps-Checkbox:focus-visible {
-    outline: var(--perses-border-width-md) solid var(--perses-checkbox-focus-color);
+    outline: var(--perses-focus-ring-width) solid var(--perses-checkbox-focus-color);
     outline-offset: var(--perses-spacing-xs);
   }
 
