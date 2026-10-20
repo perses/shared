@@ -37,7 +37,7 @@ describe('IconButton', () => {
     render(<IconButton aria-label="Close">X</IconButton>);
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('data-variant', 'ghost');
-    expect(button).toHaveAttribute('data-color', 'primary');
+    expect(button).toHaveAttribute('data-color', 'default');
     expect(button).toHaveAttribute('data-size', 'md');
   });
 

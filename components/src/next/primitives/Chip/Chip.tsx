@@ -45,7 +45,7 @@ const CONTAINER_ARIA_PROPS = new Set(['aria-hidden', 'aria-live', 'aria-atomic',
 interface ChipBaseProps
   extends Omit<HTMLAttributes<HTMLElement>, 'color'>, SpacingProps, Omit<SizingProps, 'maxWidth'>, DisplayProps {
   /**
-   * Palette of the chip; `secondary` is the neutral default. Status values are visual only; convey state through
+   * Palette of the chip; `default` is the neutral default. Status values are visual only; convey state through
    * the label too.
    */
   color?: ColorVariant | Status;
@@ -133,7 +133,7 @@ function splitChipAriaProps(domProps: Record<string, unknown>, actionOnLabel: bo
 export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
   {
     children,
-    color = 'secondary',
+    color = 'default',
     size = 'xs',
     variant = 'solid',
     startElement,

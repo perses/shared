@@ -102,7 +102,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
     label,
     labelPosition = 'end',
     size = 'md',
-    color = 'primary',
+    color = 'default',
     className,
     style,
     id,

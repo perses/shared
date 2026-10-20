@@ -50,6 +50,13 @@
     font-size: var(--perses-font-size-md);
   }
 
+  .ps-Chip[data-color='default'] {
+    --chip-bg: var(--perses-status-bg-default);
+    --chip-border: var(--perses-status-border-default);
+    --chip-text: var(--perses-status-text-default);
+    --chip-solid: var(--perses-status-solid-default);
+  }
+
   .ps-Chip[data-color='primary'] {
     --chip-bg: var(--perses-status-bg-primary);
     --chip-border: var(--perses-status-border-primary);

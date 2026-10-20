@@ -49,9 +49,9 @@ describe('Chip', () => {
     expect(screen.getByText('Production').closest('.ps-Chip')).toBeInTheDocument();
   });
 
-  it('defaults to secondary color', () => {
+  it('defaults to default color', () => {
     render(<Chip>Production</Chip>);
-    expect(screen.getByText('Production').closest('.ps-Chip')).toHaveAttribute('data-color', 'secondary');
+    expect(screen.getByText('Production').closest('.ps-Chip')).toHaveAttribute('data-color', 'default');
   });
 
   it('sets data-color attribute', () => {
@@ -390,7 +390,7 @@ describe('Chip', () => {
   });
 
   describe('combinations', () => {
-    const colors: Array<ColorVariant | Status> = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
+    const colors: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
     const sizes: ChipSize[] = ['xs', 'sm'];
     const variants: ChipVariant[] = ['solid', 'outline'];
 

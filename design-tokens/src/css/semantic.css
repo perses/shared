@@ -58,6 +58,14 @@
     --perses-tooltip-bg: var(--perses-color-black);
     --perses-tooltip-text: var(--perses-color-white);
 
+    /* Status: Default (neutral, mirrors the page surface) */
+    --perses-status-bg-default: var(--perses-bg-sunken);
+    --perses-status-bg-default-hover: var(--perses-color-gray-300);
+    --perses-status-text-default: var(--perses-text-primary);
+    --perses-status-border-default: var(--perses-border-default);
+    --perses-status-icon-default: var(--perses-text-secondary);
+    --perses-status-solid-default: var(--perses-color-gray-800);
+
     /* Status: Primary */
     --perses-status-bg-primary: var(--perses-color-blue-50);
     --perses-status-bg-primary-hover: var(--perses-color-blue-800);
@@ -134,6 +142,14 @@
     /* Tooltip */
     --perses-tooltip-bg: var(--perses-color-white);
     --perses-tooltip-text: var(--perses-color-black);
+
+    /* Status: Default (neutral, mirrors the page surface) */
+    --perses-status-bg-default: var(--perses-bg-sunken);
+    --perses-status-bg-default-hover: var(--perses-color-gray-700);
+    --perses-status-text-default: var(--perses-text-primary);
+    --perses-status-border-default: var(--perses-border-default);
+    --perses-status-icon-default: var(--perses-text-secondary);
+    --perses-status-solid-default: var(--perses-color-gray-600);
 
     /* Status: Primary */
     --perses-status-bg-primary: var(--perses-color-blue-900);

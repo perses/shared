@@ -19,7 +19,7 @@ import { Sample, Stack } from '../../stories/Sample';
 import type { ColorVariant, Size, Status } from '../types';
 import { Checkbox } from './Checkbox';
 
-const colors: Array<Status | ColorVariant> = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
+const colors: Array<Status | ColorVariant> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
 const ROW_STYLE: CSSProperties = { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem' };
 const COLUMN_STYLE: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.75rem' };

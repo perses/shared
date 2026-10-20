@@ -53,6 +53,12 @@
     font-size: var(--perses-font-size-lg);
   }
 
+  .ps-Checkbox[data-color='default'] {
+    --perses-checkbox-color: var(--perses-status-solid-default);
+    --perses-checkbox-color-hover: var(--perses-status-bg-default-hover);
+    --perses-checkbox-focus-color: var(--perses-status-border-default);
+  }
+
   .ps-Checkbox[data-color='primary'] {
     --perses-checkbox-color: var(--perses-status-solid-primary);
     --perses-checkbox-color-hover: var(--perses-status-bg-primary-hover);

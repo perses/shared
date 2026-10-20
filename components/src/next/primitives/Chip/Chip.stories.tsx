@@ -20,7 +20,7 @@ import type { ColorVariant, Status } from '../types';
 import { Chip } from './Chip';
 import type { ChipSize, ChipVariant } from './Chip';
 
-const colors: Array<ColorVariant | Status> = ['primary', 'secondary', 'success', 'warning', 'error', 'info'];
+const colors: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'success', 'warning', 'error', 'info'];
 const sizes: ChipSize[] = ['xs', 'sm', 'md'];
 const variants: ChipVariant[] = ['solid', 'outline'];
 

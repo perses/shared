@@ -43,7 +43,7 @@ const galleryIcon: CSSProperties = { fontSize: '1.25rem' };
 const galleryLabel: CSSProperties = { fontSize: '0.75rem' };
 
 const variants: ButtonVariant[] = ['solid', 'outline', 'ghost'];
-const colors: Array<ColorVariant | Status> = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
+const colors: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
 
 const basicCode = `<IconButton aria-label="Close"><CloseIcon /></IconButton>`;

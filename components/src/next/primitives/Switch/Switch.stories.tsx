@@ -20,7 +20,7 @@ import type { ColorVariant, Size, Status } from '../types';
 import { Switch } from './Switch';
 
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
-const colors: Array<ColorVariant | Status> = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
+const colors: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
 const noop = (): void => {};
 const row: CSSProperties = {
   display: 'flex',

@@ -114,7 +114,7 @@ describe('Switch', () => {
     expect(wrapper?.style.getPropertyValue('--perses-switch-size-md')).toBe('48px');
   });
 
-  it.each<ColorVariant | Status>(['primary', 'secondary', 'error', 'warning', 'success', 'info'])(
+  it.each<ColorVariant | Status>(['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'])(
     'sets data-color to %s',
     (color) => {
       render(<Switch checked onCheckedChange={noop} color={color} aria-label="Feature" />);
@@ -124,7 +124,7 @@ describe('Switch', () => {
 
   it('defaults color to primary when not provided', () => {
     render(<Switch checked={false} onCheckedChange={noop} />);
-    expect(screen.getByRole('switch')).toHaveAttribute('data-color', 'primary');
+    expect(screen.getByRole('switch')).toHaveAttribute('data-color', 'default');
   });
 
   it('renders a label wired to the control via a wrapping label element', () => {
