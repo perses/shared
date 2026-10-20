@@ -22,7 +22,7 @@ const UI_AA = 3;
 
 const palette = new Map<string, string>();
 for (const [, name, hex] of readCss('tokens.css').matchAll(/--perses-color-([\w-]+):\s*(#[0-9a-fA-F]{6})/g)) {
-  palette.set(name as string, hex as string);
+  if (name && hex) palette.set(name, hex);
 }
 
 const semanticCss = readCss('semantic.css');
@@ -31,8 +31,9 @@ const darkStart = semanticCss.indexOf("[data-perses-mode='dark']");
 function parseBlock(block: string): Map<string, string> {
   const tokens = new Map<string, string>();
   for (const [, name, color] of block.matchAll(/--perses-([\w-]+):\s*var\(--perses-color-([\w-]+)\)/g)) {
-    const hex = palette.get(color as string);
-    if (hex) tokens.set(name as string, hex);
+    if (!name || !color) continue;
+    const hex = palette.get(color);
+    if (hex) tokens.set(name, hex);
   }
   return tokens;
 }
@@ -43,11 +44,11 @@ const modes: Array<[string, Map<string, string>]> = [
 ];
 
 function luminance(hex: string): number {
-  const [r, g, b] = [1, 3, 5].map((i) => {
-    const channel = parseInt(hex.slice(i, i + 2), 16) / 255;
+  const channelLuminance = (offset: number): number => {
+    const channel = parseInt(hex.slice(offset, offset + 2), 16) / 255;
     return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
-  }) as [number, number, number];
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  return 0.2126 * channelLuminance(1) + 0.7152 * channelLuminance(3) + 0.0722 * channelLuminance(5);
 }
 
 function contrast(a: string, b: string): number {
@@ -71,16 +72,27 @@ describe('semantic token contrast (WCAG 2.x AA)', () => {
       (text) => {
         const failing = surfaces.filter((surface) => contrast(get(text), get(surface)) < TEXT_AA);
         expect(failing).toEqual([]);
-      }
+      },
     );
+
+    it('keeps elevation surface colors distinct', () => {
+      expect(new Set(surfaces.map(get)).size).toBe(surfaces.length);
+    });
 
     it.each(roles)('%s status text is readable on its tinted background', (role) => {
       expect(contrast(get(`status-text-${role}`), get(`status-bg-${role}`))).toBeGreaterThanOrEqual(TEXT_AA);
     });
 
-    it.each(roles)('%s status icon and fg text are readable on the default background', (role) => {
-      expect(contrast(get(`status-icon-${role}`), get('bg-default'))).toBeGreaterThanOrEqual(TEXT_AA);
-      expect(contrast(get(`status-fg-${role}`), get('bg-default'))).toBeGreaterThanOrEqual(TEXT_AA);
+    it.each(roles)('%s status icon is distinguishable on its tinted background', (role) => {
+      expect(contrast(get(`status-icon-${role}`), get(`status-bg-${role}`))).toBeGreaterThanOrEqual(UI_AA);
+    });
+
+    it.each(roles)('%s solid fill and foreground contrast every surface and its tinted background', (role) => {
+      const backgrounds = [...surfaces, `status-bg-${role}`];
+      const failing = backgrounds.filter(
+        (background) => contrast(get(`status-solid-${role}`), get(background)) < TEXT_AA,
+      );
+      expect(failing).toEqual([]);
     });
 
     it.each(roles)('%s text-on-solid is readable on the solid and hover fills', (role) => {
@@ -88,8 +100,9 @@ describe('semantic token contrast (WCAG 2.x AA)', () => {
       expect(contrast(get('text-on-solid'), get(`status-bg-${role}-hover`))).toBeGreaterThanOrEqual(TEXT_AA);
     });
 
-    it.each(roles)('%s solid fill is distinguishable from the default background', (role) => {
-      expect(contrast(get(`status-solid-${role}`), get('bg-default'))).toBeGreaterThanOrEqual(UI_AA);
+    it.each(roles)('%s hover fill is distinguishable from every surface', (role) => {
+      const failing = surfaces.filter((surface) => contrast(get(`status-bg-${role}-hover`), get(surface)) < UI_AA);
+      expect(failing).toEqual([]);
     });
   });
 });

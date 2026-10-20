@@ -26,7 +26,6 @@ export interface PersesColor {
   800: HexColor;
   850: HexColor;
   900: HexColor;
-  925: HexColor;
   950: HexColor;
 }
 
@@ -43,7 +42,6 @@ export const blue: PersesColor = {
   800: '#1565c0',
   850: '#1156b0',
   900: '#0d47a1',
-  925: '#093578',
   950: '#062350',
 };
 
@@ -60,7 +58,6 @@ export const green: PersesColor = {
   800: '#2e7d32',
   850: '#256e29',
   900: '#1b5e20',
-  925: '#144618',
   950: '#0e2f10',
 };
 
@@ -77,7 +74,6 @@ export const gray: PersesColor = {
   800: '#424242',
   850: '#303030',
   900: '#212121',
-  925: '#191919',
   950: '#121212',
 };
 
@@ -94,7 +90,6 @@ export const orange: PersesColor = {
   800: '#ef6c00',
   850: '#ea5e00',
   900: '#e65100',
-  925: '#b84a00',
   950: '#732900',
 };
 
@@ -111,7 +106,6 @@ export const purple: PersesColor = {
   800: '#280d5f',
   850: '#1e0a47',
   900: '#140630',
-  925: '#0f0424',
   950: '#0a0318',
 };
 
@@ -128,7 +122,6 @@ export const red: PersesColor = {
   800: '#c62828',
   850: '#be2222',
   900: '#b71c1c',
-  925: '#891515',
   950: '#5c0e0e',
 };
 

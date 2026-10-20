@@ -27,7 +27,6 @@ const colorScale = (hue: ColorHue) =>
     800: `var(--perses-color-${hue}-800)`,
     850: `var(--perses-color-${hue}-850)`,
     900: `var(--perses-color-${hue}-900)`,
-    925: `var(--perses-color-${hue}-925)`,
     950: `var(--perses-color-${hue}-950)`,
   }) as const;
 
@@ -39,7 +38,6 @@ const statusRole = (role: StatusRole) =>
     border: `var(--perses-status-border-${role})`,
     icon: `var(--perses-status-icon-${role})`,
     solid: `var(--perses-status-solid-${role})`,
-    fg: `var(--perses-status-fg-${role})`,
   }) as const;
 
 export const tokens = {

@@ -11,9 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { PersesColor } from './colors';
+
 export type { HexColor, PersesColor } from './colors';
 
-export type ColorStop = 50 | 100 | 150 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 850 | 900 | 925 | 950;
+export type ColorStop = keyof PersesColor;
 
 export type ColorHue = 'blue' | 'green' | 'gray' | 'orange' | 'purple' | 'red';
 
@@ -52,8 +54,6 @@ export type StatusBorderVar = `--perses-status-border-${StatusRole}`;
 export type StatusIconVar = `--perses-status-icon-${StatusRole}`;
 
 export type StatusSolidVar = `--perses-status-solid-${StatusRole}`;
-
-export type StatusFgVar = `--perses-status-fg-${StatusRole}`;
 
 export type SpacingScale = '0' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 
@@ -94,7 +94,6 @@ export type PersesTokenVar =
   | StatusBorderVar
   | StatusIconVar
   | StatusSolidVar
-  | StatusFgVar
   | SpacingVar
   | ControlSizeVar
   | BorderWidthVar

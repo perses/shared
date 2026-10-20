@@ -98,7 +98,7 @@
     width: var(--ps-switch-thumb-size);
     height: var(--ps-switch-thumb-size);
     border-radius: var(--perses-radius-full);
-    background-color: var(--perses-color-white);
+    background-color: var(--perses-text-on-solid);
     transition: transform 0.15s ease;
   }
 

@@ -56,12 +56,10 @@ describe('CSS primitive color variables', () => {
     ['red', red],
   ];
 
-  const stops = [50, 100, 150, 200, 300, 400, 500, 600, 700, 800, 850, 900, 925, 950] as const;
-
   it.each(hues)('tokens.css defines all %s color variables', (hue, colorObj) => {
-    for (const stop of stops) {
+    for (const [stop, value] of Object.entries(colorObj)) {
       expect(tokensCss).toContain(`--perses-color-${hue}-${stop}`);
-      expect(tokensCssUpper).toContain(colorObj[stop].toUpperCase());
+      expect(tokensCssUpper).toContain(value.toUpperCase());
     }
   });
 
@@ -131,7 +129,7 @@ describe('CSS semantic variables', () => {
 
   it('has all status tokens with property-scoped naming', () => {
     const roles = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
-    const properties = ['bg', 'text', 'border', 'icon'];
+    const properties = ['bg', 'text', 'border', 'icon', 'solid'];
     for (const role of roles) {
       for (const prop of properties) {
         expect(semanticCss).toContain(`--perses-status-${prop}-${role}`);

@@ -18,6 +18,7 @@ import { resolve } from 'path';
 const readCss = (relativePath: string): string => readFileSync(resolve(__dirname, relativePath), 'utf-8');
 
 const SIZES = ['xs', 'sm', 'md', 'lg'] as const;
+const COLORS = ['primary', 'secondary', 'error', 'warning', 'success', 'info'] as const;
 
 function ruleFor(css: string, selector: string): string {
   const start = css.indexOf(selector);
@@ -70,4 +71,17 @@ describe('control size tokens', () => {
       );
     },
   );
+});
+
+describe('control color tokens', () => {
+  it.each(COLORS)('Button %s uses the existing solid token for its fill and foreground', (color) => {
+    const rule = ruleFor(readCss('./Button/buttonBase.css'), `.ps-ButtonBase[data-color='${color}']`);
+    expect(rule).toContain(`--ps-btn-bg: var(--perses-status-solid-${color});`);
+    expect(rule).toContain(`--ps-btn-text: var(--perses-status-solid-${color});`);
+  });
+
+  it('Switch thumb contrasts its status fill through text-on-solid', () => {
+    const rule = ruleFor(readCss('./Switch/switch.css'), '.ps-Switch__thumb');
+    expect(rule).toContain('background-color: var(--perses-text-on-solid);');
+  });
 });
