@@ -28,6 +28,7 @@
     --perses-color-blue-800: #1565c0;
     --perses-color-blue-850: #1156b0;
     --perses-color-blue-900: #0d47a1;
+    --perses-color-blue-925: #093578;
     --perses-color-blue-950: #062350;
 
     /* ---- Colors: Green ---- */
@@ -43,6 +44,7 @@
     --perses-color-green-800: #2e7d32;
     --perses-color-green-850: #256e29;
     --perses-color-green-900: #1b5e20;
+    --perses-color-green-925: #144618;
     --perses-color-green-950: #0e2f10;
 
     /* ---- Colors: Gray ---- */
@@ -58,6 +60,7 @@
     --perses-color-gray-800: #424242;
     --perses-color-gray-850: #303030;
     --perses-color-gray-900: #212121;
+    --perses-color-gray-925: #191919;
     --perses-color-gray-950: #121212;
 
     /* ---- Colors: Orange ---- */
@@ -73,6 +76,7 @@
     --perses-color-orange-800: #ef6c00;
     --perses-color-orange-850: #ea5e00;
     --perses-color-orange-900: #e65100;
+    --perses-color-orange-925: #b84a00;
     --perses-color-orange-950: #732900;
 
     /* ---- Colors: Purple ---- */
@@ -88,6 +92,7 @@
     --perses-color-purple-800: #280d5f;
     --perses-color-purple-850: #1e0a47;
     --perses-color-purple-900: #140630;
+    --perses-color-purple-925: #0f0424;
     --perses-color-purple-950: #0a0318;
 
     /* ---- Colors: Red ---- */
@@ -103,6 +108,7 @@
     --perses-color-red-800: #c62828;
     --perses-color-red-850: #be2222;
     --perses-color-red-900: #b71c1c;
+    --perses-color-red-925: #891515;
     --perses-color-red-950: #5c0e0e;
 
     /* ---- Colors: Common ---- */

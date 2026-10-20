@@ -60,6 +60,7 @@ type _StatusErrorBg = AssertAssignable<ExtractVar<typeof tokens.status.error.bg>
 type _StatusSuccessText = AssertAssignable<ExtractVar<typeof tokens.status.success.text>, PersesTokenVar>;
 type _StatusWarningBorder = AssertAssignable<ExtractVar<typeof tokens.status.warning.border>, PersesTokenVar>;
 type _StatusInfoIcon = AssertAssignable<ExtractVar<typeof tokens.status.info.icon>, PersesTokenVar>;
+type _StatusInfoFg = AssertAssignable<ExtractVar<typeof tokens.status.info.fg>, PersesTokenVar>;
 
 type _ColorBlue500 = AssertAssignable<ExtractVar<(typeof tokens.color.blue)[500]>, PersesTokenVar>;
 type _ColorWhite = AssertAssignable<ExtractVar<typeof tokens.color.white>, PersesTokenVar>;

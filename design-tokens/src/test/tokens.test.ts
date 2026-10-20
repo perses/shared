@@ -27,7 +27,7 @@ describe('color constants', () => {
   ] as const;
 
   it.each(colorEntries)('%s has valid hex values for all stops', (_name, color) => {
-    const stops = [50, 100, 150, 200, 300, 400, 500, 600, 700, 800, 850, 900, 950] as const;
+    const stops = [50, 100, 150, 200, 300, 400, 500, 600, 700, 800, 850, 900, 925, 950] as const;
     for (const stop of stops) {
       expect(color[stop]).toMatch(HEX_PATTERN);
     }
@@ -80,6 +80,7 @@ describe('tokens object', () => {
     expect(tokens.status.error.text).toBe('var(--perses-status-text-error)');
     expect(tokens.status.warning.border).toBe('var(--perses-status-border-warning)');
     expect(tokens.status.info.icon).toBe('var(--perses-status-icon-info)');
+    expect(tokens.status.info.fg).toBe('var(--perses-status-fg-info)');
     expect(tokens.status.primary.bg).toBe('var(--perses-status-bg-primary)');
     expect(tokens.status.secondary.bgHover).toBe('var(--perses-status-bg-secondary-hover)');
   });

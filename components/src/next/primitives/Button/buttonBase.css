@@ -45,7 +45,7 @@
   .ps-ButtonBase[data-color='primary'] {
     --ps-btn-bg: var(--perses-status-solid-primary);
     --ps-btn-bg-hover: var(--perses-status-bg-primary-hover);
-    --ps-btn-text: var(--perses-status-solid-primary);
+    --ps-btn-text: var(--perses-status-fg-primary);
     --ps-btn-border: var(--perses-status-border-primary);
     --ps-btn-bg-subtle: var(--perses-status-bg-primary);
   }
@@ -53,7 +53,7 @@
   .ps-ButtonBase[data-color='secondary'] {
     --ps-btn-bg: var(--perses-status-solid-secondary);
     --ps-btn-bg-hover: var(--perses-status-bg-secondary-hover);
-    --ps-btn-text: var(--perses-status-solid-secondary);
+    --ps-btn-text: var(--perses-status-fg-secondary);
     --ps-btn-border: var(--perses-status-border-secondary);
     --ps-btn-bg-subtle: var(--perses-status-bg-secondary);
   }
@@ -61,7 +61,7 @@
   .ps-ButtonBase[data-color='error'] {
     --ps-btn-bg: var(--perses-status-solid-error);
     --ps-btn-bg-hover: var(--perses-status-bg-error-hover);
-    --ps-btn-text: var(--perses-status-solid-error);
+    --ps-btn-text: var(--perses-status-fg-error);
     --ps-btn-border: var(--perses-status-border-error);
     --ps-btn-bg-subtle: var(--perses-status-bg-error);
   }
@@ -69,7 +69,7 @@
   .ps-ButtonBase[data-color='warning'] {
     --ps-btn-bg: var(--perses-status-solid-warning);
     --ps-btn-bg-hover: var(--perses-status-bg-warning-hover);
-    --ps-btn-text: var(--perses-status-solid-warning);
+    --ps-btn-text: var(--perses-status-fg-warning);
     --ps-btn-border: var(--perses-status-border-warning);
     --ps-btn-bg-subtle: var(--perses-status-bg-warning);
   }
@@ -77,7 +77,7 @@
   .ps-ButtonBase[data-color='success'] {
     --ps-btn-bg: var(--perses-status-solid-success);
     --ps-btn-bg-hover: var(--perses-status-bg-success-hover);
-    --ps-btn-text: var(--perses-status-solid-success);
+    --ps-btn-text: var(--perses-status-fg-success);
     --ps-btn-border: var(--perses-status-border-success);
     --ps-btn-bg-subtle: var(--perses-status-bg-success);
   }
@@ -85,7 +85,7 @@
   .ps-ButtonBase[data-color='info'] {
     --ps-btn-bg: var(--perses-status-solid-info);
     --ps-btn-bg-hover: var(--perses-status-bg-info-hover);
-    --ps-btn-text: var(--perses-status-solid-info);
+    --ps-btn-text: var(--perses-status-fg-info);
     --ps-btn-border: var(--perses-status-border-info);
     --ps-btn-bg-subtle: var(--perses-status-bg-info);
   }

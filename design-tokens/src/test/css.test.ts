@@ -56,7 +56,7 @@ describe('CSS primitive color variables', () => {
     ['red', red],
   ];
 
-  const stops = [50, 100, 150, 200, 300, 400, 500, 600, 700, 800, 850, 900, 950] as const;
+  const stops = [50, 100, 150, 200, 300, 400, 500, 600, 700, 800, 850, 900, 925, 950] as const;
 
   it.each(hues)('tokens.css defines all %s color variables', (hue, colorObj) => {
     for (const stop of stops) {
