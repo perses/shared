@@ -13,29 +13,58 @@
 
 import type { TooltipProps } from '@mui/material';
 import { Box, styled, Tooltip, tooltipClasses } from '@mui/material';
+import type { DOMPurify as DOMPurifyInstance } from 'dompurify';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
 import type { ReactElement, ReactNode } from 'react';
 import { useMemo } from 'react';
 
-// Isolated DOMPurify instance so the hook below does not affect other consumers of the default singleton.
-const descriptionPurifier = typeof window !== 'undefined' ? DOMPurify(window) : DOMPurify;
+let descriptionPurifier: DOMPurifyInstance | undefined;
 
-descriptionPurifier.addHook('afterSanitizeAttributes', (node) => {
-  if (!(node instanceof Element) || node.tagName !== 'A') {
-    return;
+// Lazily create an isolated DOMPurify instance, so that:
+// - the hook below does not affect other consumers of the default singleton,
+// - importing this module does not fail in environments without a DOM (e.g. SSR), where DOMPurify is not supported.
+function getDescriptionPurifier(): DOMPurifyInstance {
+  if (descriptionPurifier === undefined) {
+    descriptionPurifier = DOMPurify();
+    if (descriptionPurifier.isSupported) {
+      descriptionPurifier.addHook('afterSanitizeAttributes', (node) => {
+        if (!(node instanceof Element) || node.tagName !== 'A') {
+          return;
+        }
+        // Links are always opened in a new tab, so that the dashboard being viewed is not left.
+        node.setAttribute('target', '_blank');
+        node.setAttribute('rel', 'noopener noreferrer');
+      });
+    }
   }
-  // Links are always opened in a new tab, so that the dashboard being viewed is not left.
-  node.setAttribute('target', '_blank');
-  node.setAttribute('rel', 'noopener noreferrer');
-});
+  return descriptionPurifier;
+}
+
+/**
+ * Escapes the HTML special characters of a text, so that it is displayed as-is instead of being interpreted as HTML.
+ * Used as a safe fallback when DOMPurify is not supported and the rendered Markdown therefore cannot be sanitized.
+ */
+function escapeHTML(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 /**
  * Converts a (GitHub Flavored) Markdown panel description into sanitized HTML.
+ * When HTML cannot be sanitized (no DOM available), the description is returned as escaped plain text.
  */
 export function panelDescriptionToHTML(description: string): string {
+  const purifier = getDescriptionPurifier();
+  if (!purifier.isSupported) {
+    return escapeHTML(description);
+  }
   const html = marked.parse(description, { gfm: true, breaks: true, async: false });
-  return descriptionPurifier.sanitize(html, { ADD_ATTR: ['target', 'rel'] });
+  return purifier.sanitize(html, { ADD_ATTR: ['target', 'rel'] });
 }
 
 export interface PanelDescriptionTooltipProps {

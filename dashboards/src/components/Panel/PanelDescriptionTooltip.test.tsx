@@ -42,4 +42,17 @@ describe('panelDescriptionToHTML', () => {
     expect(html).not.toContain('onerror');
     expect(html).not.toContain('javascript:');
   });
+
+  it('can be imported and falls back to escaped plain text when no DOM is available', async () => {
+    vi.resetModules();
+    vi.stubGlobal('window', undefined);
+    try {
+      const module = await import('./PanelDescriptionTooltip');
+      expect(module.panelDescriptionToHTML('**bold** <img src=x onerror="alert(1)">')).toBe(
+        '**bold** &lt;img src=x onerror=&quot;alert(1)&quot;&gt;',
+      );
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
 });
