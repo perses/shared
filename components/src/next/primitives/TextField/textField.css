@@ -47,8 +47,8 @@
   }
 
   .ps-TextField__wrapper:focus-within {
-    outline: 2px solid var(--perses-status-border-primary);
-    outline-offset: 1px;
+    outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
+    outline-offset: var(--perses-focus-ring-offset);
   }
 
   .ps-TextField[data-multiline] .ps-TextField__wrapper {

@@ -63,7 +63,6 @@ interface TextFieldBaseProps
   startAdornment?: ReactNode;
   /** Decorative content after the control. Mark purely decorative icons `aria-hidden`. */
   endAdornment?: ReactNode;
-  'data-testid'?: string;
 }
 
 /**
@@ -112,7 +111,6 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     style,
     id,
     disabled,
-    'data-testid': dataTestId,
     ...props
   },
   ref,
@@ -131,7 +129,6 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
       style={computedStyle}
       disabled={disabled}
       invalid={status === 'error' ? true : undefined}
-      data-testid={dataTestId}
       data-size={size}
       data-status={status}
       data-full-width={fullWidth || undefined}

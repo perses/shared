@@ -63,6 +63,12 @@ describe('tokens object', () => {
     expect(tokens.border.width.md).toBe('var(--perses-border-width-md)');
   });
 
+  it('produces correct var() strings for focus ring tokens', () => {
+    expect(tokens.focusRing.width).toBe('var(--perses-focus-ring-width)');
+    expect(tokens.focusRing.offset).toBe('var(--perses-focus-ring-offset)');
+    expect(tokens.focusRing.color).toBe('var(--perses-focus-ring-color)');
+  });
+
   it('produces correct var() strings for semantic text tokens', () => {
     expect(tokens.text.primary).toBe('var(--perses-text-primary)');
     expect(tokens.text.link).toBe('var(--perses-text-link)');

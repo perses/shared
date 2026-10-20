@@ -138,6 +138,11 @@
     --perses-border-width-sm: 1px;
     --perses-border-width-md: 2px;
 
+    /* ---- Focus ring ---- */
+    /* Shared keyboard-focus outline geometry; the colour is a semantic token. */
+    --perses-focus-ring-width: var(--perses-border-width-md);
+    --perses-focus-ring-offset: 2px;
+
     /* ---- Border Radius ---- */
     --perses-radius-none: 0;
     --perses-radius-sm: 2px;
