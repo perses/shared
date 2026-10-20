@@ -32,7 +32,7 @@ import {
   TableRow,
   TableRowExpandButton,
   TableSortLabel,
-  Tooltip
+  Tooltip,
 } from './index';
 import type {
   AlertProps,

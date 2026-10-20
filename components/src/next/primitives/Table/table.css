@@ -24,6 +24,7 @@
     font-family: var(--perses-font-family);
     font-size: var(--perses-font-size-sm);
     color: var(--perses-text-primary);
+    white-space: normal;
   }
 
   /* ---- Sizes ---- */
@@ -61,10 +62,13 @@
   }
 
   /* Fixed columns do not grow to fit content, so truncate instead of letting text spill into the next cell. */
-  .ps-Table[data-table-layout='fixed'] .ps-Table__cell {
-    overflow: hidden;
+  .ps-Table[data-table-layout='fixed'] > :is(thead, tbody, tfoot) > tr > .ps-Table__cell {
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .ps-Table[data-table-layout='fixed'] > :is(thead, tbody, tfoot) > tr > .ps-Table__cell:not(.ps-overflow) {
+    overflow: hidden;
   }
 
   .ps-TableContainer {
@@ -73,19 +77,27 @@
   }
 
   /* ---- Sections: head, footer, rows ---- */
-  .ps-Table__head .ps-Table__cell {
+  .ps-Table__head > tr > .ps-Table__cell {
     font-weight: var(--perses-font-weight-medium);
     color: var(--perses-text-secondary);
     border-bottom: var(--perses-border-width-sm) solid var(--perses-border-default);
   }
 
-  .ps-Table__footer .ps-Table__cell {
+  .ps-Table__footer > tr > .ps-Table__cell {
     border-top: var(--perses-border-width-sm) solid var(--perses-border-default);
     font-weight: var(--perses-font-weight-medium);
   }
 
   .ps-Table__row {
     border-bottom: var(--perses-border-width-sm) solid var(--perses-border-default);
+  }
+
+  .ps-Table[data-striped='true'] {
+    background-color: var(--perses-bg-default);
+  }
+
+  :where(.ps-Table[data-striped='true'] > .ps-Table__body) > .ps-Table__row:nth-child(even) {
+    background-color: var(--perses-bg-sunken);
   }
 
   .ps-Table__row[data-selected='true'] {
@@ -104,6 +116,13 @@
     font-size: var(--ps-table-cell-font-size);
   }
 
+  /* Auto layout respects content minimums; a tiny width hint leaves spare space for data columns. */
+  :where(.ps-Table:not([data-table-layout='fixed']) > :is(thead, tbody, tfoot) > tr)
+    > .ps-Table__cell[data-fit-content='true'] {
+    width: 1px;
+    white-space: nowrap;
+  }
+
   .ps-Table__cell[data-align='left'] {
     text-align: left;
   }
@@ -115,7 +134,7 @@
   }
 
   /* ---- Sticky header and columns ---- */
-  .ps-Table[data-sticky-header='true'] .ps-Table__head .ps-Table__cell {
+  .ps-Table[data-sticky-header='true'] > .ps-Table__head > tr > .ps-Table__cell {
     position: sticky;
     top: 0;
     z-index: 1;
@@ -138,21 +157,26 @@
   }
 
   /* A cell that is both in a sticky header and a sticky column sits above both. */
-  .ps-Table[data-sticky-header='true'] .ps-Table__head .ps-Table__cell[data-sticky] {
+  .ps-Table[data-sticky-header='true'] > .ps-Table__head > tr > .ps-Table__cell[data-sticky] {
     z-index: 2;
   }
 
-  /* Sticky cells paint their own background, so repeat the row states on them. */
-  .ps-Table__row[data-selected='true'] .ps-Table__cell[data-sticky] {
+  /* Sticky cells paint their own background, so repeat striping and the row states on them. */
+  :where(.ps-Table[data-striped='true'] > .ps-Table__body > .ps-Table__row:nth-child(even))
+    > .ps-Table__cell[data-sticky] {
+    background-color: var(--perses-bg-sunken);
+  }
+
+  .ps-Table__row[data-selected='true'] > .ps-Table__cell[data-sticky] {
     background-color: var(--perses-status-bg-primary);
   }
 
-  .ps-Table__row[data-hover='true']:hover .ps-Table__cell[data-sticky] {
+  .ps-Table__row[data-hover='true']:hover > .ps-Table__cell[data-sticky] {
     background-color: var(--perses-bg-sunken);
   }
 
   /* ---- Column resizing ---- */
-  .ps-Table__cell[data-resizable='true'] {
+  .ps-Table__cell[data-resizable='true']:not([data-sticky]) {
     position: relative;
   }
 

@@ -56,6 +56,22 @@ describe('Table', () => {
     expect(screen.getByRole('table')).toBeInTheDocument();
   });
 
+  it('enables striping only when requested and supports toggling it off', () => {
+    const { rerender } = render(<Table />);
+    const table = screen.getByRole('table');
+    expect(table).not.toHaveAttribute('data-striped');
+
+    rerender(<Table striped />);
+    expect(table).toHaveAttribute('data-striped', 'true');
+    expect(table).not.toHaveAttribute('striped');
+
+    rerender(<Table striped={false} />);
+    expect(table).not.toHaveAttribute('data-striped');
+
+    rerender(<Table />);
+    expect(table).not.toHaveAttribute('data-striped');
+  });
+
   it('applies the ps-Table class', () => {
     render(
       <Table>
@@ -325,6 +341,44 @@ describe('Table', () => {
       </Table>,
     );
     expect(screen.getByRole('columnheader')).not.toHaveAttribute('aria-sort');
+  });
+
+  it('marks both header and body cells as content-sized without forwarding fitContent to the DOM', () => {
+    render(
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell header fitContent>
+              Controls
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <TableRow>
+            <TableCell fitContent>Control</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+
+    for (const cell of [screen.getByRole('columnheader'), screen.getByRole('cell')]) {
+      expect(cell).toHaveAttribute('data-fit-content', 'true');
+      expect(cell).not.toHaveAttribute('fitContent');
+    }
+  });
+
+  it.each([undefined, false])('does not opt cells into content sizing when fitContent is %s', (fitContent) => {
+    render(
+      <Table>
+        <TableBody>
+          <TableRow>
+            <TableCell fitContent={fitContent}>Value</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+
+    expect(screen.getByRole('cell')).not.toHaveAttribute('data-fit-content');
   });
 
   it('applies a plain display value through the display style prop', () => {

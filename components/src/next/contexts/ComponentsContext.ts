@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { createContext } from 'react';
 import type {
   ComponentType,
   ForwardRefExoticComponent,
@@ -20,6 +19,7 @@ import type {
   RefAttributes,
   SVGProps,
 } from 'react';
+import { createContext } from 'react';
 
 import type { AlertProps } from '../primitives/Alert';
 import type { BoxProps } from '../primitives/Box';
@@ -31,19 +31,19 @@ import type { IconButtonProps } from '../primitives/IconButton';
 import type { SpinnerProps } from '../primitives/Spinner';
 import type { StackProps } from '../primitives/Stack';
 import type { SwitchProps } from '../primitives/Switch';
-import type { TooltipProps } from '../primitives/Tooltip';
 import type {
-  TableProps,
-  TableHeadProps,
   TableBodyProps,
-  TableFooterProps,
-  TableRowProps,
   TableCellProps,
   TableContainerProps,
-  TableRowExpandButtonProps,
-  TableSortLabelProps,
+  TableFooterProps,
+  TableHeadProps,
   TablePaginationProps,
+  TableProps,
+  TableRowExpandButtonProps,
+  TableRowProps,
+  TableSortLabelProps,
 } from '../primitives/Table';
+import type { TooltipProps } from '../primitives/Tooltip';
 
 type RefComponent<Props, Element> = ForwardRefExoticComponent<PropsWithoutRef<Props> & RefAttributes<Element>>;
 

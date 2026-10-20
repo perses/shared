@@ -89,12 +89,17 @@ export const TableContainer = forwardRef<HTMLDivElement, TableContainerProps>(fu
 export interface TableProps extends HTMLAttributes<HTMLTableElement> {
   size?: Size;
   stickyHeader?: boolean;
+  /**
+   * Shade every second row in each TableBody. Hover and selection styles take precedence.
+   * @default false
+   */
+  striped?: boolean;
   /** @default 'auto' */
   tableLayout?: 'auto' | 'fixed';
 }
 
 export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
-  { className, size = 'md', stickyHeader, tableLayout = 'auto', ...props },
+  { className, size = 'md', stickyHeader, striped, tableLayout = 'auto', ...props },
   ref,
 ) {
   return (
@@ -102,6 +107,7 @@ export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
       ref={ref}
       data-size={size}
       data-sticky-header={stickyHeader || undefined}
+      data-striped={striped || undefined}
       data-table-layout={tableLayout}
       className={clsx('ps-Table', className)}
       {...props}
@@ -179,6 +185,13 @@ interface TableCellBaseProps extends Omit<TdHTMLAttributes<HTMLTableCellElement>
   size?: Size;
   sortDirection?: SortDirection | false;
   sticky?: 'left' | 'right';
+  /**
+   * Prefer a compact column sized to its nonwrapping content plus normal cell padding.
+   * Apply to the column's header and body cells. Only applies with automatic table layout;
+   * use an explicit `style.width` for fixed-layout or resizable columns.
+   * @default false
+   */
+  fitContent?: boolean;
 }
 
 type ResizeHandleAccessibleName =
@@ -211,6 +224,7 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
     size,
     sortDirection,
     sticky,
+    fitContent,
     resizable,
     onResize,
     minResizeWidth = 40,
@@ -311,6 +325,7 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
     'data-align': align,
     'data-size': size,
     'data-sticky': sticky,
+    'data-fit-content': fitContent || undefined,
     'data-resizable': resizable || undefined,
     'aria-sort': ariaSort,
     className: clsx('ps-Table__cell', styleClassName, className),

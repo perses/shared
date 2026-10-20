@@ -35,6 +35,13 @@ const rows: MetricRow[] = [
   { name: 'cpu_usage', value: 42.1, unit: '%' },
   { name: 'memory_usage', value: 78.4, unit: '%' },
   { name: 'disk_io', value: 12.9, unit: 'MB/s' },
+  { name: 'network_io', value: 5.3, unit: 'MB/s' },
+  { name: 'load_average', value: 1.2, unit: '' },
+  { name: 'uptime', value: 123456, unit: 's' },
+  { name: 'temperature', value: 65.2, unit: '°C' },
+  { name: 'fan_speed', value: 1200, unit: 'RPM' },
+  { name: 'power_consumption', value: 250, unit: 'W' },
+  { name: 'voltage', value: 12.5, unit: 'V' },
 ];
 
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
@@ -188,6 +195,32 @@ export const Basic: Story = () => (
 );
 Basic.storyName = 'Basic';
 
+export const Striped: Story = () => (
+  <Stack>
+    <p>
+      Set <code>striped</code> on <code>Table</code> to shade every second body row using the theme background color.
+      Headers and footers are unchanged. Sticky cells match their row, and hover and selection styles take precedence.
+    </p>
+    <Sample title="Striped rows" code={basicCode.replace('<Table>', '<Table striped>')}>
+      <Table striped>
+        <TableHead>
+          <TableRow>
+            <TableCell header>Name</TableCell>
+            <TableCell header align="right">
+              Value
+            </TableCell>
+            <TableCell header>Unit</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          <MetricRows />
+        </TableBody>
+      </Table>
+    </Sample>
+  </Stack>
+);
+Striped.storyName = 'Striped';
+
 type SortKey = keyof MetricRow;
 
 const sortableColumns: Array<{ key: SortKey; label: string }> = [
@@ -315,7 +348,7 @@ const selectionCode = `const [selected, setSelected] = useState<string[]>([]);
 const allSelected = selected.length === rows.length;
 const someSelected = selected.length > 0 && !allSelected;
 
-<TableCell header>
+<TableCell header fitContent>
   <Checkbox
     aria-label="Select all rows"
     checked={allSelected}
@@ -325,7 +358,7 @@ const someSelected = selected.length > 0 && !allSelected;
 </TableCell>
 ...
 <TableRow selected={selected.includes(row.name)} hover>
-  <TableCell>
+  <TableCell fitContent>
     <Checkbox
       aria-label={\`Select \${row.name}\`}
       checked={selected.includes(row.name)}
@@ -346,8 +379,8 @@ function SelectableRow({
   const handleChange = useCallback(() => onToggle(row.name), [onToggle, row.name]);
   return (
     <TableRow selected={selected} hover>
-      <TableCell>
-        <Checkbox aria-label={`Select ${row.name}`} checked={selected} onCheckedChange={handleChange} />
+      <TableCell fitContent>
+        <Checkbox size="sm" aria-label={`Select ${row.name}`} checked={selected} onCheckedChange={handleChange} />
       </TableCell>
       <TableCell>{row.name}</TableCell>
       <TableCell align="right">{row.value}</TableCell>
@@ -372,9 +405,10 @@ function SelectableTable(): ReactElement {
     <Table>
       <TableHead>
         <TableRow>
-          <TableCell header>
+          <TableCell header fitContent>
             <Checkbox
               aria-label="Select all rows"
+              size="sm"
               checked={allSelected}
               indeterminate={someSelected}
               onCheckedChange={toggleAll}
@@ -404,7 +438,7 @@ const toggle = (name: string) =>
     return next;
   });
 
-<TableCell>
+<TableCell fitContent>
   <TableRowExpandButton
     aria-label={isExpanded ? \`Collapse \${row.name}\` : \`Expand \${row.name}\`}
     expanded={isExpanded}
@@ -425,7 +459,7 @@ function ExpandableRow({
   return (
     <Fragment>
       <TableRow>
-        <TableCell>
+        <TableCell fitContent>
           <TableRowExpandButton
             aria-label={expanded ? `Collapse ${row.name}` : `Expand ${row.name}`}
             expanded={expanded}
@@ -437,7 +471,7 @@ function ExpandableRow({
       </TableRow>
       {expanded && (
         <TableRow>
-          <TableCell />
+          <TableCell fitContent />
           <TableCell colSpan={2}>Unit: {row.unit}</TableCell>
         </TableRow>
       )}
@@ -458,7 +492,7 @@ function ExpandableTable(): ReactElement {
     <Table>
       <TableHead>
         <TableRow>
-          <TableCell header />
+          <TableCell header fitContent />
           <TableCell header>Name</TableCell>
           <TableCell header align="right">
             Value
@@ -481,6 +515,11 @@ export const Selection: Story = () => (
       checkbox uses <code>indeterminate</code> while only some rows are selected. <code>TableRow</code> accepts{' '}
       <code>selected</code> to highlight a row and <code>hover</code> to tint it on pointer hover.{' '}
       <code>TableRowExpandButton</code> toggles a detail row and exposes <code>aria-expanded</code>.
+    </p>
+    <p>
+      Set <code>fitContent</code> on the control column&apos;s header and body cells to prefer a compact width without
+      wrapping or reducing cell padding. This sizing hint applies to automatic table layout; use an explicit{' '}
+      <code>style.width</code> for fixed-layout or resizable columns.
     </p>
     <Sample title="Selectable rows with a select-all header" code={selectionCode}>
       <SelectableTable />

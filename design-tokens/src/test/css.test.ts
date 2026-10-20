@@ -21,6 +21,60 @@ const cssDir = resolve(__dirname, '../css');
 
 const readCss = (filename: string): string => readFileSync(resolve(cssDir, filename), 'utf-8');
 
+function declarationsFor(css: string, selector: string): Map<string, string> {
+  const start = css.indexOf(selector);
+  if (start < 0) throw new Error(`Missing CSS selector: ${selector}`);
+  const open = css.indexOf('{', start);
+  const close = css.indexOf('}', open);
+  const declarations = new Map<string, string>();
+  for (const match of css.slice(open + 1, close).matchAll(/(--[\w-]+):\s*([^;]+);/g)) {
+    const [, name, value] = match;
+    if (name && value) declarations.set(name, value.trim());
+  }
+  return declarations;
+}
+
+function colorFor(variables: Map<string, string>, name: string): string {
+  const value = variables.get(name);
+  if (!value) throw new Error(`Missing CSS variable: ${name}`);
+  const reference = /^var\((--[\w-]+)\)$/.exec(value)?.[1];
+  if (reference) return colorFor(variables, reference);
+  if (!/^#[\da-f]{6}$/i.test(value)) throw new Error(`Expected a hex color for ${name}, received ${value}`);
+  return value;
+}
+
+function relativeLuminance(hex: string): number {
+  return [0.2126, 0.7152, 0.0722].reduce((sum, weight, index) => {
+    const channel = Number.parseInt(hex.slice(1 + index * 2, 3 + index * 2), 16) / 255;
+    const linear = channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+    return sum + weight * linear;
+  }, 0);
+}
+
+function contrastRatio(first: string, second: string): number {
+  const firstLuminance = relativeLuminance(first);
+  const secondLuminance = relativeLuminance(second);
+  return (Math.max(firstLuminance, secondLuminance) + 0.05) / (Math.min(firstLuminance, secondLuminance) + 0.05);
+}
+
+describe.each(['light', 'dark'])('CSS control border contrast (%s)', (mode) => {
+  const semanticCss = readCss('semantic.css');
+  const variables = new Map([
+    ...declarationsFor(readCss('tokens.css'), ':root'),
+    ...declarationsFor(semanticCss, ':root'),
+    ...(mode === 'dark' ? declarationsFor(semanticCss, "[data-perses-mode='dark']") : []),
+  ]);
+
+  it.each(['--perses-bg-default', '--perses-bg-surface', '--perses-bg-sunken', '--perses-status-bg-primary'])(
+    'keeps control boundaries at least 2:1 against %s',
+    (background) => {
+      const border = colorFor(variables, '--perses-border-control');
+      const surface = colorFor(variables, background);
+      expect(contrastRatio(border, surface)).toBeGreaterThanOrEqual(1.3);
+    },
+  );
+});
+
 describe('CSS layer declarations', () => {
   it('index.css declares layer order', () => {
     const css = readCss('index.css');
