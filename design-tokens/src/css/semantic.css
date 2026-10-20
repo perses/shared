@@ -60,7 +60,7 @@
 
     /* Status: Default (neutral, mirrors the page surface) */
     --perses-status-bg-default: var(--perses-bg-sunken);
-    --perses-status-bg-default-hover: var(--perses-color-gray-300);
+    --perses-status-bg-default-hover: var(--perses-color-gray-900);
     --perses-status-text-default: var(--perses-text-primary);
     --perses-status-border-default: var(--perses-border-default);
     --perses-status-icon-default: var(--perses-text-secondary);

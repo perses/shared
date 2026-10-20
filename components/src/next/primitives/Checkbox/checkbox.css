@@ -56,7 +56,7 @@
   .ps-Checkbox[data-color='default'] {
     --perses-checkbox-color: var(--perses-status-solid-default);
     --perses-checkbox-color-hover: var(--perses-status-bg-default-hover);
-    --perses-checkbox-focus-color: var(--perses-status-border-default);
+    --perses-checkbox-focus-color: var(--perses-status-solid-default);
   }
 
   .ps-Checkbox[data-color='primary'] {
