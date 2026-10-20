@@ -33,6 +33,7 @@ type _BgBackdrop = AssertAssignable<ExtractVar<typeof tokens.bg.backdrop>, Perse
 type _BgNav = AssertAssignable<ExtractVar<typeof tokens.bg.navigation>, PersesTokenVar>;
 
 type _BorderDefault = AssertAssignable<ExtractVar<typeof tokens.border.default>, PersesTokenVar>;
+type _BorderControl = AssertAssignable<ExtractVar<typeof tokens.border.control>, PersesTokenVar>;
 
 type _TextPrimary = AssertAssignable<ExtractVar<typeof tokens.text.primary>, PersesTokenVar>;
 type _TextSecondary = AssertAssignable<ExtractVar<typeof tokens.text.secondary>, PersesTokenVar>;

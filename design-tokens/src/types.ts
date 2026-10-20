@@ -29,7 +29,7 @@ export type SemanticBgVar =
   | '--perses-bg-backdrop'
   | '--perses-bg-navigation';
 
-export type SemanticBorderVar = '--perses-border-default';
+export type SemanticBorderVar = '--perses-border-default' | '--perses-border-control';
 
 export type SemanticTextVar =
   | '--perses-text-primary'

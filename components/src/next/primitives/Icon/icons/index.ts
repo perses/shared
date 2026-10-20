@@ -25,6 +25,7 @@ export { BellOffIcon } from './BellOffIcon';
 export { BookOpenIcon } from './BookOpenIcon';
 export { CheckIcon } from './CheckIcon';
 export { ChevronDownIcon } from './ChevronDownIcon';
+export { ChevronLeftIcon } from './ChevronLeftIcon';
 export { ChevronRightIcon } from './ChevronRightIcon';
 export { ChevronUpIcon } from './ChevronUpIcon';
 export { CircleIcon } from './CircleIcon';
