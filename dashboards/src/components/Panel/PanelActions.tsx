@@ -40,6 +40,7 @@ import {
 import { LinksDisplay } from '../LinksDisplay';
 import { HeaderIconButton } from './HeaderIconButton';
 import type { PanelOptions } from './Panel';
+import { PanelDescriptionTooltip } from './PanelDescriptionTooltip';
 
 const noticeTypeToIcon: Record<Notice['type'], ReactNode> = {
   error: <AlertCircleIcon color="error" />,
@@ -98,7 +99,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   const descriptionAction = useMemo((): ReactNode | undefined => {
     if (description && description.trim().length > 0) {
       return (
-        <InfoTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
+        <PanelDescriptionTooltip id={descriptionTooltipId} description={description} enterDelay={100}>
           <HeaderIconButton aria-label="panel description" size="small">
             <InformationOutlineIcon
               aria-describedby="info-tooltip"
@@ -107,7 +108,7 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
               sx={{ color: (theme) => theme.palette.text.secondary }}
             />
           </HeaderIconButton>
-        </InfoTooltip>
+        </PanelDescriptionTooltip>
       );
     }
     return undefined;
