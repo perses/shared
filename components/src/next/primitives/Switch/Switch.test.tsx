@@ -122,7 +122,7 @@ describe('Switch', () => {
     },
   );
 
-  it('defaults color to primary when not provided', () => {
+  it('defaults color to default when not provided', () => {
     render(<Switch checked={false} onCheckedChange={noop} />);
     expect(screen.getByRole('switch')).toHaveAttribute('data-color', 'default');
   });

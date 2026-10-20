@@ -54,54 +54,42 @@
     --chip-bg: var(--perses-status-bg-default);
     --chip-border: var(--perses-status-border-default);
     --chip-text: var(--perses-status-text-default);
-    --chip-solid: var(--perses-status-solid-default);
   }
 
   .ps-Chip[data-color='primary'] {
     --chip-bg: var(--perses-status-bg-primary);
     --chip-border: var(--perses-status-border-primary);
     --chip-text: var(--perses-status-text-primary);
-    --chip-solid: var(--perses-status-solid-primary);
   }
 
   .ps-Chip[data-color='secondary'] {
     --chip-bg: var(--perses-status-bg-secondary);
     --chip-border: var(--perses-status-border-secondary);
     --chip-text: var(--perses-status-text-secondary);
-    --chip-solid: var(--perses-status-solid-secondary);
   }
 
   .ps-Chip[data-color='success'] {
     --chip-bg: var(--perses-status-bg-success);
     --chip-border: var(--perses-status-border-success);
     --chip-text: var(--perses-status-text-success);
-    --chip-solid: var(--perses-status-solid-success);
   }
 
   .ps-Chip[data-color='warning'] {
     --chip-bg: var(--perses-status-bg-warning);
     --chip-border: var(--perses-status-border-warning);
     --chip-text: var(--perses-status-text-warning);
-    --chip-solid: var(--perses-status-solid-warning);
   }
 
   .ps-Chip[data-color='error'] {
     --chip-bg: var(--perses-status-bg-error);
     --chip-border: var(--perses-status-border-error);
     --chip-text: var(--perses-status-text-error);
-    --chip-solid: var(--perses-status-solid-error);
   }
 
   .ps-Chip[data-color='info'] {
     --chip-bg: var(--perses-status-bg-info);
     --chip-border: var(--perses-status-border-info);
     --chip-text: var(--perses-status-text-info);
-    --chip-solid: var(--perses-status-solid-info);
-  }
-
-  .ps-Chip[data-variant='solid'] {
-    background-color: var(--chip-solid);
-    color: var(--perses-text-on-solid);
   }
 
   .ps-Chip[data-variant='outline'] {

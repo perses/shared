@@ -66,7 +66,7 @@ export const Basic: Story = () => (
 Basic.storyName = 'Basic';
 
 const variantsCode = `// variant: 'solid' | 'outline' | 'ghost'
-// color:   'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info'
+// color:   'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info'
 // size:    'xs' | 'sm' | 'md' | 'lg'
 <IconButton aria-label="Close" variant="outline" color="error" size="lg"><CloseIcon /></IconButton>
 

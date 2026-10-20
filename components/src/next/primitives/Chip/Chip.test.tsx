@@ -390,7 +390,15 @@ describe('Chip', () => {
   });
 
   describe('combinations', () => {
-    const colors: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
+    const colors: Array<ColorVariant | Status> = [
+      'default',
+      'primary',
+      'secondary',
+      'error',
+      'warning',
+      'success',
+      'info',
+    ];
     const sizes: ChipSize[] = ['xs', 'sm'];
     const variants: ChipVariant[] = ['solid', 'outline'];
 

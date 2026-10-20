@@ -50,7 +50,7 @@ export const Basic: Story = () => (
 Basic.storyName = 'Basic';
 
 const variantsCode = `// size:  'xs' | 'sm' | 'md' | 'lg'
-// color: 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info'
+// color: 'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info'
 <Checkbox size="lg" color="error" defaultChecked label="Delete" />`;
 const positionCode = `// labelPosition: 'end' (default) | 'start'
 <Checkbox labelPosition="start" label="Label before the control" />`;

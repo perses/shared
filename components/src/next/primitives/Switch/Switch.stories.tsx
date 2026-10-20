@@ -65,7 +65,7 @@ export const Basic: Story = () => (
 Basic.storyName = 'Basic';
 
 const variantsCode = `// size:  'xs' | 'sm' | 'md' | 'lg'
-// color: 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info' (applies to the on track)
+// color: 'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info' (applies to the on track)
 <Switch size="lg" checked onCheckedChange={setChecked} label="lg" />
 <Switch color="success" checked onCheckedChange={setChecked} label="success" />`;
 
