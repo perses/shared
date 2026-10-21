@@ -61,9 +61,9 @@ export interface PersesComponents {
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;
   Box: RefComponent<BoxProps, HTMLDivElement>;
-  Card: RefComponent<CardProps, HTMLDivElement>;
-  CardHeader: RefComponent<CardHeaderProps, HTMLDivElement>;
-  CardContent: RefComponent<CardContentProps, HTMLDivElement>;
+  Card: RefComponent<CardProps, HTMLElement>;
+  CardHeader: RefComponent<CardHeaderProps, HTMLElement>;
+  CardContent: RefComponent<CardContentProps, HTMLElement>;
   Stack: RefComponent<StackProps, HTMLDivElement>;
   Switch: RefComponent<SwitchProps, HTMLElement>;
   Tooltip: RefComponent<TooltipProps, HTMLDivElement>;
@@ -114,6 +114,8 @@ export interface ComponentsProviderProps {
    *   Box: MyBox,
    *   Button: MyButton,
    *   Card: MyCard,
+   *   CardHeader: MyCardHeader,
+   *   CardContent: MyCardContent,
    *   Chip: MyChip,
    *   IconButton: MyIconButton,
    *   Checkbox: MyCheckbox,

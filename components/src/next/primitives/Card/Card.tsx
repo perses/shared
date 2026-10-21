@@ -13,13 +13,10 @@
 
 import { clsx } from 'clsx';
 import type { HTMLAttributes, ReactNode } from 'react';
-import { forwardRef } from 'react';
+import { createElement, forwardRef } from 'react';
 
-import type { SizingProps } from '../system/sizing';
-import { sizingProps } from '../system/sizing';
-import type { SpacingProps } from '../system/spacing';
-import { spacingProps } from '../system/spacing';
-import { applyStyleProps, compileStyleProps } from '../system/styleProps';
+import { applyStyleProps, compileStyleProps, sizingProps, spacingProps } from '../system';
+import type { SizingProps, SpacingProps } from '../system';
 
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared layout utility styles used by style props.
 import '../system/layout.css';
@@ -29,50 +26,60 @@ import '../system/spacing.css';
 import './card.css';
 
 export type CardVariant = 'elevated' | 'outlined';
+/** Elements a `Card` may render as; all share `HTMLAttributes<HTMLElement>`. */
+export type CardElement = 'div' | 'section' | 'article';
+/** Elements a `CardHeader` may render as. */
+export type CardHeaderElement = 'div' | 'header';
+/** Elements a `CardContent` may render as. */
+export type CardContentElement = 'div' | 'figure';
 
 const CARD_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps]);
 const CARD_HEADER_STYLE_PROPS = compileStyleProps([spacingProps]);
 const CARD_CONTENT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps]);
 
-export interface CardProps extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps {
+export interface CardProps extends HTMLAttributes<HTMLElement>, SpacingProps, SizingProps {
   /** Surface treatment: `elevated` (shadow) or `outlined` (border). */
   variant?: CardVariant;
+  /** Semantic element to render; defaults to `div`. Use `section` for labelled regions. */
+  as?: CardElement;
 }
 
 /**
- * A surface that stacks `CardHeader` and `CardContent` vertically. Semantics come from the
- * consumer (`role="region"` + `aria-labelledby`); layout comes from style props.
+ * A surface that stacks `CardHeader` and `CardContent` vertically. Pick the semantic element with
+ * `as`; layout comes from style props.
  *
  * @example
- * <Card role="region" aria-labelledby="cpu-title" variant="outlined" height="100%">
- *   <CardHeader endElement={<IconButton aria-label="Menu"><MenuIcon /></IconButton>}>
+ * <Card as="section" aria-labelledby="cpu-title" variant="outlined" height="100%">
+ *   <CardHeader as="header" endElement={<IconButton aria-label="Menu"><MenuIcon /></IconButton>}>
  *     <Typography id="cpu-title" variant="h4">CPU</Typography>
  *   </CardHeader>
- *   <CardContent role="figure" p={0}>{chart}</CardContent>
+ *   <CardContent as="figure" p="0">{chart}</CardContent>
  * </Card>
  */
-export const Card = forwardRef<HTMLDivElement, CardProps>(function Card(
-  { variant = 'elevated', className, style, children, ...props },
+export const Card = forwardRef<HTMLElement, CardProps>(function Card(
+  { as = 'div', variant = 'elevated', className, style, children, ...props },
   ref,
 ) {
   const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, CARD_STYLE_PROPS, style);
 
-  return (
-    <div
-      {...rest}
-      ref={ref}
-      className={clsx('ps-Card', styleClassName, className)}
-      style={computedStyle}
-      data-variant={variant}
-    >
-      {children}
-    </div>
+  return createElement(
+    as,
+    {
+      ...rest,
+      ref,
+      className: clsx('ps-Card', styleClassName, className),
+      style: computedStyle,
+      'data-variant': variant,
+    },
+    children,
   );
 });
 
-export interface CardHeaderProps extends HTMLAttributes<HTMLDivElement>, SpacingProps {
+export interface CardHeaderProps extends HTMLAttributes<HTMLElement>, SpacingProps {
   /** Trailing slot, typically actions; rendered after the title content. */
   endElement?: ReactNode;
+  /** Semantic element to render; defaults to `div`. */
+  as?: CardHeaderElement;
 }
 
 /**
@@ -84,8 +91,8 @@ export interface CardHeaderProps extends HTMLAttributes<HTMLDivElement>, Spacing
  *   <Typography variant="h4">Variables</Typography>
  * </CardHeader>
  */
-export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(function CardHeader(
-  { endElement, className, style, children, ...props },
+export const CardHeader = forwardRef<HTMLElement, CardHeaderProps>(function CardHeader(
+  { as = 'div', endElement, className, style, children, ...props },
   ref,
 ) {
   const {
@@ -95,24 +102,27 @@ export const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(function C
   } = applyStyleProps(props, CARD_HEADER_STYLE_PROPS, style);
   const hasEndElement = endElement !== undefined && endElement !== null && typeof endElement !== 'boolean';
 
-  return (
-    <div {...rest} ref={ref} className={clsx('ps-CardHeader', styleClassName, className)} style={computedStyle}>
-      <div className="ps-CardHeader__content">{children}</div>
-      {hasEndElement && <div className="ps-CardHeader__end">{endElement}</div>}
-    </div>
+  return createElement(
+    as,
+    { ...rest, ref, className: clsx('ps-CardHeader', styleClassName, className), style: computedStyle },
+    createElement('div', { className: 'ps-CardHeader__content' }, children),
+    hasEndElement && createElement('div', { className: 'ps-CardHeader__end' }, endElement),
   );
 });
 
-export interface CardContentProps extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps {}
+export interface CardContentProps extends HTMLAttributes<HTMLElement>, SpacingProps, SizingProps {
+  /** Semantic element to render; defaults to `div`. Use `figure` for charts. */
+  as?: CardContentElement;
+}
 
 /**
- * Padded body of a `Card`. Use `p={0}` for edge-to-edge content such as charts.
+ * Padded body of a `Card`. Use `p="0"` for edge-to-edge content such as charts.
  *
  * @example
- * <CardContent p={0} height="100%">{chart}</CardContent>
+ * <CardContent as="figure" p="0" height="100%">{chart}</CardContent>
  */
-export const CardContent = forwardRef<HTMLDivElement, CardContentProps>(function CardContent(
-  { className, style, children, ...props },
+export const CardContent = forwardRef<HTMLElement, CardContentProps>(function CardContent(
+  { as = 'div', className, style, children, ...props },
   ref,
 ) {
   const {
@@ -121,9 +131,9 @@ export const CardContent = forwardRef<HTMLDivElement, CardContentProps>(function
     rest,
   } = applyStyleProps(props, CARD_CONTENT_STYLE_PROPS, style);
 
-  return (
-    <div {...rest} ref={ref} className={clsx('ps-CardContent', styleClassName, className)} style={computedStyle}>
-      {children}
-    </div>
+  return createElement(
+    as,
+    { ...rest, ref, className: clsx('ps-CardContent', styleClassName, className), style: computedStyle },
+    children,
   );
 });
