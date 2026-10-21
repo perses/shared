@@ -12,3 +12,4 @@
 // limitations under the License.
 
 export * from './FormActions';
+export * from './form-editor-handle';

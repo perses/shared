@@ -14,10 +14,11 @@
 import type { ButtonProps } from '@mui/material';
 import { Button } from '@mui/material';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import type { AnnotationSpec } from '@perses-dev/spec';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useAnnotationActions, useAnnotationSpecs } from '../../context';
@@ -58,6 +59,16 @@ export function EditAnnotationsButton({
     setIsAnnotationEditorOpen(false);
   };
 
+  // Let the editor handle click out / Escape, so that it can ask for confirmation before discarding unsaved changes
+  const editorRef = useRef<FormEditorHandle>(null);
+  const handleDrawerClose = (): void => {
+    if (editorRef.current) {
+      editorRef.current.requestClose();
+    } else {
+      closeAnnotationEditor();
+    }
+  };
+
   return (
     <>
       <InfoTooltip description={TOOLTIP_TEXT.editAnnotations}>
@@ -75,11 +86,12 @@ export function EditAnnotationsButton({
       </InfoTooltip>
       <Drawer
         isOpen={isAnnotationEditorOpen}
-        onClose={closeAnnotationEditor}
+        onClose={handleDrawerClose}
         slotProps={{ paper: { sx: { width: '50%' } } }}
         data-testid="annotation-editor"
       >
         <AnnotationEditor
+          ref={editorRef}
           annotationSpecs={annotationSpecs}
           onCancel={closeAnnotationEditor}
           onChange={(annotations: AnnotationSpec[]) => {

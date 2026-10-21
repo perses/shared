@@ -21,12 +21,12 @@ import {
   FormActions,
   getSubmitText,
   getTitleAction,
-  useDrawerCloseHandler,
 } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import type { VariableDefinition, ListVariableDefinition } from '@perses-dev/spec';
 import { useQueryClient } from '@tanstack/react-query';
-import type { DispatchWithoutAction, ReactElement } from 'react';
-import { useCallback, useState } from 'react';
+import type { DispatchWithoutAction, ForwardedRef, ReactElement } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
 import type { Control, SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
 
@@ -390,16 +390,19 @@ interface VariableEditorFormProps {
   onDelete?: DispatchWithoutAction;
 }
 
-export function VariableEditorForm({
-  initialVariableDefinition,
-  action,
-  isDraft,
-  isReadonly,
-  onActionChange,
-  onSave,
-  onClose,
-  onDelete,
-}: VariableEditorFormProps): ReactElement {
+export const VariableEditorForm = forwardRef(function VariableEditorForm(
+  {
+    initialVariableDefinition,
+    action,
+    isDraft,
+    isReadonly,
+    onActionChange,
+    onSave,
+    onClose,
+    onDelete,
+  }: VariableEditorFormProps,
+  ref: ForwardedRef<FormEditorHandle>,
+): ReactElement {
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
   const titleAction = getTitleAction(action, isDraft);
   const submitText = getSubmitText(action, isDraft);
@@ -442,7 +445,7 @@ export function VariableEditorForm({
     }
   }
 
-  useDrawerCloseHandler(handleCancel);
+  useImperativeHandle(ref, () => ({ requestClose: handleCancel }));
 
   return (
     <FormProvider {...form}>
@@ -597,4 +600,4 @@ export function VariableEditorForm({
       />
     </FormProvider>
   );
-}
+});

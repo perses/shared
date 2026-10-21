@@ -13,11 +13,12 @@
 
 import { Button } from '@mui/material';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import { useDatasourceStore } from '@perses-dev/plugin-system';
 import type { DatasourceSpec } from '@perses-dev/spec';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useDashboard } from '../../context';
@@ -36,6 +37,16 @@ export function EditDatasourcesButton(): ReactElement {
 
   const closeDatasourceEditor = (): void => {
     setIsDatasourceEditorOpen(false);
+  };
+
+  // Let the editor handle click out / Escape, so that it can ask for confirmation before discarding unsaved changes
+  const editorRef = useRef<FormEditorHandle>(null);
+  const handleDrawerClose = (): void => {
+    if (editorRef.current) {
+      editorRef.current.requestClose();
+    } else {
+      closeDatasourceEditor();
+    }
   };
 
   const handleChangeDatasources = (datasources: Record<string, DatasourceSpec>): void => {
@@ -89,11 +100,12 @@ export function EditDatasourcesButton(): ReactElement {
       </InfoTooltip>
       <Drawer
         isOpen={isDatasourceEditorOpen}
-        onClose={closeDatasourceEditor}
+        onClose={handleDrawerClose}
         PaperProps={{ sx: { width: '50%' } }}
         data-testid="datasource-editor"
       >
         <DatasourceEditor
+          ref={editorRef}
           datasources={localDatasources}
           onCancel={closeDatasourceEditor}
           onChange={handleChangeDatasources}

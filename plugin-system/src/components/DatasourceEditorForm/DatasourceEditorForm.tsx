@@ -14,15 +14,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Divider, FormControlLabel, Grid, Stack, Switch, TextField, Typography } from '@mui/material';
 import type { Action, DatasourceDefinition, DatasourceSpec } from '@perses-dev/client';
-import {
-  DiscardChangesConfirmationDialog,
-  FormActions,
-  getSubmitText,
-  getTitleAction,
-  useDrawerCloseHandler,
-} from '@perses-dev/components';
-import type { DispatchWithoutAction, ReactElement } from 'react';
-import { useState } from 'react';
+import { DiscardChangesConfirmationDialog, FormActions, getSubmitText, getTitleAction } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
+import type { DispatchWithoutAction, ForwardedRef, ReactElement } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 
@@ -41,7 +36,10 @@ interface DatasourceEditorFormProps {
   testConnection?: (spec: DatasourceSpec, healthCheckPath: string) => Promise<void>;
 }
 
-export function DatasourceEditorForm(props: DatasourceEditorFormProps): ReactElement {
+export const DatasourceEditorForm = forwardRef(function DatasourceEditorForm(
+  props: DatasourceEditorFormProps,
+  ref: ForwardedRef<FormEditorHandle>,
+): ReactElement {
   const {
     initialDatasourceDefinition,
     action,
@@ -92,7 +90,7 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps): ReactEle
     }
   }
 
-  useDrawerCloseHandler(handleCancel);
+  useImperativeHandle(ref, () => ({ requestClose: handleCancel }));
 
   return (
     <FormProvider {...form}>
@@ -260,4 +258,4 @@ export function DatasourceEditorForm(props: DatasourceEditorFormProps): ReactEle
       />
     </FormProvider>
   );
-}
+});

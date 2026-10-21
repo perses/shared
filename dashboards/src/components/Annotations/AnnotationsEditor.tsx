@@ -28,7 +28,7 @@ import {
   styled,
 } from '@mui/material';
 import type { Action } from '@perses-dev/client';
-import { useDrawerCloseHandler } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import { ValidationProvider, AnnotationEditorForm } from '@perses-dev/plugin-system';
 import type { AnnotationSpec, Definition, UnknownSpec } from '@perses-dev/spec';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
@@ -36,8 +36,8 @@ import ArrowUp from 'mdi-material-ui/ArrowUp';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import AddIcon from 'mdi-material-ui/Plus';
 import TrashIcon from 'mdi-material-ui/TrashCan';
-import type { ReactElement } from 'react';
-import { useState, useMemo } from 'react';
+import type { ForwardedRef, ReactElement } from 'react';
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useImmer } from 'use-immer';
 
 import { useDiscardChangesConfirmationDialog } from '../../context';
@@ -61,11 +61,14 @@ function validateAnnotationSpecs(annotationSpecs: AnnotationSpec[]): { isValid: 
   };
 }
 
-export function AnnotationEditor(props: {
-  annotationSpecs: AnnotationSpec[];
-  onChange: (annotationSpecs: AnnotationSpec[]) => void;
-  onCancel: () => void;
-}): ReactElement {
+export const AnnotationEditor = forwardRef(function AnnotationEditor(
+  props: {
+    annotationSpecs: AnnotationSpec[];
+    onChange: (annotationSpecs: AnnotationSpec[]) => void;
+    onCancel: () => void;
+  },
+  ref: ForwardedRef<FormEditorHandle>,
+): ReactElement {
   const [annotationSpecs, setAnnotationSpecs] = useImmer(props.annotationSpecs);
   const [annotationEditIdx, setAnnotationEditIdx] = useState<number | null>(null);
   const [annotationFormAction, setAnnotationFormAction] = useState<Action>('update');
@@ -94,7 +97,11 @@ export function AnnotationEditor(props: {
     }
   };
 
-  useDrawerCloseHandler(handleCancel);
+  const formRef = useRef<FormEditorHandle>(null);
+  useImperativeHandle(ref, () => ({
+    // While an item is being edited, let its form handle the request (going back to the list, with confirmation if needed)
+    requestClose: (): void => (formRef.current ? formRef.current.requestClose() : handleCancel()),
+  }));
 
   const removeAnnotation = (index: number): void => {
     setAnnotationSpecs((draft) => {
@@ -149,6 +156,7 @@ export function AnnotationEditor(props: {
       {annotationEditIdx !== null && currentEditingAnnotationSpec ? (
         <ValidationProvider>
           <AnnotationEditorForm
+            ref={formRef}
             initialAnnotationSpec={currentEditingAnnotationSpec}
             action={annotationFormAction}
             isDraft={true}
@@ -268,7 +276,7 @@ export function AnnotationEditor(props: {
       )}
     </>
   );
-}
+});
 
 const TableCell = styled(MuiTableCell)(({ theme }) => ({
   borderBottom: `solid 1px ${theme.palette.divider}`,

@@ -12,5 +12,3 @@
 // limitations under the License.
 
 export * from './Drawer';
-export { useDrawerCloseHandler } from './drawer-close-handler';
-export type { DrawerCloseHandler } from './drawer-close-handler';

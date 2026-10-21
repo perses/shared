@@ -34,7 +34,8 @@ import {
   Typography,
 } from '@mui/material';
 import type { Action } from '@perses-dev/client';
-import { InfoTooltip, useDrawerCloseHandler } from '@perses-dev/components';
+import { InfoTooltip } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import type { VariableState } from '@perses-dev/plugin-system';
 import {
   ValidationProvider,
@@ -52,8 +53,8 @@ import OpenInNewIcon from 'mdi-material-ui/OpenInNew';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import AddIcon from 'mdi-material-ui/Plus';
 import TrashIcon from 'mdi-material-ui/TrashCan';
-import type { ReactElement } from 'react';
-import { useMemo, useState } from 'react';
+import type { ForwardedRef, ReactElement, Ref } from 'react';
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useImmer } from 'use-immer';
 
 import { useDiscardChangesConfirmationDialog, VariableProvider } from '../../context';
@@ -80,13 +81,16 @@ function getValidation(variableDefinitions: VariableDefinition[]): { isValid: bo
   };
 }
 
-export function VariableEditor(props: {
-  variableDefinitions: VariableDefinition[];
-  externalVariableDefinitions: ExternalVariableDefinition[];
-  builtinVariableDefinitions: BuiltinVariableDefinition[];
-  onChange: (variableDefinitions: VariableDefinition[]) => void;
-  onCancel: () => void;
-}): ReactElement {
+export const VariableEditor = forwardRef(function VariableEditor(
+  props: {
+    variableDefinitions: VariableDefinition[];
+    externalVariableDefinitions: ExternalVariableDefinition[];
+    builtinVariableDefinitions: BuiltinVariableDefinition[];
+    onChange: (variableDefinitions: VariableDefinition[]) => void;
+    onCancel: () => void;
+  },
+  ref: ForwardedRef<FormEditorHandle>,
+): ReactElement {
   const [variableDefinitions, setVariableDefinitions] = useImmer(props.variableDefinitions);
   const [variableEditIdx, setVariableEditIdx] = useState<number | null>(null);
   const [variableFormAction, setVariableFormAction] = useState<Action>('update');
@@ -120,7 +124,11 @@ export function VariableEditor(props: {
     }
   };
 
-  useDrawerCloseHandler(handleCancel);
+  const formRef = useRef<FormEditorHandle>(null);
+  useImperativeHandle(ref, () => ({
+    // While an item is being edited, let its form handle the request (going back to the list, with confirmation if needed)
+    requestClose: (): void => (formRef.current ? formRef.current.requestClose() : handleCancel()),
+  }));
 
   const removeVariable = (index: number): void => {
     setVariableDefinitions((draft) => {
@@ -195,6 +203,7 @@ export function VariableEditor(props: {
     <>
       {variableEditIdx !== null && currentEditingVariableDefinition && (
         <VariableEditorFormWithContext
+          formRef={formRef}
           variableDefinitions={variableDefinitions}
           externalVariableDefinitions={externalVariableDefinitions}
           builtinVariableDefinitions={builtinVariableDefinitions}
@@ -431,13 +440,14 @@ export function VariableEditor(props: {
       )}
     </>
   );
-}
+});
 
 const TableCell = styled(MuiTableCell)(({ theme }) => ({
   borderBottom: `solid 1px ${theme.palette.divider}`,
 }));
 
 interface VariableEditorFormWithContextProps {
+  formRef: Ref<FormEditorHandle>;
   variableDefinitions: VariableDefinition[];
   externalVariableDefinitions: ExternalVariableDefinition[];
   builtinVariableDefinitions: BuiltinVariableDefinition[];
@@ -449,6 +459,7 @@ interface VariableEditorFormWithContextProps {
 }
 
 function VariableEditorFormWithContext({
+  formRef,
   variableDefinitions,
   externalVariableDefinitions,
   builtinVariableDefinitions,
@@ -486,6 +497,7 @@ function VariableEditorFormWithContext({
     >
       <ValidationProvider>
         <VariableEditorForm
+          ref={formRef}
           initialVariableDefinition={currentEditingVariableDefinition}
           action={variableFormAction}
           isDraft={true}
