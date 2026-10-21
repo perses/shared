@@ -35,7 +35,18 @@ describe('yamlDiagnostics', () => {
       expect(diagnostic.from).toBeGreaterThanOrEqual(0);
       expect(diagnostic.from).toBeLessThanOrEqual(diagnostic.to);
       expect(diagnostic.to).toBeLessThanOrEqual(text.length);
+      expect(diagnostic.message).not.toContain('\n');
     }
+  });
+
+  it.each([
+    { name: 'unresolved tag', text: 'a: !foo x\n', from: 3, to: 7 },
+    { name: 'unknown directive', text: '%FOO bar\n---\na: 1\n', from: 0, to: 8 },
+  ])('returns a warning for $name', ({ text, from, to }) => {
+    const diagnostics = yamlDiagnostics(text);
+    expect(diagnostics).toHaveLength(1);
+    expect(diagnostics[0]).toMatchObject({ from, to, severity: 'warning' });
+    expect(diagnostics[0]?.message).not.toContain('\n');
   });
 });
 

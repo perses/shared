@@ -13,53 +13,22 @@
 
 import { yaml } from '@codemirror/lang-yaml';
 import { linter, lintGutter } from '@codemirror/lint';
-import { useTheme } from '@mui/material';
-import type { ReactCodeMirrorProps } from '@uiw/react-codemirror';
-import CodeMirror from '@uiw/react-codemirror';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
 
+import type { CodeEditorProps } from '../CodeEditor/CodeEditor';
+import { CodeEditor } from '../CodeEditor/CodeEditor';
 import { toYAMLText, yamlDiagnostics } from './yaml-utils';
 
 const YAML_EXTENSIONS = [yaml(), linter((view) => yamlDiagnostics(view.state.doc.toString())), lintGutter()];
 
-type YAMLEditorProps<T> = Omit<ReactCodeMirrorProps, 'onBlur' | 'theme' | 'extensions' | 'onChange' | 'value'> & {
+type YAMLEditorProps<T> = Omit<CodeEditorProps<T>, 'value'> & {
+  /**
+   * Initial content of the editor. Unlike JSONEditor, a string is used as is (raw YAML or JSON text),
+   * while any other value is serialized as YAML (1.1 schema). `undefined` gives an empty editor.
+   */
   value: T;
-  placeholder?: string;
-  onChange?: (next: string) => void;
 };
 
 export function YAMLEditor<T>(props: YAMLEditorProps<T>): ReactElement {
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
-
-  const [value, setValue] = useState(() => toYAMLText(props.value));
-  const [lastProcessedValue, setLastProcessedValue] = useState<string>(value);
-
-  return (
-    <CodeMirror
-      {...props}
-      style={{ border: `1px solid ${theme.palette.divider}` }}
-      theme={isDarkMode ? 'dark' : 'light'}
-      extensions={YAML_EXTENSIONS}
-      value={value}
-      onChange={(newValue) => {
-        setValue(newValue);
-        // Trigger the provided onChange callback in real-time
-        if (props.onChange) {
-          props.onChange(newValue);
-        }
-      }}
-      onBlur={() => {
-        // Don't trigger the provided onChange if the last processed value is equal to the current value.
-        // This prevents e.g CTRL+F to trigger value refresh downstream, which would cause the embedded
-        // find & replace interface to close immediately.
-        if (lastProcessedValue !== value && props.onChange !== undefined) {
-          props.onChange(value);
-          setLastProcessedValue(value);
-        }
-      }}
-      placeholder={props.placeholder}
-    />
-  );
+  return <CodeEditor {...props} extensions={YAML_EXTENSIONS} serialize={toYAMLText} />;
 }

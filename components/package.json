@@ -31,7 +31,7 @@
     "@atlaskit/pragmatic-drag-and-drop": "^1.4.0",
     "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.0.3",
     "@codemirror/lang-json": "^6.0.1",
-    "@codemirror/lang-yaml": "^6.0.1",
+    "@codemirror/lang-yaml": "^6.1.0",
     "@codemirror/lint": "^6.9.7",
     "@date-fns/tz": "^1.4.1",
     "@fontsource/inter": "^5.0.0",

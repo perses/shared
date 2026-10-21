@@ -13,49 +13,19 @@
 
 import { json, jsonParseLinter } from '@codemirror/lang-json';
 import { linter, lintGutter } from '@codemirror/lint';
-import { useTheme } from '@mui/material';
-import type { ReactCodeMirrorProps } from '@uiw/react-codemirror';
-import CodeMirror from '@uiw/react-codemirror';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
 
-type JSONEditorProps<T> = Omit<ReactCodeMirrorProps, 'onBlur' | 'theme' | 'extensions' | 'onChange' | 'value'> & {
-  value: T;
-  placeholder?: string;
-  onChange?: (next: string) => void;
-};
+import type { CodeEditorProps } from './CodeEditor/CodeEditor';
+import { CodeEditor } from './CodeEditor/CodeEditor';
+
+const JSON_EXTENSIONS = [json(), linter(jsonParseLinter()), lintGutter()];
+
+function toJSONText(value: unknown): string {
+  return JSON.stringify(value, null, 2);
+}
+
+type JSONEditorProps<T> = CodeEditorProps<T>;
 
 export function JSONEditor<T>(props: JSONEditorProps<T>): ReactElement {
-  const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
-
-  const [value, setValue] = useState(() => JSON.stringify(props.value, null, 2));
-  const [lastProcessedValue, setLastProcessedValue] = useState<string>(value);
-
-  return (
-    <CodeMirror
-      {...props}
-      style={{ border: `1px solid ${theme.palette.divider}` }}
-      theme={isDarkMode ? 'dark' : 'light'}
-      extensions={[json(), linter(jsonParseLinter()), lintGutter()]}
-      value={value}
-      onChange={(newValue) => {
-        setValue(newValue);
-        // Trigger the provided onChange callback in real-time
-        if (props.onChange) {
-          props.onChange(newValue);
-        }
-      }}
-      onBlur={() => {
-        // Don't trigger the provided onChange if the last processed value is equal to the current value.
-        // This prevents e.g CTRL+F to trigger value refresh downstream, which would cause the embedded
-        // find & replace interface to close immediately.
-        if (lastProcessedValue !== value && props.onChange !== undefined) {
-          props.onChange(value);
-          setLastProcessedValue(value);
-        }
-      }}
-      placeholder={props.placeholder}
-    />
-  );
+  return <CodeEditor {...props} extensions={JSON_EXTENSIONS} serialize={toJSONText} />;
 }
