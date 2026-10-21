@@ -16,8 +16,6 @@ import { createRef } from 'react';
 
 import { Card, CardContent, CardHeader } from './Card';
 
-/* oxlint-disable jsx-a11y/prefer-tag-over-role -- Card is not polymorphic (§3b); consumers pass role for semantics */
-
 const RESPONSIVE_PADDING = { default: 'sm', md: 'xl' } as const;
 const STYLE_OVERRIDE = { padding: '99px' };
 const MENU_BUTTON = <button type="button">Menu</button>;
@@ -46,10 +44,10 @@ describe('Card', () => {
   });
 
   it('merges className, forwards ref and rest props', () => {
-    const ref = createRef<HTMLDivElement>();
+    const ref = createRef<HTMLElement>();
     const onMouseEnter = vi.fn();
     render(
-      <Card ref={ref} className="custom" id="panel-1" role="region" aria-label="CPU" onMouseEnter={onMouseEnter}>
+      <Card ref={ref} as="section" className="custom" id="panel-1" aria-label="CPU" onMouseEnter={onMouseEnter}>
         Body
       </Card>,
     );
@@ -57,6 +55,18 @@ describe('Card', () => {
     expect(ref.current).toBe(el);
     expect(el).toHaveClass('ps-Card', 'custom');
     expect(el).toHaveAttribute('id', 'panel-1');
+  });
+
+  it('renders a div by default and the element named by as', () => {
+    const { rerender } = render(<Card data-testid="card">Body</Card>);
+    expect(screen.getByTestId('card').tagName).toBe('DIV');
+    rerender(
+      <Card data-testid="card" as="article">
+        Body
+      </Card>,
+    );
+    expect(screen.getByTestId('card').tagName).toBe('ARTICLE');
+    expect(screen.getByTestId('card')).not.toHaveAttribute('as');
   });
 
   it('does not apply inline token styles by default', () => {
@@ -162,9 +172,9 @@ describe('CardHeader', () => {
   });
 
   it('merges className, forwards ref, id and aria attributes', () => {
-    const ref = createRef<HTMLDivElement>();
+    const ref = createRef<HTMLElement>();
     render(
-      <CardHeader ref={ref} className="custom" id="hdr" aria-labelledby="title-id">
+      <CardHeader ref={ref} as="header" className="custom" id="hdr" aria-labelledby="title-id">
         Title
       </CardHeader>,
     );
@@ -172,6 +182,7 @@ describe('CardHeader', () => {
     expect(ref.current).toBe(el);
     expect(el).toHaveClass('ps-CardHeader', 'custom');
     expect(el).toHaveAttribute('aria-labelledby', 'title-id');
+    expect(el?.tagName).toBe('HEADER');
   });
 
   it('applies spacing style props and does not leak them', () => {
@@ -196,13 +207,14 @@ describe('CardContent', () => {
   });
 
   it('merges className, forwards ref and role', () => {
-    const ref = createRef<HTMLDivElement>();
+    const ref = createRef<HTMLElement>();
     render(
-      <CardContent ref={ref} className="custom" role="figure" aria-label="Chart">
+      <CardContent ref={ref} as="figure" className="custom" aria-label="Chart">
         Body
       </CardContent>,
     );
     const el = screen.getByRole('figure', { name: 'Chart' });
+    expect(el.tagName).toBe('FIGURE');
     expect(ref.current).toBe(el);
     expect(el).toHaveClass('ps-CardContent', 'custom');
   });
@@ -223,11 +235,11 @@ describe('CardContent', () => {
 describe('Card composition', () => {
   it('renders a Panel-style card with header, end slot and content in order', () => {
     render(
-      <Card role="region" aria-labelledby="t">
-        <CardHeader endElement={ACTIONS_BUTTON}>
+      <Card as="section" aria-labelledby="t">
+        <CardHeader as="header" endElement={ACTIONS_BUTTON}>
           <span id="t">CPU usage</span>
         </CardHeader>
-        <CardContent role="figure">chart</CardContent>
+        <CardContent as="figure">chart</CardContent>
       </Card>,
     );
     const region = screen.getByRole('region', { name: 'CPU usage' });

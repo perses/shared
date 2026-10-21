@@ -12,22 +12,10 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
-import type { CSSProperties } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
 import { Button } from '../Button';
 import { Card, CardContent, CardHeader } from './Card';
-
-const row: CSSProperties = { display: 'flex', gap: '1rem', alignItems: 'flex-start', flexWrap: 'wrap' };
-const title: CSSProperties = { margin: 0, fontSize: '1rem', fontWeight: 600 };
-const text: CSSProperties = { margin: 0 };
-const chartPlaceholder: CSSProperties = {
-  height: '100%',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  background: 'repeating-linear-gradient(135deg, transparent 0 10px, var(--perses-bg-sunken) 10px 20px)',
-};
 
 const basicCode = `<Card width={320}>
   <CardContent>A card is a surface for related content.</CardContent>
@@ -73,21 +61,21 @@ const EditButton = (
 export const AllVariants: Story = () => (
   <Stack>
     <Sample title="elevated and outlined" code={variantsCode}>
-      <div style={row}>
+      <div className="story-card-row">
         <Card variant="elevated" width={320}>
           <CardHeader endElement={EditButton}>
-            <h4 style={title}>Elevated</h4>
+            <h4 className="story-card-title">Elevated</h4>
           </CardHeader>
           <CardContent>
-            <p style={text}>Default variant; uses the overlay shadow token.</p>
+            <p className="story-card-text">Default variant; uses the overlay shadow token.</p>
           </CardContent>
         </Card>
         <Card variant="outlined" width={320}>
           <CardHeader endElement={EditButton}>
-            <h4 style={title}>Outlined</h4>
+            <h4 className="story-card-title">Outlined</h4>
           </CardHeader>
           <CardContent>
-            <p style={text}>Border instead of shadow; used by dashboard panels.</p>
+            <p className="story-card-text">Border instead of shadow; used by dashboard panels.</p>
           </CardContent>
         </Card>
       </div>
@@ -96,11 +84,11 @@ export const AllVariants: Story = () => (
 );
 AllVariants.storyName = 'Variants';
 
-const panelCode = `<Card role="region" aria-labelledby="cpu-title" variant="outlined" width={420} height={260}>
-  <CardHeader py="sm" endElement={<Button size="sm" variant="ghost">⋯</Button>}>
+const panelCode = `<Card as="section" aria-labelledby="cpu-title" variant="outlined" width={420} height={260}>
+  <CardHeader as="header" py="sm" endElement={<Button size="sm" variant="ghost">⋯</Button>}>
     <h4 id="cpu-title">CPU usage</h4>
   </CardHeader>
-  <CardContent role="figure" p="0" height="100%">
+  <CardContent as="figure" p="0" height="100%">
     {chart}
   </CardContent>
 </Card>`;
@@ -110,28 +98,25 @@ const MenuButton = (
     ⋯
   </Button>
 );
-const panelContent: CSSProperties = { flexGrow: 1 };
 
 export const Panel: Story = () => (
   <Stack>
     <p>
-      A dashboard panel: the consumer supplies semantics (<code>role=&quot;region&quot;</code>,{' '}
-      <code>aria-labelledby</code>, <code>role=&quot;figure&quot;</code>) and removes the content padding so the chart
-      fills the card.
+      A dashboard panel: the consumer picks semantic elements with <code>as</code> (<code>section</code>,{' '}
+      <code>header</code>, <code>figure</code>), labels the region with <code>aria-labelledby</code>, and removes the
+      content padding so the chart fills the card.
     </p>
     <Sample title="Panel composition" code={panelCode}>
-      {/* oxlint-disable jsx-a11y/prefer-tag-over-role -- Card is not polymorphic (§3b); role carries the semantics */}
-      <Card role="region" aria-labelledby="cpu-title" variant="outlined" width={420} height={260}>
-        <CardHeader py="sm" endElement={MenuButton}>
-          <h4 id="cpu-title" style={title}>
+      <Card as="section" aria-labelledby="cpu-title" variant="outlined" width={420} height={260}>
+        <CardHeader as="header" py="sm" endElement={MenuButton}>
+          <h4 id="cpu-title" className="story-card-title">
             CPU usage
           </h4>
         </CardHeader>
-        <CardContent role="figure" p="0" style={panelContent}>
-          <div style={chartPlaceholder}>chart</div>
+        <CardContent as="figure" p="0" className="story-card-panel-content">
+          <div className="story-card-chart">chart</div>
         </CardContent>
       </Card>
-      {/* oxlint-enable jsx-a11y/prefer-tag-over-role */}
     </Sample>
   </Stack>
 );

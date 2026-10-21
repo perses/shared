@@ -39,6 +39,11 @@ describe('card.css', () => {
     expect(root).toContain('overflow: hidden;');
   });
 
+  it('uses the border-width token and leaves box-sizing to the reset', () => {
+    expect(getRule(':where(.ps-Card)')).toContain('border: var(--perses-border-width-sm) solid transparent;');
+    expect(css).not.toContain('box-sizing');
+  });
+
   it('elevated uses the overlay shadow token and outlined uses the border token', () => {
     expect(getRule(".ps-Card[data-variant='elevated']")).toContain('box-shadow: var(--perses-shadow-overlay);');
     expect(getRule(".ps-Card[data-variant='outlined']")).toContain('border-color: var(--perses-border-default);');
