@@ -139,43 +139,43 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         '@perses-dev/client': {
-          version: '0.55.0-rc.1',
+          version: '0.55.0',
           lib: () => getHostSharedModule('@perses-dev/client'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-rc.1',
+            requiredVersion: '^0.55.0',
           },
         },
         '@perses-dev/components': {
-          version: '0.55.0-rc.1',
+          version: '0.55.0',
           lib: () => getHostSharedModule('@perses-dev/components'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-rc.1',
+            requiredVersion: '^0.55.0',
           },
         },
         '@perses-dev/plugin-system': {
-          version: '0.55.0-rc.1',
+          version: '0.55.0',
           lib: () => getHostSharedModule('@perses-dev/plugin-system'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-rc.1',
+            requiredVersion: '^0.55.0',
           },
         },
         '@perses-dev/explore': {
-          version: '0.55.0-rc.1',
+          version: '0.55.0',
           lib: () => getHostSharedModule('@perses-dev/explore'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-rc.1',
+            requiredVersion: '^0.55.0',
           },
         },
         '@perses-dev/dashboards': {
-          version: '0.55.0-rc.1',
+          version: '0.55.0',
           lib: () => getHostSharedModule('@perses-dev/dashboards'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0-rc.1',
+            requiredVersion: '^0.55.0',
           },
         },
         // Below are the shared modules that are used by the plugins and are loaded asynchronously on demand using get rather than lib.
