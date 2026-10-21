@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader } from './Card';
 import { Checkbox } from './Checkbox';
 import { Chip } from './Chip';
 import { Divider } from './Divider';
+import { Grid, GridItem } from './Grid';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons';
 import { IconButton } from './IconButton';
 import { Spinner } from './Spinner';
@@ -52,6 +53,8 @@ export const defaultComponents: PersesComponents = {
   Chip,
   IconButton,
   Divider,
+  Grid,
+  GridItem,
   Spinner,
   Stack,
   Switch,

@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { gridProps, spanTransform } from './grid';
 import { sizingProps } from './sizing';
 import { spacingProps } from './spacing';
 import { applyStyleProps, compileStyleProps, mergeControlStyle } from './styleProps';
@@ -18,6 +19,7 @@ import { applyStyleProps, compileStyleProps, mergeControlStyle } from './stylePr
 const spacing = compileStyleProps([spacingProps]);
 const sizing = compileStyleProps([sizingProps]);
 const spacingAndSizing = compileStyleProps([spacingProps, sizingProps]);
+const grid = compileStyleProps([gridProps]);
 
 describe('applyStyleProps', () => {
   it('builds the className and custom-property style from registered props across categories', () => {
@@ -161,6 +163,13 @@ describe('applyStyleProps', () => {
     const { className, style } = applyStyleProps({ p: undefined, width: 10 }, spacingAndSizing);
     expect(className).toBe('ps-width');
     expect(style).toEqual({ '--ps-width': '10px' });
+  });
+
+  it('serialises a grid span count as a `span n` grid-column value', () => {
+    expect(spanTransform(4)).toBe('span 4');
+    const { className, style } = applyStyleProps({ gridColumn: { default: 12, md: 6 } }, grid);
+    expect(className).toBe('ps-grid-column');
+    expect(style).toEqual({ '--ps-grid-column': 'span 12', '--ps-grid-column-md': 'span 6' });
   });
 });
 
