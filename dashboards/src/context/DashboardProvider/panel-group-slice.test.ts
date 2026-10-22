@@ -164,3 +164,10 @@ it('rejects an unknown received item without modifying either group', () => {
   ).toThrow('Cannot find panel');
   expect(store.getState().panelGroups).toBe(before);
 });
+
+it('keeps the layout visibility on the panel group', () => {
+  const visibility = { variable: 'phase', value: ['DEV'] };
+  const store = createPanelGroupStore([{ kind: 'Grid', spec: { display: { title: 'Workers', visibility }, items: [] } }]);
+  const { panelGroups, panelGroupOrder } = store.getState();
+  expect(panelGroups[panelGroupOrder[0] ?? -1]?.visibility).toEqual(visibility);
+});
