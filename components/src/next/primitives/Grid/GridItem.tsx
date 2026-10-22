@@ -25,8 +25,9 @@ import '../system/spacing.css';
 export interface GridItemProps
   extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, Pick<DisplayProps, 'overflow'> {
   /**
-   * Number of columns to span out of the parent `Grid`'s `columns`. Omitted (or omitted at the base of a
-   * responsive object) the item takes one column, like a MUI item with no `xs`.
+   * Number of columns to span, from `1` to the parent `Grid`'s `columns` (a larger span creates implicit
+   * columns). Omitted (or omitted at the base of a responsive object) the item takes one column, like a MUI
+   * item with no `xs`.
    */
   size?: Responsive<number>;
 }

@@ -24,7 +24,7 @@ import '../system/spacing.css';
 
 /** Inline style for `Grid`, including the custom property that sets the column count. */
 export interface GridStyle extends CSSProperties {
-  '--ps-grid-columns'?: number | string;
+  '--ps-grid-columns'?: number;
 }
 
 export interface GridProps

@@ -45,10 +45,14 @@ describe('grid.css', () => {
     expect(getRule(css, '.ps-Grid,\n  .ps-GridItem')).toContain('box-sizing: border-box;');
   });
 
-  it.each(['--ps-grid-columns', '--ps-grid-column', '--ps-grid-column-md'])(
-    'declares %s non-inheriting so nested grids and items do not pick up ancestor values',
-    (property) => {
-      expect(css).toContain(`@property ${property} {\n  syntax: '*';\n  inherits: false;\n}`);
+  it('resets the column count on every grid so nested grids do not inherit it', () => {
+    expect(getRule(css, ':where(.ps-Grid)')).toContain('--ps-grid-columns: initial;');
+  });
+
+  it.each(['', '-xs', '-sm', '-md', '-lg', '-xl'])(
+    'resets --ps-grid-column%s on every item so nested items do not inherit ancestor spans',
+    (suffix) => {
+      expect(getRule(css, ':where(.ps-GridItem)')).toContain(`--ps-grid-column${suffix}: initial;`);
     },
   );
 
