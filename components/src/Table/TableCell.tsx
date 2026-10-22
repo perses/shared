@@ -93,7 +93,7 @@ export function TableCell({
   ...otherProps
 }: TableCellProps): ReactElement {
   const theme = useTheme();
-  const elRef = useRef<HTMLTableCellElement>();
+  const elRef = useRef<HTMLTableCellElement>(null);
 
   const isHeader = variant === 'head';
 

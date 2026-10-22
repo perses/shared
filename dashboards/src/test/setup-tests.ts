@@ -24,18 +24,6 @@ vi.mock('echarts/core');
 // for other options)
 defaultFallbackInView(true);
 
-// jsdom has no layout engine, so provide the observer API required by dnd-kit.
-if (typeof ResizeObserver === 'undefined') {
-  vi.stubGlobal(
-    'ResizeObserver',
-    class {
-      observe(): void {}
-      unobserve(): void {}
-      disconnect(): void {}
-    },
-  );
-}
-
 if (typeof PointerEvent === 'undefined') {
   vi.stubGlobal('PointerEvent', MouseEvent);
 }

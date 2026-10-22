@@ -17,6 +17,7 @@ import type {
   DialogProps,
   DialogTitleProps,
   DialogContentProps as MuiDialogContentProps,
+  SxProps,
   Theme,
 } from '@mui/material';
 import {
@@ -29,7 +30,7 @@ import {
   styled,
 } from '@mui/material';
 import CloseIcon from 'mdi-material-ui/Close';
-import type { MouseEvent, ReactElement } from 'react';
+import type { ElementType, MouseEvent, ReactElement } from 'react';
 
 import { combineSx } from '../utils';
 
@@ -83,7 +84,10 @@ const SecondaryButton = ({ children, ...props }: DialogButtonProps): ReactElemen
  * https://github.com/mui-org/material-ui/issues/13253
  * This component adds style to get expected behavior & should be used whenever we have a Form inside a Dialog
  */
-const Form: StyledComponent<React.ComponentProps<'form'>> = styled('form')({
+// Same props as MUI's `MUIStyledCommonProps<Theme>`, declared here to only depend on `@mui/material`
+type FormStyledProps = { theme?: Theme; as?: ElementType; sx?: SxProps<Theme> };
+
+const Form: StyledComponent<FormStyledProps, React.ComponentProps<'form'>> = styled('form')({
   overflowY: 'auto',
   display: 'flex',
   flexDirection: 'column',

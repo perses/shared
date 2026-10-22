@@ -60,6 +60,8 @@ describe('PluginEditor', () => {
 
   // Opens the PluginKindSelect and waits for loading to finish (i.e. options to appear)
   const openPluginKind: () => Promise<HTMLElement[]> = async () => {
+    // A previously opened menu may still be transitioning out, and its listbox is labelled by the same label.
+    await waitFor(() => expect(screen.queryByRole('listbox', { hidden: true })).not.toBeInTheDocument());
     const select = screen.getByLabelText('Variable Type');
     userEvent.click(select);
     const options = await screen.findAllByTestId('option');

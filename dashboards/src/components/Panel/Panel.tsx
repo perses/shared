@@ -19,7 +19,7 @@ import { useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-sys
 import type { PanelDefinition } from '@perses-dev/spec';
 import type { ComponentType, ReactNode } from 'react';
 import { memo, useEffect, useId, useMemo, useState } from 'react';
-import useResizeObserver from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 import type { PanelGroupItemId } from '../../model';
 import { PanelContent } from './PanelContent';

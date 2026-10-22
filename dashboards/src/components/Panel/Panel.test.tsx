@@ -19,6 +19,7 @@ import type { PanelDefinition, QueryDefinition, VariableDefinition, VariableValu
 import { DEFAULT_ALL_VALUE } from '@perses-dev/spec';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactElement } from 'react';
 
 import { VariableProvider } from '../../context';
 import { renderWithContext } from '../../test';
@@ -118,7 +119,7 @@ vi.mock('@perses-dev/components', async () => {
   const actual = await vi.importActual<typeof ComponentsModule>('@perses-dev/components');
   return {
     ...actual,
-    InfoTooltip: ({ children, description }: { children: React.ReactNode; description: string }): JSX.Element => (
+    InfoTooltip: ({ children, description }: { children: React.ReactNode; description: string }): ReactElement => (
       <>
         {children}
         <div role="tooltip">{description}</div>
@@ -128,7 +129,7 @@ vi.mock('@perses-dev/components', async () => {
 });
 
 vi.mock('@mui/material/CircularProgress', () => {
-  return function MockCircularProgress(props: { 'aria-label'?: string }): JSX.Element {
+  return function MockCircularProgress(props: { 'aria-label'?: string }): ReactElement {
     return <div aria-label={props['aria-label'] || 'loading'} />;
   };
 });
@@ -140,10 +141,10 @@ vi.mock('@perses-dev/plugin-system', async () => {
     useDataQueriesContext: vi.fn(() => makeDataQueriesContext()),
     usePluginRegistry: vi.fn(() => ({
       getPlugin: vi.fn().mockResolvedValue({
-        PanelComponent: (): JSX.Element => <div>TimeSeriesChart panel</div>,
+        PanelComponent: (): ReactElement => <div>TimeSeriesChart panel</div>,
         actions: [
           {
-            component: ({ queryResults }: PluginSystemModule.PanelProps<unknown>): JSX.Element => (
+            component: ({ queryResults }: PluginSystemModule.PanelProps<unknown>): ReactElement => (
               <button
                 aria-label="Export CSV"
                 data-testid="export-action"
