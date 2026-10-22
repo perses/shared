@@ -40,7 +40,7 @@
     "@perses-dev/client": "0.55.0",
     "numbro": "^2.3.6",
     "@tanstack/match-sorter-utils": "^8.19.4",
-    "@tanstack/react-table": "^8.20.5",
+    "@tanstack/react-table": "^9.2.8",
     "@uiw/react-codemirror": "^4.19.1",
     "date-fns": "^4.1.0",
     "echarts": "5.5.0",
