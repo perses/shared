@@ -73,3 +73,20 @@ samp {
     var(--perses-bg-sunken) var(--perses-spacing-sm) var(--perses-spacing-lg)
   );
 }
+
+.story-grid-outline {
+  border: var(--perses-border-width-sm) solid var(--perses-border-default);
+  background: var(--perses-bg-surface);
+}
+
+.story-grid-cell {
+  padding: var(--perses-spacing-sm);
+  text-align: center;
+  background: var(--perses-bg-sunken);
+}
+
+.story-grid-field {
+  padding: var(--perses-spacing-sm);
+  border: var(--perses-border-width-sm) solid var(--perses-border-default);
+  background: var(--perses-bg-sunken);
+}

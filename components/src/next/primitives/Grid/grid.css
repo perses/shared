@@ -19,10 +19,6 @@
  * rule's fallback; inline values written by styleProps.ts still win.
  */
 @layer perses.components {
-  .ps-Grid,
-  .ps-GridItem {
-    box-sizing: border-box;
-  }
   :where(.ps-Grid) {
     --ps-grid-columns: initial;
     display: grid;

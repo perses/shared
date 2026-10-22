@@ -11,16 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 import { forwardRef } from 'react';
 import type { CSSProperties, HTMLAttributes } from 'react';
 
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
 import type { DisplayProps, Responsive, SizingProps, SpacingProps, SpacingToken } from '../system';
 
-import './grid.css';
+// oxlint-disable-next-line import/no-unassigned-import -- Registers shared layout utility styles used by style props.
 import '../system/layout.css';
+// oxlint-disable-next-line import/no-unassigned-import -- Registers shared spacing utility styles used by style props.
 import '../system/spacing.css';
+// oxlint-disable-next-line import/no-unassigned-import -- Registers this component's styles.
+import './grid.css';
 
 /** Inline style for `Grid`, including the custom property that sets the column count. */
 export interface GridStyle extends CSSProperties {

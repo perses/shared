@@ -233,7 +233,7 @@ describe('Grid migration scenarios', () => {
     );
     const action = screen.getByTestId('action');
     expect(action.style.getPropertyValue('--ps-grid-column')).toBe('span 1');
-    expect(action.style.paddingTop).toBe('');
+    expect(action.className).not.toMatch(/\bps-p/);
   });
 
   it('ValueMappingEditor: textAlign moves to style on the item', () => {

@@ -41,8 +41,8 @@ describe('grid.css', () => {
     expect(getRule(css, ':where(.ps-GridItem)')).toContain('min-width: 0;');
   });
 
-  it('uses border-box like the other layout primitives', () => {
-    expect(getRule(css, '.ps-Grid,\n  .ps-GridItem')).toContain('box-sizing: border-box;');
+  it('relies on the perses.reset layer for box-sizing', () => {
+    expect(css).not.toMatch(/box-sizing/);
   });
 
   it('resets the column count on every grid so nested grids do not inherit it', () => {
