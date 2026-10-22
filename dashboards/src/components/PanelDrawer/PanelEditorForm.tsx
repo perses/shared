@@ -206,9 +206,11 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                   <TextField
                     {...field}
                     fullWidth
+                    multiline
+                    maxRows={10}
                     label="Description"
                     error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
+                    helperText={fieldState.error?.message ?? 'Supports Markdown'}
                     value={watchedDescription ?? ''}
                     onChange={(event) => {
                       field.onChange(event);
