@@ -15,37 +15,29 @@ import { Box } from '@mui/material';
 import { ChartsProvider, useChartsTheme } from '@perses-dev/components';
 import type { ReactElement, ReactNode } from 'react';
 
-import {
-  ExploreManager,
-  ExplorerManagerProviderWithQueryParams,
-  getExplorerKey,
-  useSortedExplorerPlugins,
-} from '../../components';
+import type { ExploreTab } from '../../components';
+import { ExploreManager, ExplorerManagerProviderWithQueryParams } from '../../components';
+import { useExploreTabs } from '../../components/ExploreManager/use-explore-tabs';
+
+const ROOT_SX = { flexGrow: 1, overflowX: 'hidden', overflowY: 'auto', display: 'flex', flexDirection: 'column' };
 
 export interface ViewAppProps {
   exploreTitleComponent?: ReactNode;
+  /** Tabs of the explore page. See `ExploreManagerProps.tabs`. */
+  tabs?: ExploreTab[];
 }
 
 export function ViewExploreApp(props: ViewAppProps): ReactElement {
-  const { exploreTitleComponent } = props;
+  const { exploreTitleComponent, tabs } = props;
 
   const chartsTheme = useChartsTheme();
-  const explorerPlugins = useSortedExplorerPlugins();
-  const defaultExplorer = explorerPlugins?.[0] ? getExplorerKey(explorerPlugins[0]) : undefined;
+  const defaultExplorer = useExploreTabs(tabs)?.[0]?.key;
 
   return (
-    <Box
-      sx={{
-        flexGrow: 1,
-        overflowX: 'hidden',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
+    <Box sx={ROOT_SX}>
       <ChartsProvider chartsTheme={chartsTheme} enablePinning={false}>
         <ExplorerManagerProviderWithQueryParams defaultExplorer={defaultExplorer}>
-          <ExploreManager exploreTitleComponent={exploreTitleComponent} />
+          <ExploreManager exploreTitleComponent={exploreTitleComponent} tabs={tabs} />
         </ExplorerManagerProviderWithQueryParams>
       </ChartsProvider>
     </Box>
