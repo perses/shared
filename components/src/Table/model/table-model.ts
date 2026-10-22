@@ -19,6 +19,7 @@ import type {
   CellContext,
   ColumnDef,
   CoreOptions,
+  ExpandedState,
   FilterFn,
   PaginationState,
   RowData,
@@ -187,6 +188,21 @@ export interface TableProps<TableData> {
    * Returns the sub rows for a given row, or `undefined` if there are none.
    */
   getSubRows?: (originalRow: TableData, index: number) => undefined | TableData[];
+
+  /**
+   * State of the expanded rows in the table, keyed by row id (see `getRowId`), or `true` when every row is expanded.
+   * When not set, the table manages this state itself and every row starts collapsed.
+   *
+   * While a search is active, rows are expanded independently of this value so that matches are visible. Once the
+   * search is cleared the table shows this value again.
+   */
+  expanded?: ExpandedState;
+
+  /**
+   * Callback fired when the user expands or collapses rows outside of a search. Use it together with `expanded` to
+   * control or persist which rows are open.
+   */
+  onExpandedChange?: (expanded: ExpandedState) => void;
 
   /**
    * List of column ids that should be hidden when the table is initially rendered.
