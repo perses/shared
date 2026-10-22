@@ -45,6 +45,13 @@ describe('grid.css', () => {
     expect(getRule(css, '.ps-Grid,\n  .ps-GridItem')).toContain('box-sizing: border-box;');
   });
 
+  it.each(['--ps-grid-columns', '--ps-grid-column', '--ps-grid-column-md'])(
+    'declares %s non-inheriting so nested grids and items do not pick up ancestor values',
+    (property) => {
+      expect(css).toContain(`@property ${property} {\n  syntax: '*';\n  inherits: false;\n}`);
+    },
+  );
+
   it('uses no raw pixel or colour values', () => {
     expect(css).not.toMatch(/\d+px/);
     expect(css).not.toMatch(/#[0-9a-f]{3,8}\b/i);

@@ -13,6 +13,39 @@
  * limitations under the License.
  */
 
+/*
+ * Custom properties inherit by default, so a nested Grid or GridItem would pick up its ancestor's column
+ * count or span. Declaring them non-inheriting makes an unset value fall through to the rule's fallback.
+ */
+@property --ps-grid-columns {
+  syntax: '*';
+  inherits: false;
+}
+@property --ps-grid-column {
+  syntax: '*';
+  inherits: false;
+}
+@property --ps-grid-column-xs {
+  syntax: '*';
+  inherits: false;
+}
+@property --ps-grid-column-sm {
+  syntax: '*';
+  inherits: false;
+}
+@property --ps-grid-column-md {
+  syntax: '*';
+  inherits: false;
+}
+@property --ps-grid-column-lg {
+  syntax: '*';
+  inherits: false;
+}
+@property --ps-grid-column-xl {
+  syntax: '*';
+  inherits: false;
+}
+
 @layer perses.components {
   .ps-Grid,
   .ps-GridItem {
