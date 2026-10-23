@@ -44,6 +44,9 @@
     --perses-border-default: var(--perses-color-gray-300);
     --perses-border-control: var(--perses-color-gray-400);
 
+    /* Focus ring */
+    --perses-focus-ring-color: var(--perses-status-border-primary);
+
     /* Text */
     --perses-text-primary: var(--perses-color-gray-800);
     --perses-text-secondary: var(--perses-color-gray-700);
@@ -128,6 +131,9 @@
     /* Border */
     --perses-border-default: var(--perses-color-gray-800);
     --perses-border-control: var(--perses-color-gray-700);
+
+    /* Focus ring */
+    --perses-focus-ring-color: var(--perses-status-border-primary);
 
     /* Text */
     --perses-text-primary: var(--perses-color-white);

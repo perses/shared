@@ -49,8 +49,8 @@
   }
 
   .ps-Switch:focus-visible {
-    outline: var(--perses-border-width-md) solid var(--perses-status-border-primary);
-    outline-offset: 2px;
+    outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
+    outline-offset: var(--perses-focus-ring-offset);
   }
 
   .ps-Switch[data-disabled] {

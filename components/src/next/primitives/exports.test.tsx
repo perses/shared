@@ -32,6 +32,7 @@ import {
   TableRow,
   TableRowExpandButton,
   TableSortLabel,
+  TextField,
   Tooltip,
 } from './index';
 import type {
@@ -59,6 +60,8 @@ import type {
   TableCellProps,
   TableProps,
   TableRowProps,
+  TextFieldProps,
+  TextFieldStyle,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -84,6 +87,7 @@ describe('primitives barrel exports', () => {
     expect(TableRow).toBeDefined();
     expect(TableRowExpandButton).toBeDefined();
     expect(TableSortLabel).toBeDefined();
+    expect(TextField).toBeDefined();
   });
 
   it('exports their prop types', () => {
@@ -114,6 +118,8 @@ describe('primitives barrel exports', () => {
     const sortDirection: SortDirection = 'asc';
     const sharedSize: Size = 'md';
     const sharedStatus: Status = 'error';
+    const textFieldProps: TextFieldProps = { label: 'Name' };
+    const textFieldStyle: TextFieldStyle = { '--perses-textfield-size-md': '2.5rem' };
 
     expect(alertProps).toBeDefined();
     expect(severity).toBe('info');
@@ -142,5 +148,7 @@ describe('primitives barrel exports', () => {
     expect(sortDirection).toBe('asc');
     expect(sharedSize).toBe('md');
     expect(sharedStatus).toBe('error');
+    expect(textFieldProps).toBeDefined();
+    expect(textFieldStyle).toBeDefined();
   });
 });

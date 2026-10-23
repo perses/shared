@@ -34,6 +34,9 @@ type _BgNav = AssertAssignable<ExtractVar<typeof tokens.bg.navigation>, PersesTo
 
 type _BorderDefault = AssertAssignable<ExtractVar<typeof tokens.border.default>, PersesTokenVar>;
 type _BorderControl = AssertAssignable<ExtractVar<typeof tokens.border.control>, PersesTokenVar>;
+type _FocusRingWidth = AssertAssignable<ExtractVar<typeof tokens.focusRing.width>, PersesTokenVar>;
+type _FocusRingOffset = AssertAssignable<ExtractVar<typeof tokens.focusRing.offset>, PersesTokenVar>;
+type _FocusRingColor = AssertAssignable<ExtractVar<typeof tokens.focusRing.color>, PersesTokenVar>;
 
 type _TextPrimary = AssertAssignable<ExtractVar<typeof tokens.text.primary>, PersesTokenVar>;
 type _TextSecondary = AssertAssignable<ExtractVar<typeof tokens.text.secondary>, PersesTokenVar>;
