@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+@import '@perses-dev/design-tokens/css/layers';
+
 @layer perses.components {
   :where(.ps-Switch__wrapper) {
     display: inline-flex;

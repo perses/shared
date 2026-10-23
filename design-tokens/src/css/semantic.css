@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+@import './layers.css';
+
 @layer perses.semantic {
   /*
    * Elevation hierarchy (lowest → highest):

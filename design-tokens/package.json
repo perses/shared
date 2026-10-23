@@ -21,6 +21,7 @@
       "import": "./dist/index.js"
     },
     "./css": "./dist/css/index.css",
+    "./css/layers": "./dist/css/layers.css",
     "./css/reset": "./dist/css/reset.css",
     "./css/tokens": "./dist/css/tokens.css",
     "./css/semantic": "./dist/css/semantic.css"

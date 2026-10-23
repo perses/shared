@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+@import '@perses-dev/design-tokens/css/layers';
+
 /*
  * Layout style props (display, flexbox, sizing). `.ps-<prop>` reads `--ps-<prop>`; each breakpoint
  * prefers `--ps-<prop>-<breakpoint>` and falls back to the base. Values set inline by styleProps.ts.
  */
-@layer perses.components {
+@layer perses.utilities {
   .ps-display {
     display: var(--ps-display, revert);
   }
