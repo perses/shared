@@ -39,7 +39,12 @@ describe('Table CSS contracts', () => {
     const layoutCss = readFileSync(resolve(__dirname, '../system/layout.css'), 'utf-8');
     // jsdom does not apply cascade layers; both stylesheets belong to the same component layer.
     style.textContent = [layoutCss, tableCss]
-      .map((css) => css.replace('@layer perses.components {', '').replace(/}\s*$/, ''))
+      .map((css) =>
+        css
+          .replace(/@import\s+[^;]+;/g, '')
+          .replace(/@layer perses\.(components|utilities)\s*\{/, '')
+          .replace(/}\s*$/, ''),
+      )
       .join('\n');
     document.head.append(style);
   });
