@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
+@import '@perses-dev/design-tokens/css/layers';
+
 /*
  * Spacing style props. `.ps-<prop>` reads `--ps-<prop>`; each breakpoint prefers
  * `--ps-<prop>-<breakpoint>` and falls back to the base. styleProps.ts sets these inline to a
  * `var(--perses-spacing-<token>)` reference (design tokens stay the source of truth).
  */
-@layer perses.components {
+@layer perses.utilities {
   .ps-p {
     padding: var(--ps-p, initial);
   }
