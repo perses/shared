@@ -61,7 +61,7 @@ describe('Button', () => {
     render(<Button>Test</Button>, { wrapper: Wrapper });
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('data-variant', 'solid');
-    expect(button).toHaveAttribute('data-color', 'primary');
+    expect(button).toHaveAttribute('data-color', 'default');
     expect(button).toHaveAttribute('data-size', 'md');
   });
 

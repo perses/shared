@@ -87,6 +87,7 @@ export const tokens = {
   },
 
   status: {
+    default: statusRole('default'),
     primary: statusRole('primary'),
     secondary: statusRole('secondary'),
     error: statusRole('error'),

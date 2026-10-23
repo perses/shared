@@ -20,7 +20,7 @@ import type { ColorVariant, Size, Status } from '../types';
 import { Switch } from './Switch';
 
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
-const colors: Array<ColorVariant | Status> = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
+const colors: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
 const noop = (): void => {};
 const row: CSSProperties = {
   display: 'flex',
@@ -65,7 +65,7 @@ export const Basic: Story = () => (
 Basic.storyName = 'Basic';
 
 const variantsCode = `// size:  'xs' | 'sm' | 'md' | 'lg'
-// color: 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info' (applies to the on track)
+// color: 'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info' (applies to the on track)
 <Switch size="lg" checked onCheckedChange={setChecked} label="lg" />
 <Switch color="success" checked onCheckedChange={setChecked} label="success" />`;
 

@@ -18,6 +18,7 @@ import { render, screen } from '@testing-library/react';
 
 import type { Size } from '../types';
 import { Checkbox } from './Checkbox';
+import type { CheckboxVariant } from './Checkbox';
 
 // jsdom does not apply cascade layers; unwrap the component layer while preserving its selectors.
 const checkboxCss = readFileSync(resolve(__dirname, './checkbox.css'), 'utf-8')
@@ -55,10 +56,10 @@ describe('Checkbox CSS contracts', () => {
   it('preserves checked, indeterminate, invalid and disabled state styling', () => {
     const { rerender } = render(<Checkbox aria-label="Select row" checked />);
     const checkbox = screen.getByRole('checkbox', { name: 'Select row' });
-    expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--perses-checkbox-color)');
+    expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--ps-checkbox-bg-subtle)');
 
     rerender(<Checkbox aria-label="Select row" checked={false} indeterminate />);
-    expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--perses-checkbox-color)');
+    expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--ps-checkbox-bg-subtle)');
 
     rerender(<Checkbox aria-label="Select row" checked={false} invalid />);
     expect(getComputedStyle(checkbox).borderStyle).toBe('dashed');
@@ -66,6 +67,53 @@ describe('Checkbox CSS contracts', () => {
     rerender(<Checkbox aria-label="Select row" checked={false} disabled />);
     expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--perses-text-disabled)');
   });
+
+  it.each([
+    ['solid', 'var(--perses-checkbox-color)', 'var(--perses-text-on-solid)'],
+    ['subtle', 'var(--ps-checkbox-bg-subtle)', 'var(--ps-checkbox-text)'],
+    ['outline', 'rgba(0, 0, 0, 0)', 'var(--ps-checkbox-text)'],
+  ] as const)('styles checked and indeterminate controls with variant=%s', (variant, background, color) => {
+    const { rerender } = render(<Checkbox aria-label="Select row" variant={variant} checked />);
+    const checkbox = screen.getByRole('checkbox', { name: 'Select row' });
+
+    expect(getComputedStyle(checkbox).backgroundColor).toBe(background);
+    expect(getComputedStyle(checkbox).color).toBe(color);
+
+    rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} indeterminate />);
+    expect(getComputedStyle(checkbox).backgroundColor).toBe(background);
+    expect(getComputedStyle(checkbox).color).toBe(color);
+
+    rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} />);
+    expect(getComputedStyle(checkbox).backgroundColor).toBe(
+      variant === 'outline' ? 'rgba(0, 0, 0, 0)' : 'var(--perses-bg-sunken)',
+    );
+  });
+
+  it.each(['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'] as const)(
+    'uses semantic subtle background and indicator text for color=%s',
+    (color) => {
+      render(<Checkbox aria-label="Select row" variant="subtle" color={color} checked />);
+      const style = getComputedStyle(screen.getByRole('checkbox'));
+      expect(style.getPropertyValue('--ps-checkbox-bg-subtle')).toBe(`var(--perses-status-bg-${color})`);
+      expect(style.getPropertyValue('--ps-checkbox-text')).toBe(`var(--perses-status-text-${color})`);
+    },
+  );
+
+  it.each<CheckboxVariant>(['solid', 'subtle', 'outline'])(
+    'preserves disabled and invalid styling with variant=%s',
+    (variant) => {
+      const { rerender } = render(<Checkbox aria-label="Select row" variant={variant} checked disabled />);
+      const checkbox = screen.getByRole('checkbox');
+      expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--perses-text-disabled)');
+      expect(getComputedStyle(checkbox).color).toBe('var(--perses-bg-surface)');
+
+      rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} disabled />);
+      expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--perses-text-disabled)');
+
+      rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} invalid />);
+      expect(getComputedStyle(checkbox).borderStyle).toBe('dashed');
+    },
+  );
 
   it.each(sizes)('uses content-independent inline alignment across selection states (%s)', (size) => {
     const { rerender } = render(<Checkbox aria-label="Select row" size={size} checked={false} />);

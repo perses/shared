@@ -43,7 +43,7 @@ export type SemanticTextVar =
 
 export type TooltipVar = '--perses-tooltip-bg' | '--perses-tooltip-text';
 
-export type StatusRole = 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info';
+export type StatusRole = 'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info';
 
 export type StatusBgVar = `--perses-status-bg-${StatusRole}` | `--perses-status-bg-${StatusRole}-hover`;
 

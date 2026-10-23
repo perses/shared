@@ -32,7 +32,6 @@ import '../system/layout.css';
 import '../system/spacing.css';
 import './chip.css';
 
-export type ChipColor = 'default' | ColorVariant | Status;
 export type ChipSize = Extract<Size, 'xs' | 'sm' | 'md'>;
 export type ChipVariant = 'solid' | 'outline';
 
@@ -45,8 +44,11 @@ const CONTAINER_ARIA_PROPS = new Set(['aria-hidden', 'aria-live', 'aria-atomic',
 // `event.currentTarget`) is the label span rather than the root div.
 interface ChipBaseProps
   extends Omit<HTMLAttributes<HTMLElement>, 'color'>, SpacingProps, Omit<SizingProps, 'maxWidth'>, DisplayProps {
-  /** Palette of the chip. Status values are visual only; convey state through the label too. */
-  color?: ChipColor;
+  /**
+   * Palette of the chip; `default` is the neutral default. Status values are visual only; convey state through
+   * the label too.
+   */
+  color?: ColorVariant | Status;
   size?: ChipSize;
   variant?: ChipVariant;
   disabled?: boolean;

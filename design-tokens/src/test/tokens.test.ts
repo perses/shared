@@ -85,9 +85,9 @@ describe('tokens object', () => {
     expect(tokens.status.secondary.bgHover).toBe('var(--perses-status-bg-secondary-hover)');
   });
 
-  it('has all 6 status roles with 5 properties each', () => {
-    const roles = ['primary', 'secondary', 'error', 'warning', 'success', 'info'] as const;
-    const properties = ['bg', 'bgHover', 'text', 'border', 'icon'] as const;
+  it('has all 7 status roles with 6 properties each', () => {
+    const roles = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'] as const;
+    const properties = ['bg', 'bgHover', 'text', 'border', 'icon', 'solid'] as const;
     for (const role of roles) {
       for (const prop of properties) {
         expect(tokens.status[role][prop]).toBeDefined();

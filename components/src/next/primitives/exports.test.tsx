@@ -41,7 +41,6 @@ import type {
   ButtonProps,
   ButtonVariant,
   CheckboxProps,
-  ChipColor,
   ChipProps,
   ChipSize,
   ChipStyle,
@@ -100,7 +99,6 @@ describe('primitives barrel exports', () => {
     const checkboxColor: ColorVariant = 'primary';
     const checkboxSize: Size = 'md';
     const chipProps: ChipProps = { children: 'Production' };
-    const chipColor: ChipColor = 'secondary';
     const chipSize: ChipSize = 'xs';
     const chipVariant: ChipVariant = 'outline';
     const chipStyle: ChipStyle = { '--perses-chip-size-sm': '2.5rem' };
@@ -129,7 +127,6 @@ describe('primitives barrel exports', () => {
     expect(checkboxColor).toBe('primary');
     expect(checkboxSize).toBe('md');
     expect(chipProps).toBeDefined();
-    expect(chipColor).toBe('secondary');
     expect(chipSize).toBe('xs');
     expect(chipVariant).toBe('outline');
     expect(chipStyle).toBeDefined();

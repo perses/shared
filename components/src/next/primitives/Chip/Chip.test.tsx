@@ -16,8 +16,9 @@ import userEvent from '@testing-library/user-event';
 import { createRef } from 'react';
 import type { CSSProperties, FormEvent, KeyboardEvent } from 'react';
 
+import type { ColorVariant, Status } from '../types';
 import { Chip } from './Chip';
-import type { ChipColor, ChipSize, ChipStyle, ChipVariant } from './Chip';
+import type { ChipSize, ChipStyle, ChipVariant } from './Chip';
 
 const noop = (): void => {};
 const preventDefault = (event: KeyboardEvent): void => event.preventDefault();
@@ -389,7 +390,15 @@ describe('Chip', () => {
   });
 
   describe('combinations', () => {
-    const colors: ChipColor[] = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
+    const colors: Array<ColorVariant | Status> = [
+      'default',
+      'primary',
+      'secondary',
+      'error',
+      'warning',
+      'success',
+      'info',
+    ];
     const sizes: ChipSize[] = ['xs', 'sm'];
     const variants: ChipVariant[] = ['solid', 'outline'];
 

@@ -62,7 +62,7 @@ export interface SwitchProps
   uncheckedValue?: string;
   /** Visual size of the track and thumb. @default 'md' */
   size?: Size;
-  /** Color of the track when the switch is on. @default 'primary' */
+  /** Color of the track when the switch is on. @default 'default' */
   color?: ColorVariant | Status;
   /** Renders a clickable label next to the switch, wrapping both in a single `<label>`. */
   label?: ReactNode;
@@ -100,7 +100,7 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
     value,
     uncheckedValue,
     size = 'md',
-    color = 'primary',
+    color = 'default',
     label,
     className,
     style,
