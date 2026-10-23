@@ -76,9 +76,20 @@ describe.each(['light', 'dark'])('CSS control border contrast (%s)', (mode) => {
 });
 
 describe('CSS layer declarations', () => {
-  it('index.css declares layer order', () => {
-    const css = readCss('index.css');
-    expect(css).toContain('@layer perses.reset, perses.tokens, perses.semantic');
+  it('every CSS entry initializes the complete order before its own rules', () => {
+    for (const entry of ['index.css', 'reset.css', 'tokens.css', 'semantic.css']) {
+      const css = readCss(entry)
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        .trim();
+      expect(css).toMatch(/^@import ['"]\.\/layers\.css['"];/);
+    }
+  });
+
+  it('the public order prelude has no presentation or reset side effects', () => {
+    const css = readCss('layers.css')
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .trim();
+    expect(css).toBe('@layer perses.reset, perses.tokens, perses.semantic, perses.components, perses.utilities;');
   });
 
   it('reset.css uses @layer perses.reset', () => {

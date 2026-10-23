@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-@layer perses.reset, perses.tokens, perses.semantic, perses.components;
+@import '@perses-dev/design-tokens/css/layers';
 
 @import '../primitives/system/layout.css';
 @import '../primitives/system/spacing.css';
