@@ -25,6 +25,7 @@ import '../system/spacing.css';
 import './checkbox.css';
 
 export type CheckboxLabelPosition = 'start' | 'end';
+export type CheckboxVariant = 'subtle' | 'solid' | 'outline';
 
 export interface CheckboxChangeEventDetails {
   event: Event;
@@ -76,6 +77,7 @@ interface CheckboxBaseProps
   labelPosition?: CheckboxLabelPosition;
   size?: Size;
   color?: ColorVariant | Status;
+  variant?: CheckboxVariant;
   style?: CheckboxStyle;
 }
 
@@ -103,6 +105,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
     labelPosition = 'end',
     size = 'md',
     color = 'default',
+    variant = 'subtle',
     className,
     style,
     id,
@@ -145,6 +148,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
       data-invalid={presenceAttr(invalid)}
       data-size={size}
       data-color={color}
+      data-variant={variant}
     >
       <BaseCheckbox.Indicator className="ps-Checkbox__indicator">
         <span className="ps-Checkbox__mark" aria-hidden="true" />

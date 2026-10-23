@@ -18,13 +18,14 @@ import type { CSSProperties } from 'react';
 
 import type { ColorVariant, Size, Status } from '../types';
 import { Checkbox } from './Checkbox';
-import type { CheckboxStyle } from './Checkbox';
+import type { CheckboxStyle, CheckboxVariant } from './Checkbox';
 
 const POSITION_STYLE: CSSProperties = { position: 'absolute' };
 const RESPONSIVE_WIDTH = { default: 100, md: 200 };
 const WIDTH_OVERRIDE = { '--ps-width': '50px' } as CSSProperties;
 const MARGIN_STYLE = { marginTop: '8px' };
 const SIZES: Size[] = ['xs', 'sm', 'md', 'lg'];
+const VARIANTS: CheckboxVariant[] = ['solid', 'subtle', 'outline'];
 const COLORS: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
 const handleKeyboardInteraction = (): void => undefined;
 describe('Checkbox', () => {
@@ -37,6 +38,36 @@ describe('Checkbox', () => {
     expect(checkbox).toHaveAttribute('data-unchecked');
     expect(checkbox).toHaveAttribute('data-size', 'md');
     expect(checkbox).toHaveAttribute('data-color', 'default');
+    expect(checkbox).toHaveAttribute('data-variant', 'subtle');
+  });
+
+  it.each(VARIANTS)('preserves selection and interaction states with variant=%s', async (variant) => {
+    const handleCheckedChange = vi.fn();
+    const { rerender } = render(
+      <Checkbox label="Select item" variant={variant} onCheckedChange={handleCheckedChange} />,
+    );
+    const checkbox = screen.getByRole('checkbox', { name: 'Select item' });
+    expect(checkbox).toHaveAttribute('data-variant', variant);
+    expect(checkbox).not.toHaveAttribute('variant');
+    expect(checkbox.closest('label')).not.toHaveAttribute('data-variant');
+
+    await userEvent.click(screen.getByText('Select item'));
+    expect(checkbox).toBeChecked();
+    expect(handleCheckedChange).toHaveBeenCalledTimes(1);
+
+    rerender(<Checkbox label="Select item" variant={variant} indeterminate />);
+    expect(checkbox).toHaveAttribute('aria-checked', 'mixed');
+
+    rerender(<Checkbox label="Select item" variant={variant} disabled onCheckedChange={handleCheckedChange} />);
+    await userEvent.click(checkbox);
+    expect(handleCheckedChange).toHaveBeenCalledTimes(1);
+
+    rerender(<Checkbox label="Select item" variant={variant} readOnly onCheckedChange={handleCheckedChange} />);
+    checkbox.focus();
+    await userEvent.keyboard(' ');
+    expect(checkbox).toHaveFocus();
+    expect(checkbox).toBeChecked();
+    expect(handleCheckedChange).toHaveBeenCalledTimes(1);
   });
 
   it('supports controlled state and reports changes', async () => {
