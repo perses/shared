@@ -51,9 +51,9 @@
   }
 
   .ps-Chip[data-color='default'] {
-    --chip-bg: var(--perses-bg-sunken);
-    --chip-border: var(--perses-border-default);
-    --chip-text: var(--perses-text-primary);
+    --chip-bg: var(--perses-status-bg-default);
+    --chip-border: var(--perses-status-border-default);
+    --chip-text: var(--perses-status-text-default);
   }
 
   .ps-Chip[data-color='primary'] {

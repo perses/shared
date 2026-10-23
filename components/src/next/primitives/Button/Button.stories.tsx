@@ -31,7 +31,7 @@ const stateDivider: CSSProperties = {
 };
 
 const variants: ButtonVariant[] = ['solid', 'outline', 'ghost'];
-const colors: Array<ColorVariant | Status> = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
+const colors: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
 
 const basicCode = `<Button>Click me</Button>`;
@@ -52,7 +52,7 @@ export const Basic: Story = () => (
 Basic.storyName = 'Basic';
 
 const variantsCode = `// variant: 'solid' | 'outline' | 'ghost'
-// color:   'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info'
+// color:   'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info'
 // size:    'xs' | 'sm' | 'md' | 'lg'
 <Button variant="outline" color="error" size="lg">Delete</Button>
 

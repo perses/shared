@@ -18,12 +18,24 @@ import type { CSSProperties, ReactElement } from 'react';
 import { Sample, Stack } from '../../stories/Sample';
 import type { ColorVariant, Size, Status } from '../types';
 import { Checkbox } from './Checkbox';
+import type { CheckboxVariant } from './Checkbox';
 
-const colors: Array<Status | ColorVariant> = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
+const colors: Array<Status | ColorVariant> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
+const variants: CheckboxVariant[] = ['subtle', 'solid', 'outline'];
 const ROW_STYLE: CSSProperties = { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '1rem' };
 const COLUMN_STYLE: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.75rem' };
 const NARROW_STYLE: CSSProperties = { width: '20rem' };
+const VARIANT_ROW_STYLE: CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' };
+const VARIANT_LABEL_STYLE: CSSProperties = { width: '4rem', fontSize: '0.75rem' };
+const SIZE_GROUPS_STYLE: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '2rem' };
+const VARIANT_ROWS_STYLE: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.5rem' };
+const SIZE_HEADING_STYLE: CSSProperties = { marginBottom: '0.5rem' };
+const STATE_DIVIDER_STYLE: CSSProperties = {
+  borderLeft: '1px solid var(--perses-border-default)',
+  marginLeft: '0.25rem',
+  paddingLeft: '0.75rem',
+};
 
 function ControlledCheckbox(): ReactElement {
   const [checked, setChecked] = useState(false);
@@ -49,26 +61,55 @@ export const Basic: Story = () => (
 );
 Basic.storyName = 'Basic';
 
-const variantsCode = `// size:  'xs' | 'sm' | 'md' | 'lg'
-// color: 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info'
-<Checkbox size="lg" color="error" defaultChecked label="Delete" />`;
+const variantsCode = `// variant: 'subtle' | 'solid' (default) | 'outline'
+// size:    'xs' | 'sm' | 'md' | 'lg'
+// color:   'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info'
+<Checkbox variant="subtle" size="lg" color="error" defaultChecked label="Delete" />
+<Checkbox variant="outline" color="success" indeterminate label="Partially selected" />
+
+// The trailing column shows the disabled state.
+<Checkbox variant="subtle" color="primary" disabled defaultChecked label="disabled" />`;
 const positionCode = `// labelPosition: 'end' (default) | 'start'
 <Checkbox labelPosition="start" label="Label before the control" />`;
 
 export const AllVariantsAndColors: Story = () => (
   <Stack>
-    <Sample title="Sizes and colors" code={variantsCode}>
-      <div style={COLUMN_STYLE}>
-        <div style={ROW_STYLE}>
-          {sizes.map((size) => (
-            <Checkbox key={size} size={size} defaultChecked label={size} />
-          ))}
-        </div>
-        <div style={ROW_STYLE}>
-          {colors.map((color) => (
-            <Checkbox key={color} color={color} defaultChecked label={color} />
-          ))}
-        </div>
+    <Sample title="Variants, colors and sizes — the last column shows the disabled state" code={variantsCode}>
+      <div style={SIZE_GROUPS_STYLE}>
+        {sizes.map((size) => (
+          <div key={size}>
+            <h3 style={SIZE_HEADING_STYLE}>Size: {size}</h3>
+            <div style={VARIANT_ROWS_STYLE}>
+              {variants.map((variant) => (
+                <div key={variant} style={VARIANT_ROW_STYLE}>
+                  <span style={VARIANT_LABEL_STYLE}>{variant}</span>
+                  {colors.map((color) => (
+                    <Checkbox
+                      key={color}
+                      variant={variant}
+                      size={size}
+                      color={color}
+                      defaultChecked
+                      label={color}
+                      aria-label={`${size} ${variant} ${color}`}
+                    />
+                  ))}
+                  <span style={STATE_DIVIDER_STYLE}>
+                    <Checkbox
+                      variant={variant}
+                      size={size}
+                      color="primary"
+                      disabled
+                      defaultChecked
+                      label="disabled"
+                      aria-label={`${size} ${variant} disabled`}
+                    />
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </Sample>
 
@@ -97,15 +138,20 @@ const longCode = `<div style={{ width: '20rem' }}>
 export const States: Story = () => (
   <Stack>
     <Sample title="States" code={statesCode}>
-      <div style={COLUMN_STYLE}>
-        <Checkbox label="Unchecked" />
-        <Checkbox label="Checked" defaultChecked />
-        <Checkbox label="Partially selected" indeterminate />
-        <Checkbox label="Disabled" disabled />
-        <Checkbox label="Disabled and checked" disabled checked />
-        <Checkbox label="Read only" readOnly checked />
-        <Checkbox label="Required" required />
-        <Checkbox label="Invalid" invalid />
+      <div style={ROW_STYLE}>
+        {variants.map((variant) => (
+          <div key={variant} style={COLUMN_STYLE}>
+            <h3>{variant}</h3>
+            <Checkbox variant={variant} label="Unchecked" />
+            <Checkbox variant={variant} label="Checked" defaultChecked />
+            <Checkbox variant={variant} label="Partially selected" indeterminate />
+            <Checkbox variant={variant} label="Disabled" disabled />
+            <Checkbox variant={variant} label="Disabled and checked" disabled checked />
+            <Checkbox variant={variant} label="Read only" readOnly checked />
+            <Checkbox variant={variant} label="Required" required />
+            <Checkbox variant={variant} label="Invalid" invalid />
+          </div>
+        ))}
       </div>
     </Sample>
 
