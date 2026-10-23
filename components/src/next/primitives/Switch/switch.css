@@ -33,7 +33,6 @@
     --ps-switch-padding: 2px;
     --ps-switch-size: var(--perses-switch-size-md, var(--perses-selection-control-size-md));
     --ps-switch-thumb-size: calc(var(--ps-switch-size) - 2 * var(--ps-switch-padding));
-    --ps-switch-checked-bg: var(--perses-status-solid-primary);
 
     position: relative;
     display: inline-flex;
@@ -67,6 +66,12 @@
     background-color: var(--ps-switch-checked-bg);
   }
 
+  .ps-Switch[data-color='default'] {
+    --ps-switch-checked-bg: var(--perses-status-solid-default);
+  }
+  .ps-Switch[data-color='primary'] {
+    --ps-switch-checked-bg: var(--perses-status-solid-primary);
+  }
   .ps-Switch[data-color='secondary'] {
     --ps-switch-checked-bg: var(--perses-status-solid-secondary);
   }

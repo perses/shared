@@ -42,7 +42,7 @@ export interface ButtonProps
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   {
     variant = 'solid',
-    color = 'primary',
+    color = 'default',
     size = 'md',
     loading = false,
     disabled,

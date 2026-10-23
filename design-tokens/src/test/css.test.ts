@@ -184,8 +184,8 @@ describe('CSS semantic variables', () => {
   });
 
   it('has all status tokens with property-scoped naming', () => {
-    const roles = ['primary', 'secondary', 'error', 'warning', 'success', 'info'];
-    const properties = ['bg', 'text', 'border', 'icon'];
+    const roles = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
+    const properties = ['bg', 'text', 'border', 'icon', 'solid'];
     for (const role of roles) {
       for (const prop of properties) {
         expect(semanticCss).toContain(`--perses-status-${prop}-${role}`);

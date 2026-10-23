@@ -45,7 +45,7 @@ export interface IconButtonProps
  * Breakpoints with no value fall back to the browser's default, not the component's own styling.
  */
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
-  { variant = 'ghost', color = 'primary', size = 'md', className, style, children, ...props },
+  { variant = 'ghost', color = 'default', size = 'md', className, style, children, ...props },
   ref,
 ) {
   const {

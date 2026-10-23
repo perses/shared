@@ -42,6 +42,14 @@
     cursor: not-allowed;
   }
 
+  .ps-ButtonBase[data-color='default'] {
+    --ps-btn-bg: var(--perses-status-solid-default);
+    --ps-btn-bg-hover: var(--perses-status-bg-default-hover);
+    --ps-btn-text: var(--perses-status-text-default);
+    --ps-btn-border: var(--perses-status-border-default);
+    --ps-btn-bg-subtle: var(--perses-status-bg-default);
+  }
+
   .ps-ButtonBase[data-color='primary'] {
     --ps-btn-bg: var(--perses-status-solid-primary);
     --ps-btn-bg-hover: var(--perses-status-bg-primary-hover);

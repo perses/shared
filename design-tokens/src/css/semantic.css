@@ -41,7 +41,7 @@
     --perses-bg-navigation: var(--perses-color-blue-150);
 
     /* Border */
-    --perses-border-default: var(--perses-color-gray-200);
+    --perses-border-default: var(--perses-color-gray-300);
     --perses-border-control: var(--perses-color-gray-400);
 
     /* Text */
@@ -58,53 +58,61 @@
     --perses-tooltip-bg: var(--perses-color-black);
     --perses-tooltip-text: var(--perses-color-white);
 
+    /* Status: Default (neutral, mirrors the page surface) */
+    --perses-status-bg-default: var(--perses-color-gray-200);
+    --perses-status-bg-default-hover: var(--perses-color-gray-800);
+    --perses-status-text-default: var(--perses-text-secondary);
+    --perses-status-border-default: var(--perses-border-default);
+    --perses-status-icon-default: var(--perses-color-gray-600);
+    --perses-status-solid-default: var(--perses-color-gray-700);
+
     /* Status: Primary */
     --perses-status-bg-primary: var(--perses-color-blue-50);
     --perses-status-bg-primary-hover: var(--perses-color-blue-800);
     --perses-status-text-primary: var(--perses-color-blue-900);
     --perses-status-border-primary: var(--perses-color-blue-200);
-    --perses-status-icon-primary: var(--perses-color-blue-700);
-    --perses-status-solid-primary: var(--perses-color-blue-700);
+    --perses-status-icon-primary: var(--perses-color-blue-600);
+    --perses-status-solid-primary: var(--perses-color-blue-500);
 
     /* Status: Secondary */
-    --perses-status-bg-secondary: var(--perses-color-gray-50);
-    --perses-status-bg-secondary-hover: var(--perses-color-gray-800);
-    --perses-status-text-secondary: var(--perses-color-gray-700);
-    --perses-status-border-secondary: var(--perses-color-gray-200);
-    --perses-status-icon-secondary: var(--perses-color-gray-600);
-    --perses-status-solid-secondary: var(--perses-color-gray-600);
+    --perses-status-bg-secondary: var(--perses-color-purple-50);
+    --perses-status-bg-secondary-hover: var(--perses-color-purple-700);
+    --perses-status-text-secondary: var(--perses-color-purple-900);
+    --perses-status-border-secondary: var(--perses-color-purple-200);
+    --perses-status-icon-secondary: var(--perses-color-purple-600);
+    --perses-status-solid-secondary: var(--perses-color-purple-500);
 
     /* Status: Error */
     --perses-status-bg-error: var(--perses-color-red-50);
     --perses-status-bg-error-hover: var(--perses-color-red-800);
     --perses-status-text-error: var(--perses-color-red-900);
     --perses-status-border-error: var(--perses-color-red-200);
-    --perses-status-icon-error: var(--perses-color-red-700);
-    --perses-status-solid-error: var(--perses-color-red-700);
+    --perses-status-icon-error: var(--perses-color-red-600);
+    --perses-status-solid-error: var(--perses-color-red-500);
 
     /* Status: Warning */
     --perses-status-bg-warning: var(--perses-color-orange-50);
     --perses-status-bg-warning-hover: var(--perses-color-orange-800);
     --perses-status-text-warning: var(--perses-color-orange-900);
     --perses-status-border-warning: var(--perses-color-orange-200);
-    --perses-status-icon-warning: var(--perses-color-orange-700);
-    --perses-status-solid-warning: var(--perses-color-orange-700);
+    --perses-status-icon-warning: var(--perses-color-orange-600);
+    --perses-status-solid-warning: var(--perses-color-orange-500);
 
     /* Status: Success */
     --perses-status-bg-success: var(--perses-color-green-50);
     --perses-status-bg-success-hover: var(--perses-color-green-800);
     --perses-status-text-success: var(--perses-color-green-900);
     --perses-status-border-success: var(--perses-color-green-200);
-    --perses-status-icon-success: var(--perses-color-green-800);
-    --perses-status-solid-success: var(--perses-color-green-800);
+    --perses-status-icon-success: var(--perses-color-green-600);
+    --perses-status-solid-success: var(--perses-color-green-500);
 
     /* Status: Info */
     --perses-status-bg-info: var(--perses-color-blue-50);
     --perses-status-bg-info-hover: var(--perses-color-blue-800);
     --perses-status-text-info: var(--perses-color-blue-900);
     --perses-status-border-info: var(--perses-color-blue-200);
-    --perses-status-icon-info: var(--perses-color-blue-700);
-    --perses-status-solid-info: var(--perses-color-blue-700);
+    --perses-status-icon-info: var(--perses-color-blue-600);
+    --perses-status-solid-info: var(--perses-color-blue-500);
   }
 
   /* ---- Dark mode: explicit (data attribute) ---- */
@@ -134,6 +142,14 @@
     /* Tooltip */
     --perses-tooltip-bg: var(--perses-color-white);
     --perses-tooltip-text: var(--perses-color-black);
+
+    /* Status: Default (neutral, mirrors the page surface) */
+    --perses-status-bg-default: var(--perses-bg-sunken);
+    --perses-status-bg-default-hover: var(--perses-color-gray-700);
+    --perses-status-text-default: var(--perses-text-primary);
+    --perses-status-border-default: var(--perses-border-default);
+    --perses-status-icon-default: var(--perses-text-secondary);
+    --perses-status-solid-default: var(--perses-color-gray-600);
 
     /* Status: Primary */
     --perses-status-bg-primary: var(--perses-color-blue-900);
