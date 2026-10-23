@@ -17,3 +17,4 @@ export * from './DatasourceStoreProvider';
 export * from './VariableProvider';
 export * from './useDashboard';
 export * from './PanelEditorProvider';
+export * from './DashboardCatalogProvider';

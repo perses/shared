@@ -15,15 +15,18 @@ import type { Theme } from '@mui/material';
 import { IconButton, Link as LinkComponent, Menu, MenuItem, Chip, capitalize, Stack } from '@mui/material';
 import { InfoTooltip } from '@perses-dev/components';
 import { useReplaceVariablesInString, useReplaceVariablesInUrl } from '@perses-dev/plugin-system';
-import type { Link } from '@perses-dev/spec';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import type { MouseEvent, ReactElement } from 'react';
 import { useId, useState } from 'react';
 
+import type { DashboardLink } from './dashboard-link';
+import { isTagLink } from './dashboard-link';
+import { TagLinkMenu } from './TagLinkMenu';
+
 type LinksVariant = 'dashboard' | 'panel';
 
 interface LinksProps {
-  links: Link[];
+  links: DashboardLink[];
   variant: LinksVariant;
 }
 
@@ -49,6 +52,9 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
 
   // Panel variant: single link shows as icon button
   if (variant === 'panel' && links.length === 1 && links[0]) {
+    if (isTagLink(links[0])) {
+      return <TagLinkMenu link={links[0]} appearance="button" />;
+    }
     return <LinkButton link={links[0]} />;
   }
 
@@ -72,9 +78,13 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
     if (canRenderAsChips) {
       return (
         <Stack direction="row" spacing={1}>
-          {links.map((link: Link) => (
-            <LinkChip key={link.url} link={link} />
-          ))}
+          {links.map((link: DashboardLink) =>
+            isTagLink(link) ? (
+              <TagLinkMenu key={linkKey(link)} link={link} appearance="chip" />
+            ) : (
+              <LinkChip key={linkKey(link)} link={link} />
+            ),
+          )}
         </Stack>
       );
     }
@@ -107,15 +117,26 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
           'aria-labelledby': buttonId,
         }}
       >
-        {links.map((link: Link) => (
-          <LinkMenuItem key={link.url} link={link} />
-        ))}
+        {links.map((link: DashboardLink) =>
+          isTagLink(link) ? (
+            <TagLinkMenu key={linkKey(link)} link={link} appearance="item" />
+          ) : (
+            <LinkMenuItem key={linkKey(link)} link={link} />
+          ),
+        )}
       </Menu>
     </>
   );
 }
 
-function LinkChip({ link }: { link: Link }): ReactElement {
+function linkKey(link: DashboardLink): string {
+  if (isTagLink(link)) {
+    return `tags:${link.name ?? ''}:${(link.tags ?? []).join(',')}`;
+  }
+  return link.url ?? link.name ?? '';
+}
+
+function LinkChip({ link }: { link: DashboardLink }): ReactElement {
   const { url, name, tooltip, targetBlank } = useLink(link);
 
   return (
@@ -134,7 +155,7 @@ function LinkChip({ link }: { link: Link }): ReactElement {
   );
 }
 
-function LinkButton({ link }: { link: Link }): ReactElement {
+function LinkButton({ link }: { link: DashboardLink }): ReactElement {
   const { url, name, tooltip, targetBlank } = useLink(link);
 
   return (
@@ -152,7 +173,7 @@ function LinkButton({ link }: { link: Link }): ReactElement {
   );
 }
 
-function LinkMenuItem({ link }: { link: Link }): ReactElement {
+function LinkMenuItem({ link }: { link: DashboardLink }): ReactElement {
   const { url, name, tooltip, targetBlank } = useLink(link);
 
   return (
@@ -164,16 +185,16 @@ function LinkMenuItem({ link }: { link: Link }): ReactElement {
   );
 }
 
-function useLink(link: Link): Link {
+function useLink(link: DashboardLink): DashboardLink & { url: string } {
   // Name/tooltip: plain string interpolation (unencoded $var).
   const name = useReplaceVariablesInString(link.name);
   const tooltip = useReplaceVariablesInString(link.tooltip);
   // URL: URL-aware interpolation (also expands %24var inside query params).
   const interpolatedUrl = useReplaceVariablesInUrl(link.renderVariables === false ? undefined : link.url);
-  const url = link.renderVariables === false ? link.url : (interpolatedUrl ?? link.url);
+  const url = link.renderVariables === false ? (link.url ?? '') : (interpolatedUrl ?? link.url ?? '');
 
   if (link.renderVariables === false) {
-    return link;
+    return { ...link, url: link.url ?? '' };
   }
 
   return { ...link, url, name, tooltip };
