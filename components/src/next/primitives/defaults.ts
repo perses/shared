@@ -15,6 +15,7 @@ import type { PersesComponents, PersesIcons } from '../contexts/ComponentsContex
 import { Alert } from './Alert';
 import { Box } from './Box';
 import { Button } from './Button';
+import { Card, CardContent, CardHeader } from './Card';
 import { Checkbox } from './Checkbox';
 import { Chip } from './Chip';
 import { Divider } from './Divider';
@@ -41,6 +42,9 @@ export const defaultComponents: PersesComponents = {
   Button,
   Alert,
   Box,
+  Card,
+  CardHeader,
+  CardContent,
   Checkbox,
   Chip,
   IconButton,
