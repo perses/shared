@@ -15,8 +15,7 @@
 // PersesTokenVar, `npm run type-check` will fail here.
 // This file is never executed — it only needs to pass tsc.
 
-import type { tokens } from '../tokens';
-import type { PersesTokenVar } from '../types';
+import type { tokens, PersesTokenVar, SemanticOpacityVar } from '../index';
 
 type ExtractVar<T extends string> = T extends `var(${infer V})` ? V : never;
 
@@ -45,6 +44,10 @@ type _TextLink = AssertAssignable<ExtractVar<typeof tokens.text.link>, PersesTok
 type _TextLinkHover = AssertAssignable<ExtractVar<typeof tokens.text.linkHover>, PersesTokenVar>;
 type _TextNav = AssertAssignable<ExtractVar<typeof tokens.text.navigation>, PersesTokenVar>;
 type _TextAccent = AssertAssignable<ExtractVar<typeof tokens.text.accent>, PersesTokenVar>;
+
+type _OpacityDisabled = AssertAssignable<ExtractVar<typeof tokens.opacity.disabled>, PersesTokenVar>;
+type _OpacityDisabledVar = AssertAssignable<'--perses-opacity-disabled', PersesTokenVar>;
+type _SemanticOpacityVar = AssertAssignable<'--perses-opacity-disabled', SemanticOpacityVar>;
 
 type _TooltipBg = AssertAssignable<ExtractVar<typeof tokens.tooltip.bg>, PersesTokenVar>;
 type _TooltipText = AssertAssignable<ExtractVar<typeof tokens.tooltip.text>, PersesTokenVar>;

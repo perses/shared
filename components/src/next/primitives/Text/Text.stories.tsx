@@ -24,6 +24,9 @@ const colorsCode = `<Text color="secondary">Design-system color</Text>
 <Text color="rgb(100 50 200 / 80%)">CSS function</Text>
 <Text color="var(--perses-text-link)">CSS custom property</Text>
 <Text color="currentColor">Current color</Text>`;
+const disabledCode = `<Text disabled>Disabled text</Text>
+<Text disabled color="error">Disabled error text</Text>
+<Text disabled color="#663399">Disabled custom color</Text>`;
 
 export const Basic: Story = () => (
   <Stack>
@@ -63,11 +66,20 @@ export const Basic: Story = () => (
       <Text weight="medium">Medium</Text>
       <Text weight="bold">Bold</Text>
       <Text color="secondary">Secondary</Text>
-      <Text color="disabled">Disabled</Text>
+
       <Text color="error">Error</Text>
       <Text color="warning">Warning</Text>
       <Text color="success">Success</Text>
       <Text color="info">Information</Text>
+    </Sample>
+    <Sample title="Disabled text preserves its color" code={disabledCode}>
+      <Text disabled>Disabled text</Text>
+      <Text disabled color="error">
+        Disabled error text
+      </Text>
+      <Text disabled color="#663399">
+        Disabled custom color
+      </Text>
     </Sample>
   </Stack>
 );

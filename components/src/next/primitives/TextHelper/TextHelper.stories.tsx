@@ -56,7 +56,7 @@ export const Basic: Story = () => (
       <div style={narrowStyle}>
         <TextHelper>Default supporting text</TextHelper>
         <TextHelper disabled status="error">
-          Disabled supporting text takes precedence over status.
+          Disabled supporting text preserves the error color.
         </TextHelper>
         <TextHelper status="error">Please provide a valid value before continuing.</TextHelper>
         <TextHelper status="warning">This action affects other members of your team.</TextHelper>

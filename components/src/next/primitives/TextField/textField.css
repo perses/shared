@@ -33,10 +33,6 @@
     color: var(--perses-text-secondary);
   }
 
-  .ps-TextField[data-disabled] .ps-TextField__label {
-    opacity: 0.5;
-  }
-
   /* ---- Wrapper holds adornments + control, carries the border ---- */
   :where(.ps-TextField__wrapper) {
     display: flex;
@@ -73,9 +69,21 @@
     outline: none;
   }
 
+  .ps-TextField[data-disabled] {
+    opacity: var(--perses-opacity-disabled, 0.5);
+  }
+
+  .ps-TextField[data-disabled] .ps-Text[data-disabled] {
+    opacity: 1;
+  }
+
   .ps-TextField__input:disabled {
-    opacity: 0.5;
+    opacity: 1;
     cursor: not-allowed;
+  }
+
+  .ps-TextField__input:disabled::placeholder {
+    opacity: 1;
   }
 
   :where(textarea.ps-TextField__input) {

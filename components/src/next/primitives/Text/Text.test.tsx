@@ -84,6 +84,27 @@ describe('Text', () => {
     expect(screen.getByText('Custom color')).toHaveAttribute('data-color', 'secondary');
   });
 
+  it('exposes disabled appearance without native or ARIA disabled semantics', () => {
+    const { rerender } = render(
+      <Text disabled color="error">
+        Message
+      </Text>,
+    );
+    const text = screen.getByText('Message');
+    expect(text).toHaveAttribute('data-disabled');
+    expect(text).toHaveAttribute('data-color', 'error');
+    expect(text).not.toHaveAttribute('disabled');
+    expect(text).not.toHaveAttribute('aria-disabled');
+
+    rerender(
+      <Text disabled={false} color="error">
+        Message
+      </Text>,
+    );
+    expect(text).not.toHaveAttribute('data-disabled');
+    expect(text).toHaveAttribute('data-color', 'error');
+  });
+
   it('supports native attributes, custom styles and responsive style props', () => {
     render(
       <Text id="summary" title="Details" className="custom" style={style} m="sm" width={width}>

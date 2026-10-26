@@ -69,8 +69,8 @@ Keep selectors for focus, disabled, multiline, and status overrides outside `:wh
     outline-offset: var(--perses-focus-ring-offset);
   }
 
-  .ps-TextField[data-disabled] .ps-TextField__label {
-    opacity: 0.5;
+  .ps-TextField[data-disabled] {
+    opacity: var(--perses-opacity-disabled, 0.5);
   }
 
   .ps-TextField[data-status='error'] .ps-TextField__helper {
@@ -78,6 +78,8 @@ Keep selectors for focus, disabled, multiline, and status overrides outside `:wh
   }
 }
 ```
+
+Apply `--perses-opacity-disabled` (default `0.5`) once at the disabled group's root, preserving status and custom colors without dimming labels or helpers again. Checkbox and Switch dim their label wrapper based on the control's effective Base UI disabled state, including inheritance; unlabeled controls dim themselves.
 
 When zero-specificity defaults set the same property on the same element in the same layer, later rules win. Put base defaults before size defaults, and keep state overrides easy to identify. Avoid `!important` or increasingly specific selectors as a substitute for the layer and default/override structure.
 

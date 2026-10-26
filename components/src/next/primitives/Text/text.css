@@ -68,9 +68,6 @@
   :where(.ps-Text[data-color='secondary']) {
     color: var(--perses-text-secondary);
   }
-  :where(.ps-Text[data-color='disabled']) {
-    color: var(--perses-text-disabled);
-  }
   :where(.ps-Text[data-color='error']) {
     color: var(--perses-status-text-error);
   }
@@ -82,5 +79,14 @@
   }
   :where(.ps-Text[data-color='info']) {
     color: var(--perses-status-text-info);
+  }
+
+  :where(.ps-Text[data-disabled]) {
+    opacity: var(--perses-opacity-disabled, 0.5);
+  }
+
+  /* An ancestor already dims the group; nested disabled text must not compound opacity. */
+  .ps-Text[data-disabled] .ps-Text[data-disabled] {
+    opacity: 1;
   }
 }

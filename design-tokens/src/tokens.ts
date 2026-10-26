@@ -87,6 +87,10 @@ export const tokens = {
     onSolid: 'var(--perses-text-on-solid)',
   },
 
+  opacity: {
+    disabled: 'var(--perses-opacity-disabled)',
+  },
+
   tooltip: {
     bg: 'var(--perses-tooltip-bg)',
     text: 'var(--perses-tooltip-text)',

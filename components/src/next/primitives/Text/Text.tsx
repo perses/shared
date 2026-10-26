@@ -32,24 +32,17 @@ export interface TextProps extends Omit<HTMLAttributes<HTMLElement>, 'color'>, S
   /** Font-weight token; inherits the element's weight when omitted. */
   weight?: 'light' | 'regular' | 'medium' | 'bold';
   /** Semantic text/status color or any CSS color value. Defaults to `primary`; `style.color` takes precedence. */
-  color?: 'primary' | 'secondary' | 'disabled' | Status | CSSProperties['color'];
+  color?: 'primary' | 'secondary' | Status | CSSProperties['color'];
+  /** Dims text using the disabled-opacity token without changing its color or disabling associated controls. */
+  disabled?: boolean;
 }
 
 const TEXT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
-const SEMANTIC_TEXT_COLORS = new Set([
-  'inherit',
-  'primary',
-  'secondary',
-  'disabled',
-  'error',
-  'warning',
-  'success',
-  'info',
-]);
+const SEMANTIC_TEXT_COLORS = new Set(['inherit', 'primary', 'secondary', 'error', 'warning', 'success', 'info']);
 
 /** Token-based text with no default margins or control-specific width containment. */
 export const Text = forwardRef<HTMLElement, TextProps>(function Text(
-  { as = 'span', size = 'md', weight, color = 'primary', className, style, children, ...props },
+  { as = 'span', size = 'md', weight, color = 'primary', disabled, className, style, children, ...props },
   ref,
 ) {
   // Keep named colors stylesheet-driven so existing theme and CSS overrides continue to work.
@@ -70,6 +63,7 @@ export const Text = forwardRef<HTMLElement, TextProps>(function Text(
       'data-size': size,
       'data-weight': weight,
       'data-color': color,
+      ...(disabled !== undefined && { 'data-disabled': disabled || undefined }),
     },
     children,
   );

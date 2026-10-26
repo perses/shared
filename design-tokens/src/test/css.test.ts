@@ -196,6 +196,22 @@ describe('CSS semantic variables', () => {
     expect(semanticCss.match(/--perses-focus-ring-color:/g)).toHaveLength(2);
   });
 
+  it.each(['light', 'dark'])('defaults disabled opacity to 0.5 in %s mode', (mode) => {
+    const variables = new Map([
+      ...declarationsFor(semanticCss, ':root'),
+      ...(mode === 'dark' ? declarationsFor(semanticCss, "[data-perses-mode='dark']") : []),
+    ]);
+    expect(variables.get('--perses-opacity-disabled')).toBe('0.5');
+  });
+
+  it.each([
+    ['light', 'var(--perses-color-gray-300)'],
+    ['dark', 'var(--perses-color-gray-600)'],
+  ])('preserves the disabled text color in %s mode', (mode, expected) => {
+    const selector = mode === 'dark' ? "[data-perses-mode='dark']" : ':root';
+    expect(declarationsFor(semanticCss, selector).get('--perses-text-disabled')).toBe(expected);
+  });
+
   it('has all text semantic tokens', () => {
     const textTokens = ['primary', 'secondary', 'disabled', 'link', 'link-hover', 'navigation', 'accent'];
     for (const name of textTokens) {

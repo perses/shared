@@ -24,8 +24,6 @@ import './textHelper.css';
 export interface TextHelperProps extends Omit<TextProps, 'as' | 'size' | 'weight' | 'color'> {
   /** Visual status; does not announce messages or mark the associated control invalid. */
   status?: Status;
-  /** Uses the disabled text color instead of the status color; does not disable the associated control. */
-  disabled?: boolean;
 }
 
 /**
@@ -34,17 +32,16 @@ export interface TextHelperProps extends Omit<TextProps, 'as' | 'size' | 'weight
  * `aria-describedby`; compose with Base UI's `Field.Description` for automatic field association.
  */
 export const TextHelper = forwardRef<HTMLParagraphElement, TextHelperProps>(function TextHelper(
-  { status, disabled, className, ...props },
+  { status, className, ...props },
   ref,
 ) {
   return (
     <Text
       {...props}
-      {...(disabled && { 'data-disabled': true })}
       ref={ref}
       as="p"
       size="xs"
-      color={disabled ? 'disabled' : (status ?? 'secondary')}
+      color={status ?? 'secondary'}
       data-status={status}
       className={clsx('ps-TextHelper', className)}
     />

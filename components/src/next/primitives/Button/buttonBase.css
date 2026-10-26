@@ -40,7 +40,7 @@
 
   .ps-ButtonBase:disabled,
   .ps-ButtonBase[aria-disabled='true'] {
-    opacity: 0.5;
+    opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
   }
 

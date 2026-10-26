@@ -114,7 +114,7 @@
 
   .ps-Chip[data-disabled='true'] {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: var(--perses-opacity-disabled, 0.5);
   }
 
   .ps-Chip__start {

@@ -50,7 +50,7 @@ describe('TextHelper', () => {
   });
 
   it.each([undefined, 'error', 'warning', 'success', 'info'] as const)(
-    'uses the disabled text color ahead of status=%s and restores the color when re-enabled',
+    'preserves status=%s while toggling disabled appearance',
     (status) => {
       const { rerender } = render(
         <TextHelper disabled status={status}>
@@ -58,7 +58,7 @@ describe('TextHelper', () => {
         </TextHelper>,
       );
       const helper = screen.getByText('Hint');
-      expect(helper).toHaveAttribute('data-color', 'disabled');
+      expect(helper).toHaveAttribute('data-color', status ?? 'secondary');
       expect(helper).toHaveAttribute('data-disabled');
       expect(helper).not.toHaveAttribute('disabled');
       expect(helper).not.toHaveAttribute('aria-disabled');

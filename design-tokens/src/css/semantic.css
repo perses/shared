@@ -59,6 +59,9 @@
     --perses-text-accent: var(--perses-color-gray-700);
     --perses-text-on-solid: var(--perses-color-white);
 
+    /* Opacity */
+    --perses-opacity-disabled: 0.5;
+
     /* Tooltip */
     --perses-tooltip-bg: var(--perses-color-black);
     --perses-tooltip-text: var(--perses-color-white);

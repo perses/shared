@@ -24,6 +24,7 @@
   }
 
   .ps-Switch__wrapper:has(.ps-Switch[data-disabled]) {
+    opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
   }
 
@@ -56,8 +57,14 @@
   }
 
   .ps-Switch[data-disabled] {
-    opacity: 0.5;
+    opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
+  }
+
+  /* A labeled switch is dimmed by its wrapper, not again by the track or nested text. */
+  .ps-Switch__wrapper:has(.ps-Switch[data-disabled]) .ps-Switch[data-disabled],
+  .ps-Switch__wrapper:has(.ps-Switch[data-disabled]) .ps-Text[data-disabled] {
+    opacity: 1;
   }
 
   .ps-Switch[data-readonly] {

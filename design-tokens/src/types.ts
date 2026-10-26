@@ -41,6 +41,8 @@ export type SemanticTextVar =
   | '--perses-text-accent'
   | '--perses-text-on-solid';
 
+export type SemanticOpacityVar = '--perses-opacity-disabled';
+
 export type TooltipVar = '--perses-tooltip-bg' | '--perses-tooltip-text';
 
 export type StatusRole = 'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info';
@@ -95,6 +97,7 @@ export type PersesTokenVar =
   | SemanticBgVar
   | SemanticBorderVar
   | SemanticTextVar
+  | SemanticOpacityVar
   | TooltipVar
   | StatusBgVar
   | StatusTextVar

@@ -16,7 +16,10 @@ import { resolve } from 'path';
 
 import { render, screen } from '@testing-library/react';
 
+import { TextHelper } from '../TextHelper';
 import { Text } from './Text';
+
+const customStyle = { color: '#663399' };
 
 // jsdom does not apply cascade layers; preserve the selectors while unwrapping the component layer.
 const css = readFileSync(resolve(__dirname, './text.css'), 'utf-8')
@@ -26,6 +29,15 @@ const css = readFileSync(resolve(__dirname, './text.css'), 'utf-8')
 
 describe('Text CSS contracts', () => {
   const style = document.createElement('style');
+
+  // jsdom cannot compute opacity containing var(); inspect the matching authored declarations instead.
+  function getOpacity(element: Element): string {
+    const rules = Array.from(style.sheet?.cssRules ?? []).filter(
+      (rule): rule is CSSStyleRule =>
+        rule instanceof CSSStyleRule && Boolean(rule.style.opacity) && element.matches(rule.selectorText),
+    );
+    return rules.at(-1)?.style.opacity ?? '1';
+  }
   beforeAll(() => {
     style.textContent = css;
     document.head.append(style);
@@ -63,7 +75,79 @@ describe('Text CSS contracts', () => {
   it.each([
     ['primary', 'var(--perses-text-primary)'],
     ['secondary', 'var(--perses-text-secondary)'],
-    ['disabled', 'var(--perses-text-disabled)'],
+    ['error', 'var(--perses-status-text-error)'],
+    ['warning', 'var(--perses-status-text-warning)'],
+    ['success', 'var(--perses-status-text-success)'],
+    ['info', 'var(--perses-status-text-info)'],
+    ['#663399', 'rgb(102, 51, 153)'],
+  ] as const)('dims disabled %s text without replacing its color', (color, expected) => {
+    const { rerender } = render(
+      <Text disabled color={color}>
+        Message
+      </Text>,
+    );
+    const text = screen.getByText('Message');
+    expect(getComputedStyle(text).color).toBe(expected);
+    expect(getOpacity(text)).toBe('var(--perses-opacity-disabled, 0.5)');
+
+    rerender(<Text color={color}>Message</Text>);
+    expect(getComputedStyle(text).color).toBe(expected);
+    expect(getOpacity(text) || '1').toBe('1');
+  });
+
+  it('preserves an explicit style color on disabled text', () => {
+    render(
+      <Text disabled color="error" style={customStyle}>
+        Message
+      </Text>,
+    );
+    const computed = getComputedStyle(screen.getByText('Message'));
+    expect(computed.color).toBe('rgb(102, 51, 153)');
+    expect(getOpacity(screen.getByText('Message'))).toBe('var(--perses-opacity-disabled, 0.5)');
+  });
+
+  it.each([undefined, 'error', 'warning', 'success', 'info'] as const)(
+    'dims standalone helpers without replacing status=%s',
+    (status) => {
+      render(
+        <TextHelper disabled status={status}>
+          Hint
+        </TextHelper>,
+      );
+      const computed = getComputedStyle(screen.getByText('Hint'));
+      expect(computed.color).toBe(status ? `var(--perses-status-text-${status})` : 'var(--perses-text-secondary)');
+      expect(getOpacity(screen.getByText('Hint'))).toBe('var(--perses-opacity-disabled, 0.5)');
+    },
+  );
+
+  it('does not compound opacity on nested disabled text and helpers', () => {
+    const { rerender } = render(
+      <Text as="div" disabled>
+        <TextHelper disabled status="error">
+          Hint
+        </TextHelper>
+      </Text>,
+    );
+    const helper = screen.getByText('Hint');
+    const parent = helper.parentElement;
+    if (!parent) throw new Error('Missing text parent');
+    expect(getOpacity(parent)).toBe('var(--perses-opacity-disabled, 0.5)');
+    expect(getOpacity(helper)).toBe('1');
+
+    rerender(
+      <Text as="div">
+        <TextHelper disabled status="error">
+          Hint
+        </TextHelper>
+      </Text>,
+    );
+    expect(getOpacity(helper)).toBe('var(--perses-opacity-disabled, 0.5)');
+  });
+
+  it.each([
+    ['primary', 'var(--perses-text-primary)'],
+    ['secondary', 'var(--perses-text-secondary)'],
+
     ['error', 'var(--perses-status-text-error)'],
     ['warning', 'var(--perses-status-text-warning)'],
     ['success', 'var(--perses-status-text-success)'],

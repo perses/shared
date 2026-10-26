@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { blue, green, gray, orange, purple, red, white, black } from '../colors';
-import { tokens } from '../tokens';
+import { tokens } from '../index';
 
 const HEX_PATTERN = /^#[0-9A-Fa-f]{6}$/;
 
@@ -74,6 +74,10 @@ describe('tokens object', () => {
     expect(tokens.text.primary).toBe('var(--perses-text-primary)');
     expect(tokens.text.link).toBe('var(--perses-text-link)');
     expect(tokens.text.disabled).toBe('var(--perses-text-disabled)');
+  });
+
+  it('exposes the configurable disabled opacity through the public entry point', () => {
+    expect(tokens).toHaveProperty('opacity.disabled', 'var(--perses-opacity-disabled)');
   });
 
   it('produces correct var() strings for status tokens', () => {
