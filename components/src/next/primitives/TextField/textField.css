@@ -28,7 +28,7 @@
     width: 100%;
   }
 
-  .ps-TextField__label {
+  :where(.ps-TextField__label) {
     font-size: var(--perses-font-size-sm);
     color: var(--perses-text-secondary);
   }
@@ -38,7 +38,7 @@
   }
 
   /* ---- Wrapper holds adornments + control, carries the border ---- */
-  .ps-TextField__wrapper {
+  :where(.ps-TextField__wrapper) {
     display: flex;
     align-items: center;
     gap: var(--perses-spacing-xs);
@@ -57,13 +57,13 @@
     align-items: flex-start;
   }
 
-  .ps-TextField__adornment {
+  :where(.ps-TextField__adornment) {
     display: inline-flex;
     align-items: center;
     color: var(--perses-text-secondary);
   }
 
-  .ps-TextField__input {
+  :where(.ps-TextField__input) {
     flex: 1;
     min-width: 0;
     border: none;
@@ -78,41 +78,41 @@
     cursor: not-allowed;
   }
 
-  textarea.ps-TextField__input {
+  :where(textarea.ps-TextField__input) {
     resize: vertical;
   }
 
   /* Sized via --ps-textfield-size: per-component --perses-textfield-size-<step>, else the shared control-size token. */
-  .ps-TextField[data-size='xs'] .ps-TextField__wrapper {
+  :where(.ps-TextField[data-size='xs'] .ps-TextField__wrapper) {
     --ps-textfield-size: var(--perses-textfield-size-xs, var(--perses-control-size-xs));
     padding: var(--perses-spacing-0) var(--perses-spacing-xs);
   }
-  .ps-TextField[data-size='xs'] .ps-TextField__input {
+  :where(.ps-TextField[data-size='xs'] .ps-TextField__input) {
     font-size: var(--perses-font-size-xs);
   }
 
-  .ps-TextField[data-size='sm'] .ps-TextField__wrapper {
+  :where(.ps-TextField[data-size='sm'] .ps-TextField__wrapper) {
     --ps-textfield-size: var(--perses-textfield-size-sm, var(--perses-control-size-sm));
     padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
   }
-  .ps-TextField[data-size='sm'] .ps-TextField__input {
+  :where(.ps-TextField[data-size='sm'] .ps-TextField__input) {
     font-size: var(--perses-font-size-xs);
   }
 
-  .ps-TextField[data-size='md'] .ps-TextField__wrapper {
+  :where(.ps-TextField[data-size='md'] .ps-TextField__wrapper) {
     --ps-textfield-size: var(--perses-textfield-size-md, var(--perses-control-size-md));
     padding: var(--perses-spacing-sm) var(--perses-spacing-md);
   }
-  .ps-TextField[data-size='md'] .ps-TextField__input {
+  :where(.ps-TextField[data-size='md'] .ps-TextField__input) {
     font-size: var(--perses-font-size-sm);
   }
 
-  .ps-TextField[data-size='lg'] .ps-TextField__wrapper {
+  :where(.ps-TextField[data-size='lg'] .ps-TextField__wrapper) {
     --ps-textfield-size: var(--perses-textfield-size-lg, var(--perses-control-size-lg));
     /* sm vertical padding so the md font + border stay inside min-height instead of overflowing it */
     padding: var(--perses-spacing-sm) var(--perses-spacing-lg);
   }
-  .ps-TextField[data-size='lg'] .ps-TextField__input {
+  :where(.ps-TextField[data-size='lg'] .ps-TextField__input) {
     font-size: var(--perses-font-size-md);
   }
 
@@ -133,7 +133,7 @@
     border-color: var(--perses-status-border-info);
   }
 
-  .ps-TextField__helper {
+  :where(.ps-TextField__helper) {
     font-size: var(--perses-font-size-xs);
     color: var(--perses-text-secondary);
   }

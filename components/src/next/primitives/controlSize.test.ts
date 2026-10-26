@@ -87,7 +87,7 @@ describe('control size tokens', () => {
 
   it('TextField wrapper min-height is driven by --ps-textfield-size', () => {
     const css = readCss('./TextField/textField.css');
-    const rule = ruleFor(css, '.ps-TextField__wrapper {');
+    const rule = ruleFor(css, ':where(.ps-TextField__wrapper)');
     expect(rule).toContain('min-height: var(--ps-textfield-size);');
     expect(css.match(/min-height:/g)).toHaveLength(1);
   });
