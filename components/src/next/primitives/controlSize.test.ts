@@ -70,4 +70,30 @@ describe('control size tokens', () => {
       );
     },
   );
+
+  it.each(SIZES)(
+    'TextField size %s sets --ps-textfield-size from the override, else --perses-control-size-%s',
+    (size) => {
+      const rule = ruleFor(
+        readCss('./TextField/textField.css'),
+        `.ps-TextField[data-size='${size}'] .ps-TextField__wrapper`,
+      );
+      expect(rule).toContain(
+        `--ps-textfield-size: var(--perses-textfield-size-${size}, var(--perses-control-size-${size}));`,
+      );
+      expect(rule).not.toContain('min-height:');
+    },
+  );
+
+  it('TextField wrapper min-height is driven by --ps-textfield-size', () => {
+    const css = readCss('./TextField/textField.css');
+    const rule = ruleFor(css, ':where(.ps-TextField__wrapper)');
+    expect(rule).toContain('min-height: var(--ps-textfield-size);');
+    expect(css.match(/min-height:/g)).toHaveLength(1);
+  });
+
+  it('TextField size lg keeps vertical padding at --perses-spacing-sm so content fits inside the min-height', () => {
+    const rule = ruleFor(readCss('./TextField/textField.css'), `.ps-TextField[data-size='lg'] .ps-TextField__wrapper`);
+    expect(rule).toContain('padding: var(--perses-spacing-sm) var(--perses-spacing-lg);');
+  });
 });

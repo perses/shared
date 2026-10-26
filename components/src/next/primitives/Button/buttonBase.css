@@ -32,15 +32,15 @@
   }
 
   .ps-ButtonBase:focus-visible {
-    outline-width: var(--perses-border-width-md);
+    outline-width: var(--perses-focus-ring-width);
     outline-style: solid;
-    outline-color: var(--perses-status-border-primary);
-    outline-offset: 2px;
+    outline-color: var(--perses-focus-ring-color);
+    outline-offset: var(--perses-focus-ring-offset);
   }
 
   .ps-ButtonBase:disabled,
   .ps-ButtonBase[aria-disabled='true'] {
-    opacity: 0.5;
+    opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
   }
 
