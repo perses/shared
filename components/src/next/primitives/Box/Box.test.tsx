@@ -16,6 +16,9 @@ import { render, screen } from '@testing-library/react';
 import { Box } from './Box';
 
 const RESPONSIVE_WIDTH = { default: '100%', md: 400, lg: 'calc(30em + 4px)' };
+const OUTER_PADDING = { md: 100 };
+const MIDDLE_PADDING = { md: '50%' };
+const INNER_PADDING = { md: 'sm' };
 
 describe('Box', () => {
   it('renders children', () => {
@@ -63,6 +66,48 @@ describe('Box', () => {
     const box = screen.getByTestId('box');
     expect(box).toHaveClass('ps-p');
     expect(box).toHaveStyle({ '--ps-p': 'var(--perses-spacing-md)' });
+  });
+
+  it('accepts scalar pixels and CSS strings for spacing props', () => {
+    render(
+      <Box p={24} px="5%" py="1rem" m="auto" mx={-8} my={0} gap="var(--custom-gap)">
+        Custom spacing
+      </Box>,
+    );
+    const box = screen.getByText('Custom spacing');
+    expect(box).toHaveStyle({
+      '--ps-p': '24px',
+      '--ps-px': '5%',
+      '--ps-py': '1rem',
+      '--ps-m': 'auto',
+      '--ps-mx': '-8px',
+      '--ps-my': '0px',
+      '--ps-gap': 'var(--custom-gap)',
+    });
+    for (const prop of ['p', 'px', 'py', 'm', 'mx', 'my', 'gap']) {
+      expect(box).not.toHaveAttribute(prop);
+    }
+  });
+
+  it('writes responsive padding on each nested box', () => {
+    render(
+      <Box p={OUTER_PADDING}>
+        Outer
+        <Box p={MIDDLE_PADDING}>
+          Middle
+          <Box p={INNER_PADDING}>Inner</Box>
+        </Box>
+      </Box>,
+    );
+    for (const name of ['Outer', 'Middle', 'Inner']) {
+      expect(screen.getByText(name)).toHaveClass('ps-p-md');
+      expect(screen.getByText(name)).not.toHaveClass('ps-p');
+      expect(screen.getByText(name)).not.toHaveClass('ps-p-lg');
+      expect(screen.getByText(name)).not.toHaveClass('ps-p-xl');
+    }
+    expect(screen.getByText('Outer')).toHaveStyle({ '--ps-p-md': '100px' });
+    expect(screen.getByText('Middle')).toHaveStyle({ '--ps-p-md': '50%' });
+    expect(screen.getByText('Inner')).toHaveStyle({ '--ps-p-md': 'var(--perses-spacing-sm)' });
   });
 
   it('applies directional spacing shorthands', () => {
@@ -147,7 +192,7 @@ describe('Box', () => {
       </Box>,
     );
     const box = screen.getByTestId('box');
-    expect(box).toHaveClass('ps-width');
+    expect(box).toHaveClass('ps-width', 'ps-width-md', 'ps-width-lg');
     expect(box).toHaveStyle({ '--ps-width': '100%' });
     expect(box).toHaveStyle({ '--ps-width-md': '400px' });
     expect(box).toHaveStyle({ '--ps-width-lg': 'calc(30em + 4px)' });
@@ -160,7 +205,7 @@ describe('Box', () => {
       </Box>,
     );
     const box = screen.getByTestId('box');
-    expect(box).toHaveClass('ps-p');
+    expect(box).toHaveClass('ps-p', 'ps-p-xs');
     expect(box).toHaveStyle({ '--ps-p': 'var(--perses-spacing-lg)' });
     expect(box).toHaveStyle({ '--ps-p-xs': 'var(--perses-spacing-sm)' });
   });
@@ -172,7 +217,7 @@ describe('Box', () => {
       </Box>,
     );
     const box = screen.getByTestId('box');
-    expect(box).toHaveClass('ps-display');
+    expect(box).toHaveClass('ps-display', 'ps-display-sm');
     expect(box).toHaveStyle({ '--ps-display': 'flex', '--ps-display-sm': 'block' });
   });
 

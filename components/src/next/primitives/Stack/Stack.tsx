@@ -15,16 +15,8 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 
-import {
-  applyStyleProps,
-  compileStyleProps,
-  displayProps,
-  flexboxProps,
-  isResponsiveValue,
-  sizingProps,
-  spacingProps,
-} from '../system';
-import type { DisplayProps, FlexboxProps, Responsive, SizingProps, SpacingProps, SpacingToken } from '../system';
+import { applyStyleProps, compileStyleProps, displayProps, flexboxProps, sizingProps, spacingProps } from '../system';
+import type { DisplayProps, FlexboxProps, Responsive, SizingProps, SpacingProps, SpacingValue } from '../system';
 
 import './stack.css';
 import '../system/layout.css';
@@ -39,8 +31,8 @@ export interface StackProps
     Pick<DisplayProps, 'overflow'> {
   /** Main axis of the stack. Defaults to `column`. */
   direction?: Responsive<'row' | 'column'>;
-  /** Space between children, as a spacing token. */
-  spacing?: Responsive<SpacingToken>;
+  /** Space between children: a spacing token, numeric pixels, or a CSS spacing value. */
+  spacing?: Responsive<SpacingValue>;
 }
 
 // Only `overflow` from the display category: `display` stays fixed to flex by the stylesheet, so
@@ -51,17 +43,6 @@ const STACK_STYLE_PROPS = compileStyleProps([
   flexboxProps,
   { overflow: displayProps.overflow },
 ]);
-
-// A responsive `direction` without a `default` breakpoint leaves the base unset, so the engine's
-// `revert` fallback resolves to the UA `row` instead of the documented `column`. Seed `column`.
-function withDirectionDefault(
-  direction: Responsive<'row' | 'column'> | undefined,
-): Responsive<'row' | 'column'> | undefined {
-  if (isResponsiveValue(direction) && direction.default === undefined) {
-    return { ...direction, default: 'column' };
-  }
-  return direction;
-}
 
 /**
  * Lays out its children in a flex row or column. It is a purely presentational `div`: it keeps DOM order,
@@ -76,11 +57,7 @@ export const Stack = forwardRef<HTMLDivElement, StackProps>(function Stack(
     className: styleClassName,
     style: computedStyle,
     rest: domProps,
-  } = applyStyleProps(
-    { ...rest, flexDirection: withDirectionDefault(direction), gap: spacing },
-    STACK_STYLE_PROPS,
-    style,
-  );
+  } = applyStyleProps({ ...rest, flexDirection: direction, gap: spacing }, STACK_STYLE_PROPS, style);
 
   return (
     <div ref={ref} {...domProps} className={clsx('ps-Stack', styleClassName, className)} style={computedStyle}>

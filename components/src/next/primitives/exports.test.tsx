@@ -27,7 +27,7 @@ import type {
   IconProps,
   Size,
   SortDirection,
-  SpacingToken,
+  SpacingValue,
   SpinnerProps,
   StackProps,
   Status,
@@ -37,8 +37,8 @@ import type {
   TableRowProps,
   TextFieldProps,
   TextFieldStyle,
-  TextProps,
   TextHelperProps,
+  TextProps,
   TooltipProps,
 } from './index';
 import {
@@ -62,8 +62,8 @@ import {
   TableRow,
   TableRowExpandButton,
   TableSortLabel,
-  TextField,
   Text,
+  TextField,
   TextHelper,
   Tooltip,
 } from './index';
@@ -99,8 +99,9 @@ describe('primitives barrel exports', () => {
   it('exports their prop types', () => {
     const alertProps: AlertProps = {};
     const severity: AlertSeverity = 'info';
-    const boxProps: BoxProps = {};
-    const spacingToken: SpacingToken = 'md';
+    const spacingToken: SpacingValue = 'md';
+    const spacingValue: SpacingValue = 100;
+    const boxProps: BoxProps = { p: { default: spacingToken, md: spacingValue, xl: '50%' } };
     const buttonProps: ButtonProps = {};
     const variant: ButtonVariant = 'solid';
     const color: ColorVariant | Status = 'primary';
@@ -133,6 +134,7 @@ describe('primitives barrel exports', () => {
     expect(severity).toBe('info');
     expect(boxProps).toBeDefined();
     expect(spacingToken).toBe('md');
+    expect(spacingValue).toBe(100);
     expect(buttonProps).toBeDefined();
     expect(variant).toBe('solid');
     expect(color).toBe('primary');

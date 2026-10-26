@@ -13,25 +13,32 @@
 
 import { tokens } from '@perses-dev/design-tokens';
 import type { SpacingScale } from '@perses-dev/design-tokens';
+import type { CSSProperties } from 'react';
 
 import type { Responsive } from './responsive';
+import { lengthTransform } from './styleProps';
 import type { StyleValueTransform } from './styleProps';
 
-export type SpacingToken = SpacingScale;
+export type SpacingValue = SpacingScale | Exclude<CSSProperties['padding'], undefined>;
 
-export const spacingTransform: StyleValueTransform<SpacingToken> = (token) => tokens.spacing[token];
-
-export interface SpacingProps {
-  p?: Responsive<SpacingToken>;
-  px?: Responsive<SpacingToken>;
-  py?: Responsive<SpacingToken>;
-  m?: Responsive<SpacingToken>;
-  mx?: Responsive<SpacingToken>;
-  my?: Responsive<SpacingToken>;
-  gap?: Responsive<SpacingToken>;
+function isSpacingToken(value: SpacingValue): value is SpacingScale {
+  return typeof value === 'string' && Object.hasOwn(tokens.spacing, value);
 }
 
-export const spacingProps: Record<keyof SpacingProps, StyleValueTransform<SpacingToken>> = {
+export const spacingTransform: StyleValueTransform<SpacingValue> = (value) =>
+  isSpacingToken(value) ? tokens.spacing[value] : lengthTransform(value);
+
+export interface SpacingProps {
+  p?: Responsive<SpacingValue>;
+  px?: Responsive<SpacingValue>;
+  py?: Responsive<SpacingValue>;
+  m?: Responsive<SpacingValue>;
+  mx?: Responsive<SpacingValue>;
+  my?: Responsive<SpacingValue>;
+  gap?: Responsive<SpacingValue>;
+}
+
+export const spacingProps: Record<keyof SpacingProps, StyleValueTransform<SpacingValue>> = {
   p: spacingTransform,
   px: spacingTransform,
   py: spacingTransform,
