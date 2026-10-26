@@ -19,15 +19,19 @@ import { Grid } from './Grid';
 import { GridItem } from './GridItem';
 
 const outline: CSSProperties = {
-  border: '1px solid var(--perses-border-default)',
+  border: 'var(--perses-border-width-sm) solid var(--perses-border-default)',
   background: 'var(--perses-bg-surface)',
 };
 const cell: CSSProperties = {
   background: 'var(--perses-bg-sunken)',
-  padding: '0.5rem',
+  padding: 'var(--perses-spacing-sm)',
   textAlign: 'center',
 };
-const field: CSSProperties = { ...outline, background: 'var(--perses-bg-sunken)', padding: '0.5rem' };
+const field: CSSProperties = {
+  ...outline,
+  background: 'var(--perses-bg-sunken)',
+  padding: 'var(--perses-spacing-sm)',
+};
 
 const WIDE_SPAN = { default: 19, md: 9 } as const;
 const NARROW_SPAN = { default: 5, md: 3 } as const;
@@ -149,7 +153,7 @@ const formCode = `<Grid spacing="lg">
 
 export const FormLayout: Story = () => (
   <Layout>
-    <Sample title="Form Layout" code={formCode}>
+    <Sample title="Form layout" code={formCode}>
       <Grid spacing="lg" p="sm" style={outline}>
         <GridItem size={8} style={field}>
           Header name

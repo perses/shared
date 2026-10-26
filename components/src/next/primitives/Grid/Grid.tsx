@@ -25,22 +25,12 @@ import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- Registers this component's styles.
 import './grid.css';
 
-/** Inline style for `Grid`, including the custom property that sets the column count. */
-export interface GridStyle extends CSSProperties {
-  '--ps-grid-columns'?: number;
-}
-
 export interface GridProps
-  extends
-    Omit<HTMLAttributes<HTMLDivElement>, 'style'>,
-    Omit<SpacingProps, 'gap'>,
-    SizingProps,
-    Pick<DisplayProps, 'overflow'> {
+  extends HTMLAttributes<HTMLDivElement>, Omit<SpacingProps, 'gap'>, SizingProps, Pick<DisplayProps, 'overflow'> {
   /** Number of equal-width columns. Defaults to `12`. */
   columns?: number;
   /** Space between rows and columns, as a spacing token. */
   spacing?: Responsive<SpacingToken>;
-  style?: GridStyle;
 }
 
 const GRID_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
@@ -64,7 +54,10 @@ export const Grid = forwardRef<HTMLDivElement, GridProps>(function Grid(
     className: styleClassName,
     style: computedStyle,
     rest: domProps,
-  } = applyStyleProps({ ...rest, gap: spacing }, GRID_STYLE_PROPS, { '--ps-grid-columns': columns, ...style });
+  } = applyStyleProps({ ...rest, gap: spacing }, GRID_STYLE_PROPS, {
+    '--ps-grid-columns': columns,
+    ...style,
+  } as CSSProperties);
 
   return (
     <div ref={ref} {...domProps} className={clsx('ps-Grid', styleClassName, className)} style={computedStyle}>

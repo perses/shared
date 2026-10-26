@@ -20,7 +20,7 @@ import { GridItem } from './GridItem';
 const RESPONSIVE_SPACING = { default: 'sm', md: 'xl' } as const;
 const RESPONSIVE_SIZE = { default: 12, md: 6 } as const;
 const PARTIAL_RESPONSIVE_SIZE = { md: 6, xl: undefined } as const;
-const STYLE_OVERRIDE = { '--ps-grid-columns': 6, gap: '99px' } as const;
+const STYLE_OVERRIDE = { gap: '99px' } as const;
 const ITEM_STYLE_OVERRIDE = { gridColumn: 'span 2' } as const;
 const CENTERED = { textAlign: 'center' } as const;
 const END = { textAlign: 'end' } as const;
@@ -95,7 +95,7 @@ describe('Grid', () => {
       </Grid>,
     );
     const grid = screen.getByTestId('grid');
-    expect(grid.style.getPropertyValue('--ps-grid-columns')).toBe('6');
+    expect(grid.style.getPropertyValue('--ps-grid-columns')).toBe('12');
     expect(grid.style.gap).toBe('99px');
     expect(grid).toHaveClass('ps-Grid');
     expect(grid).toHaveClass('custom');
