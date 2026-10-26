@@ -15,6 +15,7 @@ export type Breakpoint = 'default' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 export type ResponsiveObject<T> = Partial<Record<Breakpoint, T>>;
 
+/** A scalar base value or mobile-first breakpoint overrides, resolved through the CSS cascade. */
 export type Responsive<T> = T | ResponsiveObject<T>;
 
 export function isResponsiveValue<T>(value: Responsive<T> | undefined): value is ResponsiveObject<T> {

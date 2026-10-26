@@ -20,6 +20,7 @@ import { Stack } from './Stack';
 const RESPONSIVE_DIRECTION = { default: 'column', md: 'row' } as const;
 const PARTIAL_RESPONSIVE_DIRECTION = { md: 'row' } as const;
 const RESPONSIVE_SPACING = { default: 'sm', md: 'xl' } as const;
+const MIXED_RESPONSIVE_SPACING = { default: 'sm', md: 24, lg: '5%' };
 const STYLE_OVERRIDE = { gap: '99px' };
 
 describe('Stack', () => {
@@ -78,6 +79,23 @@ describe('Stack', () => {
     expect(stack).toHaveStyle({ '--ps-gap': 'var(--perses-spacing-lg)' });
   });
 
+  it.each([
+    [24, '24px'],
+    ['5%', '5%'],
+  ] as const)('accepts scalar spacing %s', (spacing, expected) => {
+    render(<Stack spacing={spacing}>Custom gap</Stack>);
+    expect(screen.getByText('Custom gap')).toHaveStyle({ '--ps-gap': expected });
+  });
+
+  it('mixes tokens, pixels and CSS strings in responsive spacing', () => {
+    render(<Stack spacing={MIXED_RESPONSIVE_SPACING}>Responsive gap</Stack>);
+    expect(screen.getByText('Responsive gap')).toHaveStyle({
+      '--ps-gap': 'var(--perses-spacing-sm)',
+      '--ps-gap-md': '24px',
+      '--ps-gap-lg': '5%',
+    });
+  });
+
   it('forwards alignItems and justifyContent', () => {
     render(
       <Stack data-testid="stack" alignItems="center" justifyContent="space-between">
@@ -116,16 +134,17 @@ describe('Stack', () => {
     });
   });
 
-  it('seeds a column base for a responsive direction that omits the default breakpoint', () => {
+  it('leaves the column default to the stylesheet until the first responsive direction', () => {
     render(
       <Stack data-testid="stack" direction={PARTIAL_RESPONSIVE_DIRECTION}>
         Content
       </Stack>,
     );
-    expect(screen.getByTestId('stack')).toHaveStyle({
-      '--ps-flex-direction': 'column',
-      '--ps-flex-direction-md': 'row',
-    });
+    const stack = screen.getByTestId('stack');
+    expect(stack).toHaveClass('ps-flex-direction-md');
+    expect(stack).not.toHaveClass('ps-flex-direction');
+    expect(stack.style.getPropertyValue('--ps-flex-direction')).toBe('');
+    expect(stack).toHaveStyle({ '--ps-flex-direction-md': 'row' });
   });
 
   it('creates responsive spacing variables', () => {
@@ -134,6 +153,7 @@ describe('Stack', () => {
         Content
       </Stack>,
     );
+    expect(screen.getByTestId('stack')).toHaveClass('ps-gap', 'ps-gap-md');
     expect(screen.getByTestId('stack')).toHaveStyle({
       '--ps-gap': 'var(--perses-spacing-sm)',
       '--ps-gap-md': 'var(--perses-spacing-xl)',

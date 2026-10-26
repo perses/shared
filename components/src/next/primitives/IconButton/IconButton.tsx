@@ -41,8 +41,9 @@ export interface IconButtonProps
 }
 
 /**
- * Spacing, sizing and display props are responsive. When you pass a responsive object, include `default`.
- * Breakpoints with no value fall back to the browser's default, not the component's own styling.
+ * Spacing, sizing and display props accept mobile-first responsive objects with an optional `default`.
+ * Values persist at larger breakpoints until overridden. Below the first provided breakpoint,
+ * the component's own styling is preserved.
  */
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(function IconButton(
   { variant = 'ghost', color = 'default', size = 'md', className, style, children, ...props },

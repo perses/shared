@@ -14,4 +14,16 @@
 /** @type {import('@ladle/react').UserConfig} */
 export default {
   stories: 'src/next/**/*.stories.tsx',
+  addons: {
+    width: {
+      // Each preset sits within the matching Perses media-query range.
+      options: {
+        xs: 414,
+        sm: 640,
+        md: 1024,
+        lg: 1280,
+        xl: 1536,
+      },
+    },
+  },
 };

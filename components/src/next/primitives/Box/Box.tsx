@@ -22,7 +22,7 @@ import './box.css';
 import '../system/layout.css';
 import '../system/spacing.css';
 
-export type { Breakpoint, Responsive, ResponsiveObject, SpacingToken } from '../system';
+export type { Breakpoint, Responsive, ResponsiveObject, SpacingValue } from '../system';
 
 export interface BoxProps
   extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, FlexboxProps, DisplayProps {}

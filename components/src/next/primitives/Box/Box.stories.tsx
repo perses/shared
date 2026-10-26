@@ -12,12 +12,13 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
+import type { SpacingScale } from '@perses-dev/design-tokens';
 import type { CSSProperties } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
 import type { SampleFile } from '../../stories/Sample';
 import { Box } from './Box';
-import type { Responsive as ResponsiveValue, SpacingToken } from './Box';
+import type { Responsive as ResponsiveValue, SpacingValue } from './Box';
 
 // Box-demo chrome (not part of the Box API). Colors use Perses tokens so they follow Ladle's
 // light/dark toggle; the Sample/Stack scaffolding lives in stories/Sample. Each Sample's `code`
@@ -63,7 +64,7 @@ export const Basic: Story = () => (
 );
 Basic.storyName = 'Basic';
 
-const spacingScale: SpacingToken[] = ['0', 'xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'];
+const spacingScale: SpacingScale[] = ['0', 'xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'];
 
 const paddingScaleCode = `// p accepts any spacing token: 0, xs, sm, md, lg, xl, 2xl, 3xl, 4xl
 <Box p="md">Content</Box>`;
@@ -234,7 +235,7 @@ const responsiveWidth: ResponsiveValue<CSSProperties['width']> = {
 };
 const responsiveDisplay: ResponsiveValue<CSSProperties['display']> = { default: 'block', md: 'flex' };
 const responsiveDirection: ResponsiveValue<CSSProperties['flexDirection']> = { default: 'column', md: 'row' };
-const responsivePadding: ResponsiveValue<SpacingToken> = { default: 'sm', md: 'lg', xl: '4xl' };
+const responsivePadding: ResponsiveValue<SpacingValue> = { default: 'sm', md: 24, xl: '2rem' };
 
 const respWidthCode = `<Box width={{ default: '100%', sm: '80%', md: 400, lg: 'calc(30em + 4px)' }} p="md">
   I resize with the viewport.
@@ -249,7 +250,7 @@ const respLayoutCode = `<Box
   <Box flex="1" p="md">Item 2</Box>
   <Box flex="1" p="md">Item 3</Box>
 </Box>`;
-const respSpacingCode = `<Box p={{ default: 'sm', md: 'lg', xl: '4xl' }}>Padding grows at wider breakpoints.</Box>`;
+const respSpacingCode = `<Box p={{ default: 'sm', md: 24, xl: '2rem' }}>Padding grows at wider breakpoints.</Box>`;
 
 const cardJsx = `<Box display="flex" flexDirection={direction} gap="md" p="lg" maxWidth={520}>
   <Box flex="1" p="md">Header</Box>
@@ -267,15 +268,16 @@ export const Responsive: Story = () => (
       <strong>Every style prop accepts a responsive object. Resize the viewport to see the values change.</strong>
       <ul>
         <li>
-          <code>default</code> — base / fallback
+          <code>default</code> — optional base value
         </li>
         <li>
-          <code>xs</code> ≤ 599 · <code>sm</code> 600–899 · <code>md</code> 900–1199 · <code>lg</code> 1200–1535 ·{' '}
-          <code>xl</code> ≥ 1536 (px)
+          <code>xs</code> ≥ 0 · <code>sm</code> ≥ 600 · <code>md</code> ≥ 900 · <code>lg</code> ≥ 1200 · <code>xl</code>{' '}
+          ≥ 1536 (px)
         </li>
       </ul>
       <em>
-        A breakpoint with no value falls back to <code>default</code>, not the next-smaller one.
+        Values apply from their breakpoint upward until explicitly overridden. Missing breakpoints keep the previous
+        value; without a base value, component styling is preserved below the first breakpoint.
       </em>
     </div>
 
@@ -299,7 +301,7 @@ export const Responsive: Story = () => (
       </Box>
     </Sample>
 
-    <Sample title="Responsive spacing" code={respSpacingCode}>
+    <Sample title="Responsive spacing (tokens, numeric pixels, and CSS lengths)" code={respSpacingCode}>
       <Box p={responsivePadding} style={outline}>
         Padding grows at wider breakpoints.
       </Box>
@@ -318,3 +320,38 @@ export const Responsive: Story = () => (
   </Stack>
 );
 Responsive.storyName = 'Responsive';
+
+const outerPadding = { xs: 'sm', md: 5 };
+const innerPadding = { md: 'sm' };
+const middlePadding = { md: '5%' };
+const nestingCode = `const outerPadding = { md: 5 };
+const middlePadding = { md: '5%' };
+const innerPadding = { md: 'sm' };
+
+<Box p={outerPadding}>
+  <Box p={middlePadding}>
+    <Box p={innerPadding}>A box</Box>
+  </Box>
+</Box>`;
+
+const boxResponsiveWidth = { default: 600, md: 400 };
+
+export const Nesting: Story = () => (
+  <Stack>
+    <p>
+      Spacing accepts tokens, numeric pixels, or CSS strings. At <code>md</code> and wider (≥ 900 px), the outer box
+      uses 5 px, the middle box uses 5% of its containing block’s width, and the inner box uses the <code>sm</code>{' '}
+      token. These values remain active at <code>lg</code> and <code>xl</code>.
+    </p>
+    <Sample title="Nested responsive padding with mixed spacing values" code={nestingCode}>
+      <Box p={outerPadding} width={boxResponsiveWidth} style={outline}>
+        <Box p={middlePadding} style={panel}>
+          <Box p={innerPadding} style={fill} width={100}>
+            A box
+          </Box>
+        </Box>
+      </Box>
+    </Sample>
+  </Stack>
+);
+Nesting.storyName = 'Nesting';

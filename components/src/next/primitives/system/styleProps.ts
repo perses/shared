@@ -36,20 +36,24 @@ function cssName(prop: string): string {
 }
 
 function writeStyleProp(
-  varPrefix: string,
+  entry: CompiledStyleProp,
   value: Responsive<unknown>,
-  transform: (value: unknown) => string,
   target: Record<string, string>,
+  classNames: string[],
 ): void {
+  const { className, varPrefix, transform } = entry;
   // Common case: a single base value, written to `--ps-<name>` with no intermediate allocation.
   if (!isResponsiveValue(value)) {
     target[varPrefix] = transform(value);
+    classNames.push(className);
     return;
   }
   // Responsive object: base goes to `--ps-<name>`, every other breakpoint to `--ps-<name>-<bp>`.
   for (const [breakpoint, breakpointValue] of Object.entries(value)) {
     if (breakpointValue === undefined) continue;
-    target[breakpoint === 'default' ? varPrefix : `${varPrefix}-${breakpoint}`] = transform(breakpointValue);
+    const suffix = breakpoint === 'default' ? '' : `-${breakpoint}`;
+    target[`${varPrefix}${suffix}`] = transform(breakpointValue);
+    classNames.push(`${className}${suffix}`);
   }
 }
 
@@ -114,8 +118,7 @@ export function applyStyleProps<Props extends Record<string, unknown>, K extends
   for (const entry of compiled.props) {
     const value = props[entry.prop] as Responsive<unknown> | undefined;
     if (value === undefined) continue;
-    classNames.push(entry.className);
-    writeStyleProp(entry.varPrefix, value, entry.transform, computed);
+    writeStyleProp(entry, value, computed, classNames);
   }
 
   if (style) Object.assign(computed, style);
