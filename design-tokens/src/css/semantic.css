@@ -32,8 +32,9 @@
    *   border-control — visible boundaries of form controls
    */
 
-  /* ---- Light mode (default) ---- */
-  :root {
+  /* ---- Light mode: document default and explicit boundaries ---- */
+  :root,
+  [data-perses-mode='light'] {
     /* Background: Elevation */
     --perses-bg-default: var(--perses-color-white);
     --perses-bg-surface: var(--perses-color-gray-50);

@@ -14,8 +14,9 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-import { blue, green, gray, orange, purple, red, white, black } from '../colors';
 import type { PersesColor } from '../colors';
+import { black, blue, gray, green, orange, purple, red, white } from '../colors';
+import { tokens } from '../tokens';
 
 const cssDir = resolve(__dirname, '../css');
 
@@ -170,11 +171,26 @@ describe('CSS primitive dimension variables', () => {
 
 describe('CSS semantic variables', () => {
   const semanticCss = readCss('semantic.css');
+  const semanticNames = [
+    ...Object.values(tokens.bg),
+    tokens.border.default,
+    tokens.border.control,
+    ...Object.values(tokens.text),
+    ...Object.values(tokens.tooltip),
+    ...Object.values(tokens.status).flatMap((role) => Object.values(role)),
+  ]
+    .map((reference) => reference.slice(4, -1))
+    .toSorted();
 
-  it('defines light mode defaults on :root', () => {
-    expect(semanticCss).toContain(':root {');
-    expect(semanticCss).toContain('--perses-bg-default');
-    expect(semanticCss).toContain('--perses-text-primary');
+  it.each([':root', "[data-perses-mode='light']", "[data-perses-mode='dark']"])(
+    '%s declares every public semantic token',
+    (selector) => {
+      expect([...declarationsFor(semanticCss, selector).keys()].toSorted()).toEqual(semanticNames);
+    },
+  );
+
+  it('explicit light boundaries use the same mapping as the document default', () => {
+    expect(declarationsFor(semanticCss, "[data-perses-mode='light']")).toEqual(declarationsFor(semanticCss, ':root'));
   });
 
   it('defines dark mode via data attribute', () => {
@@ -228,5 +244,28 @@ describe('CSS semantic variables', () => {
       }
       expect(semanticCss).toContain(`--perses-status-bg-${role}-hover`);
     }
+  });
+
+  it.each([
+    [
+      'light',
+      {
+        '--perses-bg-default': 'var(--perses-color-white)',
+        '--perses-text-primary': 'var(--perses-color-gray-800)',
+        '--perses-status-solid-primary': 'var(--perses-color-blue-500)',
+        '--perses-status-text-default': 'var(--perses-text-secondary)',
+      },
+    ],
+    [
+      'dark',
+      {
+        '--perses-bg-default': 'var(--perses-color-gray-900)',
+        '--perses-text-primary': 'var(--perses-color-white)',
+        '--perses-status-solid-primary': 'var(--perses-color-blue-400)',
+        '--perses-status-text-default': 'var(--perses-text-primary)',
+      },
+    ],
+  ])('%s boundaries map representative palette and semantic aliases', (mode, expected) => {
+    expect(Object.fromEntries(declarationsFor(semanticCss, `[data-perses-mode='${mode}']`))).toMatchObject(expected);
   });
 });
