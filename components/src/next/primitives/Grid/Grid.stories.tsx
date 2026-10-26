@@ -12,10 +12,22 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
+import type { CSSProperties } from 'react';
 
 import { Sample, Stack as Layout } from '../../stories/Sample';
 import { Grid } from './Grid';
 import { GridItem } from './GridItem';
+
+const outline: CSSProperties = {
+  border: '1px solid var(--perses-border-default)',
+  background: 'var(--perses-bg-surface)',
+};
+const cell: CSSProperties = {
+  background: 'var(--perses-bg-sunken)',
+  padding: '0.5rem',
+  textAlign: 'center',
+};
+const field: CSSProperties = { ...outline, background: 'var(--perses-bg-sunken)', padding: '0.5rem' };
 
 const WIDE_SPAN = { default: 19, md: 9 } as const;
 const NARROW_SPAN = { default: 5, md: 3 } as const;
@@ -38,14 +50,14 @@ export const Basic: Story = () => (
       behave exactly as documented on <code>Box</code>.
     </p>
     <Sample title="Minimal usage" code={basicCode}>
-      <Grid spacing="lg" p="sm" className="story-grid-outline">
-        <GridItem size={12} className="story-grid-cell">
+      <Grid spacing="lg" p="sm" style={outline}>
+        <GridItem size={12} style={cell}>
           Title (12)
         </GridItem>
-        <GridItem size={4} className="story-grid-cell">
+        <GridItem size={4} style={cell}>
           Label (4)
         </GridItem>
-        <GridItem size={8} className="story-grid-cell">
+        <GridItem size={8} style={cell}>
           Field (8)
         </GridItem>
       </Grid>
@@ -61,29 +73,31 @@ const columnsCode = `<Grid spacing="sm">
   …
 </Grid>
 
-{/* fractional MUI spans (9.5 / 2.5) → integer spans on a 24-column grid */}
+{/* A 24-column grid allows finer spans than 12 columns.
+    default: the span used on all screen widths, unless a breakpoint below overrides it.
+    md: the span used only on screens 900–1199px wide. */}
 <Grid columns={24} spacing="sm">
-  <GridItem size={{ default: 19, md: 9 }}>19 → 9</GridItem>
-  <GridItem size={{ default: 5, md: 3 }}>5 → 3</GridItem>
+  <GridItem size={{ default: 19, md: 9 }}>Wide: 19 columns, 9 at md</GridItem>
+  <GridItem size={{ default: 5, md: 3 }}>Narrow: 5 columns, 3 at md</GridItem>
 </Grid>`;
 
 export const Columns: Story = () => (
   <Layout>
     <Sample title="Spans wrap onto new rows when they exceed 12" code={columnsCode}>
       <Layout>
-        <Grid spacing="sm" p="sm" className="story-grid-outline">
+        <Grid spacing="sm" p="sm" style={outline}>
           {SPAN_CELLS.map(({ id, span }) => (
-            <GridItem key={id} size={span} className="story-grid-cell">
+            <GridItem key={id} size={span} style={cell}>
               {span}
             </GridItem>
           ))}
         </Grid>
-        <Grid columns={24} spacing="sm" p="sm" className="story-grid-outline">
-          <GridItem size={WIDE_SPAN} className="story-grid-cell">
-            19 → 9 of 24
+        <Grid columns={24} spacing="sm" p="sm" style={outline}>
+          <GridItem size={WIDE_SPAN} style={cell}>
+            Wide: 19 of 24 columns; 9 columns at md (900–1199px)
           </GridItem>
-          <GridItem size={NARROW_SPAN} className="story-grid-cell">
-            5 → 3 of 24
+          <GridItem size={NARROW_SPAN} style={cell}>
+            Narrow: 5 of 24 columns; 3 columns at md (900–1199px)
           </GridItem>
         </Grid>
       </Layout>
@@ -105,16 +119,16 @@ const nestedCode = `<Grid spacing="lg">
 export const Nested: Story = () => (
   <Layout>
     <Sample title="A GridItem can host another Grid" code={nestedCode}>
-      <Grid spacing="lg" p="sm" className="story-grid-outline">
-        <GridItem size={4} className="story-grid-cell">
+      <Grid spacing="lg" p="sm" style={outline}>
+        <GridItem size={4} style={cell}>
           Variable (4)
         </GridItem>
         <GridItem size={8}>
-          <Grid spacing="sm" p="sm" className="story-grid-outline">
-            <GridItem size={6} className="story-grid-cell">
+          <Grid spacing="sm" p="sm" style={outline}>
+            <GridItem size={6} style={cell}>
               Name (6)
             </GridItem>
-            <GridItem size={6} className="story-grid-cell">
+            <GridItem size={6} style={cell}>
               Value (6)
             </GridItem>
           </Grid>
@@ -135,21 +149,21 @@ const formCode = `<Grid spacing="lg">
 
 export const FormLayout: Story = () => (
   <Layout>
-    <Sample title="Form rows align without padding hacks" code={formCode}>
-      <Grid spacing="lg" p="sm" className="story-grid-outline">
-        <GridItem size={8} className="story-grid-field">
+    <Sample title="Form Layout" code={formCode}>
+      <Grid spacing="lg" p="sm" style={outline}>
+        <GridItem size={8} style={field}>
           Header name
         </GridItem>
-        <GridItem size={3} className="story-grid-field">
+        <GridItem size={3} style={field}>
           Header value
         </GridItem>
-        <GridItem size={1} className="story-grid-cell">
+        <GridItem size={1} style={cell}>
           ×
         </GridItem>
-        <GridItem size={4} className="story-grid-field">
+        <GridItem size={4} style={field}>
           Label
         </GridItem>
-        <GridItem size={12} className="story-grid-field">
+        <GridItem size={12} style={field}>
           Input
         </GridItem>
       </Grid>

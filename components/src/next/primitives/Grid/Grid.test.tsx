@@ -199,7 +199,6 @@ describe('GridItem', () => {
   });
 });
 
-// One scenario per audited MUI Grid shape so the migration contract is pinned.
 describe('Grid migration scenarios', () => {
   it('LayoutEditor: 12 / 4+8 rows with a nested grid inside an item', () => {
     render(
@@ -219,7 +218,7 @@ describe('Grid migration scenarios', () => {
     expect(screen.getByTestId('inner').style.getPropertyValue('--ps-gap')).toBe('var(--perses-spacing-sm)');
   });
 
-  it('HTTPSettingsEditor: 8 / 3 / 1 and 4 / 12 rows without padding hacks', () => {
+  it('HTTPSettingsEditor: 8 / 3 / 1 and 4 / 12 rows', () => {
     render(
       <Grid spacing="lg">
         <GridItem size={8}>Key</GridItem>

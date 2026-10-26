@@ -43,7 +43,6 @@ export interface GridProps
   style?: GridStyle;
 }
 
-// Only `overflow` from the display category: `display` stays fixed to grid by the stylesheet.
 const GRID_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
 
 /**
