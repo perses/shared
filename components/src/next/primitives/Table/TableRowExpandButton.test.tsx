@@ -51,9 +51,18 @@ describe('TableRowExpandButton', () => {
     expect(screen.getByRole('button')).toBeInTheDocument();
   });
 
-  it('reflects the expanded prop', () => {
-    render(<TableRowExpandButton aria-label="Collapse row" expanded />);
-    expect(screen.getByRole('button')).toHaveAttribute('data-expanded', 'true');
+  it.each([false, undefined])('removes the expanded marker when expanded becomes %s', (expanded) => {
+    const { rerender } = render(<TableRowExpandButton aria-label="Row details" expanded />);
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('data-expanded', '');
+    expect(button).toHaveAttribute('aria-expanded', 'true');
+
+    rerender(<TableRowExpandButton aria-label="Row details" expanded={expanded} />);
+    expect(button).not.toHaveAttribute('data-expanded');
+    expect(button).toHaveAttribute('aria-expanded', 'false');
+
+    rerender(<TableRowExpandButton aria-label="Row details" expanded />);
+    expect(button).toHaveAttribute('data-expanded', '');
   });
 
   it('calls onClick when clicked', () => {

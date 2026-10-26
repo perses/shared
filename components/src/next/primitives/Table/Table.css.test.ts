@@ -17,19 +17,12 @@ import { resolve } from 'path';
 import { within } from '@testing-library/react';
 
 const tableCss = readFileSync(resolve(__dirname, './table.css'), 'utf-8');
-
-function ruleFor(css: string, selector: string): string {
-  const start = css.indexOf(selector);
-  if (start < 0) throw new Error(`missing rule ${selector}`);
-  const open = css.indexOf('{', start);
-  if (open < 0) throw new Error(`missing rule body for ${selector}`);
-  let depth = 0;
-  for (let index = open; index < css.length; index++) {
-    if (css[index] === '{') depth++;
-    else if (css[index] === '}' && --depth === 0) return css.slice(open + 1, index);
-  }
-  throw new Error(`unterminated rule for ${selector}`);
-}
+const booleanMarkers = [
+  { marker: undefined, present: false },
+  { marker: '', present: true },
+  { marker: 'true', present: true },
+  { marker: 'false', present: true },
+];
 
 describe('Table CSS contracts', () => {
   const style = document.createElement('style');
@@ -63,26 +56,31 @@ describe('Table CSS contracts', () => {
   });
 
   it('gives fixed-layout tables an explicit, overridable width', () => {
-    const rule = ruleFor(tableCss, ".ps-Table[data-table-layout='fixed']");
-    expect(rule).toContain('min-width: 0;');
-    expect(rule).toContain('width: 100%;');
-    expect(rule).toContain('table-layout: fixed;');
+    container.innerHTML = '<table class="ps-Table" data-table-layout="fixed" aria-label="Fixed table"></table>';
+    const table = within(container).getByRole('table', { name: 'Fixed table' });
+    expect(getComputedStyle(table).minWidth).toBe('0');
+    expect(getComputedStyle(table).width).toBe('100%');
+    expect(getComputedStyle(table).tableLayout).toBe('fixed');
+
+    table.style.width = '80px';
+    expect(getComputedStyle(table).width).toBe('80px');
   });
 
   it('uses a small nonwrapping width hint for fit-content cells without changing their padding', () => {
     container.innerHTML = `
       <table class="ps-Table" data-table-layout="auto">
         <thead class="ps-Table__head"><tr>
-          <th class="ps-Table__cell" data-fit-content="true">Controls header</th>
+          <th class="ps-Table__cell" data-fit-content="">Controls header</th>
           <th class="ps-Table__cell">Name</th>
         </tr></thead>
         <tbody class="ps-Table__body"><tr>
-          <td class="ps-Table__cell" data-fit-content="true">Controls</td>
+          <td class="ps-Table__cell" data-fit-content="">Controls</td>
           <td class="ps-Table__cell">Data</td>
-          <td class="ps-Table__cell" data-fit-content="false">Opt out</td>
+          <td class="ps-Table__cell" data-fit-content="false">False string</td>
+                    <td class="ps-Table__cell" data-fit-content="true">Legacy true</td>
         </tr></tbody>
         <tfoot class="ps-Table__footer"><tr>
-          <td class="ps-Table__cell" data-fit-content="true">Footer control</td>
+          <td class="ps-Table__cell" data-fit-content="">Footer control</td>
         </tr></tfoot>
       </table>
     `;
@@ -93,6 +91,8 @@ describe('Table CSS contracts', () => {
       cells.getByRole('columnheader', { name: 'Controls header' }),
       cells.getByRole('cell', { name: 'Controls' }),
       cells.getByRole('cell', { name: 'Footer control' }),
+      cells.getByRole('cell', { name: 'False string' }),
+      cells.getByRole('cell', { name: 'Legacy true' }),
     ]) {
       const cellStyle = getComputedStyle(cell);
       expect(cellStyle.width).toBe('1px');
@@ -100,13 +100,12 @@ describe('Table CSS contracts', () => {
       expect(cellStyle.padding).toBe(normalStyle.padding);
     }
     expect(normalStyle.width).not.toBe('1px');
-    expect(getComputedStyle(cells.getByRole('cell', { name: 'Opt out' })).width).not.toBe('1px');
   });
 
   it('lets an explicit cell width override the fit-content hint', () => {
     container.innerHTML = `
       <table class="ps-Table"><tbody><tr>
-        <td class="ps-Table__cell" data-fit-content="true" style="width: 80px">Explicit width</td>
+        <td class="ps-Table__cell" data-fit-content="" style="width: 80px">Explicit width</td>
       </tr></tbody></table>
     `;
 
@@ -118,11 +117,11 @@ describe('Table CSS contracts', () => {
   it('does not apply an automatic-layout width hint to fixed-layout cells or nested tables', () => {
     container.innerHTML = `
       <table class="ps-Table" data-table-layout="auto"><tbody><tr>
-        <td class="ps-Table__cell" data-fit-content="true">Outer control</td>
+        <td class="ps-Table__cell" data-fit-content="">Outer control</td>
         <td class="ps-Table__cell">
           <table class="ps-Table" data-table-layout="fixed"><thead class="ps-Table__head"><tr>
-            <th class="ps-Table__cell" data-fit-content="true">Unspecified fixed width</th>
-            <th class="ps-Table__cell" data-fit-content="true" style="width: 48px">Explicit fixed width</th>
+            <th class="ps-Table__cell" data-fit-content="">Unspecified fixed width</th>
+            <th class="ps-Table__cell" data-fit-content="" style="width: 48px">Explicit fixed width</th>
           </tr></thead></table>
         </td>
       </tr></tbody></table>
@@ -138,7 +137,8 @@ describe('Table CSS contracts', () => {
 
   it.each([
     { attributes: '', striped: false },
-    { attributes: 'data-striped="false"', striped: false },
+    { attributes: 'data-striped=""', striped: true },
+    { attributes: 'data-striped="false"', striped: true },
     { attributes: 'data-striped="true"', striped: true },
   ])('alternates only body row backgrounds when striped=$striped ($attributes)', ({ attributes, striped }) => {
     container.innerHTML = `
@@ -173,7 +173,7 @@ describe('Table CSS contracts', () => {
 
   it.each(['left', 'right'])('matches sticky %s cell backgrounds to their striped rows', (sticky) => {
     container.innerHTML = `
-      <table class="ps-Table" data-striped="true"><tbody class="ps-Table__body">
+      <table class="ps-Table" data-striped=""><tbody class="ps-Table__body">
         <tr class="ps-Table__row"><td class="ps-Table__cell" data-sticky="${sticky}">First row</td></tr>
         <tr class="ps-Table__row"><td class="ps-Table__cell" data-sticky="${sticky}">Second row</td></tr>
       </tbody></table>
@@ -188,40 +188,44 @@ describe('Table CSS contracts', () => {
     );
   });
 
-  it('preserves selection backgrounds on striped rows and their sticky cells', () => {
-    container.innerHTML = `
-      <table class="ps-Table" data-striped="true"><tbody class="ps-Table__body">
-        <tr class="ps-Table__row"><td class="ps-Table__cell">First row</td></tr>
-        <tr class="ps-Table__row" data-selected="true" data-hover="true">
-          <td class="ps-Table__cell" data-sticky="left">Selected row</td>
-        </tr>
-        <tr class="ps-Table__row"><td class="ps-Table__cell">Third row</td></tr>
-        <tr class="ps-Table__row"><td class="ps-Table__cell">Fourth row</td></tr>
-      </tbody></table>
-    `;
+  it.each(booleanMarkers)(
+    'preserves selection precedence over striping and sticky backgrounds with data-selected=$marker',
+    ({ marker, present }) => {
+      const attributes = marker === undefined ? '' : `data-selected="${marker}"`;
+      container.innerHTML = `
+        <table class="ps-Table" data-striped=""><tbody class="ps-Table__body">
+          <tr class="ps-Table__row"><td class="ps-Table__cell">First row</td></tr>
+          <tr class="ps-Table__row" ${attributes} data-hover="" aria-label="Selected row">
+            <td class="ps-Table__cell" data-sticky="left">Selected left cell</td>
+            <td class="ps-Table__cell" data-sticky="right">Selected right cell</td>
+          </tr>
+          <tr class="ps-Table__row"><td class="ps-Table__cell">Third row</td></tr>
+          <tr class="ps-Table__row"><td class="ps-Table__cell">Fourth row</td></tr>
+        </tbody></table>
+      `;
 
-    const cells = within(container);
-    expect(getComputedStyle(cells.getByRole('row', { name: 'Fourth row' })).backgroundColor).toBe(
-      'var(--perses-bg-sunken)',
-    );
-    expect(getComputedStyle(cells.getByRole('row', { name: 'Selected row' })).backgroundColor).toBe(
-      'var(--perses-status-bg-primary)',
-    );
-    expect(getComputedStyle(cells.getByRole('cell', { name: 'Selected row' })).backgroundColor).toBe(
-      'var(--perses-status-bg-primary)',
-    );
-  });
+      const cells = within(container);
+      expect(getComputedStyle(cells.getByRole('row', { name: 'Fourth row' })).backgroundColor).toBe(
+        'var(--perses-bg-sunken)',
+      );
+      const background = present ? 'var(--perses-status-bg-primary)' : 'var(--perses-bg-sunken)';
+      expect(getComputedStyle(cells.getByRole('row', { name: 'Selected row' })).backgroundColor).toBe(background);
+      for (const name of ['Selected left cell', 'Selected right cell']) {
+        expect(getComputedStyle(cells.getByRole('cell', { name })).backgroundColor).toBe(background);
+      }
+    },
+  );
 
   it('keeps nested table striping independent from its parent table', () => {
     container.innerHTML = `
-      <table class="ps-Table" data-striped="true"><tbody class="ps-Table__body">
+      <table class="ps-Table" data-striped=""><tbody class="ps-Table__body">
         <tr class="ps-Table__row"><td class="ps-Table__cell">First outer row</td></tr>
         <tr class="ps-Table__row" aria-label="Second outer row"><td class="ps-Table__cell">
           <table class="ps-Table"><tbody class="ps-Table__body">
             <tr class="ps-Table__row"><td class="ps-Table__cell">First nested row</td></tr>
             <tr class="ps-Table__row"><td class="ps-Table__cell" data-sticky="left">Second nested row</td></tr>
           </tbody></table>
-          <table class="ps-Table" data-striped="true" aria-label="Nested striped table"><tbody class="ps-Table__body">
+          <table class="ps-Table" data-striped="" aria-label="Nested striped table"><tbody class="ps-Table__body">
             <tr class="ps-Table__row"><td class="ps-Table__cell" data-sticky="left">First nested striped row</td></tr>
             <tr class="ps-Table__row"><td class="ps-Table__cell" data-sticky="right">Second nested striped row</td></tr>
           </tbody></table>
@@ -257,7 +261,7 @@ describe('Table CSS contracts', () => {
     container.innerHTML = `
       <table class="ps-Table">
         <thead class="ps-Table__head"><tr class="ps-Table__row">
-          <th class="ps-Table__cell" data-sticky="${sticky}" data-resizable="true">Resizable column</th>
+          <th class="ps-Table__cell" data-sticky="${sticky}" data-resizable="">Resizable column</th>
         </tr></thead>
       </table>
     `;
@@ -267,16 +271,21 @@ describe('Table CSS contracts', () => {
     expect(getComputedStyle(cell).getPropertyValue(sticky)).toBe('0px');
   });
 
-  it('positions a nonsticky resizable cell relative to its resize handle', () => {
-    container.innerHTML = `
-      <table class="ps-Table"><tbody><tr>
-        <td class="ps-Table__cell" data-resizable="true">Resizable cell</td>
-      </tr></tbody></table>
-    `;
+  it.each(booleanMarkers)(
+    'positions only present nonsticky resizable markers relative to their handle (data-resizable=$marker)',
+    ({ marker, present }) => {
+      const attributes = marker === undefined ? '' : `data-resizable="${marker}"`;
+      container.innerHTML = `
+        <table class="ps-Table"><tbody><tr>
+          <td class="ps-Table__cell" ${attributes}>Resizable cell</td>
+        </tr></tbody></table>
+      `;
 
-    const cell = within(container).getByRole('cell', { name: 'Resizable cell' });
-    expect(getComputedStyle(cell).position).toBe('relative');
-  });
+      const cell = within(container).getByRole('cell', { name: 'Resizable cell' });
+      if (present) expect(getComputedStyle(cell).position).toBe('relative');
+      else expect(getComputedStyle(cell).position).not.toBe('relative');
+    },
+  );
 
   it('honors explicit overflow style props in a fixed-layout table', () => {
     container.innerHTML = `
@@ -300,9 +309,61 @@ describe('Table CSS contracts', () => {
     expect(getComputedStyle(defaultCell).textOverflow).toBe('ellipsis');
   });
 
+  it.each(booleanMarkers)(
+    'keeps sticky header, column and resize precedence with data-sticky-header=$marker',
+    ({ marker, present }) => {
+      const attributes = marker === undefined ? '' : `data-sticky-header="${marker}"`;
+      container.innerHTML = `
+        <table class="ps-Table" ${attributes}>
+          <thead class="ps-Table__head"><tr class="ps-Table__row">
+            <th class="ps-Table__cell" data-resizable="">Header</th>
+            <th class="ps-Table__cell" data-resizable="" data-sticky="left">Left header</th>
+            <th class="ps-Table__cell" data-resizable="" data-sticky="right">Right header</th>
+          </tr></thead>
+        </table>
+      `;
+
+      const header = within(container).getByRole('columnheader', { name: 'Header' });
+      expect(getComputedStyle(header).position).toBe(present ? 'sticky' : 'relative');
+      expect(getComputedStyle(header).zIndex).toBe(present ? '1' : '');
+      for (const [name, side] of [
+        ['Left header', 'left'],
+        ['Right header', 'right'],
+      ] as const) {
+        const cell = within(container).getByRole('columnheader', { name });
+        const cellStyle = getComputedStyle(cell);
+        expect(cellStyle.position).toBe('sticky');
+        expect(cellStyle.getPropertyValue(side)).toBe('0px');
+        expect(cellStyle.top).toBe(present ? '0px' : '');
+        expect(cellStyle.zIndex).toBe(present ? '2' : '1');
+        expect(cellStyle.backgroundColor).toBe('var(--perses-bg-default)');
+      }
+    },
+  );
+
+  it.each(booleanMarkers)('styles sort and expand icons by marker presence (marker=$marker)', ({ marker, present }) => {
+    const active = marker === undefined ? '' : `data-active="${marker}"`;
+    const expanded = marker === undefined ? '' : `data-expanded="${marker}"`;
+    container.innerHTML = `
+        <button class="ps-TableSortLabel" ${active} data-direction="asc" aria-label="Sort">
+          <span class="ps-TableSortLabel__icon" aria-label="Sort icon"></span>
+        </button>
+        <button class="ps-TableRowExpandButton" ${expanded} aria-label="Expand">
+          <span class="ps-TableRowExpandButton__icon" aria-label="Expand icon"></span>
+        </button>
+      `;
+
+    const sortIcon = within(container).getByLabelText('Sort icon');
+    expect(getComputedStyle(sortIcon).opacity).toBe(present ? '1' : '0.35');
+    expect(getComputedStyle(sortIcon).transform).toBe('rotate(180deg)');
+    const expandIcon = within(container).getByLabelText('Expand icon');
+    if (present) expect(getComputedStyle(expandIcon).transform).toBe('rotate(90deg)');
+    else expect(getComputedStyle(expandIcon).transform).not.toBe('rotate(90deg)');
+  });
+
   it('does not make a nested table header sticky unless that table opts in', () => {
     container.innerHTML = `
-      <table class="ps-Table" data-sticky-header="true">
+      <table class="ps-Table" data-sticky-header="">
         <thead class="ps-Table__head"><tr class="ps-Table__row">
           <th class="ps-Table__cell">Outer header</th>
         </tr></thead>
@@ -312,7 +373,7 @@ describe('Table CSS contracts', () => {
               <th class="ps-Table__cell">Nested header</th>
             </tr></thead>
           </table>
-          <table class="ps-Table" data-sticky-header="true">
+          <table class="ps-Table" data-sticky-header="">
             <thead class="ps-Table__head"><tr class="ps-Table__row">
               <th class="ps-Table__cell">Nested sticky header</th>
             </tr></thead>

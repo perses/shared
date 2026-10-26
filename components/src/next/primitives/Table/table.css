@@ -17,7 +17,7 @@
 
 @layer perses.components {
   /* ---- Table base ---- */
-  .ps-Table {
+  :where(.ps-Table) {
     --ps-table-cell-padding-y: var(--perses-spacing-sm);
     --ps-table-cell-padding-x: var(--perses-spacing-md);
     --ps-table-cell-font-size: var(--perses-font-size-sm);
@@ -31,87 +31,87 @@
 
   /* ---- Sizes ---- */
   /* The table sets the size; a cell-level size overrides it by redefining the same custom properties on the cell. */
-  .ps-Table[data-size='xs'],
-  .ps-Table__cell[data-size='xs'] {
+  :where(.ps-Table[data-size='xs']),
+  :where(.ps-Table__cell[data-size='xs']) {
     --ps-table-cell-padding-y: var(--perses-spacing-0);
     --ps-table-cell-padding-x: var(--perses-spacing-xs);
     --ps-table-cell-font-size: var(--perses-font-size-xs);
   }
-  .ps-Table[data-size='sm'],
-  .ps-Table__cell[data-size='sm'] {
+  :where(.ps-Table[data-size='sm']),
+  :where(.ps-Table__cell[data-size='sm']) {
     --ps-table-cell-padding-y: var(--perses-spacing-xs);
     --ps-table-cell-padding-x: var(--perses-spacing-sm);
     --ps-table-cell-font-size: var(--perses-font-size-xs);
   }
-  .ps-Table[data-size='md'],
-  .ps-Table__cell[data-size='md'] {
+  :where(.ps-Table[data-size='md']),
+  :where(.ps-Table__cell[data-size='md']) {
     --ps-table-cell-padding-y: var(--perses-spacing-sm);
     --ps-table-cell-padding-x: var(--perses-spacing-md);
     --ps-table-cell-font-size: var(--perses-font-size-sm);
   }
-  .ps-Table[data-size='lg'],
-  .ps-Table__cell[data-size='lg'] {
+  :where(.ps-Table[data-size='lg']),
+  :where(.ps-Table__cell[data-size='lg']) {
     --ps-table-cell-padding-y: var(--perses-spacing-md);
     --ps-table-cell-padding-x: var(--perses-spacing-lg);
     --ps-table-cell-font-size: var(--perses-font-size-md);
   }
 
   /* ---- Layout ---- */
-  .ps-Table[data-table-layout='fixed'] {
+  :where(.ps-Table[data-table-layout='fixed']) {
     min-width: 0;
     width: 100%;
     table-layout: fixed;
   }
 
   /* Fixed columns do not grow to fit content, so truncate instead of letting text spill into the next cell. */
-  .ps-Table[data-table-layout='fixed'] > :is(thead, tbody, tfoot) > tr > .ps-Table__cell {
+  :where(.ps-Table[data-table-layout='fixed'] > :is(thead, tbody, tfoot) > tr > .ps-Table__cell) {
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .ps-Table[data-table-layout='fixed'] > :is(thead, tbody, tfoot) > tr > .ps-Table__cell:not(.ps-overflow) {
+  :where(.ps-Table[data-table-layout='fixed'] > :is(thead, tbody, tfoot) > tr > .ps-Table__cell:not(.ps-overflow)) {
     overflow: hidden;
   }
 
-  .ps-TableContainer {
+  :where(.ps-TableContainer) {
     width: 100%;
     overflow: auto;
   }
 
   /* ---- Sections: head, footer, rows ---- */
-  .ps-Table__head > tr > .ps-Table__cell {
+  :where(.ps-Table__head > tr > .ps-Table__cell) {
     font-weight: var(--perses-font-weight-medium);
     color: var(--perses-text-secondary);
     border-bottom: var(--perses-border-width-sm) solid var(--perses-border-default);
   }
 
-  .ps-Table__footer > tr > .ps-Table__cell {
+  :where(.ps-Table__footer > tr > .ps-Table__cell) {
     border-top: var(--perses-border-width-sm) solid var(--perses-border-default);
     font-weight: var(--perses-font-weight-medium);
   }
 
-  .ps-Table__row {
+  :where(.ps-Table__row) {
     border-bottom: var(--perses-border-width-sm) solid var(--perses-border-default);
   }
 
-  .ps-Table[data-striped='true'] {
+  :where(.ps-Table[data-striped]) {
     background-color: var(--perses-bg-default);
   }
 
-  :where(.ps-Table[data-striped='true'] > .ps-Table__body) > .ps-Table__row:nth-child(even) {
+  :where(.ps-Table[data-striped] > .ps-Table__body > .ps-Table__row:nth-child(even)) {
     background-color: var(--perses-bg-sunken);
   }
 
-  .ps-Table__row[data-selected='true'] {
+  :where(.ps-Table__row[data-selected]) {
     background-color: var(--perses-status-bg-primary);
   }
 
-  .ps-Table__row[data-hover='true']:hover {
+  :where(.ps-Table__row[data-hover]:hover) {
     background-color: var(--perses-bg-sunken);
   }
 
   /* ---- Cells ---- */
-  .ps-Table__cell {
+  :where(.ps-Table__cell) {
     /* Border-box so a resized `width` is the rendered width the resize handle measures. */
     box-sizing: border-box;
     padding: var(--ps-table-cell-padding-y) var(--ps-table-cell-padding-x);
@@ -119,70 +119,71 @@
   }
 
   /* Auto layout respects content minimums; a tiny width hint leaves spare space for data columns. */
-  :where(.ps-Table:not([data-table-layout='fixed']) > :is(thead, tbody, tfoot) > tr)
-    > .ps-Table__cell[data-fit-content='true'] {
+  :where(
+    .ps-Table:not([data-table-layout='fixed']) > :is(thead, tbody, tfoot) > tr > .ps-Table__cell[data-fit-content]
+  ) {
     width: 1px;
     white-space: nowrap;
   }
 
-  .ps-Table__cell[data-align='left'] {
+  :where(.ps-Table__cell[data-align='left']) {
     text-align: left;
   }
-  .ps-Table__cell[data-align='center'] {
+  :where(.ps-Table__cell[data-align='center']) {
     text-align: center;
   }
-  .ps-Table__cell[data-align='right'] {
+  :where(.ps-Table__cell[data-align='right']) {
     text-align: right;
   }
 
+  /* Resizing needs a positioning context, but sticky headers and columns take precedence below. */
+  :where(.ps-Table__cell[data-resizable]:not([data-sticky])) {
+    position: relative;
+  }
+
   /* ---- Sticky header and columns ---- */
-  .ps-Table[data-sticky-header='true'] > .ps-Table__head > tr > .ps-Table__cell {
+  :where(.ps-Table[data-sticky-header] > .ps-Table__head > tr > .ps-Table__cell) {
     position: sticky;
     top: 0;
     z-index: 1;
     background-color: var(--perses-bg-default);
   }
 
-  .ps-Table__cell[data-sticky='left'],
-  .ps-Table__cell[data-sticky='right'] {
+  :where(.ps-Table__cell[data-sticky='left']),
+  :where(.ps-Table__cell[data-sticky='right']) {
     position: sticky;
     z-index: 1;
     background-color: var(--perses-bg-default);
   }
 
-  .ps-Table__cell[data-sticky='left'] {
+  :where(.ps-Table__cell[data-sticky='left']) {
     left: 0;
   }
 
-  .ps-Table__cell[data-sticky='right'] {
+  :where(.ps-Table__cell[data-sticky='right']) {
     right: 0;
   }
 
   /* A cell that is both in a sticky header and a sticky column sits above both. */
-  .ps-Table[data-sticky-header='true'] > .ps-Table__head > tr > .ps-Table__cell[data-sticky] {
+  :where(.ps-Table[data-sticky-header] > .ps-Table__head > tr > .ps-Table__cell[data-sticky]) {
     z-index: 2;
   }
 
   /* Sticky cells paint their own background, so repeat striping and the row states on them. */
-  :where(.ps-Table[data-striped='true'] > .ps-Table__body > .ps-Table__row:nth-child(even))
-    > .ps-Table__cell[data-sticky] {
+  :where(.ps-Table[data-striped] > .ps-Table__body > .ps-Table__row:nth-child(even) > .ps-Table__cell[data-sticky]) {
     background-color: var(--perses-bg-sunken);
   }
 
-  .ps-Table__row[data-selected='true'] > .ps-Table__cell[data-sticky] {
+  :where(.ps-Table__row[data-selected] > .ps-Table__cell[data-sticky]) {
     background-color: var(--perses-status-bg-primary);
   }
 
-  .ps-Table__row[data-hover='true']:hover > .ps-Table__cell[data-sticky] {
+  :where(.ps-Table__row[data-hover]:hover > .ps-Table__cell[data-sticky]) {
     background-color: var(--perses-bg-sunken);
   }
 
   /* ---- Column resizing ---- */
-  .ps-Table__cell[data-resizable='true']:not([data-sticky]) {
-    position: relative;
-  }
-
-  .ps-Table__resizeHandle {
+  :where(.ps-Table__resizeHandle) {
     position: absolute;
     top: 0;
     right: -0.3125rem;
@@ -195,7 +196,7 @@
     background-color: transparent;
   }
 
-  .ps-Table__resizeHandle::before {
+  :where(.ps-Table__resizeHandle)::before {
     content: '';
     position: absolute;
     top: 0;
@@ -205,21 +206,21 @@
     background-color: var(--perses-text-disabled);
   }
 
-  .ps-Table__resizeHandle:hover::before,
-  .ps-Table__resizeHandle:active::before,
-  .ps-Table__resizeHandle:focus-visible::before {
+  :where(.ps-Table__resizeHandle:hover)::before,
+  :where(.ps-Table__resizeHandle:active)::before,
+  :where(.ps-Table__resizeHandle:focus-visible)::before {
     left: 0.1875rem;
     width: 0.25rem;
     background-color: var(--perses-text-secondary);
   }
 
-  .ps-Table__cell[data-sticky] .ps-Table__resizeHandle {
+  :where(.ps-Table__cell[data-sticky] .ps-Table__resizeHandle) {
     z-index: 2;
   }
 
   /* ---- Sort label / row expand button (shared reset on top of ps-ButtonBase) ---- */
-  .ps-TableSortLabel,
-  .ps-TableRowExpandButton {
+  :where(.ps-TableSortLabel),
+  :where(.ps-TableRowExpandButton) {
     padding: var(--perses-spacing-0);
     background: none;
     border-color: transparent;
@@ -228,29 +229,29 @@
   }
 
   /* ---- Sort label ---- */
-  .ps-TableSortLabel {
+  :where(.ps-TableSortLabel) {
     gap: var(--perses-spacing-sm);
   }
 
-  .ps-TableSortLabel__icon {
+  :where(.ps-TableSortLabel__icon) {
     font-size: 0.75em;
     opacity: 0.35;
     transition: opacity 0.15s ease;
   }
 
-  .ps-TableSortLabel:hover .ps-TableSortLabel__icon,
-  .ps-TableSortLabel:focus-visible .ps-TableSortLabel__icon,
-  .ps-TableSortLabel[data-active='true'] .ps-TableSortLabel__icon {
+  :where(.ps-TableSortLabel:hover .ps-TableSortLabel__icon),
+  :where(.ps-TableSortLabel:focus-visible .ps-TableSortLabel__icon),
+  :where(.ps-TableSortLabel[data-active] .ps-TableSortLabel__icon) {
     opacity: 1;
   }
 
   /* Icons (default or custom) are expected to point down (desc) and are flipped for ascending. */
-  .ps-TableSortLabel[data-direction='asc'] .ps-TableSortLabel__icon {
+  :where(.ps-TableSortLabel[data-direction='asc'] .ps-TableSortLabel__icon) {
     transform: rotate(180deg);
   }
 
   /* ---- Pagination ---- */
-  .ps-TablePagination {
+  :where(.ps-TablePagination) {
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -261,18 +262,18 @@
     color: var(--perses-text-secondary);
   }
 
-  .ps-TablePagination__rowsPerPage {
+  :where(.ps-TablePagination__rowsPerPage) {
     display: inline-flex;
     align-items: center;
     gap: var(--perses-spacing-xs);
   }
 
   /* ---- Row expand button ---- */
-  .ps-TableRowExpandButton__icon {
+  :where(.ps-TableRowExpandButton__icon) {
     transition: transform 0.15s ease;
   }
 
-  .ps-TableRowExpandButton[data-expanded='true'] .ps-TableRowExpandButton__icon {
+  :where(.ps-TableRowExpandButton[data-expanded] .ps-TableRowExpandButton__icon) {
     transform: rotate(90deg);
   }
 }

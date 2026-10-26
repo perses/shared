@@ -24,14 +24,10 @@ import { Checkbox } from './Checkbox';
 import type { CheckboxStyle, CheckboxVariant } from './Checkbox';
 
 // jsdom does not apply cascade layers; unwrap the component layer while preserving its selectors.
-const checkboxCss = ['../Text/text.css', './checkbox.css']
-  .map((path) =>
-    readFileSync(resolve(__dirname, path), 'utf-8')
-      .replace(/@import\s+[^;]+;/g, '')
-      .replace('@layer perses.components {', '')
-      .replace(/}\s*$/, ''),
-  )
-  .join('\n');
+const checkboxCss = readFileSync(resolve(__dirname, './checkbox.css'), 'utf-8')
+  .replace(/@import\s+[^;]+;/g, '')
+  .replace('@layer perses.components {', '')
+  .replace(/}\s*$/, '');
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
 const colors: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
 const customStyle: CheckboxStyle = {
@@ -177,7 +173,12 @@ describe('Checkbox CSS contracts', () => {
       expect(getOpacity(checkbox)).toBe('1');
       expect(checkbox).not.toHaveAttribute('data-disabled');
 
-      rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} invalid disabled />);
+      rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} indeterminate disabled />);
+      expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--perses-text-disabled)');
+      expect(getComputedStyle(checkbox).color).toBe('var(--perses-bg-surface)');
+      expect(getComputedStyle(checkbox).cursor).toBe('not-allowed');
+
+      rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} invalid />);
       expect(getComputedStyle(checkbox).borderStyle).toBe('dashed');
       // jsdom does not consistently compute variable border colors after state changes.
       const borderRules = Array.from(style.sheet?.cssRules ?? []).filter(
@@ -265,6 +266,69 @@ describe('Checkbox CSS contracts', () => {
     expect(getOpacity(text)).toBe('1');
     expect(getOpacity(wrapper)).toBe('var(--perses-opacity-disabled, 0.5)');
   });
+  it.each([undefined, '', 'true', 'false'])(
+    'styles invalid controls by marker presence, not its value (%s)',
+    (marker) => {
+      render(<Checkbox aria-label="Select row" checked={false} />);
+      const checkbox = screen.getByRole('checkbox', { name: 'Select row' });
+      if (marker !== undefined) checkbox.setAttribute('data-invalid', marker);
+
+      // jsdom cannot resolve the variable-based base border shorthand, but it can apply the invalid longhand.
+      if (marker === undefined) expect(getComputedStyle(checkbox).borderStyle).not.toBe('dashed');
+      else expect(getComputedStyle(checkbox).borderStyle).toBe('dashed');
+    },
+  );
+
+  it.each([undefined, '', 'true', 'false'])(
+    'styles disabled labels by marker presence, not its value (%s)',
+    (marker) => {
+      render(<Checkbox label="Select row" />);
+      const label = screen.getByRole('checkbox', { name: 'Select row' }).closest('label');
+      if (!label) throw new Error('Missing checkbox label wrapper');
+      if (marker !== undefined) label.setAttribute('data-disabled', marker);
+
+      expect(getComputedStyle(label).color).toBe(
+        marker === undefined ? 'var(--perses-text-primary)' : 'var(--perses-text-disabled)',
+      );
+      expect(getComputedStyle(label).cursor).toBe(marker === undefined ? 'pointer' : 'not-allowed');
+    },
+  );
+
+  it.each<CheckboxVariant>(['solid', 'subtle', 'outline'])(
+    'preserves forced-color selection and disabled precedence with variant=%s',
+    (variant) => {
+      const forcedColors = Array.from(style.sheet?.cssRules ?? []).find(
+        (rule): rule is CSSMediaRule =>
+          rule instanceof CSSMediaRule && /\(forced-colors:\s*active\)/.test(rule.conditionText),
+      );
+      if (!forcedColors) throw new Error('Missing forced-colors rules');
+
+      const { rerender } = render(<Checkbox aria-label="Select row" variant={variant} checked={false} />);
+      const checkbox = screen.getByRole('checkbox', { name: 'Select row' });
+      // jsdom does not activate media queries or resolve system colors. Match the original media selectors
+      // and inspect their winning declarations in source order, preserving descendant and state conditions.
+      function propertyFor(property: string): string {
+        const rules = Array.from(forcedColors?.cssRules ?? []).filter(
+          (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && checkbox.matches(rule.selectorText),
+        );
+        expect(rules.length).toBeGreaterThan(0);
+        return rules.reduce((value, rule) => rule.style.getPropertyValue(property) || value, '');
+      }
+
+      expect(propertyFor('border-color')).toBe('ButtonText');
+      for (const state of [{ checked: true }, { checked: false, indeterminate: true }]) {
+        rerender(<Checkbox aria-label="Select row" variant={variant} {...state} />);
+        expect(propertyFor('border-color')).toBe('Highlight');
+        expect(propertyFor('color')).toBe('HighlightText');
+        expect(propertyFor('background-color')).toBe('Highlight');
+
+        rerender(<Checkbox aria-label="Select row" variant={variant} {...state} disabled />);
+        expect(propertyFor('border-color')).toBe('GrayText');
+        expect(propertyFor('color')).toBe('GrayText');
+        expect(propertyFor('background-color')).toBe('transparent');
+      }
+    },
+  );
 
   it.each(sizes)('uses content-independent inline alignment across selection states (%s)', (size) => {
     const { rerender } = render(<Checkbox aria-label="Select row" size={size} checked={false} />);
