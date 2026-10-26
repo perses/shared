@@ -132,22 +132,4 @@
   .ps-TextField[data-status='info'] .ps-TextField__wrapper {
     border-color: var(--perses-status-border-info);
   }
-
-  :where(.ps-TextField__helper) {
-    font-size: var(--perses-font-size-xs);
-    color: var(--perses-text-secondary);
-  }
-
-  .ps-TextField[data-status='error'] .ps-TextField__helper {
-    color: var(--perses-status-text-error);
-  }
-  .ps-TextField[data-status='warning'] .ps-TextField__helper {
-    color: var(--perses-status-text-warning);
-  }
-  .ps-TextField[data-status='success'] .ps-TextField__helper {
-    color: var(--perses-status-text-success);
-  }
-  .ps-TextField[data-status='info'] .ps-TextField__helper {
-    color: var(--perses-status-text-info);
-  }
 }

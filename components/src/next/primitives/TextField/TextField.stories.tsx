@@ -61,7 +61,7 @@ Basic.storyName = 'Basic';
 const variantsCode = `// size:   'xs' | 'sm' | 'md' | 'lg'
 // status: 'error' | 'warning' | 'success' | 'info'
 // status="error" also sets aria-invalid; helperText is linked via aria-describedby.
-<TextField label="Email" size="lg" status="error" helperText="This field has error status" />`;
+<TextField label="Email" size="lg" status="error" helperText="This field has error status with a long helper text" />`;
 
 export const Variants: Story = () => (
   <Stack>
@@ -74,7 +74,7 @@ export const Variants: Story = () => (
               label={`${status ?? 'default'} / ${size}`}
               status={status}
               size={size}
-              helperText={status ? `This field has ${status} status` : undefined}
+              helperText={status ? `This field has ${status} status with a long helper text` : undefined}
               placeholder="Type here"
             />
           )),
@@ -86,7 +86,7 @@ export const Variants: Story = () => (
 Variants.storyName = 'Variants';
 
 const stateCode = `<TextField label="Name" helperText="Shown to other members of your team" />
-<TextField label="Disabled" disabled defaultValue="Cannot be edited" />
+<TextField label="Disabled" disabled defaultValue="Cannot be edited" helperText="This field is disabled" />
 <TextField label="Read only" readOnly defaultValue="Can be focused, not edited" />
 <TextField label="Required" required />`;
 
@@ -95,7 +95,7 @@ export const States: Story = () => (
     <Sample title="Helper text, disabled, read-only and required" code={stateCode}>
       <div style={columnStyle}>
         <TextField label="Name" helperText="Shown to other members of your team" />
-        <TextField label="Disabled" disabled defaultValue="Cannot be edited" />
+        <TextField label="Disabled" disabled defaultValue="Cannot be edited" helperText="This field is disabled" />
         <TextField label="Read only" readOnly defaultValue="Can be focused, not edited" />
         <TextField label="Required" required />
       </div>

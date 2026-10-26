@@ -35,7 +35,9 @@ import {
   TableRowExpandButton,
   TableSortLabel,
 } from './Table';
+import { Text } from './Text';
 import { TextField } from './TextField';
+import { TextHelper } from './TextHelper';
 import { Tooltip } from './Tooltip';
 
 export const defaultComponents: PersesComponents = {
@@ -61,6 +63,8 @@ export const defaultComponents: PersesComponents = {
   TableSortLabel,
   TablePagination,
   TextField,
+  Text,
+  TextHelper,
 };
 
 export const defaultIcons: PersesIcons = {

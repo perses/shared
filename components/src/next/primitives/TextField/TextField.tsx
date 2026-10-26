@@ -13,11 +13,12 @@
 
 import { Field } from '@base-ui/react/field';
 import clsx from 'clsx';
-import { forwardRef, useId } from 'react';
-import type { CSSProperties, InputHTMLAttributes, ReactNode } from 'react';
+import { forwardRef, useId, useMemo } from 'react';
+import type { CSSProperties, InputHTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
+import { TextHelper } from '../TextHelper';
 import type { Size, Status } from '../types';
 
 import '../system/layout.css';
@@ -119,6 +120,13 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
 ) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
+  const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
+    () =>
+      (descriptionProps, state): ReactElement => (
+        <TextHelper {...descriptionProps} status={status} disabled={state.disabled} />
+      ),
+    [status],
+  );
   const {
     className: styleClassName,
     style: computedStyle,
@@ -156,7 +164,11 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
         />
         {endAdornment && <span className="ps-TextField__adornment ps-TextField__adornment--end">{endAdornment}</span>}
       </div>
-      {helperText && <Field.Description className="ps-TextField__helper">{helperText}</Field.Description>}
+      {helperText && (
+        <Field.Description className="ps-TextField__helper" render={renderHelper}>
+          {helperText}
+        </Field.Description>
+      )}
     </Field.Root>
   );
 });

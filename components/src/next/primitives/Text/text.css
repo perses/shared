@@ -1,0 +1,86 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '@perses-dev/design-tokens/css/layers';
+
+@layer perses.components {
+  :where(.ps-Text) {
+    margin: 0;
+    font-family: var(--perses-font-family);
+  }
+
+  :where(.ps-Text[data-size='xs']) {
+    font-size: var(--perses-font-size-xs);
+  }
+  :where(.ps-Text[data-size='sm']) {
+    font-size: var(--perses-font-size-sm);
+  }
+  :where(.ps-Text[data-size='md']) {
+    font-size: var(--perses-font-size-md);
+  }
+  :where(.ps-Text[data-size='lg']) {
+    font-size: var(--perses-font-size-lg);
+  }
+  :where(.ps-Text[data-size='xl']) {
+    font-size: var(--perses-font-size-xl);
+  }
+  :where(.ps-Text[data-size='2xl']) {
+    font-size: var(--perses-font-size-2xl);
+  }
+  :where(.ps-Text[data-size='3xl']) {
+    font-size: var(--perses-font-size-3xl);
+  }
+  :where(.ps-Text[data-size='4xl']) {
+    font-size: var(--perses-font-size-4xl);
+  }
+
+  :where(.ps-Text[data-weight='light']) {
+    font-weight: var(--perses-font-weight-light);
+  }
+  :where(.ps-Text[data-weight='regular']) {
+    font-weight: var(--perses-font-weight-regular);
+  }
+  :where(.ps-Text[data-weight='medium']) {
+    font-weight: var(--perses-font-weight-medium);
+  }
+  :where(.ps-Text[data-weight='bold']) {
+    font-weight: var(--perses-font-weight-bold);
+  }
+
+  :where(.ps-Text[data-color='inherit']) {
+    color: inherit;
+  }
+  :where(.ps-Text[data-color='primary']) {
+    color: var(--perses-text-primary);
+  }
+  :where(.ps-Text[data-color='secondary']) {
+    color: var(--perses-text-secondary);
+  }
+  :where(.ps-Text[data-color='disabled']) {
+    color: var(--perses-text-disabled);
+  }
+  :where(.ps-Text[data-color='error']) {
+    color: var(--perses-status-text-error);
+  }
+  :where(.ps-Text[data-color='warning']) {
+    color: var(--perses-status-text-warning);
+  }
+  :where(.ps-Text[data-color='success']) {
+    color: var(--perses-status-text-success);
+  }
+  :where(.ps-Text[data-color='info']) {
+    color: var(--perses-status-text-info);
+  }
+}
