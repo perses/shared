@@ -19,27 +19,71 @@
  * Spacing style props. `.ps-<prop>` reads `--ps-<prop>`; each breakpoint prefers
  * `--ps-<prop>-<breakpoint>` and falls back to the base. styleProps.ts sets these inline to a
  * `var(--perses-spacing-<token>)` reference (design tokens stay the source of truth).
+ * Each base rule resets its own variables to `initial` so an element never inherits an ancestor's
+ * style-prop value; inline declarations on the element itself still win.
  */
 @layer perses.utilities {
   .ps-p {
+    --ps-p: initial;
+    --ps-p-xs: initial;
+    --ps-p-sm: initial;
+    --ps-p-md: initial;
+    --ps-p-lg: initial;
+    --ps-p-xl: initial;
     padding: var(--ps-p, initial);
   }
   .ps-px {
+    --ps-px: initial;
+    --ps-px-xs: initial;
+    --ps-px-sm: initial;
+    --ps-px-md: initial;
+    --ps-px-lg: initial;
+    --ps-px-xl: initial;
     padding-inline: var(--ps-px, initial);
   }
   .ps-py {
+    --ps-py: initial;
+    --ps-py-xs: initial;
+    --ps-py-sm: initial;
+    --ps-py-md: initial;
+    --ps-py-lg: initial;
+    --ps-py-xl: initial;
     padding-block: var(--ps-py, initial);
   }
   .ps-m {
+    --ps-m: initial;
+    --ps-m-xs: initial;
+    --ps-m-sm: initial;
+    --ps-m-md: initial;
+    --ps-m-lg: initial;
+    --ps-m-xl: initial;
     margin: var(--ps-m, initial);
   }
   .ps-mx {
+    --ps-mx: initial;
+    --ps-mx-xs: initial;
+    --ps-mx-sm: initial;
+    --ps-mx-md: initial;
+    --ps-mx-lg: initial;
+    --ps-mx-xl: initial;
     margin-inline: var(--ps-mx, initial);
   }
   .ps-my {
+    --ps-my: initial;
+    --ps-my-xs: initial;
+    --ps-my-sm: initial;
+    --ps-my-md: initial;
+    --ps-my-lg: initial;
+    --ps-my-xl: initial;
     margin-block: var(--ps-my, initial);
   }
   .ps-gap {
+    --ps-gap: initial;
+    --ps-gap-xs: initial;
+    --ps-gap-sm: initial;
+    --ps-gap-md: initial;
+    --ps-gap-lg: initial;
+    --ps-gap-xl: initial;
     gap: var(--ps-gap, initial);
   }
 

@@ -18,45 +18,125 @@
 /*
  * Layout style props (display, flexbox, sizing). `.ps-<prop>` reads `--ps-<prop>`; each breakpoint
  * prefers `--ps-<prop>-<breakpoint>` and falls back to the base. Values set inline by styleProps.ts.
+ * Each base rule resets its own variables to `initial` so an element never inherits an ancestor's
+ * style-prop value; inline declarations on the element itself still win.
  */
 @layer perses.utilities {
   .ps-display {
+    --ps-display: initial;
+    --ps-display-xs: initial;
+    --ps-display-sm: initial;
+    --ps-display-md: initial;
+    --ps-display-lg: initial;
+    --ps-display-xl: initial;
     display: var(--ps-display, revert);
   }
   .ps-flex-direction {
+    --ps-flex-direction: initial;
+    --ps-flex-direction-xs: initial;
+    --ps-flex-direction-sm: initial;
+    --ps-flex-direction-md: initial;
+    --ps-flex-direction-lg: initial;
+    --ps-flex-direction-xl: initial;
     flex-direction: var(--ps-flex-direction, revert);
   }
   .ps-align-items {
+    --ps-align-items: initial;
+    --ps-align-items-xs: initial;
+    --ps-align-items-sm: initial;
+    --ps-align-items-md: initial;
+    --ps-align-items-lg: initial;
+    --ps-align-items-xl: initial;
     align-items: var(--ps-align-items, revert);
   }
   .ps-justify-content {
+    --ps-justify-content: initial;
+    --ps-justify-content-xs: initial;
+    --ps-justify-content-sm: initial;
+    --ps-justify-content-md: initial;
+    --ps-justify-content-lg: initial;
+    --ps-justify-content-xl: initial;
     justify-content: var(--ps-justify-content, revert);
   }
   .ps-flex-wrap {
+    --ps-flex-wrap: initial;
+    --ps-flex-wrap-xs: initial;
+    --ps-flex-wrap-sm: initial;
+    --ps-flex-wrap-md: initial;
+    --ps-flex-wrap-lg: initial;
+    --ps-flex-wrap-xl: initial;
     flex-wrap: var(--ps-flex-wrap, revert);
   }
   .ps-flex {
+    --ps-flex: initial;
+    --ps-flex-xs: initial;
+    --ps-flex-sm: initial;
+    --ps-flex-md: initial;
+    --ps-flex-lg: initial;
+    --ps-flex-xl: initial;
     flex: var(--ps-flex, revert);
   }
   .ps-width {
+    --ps-width: initial;
+    --ps-width-xs: initial;
+    --ps-width-sm: initial;
+    --ps-width-md: initial;
+    --ps-width-lg: initial;
+    --ps-width-xl: initial;
     width: var(--ps-width, revert);
   }
   .ps-height {
+    --ps-height: initial;
+    --ps-height-xs: initial;
+    --ps-height-sm: initial;
+    --ps-height-md: initial;
+    --ps-height-lg: initial;
+    --ps-height-xl: initial;
     height: var(--ps-height, revert);
   }
   .ps-min-width {
+    --ps-min-width: initial;
+    --ps-min-width-xs: initial;
+    --ps-min-width-sm: initial;
+    --ps-min-width-md: initial;
+    --ps-min-width-lg: initial;
+    --ps-min-width-xl: initial;
     min-width: var(--ps-min-width, revert);
   }
   .ps-max-width {
+    --ps-max-width: initial;
+    --ps-max-width-xs: initial;
+    --ps-max-width-sm: initial;
+    --ps-max-width-md: initial;
+    --ps-max-width-lg: initial;
+    --ps-max-width-xl: initial;
     max-width: var(--ps-max-width, revert);
   }
   .ps-min-height {
+    --ps-min-height: initial;
+    --ps-min-height-xs: initial;
+    --ps-min-height-sm: initial;
+    --ps-min-height-md: initial;
+    --ps-min-height-lg: initial;
+    --ps-min-height-xl: initial;
     min-height: var(--ps-min-height, revert);
   }
   .ps-max-height {
+    --ps-max-height: initial;
+    --ps-max-height-xs: initial;
+    --ps-max-height-sm: initial;
+    --ps-max-height-md: initial;
+    --ps-max-height-lg: initial;
+    --ps-max-height-xl: initial;
     max-height: var(--ps-max-height, revert);
   }
   .ps-overflow {
+    --ps-overflow: initial;
+    --ps-overflow-xs: initial;
+    --ps-overflow-sm: initial;
+    --ps-overflow-md: initial;
+    --ps-overflow-lg: initial;
+    --ps-overflow-xl: initial;
     overflow: var(--ps-overflow, revert);
   }
 
