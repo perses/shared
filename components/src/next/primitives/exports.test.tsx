@@ -11,6 +11,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {
+  AlertProps,
+  AlertSeverity,
+  BoxProps,
+  ButtonProps,
+  ButtonVariant,
+  CheckboxProps,
+  ChipProps,
+  ChipSize,
+  ChipStyle,
+  ChipVariant,
+  ColorVariant,
+  DividerProps,
+  IconProps,
+  Size,
+  SortDirection,
+  SpacingToken,
+  SpinnerProps,
+  StackProps,
+  Status,
+  SwitchProps,
+  TableCellProps,
+  TableProps,
+  TableRowProps,
+  TextFieldProps,
+  TextFieldStyle,
+  TooltipProps,
+} from './index';
 import {
   Alert,
   Box,
@@ -32,36 +60,8 @@ import {
   TableRow,
   TableRowExpandButton,
   TableSortLabel,
+  TextField,
   Tooltip,
-} from './index';
-import { Alert, Box, Button, Checkbox, Chip, Divider, Icon, Spinner, Stack, Switch, TextField } from './index';
-import type {
-  AlertProps,
-  AlertSeverity,
-  BoxProps,
-  ButtonProps,
-  ButtonVariant,
-  CheckboxProps,
-  ChipProps,
-  ChipSize,
-  ChipStyle,
-  ChipVariant,
-  ColorVariant,
-  DividerProps,
-  IconProps,
-  SpacingToken,
-  Size,
-  SortDirection,
-  SpinnerProps,
-  StackProps,
-  Status,
-  SwitchProps,
-  TooltipProps,
-  TableCellProps,
-  TableProps,
-  TableRowProps,
-  TextFieldProps,
-  TextFieldStyle,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -118,7 +118,6 @@ describe('primitives barrel exports', () => {
     const sortDirection: SortDirection = 'asc';
     const sharedSize: Size = 'md';
     const sharedStatus: Status = 'error';
-    const textFieldProps: TextFieldProps = {};
     const textFieldProps: TextFieldProps = { label: 'Name' };
     const textFieldStyle: TextFieldStyle = { '--perses-textfield-size-md': '2.5rem' };
 

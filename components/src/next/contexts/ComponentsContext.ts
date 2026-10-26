@@ -43,8 +43,8 @@ import type {
   TableRowProps,
   TableSortLabelProps,
 } from '../primitives/Table';
-import type { TooltipProps } from '../primitives/Tooltip';
 import type { TextFieldProps } from '../primitives/TextField';
+import type { TooltipProps } from '../primitives/Tooltip';
 
 type RefComponent<Props, Element> = ForwardRefExoticComponent<PropsWithoutRef<Props> & RefAttributes<Element>>;
 
