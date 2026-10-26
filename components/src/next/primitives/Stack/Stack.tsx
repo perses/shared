@@ -15,15 +15,7 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 
-import {
-  applyStyleProps,
-  compileStyleProps,
-  displayProps,
-  flexboxProps,
-  isResponsiveValue,
-  sizingProps,
-  spacingProps,
-} from '../system';
+import { applyStyleProps, compileStyleProps, displayProps, flexboxProps, sizingProps, spacingProps } from '../system';
 import type { DisplayProps, FlexboxProps, Responsive, SizingProps, SpacingProps, SpacingValue } from '../system';
 
 import './stack.css';
@@ -52,17 +44,6 @@ const STACK_STYLE_PROPS = compileStyleProps([
   { overflow: displayProps.overflow },
 ]);
 
-// A responsive `direction` without a `default` breakpoint leaves the base unset, so the engine's
-// `revert` fallback resolves to the UA `row` instead of the documented `column`. Seed `column`.
-function withDirectionDefault(
-  direction: Responsive<'row' | 'column'> | undefined,
-): Responsive<'row' | 'column'> | undefined {
-  if (isResponsiveValue(direction) && direction.default === undefined) {
-    return { ...direction, default: 'column' };
-  }
-  return direction;
-}
-
 /**
  * Lays out its children in a flex row or column. It is a purely presentational `div`: it keeps DOM order,
  * so keyboard and screen-reader order follow the source. Pass `role` and `aria-*` attributes when the group
@@ -76,11 +57,7 @@ export const Stack = forwardRef<HTMLDivElement, StackProps>(function Stack(
     className: styleClassName,
     style: computedStyle,
     rest: domProps,
-  } = applyStyleProps(
-    { ...rest, flexDirection: withDirectionDefault(direction), gap: spacing },
-    STACK_STYLE_PROPS,
-    style,
-  );
+  } = applyStyleProps({ ...rest, flexDirection: direction, gap: spacing }, STACK_STYLE_PROPS, style);
 
   return (
     <div ref={ref} {...domProps} className={clsx('ps-Stack', styleClassName, className)} style={computedStyle}>

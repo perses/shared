@@ -33,17 +33,19 @@ describe('applyStyleProps', () => {
   });
 
   it('writes the base value to the unsuffixed property and each breakpoint to its suffix', () => {
-    const { style } = applyStyleProps({ width: { default: '100%', md: 400 } }, sizing);
+    const { className, style } = applyStyleProps({ width: { default: '100%', md: 400 } }, sizing);
+    expect(className).toBe('ps-width ps-width-md');
     expect(style).toEqual({ '--ps-width': '100%', '--ps-width-md': '400px' });
   });
 
   it.each(['p', 'px', 'py', 'm', 'mx', 'my', 'gap'] as const)(
     'mixes tokens, pixels and CSS strings across responsive %s values',
     (prop) => {
-      const { style } = applyStyleProps(
+      const { className, style } = applyStyleProps(
         { [prop]: { default: 'sm', xs: 0, sm: 12.5, md: '50%', lg: 'calc(1rem + 4px)', xl: undefined } },
         spacing,
       );
+      expect(className).toBe(`ps-${prop} ps-${prop}-xs ps-${prop}-sm ps-${prop}-md ps-${prop}-lg`);
       expect(style).toEqual({
         [`--ps-${prop}`]: 'var(--perses-spacing-sm)',
         [`--ps-${prop}-xs`]: '0px',
@@ -76,6 +78,28 @@ describe('applyStyleProps', () => {
   ])('serializes scalar spacing %s as %s', (value, expected) => {
     const { style } = applyStyleProps({ m: value }, spacing);
     expect(style).toEqual({ '--ps-m': expected });
+  });
+
+  it('emits only the provided breakpoint class without a base or filled larger values', () => {
+    const { className, style } = applyStyleProps({ p: { md: 100 } }, spacing);
+    expect(className).toBe('ps-p-md');
+    expect(style).toEqual({ '--ps-p-md': '100px' });
+  });
+
+  it('keeps an explicit zero override when responsive keys arrive in reverse order', () => {
+    const { className, style } = applyStyleProps({ minWidth: { xl: 0, md: 100, default: 50 } }, sizing);
+    expect(className.split(' ').toSorted()).toEqual(['ps-min-width', 'ps-min-width-md', 'ps-min-width-xl']);
+    expect(style).toEqual({ '--ps-min-width': '50px', '--ps-min-width-md': '100px', '--ps-min-width-xl': '0px' });
+  });
+
+  it('does not emit classes or variables for empty or undefined-only responsive values', () => {
+    const { className, style, rest } = applyStyleProps(
+      { p: {}, width: { default: undefined, md: undefined } },
+      spacingAndSizing,
+    );
+    expect(className).toBe('');
+    expect(style).toEqual({});
+    expect(rest).toEqual({});
   });
 
   it('returns unregistered props in rest and omits consumed ones', () => {

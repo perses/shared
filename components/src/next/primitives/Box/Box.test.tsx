@@ -99,6 +99,12 @@ describe('Box', () => {
         </Box>
       </Box>,
     );
+    for (const name of ['Outer', 'Middle', 'Inner']) {
+      expect(screen.getByText(name)).toHaveClass('ps-p-md');
+      expect(screen.getByText(name)).not.toHaveClass('ps-p');
+      expect(screen.getByText(name)).not.toHaveClass('ps-p-lg');
+      expect(screen.getByText(name)).not.toHaveClass('ps-p-xl');
+    }
     expect(screen.getByText('Outer')).toHaveStyle({ '--ps-p-md': '100px' });
     expect(screen.getByText('Middle')).toHaveStyle({ '--ps-p-md': '50%' });
     expect(screen.getByText('Inner')).toHaveStyle({ '--ps-p-md': 'var(--perses-spacing-sm)' });
@@ -186,7 +192,7 @@ describe('Box', () => {
       </Box>,
     );
     const box = screen.getByTestId('box');
-    expect(box).toHaveClass('ps-width');
+    expect(box).toHaveClass('ps-width', 'ps-width-md', 'ps-width-lg');
     expect(box).toHaveStyle({ '--ps-width': '100%' });
     expect(box).toHaveStyle({ '--ps-width-md': '400px' });
     expect(box).toHaveStyle({ '--ps-width-lg': 'calc(30em + 4px)' });
@@ -199,7 +205,7 @@ describe('Box', () => {
       </Box>,
     );
     const box = screen.getByTestId('box');
-    expect(box).toHaveClass('ps-p');
+    expect(box).toHaveClass('ps-p', 'ps-p-xs');
     expect(box).toHaveStyle({ '--ps-p': 'var(--perses-spacing-lg)' });
     expect(box).toHaveStyle({ '--ps-p-xs': 'var(--perses-spacing-sm)' });
   });
@@ -211,7 +217,7 @@ describe('Box', () => {
       </Box>,
     );
     const box = screen.getByTestId('box');
-    expect(box).toHaveClass('ps-display');
+    expect(box).toHaveClass('ps-display', 'ps-display-sm');
     expect(box).toHaveStyle({ '--ps-display': 'flex', '--ps-display-sm': 'block' });
   });
 

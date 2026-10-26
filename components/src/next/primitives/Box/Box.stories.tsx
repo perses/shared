@@ -268,15 +268,16 @@ export const Responsive: Story = () => (
       <strong>Every style prop accepts a responsive object. Resize the viewport to see the values change.</strong>
       <ul>
         <li>
-          <code>default</code> — base / fallback
+          <code>default</code> — optional base value
         </li>
         <li>
-          <code>xs</code> ≤ 599 · <code>sm</code> 600–899 · <code>md</code> 900–1199 · <code>lg</code> 1200–1535 ·{' '}
-          <code>xl</code> ≥ 1536 (px)
+          <code>xs</code> ≥ 0 · <code>sm</code> ≥ 600 · <code>md</code> ≥ 900 · <code>lg</code> ≥ 1200 · <code>xl</code>{' '}
+          ≥ 1536 (px)
         </li>
       </ul>
       <em>
-        A breakpoint with no value falls back to <code>default</code>, not the next-smaller one.
+        Values apply from their breakpoint upward until explicitly overridden. Missing breakpoints keep the previous
+        value; without a base value, component styling is preserved below the first breakpoint.
       </em>
     </div>
 
@@ -320,11 +321,11 @@ export const Responsive: Story = () => (
 );
 Responsive.storyName = 'Responsive';
 
-const outerPadding = { md: 5 };
+const outerPadding = { xs: 'sm', md: 5 };
 const innerPadding = { md: 'sm' };
 const middlePadding = { md: '5%' };
-const nestingCode = `const outerPadding = { md: 100 };
-const middlePadding = { md: '50%' };
+const nestingCode = `const outerPadding = { md: 5 };
+const middlePadding = { md: '5%' };
 const innerPadding = { md: 'sm' };
 
 <Box p={outerPadding}>
@@ -333,16 +334,19 @@ const innerPadding = { md: 'sm' };
   </Box>
 </Box>`;
 
+const boxResponsiveWidth = { default: 600, md: 400 };
+
 export const Nesting: Story = () => (
   <Stack>
     <p>
-      Spacing accepts tokens, numeric pixels, or CSS strings. At <code>md</code> (900–1199 px), the outer box uses 100
-      px, the middle box uses 50% of its containing block’s width, and the inner box uses the <code>sm</code> token.
+      Spacing accepts tokens, numeric pixels, or CSS strings. At <code>md</code> and wider (≥ 900 px), the outer box
+      uses 5 px, the middle box uses 5% of its containing block’s width, and the inner box uses the <code>sm</code>{' '}
+      token. These values remain active at <code>lg</code> and <code>xl</code>.
     </p>
     <Sample title="Nested responsive padding with mixed spacing values" code={nestingCode}>
-      <Box p={outerPadding} style={outline}>
+      <Box p={outerPadding} width={boxResponsiveWidth} style={outline}>
         <Box p={middlePadding} style={panel}>
-          <Box p={innerPadding} style={fill}>
+          <Box p={innerPadding} style={fill} width={100}>
             A box
           </Box>
         </Box>

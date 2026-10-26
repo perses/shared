@@ -134,16 +134,17 @@ describe('Stack', () => {
     });
   });
 
-  it('seeds a column base for a responsive direction that omits the default breakpoint', () => {
+  it('leaves the column default to the stylesheet until the first responsive direction', () => {
     render(
       <Stack data-testid="stack" direction={PARTIAL_RESPONSIVE_DIRECTION}>
         Content
       </Stack>,
     );
-    expect(screen.getByTestId('stack')).toHaveStyle({
-      '--ps-flex-direction': 'column',
-      '--ps-flex-direction-md': 'row',
-    });
+    const stack = screen.getByTestId('stack');
+    expect(stack).toHaveClass('ps-flex-direction-md');
+    expect(stack).not.toHaveClass('ps-flex-direction');
+    expect(stack.style.getPropertyValue('--ps-flex-direction')).toBe('');
+    expect(stack).toHaveStyle({ '--ps-flex-direction-md': 'row' });
   });
 
   it('creates responsive spacing variables', () => {
@@ -152,6 +153,7 @@ describe('Stack', () => {
         Content
       </Stack>,
     );
+    expect(screen.getByTestId('stack')).toHaveClass('ps-gap', 'ps-gap-md');
     expect(screen.getByTestId('stack')).toHaveStyle({
       '--ps-gap': 'var(--perses-spacing-sm)',
       '--ps-gap-md': 'var(--perses-spacing-xl)',
