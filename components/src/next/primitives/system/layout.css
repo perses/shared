@@ -16,253 +16,359 @@
 @import '@perses-dev/design-tokens/css/layers';
 
 /*
- * Layout style props (display, flexbox, sizing). `.ps-<prop>` reads `--ps-<prop>`; each breakpoint
- * prefers `--ps-<prop>-<breakpoint>` and falls back to the base. Values set inline by styleProps.ts.
+ * Layout style props (display, flexbox, sizing). Each class reads only its matching
+ * custom property, set inline by styleProps.ts. Breakpoint values carry forward
+ * until a later explicit breakpoint overrides them.
  */
 @layer perses.utilities {
   .ps-display {
     display: var(--ps-display, revert);
   }
-  .ps-flex-direction {
-    flex-direction: var(--ps-flex-direction, revert);
+  .ps-display-xs {
+    display: var(--ps-display-xs, revert);
   }
-  .ps-align-items {
-    align-items: var(--ps-align-items, revert);
-  }
-  .ps-justify-content {
-    justify-content: var(--ps-justify-content, revert);
-  }
-  .ps-flex-wrap {
-    flex-wrap: var(--ps-flex-wrap, revert);
-  }
-  .ps-flex {
-    flex: var(--ps-flex, revert);
-  }
-  .ps-width {
-    width: var(--ps-width, revert);
-  }
-  .ps-height {
-    height: var(--ps-height, revert);
-  }
-  .ps-min-width {
-    min-width: var(--ps-min-width, revert);
-  }
-  .ps-max-width {
-    max-width: var(--ps-max-width, revert);
-  }
-  .ps-min-height {
-    min-height: var(--ps-min-height, revert);
-  }
-  .ps-max-height {
-    max-height: var(--ps-max-height, revert);
-  }
-  .ps-overflow {
-    overflow: var(--ps-overflow, revert);
-  }
-
-  @media (max-width: 599.98px) {
-    .ps-display {
-      display: var(--ps-display-xs, var(--ps-display, revert));
-    }
-    .ps-flex-direction {
-      flex-direction: var(--ps-flex-direction-xs, var(--ps-flex-direction, revert));
-    }
-    .ps-align-items {
-      align-items: var(--ps-align-items-xs, var(--ps-align-items, revert));
-    }
-    .ps-justify-content {
-      justify-content: var(--ps-justify-content-xs, var(--ps-justify-content, revert));
-    }
-    .ps-flex-wrap {
-      flex-wrap: var(--ps-flex-wrap-xs, var(--ps-flex-wrap, revert));
-    }
-    .ps-flex {
-      flex: var(--ps-flex-xs, var(--ps-flex, revert));
-    }
-    .ps-width {
-      width: var(--ps-width-xs, var(--ps-width, revert));
-    }
-    .ps-height {
-      height: var(--ps-height-xs, var(--ps-height, revert));
-    }
-    .ps-min-width {
-      min-width: var(--ps-min-width-xs, var(--ps-min-width, revert));
-    }
-    .ps-max-width {
-      max-width: var(--ps-max-width-xs, var(--ps-max-width, revert));
-    }
-    .ps-min-height {
-      min-height: var(--ps-min-height-xs, var(--ps-min-height, revert));
-    }
-    .ps-max-height {
-      max-height: var(--ps-max-height-xs, var(--ps-max-height, revert));
-    }
-    .ps-overflow {
-      overflow: var(--ps-overflow-xs, var(--ps-overflow, revert));
+  @media (min-width: 600px) {
+    .ps-display-sm {
+      display: var(--ps-display-sm, revert);
     }
   }
-  @media (min-width: 600px) and (max-width: 899.98px) {
-    .ps-display {
-      display: var(--ps-display-sm, var(--ps-display, revert));
-    }
-    .ps-flex-direction {
-      flex-direction: var(--ps-flex-direction-sm, var(--ps-flex-direction, revert));
-    }
-    .ps-align-items {
-      align-items: var(--ps-align-items-sm, var(--ps-align-items, revert));
-    }
-    .ps-justify-content {
-      justify-content: var(--ps-justify-content-sm, var(--ps-justify-content, revert));
-    }
-    .ps-flex-wrap {
-      flex-wrap: var(--ps-flex-wrap-sm, var(--ps-flex-wrap, revert));
-    }
-    .ps-flex {
-      flex: var(--ps-flex-sm, var(--ps-flex, revert));
-    }
-    .ps-width {
-      width: var(--ps-width-sm, var(--ps-width, revert));
-    }
-    .ps-height {
-      height: var(--ps-height-sm, var(--ps-height, revert));
-    }
-    .ps-min-width {
-      min-width: var(--ps-min-width-sm, var(--ps-min-width, revert));
-    }
-    .ps-max-width {
-      max-width: var(--ps-max-width-sm, var(--ps-max-width, revert));
-    }
-    .ps-min-height {
-      min-height: var(--ps-min-height-sm, var(--ps-min-height, revert));
-    }
-    .ps-max-height {
-      max-height: var(--ps-max-height-sm, var(--ps-max-height, revert));
-    }
-    .ps-overflow {
-      overflow: var(--ps-overflow-sm, var(--ps-overflow, revert));
+  @media (min-width: 900px) {
+    .ps-display-md {
+      display: var(--ps-display-md, revert);
     }
   }
-  @media (min-width: 900px) and (max-width: 1199.98px) {
-    .ps-display {
-      display: var(--ps-display-md, var(--ps-display, revert));
-    }
-    .ps-flex-direction {
-      flex-direction: var(--ps-flex-direction-md, var(--ps-flex-direction, revert));
-    }
-    .ps-align-items {
-      align-items: var(--ps-align-items-md, var(--ps-align-items, revert));
-    }
-    .ps-justify-content {
-      justify-content: var(--ps-justify-content-md, var(--ps-justify-content, revert));
-    }
-    .ps-flex-wrap {
-      flex-wrap: var(--ps-flex-wrap-md, var(--ps-flex-wrap, revert));
-    }
-    .ps-flex {
-      flex: var(--ps-flex-md, var(--ps-flex, revert));
-    }
-    .ps-width {
-      width: var(--ps-width-md, var(--ps-width, revert));
-    }
-    .ps-height {
-      height: var(--ps-height-md, var(--ps-height, revert));
-    }
-    .ps-min-width {
-      min-width: var(--ps-min-width-md, var(--ps-min-width, revert));
-    }
-    .ps-max-width {
-      max-width: var(--ps-max-width-md, var(--ps-max-width, revert));
-    }
-    .ps-min-height {
-      min-height: var(--ps-min-height-md, var(--ps-min-height, revert));
-    }
-    .ps-max-height {
-      max-height: var(--ps-max-height-md, var(--ps-max-height, revert));
-    }
-    .ps-overflow {
-      overflow: var(--ps-overflow-md, var(--ps-overflow, revert));
-    }
-  }
-  @media (min-width: 1200px) and (max-width: 1535.98px) {
-    .ps-display {
-      display: var(--ps-display-lg, var(--ps-display, revert));
-    }
-    .ps-flex-direction {
-      flex-direction: var(--ps-flex-direction-lg, var(--ps-flex-direction, revert));
-    }
-    .ps-align-items {
-      align-items: var(--ps-align-items-lg, var(--ps-align-items, revert));
-    }
-    .ps-justify-content {
-      justify-content: var(--ps-justify-content-lg, var(--ps-justify-content, revert));
-    }
-    .ps-flex-wrap {
-      flex-wrap: var(--ps-flex-wrap-lg, var(--ps-flex-wrap, revert));
-    }
-    .ps-flex {
-      flex: var(--ps-flex-lg, var(--ps-flex, revert));
-    }
-    .ps-width {
-      width: var(--ps-width-lg, var(--ps-width, revert));
-    }
-    .ps-height {
-      height: var(--ps-height-lg, var(--ps-height, revert));
-    }
-    .ps-min-width {
-      min-width: var(--ps-min-width-lg, var(--ps-min-width, revert));
-    }
-    .ps-max-width {
-      max-width: var(--ps-max-width-lg, var(--ps-max-width, revert));
-    }
-    .ps-min-height {
-      min-height: var(--ps-min-height-lg, var(--ps-min-height, revert));
-    }
-    .ps-max-height {
-      max-height: var(--ps-max-height-lg, var(--ps-max-height, revert));
-    }
-    .ps-overflow {
-      overflow: var(--ps-overflow-lg, var(--ps-overflow, revert));
+  @media (min-width: 1200px) {
+    .ps-display-lg {
+      display: var(--ps-display-lg, revert);
     }
   }
   @media (min-width: 1536px) {
-    .ps-display {
-      display: var(--ps-display-xl, var(--ps-display, revert));
+    .ps-display-xl {
+      display: var(--ps-display-xl, revert);
     }
-    .ps-flex-direction {
-      flex-direction: var(--ps-flex-direction-xl, var(--ps-flex-direction, revert));
+  }
+
+  .ps-flex-direction {
+    flex-direction: var(--ps-flex-direction, revert);
+  }
+  .ps-flex-direction-xs {
+    flex-direction: var(--ps-flex-direction-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-flex-direction-sm {
+      flex-direction: var(--ps-flex-direction-sm, revert);
     }
-    .ps-align-items {
-      align-items: var(--ps-align-items-xl, var(--ps-align-items, revert));
+  }
+  @media (min-width: 900px) {
+    .ps-flex-direction-md {
+      flex-direction: var(--ps-flex-direction-md, revert);
     }
-    .ps-justify-content {
-      justify-content: var(--ps-justify-content-xl, var(--ps-justify-content, revert));
+  }
+  @media (min-width: 1200px) {
+    .ps-flex-direction-lg {
+      flex-direction: var(--ps-flex-direction-lg, revert);
     }
-    .ps-flex-wrap {
-      flex-wrap: var(--ps-flex-wrap-xl, var(--ps-flex-wrap, revert));
+  }
+  @media (min-width: 1536px) {
+    .ps-flex-direction-xl {
+      flex-direction: var(--ps-flex-direction-xl, revert);
     }
-    .ps-flex {
-      flex: var(--ps-flex-xl, var(--ps-flex, revert));
+  }
+
+  .ps-align-items {
+    align-items: var(--ps-align-items, revert);
+  }
+  .ps-align-items-xs {
+    align-items: var(--ps-align-items-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-align-items-sm {
+      align-items: var(--ps-align-items-sm, revert);
     }
-    .ps-width {
-      width: var(--ps-width-xl, var(--ps-width, revert));
+  }
+  @media (min-width: 900px) {
+    .ps-align-items-md {
+      align-items: var(--ps-align-items-md, revert);
     }
-    .ps-height {
-      height: var(--ps-height-xl, var(--ps-height, revert));
+  }
+  @media (min-width: 1200px) {
+    .ps-align-items-lg {
+      align-items: var(--ps-align-items-lg, revert);
     }
-    .ps-min-width {
-      min-width: var(--ps-min-width-xl, var(--ps-min-width, revert));
+  }
+  @media (min-width: 1536px) {
+    .ps-align-items-xl {
+      align-items: var(--ps-align-items-xl, revert);
     }
-    .ps-max-width {
-      max-width: var(--ps-max-width-xl, var(--ps-max-width, revert));
+  }
+
+  .ps-justify-content {
+    justify-content: var(--ps-justify-content, revert);
+  }
+  .ps-justify-content-xs {
+    justify-content: var(--ps-justify-content-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-justify-content-sm {
+      justify-content: var(--ps-justify-content-sm, revert);
     }
-    .ps-min-height {
-      min-height: var(--ps-min-height-xl, var(--ps-min-height, revert));
+  }
+  @media (min-width: 900px) {
+    .ps-justify-content-md {
+      justify-content: var(--ps-justify-content-md, revert);
     }
-    .ps-max-height {
-      max-height: var(--ps-max-height-xl, var(--ps-max-height, revert));
+  }
+  @media (min-width: 1200px) {
+    .ps-justify-content-lg {
+      justify-content: var(--ps-justify-content-lg, revert);
     }
-    .ps-overflow {
-      overflow: var(--ps-overflow-xl, var(--ps-overflow, revert));
+  }
+  @media (min-width: 1536px) {
+    .ps-justify-content-xl {
+      justify-content: var(--ps-justify-content-xl, revert);
+    }
+  }
+
+  .ps-flex-wrap {
+    flex-wrap: var(--ps-flex-wrap, revert);
+  }
+  .ps-flex-wrap-xs {
+    flex-wrap: var(--ps-flex-wrap-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-flex-wrap-sm {
+      flex-wrap: var(--ps-flex-wrap-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-flex-wrap-md {
+      flex-wrap: var(--ps-flex-wrap-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-flex-wrap-lg {
+      flex-wrap: var(--ps-flex-wrap-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-flex-wrap-xl {
+      flex-wrap: var(--ps-flex-wrap-xl, revert);
+    }
+  }
+
+  .ps-flex {
+    flex: var(--ps-flex, revert);
+  }
+  .ps-flex-xs {
+    flex: var(--ps-flex-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-flex-sm {
+      flex: var(--ps-flex-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-flex-md {
+      flex: var(--ps-flex-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-flex-lg {
+      flex: var(--ps-flex-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-flex-xl {
+      flex: var(--ps-flex-xl, revert);
+    }
+  }
+
+  .ps-width {
+    width: var(--ps-width, revert);
+  }
+  .ps-width-xs {
+    width: var(--ps-width-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-width-sm {
+      width: var(--ps-width-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-width-md {
+      width: var(--ps-width-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-width-lg {
+      width: var(--ps-width-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-width-xl {
+      width: var(--ps-width-xl, revert);
+    }
+  }
+
+  .ps-height {
+    height: var(--ps-height, revert);
+  }
+  .ps-height-xs {
+    height: var(--ps-height-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-height-sm {
+      height: var(--ps-height-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-height-md {
+      height: var(--ps-height-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-height-lg {
+      height: var(--ps-height-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-height-xl {
+      height: var(--ps-height-xl, revert);
+    }
+  }
+
+  .ps-min-width {
+    min-width: var(--ps-min-width, revert);
+  }
+  .ps-min-width-xs {
+    min-width: var(--ps-min-width-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-min-width-sm {
+      min-width: var(--ps-min-width-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-min-width-md {
+      min-width: var(--ps-min-width-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-min-width-lg {
+      min-width: var(--ps-min-width-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-min-width-xl {
+      min-width: var(--ps-min-width-xl, revert);
+    }
+  }
+
+  .ps-max-width {
+    max-width: var(--ps-max-width, revert);
+  }
+  .ps-max-width-xs {
+    max-width: var(--ps-max-width-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-max-width-sm {
+      max-width: var(--ps-max-width-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-max-width-md {
+      max-width: var(--ps-max-width-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-max-width-lg {
+      max-width: var(--ps-max-width-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-max-width-xl {
+      max-width: var(--ps-max-width-xl, revert);
+    }
+  }
+
+  .ps-min-height {
+    min-height: var(--ps-min-height, revert);
+  }
+  .ps-min-height-xs {
+    min-height: var(--ps-min-height-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-min-height-sm {
+      min-height: var(--ps-min-height-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-min-height-md {
+      min-height: var(--ps-min-height-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-min-height-lg {
+      min-height: var(--ps-min-height-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-min-height-xl {
+      min-height: var(--ps-min-height-xl, revert);
+    }
+  }
+
+  .ps-max-height {
+    max-height: var(--ps-max-height, revert);
+  }
+  .ps-max-height-xs {
+    max-height: var(--ps-max-height-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-max-height-sm {
+      max-height: var(--ps-max-height-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-max-height-md {
+      max-height: var(--ps-max-height-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-max-height-lg {
+      max-height: var(--ps-max-height-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-max-height-xl {
+      max-height: var(--ps-max-height-xl, revert);
+    }
+  }
+
+  .ps-overflow {
+    overflow: var(--ps-overflow, revert);
+  }
+  .ps-overflow-xs {
+    overflow: var(--ps-overflow-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-overflow-sm {
+      overflow: var(--ps-overflow-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-overflow-md {
+      overflow: var(--ps-overflow-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-overflow-lg {
+      overflow: var(--ps-overflow-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-overflow-xl {
+      overflow: var(--ps-overflow-xl, revert);
     }
   }
 }
