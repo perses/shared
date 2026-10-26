@@ -26,3 +26,18 @@ initializes the same complete layer order before its own declarations:
 
 `@perses-dev/design-tokens/css/layers` is the public, order-only prelude. It contains no reset, selectors, or token values.
 Components use this export internally; consumers do not need a bootstrap import to initialize library order.
+
+## Disabled opacity
+
+`tokens.opacity.disabled` references `var(--perses-opacity-disabled)`, which defaults to `0.5` in both light and dark modes.
+Use it for disabled-state opacity without replacing status or custom colors. Override the semantic token globally or in a
+scoped container:
+
+```css
+:root {
+  --perses-opacity-disabled: 0.6;
+}
+```
+
+The variable is included in the public `SemanticOpacityVar` and `PersesTokenVar` types. The existing
+`--perses-text-disabled` and `tokens.text.disabled` color tokens remain available for consumers that need them.

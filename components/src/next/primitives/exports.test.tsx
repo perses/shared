@@ -11,6 +11,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type {
+  AlertProps,
+  AlertSeverity,
+  BoxProps,
+  ButtonProps,
+  ButtonVariant,
+  CheckboxProps,
+  ChipProps,
+  ChipSize,
+  ChipStyle,
+  ChipVariant,
+  ColorVariant,
+  DividerProps,
+  IconProps,
+  Size,
+  SortDirection,
+  SpacingToken,
+  SpinnerProps,
+  StackProps,
+  Status,
+  SwitchProps,
+  TableCellProps,
+  TableProps,
+  TableRowProps,
+  TextFieldProps,
+  TextFieldStyle,
+  TextProps,
+  TextHelperProps,
+  TooltipProps,
+} from './index';
 import {
   Alert,
   Box,
@@ -32,33 +62,10 @@ import {
   TableRow,
   TableRowExpandButton,
   TableSortLabel,
+  TextField,
+  Text,
+  TextHelper,
   Tooltip,
-} from './index';
-import type {
-  AlertProps,
-  AlertSeverity,
-  BoxProps,
-  ButtonProps,
-  ButtonVariant,
-  CheckboxProps,
-  ChipProps,
-  ChipSize,
-  ChipStyle,
-  ChipVariant,
-  ColorVariant,
-  DividerProps,
-  IconProps,
-  SpacingToken,
-  Size,
-  SortDirection,
-  SpinnerProps,
-  StackProps,
-  Status,
-  SwitchProps,
-  TooltipProps,
-  TableCellProps,
-  TableProps,
-  TableRowProps,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -84,6 +91,9 @@ describe('primitives barrel exports', () => {
     expect(TableRow).toBeDefined();
     expect(TableRowExpandButton).toBeDefined();
     expect(TableSortLabel).toBeDefined();
+    expect(TextField).toBeDefined();
+    expect(Text).toBeDefined();
+    expect(TextHelper).toBeDefined();
   });
 
   it('exports their prop types', () => {
@@ -114,6 +124,10 @@ describe('primitives barrel exports', () => {
     const sortDirection: SortDirection = 'asc';
     const sharedSize: Size = 'md';
     const sharedStatus: Status = 'error';
+    const textFieldProps: TextFieldProps = { label: 'Name' };
+    const textFieldStyle: TextFieldStyle = { '--perses-textfield-size-md': '2.5rem' };
+    const textProps: TextProps = { as: 'p', size: 'sm', weight: 'medium', color: 'secondary' };
+    const textHelperProps: TextHelperProps = { status: 'error' };
 
     expect(alertProps).toBeDefined();
     expect(severity).toBe('info');
@@ -142,5 +156,9 @@ describe('primitives barrel exports', () => {
     expect(sortDirection).toBe('asc');
     expect(sharedSize).toBe('md');
     expect(sharedStatus).toBe('error');
+    expect(textFieldProps).toBeDefined();
+    expect(textFieldStyle).toBeDefined();
+    expect(textProps).toBeDefined();
+    expect(textHelperProps).toBeDefined();
   });
 });

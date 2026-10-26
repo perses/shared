@@ -41,6 +41,8 @@ export type SemanticTextVar =
   | '--perses-text-accent'
   | '--perses-text-on-solid';
 
+export type SemanticOpacityVar = '--perses-opacity-disabled';
+
 export type TooltipVar = '--perses-tooltip-bg' | '--perses-tooltip-text';
 
 export type StatusRole = 'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info';
@@ -66,6 +68,8 @@ export type ControlSizeVar = `--perses-control-size-${ControlSizeScale}`;
 export type BorderWidthScale = 'sm' | 'md';
 
 export type BorderWidthVar = `--perses-border-width-${BorderWidthScale}`;
+
+export type FocusRingVar = '--perses-focus-ring-width' | '--perses-focus-ring-offset' | '--perses-focus-ring-color';
 
 export type RadiusVar = `--perses-radius-${'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'}`;
 
@@ -93,6 +97,7 @@ export type PersesTokenVar =
   | SemanticBgVar
   | SemanticBorderVar
   | SemanticTextVar
+  | SemanticOpacityVar
   | TooltipVar
   | StatusBgVar
   | StatusTextVar
@@ -102,6 +107,7 @@ export type PersesTokenVar =
   | SpacingVar
   | ControlSizeVar
   | BorderWidthVar
+  | FocusRingVar
   | RadiusVar
   | ShadowVar
   | ZIndexVar

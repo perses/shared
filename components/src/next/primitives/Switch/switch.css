@@ -24,6 +24,7 @@
   }
 
   .ps-Switch__wrapper:has(.ps-Switch[data-disabled]) {
+    opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
   }
 
@@ -51,13 +52,19 @@
   }
 
   .ps-Switch:focus-visible {
-    outline: var(--perses-border-width-md) solid var(--perses-status-border-primary);
-    outline-offset: 2px;
+    outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
+    outline-offset: var(--perses-focus-ring-offset);
   }
 
   .ps-Switch[data-disabled] {
-    opacity: 0.5;
+    opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
+  }
+
+  /* A labeled switch is dimmed by its wrapper, not again by the track or nested text. */
+  .ps-Switch__wrapper:has(.ps-Switch[data-disabled]) .ps-Switch[data-disabled],
+  .ps-Switch__wrapper:has(.ps-Switch[data-disabled]) .ps-Text[data-disabled] {
+    opacity: 1;
   }
 
   .ps-Switch[data-readonly] {

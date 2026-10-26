@@ -146,6 +146,11 @@ describe('CSS primitive dimension variables', () => {
     expect(tokensCss).toContain('--perses-border-width-md');
   });
 
+  it('defines focus ring geometry variables', () => {
+    expect(tokensCss).toContain('--perses-focus-ring-width');
+    expect(tokensCss).toContain('--perses-focus-ring-offset');
+  });
+
   it('defines control size variables in rem', () => {
     const expected = { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '2.75rem' };
     for (const [name, value] of Object.entries(expected)) {
@@ -185,6 +190,26 @@ describe('CSS semantic variables', () => {
 
   it('has border semantic token', () => {
     expect(semanticCss).toContain('--perses-border-default');
+  });
+
+  it('has focus ring colour semantic token in both modes', () => {
+    expect(semanticCss.match(/--perses-focus-ring-color:/g)).toHaveLength(2);
+  });
+
+  it.each(['light', 'dark'])('defaults disabled opacity to 0.5 in %s mode', (mode) => {
+    const variables = new Map([
+      ...declarationsFor(semanticCss, ':root'),
+      ...(mode === 'dark' ? declarationsFor(semanticCss, "[data-perses-mode='dark']") : []),
+    ]);
+    expect(variables.get('--perses-opacity-disabled')).toBe('0.5');
+  });
+
+  it.each([
+    ['light', 'var(--perses-color-gray-300)'],
+    ['dark', 'var(--perses-color-gray-600)'],
+  ])('preserves the disabled text color in %s mode', (mode, expected) => {
+    const selector = mode === 'dark' ? "[data-perses-mode='dark']" : ':root';
+    expect(declarationsFor(semanticCss, selector).get('--perses-text-disabled')).toBe(expected);
   });
 
   it('has all text semantic tokens', () => {

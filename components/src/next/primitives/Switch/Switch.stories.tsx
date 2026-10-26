@@ -21,14 +21,23 @@ import { Switch } from './Switch';
 
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
 const colors: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
+const states = ['off', 'on'] as const;
 const noop = (): void => {};
 const row: CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
-  gap: '1.5rem',
+  gap: '0.5rem',
 };
-const rowLabel: CSSProperties = { width: '2rem', fontSize: '0.75rem' };
+const rowLabel: CSSProperties = { width: '4rem', fontSize: '0.75rem' };
+const sizeGroups: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '2rem' };
+const stateRows: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.5rem' };
+const sizeHeading: CSSProperties = { marginBottom: '0.5rem' };
+const stateDivider: CSSProperties = {
+  borderLeft: '1px solid var(--perses-border-default)',
+  marginLeft: '0.25rem',
+  paddingLeft: '0.75rem',
+};
 const grid: CSSProperties = {
   display: 'flex',
   flexDirection: 'column',
@@ -42,12 +51,6 @@ const basicCode = `const [checked, setChecked] = useState(false);
 function ControlledSwitch(): ReactElement {
   const [checked, setChecked] = useState(false);
   return <Switch checked={checked} onCheckedChange={setChecked} label="Enable feature" />;
-}
-
-// Starts on so the color is visible, but stays toggleable to show the off state.
-function ToggleableSwitch({ color }: { color: ColorVariant | Status }): ReactElement {
-  const [checked, setChecked] = useState(true);
-  return <Switch color={color} checked={checked} onCheckedChange={setChecked} label={color} />;
 }
 
 export const Basic: Story = () => (
@@ -66,27 +69,59 @@ Basic.storyName = 'Basic';
 
 const variantsCode = `// size:  'xs' | 'sm' | 'md' | 'lg'
 // color: 'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'success' | 'info' (applies to the on track)
-<Switch size="lg" checked onCheckedChange={setChecked} label="lg" />
-<Switch color="success" checked onCheckedChange={setChecked} label="success" />`;
+// Rows start off or on; enabled examples remain toggleable.
+<Switch size="lg" color="success" label="Off" />
+<Switch size="lg" color="success" defaultChecked label="On" />
+
+// The trailing column shows the disabled state.
+<Switch size="lg" color="primary" disabled defaultChecked label="disabled" />`;
+const standaloneCode = `<Switch defaultChecked aria-label="Enable feature" />`;
 
 export const Variants: Story = () => (
   <Stack>
-    <Sample title="Sizes — off, on, and without a visible label" code={variantsCode}>
-      <div style={grid}>
+    <Sample title="Colors and sizes — the last column shows the disabled state" code={variantsCode}>
+      <div style={sizeGroups}>
         {sizes.map((size) => (
-          <div key={size} style={row}>
-            <span style={rowLabel}>{size}</span>
-            <Switch size={size} checked={false} onCheckedChange={noop} label="Off" />
-            <Switch size={size} checked onCheckedChange={noop} label="On" />
-            <Switch size={size} checked aria-label={`${size} switch without label`} onCheckedChange={noop} />
+          <div key={size}>
+            <h3 style={sizeHeading}>Size: {size}</h3>
+            <div style={stateRows}>
+              {states.map((state) => (
+                <div key={state} style={row}>
+                  <span style={rowLabel}>{state}</span>
+                  {colors.map((color) => (
+                    <Switch
+                      key={color}
+                      size={size}
+                      color={color}
+                      defaultChecked={state === 'on'}
+                      label={color}
+                      aria-label={`${size} ${state} ${color}`}
+                    />
+                  ))}
+                  <span style={stateDivider}>
+                    <Switch
+                      size={size}
+                      color="primary"
+                      defaultChecked={state === 'on'}
+                      disabled
+                      label="disabled"
+                      aria-label={`${size} ${state} disabled`}
+                    />
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
     </Sample>
-    <Sample title="Colors — toggle to compare the on and off track">
-      <div style={row}>
-        {colors.map((color) => (
-          <ToggleableSwitch key={color} color={color} />
+    <Sample title="Without a visible label" code={standaloneCode}>
+      <div style={grid}>
+        {sizes.map((size) => (
+          <div key={size} style={row}>
+            <span style={rowLabel}>{size}</span>
+            <Switch size={size} defaultChecked aria-label={`${size} switch without label`} />
+          </div>
         ))}
       </div>
     </Sample>

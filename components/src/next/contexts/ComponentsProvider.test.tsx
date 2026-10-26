@@ -125,6 +125,37 @@ describe('ComponentsProvider', () => {
     expect(alertRef.current).toBeInstanceOf(HTMLDivElement);
   });
 
+  it('provides text primitives with refs for accessible control descriptions', () => {
+    const textRef = createRef<HTMLElement>();
+    const helperRef = createRef<HTMLParagraphElement>();
+
+    function TextConsumer(): ReactElement {
+      const {
+        components: { Text, TextHelper },
+      } = useComponents();
+      return (
+        <>
+          <Text as="p" ref={textRef}>
+            Publication
+          </Text>
+          <button aria-describedby="publication-help">Publish</button>
+          <TextHelper id="publication-help" ref={helperRef}>
+            Visible to your team
+          </TextHelper>
+        </>
+      );
+    }
+
+    render(
+      <ComponentsProvider components={components} icons={icons}>
+        <TextConsumer />
+      </ComponentsProvider>,
+    );
+    expect(textRef.current).toBe(screen.getByText('Publication'));
+    expect(helperRef.current).toBe(screen.getByText('Visible to your team'));
+    expect(screen.getByRole('button', { name: 'Publish' })).toHaveAccessibleDescription('Visible to your team');
+  });
+
   it('supports overriding Chip', () => {
     render(
       <ComponentsProvider components={chipOverrides} icons={icons}>
