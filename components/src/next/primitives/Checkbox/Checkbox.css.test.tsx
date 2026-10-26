@@ -14,20 +14,48 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
+import { Field } from '@base-ui/react/field';
+import { Fieldset } from '@base-ui/react/fieldset';
 import { render, screen } from '@testing-library/react';
 
-import type { Size } from '../types';
+import { Text } from '../Text';
+import type { ColorVariant, Size, Status } from '../types';
 import { Checkbox } from './Checkbox';
-import type { CheckboxVariant } from './Checkbox';
+import type { CheckboxStyle, CheckboxVariant } from './Checkbox';
 
 // jsdom does not apply cascade layers; unwrap the component layer while preserving its selectors.
-const checkboxCss = readFileSync(resolve(__dirname, './checkbox.css'), 'utf-8')
-  .replace('@layer perses.components {', '')
-  .replace(/}\s*$/, '');
+const checkboxCss = ['../Text/text.css', './checkbox.css']
+  .map((path) =>
+    readFileSync(resolve(__dirname, path), 'utf-8')
+      .replace(/@import\s+[^;]+;/g, '')
+      .replace('@layer perses.components {', '')
+      .replace(/}\s*$/, ''),
+  )
+  .join('\n');
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
+const colors: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
+const customStyle: CheckboxStyle = {
+  '--perses-checkbox-color': '#663399',
+  color: '#663399',
+  backgroundColor: '#ddeeff',
+};
+const customLabel = (
+  <Text disabled color="#663399">
+    Custom label
+  </Text>
+);
 
 describe('Checkbox CSS contracts', () => {
   const style = document.createElement('style');
+
+  // jsdom cannot compute opacity containing var(); inspect matching authored declarations instead.
+  function getOpacity(element: Element): string {
+    const rules = Array.from(style.sheet?.cssRules ?? []).filter(
+      (rule): rule is CSSStyleRule =>
+        rule instanceof CSSStyleRule && Boolean(rule.style.opacity) && element.matches(rule.selectorText),
+    );
+    return rules.at(-1)?.style.opacity ?? '1';
+  }
 
   beforeAll(() => {
     style.textContent = checkboxCss;
@@ -65,7 +93,8 @@ describe('Checkbox CSS contracts', () => {
     expect(getComputedStyle(checkbox).borderStyle).toBe('dashed');
 
     rerender(<Checkbox aria-label="Select row" checked={false} disabled />);
-    expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--perses-text-disabled)');
+    expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--perses-bg-sunken)');
+    expect(getOpacity(checkbox)).toBe('var(--perses-opacity-disabled, 0.5)');
   });
 
   it.each([
@@ -93,27 +122,149 @@ describe('Checkbox CSS contracts', () => {
     'uses semantic subtle background and indicator text for color=%s',
     (color) => {
       render(<Checkbox aria-label="Select row" variant="subtle" color={color} checked />);
-      const style = getComputedStyle(screen.getByRole('checkbox'));
-      expect(style.getPropertyValue('--ps-checkbox-bg-subtle')).toBe(`var(--perses-status-bg-${color})`);
-      expect(style.getPropertyValue('--ps-checkbox-text')).toBe(`var(--perses-status-text-${color})`);
+      const computed = getComputedStyle(screen.getByRole('checkbox'));
+      expect(computed.getPropertyValue('--ps-checkbox-bg-subtle')).toBe(`var(--perses-status-bg-${color})`);
+      expect(computed.getPropertyValue('--ps-checkbox-text')).toBe(`var(--perses-status-text-${color})`);
     },
   );
 
-  it.each<CheckboxVariant>(['solid', 'subtle', 'outline'])(
-    'preserves disabled and invalid styling with variant=%s',
-    (variant) => {
+  describe.each<CheckboxVariant>(['solid', 'subtle', 'outline'])('disabled variant=%s', (variant) => {
+    it.each(['unchecked', 'checked', 'indeterminate'])('preserves all color choices when %s', (state) => {
+      const checked = state === 'checked';
+      const indeterminate = state === 'indeterminate';
+      const { rerender } = render(<Checkbox aria-label="Select row" checked={checked} indeterminate={indeterminate} />);
+      const checkbox = screen.getByRole('checkbox');
+
+      for (const color of colors) {
+        rerender(
+          <Checkbox
+            aria-label="Select row"
+            variant={variant}
+            color={color}
+            checked={checked}
+            indeterminate={indeterminate}
+          />,
+        );
+        const enabled = getComputedStyle(checkbox);
+        const normalColors = { color: enabled.color, background: enabled.backgroundColor, border: enabled.borderColor };
+
+        rerender(
+          <Checkbox
+            aria-label="Select row"
+            variant={variant}
+            color={color}
+            checked={checked}
+            indeterminate={indeterminate}
+            disabled
+          />,
+        );
+        const disabled = getComputedStyle(checkbox);
+        expect(disabled.color).toBe(normalColors.color);
+        expect(disabled.backgroundColor).toBe(normalColors.background);
+        expect(disabled.borderColor).toBe(normalColors.border);
+        expect(getOpacity(checkbox)).toBe('var(--perses-opacity-disabled, 0.5)');
+        expect(checkbox).toHaveAttribute('aria-disabled', 'true');
+        expect(checkbox).toHaveAttribute('aria-checked', indeterminate ? 'mixed' : String(checked));
+      }
+    });
+
+    it('restores full opacity when re-enabled and keeps read-only and invalid styling', () => {
       const { rerender } = render(<Checkbox aria-label="Select row" variant={variant} checked disabled />);
       const checkbox = screen.getByRole('checkbox');
-      expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--perses-text-disabled)');
-      expect(getComputedStyle(checkbox).color).toBe('var(--perses-bg-surface)');
+      expect(getOpacity(checkbox)).toBe('var(--perses-opacity-disabled, 0.5)');
 
-      rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} disabled />);
-      expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--perses-text-disabled)');
+      rerender(<Checkbox aria-label="Select row" variant={variant} checked readOnly />);
+      expect(getOpacity(checkbox)).toBe('1');
+      expect(checkbox).not.toHaveAttribute('data-disabled');
 
-      rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} invalid />);
+      rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} invalid disabled />);
       expect(getComputedStyle(checkbox).borderStyle).toBe('dashed');
+      // jsdom does not consistently compute variable border colors after state changes.
+      const borderRules = Array.from(style.sheet?.cssRules ?? []).filter(
+        (rule): rule is CSSStyleRule =>
+          rule instanceof CSSStyleRule &&
+          checkbox.matches(rule.selectorText) &&
+          Boolean(rule.style.getPropertyValue('border-color')),
+      );
+      expect(borderRules.at(-1)?.style.getPropertyValue('border-color')).toBe('var(--perses-status-border-error)');
+    });
+  });
+
+  it.each(['start', 'end'] as const)(
+    'dims the labelPosition=%s group once without replacing label colors',
+    (labelPosition) => {
+      const { rerender } = render(
+        <Checkbox label="Accept terms" labelPosition={labelPosition} checked disabled color="primary" />,
+      );
+      const checkbox = screen.getByRole('checkbox', { name: 'Accept terms' });
+      const label = screen.getByText('Accept terms');
+      const wrapper = checkbox.closest('label');
+      if (!wrapper) throw new Error('Missing checkbox label wrapper');
+      expect(getOpacity(wrapper)).toBe('var(--perses-opacity-disabled, 0.5)');
+      expect(getOpacity(checkbox)).toBe('1');
+      expect(getOpacity(label)).toBe('1');
+      expect(getComputedStyle(label).color).toBe('var(--perses-text-primary)');
+      expect(getComputedStyle(wrapper).cursor).toBe('not-allowed');
+
+      rerender(<Checkbox label="Accept terms" labelPosition={labelPosition} checked color="primary" />);
+      expect(getOpacity(wrapper)).toBe('1');
+      expect(getOpacity(checkbox)).toBe('1');
+      expect(getComputedStyle(wrapper).cursor).toBe('pointer');
     },
   );
+
+  it.each(['Field.Root', 'Fieldset.Root'] as const)(
+    'follows inherited %s disabled state through Field.Root',
+    (source) => {
+      const { rerender } = render(
+        <Fieldset.Root disabled={source === 'Fieldset.Root'}>
+          <Field.Root disabled={source === 'Field.Root'}>
+            <Checkbox label="Accept terms" disabled={false} checked color="success" />
+          </Field.Root>
+        </Fieldset.Root>,
+      );
+      const checkbox = screen.getByRole('checkbox', { name: 'Accept terms' });
+      const wrapper = checkbox.closest('label');
+      if (!wrapper) throw new Error('Missing checkbox label wrapper');
+      expect(checkbox).toHaveAttribute('data-disabled');
+      expect(getOpacity(wrapper)).toBe('var(--perses-opacity-disabled, 0.5)');
+      expect(getOpacity(checkbox)).toBe('1');
+      expect(getComputedStyle(screen.getByText('Accept terms')).color).toBe('var(--perses-text-primary)');
+      expect(getComputedStyle(wrapper).cursor).toBe('not-allowed');
+
+      rerender(
+        <Fieldset.Root>
+          <Field.Root>
+            <Checkbox label="Accept terms" disabled={false} checked color="success" />
+          </Field.Root>
+        </Fieldset.Root>,
+      );
+      expect(checkbox).not.toHaveAttribute('data-disabled');
+      expect(getOpacity(wrapper)).toBe('1');
+      expect(getOpacity(checkbox)).toBe('1');
+      expect(getComputedStyle(wrapper).cursor).toBe('pointer');
+    },
+  );
+
+  it('preserves custom control colors while disabled', () => {
+    render(<Checkbox aria-label="Select row" checked disabled style={customStyle} />);
+    const checkbox = screen.getByRole('checkbox');
+    const computed = getComputedStyle(checkbox);
+    expect(computed.getPropertyValue('--perses-checkbox-color')).toBe('#663399');
+    expect(computed.color).toBe('rgb(102, 51, 153)');
+    expect(computed.backgroundColor).toBe('rgb(221, 238, 255)');
+    expect(getOpacity(checkbox)).toBe('var(--perses-opacity-disabled, 0.5)');
+  });
+
+  it('preserves custom label colors without compounding nested disabled text opacity', () => {
+    render(<Checkbox label={customLabel} checked disabled />);
+    const text = screen.getByText('Custom label');
+    const wrapper = text.closest('label');
+    if (!wrapper) throw new Error('Missing checkbox label wrapper');
+    expect(getComputedStyle(text).color).toBe('rgb(102, 51, 153)');
+    expect(getOpacity(text)).toBe('1');
+    expect(getOpacity(wrapper)).toBe('var(--perses-opacity-disabled, 0.5)');
+  });
 
   it.each(sizes)('uses content-independent inline alignment across selection states (%s)', (size) => {
     const { rerender } = render(<Checkbox aria-label="Select row" size={size} checked={false} />);

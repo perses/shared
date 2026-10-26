@@ -43,6 +43,9 @@ import type {
   TableRowProps,
   TableSortLabelProps,
 } from '../primitives/Table';
+import type { TextProps } from '../primitives/Text';
+import type { TextFieldProps } from '../primitives/TextField';
+import type { TextHelperProps } from '../primitives/TextHelper';
 import type { TooltipProps } from '../primitives/Tooltip';
 
 type RefComponent<Props, Element> = ForwardRefExoticComponent<PropsWithoutRef<Props> & RefAttributes<Element>>;
@@ -73,6 +76,9 @@ export interface PersesComponents {
   TableRowExpandButton: RefComponent<TableRowExpandButtonProps, HTMLButtonElement>;
   TableSortLabel: RefComponent<TableSortLabelProps, HTMLButtonElement>;
   TablePagination: RefComponent<TablePaginationProps, HTMLDivElement>;
+  TextField: RefComponent<TextFieldProps, HTMLInputElement | HTMLTextAreaElement>;
+  Text: RefComponent<TextProps, HTMLElement>;
+  TextHelper: RefComponent<TextHelperProps, HTMLParagraphElement>;
 }
 
 export interface PersesIcons {
@@ -127,6 +133,9 @@ export interface ComponentsProviderProps {
    *   TableRowExpandButton: MyTableRowExpandButton,
    *   TableSortLabel: MyTableSortLabel,
    *   TablePagination: MyTablePagination,
+   *   TextField: MyTextField,
+   *   Text: MyText,
+   *   TextHelper: MyTextHelper,
    * };
    */
   components: PersesComponents;

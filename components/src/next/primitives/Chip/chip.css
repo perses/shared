@@ -106,15 +106,15 @@
   .ps-Chip[data-clickable='true']:focus-visible,
   .ps-Chip__label[role='button']:focus-visible,
   .ps-Chip__close:focus-visible {
-    outline-width: var(--perses-border-width-md);
+    outline-width: var(--perses-focus-ring-width);
     outline-style: solid;
-    outline-color: var(--perses-status-border-primary);
-    outline-offset: 2px;
+    outline-color: var(--perses-focus-ring-color);
+    outline-offset: var(--perses-focus-ring-offset);
   }
 
   .ps-Chip[data-disabled='true'] {
     cursor: not-allowed;
-    opacity: 0.5;
+    opacity: var(--perses-opacity-disabled, 0.5);
   }
 
   .ps-Chip__start {

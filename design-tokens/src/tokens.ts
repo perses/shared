@@ -70,6 +70,12 @@ export const tokens = {
     },
   },
 
+  focusRing: {
+    width: 'var(--perses-focus-ring-width)',
+    offset: 'var(--perses-focus-ring-offset)',
+    color: 'var(--perses-focus-ring-color)',
+  },
+
   text: {
     primary: 'var(--perses-text-primary)',
     secondary: 'var(--perses-text-secondary)',
@@ -79,6 +85,10 @@ export const tokens = {
     navigation: 'var(--perses-text-navigation)',
     accent: 'var(--perses-text-accent)',
     onSolid: 'var(--perses-text-on-solid)',
+  },
+
+  opacity: {
+    disabled: 'var(--perses-opacity-disabled)',
   },
 
   tooltip: {
