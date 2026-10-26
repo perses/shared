@@ -41,9 +41,12 @@ describe('grid.css', () => {
     expect(getRule(css, ':where(.ps-GridItem)')).toContain('min-width: 0;');
   });
 
-  it('relies on the perses.reset layer for box-sizing', () => {
-    expect(css).not.toMatch(/box-sizing/);
-  });
+  it.each([':where(.ps-Grid)', ':where(.ps-GridItem)'])(
+    'uses border-box on %s so padding stays inside the declared width, matching Box and Stack',
+    (selector) => {
+      expect(getRule(css, selector)).toContain('box-sizing: border-box;');
+    },
+  );
 
   it('resets the column count on every grid so nested grids do not inherit it', () => {
     expect(getRule(css, ':where(.ps-Grid)')).toContain('--ps-grid-columns: initial;');
