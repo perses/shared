@@ -24,7 +24,7 @@ import {
   sizingProps,
   spacingProps,
 } from '../system';
-import type { DisplayProps, FlexboxProps, Responsive, SizingProps, SpacingProps, SpacingToken } from '../system';
+import type { DisplayProps, FlexboxProps, Responsive, SizingProps, SpacingProps, SpacingValue } from '../system';
 
 import './stack.css';
 import '../system/layout.css';
@@ -39,8 +39,8 @@ export interface StackProps
     Pick<DisplayProps, 'overflow'> {
   /** Main axis of the stack. Defaults to `column`. */
   direction?: Responsive<'row' | 'column'>;
-  /** Space between children, as a spacing token. */
-  spacing?: Responsive<SpacingToken>;
+  /** Space between children: a spacing token, numeric pixels, or a CSS spacing value. */
+  spacing?: Responsive<SpacingValue>;
 }
 
 // Only `overflow` from the display category: `display` stays fixed to flex by the stylesheet, so

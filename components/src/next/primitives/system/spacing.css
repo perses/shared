@@ -17,8 +17,8 @@
 
 /*
  * Spacing style props. `.ps-<prop>` reads `--ps-<prop>`; each breakpoint prefers
- * `--ps-<prop>-<breakpoint>` and falls back to the base. styleProps.ts sets these inline to a
- * `var(--perses-spacing-<token>)` reference (design tokens stay the source of truth).
+ * `--ps-<prop>-<breakpoint>` and falls back to the base. Values are set inline as
+ * `var(--perses-spacing-<token>)` references, numeric pixels, or literal CSS spacing values.
  */
 @layer perses.utilities {
   .ps-p {

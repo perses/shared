@@ -12,60 +12,60 @@
 // limitations under the License.
 
 import type {
-  AlertProps,
-  AlertSeverity,
-  BoxProps,
-  ButtonProps,
-  ButtonVariant,
-  CheckboxProps,
-  ChipProps,
-  ChipSize,
-  ChipStyle,
-  ChipVariant,
-  ColorVariant,
-  DividerProps,
-  IconProps,
-  Size,
-  SortDirection,
-  SpacingToken,
-  SpinnerProps,
-  StackProps,
-  Status,
-  SwitchProps,
-  TableCellProps,
-  TableProps,
-  TableRowProps,
-  TextFieldProps,
-  TextFieldStyle,
-  TextProps,
-  TextHelperProps,
-  TooltipProps,
+    AlertProps,
+    AlertSeverity,
+    BoxProps,
+    ButtonProps,
+    ButtonVariant,
+    CheckboxProps,
+    ChipProps,
+    ChipSize,
+    ChipStyle,
+    ChipVariant,
+    ColorVariant,
+    DividerProps,
+    IconProps,
+    Size,
+    SortDirection,
+    SpacingValue,
+    SpinnerProps,
+    StackProps,
+    Status,
+    SwitchProps,
+    TableCellProps,
+    TableProps,
+    TableRowProps,
+    TextFieldProps,
+    TextFieldStyle,
+    TextHelperProps,
+    TextProps,
+    TooltipProps
 } from './index';
 import {
-  Alert,
-  Box,
-  Button,
-  Checkbox,
-  Chip,
-  Divider,
-  Icon,
-  Spinner,
-  Stack,
-  Switch,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableFooter,
-  TableHead,
-  TablePagination,
-  TableRow,
-  TableRowExpandButton,
-  TableSortLabel,
-  TextField,
-  Text,
-  TextHelper,
-  Tooltip,
+    Alert,
+    Box,
+    Button,
+    Checkbox,
+    Chip,
+    Divider,
+    Icon,
+    Spinner,
+    Stack,
+    Switch,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableFooter,
+    TableHead,
+    TablePagination,
+    TableRow,
+    TableRowExpandButton,
+    TableSortLabel,
+    Text,
+    TextField,
+    TextHelper,
+    Tooltip,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -99,8 +99,9 @@ describe('primitives barrel exports', () => {
   it('exports their prop types', () => {
     const alertProps: AlertProps = {};
     const severity: AlertSeverity = 'info';
-    const boxProps: BoxProps = {};
-    const spacingToken: SpacingToken = 'md';
+    const spacingToken: SpacingValue = 'md';
+    const spacingValue: SpacingValue = 100;
+    const boxProps: BoxProps = { p: { default: spacingToken, md: spacingValue, xl: '50%' } };
     const buttonProps: ButtonProps = {};
     const variant: ButtonVariant = 'solid';
     const color: ColorVariant | Status = 'primary';
@@ -133,6 +134,7 @@ describe('primitives barrel exports', () => {
     expect(severity).toBe('info');
     expect(boxProps).toBeDefined();
     expect(spacingToken).toBe('md');
+    expect(spacingValue).toBe(100);
     expect(buttonProps).toBeDefined();
     expect(variant).toBe('solid');
     expect(color).toBe('primary');

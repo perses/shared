@@ -20,6 +20,7 @@ import { Stack } from './Stack';
 const RESPONSIVE_DIRECTION = { default: 'column', md: 'row' } as const;
 const PARTIAL_RESPONSIVE_DIRECTION = { md: 'row' } as const;
 const RESPONSIVE_SPACING = { default: 'sm', md: 'xl' } as const;
+const MIXED_RESPONSIVE_SPACING = { default: 'sm', md: 24, lg: '5%' };
 const STYLE_OVERRIDE = { gap: '99px' };
 
 describe('Stack', () => {
@@ -76,6 +77,23 @@ describe('Stack', () => {
     const stack = screen.getByTestId('stack');
     expect(stack).toHaveClass('ps-gap');
     expect(stack).toHaveStyle({ '--ps-gap': 'var(--perses-spacing-lg)' });
+  });
+
+  it.each([
+    [24, '24px'],
+    ['5%', '5%'],
+  ] as const)('accepts scalar spacing %s', (spacing, expected) => {
+    render(<Stack spacing={spacing}>Custom gap</Stack>);
+    expect(screen.getByText('Custom gap')).toHaveStyle({ '--ps-gap': expected });
+  });
+
+  it('mixes tokens, pixels and CSS strings in responsive spacing', () => {
+    render(<Stack spacing={MIXED_RESPONSIVE_SPACING}>Responsive gap</Stack>);
+    expect(screen.getByText('Responsive gap')).toHaveStyle({
+      '--ps-gap': 'var(--perses-spacing-sm)',
+      '--ps-gap-md': '24px',
+      '--ps-gap-lg': '5%',
+    });
   });
 
   it('forwards alignItems and justifyContent', () => {

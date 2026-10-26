@@ -37,6 +37,47 @@ describe('applyStyleProps', () => {
     expect(style).toEqual({ '--ps-width': '100%', '--ps-width-md': '400px' });
   });
 
+  it.each(['p', 'px', 'py', 'm', 'mx', 'my', 'gap'] as const)(
+    'mixes tokens, pixels and CSS strings across responsive %s values',
+    (prop) => {
+      const { style } = applyStyleProps(
+        { [prop]: { default: 'sm', xs: 0, sm: 12.5, md: '50%', lg: 'calc(1rem + 4px)', xl: undefined } },
+        spacing,
+      );
+      expect(style).toEqual({
+        [`--ps-${prop}`]: 'var(--perses-spacing-sm)',
+        [`--ps-${prop}-xs`]: '0px',
+        [`--ps-${prop}-sm`]: '12.5px',
+        [`--ps-${prop}-md`]: '50%',
+        [`--ps-${prop}-lg`]: 'calc(1rem + 4px)',
+      });
+    },
+  );
+
+  it.each([
+    ['0', 'var(--perses-spacing-0)'],
+    ['xs', 'var(--perses-spacing-xs)'],
+    ['sm', 'var(--perses-spacing-sm)'],
+    ['md', 'var(--perses-spacing-md)'],
+    ['lg', 'var(--perses-spacing-lg)'],
+    ['xl', 'var(--perses-spacing-xl)'],
+    ['2xl', 'var(--perses-spacing-2xl)'],
+    ['3xl', 'var(--perses-spacing-3xl)'],
+    ['4xl', 'var(--perses-spacing-4xl)'],
+    [0, '0px'],
+    [100, '100px'],
+    [-8, '-8px'],
+    ['50%', '50%'],
+    ['1rem', '1rem'],
+    ['4px 8px', '4px 8px'],
+    ['var(--custom-spacing)', 'var(--custom-spacing)'],
+    ['auto', 'auto'],
+    ['calc(1rem + 4px)', 'calc(1rem + 4px)'],
+  ])('serializes scalar spacing %s as %s', (value, expected) => {
+    const { style } = applyStyleProps({ m: value }, spacing);
+    expect(style).toEqual({ '--ps-m': expected });
+  });
+
   it('returns unregistered props in rest and omits consumed ones', () => {
     const { rest } = applyStyleProps({ p: 'md', id: 'x', role: 'group' }, spacing);
     expect(rest).toEqual({ id: 'x', role: 'group' });
