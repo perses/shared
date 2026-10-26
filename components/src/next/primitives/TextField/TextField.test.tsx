@@ -114,6 +114,14 @@ describe('TextField', () => {
     expect([missingName, withLabel, withAriaLabel, withAriaLabelledBy]).toHaveLength(4);
   });
 
+  it('rejects overriding a visible label with aria-label or aria-labelledby at the type level', () => {
+    // @ts-expect-error -- aria-label would override the visible label as the accessible name (WCAG 2.5.3)
+    const withAriaLabel = <TextField label="Name" aria-label="Different" />;
+    // @ts-expect-error -- aria-labelledby would override the visible label as the accessible name (WCAG 2.5.3)
+    const withAriaLabelledBy = <TextField label="Name" aria-labelledby="other" />;
+    expect([withAriaLabel, withAriaLabelledBy]).toHaveLength(2);
+  });
+
   it('renders a textarea when multiline is true', () => {
     render(<TextField label="Comment" multiline />);
     expect(screen.getByLabelText('Comment').tagName).toBe('TEXTAREA');
@@ -178,6 +186,14 @@ describe('TextField', () => {
     const root = getRoot();
     expect(root).not.toHaveClass('ps-display');
     expect(root.style.getPropertyValue('--ps-display')).toBe('');
+  });
+
+  it('does not leak a type-bypassed display value onto the input', () => {
+    // @ts-expect-error display is fixed by the TextField stylesheet
+    render(<TextField label="Name" display="block" />);
+    const input = screen.getByRole('textbox');
+    expect(input).not.toHaveAttribute('display');
+    expect(input.style.display).toBe('');
   });
 
   it('places className and style on the root, not the input', () => {

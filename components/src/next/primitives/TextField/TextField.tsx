@@ -67,14 +67,16 @@ interface TextFieldBaseProps
 
 /**
  * Accessible-name contract: at least one of `label`, `aria-label` or `aria-labelledby` is required so the control
- * always has an accessible name.
+ * always has an accessible name. When a visible `label` is provided it is the accessible name; `aria-label` and
+ * `aria-labelledby` are disallowed there because either would silently override the visible text and produce a
+ * Label-in-Name mismatch (WCAG 2.5.3).
  */
 type TextFieldAccessibleName =
   | {
-      /** Visible label, associated with the control through `htmlFor`/`id`. */
+      /** Visible label, associated with the control through `htmlFor`/`id`, and used as the accessible name. */
       label: ReactNode;
-      'aria-label'?: string;
-      'aria-labelledby'?: string;
+      'aria-label'?: never;
+      'aria-labelledby'?: never;
     }
   | {
       label?: undefined;
@@ -122,6 +124,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     style: computedStyle,
     rest,
   } = applyStyleProps(props, TEXT_FIELD_STYLE_PROPS, style);
+  const { display: _display, ...restWithoutDisplay } = rest as typeof rest & { display?: unknown };
 
   return (
     <Field.Root
@@ -144,7 +147,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
           <span className="ps-TextField__adornment ps-TextField__adornment--start">{startAdornment}</span>
         )}
         <Field.Control
-          {...rest}
+          {...restWithoutDisplay}
           ref={ref}
           id={inputId}
           className="ps-TextField__input"
