@@ -127,6 +127,9 @@ not structure or behavior. See each component's Slots story for available target
 - Append consumer classes to required classes. Merge inline styles by property, allowing visual overrides while
   preserving functional styles. Keep behavior-critical parts private unless their styling policy is documented.
 - Styling does not render optional parts. Consumer overrides must preserve usable layout, visible focus, and accessibility.
+- If a slot is the element that
+uses the component's own custom properties, type it as `SlotStyleProps<ComponentNameStyle>` (for example
+`control?: SlotStyleProps<CheckboxStyle>`) so those values are type-checked the same way as the top-level `style`. 
 
 ## Checks when changing styles
 

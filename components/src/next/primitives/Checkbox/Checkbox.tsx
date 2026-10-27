@@ -58,7 +58,8 @@ export type CheckboxAccessibleName = { label: ReactNode } | { 'aria-label': stri
 
 /** Styling-only overrides for the checkbox's documented internal parts. */
 export interface CheckboxSlotProps {
-  control?: SlotStyleProps;
+  /** The sized control element; accepts the `CheckboxStyle` custom properties. */
+  control?: SlotStyleProps<CheckboxStyle>;
   indicator?: SlotStyleProps;
   label?: SlotStyleProps;
 }

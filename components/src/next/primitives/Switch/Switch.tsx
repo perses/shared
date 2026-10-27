@@ -44,7 +44,8 @@ export interface SwitchStyle extends CSSProperties {
 
 /** Styling-only overrides for the switch's documented internal parts. */
 export interface SwitchSlotProps {
-  control?: SlotStyleProps;
+  /** The sized control element; accepts the `SwitchStyle` custom properties. */
+  control?: SlotStyleProps<SwitchStyle>;
   thumb?: SlotStyleProps;
   label?: SlotStyleProps;
 }

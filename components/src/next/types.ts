@@ -27,12 +27,14 @@ export type PersesCSSProperties<Style extends CSSProperties = CSSProperties> =
 /**
  * Styling overrides for a documented internal part. Does not expose element replacement, content, event handlers,
  * refs, state, or accessibility attributes. Components read these fields explicitly rather than spreading this object.
+ * Pass the component's `Style` interface when the slot element is the one that reads its documented custom
+ * properties, so those values are type-checked the same way as the top-level `style`.
  */
-export interface SlotStyleProps {
+export interface SlotStyleProps<Style extends CSSProperties = CSSProperties> {
   /** Additional classes; required component classes are preserved. */
   className?: string;
   /** Inline visual overrides, including CSS custom properties. */
-  style?: PersesCSSProperties;
+  style?: PersesCSSProperties<Style>;
 }
 
 export interface StyledSVGProps extends SVGProps<SVGSVGElement> {

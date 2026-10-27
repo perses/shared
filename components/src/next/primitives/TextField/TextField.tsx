@@ -41,8 +41,8 @@ export interface TextFieldStyle extends CSSProperties {
 export interface TextFieldSlotProps {
   /** Visible label; rendered only when `label` is provided. */
   label?: SlotStyleProps;
-  /** Bordered wrapper around the control and adornments. */
-  wrapper?: SlotStyleProps;
+  /** Bordered wrapper around the control and adornments; accepts the `TextFieldStyle` size custom properties. */
+  wrapper?: SlotStyleProps<TextFieldStyle>;
   /** Native input, or textarea when `multiline` is true. */
   input?: SlotStyleProps;
   /** Supporting text; rendered only when `helperText` is provided. */

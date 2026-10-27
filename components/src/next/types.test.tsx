@@ -96,7 +96,7 @@ expectTypeOf<TablePaginationProps['slotProps']>().toEqualTypeOf<TablePaginationS
 
 expectTypeOf<AlertSlotProps>().toEqualTypeOf<{ icon?: SlotStyleProps; message?: SlotStyleProps }>();
 expectTypeOf<CheckboxSlotProps>().toEqualTypeOf<{
-  control?: SlotStyleProps;
+  control?: SlotStyleProps<CheckboxStyle>;
   indicator?: SlotStyleProps;
   label?: SlotStyleProps;
 }>();
@@ -106,7 +106,7 @@ expectTypeOf<ChipSlotProps>().toEqualTypeOf<{
   closeButton?: SlotStyleProps;
 }>();
 expectTypeOf<SwitchSlotProps>().toEqualTypeOf<{
-  control?: SlotStyleProps;
+  control?: SlotStyleProps<SwitchStyle>;
   thumb?: SlotStyleProps;
   label?: SlotStyleProps;
 }>();
@@ -203,6 +203,17 @@ expectTypeOf({ color: 'red', '--app-value': {} } satisfies PersesCSSProperties);
 expectTypeOf({ '--perses-checkbox-size-md': 24 } satisfies PersesCSSProperties<CheckboxStyle>);
 // @ts-expect-error Component-specific border styles retain their CSS value type, not arbitrary numbers.
 expectTypeOf({ '--perses-chip-border-style': 1 } satisfies PersesCSSProperties<ChipStyle>);
+
+expectTypeOf<NonNullable<TextFieldSlotProps['wrapper']>>().toEqualTypeOf<SlotStyleProps<TextFieldStyle>>();
+expectTypeOf({
+  control: { style: { '--perses-checkbox-size-md': '24px', '--app-accent': 'blue' } },
+} satisfies CheckboxSlotProps);
+// @ts-expect-error Typed slots check documented custom properties the same way as the top-level style.
+expectTypeOf({ control: { style: { '--perses-checkbox-size-md': 24 } } } satisfies CheckboxSlotProps);
+// @ts-expect-error Typed slots check documented custom properties the same way as the top-level style.
+expectTypeOf({ control: { style: { '--perses-switch-size-md': 24 } } } satisfies SwitchSlotProps);
+// @ts-expect-error Typed slots check documented custom properties the same way as the top-level style.
+expectTypeOf({ wrapper: { style: { '--perses-textfield-size-md': 40 } } } satisfies TextFieldSlotProps);
 
 const MIXED_STYLE = {
   marginTop: 8,
