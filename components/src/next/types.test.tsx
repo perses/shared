@@ -15,38 +15,19 @@ import { render, screen } from '@testing-library/react';
 import type { ComponentProps, CSSProperties } from 'react';
 import { expectTypeOf } from 'vitest';
 
-import type { PersesCSSProperties, PersesIcons } from './index';
+import type { PersesComponents, PersesCSSProperties, PersesIcons } from './index';
 import { AddIcon, Box, Checkbox } from './primitives';
 import type {
-  AlertProps,
-  BoxProps,
-  ButtonProps,
   CheckboxProps,
   CheckboxStyle,
   ChipProps,
   ChipStyle,
-  IconButtonProps,
   IconProps,
   PersesCSSProperties as PrimitiveCSSProperties,
-  SpinnerProps,
-  StackProps,
   SwitchProps,
   SwitchStyle,
-  TableBodyProps,
-  TableCellProps,
-  TableContainerProps,
-  TableFooterProps,
-  TableHeadProps,
-  TablePaginationProps,
-  TableProps,
-  TableRowExpandButtonProps,
-  TableRowProps,
-  TableSortLabelProps,
   TextFieldProps,
   TextFieldStyle,
-  TextHelperProps,
-  TextProps,
-  TooltipProps,
 } from './primitives';
 
 // These type-level contracts are checked by `npm run type-check`.
@@ -69,40 +50,28 @@ interface ExtendedTextFieldStyle extends TextFieldStyle {
   '--app-accent': string;
 }
 
+// Derived from the component registry so every registered primitive and icon is checked without listing it here.
 type StyledProps = {
+  [Name in keyof PersesComponents]: ComponentProps<PersesComponents[Name]>;
+} & {
+  [Name in keyof PersesIcons as `${Name}Icon`]: ComponentProps<PersesIcons[Name]>;
+} & {
   AddIcon: ComponentProps<typeof AddIcon>;
-  RegistryIcon: ComponentProps<PersesIcons['Info']>;
-  Alert: AlertProps;
-  Box: BoxProps;
-  Button: ButtonProps;
-  Checkbox: CheckboxProps;
-  Chip: ChipProps;
   Icon: IconProps;
-  IconButton: IconButtonProps;
-  Spinner: SpinnerProps;
-  Stack: StackProps;
-  Switch: SwitchProps;
-  Table: TableProps;
-  TableBody: TableBodyProps;
-  TableCell: TableCellProps;
-  TableContainer: TableContainerProps;
-  TableFooter: TableFooterProps;
-  TableHead: TableHeadProps;
-  TablePagination: TablePaginationProps;
-  TableRow: TableRowProps;
-  TableRowExpandButton: TableRowExpandButtonProps;
-  TableSortLabel: TableSortLabelProps;
-  Text: TextProps;
-  TextField: TextFieldProps;
-  TextHelper: TextHelperProps;
-  Tooltip: TooltipProps;
 };
+type StyleOf<Props> = Props extends { style?: infer Style } ? NonNullable<Style> : never;
 
 // Structural assignability alone would allow extra keys on non-literal objects,
 // masking the excess-property errors callers encounter with inline styles.
+// Components without a `style` prop, such as Divider, are skipped.
 type MissingCustomProperties = {
-  [Name in keyof StyledProps]: `--${string}` extends StyleKeys<NonNullable<StyledProps[Name]['style']>> ? never : Name;
+  [Name in keyof StyledProps]: 'style' extends keyof StyledProps[Name]
+    ? `--${string}` extends StyleKeys<StyleOf<StyledProps[Name]>>
+      ? never
+      : Name
+    : never;
 }[keyof StyledProps];
+type _RegistryCovered = AssertAssignable<'Checkbox' | 'TableCell' | 'InfoIcon' | 'AddIcon', keyof StyledProps>;
 type _EveryStyleSupportsCustomProperties = AssertNever<MissingCustomProperties>;
 
 type _ReactCompatible = AssertAssignable<PersesCSSProperties, CSSProperties>;
