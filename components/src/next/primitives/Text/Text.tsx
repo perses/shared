@@ -16,6 +16,7 @@ import { clsx } from 'clsx';
 import { createElement, forwardRef } from 'react';
 import type { CSSProperties, HTMLAttributes } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import type { Status } from '../types';
@@ -25,6 +26,7 @@ import '../system/spacing.css';
 import './text.css';
 
 export interface TextProps extends Omit<HTMLAttributes<HTMLElement>, 'color'>, SpacingProps, SizingProps, DisplayProps {
+  style?: PersesCSSProperties;
   /** Semantic element to render. Typography is independent of the chosen element. Defaults to `span`. */
   as?: 'span' | 'p' | 'div' | 'strong' | 'em' | 'small';
   /** Font-size token. Defaults to `md`. */

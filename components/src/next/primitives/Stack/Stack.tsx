@@ -15,6 +15,7 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import { applyStyleProps, compileStyleProps, displayProps, flexboxProps, sizingProps, spacingProps } from '../system';
 import type { DisplayProps, FlexboxProps, Responsive, SizingProps, SpacingProps, SpacingValue } from '../system';
 
@@ -29,6 +30,7 @@ export interface StackProps
     SizingProps,
     Omit<FlexboxProps, 'flexDirection'>,
     Pick<DisplayProps, 'overflow'> {
+  style?: PersesCSSProperties;
   /** Main axis of the stack. Defaults to `column`. */
   direction?: Responsive<'row' | 'column'>;
   /** Space between children: a spacing token, numeric pixels, or a CSS spacing value. */

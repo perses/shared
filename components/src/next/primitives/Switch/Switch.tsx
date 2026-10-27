@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import type { ColorVariant, Size, Status } from '../types';
@@ -67,7 +68,7 @@ export interface SwitchProps
   /** Renders a clickable label next to the switch, wrapping both in a single `<label>`. */
   label?: ReactNode;
   /** Inline style, extended with typed selection-control size override custom properties. */
-  style?: SwitchStyle;
+  style?: PersesCSSProperties<SwitchStyle>;
 }
 
 /**
