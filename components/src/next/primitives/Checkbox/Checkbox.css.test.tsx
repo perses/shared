@@ -173,9 +173,11 @@ describe('Checkbox CSS contracts', () => {
       expect(getOpacity(checkbox)).toBe('1');
       expect(checkbox).not.toHaveAttribute('data-disabled');
 
+      rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} indeterminate />);
+      const indeterminateBackground = getComputedStyle(checkbox).backgroundColor;
       rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} indeterminate disabled />);
-      expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--perses-text-disabled)');
-      expect(getComputedStyle(checkbox).color).toBe('var(--perses-bg-surface)');
+      expect(getComputedStyle(checkbox).backgroundColor).toBe(indeterminateBackground);
+      expect(getOpacity(checkbox)).toBe('var(--perses-opacity-disabled, 0.5)');
       expect(getComputedStyle(checkbox).cursor).toBe('not-allowed');
 
       rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} invalid />);
@@ -280,16 +282,15 @@ describe('Checkbox CSS contracts', () => {
   );
 
   it.each([undefined, '', 'true', 'false'])(
-    'styles disabled labels by marker presence, not its value (%s)',
+    'dims disabled labels by marker presence, not its value (%s)',
     (marker) => {
       render(<Checkbox label="Select row" />);
-      const label = screen.getByRole('checkbox', { name: 'Select row' }).closest('label');
+      const checkbox = screen.getByRole('checkbox', { name: 'Select row' });
+      const label = checkbox.closest('label');
       if (!label) throw new Error('Missing checkbox label wrapper');
-      if (marker !== undefined) label.setAttribute('data-disabled', marker);
+      if (marker !== undefined) checkbox.setAttribute('data-disabled', marker);
 
-      expect(getComputedStyle(label).color).toBe(
-        marker === undefined ? 'var(--perses-text-primary)' : 'var(--perses-text-disabled)',
-      );
+      expect(getOpacity(label)).toBe(marker === undefined ? '1' : 'var(--perses-opacity-disabled, 0.5)');
       expect(getComputedStyle(label).cursor).toBe(marker === undefined ? 'pointer' : 'not-allowed');
     },
   );
