@@ -16,13 +16,13 @@
 @import '@perses-dev/design-tokens/css/layers';
 
 @layer perses.components {
-  .ps-Icon {
+  :where(.ps-Icon) {
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
   }
 
-  .ps-Icon svg {
+  :where(.ps-Icon svg) {
     width: 1em;
     height: 1em;
   }

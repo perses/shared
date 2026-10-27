@@ -31,20 +31,26 @@
       color 0.15s ease;
   }
 
-  .ps-ButtonBase:focus-visible {
+  :where(.ps-ButtonBase:focus-visible) {
     outline-width: var(--perses-focus-ring-width);
     outline-style: solid;
     outline-color: var(--perses-focus-ring-color);
     outline-offset: var(--perses-focus-ring-offset);
   }
 
-  .ps-ButtonBase:disabled,
-  .ps-ButtonBase[aria-disabled='true'] {
+  :where(.ps-ButtonBase:disabled),
+  :where(.ps-ButtonBase[aria-disabled='true']) {
     opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
   }
 
-  .ps-ButtonBase[data-color='default'] {
+  :where(.ps-ButtonBase[data-loading]:disabled),
+  :where(.ps-ButtonBase[data-loading][aria-disabled='true']) {
+    opacity: 1;
+    cursor: wait;
+  }
+
+  :where(.ps-ButtonBase[data-color='default']) {
     --ps-btn-bg: var(--perses-status-solid-default);
     --ps-btn-bg-hover: var(--perses-status-bg-default-hover);
     --ps-btn-text: var(--perses-status-text-default);
@@ -52,7 +58,7 @@
     --ps-btn-bg-subtle: var(--perses-status-bg-default);
   }
 
-  .ps-ButtonBase[data-color='primary'] {
+  :where(.ps-ButtonBase[data-color='primary']) {
     --ps-btn-bg: var(--perses-status-solid-primary);
     --ps-btn-bg-hover: var(--perses-status-bg-primary-hover);
     --ps-btn-text: var(--perses-status-solid-primary);
@@ -60,7 +66,7 @@
     --ps-btn-bg-subtle: var(--perses-status-bg-primary);
   }
 
-  .ps-ButtonBase[data-color='secondary'] {
+  :where(.ps-ButtonBase[data-color='secondary']) {
     --ps-btn-bg: var(--perses-status-solid-secondary);
     --ps-btn-bg-hover: var(--perses-status-bg-secondary-hover);
     --ps-btn-text: var(--perses-status-solid-secondary);
@@ -68,7 +74,7 @@
     --ps-btn-bg-subtle: var(--perses-status-bg-secondary);
   }
 
-  .ps-ButtonBase[data-color='error'] {
+  :where(.ps-ButtonBase[data-color='error']) {
     --ps-btn-bg: var(--perses-status-solid-error);
     --ps-btn-bg-hover: var(--perses-status-bg-error-hover);
     --ps-btn-text: var(--perses-status-solid-error);
@@ -76,7 +82,7 @@
     --ps-btn-bg-subtle: var(--perses-status-bg-error);
   }
 
-  .ps-ButtonBase[data-color='warning'] {
+  :where(.ps-ButtonBase[data-color='warning']) {
     --ps-btn-bg: var(--perses-status-solid-warning);
     --ps-btn-bg-hover: var(--perses-status-bg-warning-hover);
     --ps-btn-text: var(--perses-status-solid-warning);
@@ -84,7 +90,7 @@
     --ps-btn-bg-subtle: var(--perses-status-bg-warning);
   }
 
-  .ps-ButtonBase[data-color='success'] {
+  :where(.ps-ButtonBase[data-color='success']) {
     --ps-btn-bg: var(--perses-status-solid-success);
     --ps-btn-bg-hover: var(--perses-status-bg-success-hover);
     --ps-btn-text: var(--perses-status-solid-success);
@@ -92,7 +98,7 @@
     --ps-btn-bg-subtle: var(--perses-status-bg-success);
   }
 
-  .ps-ButtonBase[data-color='info'] {
+  :where(.ps-ButtonBase[data-color='info']) {
     --ps-btn-bg: var(--perses-status-solid-info);
     --ps-btn-bg-hover: var(--perses-status-bg-info-hover);
     --ps-btn-text: var(--perses-status-solid-info);
@@ -100,29 +106,29 @@
     --ps-btn-bg-subtle: var(--perses-status-bg-info);
   }
 
-  .ps-ButtonBase[data-variant='solid'] {
+  :where(.ps-ButtonBase[data-variant='solid']) {
     color: var(--perses-text-on-solid);
     background-color: var(--ps-btn-bg);
   }
 
-  .ps-ButtonBase[data-variant='solid']:hover:not(:disabled):not([aria-disabled='true']) {
+  :where(.ps-ButtonBase[data-variant='solid']:hover:not(:disabled):not([aria-disabled='true'])) {
     background-color: var(--ps-btn-bg-hover);
   }
 
-  .ps-ButtonBase[data-variant='outline'] {
+  :where(.ps-ButtonBase[data-variant='outline']) {
     color: var(--ps-btn-text);
     background-color: transparent;
     border-color: var(--ps-btn-border);
   }
 
-  .ps-ButtonBase[data-variant='outline']:hover:not(:disabled):not([aria-disabled='true']),
-  .ps-ButtonBase[data-variant='ghost']:hover:not(:disabled):not([aria-disabled='true']) {
-    background-color: var(--ps-btn-bg-subtle);
-  }
-
-  .ps-ButtonBase[data-variant='ghost'] {
+  :where(.ps-ButtonBase[data-variant='ghost']) {
     color: var(--ps-btn-text);
     background-color: transparent;
     border-color: transparent;
+  }
+
+  :where(.ps-ButtonBase[data-variant='outline']:hover:not(:disabled):not([aria-disabled='true'])),
+  :where(.ps-ButtonBase[data-variant='ghost']:hover:not(:disabled):not([aria-disabled='true'])) {
+    background-color: var(--ps-btn-bg-subtle);
   }
 }

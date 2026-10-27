@@ -31,10 +31,6 @@ export interface CheckboxChangeEventDetails {
   event: Event;
 }
 
-function presenceAttr(value: boolean): true | undefined {
-  return value || undefined;
-}
-
 export interface CheckboxStyle extends CSSProperties {
   '--perses-checkbox-border-color'?: string;
   '--perses-checkbox-color'?: string;
@@ -145,7 +141,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
       inputRef={inputRef}
       className={clsx('ps-Checkbox', !hasLabel && callerClassName)}
       style={hasLabel ? undefined : computedStyle}
-      data-invalid={presenceAttr(invalid)}
+      data-invalid={invalid ? '' : undefined}
       data-size={size}
       data-color={color}
       data-variant={variant}
@@ -164,7 +160,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
     <label
       className={clsx('ps-Checkbox__field', callerClassName)}
       style={computedStyle}
-      data-disabled={presenceAttr(disabled)}
+      data-disabled={disabled ? '' : undefined}
       data-label-position={labelPosition}
     >
       {control}

@@ -62,11 +62,14 @@ describe('Table', () => {
     expect(table).not.toHaveAttribute('data-striped');
 
     rerender(<Table striped />);
-    expect(table).toHaveAttribute('data-striped', 'true');
+    expect(table).toHaveAttribute('data-striped', '');
     expect(table).not.toHaveAttribute('striped');
 
     rerender(<Table striped={false} />);
     expect(table).not.toHaveAttribute('data-striped');
+
+    rerender(<Table striped />);
+    expect(table).toHaveAttribute('data-striped', '');
 
     rerender(<Table />);
     expect(table).not.toHaveAttribute('data-striped');
@@ -124,17 +127,35 @@ describe('Table', () => {
     expect(screen.getByText('Total')).toBeInTheDocument();
   });
 
-  it('marks a row as selected via data-selected', () => {
-    render(
+  it.each([
+    ['selected', 'data-selected'],
+    ['hover', 'data-hover'],
+  ] as const)('toggles the %s row marker using presence and absence', (prop, attribute) => {
+    const { rerender } = render(
       <Table>
         <TableBody>
-          <TableRow selected>
+          <TableRow {...{ [prop]: true }}>
             <TableCell>Row</TableCell>
           </TableRow>
         </TableBody>
       </Table>,
     );
-    expect(screen.getByRole('row')).toHaveAttribute('data-selected', 'true');
+    const row = screen.getByRole('row');
+    expect(row).toHaveAttribute(attribute, '');
+
+    for (const value of [false, true, undefined]) {
+      rerender(
+        <Table>
+          <TableBody>
+            <TableRow {...{ [prop]: value }}>
+              <TableCell>Row</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>,
+      );
+      if (value) expect(row).toHaveAttribute(attribute, '');
+      else expect(row).not.toHaveAttribute(attribute);
+    }
   });
 
   it('aligns cell content via the align prop', () => {
@@ -241,7 +262,7 @@ describe('Table', () => {
         </TableBody>
       </Table>,
     );
-    expect(screen.getByRole('row')).toHaveAttribute('data-hover', 'true');
+    expect(screen.getByRole('row')).toHaveAttribute('data-hover', '');
   });
 
   it('does not set data-hover when the hover prop is omitted', () => {
@@ -272,17 +293,16 @@ describe('Table', () => {
     expect(screen.getByTestId('container')).toHaveClass('ps-TableContainer');
   });
 
-  it('marks the table as sticky-header via data-sticky-header', () => {
-    render(
-      <Table stickyHeader>
-        <TableBody>
-          <TableRow>
-            <TableCell>Value</TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>,
-    );
-    expect(screen.getByRole('table')).toHaveAttribute('data-sticky-header', 'true');
+  it.each([false, undefined])('removes the sticky header marker when stickyHeader becomes %s', (stickyHeader) => {
+    const { rerender } = render(<Table stickyHeader />);
+    const table = screen.getByRole('table');
+    expect(table).toHaveAttribute('data-sticky-header', '');
+
+    rerender(<Table stickyHeader={stickyHeader} />);
+    expect(table).not.toHaveAttribute('data-sticky-header');
+
+    rerender(<Table stickyHeader />);
+    expect(table).toHaveAttribute('data-sticky-header', '');
   });
 
   it('sets aria-sort to ascending when sortDirection is asc', () => {
@@ -362,23 +382,41 @@ describe('Table', () => {
     );
 
     for (const cell of [screen.getByRole('columnheader'), screen.getByRole('cell')]) {
-      expect(cell).toHaveAttribute('data-fit-content', 'true');
+      expect(cell).toHaveAttribute('data-fit-content', '');
       expect(cell).not.toHaveAttribute('fitContent');
     }
   });
 
-  it.each([undefined, false])('does not opt cells into content sizing when fitContent is %s', (fitContent) => {
-    render(
+  it.each([false, true])('toggles the content sizing marker when header=%s', (header) => {
+    const { rerender } = render(
       <Table>
         <TableBody>
           <TableRow>
-            <TableCell fitContent={fitContent}>Value</TableCell>
+            <TableCell header={header} fitContent>
+              Value
+            </TableCell>
           </TableRow>
         </TableBody>
       </Table>,
     );
+    const cell = screen.getByRole(header ? 'columnheader' : 'cell');
+    expect(cell).toHaveAttribute('data-fit-content', '');
 
-    expect(screen.getByRole('cell')).not.toHaveAttribute('data-fit-content');
+    for (const fitContent of [false, true, undefined]) {
+      rerender(
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell header={header} fitContent={fitContent}>
+                Value
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>,
+      );
+      if (fitContent) expect(cell).toHaveAttribute('data-fit-content', '');
+      else expect(cell).not.toHaveAttribute('data-fit-content');
+    }
   });
 
   it('applies a plain display value through the display style prop', () => {
@@ -474,6 +512,55 @@ describe('Table', () => {
       </Table>,
     );
     expect(screen.getByRole('cell')).not.toHaveAttribute('data-sticky');
+  });
+
+  it.each([false, true])('toggles the resizable marker when header=%s', (header) => {
+    const onResize = vi.fn();
+    const { rerender } = render(
+      <Table>
+        <TableBody>
+          <TableRow>
+            <TableCell header={header}>Value</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>,
+    );
+    const cell = screen.getByRole(header ? 'columnheader' : 'cell');
+    expect(cell).not.toHaveAttribute('data-resizable');
+
+    for (const resizable of [false, undefined] as const) {
+      rerender(
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell
+                header={header}
+                resizable
+                onResize={onResize}
+                maxResizeWidth={200}
+                resizeHandleAriaLabel="Resize Value column"
+              >
+                Value
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>,
+      );
+      expect(cell).toHaveAttribute('data-resizable', '');
+
+      rerender(
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell header={header} resizable={resizable}>
+                Value
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>,
+      );
+      expect(cell).not.toHaveAttribute('data-resizable');
+    }
   });
 
   it('renders a resize handle when resizable is set', () => {

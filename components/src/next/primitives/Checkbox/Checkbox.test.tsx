@@ -170,6 +170,31 @@ describe('Checkbox', () => {
     expect(handleCheckedChange).not.toHaveBeenCalled();
   });
 
+  it.each([false, undefined])('removes the invalid marker when invalid becomes %s', (invalid) => {
+    const { rerender } = render(<Checkbox aria-label="Select item" invalid />);
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).toHaveAttribute('data-invalid', '');
+    expect(checkbox).toHaveAttribute('aria-invalid', 'true');
+
+    rerender(<Checkbox aria-label="Select item" invalid={invalid} />);
+    expect(checkbox).not.toHaveAttribute('data-invalid');
+
+    rerender(<Checkbox aria-label="Select item" invalid />);
+    expect(checkbox).toHaveAttribute('data-invalid', '');
+  });
+
+  it.each([false, undefined])('removes the label disabled marker when disabled becomes %s', (disabled) => {
+    const { rerender } = render(<Checkbox label="Select item" disabled />);
+    const field = screen.getByRole('checkbox').closest('label');
+    expect(field).toHaveAttribute('data-disabled', '');
+
+    rerender(<Checkbox label="Select item" disabled={disabled} />);
+    expect(field).not.toHaveAttribute('data-disabled');
+
+    rerender(<Checkbox label="Select item" disabled />);
+    expect(field).toHaveAttribute('data-disabled', '');
+  });
+
   it('renders a clickable visible label', async () => {
     render(<Checkbox label="Accept terms" />);
 

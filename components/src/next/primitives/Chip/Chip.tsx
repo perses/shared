@@ -186,8 +186,8 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
       data-color={color}
       data-size={size}
       data-variant={variant}
-      data-clickable={interactive || undefined}
-      data-disabled={disabled || undefined}
+      data-clickable={interactive ? '' : undefined}
+      data-disabled={disabled ? '' : undefined}
     >
       {startElement && <span className="ps-Chip__start">{startElement}</span>}
       <span ref={labelRef} className="ps-Chip__label" {...labelActionProps}>

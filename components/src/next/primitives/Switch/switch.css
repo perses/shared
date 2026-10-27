@@ -28,7 +28,7 @@
     cursor: not-allowed;
   }
 
-  .ps-Switch__wrapper:has(.ps-Switch[data-readonly]) {
+  :where(.ps-Switch__wrapper:has(.ps-Switch[data-readonly])) {
     cursor: default;
   }
 
@@ -71,43 +71,43 @@
     cursor: default;
   }
 
-  .ps-Switch[data-checked] {
+  :where(.ps-Switch[data-checked]) {
     background-color: var(--ps-switch-checked-bg);
   }
 
-  .ps-Switch[data-color='default'] {
+  :where(.ps-Switch[data-color='default']) {
     --ps-switch-checked-bg: var(--perses-status-solid-default);
   }
-  .ps-Switch[data-color='primary'] {
+  :where(.ps-Switch[data-color='primary']) {
     --ps-switch-checked-bg: var(--perses-status-solid-primary);
   }
-  .ps-Switch[data-color='secondary'] {
+  :where(.ps-Switch[data-color='secondary']) {
     --ps-switch-checked-bg: var(--perses-status-solid-secondary);
   }
-  .ps-Switch[data-color='error'] {
+  :where(.ps-Switch[data-color='error']) {
     --ps-switch-checked-bg: var(--perses-status-solid-error);
   }
-  .ps-Switch[data-color='warning'] {
+  :where(.ps-Switch[data-color='warning']) {
     --ps-switch-checked-bg: var(--perses-status-solid-warning);
   }
-  .ps-Switch[data-color='success'] {
+  :where(.ps-Switch[data-color='success']) {
     --ps-switch-checked-bg: var(--perses-status-solid-success);
   }
-  .ps-Switch[data-color='info'] {
+  :where(.ps-Switch[data-color='info']) {
     --ps-switch-checked-bg: var(--perses-status-solid-info);
   }
 
-  .ps-Switch[data-size='xs'] {
+  :where(.ps-Switch[data-size='xs']) {
     --ps-switch-size: var(--perses-switch-size-xs, var(--perses-selection-control-size-xs));
   }
-  .ps-Switch[data-size='sm'] {
+  :where(.ps-Switch[data-size='sm']) {
     --ps-switch-size: var(--perses-switch-size-sm, var(--perses-selection-control-size-sm));
   }
-  .ps-Switch[data-size='lg'] {
+  :where(.ps-Switch[data-size='lg']) {
     --ps-switch-size: var(--perses-switch-size-lg, var(--perses-selection-control-size-lg));
   }
 
-  .ps-Switch__thumb {
+  :where(.ps-Switch__thumb) {
     display: block;
     width: var(--ps-switch-thumb-size);
     height: var(--ps-switch-thumb-size);
@@ -116,11 +116,11 @@
     transition: transform 0.15s ease;
   }
 
-  .ps-Switch[data-checked] .ps-Switch__thumb {
+  :where(.ps-Switch[data-checked] .ps-Switch__thumb) {
     transform: translateX(var(--ps-switch-thumb-size));
   }
 
-  .ps-Switch__label {
+  :where(.ps-Switch__label) {
     font-family: var(--perses-font-family);
     font-size: var(--perses-font-size-sm);
     color: var(--perses-text-primary);
@@ -128,25 +128,25 @@
 
   /* Thumb position, not colour alone, shows the state; keep it visible in forced-colors mode. */
   @media (forced-colors: active) {
-    .ps-Switch {
+    :where(.ps-Switch) {
       border: 1px solid CanvasText;
       forced-color-adjust: none;
       background-color: Canvas;
     }
-    .ps-Switch[data-checked] {
+    :where(.ps-Switch[data-checked]) {
       background-color: Highlight;
     }
-    .ps-Switch__thumb {
+    :where(.ps-Switch__thumb) {
       background-color: CanvasText;
     }
-    .ps-Switch[data-checked] .ps-Switch__thumb {
+    :where(.ps-Switch[data-checked] .ps-Switch__thumb) {
       background-color: HighlightText;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ps-Switch,
-    .ps-Switch__thumb {
+    :where(.ps-Switch),
+    :where(.ps-Switch__thumb) {
       transition: none;
     }
   }

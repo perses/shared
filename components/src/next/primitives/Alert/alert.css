@@ -28,46 +28,46 @@
     line-height: var(--perses-line-height-normal);
   }
 
-  .ps-Alert[data-severity='error'] {
+  :where(.ps-Alert[data-severity='error']) {
     background-color: var(--perses-status-bg-error);
     border-color: var(--perses-status-border-error);
     color: var(--perses-status-text-error);
   }
 
-  .ps-Alert[data-severity='warning'] {
+  :where(.ps-Alert[data-severity='warning']) {
     background-color: var(--perses-status-bg-warning);
     border-color: var(--perses-status-border-warning);
     color: var(--perses-status-text-warning);
   }
 
-  .ps-Alert[data-severity='success'] {
+  :where(.ps-Alert[data-severity='success']) {
     background-color: var(--perses-status-bg-success);
     border-color: var(--perses-status-border-success);
     color: var(--perses-status-text-success);
   }
 
-  .ps-Alert[data-severity='info'] {
+  :where(.ps-Alert[data-severity='info']) {
     background-color: var(--perses-status-bg-info);
     border-color: var(--perses-status-border-info);
     color: var(--perses-status-text-info);
   }
 
   /* ---- Icon ---- */
-  .ps-Alert > .ps-Icon {
+  :where(.ps-Alert > .ps-Icon) {
     width: 1.6em;
     height: 1.6em;
   }
 
-  .ps-Alert[data-severity='error'] > .ps-Icon {
+  :where(.ps-Alert[data-severity='error'] > .ps-Icon) {
     color: var(--perses-status-icon-error);
   }
-  .ps-Alert[data-severity='warning'] > .ps-Icon {
+  :where(.ps-Alert[data-severity='warning'] > .ps-Icon) {
     color: var(--perses-status-icon-warning);
   }
-  .ps-Alert[data-severity='success'] > .ps-Icon {
+  :where(.ps-Alert[data-severity='success'] > .ps-Icon) {
     color: var(--perses-status-icon-success);
   }
-  .ps-Alert[data-severity='info'] > .ps-Icon {
+  :where(.ps-Alert[data-severity='info'] > .ps-Icon) {
     color: var(--perses-status-icon-info);
   }
 }

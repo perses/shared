@@ -16,11 +16,11 @@
 @import '@perses-dev/design-tokens/css/layers';
 
 @layer perses.components {
-  .ps-Tooltip__positioner {
+  :where(.ps-Tooltip__positioner) {
     z-index: var(--perses-z-index-overlay);
   }
 
-  .ps-Tooltip {
+  :where(.ps-Tooltip) {
     background-color: var(--perses-tooltip-bg);
     color: var(--perses-tooltip-text);
     font-family: var(--perses-font-family);
@@ -32,26 +32,26 @@
     max-width: 20rem;
   }
 
-  .ps-Tooltip__arrow {
+  :where(.ps-Tooltip__arrow) {
     background-color: var(--perses-tooltip-bg);
     width: var(--perses-spacing-sm);
     height: var(--perses-spacing-sm);
     transform: rotate(45deg);
   }
 
-  .ps-Tooltip__arrow[data-side='top'] {
+  :where(.ps-Tooltip__arrow[data-side='top']) {
     bottom: calc(var(--perses-spacing-sm) / -2);
   }
 
-  .ps-Tooltip__arrow[data-side='bottom'] {
+  :where(.ps-Tooltip__arrow[data-side='bottom']) {
     top: calc(var(--perses-spacing-sm) / -2);
   }
 
-  .ps-Tooltip__arrow[data-side='left'] {
+  :where(.ps-Tooltip__arrow[data-side='left']) {
     right: calc(var(--perses-spacing-sm) / -2);
   }
 
-  .ps-Tooltip__arrow[data-side='right'] {
+  :where(.ps-Tooltip__arrow[data-side='right']) {
     left: calc(var(--perses-spacing-sm) / -2);
   }
 }

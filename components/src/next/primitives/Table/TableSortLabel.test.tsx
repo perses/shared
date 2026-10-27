@@ -33,9 +33,16 @@ describe('TableSortLabel', () => {
     expect(screen.getByRole('button')).toHaveAttribute('data-direction', 'desc');
   });
 
-  it('marks active via data-active', () => {
-    render(<TableSortLabel active>Name</TableSortLabel>);
-    expect(screen.getByRole('button')).toHaveAttribute('data-active', 'true');
+  it.each([false, undefined])('removes the active marker when active becomes %s', (active) => {
+    const { rerender } = render(<TableSortLabel active>Name</TableSortLabel>);
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('data-active', '');
+
+    rerender(<TableSortLabel active={active}>Name</TableSortLabel>);
+    expect(button).not.toHaveAttribute('data-active');
+
+    rerender(<TableSortLabel active>Name</TableSortLabel>);
+    expect(button).toHaveAttribute('data-active', '');
   });
 
   it('does not set data-active when inactive', () => {

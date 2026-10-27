@@ -16,7 +16,7 @@
 @import '@perses-dev/design-tokens/css/layers';
 
 @layer perses.components {
-  .ps-Box {
+  :where(.ps-Box) {
     box-sizing: border-box;
   }
 }

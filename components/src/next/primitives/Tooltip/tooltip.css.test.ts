@@ -14,37 +14,52 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-// jsdom does not apply these layered styles, so assert selector-scoped CSS contracts.
+// jsdom cannot resolve these token values; inspect declarations from rules matching actual elements.
 // Browser validation of stacking and arrow placement remains an integration check.
-const css = readFileSync(resolve(__dirname, './tooltip.css'), 'utf-8');
+const css = readFileSync(resolve(__dirname, './tooltip.css'), 'utf-8')
+  .replace(/@import\s+[^;]+;/g, '')
+  .replace('@layer perses.components {', '')
+  .replace(/}\s*$/, '');
+const style = document.createElement('style');
 
-function getRule(selector: string): string {
-  const rule = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].find(
-    ([, ruleSelector]) => ruleSelector?.trim() === selector,
-  )?.[2];
-  expect(rule).toBeDefined();
-  return rule ?? '';
+function propertyFor(className: string, property: string, side?: string): string {
+  const element = document.createElement('div');
+  element.className = className;
+  if (side !== undefined) element.setAttribute('data-side', side);
+  const rules = Array.from(style.sheet?.cssRules ?? []).filter(
+    (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && element.matches(rule.selectorText),
+  );
+  expect(rules.length).toBeGreaterThan(0);
+  return rules.reduce((value, rule) => rule.style.getPropertyValue(property) || value, '');
 }
 
 describe('tooltip.css', () => {
+  beforeAll(() => {
+    style.textContent = css;
+    document.head.append(style);
+  });
+
+  afterAll(() => {
+    style.remove();
+  });
+
   it('consumes the overlay shadow token on the popup', () => {
-    expect(getRule('.ps-Tooltip')).toContain('box-shadow: var(--perses-shadow-overlay);');
+    expect(propertyFor('ps-Tooltip', 'box-shadow')).toBe('var(--perses-shadow-overlay)');
   });
 
   it('consumes the overlay z-index token on the transformed positioner', () => {
-    expect(getRule('.ps-Tooltip__positioner')).toContain('z-index: var(--perses-z-index-overlay);');
+    expect(propertyFor('ps-Tooltip__positioner', 'z-index')).toBe('var(--perses-z-index-overlay)');
   });
 
   it('does not confine the overlay z-index to the popup stacking context', () => {
-    expect(getRule('.ps-Tooltip')).not.toMatch(/\bz-index\s*:/);
+    expect(propertyFor('ps-Tooltip', 'z-index')).toBe('');
   });
 
   it('paints the empty arrow div as a token-filled rotated square', () => {
-    const arrow = getRule('.ps-Tooltip__arrow');
-    expect(arrow).toContain('background-color: var(--perses-tooltip-bg);');
-    expect(arrow).toContain('width: var(--perses-spacing-sm);');
-    expect(arrow).toContain('height: var(--perses-spacing-sm);');
-    expect(arrow).toContain('transform: rotate(45deg);');
+    expect(propertyFor('ps-Tooltip__arrow', 'background-color')).toBe('var(--perses-tooltip-bg)');
+    expect(propertyFor('ps-Tooltip__arrow', 'width')).toBe('var(--perses-spacing-sm)');
+    expect(propertyFor('ps-Tooltip__arrow', 'height')).toBe('var(--perses-spacing-sm)');
+    expect(propertyFor('ps-Tooltip__arrow', 'transform')).toBe('rotate(45deg)');
   });
 
   it.each([
@@ -53,8 +68,15 @@ describe('tooltip.css', () => {
     ['left', 'right'],
     ['right', 'left'],
   ])('attaches the %s arrow halfway outside the %s popup edge', (side, edge) => {
-    expect(getRule(`.ps-Tooltip__arrow[data-side='${side}']`)).toContain(
-      `${edge}: calc(var(--perses-spacing-sm) / -2);`,
-    );
+    expect(propertyFor('ps-Tooltip__arrow', edge, side)).toBe('calc(var(--perses-spacing-sm) / -2)');
+    for (const otherEdge of ['top', 'bottom', 'left', 'right'].filter((candidate) => candidate !== edge)) {
+      expect(propertyFor('ps-Tooltip__arrow', otherEdge, side)).toBe('');
+    }
+  });
+
+  it.each([undefined, '', 'true', 'false'])('does not attach an arrow with non-directional data-side=%s', (side) => {
+    for (const edge of ['top', 'bottom', 'left', 'right']) {
+      expect(propertyFor('ps-Tooltip__arrow', edge, side)).toBe('');
+    }
   });
 });

@@ -22,7 +22,7 @@
     }
   }
 
-  .ps-Spinner {
+  :where(.ps-Spinner) {
     width: 1em;
     height: 1em;
     animation: ps-spin 0.75s linear infinite;

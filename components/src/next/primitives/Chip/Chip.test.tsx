@@ -82,6 +82,35 @@ describe('Chip', () => {
     expect(chip).toHaveAttribute('data-variant', 'outline');
   });
 
+  it.each([false, true])('toggles the clickable marker with onClick when removable=%s', (removable) => {
+    const onClose = removable ? noop : undefined;
+    const { rerender } = render(<Chip onClose={onClose}>Production</Chip>);
+    const chip = screen.getByText('Production').closest('.ps-Chip');
+    expect(chip).not.toHaveAttribute('data-clickable');
+
+    rerender(
+      <Chip onClose={onClose} onClick={noop}>
+        Production
+      </Chip>,
+    );
+    expect(chip).toHaveAttribute('data-clickable', '');
+
+    rerender(<Chip onClose={onClose}>Production</Chip>);
+    expect(chip).not.toHaveAttribute('data-clickable');
+  });
+
+  it.each([false, undefined])('removes the disabled marker when disabled becomes %s', (disabled) => {
+    const { rerender } = render(<Chip disabled>Production</Chip>);
+    const chip = screen.getByText('Production').closest('.ps-Chip');
+    expect(chip).toHaveAttribute('data-disabled', '');
+
+    rerender(<Chip disabled={disabled}>Production</Chip>);
+    expect(chip).not.toHaveAttribute('data-disabled');
+
+    rerender(<Chip disabled>Production</Chip>);
+    expect(chip).toHaveAttribute('data-disabled', '');
+  });
+
   it('renders an optional start element', () => {
     render(<Chip startElement={startElement}>Production</Chip>);
     expect(screen.getByTestId('start-element')).toBeInTheDocument();
@@ -270,7 +299,7 @@ describe('Chip', () => {
     expect(chip).toHaveAttribute('data-color', 'warning');
     expect(chip).toHaveAttribute('data-size', 'sm');
     expect(chip).toHaveAttribute('data-variant', 'outline');
-    expect(chip).toHaveAttribute('data-disabled', 'true');
+    expect(chip).toHaveAttribute('data-disabled', '');
     expect(chip).toHaveStyle({
       '--perses-chip-label-max-width': '120px',
       marginTop: '4px',
@@ -428,7 +457,7 @@ describe('Chip', () => {
         </Chip>,
       );
       const chip = screen.getByText('Chip').closest('.ps-Chip');
-      if (disabled) expect(chip).toHaveAttribute('data-disabled', 'true');
+      if (disabled) expect(chip).toHaveAttribute('data-disabled', '');
       else expect(chip).not.toHaveAttribute('data-disabled');
       expect(screen.getByRole('button', { name: 'Remove Chip' })).toHaveProperty('disabled', disabled);
     });
