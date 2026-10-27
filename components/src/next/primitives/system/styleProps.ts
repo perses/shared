@@ -131,3 +131,15 @@ export function applyStyleProps<Props extends Record<string, unknown>, K extends
 
   return { className: clsx(classNames), style: computed, rest: rest as Omit<Props, K> };
 }
+
+/**
+ * Resolves the inline style for an unlabeled control that renders without a wrapper element.
+ * Both the top-level `style` and `slotProps.control.style` target the same element, so the
+ * top-level style wins and the slot style fills in anything it did not set.
+ */
+export function mergeControlStyle(
+  slotStyle: PersesCSSProperties | undefined,
+  topLevelStyle: PersesCSSProperties,
+): PersesCSSProperties {
+  return slotStyle ? { ...slotStyle, ...topLevelStyle } : topLevelStyle;
+}

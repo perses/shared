@@ -28,4 +28,4 @@ export * from './TextField';
 export * from './Text';
 export * from './TextHelper';
 export type { ColorVariant, Size, Status } from './types';
-export type { PersesCSSProperties } from '../types';
+export type { PersesCSSProperties, SlotStyleProps } from '../types';

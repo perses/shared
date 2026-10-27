@@ -13,7 +13,7 @@
 
 import { sizingProps } from './sizing';
 import { spacingProps } from './spacing';
-import { applyStyleProps, compileStyleProps } from './styleProps';
+import { applyStyleProps, compileStyleProps, mergeControlStyle } from './styleProps';
 
 const spacing = compileStyleProps([spacingProps]);
 const sizing = compileStyleProps([sizingProps]);
@@ -139,5 +139,19 @@ describe('applyStyleProps', () => {
     const { className, style } = applyStyleProps({ p: undefined, width: 10 }, spacingAndSizing);
     expect(className).toBe('ps-width');
     expect(style).toEqual({ '--ps-width': '10px' });
+  });
+});
+
+describe('mergeControlStyle', () => {
+  it('returns the top-level style unchanged when there is no slot style', () => {
+    const topLevel = { '--ps-p': '4px' };
+    expect(mergeControlStyle(undefined, topLevel)).toBe(topLevel);
+  });
+
+  it('lets the top-level style win over the slot style and keeps slot-only keys', () => {
+    expect(mergeControlStyle({ color: 'red', opacity: 0.5 }, { color: 'blue' })).toEqual({
+      color: 'blue',
+      opacity: 0.5,
+    });
   });
 });

@@ -17,7 +17,7 @@ import { forwardRef } from 'react';
 
 import type { PersesIcons } from '../../contexts/ComponentsContext';
 import { useComponents } from '../../contexts/ComponentsProvider';
-import type { PersesCSSProperties } from '../../types';
+import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import { Icon } from '../Icon/Icon';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../Icon/icons';
 import type { DisplayProps } from '../system/display';
@@ -33,6 +33,13 @@ import '../system/spacing.css';
 import './alert.css';
 
 export type AlertSeverity = 'error' | 'warning' | 'success' | 'info';
+
+export interface AlertSlotProps {
+  /** Shared Icon wrapper; rendered only when `icon` resolves to visible content. */
+  icon?: SlotStyleProps;
+  /** Message container around `children`. */
+  message?: SlotStyleProps;
+}
 
 const SEVERITY_ICONS: Record<AlertSeverity, { key: keyof PersesIcons; icon: ComponentType<SVGProps<SVGSVGElement>> }> =
   {
@@ -50,12 +57,14 @@ const ALERT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayP
 
 export interface AlertProps extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, DisplayProps {
   style?: PersesCSSProperties;
+  /** Styling-only overrides for internal parts; does not replace content, behavior, or accessibility attributes. */
+  slotProps?: AlertSlotProps;
   severity?: AlertSeverity;
   icon?: AlertSeverity | ReactElement | number | boolean | null;
 }
 
 export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  { severity = 'info', role = 'alert', className, style, icon, children, ...props },
+  { severity = 'info', role = 'alert', className, style, slotProps, icon, children, ...props },
   ref,
 ) {
   const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, ALERT_STYLE_PROPS, style);
@@ -74,8 +83,14 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
 
   return (
     <div role={role} {...rest} ref={ref} className={classes} style={computedStyle} data-severity={severity}>
-      {Boolean(resolvedIcon) && <Icon className="ps-Alert__icon">{resolvedIcon}</Icon>}
-      <div className="ps-Alert__message">{children}</div>
+      {Boolean(resolvedIcon) && (
+        <Icon className={clsx('ps-Alert__icon', slotProps?.icon?.className)} style={slotProps?.icon?.style}>
+          {resolvedIcon}
+        </Icon>
+      )}
+      <div className={clsx('ps-Alert__message', slotProps?.message?.className)} style={slotProps?.message?.style}>
+        {children}
+      </div>
     </div>
   );
 });
