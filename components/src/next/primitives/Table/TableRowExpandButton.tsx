@@ -59,7 +59,7 @@ export const TableRowExpandButton = forwardRef<HTMLButtonElement, TableRowExpand
         ref={ref}
         type={type}
         aria-expanded={expanded ?? false}
-        data-expanded={expanded || undefined}
+        data-expanded={expanded ? '' : undefined}
         className={clsx('ps-ButtonBase', 'ps-TableRowExpandButton', className)}
         {...props}
       >

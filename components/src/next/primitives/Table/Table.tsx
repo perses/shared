@@ -106,8 +106,8 @@ export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
     <table
       ref={ref}
       data-size={size}
-      data-sticky-header={stickyHeader || undefined}
-      data-striped={striped || undefined}
+      data-sticky-header={stickyHeader ? '' : undefined}
+      data-striped={striped ? '' : undefined}
       data-table-layout={tableLayout}
       className={clsx('ps-Table', className)}
       {...props}
@@ -162,8 +162,8 @@ export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(function 
   return (
     <tr
       ref={ref}
-      data-selected={selected || undefined}
-      data-hover={hover || undefined}
+      data-selected={selected ? '' : undefined}
+      data-hover={hover ? '' : undefined}
       className={clsx('ps-Table__row', className)}
       {...props}
     />
@@ -325,8 +325,8 @@ export const TableCell = forwardRef<HTMLTableCellElement, TableCellProps>(functi
     'data-align': align,
     'data-size': size,
     'data-sticky': sticky,
-    'data-fit-content': fitContent || undefined,
-    'data-resizable': resizable || undefined,
+    'data-fit-content': fitContent ? '' : undefined,
+    'data-resizable': resizable ? '' : undefined,
     'aria-sort': ariaSort,
     className: clsx('ps-Table__cell', styleClassName, className),
     style: cellStyle,

@@ -55,7 +55,7 @@
     font-size: var(--perses-font-size-lg);
   }
 
-  .ps-Checkbox[data-color='default'] {
+  :where(.ps-Checkbox[data-color='default']) {
     --ps-checkbox-bg-subtle: var(--perses-status-bg-default);
     --ps-checkbox-text: var(--perses-status-text-default);
     --perses-checkbox-color: var(--perses-status-solid-default);
@@ -63,7 +63,7 @@
     --perses-checkbox-focus-color: var(--perses-status-solid-default);
   }
 
-  .ps-Checkbox[data-color='primary'] {
+  :where(.ps-Checkbox[data-color='primary']) {
     --ps-checkbox-bg-subtle: var(--perses-status-bg-primary);
     --ps-checkbox-text: var(--perses-status-text-primary);
     --perses-checkbox-color: var(--perses-status-solid-primary);
@@ -71,7 +71,7 @@
     --perses-checkbox-focus-color: var(--perses-status-border-primary);
   }
 
-  .ps-Checkbox[data-color='secondary'] {
+  :where(.ps-Checkbox[data-color='secondary']) {
     --ps-checkbox-bg-subtle: var(--perses-status-bg-secondary);
     --ps-checkbox-text: var(--perses-status-text-secondary);
     --perses-checkbox-color: var(--perses-status-solid-secondary);
@@ -79,7 +79,7 @@
     --perses-checkbox-focus-color: var(--perses-status-border-secondary);
   }
 
-  .ps-Checkbox[data-color='error'] {
+  :where(.ps-Checkbox[data-color='error']) {
     --ps-checkbox-bg-subtle: var(--perses-status-bg-error);
     --ps-checkbox-text: var(--perses-status-text-error);
     --perses-checkbox-color: var(--perses-status-solid-error);
@@ -87,7 +87,7 @@
     --perses-checkbox-focus-color: var(--perses-status-border-error);
   }
 
-  .ps-Checkbox[data-color='warning'] {
+  :where(.ps-Checkbox[data-color='warning']) {
     --ps-checkbox-bg-subtle: var(--perses-status-bg-warning);
     --ps-checkbox-text: var(--perses-status-text-warning);
     --perses-checkbox-color: var(--perses-status-solid-warning);
@@ -95,7 +95,7 @@
     --perses-checkbox-focus-color: var(--perses-status-border-warning);
   }
 
-  .ps-Checkbox[data-color='success'] {
+  :where(.ps-Checkbox[data-color='success']) {
     --ps-checkbox-bg-subtle: var(--perses-status-bg-success);
     --ps-checkbox-text: var(--perses-status-text-success);
     --perses-checkbox-color: var(--perses-status-solid-success);
@@ -103,7 +103,7 @@
     --perses-checkbox-focus-color: var(--perses-status-border-success);
   }
 
-  .ps-Checkbox[data-color='info'] {
+  :where(.ps-Checkbox[data-color='info']) {
     --ps-checkbox-bg-subtle: var(--perses-status-bg-info);
     --ps-checkbox-text: var(--perses-status-text-info);
     --perses-checkbox-color: var(--perses-status-solid-info);
@@ -111,68 +111,70 @@
     --perses-checkbox-focus-color: var(--perses-status-border-info);
   }
 
-  .ps-Checkbox[data-variant='outline'] {
+  :where(.ps-Checkbox[data-variant='outline']) {
     background-color: transparent;
   }
 
-  .ps-Checkbox[data-checked],
-  .ps-Checkbox[data-indeterminate] {
+  :where(.ps-Checkbox[data-checked]),
+  :where(.ps-Checkbox[data-indeterminate]) {
     border-color: var(--perses-checkbox-color);
     background-color: var(--perses-checkbox-color);
   }
 
-  .ps-Checkbox[data-variant='subtle']:where([data-checked], [data-indeterminate]) {
+  :where(.ps-Checkbox[data-variant='subtle']:is([data-checked], [data-indeterminate])) {
     color: var(--ps-checkbox-text);
     background-color: var(--ps-checkbox-bg-subtle);
   }
 
-  .ps-Checkbox[data-variant='outline']:where([data-checked], [data-indeterminate]) {
+  :where(.ps-Checkbox[data-variant='outline']:is([data-checked], [data-indeterminate])) {
     color: var(--ps-checkbox-text);
     background-color: transparent;
   }
 
-  .ps-Checkbox[data-checked]:hover:not([data-disabled]):not([data-readonly]),
-  .ps-Checkbox[data-indeterminate]:hover:not([data-disabled]):not([data-readonly]) {
+  :where(.ps-Checkbox[data-checked]:hover:not([data-disabled]):not([data-readonly])),
+  :where(.ps-Checkbox[data-indeterminate]:hover:not([data-disabled]):not([data-readonly])) {
     border-color: var(--perses-checkbox-color-hover);
     background-color: var(--perses-checkbox-color-hover);
   }
 
-  .ps-Checkbox:where([data-variant='subtle'], [data-variant='outline']):is(
-      [data-checked],
-      [data-indeterminate]
-    ):hover:not([data-disabled]):not([data-readonly]) {
+  :where(
+    .ps-Checkbox:is([data-variant='subtle'], [data-variant='outline']):is(
+        [data-checked],
+        [data-indeterminate]
+      ):hover:not([data-disabled]):not([data-readonly])
+  ) {
     background-color: var(--ps-checkbox-bg-subtle);
   }
 
-  .ps-Checkbox:hover:not([data-checked]):not([data-indeterminate]):not([data-disabled]):not([data-readonly]) {
+  :where(.ps-Checkbox:hover:not([data-checked]):not([data-indeterminate]):not([data-disabled]):not([data-readonly])) {
     border-color: var(--perses-checkbox-color);
   }
 
   /* Colour follows the checkbox colour variant; offset is wider than the shared ring so it clears the small box. */
-  .ps-Checkbox:focus-visible {
+  :where(.ps-Checkbox:focus-visible) {
     outline: var(--perses-focus-ring-width) solid var(--perses-checkbox-focus-color);
     outline-offset: var(--perses-spacing-xs);
   }
 
-  .ps-Checkbox[data-disabled] {
+  :where(.ps-Checkbox[data-disabled]) {
     opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
   }
 
-  .ps-Checkbox[data-readonly] {
+  :where(.ps-Checkbox[data-readonly]) {
     cursor: default;
   }
 
-  .ps-Checkbox[data-invalid]:not([data-checked]):not([data-indeterminate]) {
+  :where(.ps-Checkbox[data-invalid]:not([data-checked]):not([data-indeterminate])) {
     border-color: var(--perses-status-border-error);
   }
 
   /* Invalid is also conveyed by a dashed border so it does not rely on colour alone. */
-  .ps-Checkbox[data-invalid] {
+  :where(.ps-Checkbox[data-invalid]) {
     border-style: dashed;
   }
 
-  .ps-Checkbox__indicator {
+  :where(.ps-Checkbox__indicator) {
     display: flex;
     width: 100%;
     height: 100%;
@@ -180,14 +182,14 @@
     justify-content: center;
   }
 
-  .ps-Checkbox__mark::before {
+  :where(.ps-Checkbox__mark)::before {
     content: '✓';
     font-family: var(--perses-font-family);
     font-weight: var(--perses-font-weight-bold);
     line-height: var(--perses-line-height-tight);
   }
 
-  .ps-Checkbox[data-indeterminate] .ps-Checkbox__mark::before {
+  :where(.ps-Checkbox[data-indeterminate] .ps-Checkbox__mark)::before {
     content: '−';
   }
 
@@ -202,7 +204,7 @@
     cursor: pointer;
   }
 
-  .ps-Checkbox__field[data-label-position='start'] {
+  :where(.ps-Checkbox__field[data-label-position='start']) {
     flex-direction: row-reverse;
     justify-content: flex-end;
   }
@@ -218,24 +220,24 @@
   }
 
   @media (forced-colors: active) {
-    .ps-Checkbox {
+    :where(.ps-Checkbox) {
       border-color: ButtonText;
     }
 
-    .ps-Checkbox[data-checked],
-    .ps-Checkbox[data-indeterminate] {
+    :where(.ps-Checkbox[data-checked]),
+    :where(.ps-Checkbox[data-indeterminate]) {
       border-color: Highlight;
       color: HighlightText;
       background-color: Highlight;
     }
 
-    .ps-Checkbox[data-disabled] {
+    :where(.ps-Checkbox[data-disabled]) {
       border-color: GrayText;
       color: GrayText;
       background-color: transparent;
     }
 
-    .ps-Checkbox:focus-visible {
+    :where(.ps-Checkbox:focus-visible) {
       outline-color: Highlight;
     }
   }

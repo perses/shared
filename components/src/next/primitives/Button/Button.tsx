@@ -73,7 +73,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       data-variant={variant}
       data-color={color}
       data-size={size}
-      data-loading={loading || undefined}
+      data-loading={loading ? '' : undefined}
     >
       {loading && (
         <Icon className="ps-Button__spinner">

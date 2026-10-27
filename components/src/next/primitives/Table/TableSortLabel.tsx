@@ -71,7 +71,7 @@ export const TableSortLabel = forwardRef<HTMLButtonElement, TableSortLabelProps>
     <button
       ref={ref}
       type={type}
-      data-active={active || undefined}
+      data-active={active ? '' : undefined}
       data-direction={direction}
       className={clsx('ps-ButtonBase', 'ps-TableSortLabel', className)}
       {...props}

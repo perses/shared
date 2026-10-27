@@ -131,7 +131,19 @@ describe('Button', () => {
     render(<Button loading>Save</Button>, { wrapper: Wrapper });
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('aria-busy', 'true');
-    expect(button).toHaveAttribute('data-loading');
+    expect(button).toHaveAttribute('data-loading', '');
+  });
+
+  it.each([false, undefined])('removes the loading marker when loading becomes %s', (loading) => {
+    const { rerender } = render(<Button loading>Save</Button>, { wrapper: Wrapper });
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('data-loading', '');
+
+    rerender(<Button loading={loading}>Save</Button>);
+    expect(button).not.toHaveAttribute('data-loading');
+
+    rerender(<Button loading>Save</Button>);
+    expect(button).toHaveAttribute('data-loading', '');
   });
 
   it('does not render spinner when loading is false', () => {
