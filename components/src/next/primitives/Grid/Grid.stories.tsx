@@ -79,7 +79,7 @@ const columnsCode = `<Grid spacing="sm">
 
 {/* A 24-column grid allows finer spans than 12 columns.
     default: the span used on all screen widths, unless a breakpoint below overrides it.
-    md: the span used only on screens 900–1199px wide. */}
+    md: the span used at md and wider (≥ 900 px), until a wider breakpoint overrides it. */}
 <Grid columns={24} spacing="sm">
   <GridItem size={{ default: 19, md: 9 }}>Wide: 19 columns, 9 at md</GridItem>
   <GridItem size={{ default: 5, md: 3 }}>Narrow: 5 columns, 3 at md</GridItem>
@@ -98,10 +98,10 @@ export const Columns: Story = () => (
         </Grid>
         <Grid columns={24} spacing="sm" p="sm" style={outline}>
           <GridItem size={WIDE_SPAN} style={cell}>
-            Wide: 19 of 24 columns; 9 columns at md (900–1199px)
+            Wide: 19 of 24 columns; 9 columns at md and wider (≥ 900 px)
           </GridItem>
           <GridItem size={NARROW_SPAN} style={cell}>
-            Narrow: 5 of 24 columns; 3 columns at md (900–1199px)
+            Narrow: 5 of 24 columns; 3 columns at md and wider (≥ 900 px)
           </GridItem>
         </Grid>
       </Layout>

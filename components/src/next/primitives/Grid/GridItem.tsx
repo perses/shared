@@ -45,7 +45,7 @@ const GRID_ITEM_STYLE_PROPS = compileStyleProps([
  * A cell of a `Grid`. `size` sets how many columns it spans, per breakpoint if needed.
  *
  * @example
- * <GridItem size={{ default: 12, md: 6 }}>Full width, except half width at `md` (900–1199px)</GridItem>
+ * <GridItem size={{ default: 12, md: 6 }}>Full width; half width at `md` and wider (≥ 900 px)</GridItem>
  */
 export const GridItem = forwardRef<HTMLDivElement, GridItemProps>(function GridItem(
   { size, className, style, children, ...rest },
