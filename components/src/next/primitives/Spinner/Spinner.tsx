@@ -12,11 +12,13 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import type { ReactElement, SVGProps } from 'react';
+import type { ReactElement } from 'react';
+
+import type { StyledSVGProps } from '../../types';
 
 import './spinner.css';
 
-export type SpinnerProps = SVGProps<SVGSVGElement>;
+export type SpinnerProps = StyledSVGProps;
 
 export function Spinner({ className, ...rest }: SpinnerProps): ReactElement {
   return (

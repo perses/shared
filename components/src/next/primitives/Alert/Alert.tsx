@@ -17,6 +17,7 @@ import { forwardRef } from 'react';
 
 import type { PersesIcons } from '../../contexts/ComponentsContext';
 import { useComponents } from '../../contexts/ComponentsProvider';
+import type { PersesCSSProperties } from '../../types';
 import { Icon } from '../Icon/Icon';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../Icon/icons';
 import type { DisplayProps } from '../system/display';
@@ -48,6 +49,7 @@ function isAlertSeverity(icon: unknown): icon is AlertSeverity {
 const ALERT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
 
 export interface AlertProps extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, DisplayProps {
+  style?: PersesCSSProperties;
   severity?: AlertSeverity;
   icon?: AlertSeverity | ReactElement | number | boolean | null;
 }

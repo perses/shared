@@ -17,6 +17,7 @@ import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
 
 import { useComponents } from '../../contexts/ComponentsProvider';
+import type { PersesCSSProperties } from '../../types';
 import { Icon } from '../Icon/Icon';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
@@ -33,6 +34,7 @@ const BUTTON_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, display
 
 export interface ButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'color'>, SpacingProps, SizingProps, DisplayProps {
+  style?: PersesCSSProperties;
   variant?: ButtonVariant;
   color?: ColorVariant | Status;
   size?: Size;

@@ -15,6 +15,7 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import { applyStyleProps, compileStyleProps, displayProps, flexboxProps, sizingProps, spacingProps } from '../system';
 import type { DisplayProps, FlexboxProps, SizingProps, SpacingProps } from '../system';
 
@@ -25,7 +26,9 @@ import '../system/spacing.css';
 export type { Breakpoint, Responsive, ResponsiveObject, SpacingValue } from '../system';
 
 export interface BoxProps
-  extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, FlexboxProps, DisplayProps {}
+  extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, FlexboxProps, DisplayProps {
+  style?: PersesCSSProperties;
+}
 
 const BOX_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, flexboxProps, displayProps]);
 

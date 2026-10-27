@@ -21,6 +21,7 @@ import type {
   TdHTMLAttributes,
 } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import type { DisplayProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps } from '../system';
 import type { Size } from '../types';
@@ -67,7 +68,9 @@ const ARIA_SORT: Record<SortDirection, 'ascending' | 'descending'> = { asc: 'asc
  *   <Table stickyHeader>...</Table>
  * </TableContainer>
  */
-export type TableContainerProps = HTMLAttributes<HTMLDivElement>;
+export interface TableContainerProps extends HTMLAttributes<HTMLDivElement> {
+  style?: PersesCSSProperties;
+}
 
 export const TableContainer = forwardRef<HTMLDivElement, TableContainerProps>(function TableContainer(
   { className, ...props },
@@ -87,6 +90,7 @@ export const TableContainer = forwardRef<HTMLDivElement, TableContainerProps>(fu
  * </Table>
  */
 export interface TableProps extends HTMLAttributes<HTMLTableElement> {
+  style?: PersesCSSProperties;
   size?: Size;
   stickyHeader?: boolean;
   /**
@@ -115,7 +119,9 @@ export const Table = forwardRef<HTMLTableElement, TableProps>(function Table(
   );
 });
 
-export type TableHeadProps = HTMLAttributes<HTMLTableSectionElement>;
+export interface TableHeadProps extends HTMLAttributes<HTMLTableSectionElement> {
+  style?: PersesCSSProperties;
+}
 
 export const TableHead = forwardRef<HTMLTableSectionElement, TableHeadProps>(function TableHead(
   { className, ...props },
@@ -124,7 +130,9 @@ export const TableHead = forwardRef<HTMLTableSectionElement, TableHeadProps>(fun
   return <thead ref={ref} className={clsx('ps-Table__head', className)} {...props} />;
 });
 
-export type TableBodyProps = HTMLAttributes<HTMLTableSectionElement>;
+export interface TableBodyProps extends HTMLAttributes<HTMLTableSectionElement> {
+  style?: PersesCSSProperties;
+}
 
 export const TableBody = forwardRef<HTMLTableSectionElement, TableBodyProps>(function TableBody(
   { className, ...props },
@@ -133,7 +141,9 @@ export const TableBody = forwardRef<HTMLTableSectionElement, TableBodyProps>(fun
   return <tbody ref={ref} className={clsx('ps-Table__body', className)} {...props} />;
 });
 
-export type TableFooterProps = HTMLAttributes<HTMLTableSectionElement>;
+export interface TableFooterProps extends HTMLAttributes<HTMLTableSectionElement> {
+  style?: PersesCSSProperties;
+}
 
 export const TableFooter = forwardRef<HTMLTableSectionElement, TableFooterProps>(function TableFooter(
   { className, ...props },
@@ -151,6 +161,7 @@ export const TableFooter = forwardRef<HTMLTableSectionElement, TableFooterProps>
  * </TableRow>
  */
 export interface TableRowProps extends HTMLAttributes<HTMLTableRowElement> {
+  style?: PersesCSSProperties;
   selected?: boolean;
   hover?: boolean;
 }
@@ -180,6 +191,7 @@ export const TableRow = forwardRef<HTMLTableRowElement, TableRowProps>(function 
  * <TableCell header align="right">Value</TableCell>
  */
 interface TableCellBaseProps extends Omit<TdHTMLAttributes<HTMLTableCellElement>, 'onResize'>, DisplayProps {
+  style?: PersesCSSProperties;
   header?: boolean;
   align?: 'left' | 'center' | 'right';
   size?: Size;

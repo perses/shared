@@ -13,12 +13,12 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { CSSProperties } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import { IconButton } from './IconButton';
 
 const RESPONSIVE_WIDTH = { default: 100, md: 200 };
-const WIDTH_OVERRIDE = { '--ps-width': '50px' } as CSSProperties;
+const WIDTH_OVERRIDE = { '--ps-width': '50px' } satisfies PersesCSSProperties;
 
 describe('IconButton', () => {
   it('renders children', () => {
