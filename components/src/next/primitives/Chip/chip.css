@@ -103,9 +103,9 @@
     cursor: pointer;
   }
 
-  .ps-Chip[data-clickable='true']:focus-visible,
-  .ps-Chip__label[role='button']:focus-visible,
-  .ps-Chip__close:focus-visible {
+  :where(.ps-Chip[data-clickable]:focus-visible),
+  :where(.ps-Chip__label[role='button']:focus-visible),
+  :where(.ps-Chip__close:focus-visible) {
     outline-width: var(--perses-focus-ring-width);
     outline-style: solid;
     outline-color: var(--perses-focus-ring-color);
