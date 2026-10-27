@@ -250,7 +250,7 @@ describe('TablePagination', () => {
       expect(container.querySelector('[slotprops]')).not.toBeInTheDocument();
       expect(label).toHaveClass('ps-TablePagination__rowsPerPage', 'custom-rows-per-page');
       expect(label).toHaveStyle({ letterSpacing: '1px', '--app-rows-per-page': '1' });
-      expect(select).toHaveClass('custom-select');
+      expect(select).toHaveClass('ps-TablePagination__select', 'custom-select');
       expect(select).toHaveStyle({ fontFamily: 'monospace', '--app-select': 'select' });
       expect(range).toHaveClass('ps-TablePagination__range', 'custom-range');
       expect(range).toHaveStyle({ fontVariantNumeric: 'tabular-nums', '--app-range': 'range' });

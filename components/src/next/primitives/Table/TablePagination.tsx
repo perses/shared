@@ -123,7 +123,7 @@ export const TablePagination = forwardRef<HTMLDivElement, TablePaginationProps>(
         >
           {labelRowsPerPage}
           <select
-            className={slotProps?.select?.className}
+            className={clsx('ps-TablePagination__select', slotProps?.select?.className)}
             style={slotProps?.select?.style}
             value={rowsPerPage}
             onChange={handleRowsPerPageChange}
