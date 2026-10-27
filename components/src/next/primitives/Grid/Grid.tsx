@@ -16,7 +16,7 @@ import { forwardRef } from 'react';
 import type { CSSProperties, HTMLAttributes } from 'react';
 
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
-import type { DisplayProps, Responsive, SizingProps, SpacingProps, SpacingToken } from '../system';
+import type { DisplayProps, Responsive, SizingProps, SpacingProps, SpacingValue } from '../system';
 
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared layout utility styles used by style props.
 import '../system/layout.css';
@@ -29,8 +29,8 @@ export interface GridProps
   extends HTMLAttributes<HTMLDivElement>, Omit<SpacingProps, 'gap'>, SizingProps, Pick<DisplayProps, 'overflow'> {
   /** Number of equal-width columns. Defaults to `12`. */
   columns?: number;
-  /** Space between rows and columns, as a spacing token. */
-  spacing?: Responsive<SpacingToken>;
+  /** Space between rows and columns, as a spacing token or CSS length. */
+  spacing?: Responsive<SpacingValue>;
 }
 
 const GRID_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);

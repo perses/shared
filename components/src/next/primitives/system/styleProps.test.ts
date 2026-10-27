@@ -168,7 +168,7 @@ describe('applyStyleProps', () => {
   it('serialises a grid span count as a `span n` grid-column value', () => {
     expect(spanTransform(4)).toBe('span 4');
     const { className, style } = applyStyleProps({ gridColumn: { default: 12, md: 6 } }, grid);
-    expect(className).toBe('ps-grid-column');
+    expect(className).toBe('ps-grid-column ps-grid-column-md');
     expect(style).toEqual({ '--ps-grid-column': 'span 12', '--ps-grid-column-md': 'span 6' });
   });
 });

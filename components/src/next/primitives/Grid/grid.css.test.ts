@@ -70,7 +70,8 @@ describe('layout.css grid-column', () => {
     expect(getRule(layoutCss, '.ps-grid-column')).toContain('grid-column: var(--ps-grid-column, revert);');
   });
 
-  it.each(['xs', 'sm', 'md', 'lg', 'xl'])('falls back from --ps-grid-column-%s to the base', (bp) => {
-    expect(layoutCss).toContain(`grid-column: var(--ps-grid-column-${bp}, var(--ps-grid-column, revert));`);
+  it.each(['xs', 'sm', 'md', 'lg', 'xl'])('reads only --ps-grid-column-%s on its breakpoint class', (bp) => {
+    expect(getRule(layoutCss, `.ps-grid-column-${bp}`)).toContain(`grid-column: var(--ps-grid-column-${bp}, revert);`);
+    expect(layoutCss).not.toContain(`var(--ps-grid-column-${bp}, var(--ps-grid-column`);
   });
 });

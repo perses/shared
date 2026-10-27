@@ -161,7 +161,8 @@ describe('GridItem', () => {
       </GridItem>,
     );
     const item = screen.getByTestId('item');
-    expect(item).toHaveClass('ps-grid-column');
+    expect(item).toHaveClass('ps-grid-column-md');
+    expect(item).not.toHaveClass('ps-grid-column');
     expect(item.style.getPropertyValue('--ps-grid-column')).toBe('');
     expect(item.style.getPropertyValue('--ps-grid-column-md')).toBe('span 6');
     expect(item.style.getPropertyValue('--ps-grid-column-xl')).toBe('');
