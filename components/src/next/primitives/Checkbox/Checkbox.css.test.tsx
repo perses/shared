@@ -281,19 +281,16 @@ describe('Checkbox CSS contracts', () => {
     },
   );
 
-  it.each([undefined, '', 'true', 'false'])(
-    'dims disabled labels by marker presence, not its value (%s)',
-    (marker) => {
-      render(<Checkbox label="Select row" />);
-      const checkbox = screen.getByRole('checkbox', { name: 'Select row' });
-      const label = checkbox.closest('label');
-      if (!label) throw new Error('Missing checkbox label wrapper');
-      if (marker !== undefined) checkbox.setAttribute('data-disabled', marker);
+  it.each([undefined, '', 'true', 'false'])('dims disabled labels by marker presence, not its value (%s)', (marker) => {
+    render(<Checkbox label="Select row" />);
+    const checkbox = screen.getByRole('checkbox', { name: 'Select row' });
+    const label = checkbox.closest('label');
+    if (!label) throw new Error('Missing checkbox label wrapper');
+    if (marker !== undefined) checkbox.setAttribute('data-disabled', marker);
 
-      expect(getOpacity(label)).toBe(marker === undefined ? '1' : 'var(--perses-opacity-disabled, 0.5)');
-      expect(getComputedStyle(label).cursor).toBe(marker === undefined ? 'pointer' : 'not-allowed');
-    },
-  );
+    expect(getOpacity(label)).toBe(marker === undefined ? '1' : 'var(--perses-opacity-disabled, 0.5)');
+    expect(getComputedStyle(label).cursor).toBe(marker === undefined ? 'pointer' : 'not-allowed');
+  });
 
   it.each<CheckboxVariant>(['solid', 'subtle', 'outline'])(
     'preserves forced-color selection and disabled precedence with variant=%s',
