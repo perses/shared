@@ -55,7 +55,7 @@ describe('card.css', () => {
   });
 
   it('lets the header content slot shrink and grow', () => {
-    const content = getRule('.ps-CardHeader__content');
+    const content = getRule(':where(.ps-CardHeader__content)');
     expect(content).toContain('flex: 1;');
     expect(content).toContain('min-width: 0;');
   });

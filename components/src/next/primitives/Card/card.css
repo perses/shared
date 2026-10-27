@@ -44,12 +44,12 @@
     padding: var(--perses-spacing-lg);
   }
 
-  .ps-CardHeader__content {
+  :where(.ps-CardHeader__content) {
     flex: 1;
     min-width: 0;
   }
 
-  .ps-CardHeader__end {
+  :where(.ps-CardHeader__end) {
     display: flex;
     align-items: center;
     flex-shrink: 0;
