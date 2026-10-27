@@ -17,6 +17,7 @@ import type { CSSProperties } from 'react';
 import { Sample, Stack } from '../../stories/Sample';
 import type { Size, Status } from '../types';
 import { TextField } from './TextField';
+import type { TextFieldSlotProps } from './TextField';
 
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
 const statuses: Array<Status | undefined> = [undefined, 'error', 'warning', 'success', 'info'];
@@ -130,3 +131,53 @@ export const AdornmentsAndMultiline: Story = () => (
   </Stack>
 );
 AdornmentsAndMultiline.storyName = 'Adornments and multiline';
+
+const querySlots: TextFieldSlotProps = {
+  label: { style: { fontWeight: 'var(--perses-font-weight-bold)' } },
+  wrapper: { style: { borderRadius: 0 } },
+  input: { className: 'query-input', style: { fontFamily: 'monospace' } },
+  helper: { style: { fontStyle: 'italic' } },
+};
+const slotStylingCode = `const querySlots: TextFieldSlotProps = {
+  label: { style: { fontWeight: 'var(--perses-font-weight-bold)' } },
+  wrapper: { style: { borderRadius: 0 } },
+  input: { className: 'query-input', style: { fontFamily: 'monospace' } },
+  helper: { style: { fontStyle: 'italic' } },
+};
+
+<TextField
+  label="Query"
+  defaultValue="up"
+  helperText="Enter a PromQL expression"
+  slotProps={querySlots}
+/>`;
+
+export const Slots: Story = () => (
+  <Stack>
+    <p>
+      Use <code>slotProps</code> to style internal parts with <code>className</code> or <code>style</code>, without
+      changing structure or behavior.
+    </p>
+    <div>
+      <h3>Available slots</h3>
+      <ul>
+        <li>
+          <code>label</code> — Visible label, when provided.
+        </li>
+        <li>
+          <code>wrapper</code> — Bordered control and adornment container.
+        </li>
+        <li>
+          <code>input</code> — Input or multiline textarea.
+        </li>
+        <li>
+          <code>helper</code> — Helper text, when provided.
+        </li>
+      </ul>
+    </div>
+    <Sample title="Styling slots" code={slotStylingCode}>
+      <TextField label="Query" defaultValue="up" helperText="Enter a PromQL expression" slotProps={querySlots} />
+    </Sample>
+  </Stack>
+);
+Slots.storyName = 'Slots';

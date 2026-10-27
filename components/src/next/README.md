@@ -115,6 +115,22 @@ Apply `--perses-opacity-disabled` (default `0.5`) once at the disabled group's r
 
 When zero-specificity defaults set the same property on the same element in the same layer, later rules win. Put base defaults before size defaults, and keep state overrides easy to identify. Avoid `!important` or increasingly specific selectors as a substitute for the layer and default/override structure.
 
+## Slots
+
+Components may expose `slotProps` to style named internal parts. Each slot accepts `SlotStyleProps` from
+`@perses-dev/components/next`: `className` and `style`, including CSS custom properties. Slots customize appearance,
+not structure or behavior. See each component's Slots story for available targets and examples.
+
+- Expose intentional, stable slot names as public API, not Base UI internals.
+- Preserve existing top-level prop destinations; avoid duplicating root styling in a slot.
+- Read styling fields explicitly. Never spread slot objects or forward unsupported keys, even when types are bypassed.
+- Append consumer classes to required classes. Merge inline styles by property, allowing visual overrides while
+  preserving functional styles. Keep behavior-critical parts private unless their styling policy is documented.
+- Styling does not render optional parts. Consumer overrides must preserve usable layout, visible focus, and accessibility.
+- If a slot is the element that
+uses the component's own custom properties, type it as `SlotStyleProps<ComponentNameStyle>` (for example
+`control?: SlotStyleProps<CheckboxStyle>`) so those values are type-checked the same way as the top-level `style`. 
+
 ## Checks when changing styles
 
 - Compare neighboring primitives before introducing a new pattern.

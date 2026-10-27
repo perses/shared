@@ -18,7 +18,7 @@ import type { CSSProperties, ReactElement } from 'react';
 import { Sample, Stack } from '../../stories/Sample';
 import type { ColorVariant, Status } from '../types';
 import { Chip } from './Chip';
-import type { ChipSize, ChipVariant } from './Chip';
+import type { ChipSize, ChipSlotProps, ChipVariant } from './Chip';
 
 const colors: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'success', 'warning', 'error', 'info'];
 const sizes: ChipSize[] = ['xs', 'sm', 'md'];
@@ -200,3 +200,47 @@ export const Clickable: Story = () => {
   );
 };
 Clickable.storyName = 'Selectable and removable';
+
+const filterSlots: ChipSlotProps = {
+  start: { style: { opacity: 0.7 } },
+  label: { className: 'filter-label', style: { fontFamily: 'monospace' } },
+  closeButton: { style: { borderRadius: 0 } },
+};
+const slotStylingCode = `const filterSlots: ChipSlotProps = {
+  start: { style: { opacity: 0.7 } },
+  label: { className: 'filter-label', style: { fontFamily: 'monospace' } },
+  closeButton: { style: { borderRadius: 0 } },
+};
+
+<Chip startElement={tagIcon} onClose={noop} slotProps={filterSlots}>
+  region: us-east-1
+</Chip>`;
+
+export const Slots: Story = () => (
+  <Stack>
+    <p>
+      Use <code>slotProps</code> to style internal parts with <code>className</code> or <code>style</code>, without
+      changing structure or behavior.
+    </p>
+    <div>
+      <h3>Available slots</h3>
+      <ul>
+        <li>
+          <code>start</code> — Start element wrapper, when provided.
+        </li>
+        <li>
+          <code>label</code> — Label, also the action when clickable and removable.
+        </li>
+        <li>
+          <code>closeButton</code> — Close button, when removable.
+        </li>
+      </ul>
+    </div>
+    <Sample title="Styling slots" code={slotStylingCode}>
+      <Chip startElement={tagIcon} onClose={noop} slotProps={filterSlots}>
+        region: us-east-1
+      </Chip>
+    </Sample>
+  </Stack>
+);
+Slots.storyName = 'Slots';

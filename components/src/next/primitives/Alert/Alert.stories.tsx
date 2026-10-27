@@ -16,7 +16,7 @@ import type { CSSProperties } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
 import { Alert } from './Alert';
-import type { AlertSeverity } from './Alert';
+import type { AlertSeverity, AlertSlotProps } from './Alert';
 
 const column: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '1rem' };
 
@@ -83,3 +83,42 @@ export const AllSeverities: Story = () => (
   </Stack>
 );
 AllSeverities.storyName = 'Variants';
+
+const statusSlots: AlertSlotProps = {
+  icon: { style: { alignSelf: 'flex-start' } },
+  message: { className: 'status-message', style: { fontWeight: 'var(--perses-font-weight-bold)' } },
+};
+const slotStylingCode = `const statusSlots: AlertSlotProps = {
+  icon: { style: { alignSelf: 'flex-start' } },
+  message: { className: 'status-message', style: { fontWeight: 'var(--perses-font-weight-bold)' } },
+};
+
+<Alert severity="info" icon="info" slotProps={statusSlots}>
+  This is an info alert.
+</Alert>`;
+
+export const Slots: Story = () => (
+  <Stack>
+    <p>
+      Use <code>slotProps</code> to style internal parts with <code>className</code> or <code>style</code>, without
+      changing structure or behavior.
+    </p>
+    <div>
+      <h3>Available slots</h3>
+      <ul>
+        <li>
+          <code>icon</code> — Icon wrapper, when an icon is rendered.
+        </li>
+        <li>
+          <code>message</code> — Message container.
+        </li>
+      </ul>
+    </div>
+    <Sample title="Styling slots" code={slotStylingCode}>
+      <Alert severity="info" icon="info" slotProps={statusSlots}>
+        This is an info alert.
+      </Alert>
+    </Sample>
+  </Stack>
+);
+Slots.storyName = 'Slots';

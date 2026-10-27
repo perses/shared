@@ -27,7 +27,6 @@ const DOLLAR = <span>$</span>;
 const PERCENT = <span>%</span>;
 const START_ICON = <span data-testid="start-icon" />;
 const END_ICON = <span data-testid="end-icon" />;
-
 /** Root element of the field whose control is named by `label`. */
 const getRoot = (label = 'Name'): HTMLElement => screen.getByLabelText(label).closest('.ps-TextField') as HTMLElement;
 

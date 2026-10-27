@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { clsx } from 'clsx';
 import { useCallback } from 'react';
 import type { MouseEvent, MouseEventHandler, ReactElement, ReactNode } from 'react';
 
+import type { SlotStyleProps } from '../../types';
 import { CloseIcon } from '../Icon/icons';
 
-interface ChipCloseButtonProps {
+interface ChipCloseButtonProps extends SlotStyleProps {
   children: ReactNode;
   closeIcon?: ReactElement;
   closeAriaLabel?: string;
@@ -36,6 +38,8 @@ export function ChipCloseButton({
   closeAriaLabel,
   disabled,
   onClose,
+  className,
+  style,
 }: ChipCloseButtonProps): ReactElement {
   const handleClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>): void => {
@@ -49,7 +53,8 @@ export function ChipCloseButton({
   return (
     <button
       type="button"
-      className="ps-Chip__close"
+      className={clsx('ps-Chip__close', className)}
+      style={style}
       aria-label={closeAriaLabel ?? getCloseAriaLabel(children)}
       disabled={disabled}
       onClick={handleClick}
