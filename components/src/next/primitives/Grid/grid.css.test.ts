@@ -52,12 +52,9 @@ describe('grid.css', () => {
     expect(getRule(css, ':where(.ps-Grid)')).toContain('--ps-grid-columns: initial;');
   });
 
-  it.each(['', '-xs', '-sm', '-md', '-lg', '-xl'])(
-    'resets --ps-grid-column%s on every item so nested items do not inherit ancestor spans',
-    (suffix) => {
-      expect(getRule(css, ':where(.ps-GridItem)')).toContain(`--ps-grid-column${suffix}: initial;`);
-    },
-  );
+  it('does not reset item span variables; per-breakpoint classes already prevent inheritance', () => {
+    expect(getRule(css, ':where(.ps-GridItem)')).not.toContain('--ps-grid-column');
+  });
 
   it('uses no raw pixel or colour values', () => {
     expect(css).not.toMatch(/\d+px/);

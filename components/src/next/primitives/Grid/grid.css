@@ -15,11 +15,6 @@
 
 @import '@perses-dev/design-tokens/css/layers';
 
-/*
- * Custom properties inherit, so a nested Grid or GridItem would pick up its ancestor's column count or span.
- * Resetting them to `initial` (the guaranteed-invalid value) makes every unset variable fall through to the
- * rule's fallback; inline values written by styleProps.ts still win.
- */
 @layer perses.components {
   :where(.ps-Grid) {
     --ps-grid-columns: initial;
@@ -28,12 +23,6 @@
     grid-template-columns: repeat(var(--ps-grid-columns, 12), minmax(0, 1fr));
   }
   :where(.ps-GridItem) {
-    --ps-grid-column: initial;
-    --ps-grid-column-xs: initial;
-    --ps-grid-column-sm: initial;
-    --ps-grid-column-md: initial;
-    --ps-grid-column-lg: initial;
-    --ps-grid-column-xl: initial;
     box-sizing: border-box;
     min-width: 0;
   }
