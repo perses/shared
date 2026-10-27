@@ -31,15 +31,15 @@
       color 0.15s ease;
   }
 
-  .ps-ButtonBase:focus-visible {
+  :where(.ps-ButtonBase:focus-visible) {
     outline-width: var(--perses-focus-ring-width);
     outline-style: solid;
     outline-color: var(--perses-focus-ring-color);
     outline-offset: var(--perses-focus-ring-offset);
   }
 
-  .ps-ButtonBase:disabled,
-  .ps-ButtonBase[aria-disabled='true'] {
+  :where(.ps-ButtonBase:disabled),
+  :where(.ps-ButtonBase[aria-disabled='true']) {
     opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
   }
