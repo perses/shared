@@ -28,11 +28,11 @@
     font-family: var(--perses-font-family);
   }
 
-  .ps-Card[data-variant='elevated'] {
+  :where(.ps-Card[data-variant='elevated']) {
     box-shadow: var(--perses-shadow-overlay);
   }
 
-  .ps-Card[data-variant='outlined'] {
+  :where(.ps-Card[data-variant='outlined']) {
     border-color: var(--perses-border-default);
   }
 

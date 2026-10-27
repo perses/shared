@@ -45,8 +45,10 @@ describe('card.css', () => {
   });
 
   it('elevated uses the overlay shadow token and outlined uses the border token', () => {
-    expect(getRule(".ps-Card[data-variant='elevated']")).toContain('box-shadow: var(--perses-shadow-overlay);');
-    expect(getRule(".ps-Card[data-variant='outlined']")).toContain('border-color: var(--perses-border-default);');
+    expect(getRule(":where(.ps-Card[data-variant='elevated'])")).toContain('box-shadow: var(--perses-shadow-overlay);');
+    expect(getRule(":where(.ps-Card[data-variant='outlined'])")).toContain(
+      'border-color: var(--perses-border-default);',
+    );
   });
 
   it('wraps sub-part padding defaults in :where()', () => {
