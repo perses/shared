@@ -20,6 +20,8 @@ import { AddIcon, Box, Checkbox } from './primitives';
 import type {
   AlertProps,
   AlertSlotProps,
+  CardHeaderProps,
+  CardHeaderSlotProps,
   CheckboxProps,
   CheckboxSlotProps,
   CheckboxStyle,
@@ -89,12 +91,14 @@ type _TextFieldSlotKeys = AssertNever<Exclude<keyof TextFieldSlotProps, 'label' 
 type _TextFieldSlotProp = AssertAssignable<NonNullable<TextFieldProps['slotProps']>, TextFieldSlotProps>;
 
 expectTypeOf<AlertProps['slotProps']>().toEqualTypeOf<AlertSlotProps | undefined>();
+expectTypeOf<CardHeaderProps['slotProps']>().toEqualTypeOf<CardHeaderSlotProps | undefined>();
 expectTypeOf<CheckboxProps['slotProps']>().toEqualTypeOf<CheckboxSlotProps | undefined>();
 expectTypeOf<ChipProps['slotProps']>().toEqualTypeOf<ChipSlotProps | undefined>();
 expectTypeOf<SwitchProps['slotProps']>().toEqualTypeOf<SwitchSlotProps | undefined>();
 expectTypeOf<TablePaginationProps['slotProps']>().toEqualTypeOf<TablePaginationSlotProps | undefined>();
 
 expectTypeOf<AlertSlotProps>().toEqualTypeOf<{ icon?: SlotStyleProps; message?: SlotStyleProps }>();
+expectTypeOf<CardHeaderSlotProps>().toEqualTypeOf<{ content?: SlotStyleProps; end?: SlotStyleProps }>();
 expectTypeOf<CheckboxSlotProps>().toEqualTypeOf<{
   control?: SlotStyleProps<CheckboxStyle>;
   indicator?: SlotStyleProps;
@@ -120,6 +124,8 @@ expectTypeOf<TablePaginationSlotProps>().toEqualTypeOf<{
 
 // @ts-expect-error Icon slots cannot replace the rendered icon.
 expectTypeOf({ icon: { render: 'svg' } } satisfies AlertSlotProps);
+// @ts-expect-error The end wrapper's content comes from endElement, not the slot.
+expectTypeOf({ end: { children: 'Actions' } } satisfies CardHeaderSlotProps);
 // @ts-expect-error Control IDs remain on the component's top-level API.
 expectTypeOf({ control: { id: 'different-control' } } satisfies CheckboxSlotProps);
 // @ts-expect-error Close callbacks remain on the component's top-level API.

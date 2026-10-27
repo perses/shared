@@ -16,6 +16,7 @@ import type { Story } from '@ladle/react';
 import { Sample, Stack } from '../../stories/Sample';
 import { Button } from '../Button';
 import { Card, CardContent, CardHeader } from './Card';
+import type { CardHeaderSlotProps } from './Card';
 
 const basicCode = `<Card width={320}>
   <CardContent>A card is a surface for related content.</CardContent>
@@ -121,3 +122,48 @@ export const Panel: Story = () => (
   </Stack>
 );
 Panel.storyName = 'Panel';
+
+const headerSlots: CardHeaderSlotProps = {
+  content: { style: { fontWeight: 'var(--perses-font-weight-bold)' } },
+  end: { className: 'header-actions', style: { gap: 'var(--perses-spacing-xs)' } },
+};
+const slotStylingCode = `const headerSlots: CardHeaderSlotProps = {
+  content: { style: { fontWeight: 'var(--perses-font-weight-bold)' } },
+  end: { className: 'header-actions', style: { gap: 'var(--perses-spacing-xs)' } },
+};
+
+<Card width={320}>
+  <CardHeader endElement={<Button size="sm" variant="ghost">⋯</Button>} slotProps={headerSlots}>
+    Alerts
+  </CardHeader>
+  <CardContent>Three firing, two pending.</CardContent>
+</Card>`;
+
+export const Slots: Story = () => (
+  <Stack>
+    <p>
+      Use <code>slotProps</code> on <code>CardHeader</code> to style its internal parts with <code>className</code> or{' '}
+      <code>style</code>, without changing structure or behavior.
+    </p>
+    <div>
+      <h3>Available slots</h3>
+      <ul>
+        <li>
+          <code>content</code> — Wrapper around the title children.
+        </li>
+        <li>
+          <code>end</code> — Wrapper around <code>endElement</code>, when one is rendered.
+        </li>
+      </ul>
+    </div>
+    <Sample title="Styling slots" code={slotStylingCode}>
+      <Card width={320}>
+        <CardHeader endElement={MenuButton} slotProps={headerSlots}>
+          Alerts
+        </CardHeader>
+        <CardContent>Three firing, two pending.</CardContent>
+      </Card>
+    </Sample>
+  </Stack>
+);
+Slots.storyName = 'Slots';

@@ -15,7 +15,7 @@ import { clsx } from 'clsx';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { createElement, forwardRef } from 'react';
 
-import type { PersesCSSProperties } from '../../types';
+import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import { applyStyleProps, compileStyleProps, sizingProps, spacingProps } from '../system';
 import type { SizingProps, SpacingProps } from '../system';
 
@@ -77,12 +77,21 @@ export const Card = forwardRef<HTMLElement, CardProps>(function Card(
   );
 });
 
+export interface CardHeaderSlotProps {
+  /** Wrapper around the title `children`; grows to fill the row. */
+  content?: SlotStyleProps;
+  /** Wrapper around `endElement`; rendered only when `endElement` resolves to visible content. */
+  end?: SlotStyleProps;
+}
+
 export interface CardHeaderProps extends HTMLAttributes<HTMLElement>, SpacingProps {
   /** Trailing slot, typically actions; rendered after the title content. */
   endElement?: ReactNode;
   /** Semantic element to render; defaults to `div`. */
   as?: CardHeaderElement;
   style?: PersesCSSProperties;
+  /** Styling-only overrides for internal parts; does not replace content, behavior, or accessibility attributes. */
+  slotProps?: CardHeaderSlotProps;
 }
 
 /**
@@ -95,7 +104,7 @@ export interface CardHeaderProps extends HTMLAttributes<HTMLElement>, SpacingPro
  * </CardHeader>
  */
 export const CardHeader = forwardRef<HTMLElement, CardHeaderProps>(function CardHeader(
-  { as = 'div', endElement, className, style, children, ...props },
+  { as = 'div', endElement, className, style, slotProps, children, ...props },
   ref,
 ) {
   const {
@@ -108,8 +117,17 @@ export const CardHeader = forwardRef<HTMLElement, CardHeaderProps>(function Card
   return createElement(
     as,
     { ...rest, ref, className: clsx('ps-CardHeader', styleClassName, className), style: computedStyle },
-    createElement('div', { className: 'ps-CardHeader__content' }, children),
-    hasEndElement && createElement('div', { className: 'ps-CardHeader__end' }, endElement),
+    createElement(
+      'div',
+      { className: clsx('ps-CardHeader__content', slotProps?.content?.className), style: slotProps?.content?.style },
+      children,
+    ),
+    hasEndElement &&
+      createElement(
+        'div',
+        { className: clsx('ps-CardHeader__end', slotProps?.end?.className), style: slotProps?.end?.style },
+        endElement,
+      ),
   );
 });
 
