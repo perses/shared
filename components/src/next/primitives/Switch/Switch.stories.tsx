@@ -18,6 +18,7 @@ import type { CSSProperties, ReactElement } from 'react';
 import { Sample, Stack } from '../../stories/Sample';
 import type { ColorVariant, Size, Status } from '../types';
 import { Switch } from './Switch';
+import type { SwitchSlotProps } from './Switch';
 
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
 const colors: Array<ColorVariant | Status> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
@@ -149,3 +150,43 @@ export const States: Story = () => (
   </Stack>
 );
 States.storyName = 'States';
+
+const featureSlots: SwitchSlotProps = {
+  control: { className: 'feature-control', style: { borderRadius: 0 } },
+  thumb: { style: { borderRadius: 0 } },
+  label: { style: { fontWeight: 'var(--perses-font-weight-bold)' } },
+};
+const slotStylingCode = `const featureSlots: SwitchSlotProps = {
+  control: { className: 'feature-control', style: { borderRadius: 0 } },
+  thumb: { style: { borderRadius: 0 } },
+  label: { style: { fontWeight: 'var(--perses-font-weight-bold)' } },
+};
+
+<Switch label="Enable feature" defaultChecked slotProps={featureSlots} />`;
+
+export const Slots: Story = () => (
+  <Stack>
+    <p>
+      Use <code>slotProps</code> to style internal parts with <code>className</code> or <code>style</code>, without
+      changing structure or behavior.
+    </p>
+    <div>
+      <h3>Available slots</h3>
+      <ul>
+        <li>
+          <code>control</code> — Switch track.
+        </li>
+        <li>
+          <code>thumb</code> — Moving thumb.
+        </li>
+        <li>
+          <code>label</code> — Visible label, when provided.
+        </li>
+      </ul>
+    </div>
+    <Sample title="Styling slots" code={slotStylingCode}>
+      <Switch label="Enable feature" defaultChecked slotProps={featureSlots} />
+    </Sample>
+  </Stack>
+);
+Slots.storyName = 'Slots';

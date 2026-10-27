@@ -18,7 +18,7 @@ import type { CSSProperties, ReactElement } from 'react';
 import { Sample, Stack } from '../../stories/Sample';
 import type { ColorVariant, Size, Status } from '../types';
 import { Checkbox } from './Checkbox';
-import type { CheckboxVariant } from './Checkbox';
+import type { CheckboxSlotProps, CheckboxVariant } from './Checkbox';
 
 const colors: Array<Status | ColorVariant> = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
@@ -177,3 +177,43 @@ export const States: Story = () => (
   </Stack>
 );
 States.storyName = 'States';
+
+const notificationSlots: CheckboxSlotProps = {
+  control: { className: 'notification-control', style: { borderRadius: 0 } },
+  indicator: { style: { opacity: 0.9 } },
+  label: { style: { fontWeight: 'var(--perses-font-weight-bold)' } },
+};
+const slotStylingCode = `const notificationSlots: CheckboxSlotProps = {
+  control: { className: 'notification-control', style: { borderRadius: 0 } },
+  indicator: { style: { opacity: 0.9 } },
+  label: { style: { fontWeight: 'var(--perses-font-weight-bold)' } },
+};
+
+<Checkbox label="Enable notifications" defaultChecked slotProps={notificationSlots} />`;
+
+export const Slots: Story = () => (
+  <Stack>
+    <p>
+      Use <code>slotProps</code> to style internal parts with <code>className</code> or <code>style</code>, without
+      changing structure or behavior.
+    </p>
+    <div>
+      <h3>Available slots</h3>
+      <ul>
+        <li>
+          <code>control</code> — Checkbox control.
+        </li>
+        <li>
+          <code>indicator</code> — Checked or indeterminate mark container.
+        </li>
+        <li>
+          <code>label</code> — Visible label, when provided.
+        </li>
+      </ul>
+    </div>
+    <Sample title="Styling slots" code={slotStylingCode}>
+      <Checkbox label="Enable notifications" defaultChecked slotProps={notificationSlots} />
+    </Sample>
+  </Stack>
+);
+Slots.storyName = 'Slots';

@@ -16,9 +16,16 @@ import clsx from 'clsx';
 import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 import { forwardRef, useCallback } from 'react';
 
-import type { PersesCSSProperties } from '../../types';
+import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
-import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
+import {
+  applyStyleProps,
+  compileStyleProps,
+  displayProps,
+  mergeControlStyle,
+  sizingProps,
+  spacingProps,
+} from '../system';
 import type { ColorVariant, Size, Status } from '../types';
 
 import '../system/layout.css';
@@ -49,6 +56,14 @@ const CHECKBOX_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displ
 /** A checkbox must have an accessible name: a visible `label`, `aria-label` or `aria-labelledby`. */
 export type CheckboxAccessibleName = { label: ReactNode } | { 'aria-label': string } | { 'aria-labelledby': string };
 
+/** Styling-only overrides for the checkbox's documented internal parts. */
+export interface CheckboxSlotProps {
+  /** The sized control element; accepts the `CheckboxStyle` custom properties. */
+  control?: SlotStyleProps<CheckboxStyle>;
+  indicator?: SlotStyleProps;
+  label?: SlotStyleProps;
+}
+
 export type CheckboxProps = CheckboxBaseProps & CheckboxAccessibleName;
 
 interface CheckboxBaseProps
@@ -76,6 +91,11 @@ interface CheckboxBaseProps
   color?: ColorVariant | Status;
   variant?: CheckboxVariant;
   style?: PersesCSSProperties<CheckboxStyle>;
+  /**
+   * Styles internal parts without changing structure or behavior. On an unlabeled control, top-level styles win
+   * conflicting properties over `slotProps.control.style`. With a label, top-level styles stay on the outer wrapper.
+   */
+  slotProps?: CheckboxSlotProps;
 }
 
 /**
@@ -105,6 +125,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
     variant = 'subtle',
     className,
     style,
+    slotProps,
     id,
     'aria-invalid': ariaInvalidProp,
     ...props
@@ -115,6 +136,9 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
   const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, CHECKBOX_STYLE_PROPS, style);
   const domProps = rest as HTMLAttributes<HTMLElement>;
   const callerClassName = clsx(styleClassName, className);
+  const controlStyle = hasLabel
+    ? slotProps?.control?.style
+    : mergeControlStyle(slotProps?.control?.style, computedStyle);
   const handleCheckedChange = useCallback(
     (nextChecked: boolean, eventDetails: BaseCheckbox.Root.ChangeEventDetails): void => {
       onCheckedChange?.(nextChecked, { event: eventDetails.event });
@@ -140,14 +164,17 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
       uncheckedValue={uncheckedValue}
       form={form}
       inputRef={inputRef}
-      className={clsx('ps-Checkbox', !hasLabel && callerClassName)}
-      style={hasLabel ? undefined : computedStyle}
+      className={clsx('ps-Checkbox', !hasLabel && callerClassName, slotProps?.control?.className)}
+      style={controlStyle}
       data-invalid={invalid ? '' : undefined}
       data-size={size}
       data-color={color}
       data-variant={variant}
     >
-      <BaseCheckbox.Indicator className="ps-Checkbox__indicator">
+      <BaseCheckbox.Indicator
+        className={clsx('ps-Checkbox__indicator', slotProps?.indicator?.className)}
+        style={slotProps?.indicator?.style}
+      >
         <span className="ps-Checkbox__mark" aria-hidden="true" />
       </BaseCheckbox.Indicator>
     </BaseCheckbox.Root>
@@ -165,7 +192,9 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
       data-label-position={labelPosition}
     >
       {control}
-      <span className="ps-Checkbox__labelText">{label}</span>
+      <span className={clsx('ps-Checkbox__labelText', slotProps?.label?.className)} style={slotProps?.label?.style}>
+        {label}
+      </span>
     </label>
   );
 });
