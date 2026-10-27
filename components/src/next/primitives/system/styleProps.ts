@@ -12,8 +12,8 @@
 // limitations under the License.
 
 import clsx from 'clsx';
-import type { CSSProperties } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import { isResponsiveValue } from './responsive';
 import type { Responsive } from './responsive';
 
@@ -38,7 +38,7 @@ function cssName(prop: string): string {
 function writeStyleProp(
   entry: CompiledStyleProp,
   value: Responsive<unknown>,
-  target: Record<string, string>,
+  target: Record<`--${string}`, string | number | undefined>,
   classNames: string[],
 ): void {
   const { className, varPrefix, transform } = entry;
@@ -60,7 +60,7 @@ function writeStyleProp(
 interface CompiledStyleProp {
   prop: string;
   className: string;
-  varPrefix: string;
+  varPrefix: `--ps-${string}`;
   transform: (value: unknown) => string;
 }
 
@@ -110,10 +110,10 @@ export function compileStyleProps<const Registries extends readonly StylePropReg
 export function applyStyleProps<Props extends Record<string, unknown>, K extends string>(
   props: Props,
   compiled: CompiledStyleProps<K>,
-  style?: CSSProperties,
-): { className: string; style: CSSProperties; rest: Omit<Props, K> } {
+  style?: PersesCSSProperties,
+): { className: string; style: PersesCSSProperties; rest: Omit<Props, K> } {
   const classNames: string[] = [];
-  const computed: Record<string, string> = {};
+  const computed: Record<`--${string}`, string | number | undefined> = {};
 
   for (const entry of compiled.props) {
     const value = props[entry.prop] as Responsive<unknown> | undefined;
@@ -129,5 +129,5 @@ export function applyStyleProps<Props extends Record<string, unknown>, K extends
     if (!keys.has(prop)) rest[prop] = props[prop];
   }
 
-  return { className: clsx(classNames), style: computed as CSSProperties, rest: rest as Omit<Props, K> };
+  return { className: clsx(classNames), style: computed, rest: rest as Omit<Props, K> };
 }

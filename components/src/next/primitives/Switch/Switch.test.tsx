@@ -14,15 +14,15 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRef } from 'react';
-import type { CSSProperties } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import type { ColorVariant, Size, Status } from '../types';
 import { Switch } from './Switch';
 import type { SwitchStyle } from './Switch';
 
 const noop = (): void => {};
 const RESPONSIVE_WIDTH = { default: 100, md: 200 };
-const WIDTH_OVERRIDE = { '--ps-width': '50px' } as CSSProperties;
+const WIDTH_OVERRIDE = { '--ps-width': '50px' } satisfies PersesCSSProperties<SwitchStyle>;
 
 if (typeof window.PointerEvent === 'undefined') {
   window.PointerEvent = window.MouseEvent as unknown as typeof PointerEvent;

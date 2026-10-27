@@ -15,6 +15,7 @@ import { clsx } from 'clsx';
 import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes, ReactElement, ReactNode } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import { ChevronRightIcon, Icon } from '../Icon';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared button styles.
@@ -26,6 +27,7 @@ interface TableRowExpandButtonBaseProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   'children' | 'aria-label'
 > {
+  style?: PersesCSSProperties;
   expanded?: boolean;
   icon?: ReactElement;
 }

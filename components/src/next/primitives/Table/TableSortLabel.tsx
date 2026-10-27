@@ -15,6 +15,7 @@ import { clsx } from 'clsx';
 import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes, ReactElement, ReactNode } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import { ArrowDownIcon, Icon } from '../Icon';
 import type { SortDirection } from './Table';
 
@@ -45,6 +46,7 @@ interface TableSortLabelBaseProps extends Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,
   'children' | 'aria-label' | 'aria-labelledby'
 > {
+  style?: PersesCSSProperties;
   active?: boolean;
   direction?: SortDirection;
   /**
