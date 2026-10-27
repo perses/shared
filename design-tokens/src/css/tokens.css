@@ -148,6 +148,9 @@
     --perses-focus-ring-width: var(--perses-border-width-md);
     --perses-focus-ring-offset: 2px;
 
+    /* ---- Opacity ---- */
+    --perses-opacity-disabled: 0.5;
+
     /* ---- Border Radius ---- */
     --perses-radius-none: 0;
     --perses-radius-sm: 2px;

@@ -14,8 +14,9 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-import { blue, green, gray, orange, purple, red, white, black } from '../colors';
 import type { PersesColor } from '../colors';
+import { black, blue, gray, green, orange, purple, red, white } from '../colors';
+import { tokens } from '../tokens';
 
 const cssDir = resolve(__dirname, '../css');
 
@@ -32,6 +33,12 @@ function declarationsFor(css: string, selector: string): Map<string, string> {
     if (name && value) declarations.set(name, value.trim());
   }
   return declarations;
+}
+
+/** Every `--perses-*` name referenced anywhere in a `tokens` subtree. */
+function tokenNames(value: unknown): string[] {
+  if (typeof value === 'string') return [...value.matchAll(/var\((--[\w-]+)\)/g)].map((match) => match[1]!);
+  return Object.values(value as Record<string, unknown>).flatMap(tokenNames);
 }
 
 function colorFor(variables: Map<string, string>, name: string): string {
@@ -151,6 +158,10 @@ describe('CSS primitive dimension variables', () => {
     expect(tokensCss).toContain('--perses-focus-ring-offset');
   });
 
+  it('defines the disabled opacity primitive', () => {
+    expect(declarationsFor(tokensCss, ':root').get('--perses-opacity-disabled')).toBe('0.5');
+  });
+
   it('defines control size variables in rem', () => {
     const expected = { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '2.75rem' };
     for (const [name, value] of Object.entries(expected)) {
@@ -170,38 +181,28 @@ describe('CSS primitive dimension variables', () => {
 
 describe('CSS semantic variables', () => {
   const semanticCss = readCss('semantic.css');
+  const primitiveNames = new Set(declarationsFor(readCss('tokens.css'), ':root').keys());
+  const allNames = [...new Set(tokenNames(tokens))];
+  const semanticNames = allNames.filter((name) => !primitiveNames.has(name)).toSorted();
 
-  it('defines light mode defaults on :root', () => {
-    expect(semanticCss).toContain(':root {');
-    expect(semanticCss).toContain('--perses-bg-default');
-    expect(semanticCss).toContain('--perses-text-primary');
+  it('derives a non-empty semantic set from tokens.ts minus tokens.css', () => {
+    expect(semanticNames.length).toBeGreaterThan(0);
   });
 
-  it('defines dark mode via data attribute', () => {
-    expect(semanticCss).toContain(`[data-perses-mode='dark']`);
+  it('declares every tokens.ts reference in tokens.css or semantic.css', () => {
+    const declared = new Set([...primitiveNames, ...declarationsFor(semanticCss, ':root').keys()]);
+    expect(allNames.filter((name) => !declared.has(name))).toEqual([]);
   });
 
-  it('has all background semantic tokens', () => {
-    const bgTokens = ['default', 'surface', 'sunken', 'overlay', 'backdrop', 'navigation'];
-    for (const name of bgTokens) {
-      expect(semanticCss).toContain(`--perses-bg-${name}`);
-    }
-  });
+  it.each([':root', "[data-perses-mode='light']", "[data-perses-mode='dark']"])(
+    '%s declares every public semantic token',
+    (selector) => {
+      expect([...declarationsFor(semanticCss, selector).keys()].toSorted()).toEqual(semanticNames);
+    },
+  );
 
-  it('has border semantic token', () => {
-    expect(semanticCss).toContain('--perses-border-default');
-  });
-
-  it('has focus ring colour semantic token in both modes', () => {
-    expect(semanticCss.match(/--perses-focus-ring-color:/g)).toHaveLength(2);
-  });
-
-  it.each(['light', 'dark'])('defaults disabled opacity to 0.5 in %s mode', (mode) => {
-    const variables = new Map([
-      ...declarationsFor(semanticCss, ':root'),
-      ...(mode === 'dark' ? declarationsFor(semanticCss, "[data-perses-mode='dark']") : []),
-    ]);
-    expect(variables.get('--perses-opacity-disabled')).toBe('0.5');
+  it('explicit light boundaries use the same mapping as the document default', () => {
+    expect(declarationsFor(semanticCss, "[data-perses-mode='light']")).toEqual(declarationsFor(semanticCss, ':root'));
   });
 
   it.each([
@@ -212,21 +213,26 @@ describe('CSS semantic variables', () => {
     expect(declarationsFor(semanticCss, selector).get('--perses-text-disabled')).toBe(expected);
   });
 
-  it('has all text semantic tokens', () => {
-    const textTokens = ['primary', 'secondary', 'disabled', 'link', 'link-hover', 'navigation', 'accent'];
-    for (const name of textTokens) {
-      expect(semanticCss).toContain(`--perses-text-${name}`);
-    }
-  });
-
-  it('has all status tokens with property-scoped naming', () => {
-    const roles = ['default', 'primary', 'secondary', 'error', 'warning', 'success', 'info'];
-    const properties = ['bg', 'text', 'border', 'icon', 'solid'];
-    for (const role of roles) {
-      for (const prop of properties) {
-        expect(semanticCss).toContain(`--perses-status-${prop}-${role}`);
-      }
-      expect(semanticCss).toContain(`--perses-status-bg-${role}-hover`);
-    }
+  it.each([
+    [
+      'light',
+      {
+        '--perses-bg-default': 'var(--perses-color-white)',
+        '--perses-text-primary': 'var(--perses-color-gray-800)',
+        '--perses-status-solid-primary': 'var(--perses-color-blue-500)',
+        '--perses-status-text-default': 'var(--perses-text-secondary)',
+      },
+    ],
+    [
+      'dark',
+      {
+        '--perses-bg-default': 'var(--perses-color-gray-900)',
+        '--perses-text-primary': 'var(--perses-color-white)',
+        '--perses-status-solid-primary': 'var(--perses-color-blue-400)',
+        '--perses-status-text-default': 'var(--perses-text-primary)',
+      },
+    ],
+  ])('%s boundaries map representative palette and semantic aliases', (mode, expected) => {
+    expect(Object.fromEntries(declarationsFor(semanticCss, `[data-perses-mode='${mode}']`))).toMatchObject(expected);
   });
 });
