@@ -16,11 +16,25 @@ import { forwardRef, useCallback } from 'react';
 import type { ChangeEvent, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import { useComponents } from '../../contexts/ComponentsProvider';
-import type { PersesCSSProperties } from '../../types';
+import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import { ChevronLeftIcon, ChevronRightIcon, Icon } from '../Icon';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the table styles.
 import './table.css';
+
+/** Documented internal styling targets; the root remains styled through top-level `className` and `style`. */
+export interface TablePaginationSlotProps {
+  /** Rows-per-page label wrapper; rendered only when `onRowsPerPageChange` is provided. */
+  rowsPerPage?: SlotStyleProps;
+  /** Native rows-per-page select; rendered only when `onRowsPerPageChange` is provided. */
+  select?: SlotStyleProps;
+  /** Current row range and total count. */
+  range?: SlotStyleProps;
+  /** Provider-resolved previous-page IconButton. */
+  previousButton?: SlotStyleProps;
+  /** Provider-resolved next-page IconButton. */
+  nextButton?: SlotStyleProps;
+}
 
 /**
  * Fully controlled pagination footer for use below a `Table`.
@@ -40,6 +54,8 @@ import './table.css';
  */
 export interface TablePaginationProps extends HTMLAttributes<HTMLDivElement> {
   style?: PersesCSSProperties;
+  /** Styling-only overrides for internal parts; does not replace content, behavior, or accessibility attributes. */
+  slotProps?: TablePaginationSlotProps;
   /** Total number of rows across all pages. */
   count: number;
   /** Current zero-based page index. */
@@ -77,6 +93,7 @@ export const TablePagination = forwardRef<HTMLDivElement, TablePaginationProps>(
     previousIcon = defaultPreviousIcon,
     nextIcon = defaultNextIcon,
     className,
+    slotProps,
     ...props
   },
   ref,
@@ -100,9 +117,17 @@ export const TablePagination = forwardRef<HTMLDivElement, TablePaginationProps>(
   return (
     <div ref={ref} className={clsx('ps-TablePagination', className)} {...props}>
       {onRowsPerPageChange && (
-        <label className="ps-TablePagination__rowsPerPage">
+        <label
+          className={clsx('ps-TablePagination__rowsPerPage', slotProps?.rowsPerPage?.className)}
+          style={slotProps?.rowsPerPage?.style}
+        >
           {labelRowsPerPage}
-          <select value={rowsPerPage} onChange={handleRowsPerPageChange}>
+          <select
+            className={slotProps?.select?.className}
+            style={slotProps?.select?.style}
+            value={rowsPerPage}
+            onChange={handleRowsPerPageChange}
+          >
             {rowsPerPageOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
@@ -111,10 +136,12 @@ export const TablePagination = forwardRef<HTMLDivElement, TablePaginationProps>(
           </select>
         </label>
       )}
-      <span className="ps-TablePagination__range">
+      <span className={clsx('ps-TablePagination__range', slotProps?.range?.className)} style={slotProps?.range?.style}>
         {start}-{end} of {count}
       </span>
       <IconButton
+        className={slotProps?.previousButton?.className}
+        style={slotProps?.previousButton?.style}
         variant="ghost"
         size="sm"
         aria-label="Previous page"
@@ -123,7 +150,15 @@ export const TablePagination = forwardRef<HTMLDivElement, TablePaginationProps>(
       >
         <Icon>{previousIcon}</Icon>
       </IconButton>
-      <IconButton variant="ghost" size="sm" aria-label="Next page" disabled={page >= lastPage} onClick={handleNextPage}>
+      <IconButton
+        className={slotProps?.nextButton?.className}
+        style={slotProps?.nextButton?.style}
+        variant="ghost"
+        size="sm"
+        aria-label="Next page"
+        disabled={page >= lastPage}
+        onClick={handleNextPage}
+      >
         <Icon>{nextIcon}</Icon>
       </IconButton>
     </div>

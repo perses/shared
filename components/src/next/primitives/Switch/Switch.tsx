@@ -16,7 +16,7 @@ import clsx from 'clsx';
 import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
-import type { PersesCSSProperties } from '../../types';
+import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import type { ColorVariant, Size, Status } from '../types';
@@ -27,12 +27,26 @@ import './switch.css';
 
 const SWITCH_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
 
+function mergeControlStyle(
+  slotStyle: PersesCSSProperties | undefined,
+  topLevelStyle: PersesCSSProperties,
+): PersesCSSProperties {
+  return slotStyle ? { ...slotStyle, ...topLevelStyle } : topLevelStyle;
+}
+
 export interface SwitchStyle extends CSSProperties {
   /** Per-step size override; falls back to the shared selection-control scale. */
   '--perses-switch-size-xs'?: string;
   '--perses-switch-size-sm'?: string;
   '--perses-switch-size-md'?: string;
   '--perses-switch-size-lg'?: string;
+}
+
+/** Styling-only overrides for the switch's documented internal parts. */
+export interface SwitchSlotProps {
+  control?: SlotStyleProps;
+  thumb?: SlotStyleProps;
+  label?: SlotStyleProps;
 }
 
 export interface SwitchProps
@@ -69,6 +83,11 @@ export interface SwitchProps
   label?: ReactNode;
   /** Inline style, extended with typed selection-control size override custom properties. */
   style?: PersesCSSProperties<SwitchStyle>;
+  /**
+   * Styles internal parts without changing structure or behavior. On an unlabeled control, top-level styles win
+   * conflicting properties over `slotProps.control.style`. With a label, top-level styles stay on the outer wrapper.
+   */
+  slotProps?: SwitchSlotProps;
 }
 
 /**
@@ -105,6 +124,7 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
     label,
     className,
     style,
+    slotProps,
     id,
     'aria-labelledby': ariaLabelledBy,
     'aria-label': ariaLabel,
@@ -119,6 +139,9 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
   const hiddenInputId = `${controlId}-input`;
   const hasLabel = Boolean(label);
   const callerClassName = clsx(styleClassName, className);
+  const controlStyle = hasLabel
+    ? slotProps?.control?.style
+    : mergeControlStyle(slotProps?.control?.style, computedStyle);
   const rootElement = useMemo(() => <span id={controlId} />, [controlId]);
 
   const root = (
@@ -141,10 +164,13 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
       aria-labelledby={ariaLabelledBy ?? (hasLabel && ariaLabel === undefined ? labelId : undefined)}
       data-size={size}
       data-color={color}
-      className={clsx('ps-Switch', !hasLabel && callerClassName)}
-      style={hasLabel ? undefined : computedStyle}
+      className={clsx('ps-Switch', !hasLabel && callerClassName, slotProps?.control?.className)}
+      style={controlStyle}
     >
-      <BaseSwitch.Thumb className="ps-Switch__thumb" />
+      <BaseSwitch.Thumb
+        className={clsx('ps-Switch__thumb', slotProps?.thumb?.className)}
+        style={slotProps?.thumb?.style}
+      />
     </BaseSwitch.Root>
   );
 
@@ -155,7 +181,12 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
   return (
     <label className={clsx('ps-Switch__wrapper', callerClassName)} style={computedStyle} htmlFor={hiddenInputId}>
       {root}
-      <span id={labelId} className="ps-Switch__label" aria-hidden={ariaLabel !== undefined || undefined}>
+      <span
+        id={labelId}
+        className={clsx('ps-Switch__label', slotProps?.label?.className)}
+        style={slotProps?.label?.style}
+        aria-hidden={ariaLabel !== undefined || undefined}
+      >
         {label}
       </span>
     </label>

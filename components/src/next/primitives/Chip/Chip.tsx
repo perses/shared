@@ -15,7 +15,7 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 import type { CSSProperties, HTMLAttributes, MouseEventHandler, ReactElement, ReactNode } from 'react';
 
-import type { PersesCSSProperties } from '../../types';
+import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import {
   applyStyleProps,
@@ -35,6 +35,15 @@ import './chip.css';
 
 export type ChipSize = Extract<Size, 'xs' | 'sm' | 'md'>;
 export type ChipVariant = 'solid' | 'outline';
+
+export interface ChipSlotProps {
+  /** Wrapper around `startElement`; rendered only when it is provided. */
+  start?: SlotStyleProps;
+  /** Label span; also the action when both `onClick` and `onClose` are provided. */
+  label?: SlotStyleProps;
+  /** Internal close button; rendered only when `onClose` is provided. */
+  closeButton?: SlotStyleProps;
+}
 
 // `maxWidth` keeps its own meaning (the label's max width), so it is not a style prop here.
 const { maxWidth: _labelMaxWidth, ...chipSizingProps } = sizingProps;
@@ -62,6 +71,8 @@ interface ChipBaseProps
   /** Maximum width of the label; longer text is truncated with an ellipsis. */
   maxWidth?: CSSProperties['maxWidth'];
   style?: PersesCSSProperties<ChipStyle>;
+  /** Styling-only overrides for internal parts; does not replace content, behavior, or accessibility attributes. */
+  slotProps?: ChipSlotProps;
 }
 
 /**
@@ -152,6 +163,7 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
     maxWidth,
     style,
     className,
+    slotProps,
     ...props
   },
   ref,
@@ -193,12 +205,28 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
       data-clickable={interactive ? '' : undefined}
       data-disabled={disabled ? '' : undefined}
     >
-      {startElement && <span className="ps-Chip__start">{startElement}</span>}
-      <span ref={labelRef} className="ps-Chip__label" {...labelActionProps}>
+      {startElement && (
+        <span className={clsx('ps-Chip__start', slotProps?.start?.className)} style={slotProps?.start?.style}>
+          {startElement}
+        </span>
+      )}
+      <span
+        ref={labelRef}
+        className={clsx('ps-Chip__label', slotProps?.label?.className)}
+        style={slotProps?.label?.style}
+        {...labelActionProps}
+      >
         {children}
       </span>
       {onClose && (
-        <ChipCloseButton closeIcon={closeIcon} closeAriaLabel={closeAriaLabel} disabled={disabled} onClose={onClose}>
+        <ChipCloseButton
+          closeIcon={closeIcon}
+          closeAriaLabel={closeAriaLabel}
+          disabled={disabled}
+          onClose={onClose}
+          className={slotProps?.closeButton?.className}
+          style={slotProps?.closeButton?.style}
+        >
           {children}
         </ChipCloseButton>
       )}

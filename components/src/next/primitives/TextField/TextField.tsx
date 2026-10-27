@@ -16,7 +16,7 @@ import clsx from 'clsx';
 import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, InputHTMLAttributes, ReactElement, ReactNode } from 'react';
 
-import type { PersesCSSProperties } from '../../types';
+import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
 import { TextHelper } from '../TextHelper';
@@ -37,6 +37,18 @@ export interface TextFieldStyle extends CSSProperties {
   '--perses-textfield-size-lg'?: string;
 }
 
+/** Documented internal styling targets; the root remains styled through top-level `className` and `style`. */
+export interface TextFieldSlotProps {
+  /** Visible label; rendered only when `label` is provided. */
+  label?: SlotStyleProps;
+  /** Bordered wrapper around the control and adornments. */
+  wrapper?: SlotStyleProps;
+  /** Native input, or textarea when `multiline` is true. */
+  input?: SlotStyleProps;
+  /** Supporting text; rendered only when `helperText` is provided. */
+  helper?: SlotStyleProps;
+}
+
 // Only `overflow` from the display category: `display` stays fixed to inline-flex/flex by the stylesheet, so
 // compiling it would strip a `display` value from the DOM and let `.ps-display` override the default.
 const TEXT_FIELD_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
@@ -52,6 +64,8 @@ interface TextFieldBaseProps
     Pick<DisplayProps, 'overflow'> {
   /** Inline styles for the root; accepts the `--perses-textfield-size-<step>` override custom properties. */
   style?: PersesCSSProperties<TextFieldStyle>;
+  /** Styling-only overrides for internal parts; does not replace content, behavior, or accessibility attributes. */
+  slotProps?: TextFieldSlotProps;
   /** Hint or validation message, linked to the control through `aria-describedby`. */
   helperText?: ReactNode;
   /** Visual status. `error` also sets `aria-invalid` on the control. */
@@ -98,7 +112,7 @@ export type TextFieldProps = TextFieldBaseProps & TextFieldAccessibleName;
 /**
  * Text input with label, helper text and adornments. Spacing, sizing and `overflow` style props apply to the root
  * element and behave as documented on `Box`; `display` is fixed by the stylesheet. Native input attributes go to the
- * control.
+ * control. Use `slotProps` for internal part styling; native attributes, handlers, and `ref` stay on the control.
  */
 export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldProps>(function TextField(
   {
@@ -113,6 +127,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     endAdornment,
     className,
     style,
+    slotProps,
     id,
     disabled,
     ...props
@@ -147,11 +162,15 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
       data-multiline={multiline || undefined}
     >
       {label && (
-        <Field.Label className="ps-TextField__label" htmlFor={inputId}>
+        <Field.Label
+          className={clsx('ps-TextField__label', slotProps?.label?.className)}
+          style={slotProps?.label?.style}
+          htmlFor={inputId}
+        >
           {label}
         </Field.Label>
       )}
-      <div className="ps-TextField__wrapper">
+      <div className={clsx('ps-TextField__wrapper', slotProps?.wrapper?.className)} style={slotProps?.wrapper?.style}>
         {startAdornment && (
           <span className="ps-TextField__adornment ps-TextField__adornment--start">{startAdornment}</span>
         )}
@@ -159,14 +178,19 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
           {...restWithoutDisplay}
           ref={ref}
           id={inputId}
-          className="ps-TextField__input"
+          className={clsx('ps-TextField__input', slotProps?.input?.className)}
+          style={slotProps?.input?.style}
           render={multiline ? renderTextarea : undefined}
           {...(multiline && { rows })}
         />
         {endAdornment && <span className="ps-TextField__adornment ps-TextField__adornment--end">{endAdornment}</span>}
       </div>
       {helperText && (
-        <Field.Description className="ps-TextField__helper" render={renderHelper}>
+        <Field.Description
+          className={clsx('ps-TextField__helper', slotProps?.helper?.className)}
+          style={slotProps?.helper?.style}
+          render={renderHelper}
+        >
           {helperText}
         </Field.Description>
       )}

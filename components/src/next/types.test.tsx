@@ -15,18 +15,27 @@ import { render, screen } from '@testing-library/react';
 import type { ComponentProps, CSSProperties } from 'react';
 import { expectTypeOf } from 'vitest';
 
-import type { PersesComponents, PersesCSSProperties, PersesIcons } from './index';
+import type { PersesComponents, PersesCSSProperties, PersesIcons, SlotStyleProps } from './index';
 import { AddIcon, Box, Checkbox } from './primitives';
 import type {
+  AlertProps,
+  AlertSlotProps,
   CheckboxProps,
+  CheckboxSlotProps,
   CheckboxStyle,
   ChipProps,
+  ChipSlotProps,
   ChipStyle,
   IconProps,
   PersesCSSProperties as PrimitiveCSSProperties,
+  SlotStyleProps as PrimitiveSlotStyleProps,
   SwitchProps,
+  SwitchSlotProps,
   SwitchStyle,
+  TablePaginationProps,
+  TablePaginationSlotProps,
   TextFieldProps,
+  TextFieldSlotProps,
   TextFieldStyle,
 } from './primitives';
 
@@ -73,6 +82,70 @@ type MissingCustomProperties = {
 }[keyof StyledProps];
 type _RegistryCovered = AssertAssignable<'Checkbox' | 'TableCell' | 'InfoIcon' | 'AddIcon', keyof StyledProps>;
 type _EveryStyleSupportsCustomProperties = AssertNever<MissingCustomProperties>;
+
+type _SlotStylePrimitiveExport = AssertAssignable<SlotStyleProps, PrimitiveSlotStyleProps>;
+type _SlotStyleKeys = AssertNever<Exclude<keyof SlotStyleProps, 'className' | 'style'>>;
+type _TextFieldSlotKeys = AssertNever<Exclude<keyof TextFieldSlotProps, 'label' | 'wrapper' | 'input' | 'helper'>>;
+type _TextFieldSlotProp = AssertAssignable<NonNullable<TextFieldProps['slotProps']>, TextFieldSlotProps>;
+
+expectTypeOf<AlertProps['slotProps']>().toEqualTypeOf<AlertSlotProps | undefined>();
+expectTypeOf<CheckboxProps['slotProps']>().toEqualTypeOf<CheckboxSlotProps | undefined>();
+expectTypeOf<ChipProps['slotProps']>().toEqualTypeOf<ChipSlotProps | undefined>();
+expectTypeOf<SwitchProps['slotProps']>().toEqualTypeOf<SwitchSlotProps | undefined>();
+expectTypeOf<TablePaginationProps['slotProps']>().toEqualTypeOf<TablePaginationSlotProps | undefined>();
+
+expectTypeOf<AlertSlotProps>().toEqualTypeOf<{ icon?: SlotStyleProps; message?: SlotStyleProps }>();
+expectTypeOf<CheckboxSlotProps>().toEqualTypeOf<{
+  control?: SlotStyleProps;
+  indicator?: SlotStyleProps;
+  label?: SlotStyleProps;
+}>();
+expectTypeOf<ChipSlotProps>().toEqualTypeOf<{
+  start?: SlotStyleProps;
+  label?: SlotStyleProps;
+  closeButton?: SlotStyleProps;
+}>();
+expectTypeOf<SwitchSlotProps>().toEqualTypeOf<{
+  control?: SlotStyleProps;
+  thumb?: SlotStyleProps;
+  label?: SlotStyleProps;
+}>();
+expectTypeOf<TablePaginationSlotProps>().toEqualTypeOf<{
+  rowsPerPage?: SlotStyleProps;
+  select?: SlotStyleProps;
+  range?: SlotStyleProps;
+  previousButton?: SlotStyleProps;
+  nextButton?: SlotStyleProps;
+}>();
+
+// @ts-expect-error Icon slots cannot replace the rendered icon.
+expectTypeOf({ icon: { render: 'svg' } } satisfies AlertSlotProps);
+// @ts-expect-error Control IDs remain on the component's top-level API.
+expectTypeOf({ control: { id: 'different-control' } } satisfies CheckboxSlotProps);
+// @ts-expect-error Close callbacks remain on the component's top-level API.
+expectTypeOf({ closeButton: { onClick: undefined } } satisfies ChipSlotProps);
+// @ts-expect-error Slot styling cannot replace control refs.
+expectTypeOf({ control: { ref: undefined } } satisfies SwitchSlotProps);
+// @ts-expect-error Navigation disabled state is owned by pagination.
+expectTypeOf({ nextButton: { disabled: false } } satisfies TablePaginationSlotProps);
+
+expectTypeOf({ input: { className: 'query-input', style: { '--app-accent': 'blue' } } } satisfies TextFieldSlotProps);
+// @ts-expect-error Slot styling must not replace the input renderer.
+expectTypeOf({ input: { render: 'textarea' } } satisfies TextFieldSlotProps);
+// @ts-expect-error Handlers remain on the component's top-level API.
+expectTypeOf({ input: { onChange: undefined } } satisfies TextFieldSlotProps);
+// @ts-expect-error Refs remain on the component's top-level API.
+expectTypeOf({ input: { ref: undefined } } satisfies TextFieldSlotProps);
+// @ts-expect-error IDs and accessibility relationships are not styling overrides.
+expectTypeOf({ input: { id: 'different-input' } } satisfies TextFieldSlotProps);
+// @ts-expect-error ARIA attributes are not styling overrides.
+expectTypeOf({ input: { 'aria-label': 'Different name' } } satisfies TextFieldSlotProps);
+// @ts-expect-error State markers are owned by the component.
+expectTypeOf({ input: { 'data-disabled': '' } } satisfies TextFieldSlotProps);
+// @ts-expect-error Content remains on the component's top-level API.
+expectTypeOf({ helper: { children: 'Different helper' } } satisfies TextFieldSlotProps);
+// @ts-expect-error Only documented parts are styling targets; root styling stays top-level.
+expectTypeOf({ root: { className: 'different-root' } } satisfies TextFieldSlotProps);
 
 type _ReactCompatible = AssertAssignable<PersesCSSProperties, CSSProperties>;
 type _ExistingReactStylesAccepted = AssertAssignable<CSSProperties, PersesCSSProperties>;

@@ -24,6 +24,17 @@ export type PersesCSSProperties<Style extends CSSProperties = CSSProperties> =
       [customProperty: `--${string}`]: string | number | undefined;
     });
 
+/**
+ * Styling overrides for a documented internal part. Does not expose element replacement, content, event handlers,
+ * refs, state, or accessibility attributes. Components read these fields explicitly rather than spreading this object.
+ */
+export interface SlotStyleProps {
+  /** Additional classes; required component classes are preserved. */
+  className?: string;
+  /** Inline visual overrides, including CSS custom properties. */
+  style?: PersesCSSProperties;
+}
+
 export interface StyledSVGProps extends SVGProps<SVGSVGElement> {
   style?: PersesCSSProperties;
 }
