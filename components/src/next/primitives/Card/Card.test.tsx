@@ -18,6 +18,7 @@ import { Card, CardContent, CardHeader } from './Card';
 
 const RESPONSIVE_PADDING = { default: 'sm', md: 'xl' } as const;
 const STYLE_OVERRIDE = { padding: '99px' };
+const CUSTOM_PROPERTY_STYLE = { '--perses-bg-surface': 'white', '--app-accent': 'blue' };
 const MENU_BUTTON = <button type="button">Menu</button>;
 const ACTIONS_BUTTON = <button type="button">Actions</button>;
 
@@ -132,6 +133,22 @@ describe('Card', () => {
     it('does not expose display as a style prop', () => {
       // @ts-expect-error display is owned by card.css, not the style engine
       render(<Card display="grid">Body</Card>);
+    });
+
+    it('passes CSS custom properties through style on every part', () => {
+      render(
+        <Card data-testid="card" style={CUSTOM_PROPERTY_STYLE}>
+          <CardHeader data-testid="header" style={CUSTOM_PROPERTY_STYLE}>
+            Title
+          </CardHeader>
+          <CardContent data-testid="content" style={CUSTOM_PROPERTY_STYLE}>
+            Body
+          </CardContent>
+        </Card>,
+      );
+      for (const id of ['card', 'header', 'content']) {
+        expect(screen.getByTestId(id)).toHaveStyle({ '--perses-bg-surface': 'white', '--app-accent': 'blue' });
+      }
     });
   });
 });

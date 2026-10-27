@@ -15,6 +15,7 @@ import { clsx } from 'clsx';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { createElement, forwardRef } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import { applyStyleProps, compileStyleProps, sizingProps, spacingProps } from '../system';
 import type { SizingProps, SpacingProps } from '../system';
 
@@ -42,6 +43,7 @@ export interface CardProps extends HTMLAttributes<HTMLElement>, SpacingProps, Si
   variant?: CardVariant;
   /** Semantic element to render; defaults to `div`. Use `section` for labelled regions. */
   as?: CardElement;
+  style?: PersesCSSProperties;
 }
 
 /**
@@ -80,6 +82,7 @@ export interface CardHeaderProps extends HTMLAttributes<HTMLElement>, SpacingPro
   endElement?: ReactNode;
   /** Semantic element to render; defaults to `div`. */
   as?: CardHeaderElement;
+  style?: PersesCSSProperties;
 }
 
 /**
@@ -113,6 +116,7 @@ export const CardHeader = forwardRef<HTMLElement, CardHeaderProps>(function Card
 export interface CardContentProps extends HTMLAttributes<HTMLElement>, SpacingProps, SizingProps {
   /** Semantic element to render; defaults to `div`. Use `figure` for charts. */
   as?: CardContentElement;
+  style?: PersesCSSProperties;
 }
 
 /**
