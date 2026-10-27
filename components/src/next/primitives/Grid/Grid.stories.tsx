@@ -33,8 +33,8 @@ const field: CSSProperties = {
   padding: 'var(--perses-spacing-sm)',
 };
 
-const WIDE_SPAN = { default: 19, md: 9 } as const;
-const NARROW_SPAN = { default: 5, md: 3 } as const;
+const WIDE_SPAN = { default: 24, md: 18 } as const;
+const NARROW_SPAN = { default: 24, md: 6 } as const;
 // Every span that divides 12 evenly, repeated to fill its row: 1×12, 2×6, 3×4, 4×3, 6×2, 12×1.
 const SPAN_CELLS = [12, 6, 4, 3, 2, 1].flatMap((span) =>
   Array.from({ length: 12 / span }, (_, position) => ({ id: `${span}-${position}`, span })),
@@ -79,10 +79,11 @@ const columnsCode = `<Grid spacing="sm">
 
 {/* A 24-column grid allows finer spans than 12 columns.
     default: the span used on all screen widths, unless a breakpoint below overrides it.
-    md: the span used at md and wider (≥ 900 px), until a wider breakpoint overrides it. */}
+    md: the span used at md and wider (≥ 900 px), until a wider breakpoint overrides it.
+    These items stack full-width on small screens and share one row at md and wider. */}
 <Grid columns={24} spacing="sm">
-  <GridItem size={{ default: 19, md: 9 }}>Wide: 19 columns, 9 at md</GridItem>
-  <GridItem size={{ default: 5, md: 3 }}>Narrow: 5 columns, 3 at md</GridItem>
+  <GridItem size={{ default: 24, md: 18 }}>default 24 · md 18</GridItem>
+  <GridItem size={{ default: 24, md: 6 }}>default 24 · md 6</GridItem>
 </Grid>`;
 
 export const Columns: Story = () => (
@@ -98,10 +99,10 @@ export const Columns: Story = () => (
         </Grid>
         <Grid columns={24} spacing="sm" p="sm" style={outline}>
           <GridItem size={WIDE_SPAN} style={cell}>
-            Wide: 19 of 24 columns; 9 columns at md and wider (≥ 900 px)
+            default 24 · md 18
           </GridItem>
           <GridItem size={NARROW_SPAN} style={cell}>
-            Narrow: 5 of 24 columns; 3 columns at md and wider (≥ 900 px)
+            default 24 · md 6
           </GridItem>
         </Grid>
       </Layout>
