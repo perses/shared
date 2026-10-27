@@ -17,7 +17,14 @@ import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
-import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
+import {
+  applyStyleProps,
+  compileStyleProps,
+  displayProps,
+  mergeControlStyle,
+  sizingProps,
+  spacingProps,
+} from '../system';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import type { ColorVariant, Size, Status } from '../types';
 
@@ -26,13 +33,6 @@ import '../system/spacing.css';
 import './switch.css';
 
 const SWITCH_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
-
-function mergeControlStyle(
-  slotStyle: PersesCSSProperties | undefined,
-  topLevelStyle: PersesCSSProperties,
-): PersesCSSProperties {
-  return slotStyle ? { ...slotStyle, ...topLevelStyle } : topLevelStyle;
-}
 
 export interface SwitchStyle extends CSSProperties {
   /** Per-step size override; falls back to the shared selection-control scale. */

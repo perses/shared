@@ -18,7 +18,14 @@ import { forwardRef, useCallback } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
-import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
+import {
+  applyStyleProps,
+  compileStyleProps,
+  displayProps,
+  mergeControlStyle,
+  sizingProps,
+  spacingProps,
+} from '../system';
 import type { ColorVariant, Size, Status } from '../types';
 
 import '../system/layout.css';
@@ -45,13 +52,6 @@ export interface CheckboxStyle extends CSSProperties {
 }
 
 const CHECKBOX_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
-
-function mergeControlStyle(
-  slotStyle: PersesCSSProperties | undefined,
-  topLevelStyle: PersesCSSProperties,
-): PersesCSSProperties {
-  return slotStyle ? { ...slotStyle, ...topLevelStyle } : topLevelStyle;
-}
 
 /** A checkbox must have an accessible name: a visible `label`, `aria-label` or `aria-labelledby`. */
 export type CheckboxAccessibleName = { label: ReactNode } | { 'aria-label': string } | { 'aria-labelledby': string };
