@@ -35,7 +35,14 @@ describe('ThemeModeProvider', () => {
   });
 
   it('updates the wrapper when mode changes', () => {
-    render(
+    const { rerender } = render(
+      <ThemeModeProvider mode="dark">
+        <span data-testid="child">Content</span>
+      </ThemeModeProvider>,
+    );
+    expect(screen.getByTestId('child').parentElement).toHaveAttribute('data-perses-mode', 'dark');
+
+    rerender(
       <ThemeModeProvider mode="light">
         <span data-testid="child">Content</span>
       </ThemeModeProvider>,
