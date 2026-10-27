@@ -15,6 +15,7 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 import type { CSSProperties, HTMLAttributes, MouseEventHandler, ReactElement, ReactNode } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import {
   applyStyleProps,
@@ -60,7 +61,7 @@ interface ChipBaseProps
   onClose?: MouseEventHandler<HTMLButtonElement>;
   /** Maximum width of the label; longer text is truncated with an ellipsis. */
   maxWidth?: CSSProperties['maxWidth'];
-  style?: ChipStyle;
+  style?: PersesCSSProperties<ChipStyle>;
 }
 
 /**
@@ -84,7 +85,10 @@ export interface ChipStyle extends CSSProperties {
   '--perses-chip-size-sm'?: string;
 }
 
-function withLabelMaxWidth(style: ChipStyle | undefined, maxWidth: CSSProperties['maxWidth']): ChipStyle | undefined {
+function withLabelMaxWidth(
+  style: PersesCSSProperties<ChipStyle> | undefined,
+  maxWidth: CSSProperties['maxWidth'],
+): PersesCSSProperties<ChipStyle> | undefined {
   if (maxWidth === undefined) return style;
   return { ...style, '--perses-chip-label-max-width': lengthTransform(maxWidth) };
 }

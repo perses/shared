@@ -15,9 +15,12 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
+
 import './icon.css';
 
 export interface IconProps extends HTMLAttributes<HTMLSpanElement> {
+  style?: PersesCSSProperties;
   children?: ReactNode;
 }
 

@@ -65,6 +65,8 @@ export type ControlSizeScale = 'xs' | 'sm' | 'md' | 'lg';
 
 export type ControlSizeVar = `--perses-control-size-${ControlSizeScale}`;
 
+export type SelectionControlSizeVar = `--perses-selection-control-size-${ControlSizeScale}`;
+
 export type BorderWidthScale = 'sm' | 'md';
 
 export type BorderWidthVar = `--perses-border-width-${BorderWidthScale}`;
@@ -106,6 +108,7 @@ export type PersesTokenVar =
   | StatusSolidVar
   | SpacingVar
   | ControlSizeVar
+  | SelectionControlSizeVar
   | BorderWidthVar
   | FocusRingVar
   | RadiusVar

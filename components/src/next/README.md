@@ -9,6 +9,38 @@ This directory contains the next-generation reusable components. This guide docu
 - Represent sizes and visual states with the component's `data-*` attributes or native pseudo-classes. Preserve semantic HTML and ARIA attributes; styling attributes do not replace accessibility semantics.
 - Treat exported props, class names, custom properties intended for consumer overrides, and observable CSS behavior as compatibility-sensitive.
 
+### Adding and registering a component
+
+Consumers swap primitives through `ComponentsProvider`, so a component is only usable once it is registered. For a new `ComponentName`:
+
+- Create `primitives/ComponentName/` with the implementation, stylesheet, tests, stories, and an `index.ts` barrel.
+- Export the barrel from [`primitives/index.ts`](./primitives/index.ts) and add the component and its prop types to [`exports.test.tsx`](./primitives/exports.test.tsx).
+- Add the component to the `PersesComponents` interface in [`contexts/ComponentsContext.ts`](./contexts/ComponentsContext.ts) and to `defaultComponents` in [`primitives/defaults.ts`](./primitives/defaults.ts). Every entry is required, so a missing default is a type error.
+
+Registering the component in `PersesComponents` enables the compile-time check in [`types.test.tsx`](./types.test.tsx), which verifies that its `style` prop accepts custom properties. Stylesheets under `primitives/` are discovered automatically by [`css/layers.test.ts`](./css/layers.test.ts).
+
+### Inline `style` and custom properties
+
+React's `CSSProperties` does not accept CSS custom properties, so consumers would otherwise have to cast every `--perses-*` or application variable they pass through `style`. Type the `style` prop with `PersesCSSProperties` from `../types` (also exported publicly) instead of relying on the `HTMLAttributes` default:
+
+```ts
+export interface BoxProps extends HTMLAttributes<HTMLDivElement> {
+  style?: PersesCSSProperties;
+}
+```
+
+When a component documents its own override variables, declare them in a `ComponentNameStyle` interface that extends `CSSProperties` and wrap it so consumers keep those typed keys while still being able to add other custom properties:
+
+```ts
+export interface CheckboxStyle extends CSSProperties {
+  '--perses-checkbox-size-md'?: string;
+}
+
+style?: PersesCSSProperties<CheckboxStyle>;
+```
+
+React appends `px` to numeric values of standard properties such as `marginTop: 8`, but not to custom properties: `'--app-size': 8` is emitted as a bare `8`. Include the unit yourself, for example `'--app-size': '8px'`.
+
 ## CSS conventions
 
 ### Cascade layers and tokens

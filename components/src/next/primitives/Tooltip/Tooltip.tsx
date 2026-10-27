@@ -17,6 +17,8 @@ import { clsx } from 'clsx';
 import { cloneElement, forwardRef, useId, useState } from 'react';
 import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
+
 import './tooltip.css';
 
 /** Mirrors --perses-spacing-sm (8px). */
@@ -33,6 +35,7 @@ export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
  * The popup portals to document.body; ancestor-scoped themes and token overrides do not propagate to it.
  */
 export interface TooltipProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
+  style?: PersesCSSProperties;
   /**
    * Popup content. It supplements, and should not replace, the trigger's accessible name.
    * `''`, `false`, `null`, or `undefined` disables the tooltip and renders only the trigger,

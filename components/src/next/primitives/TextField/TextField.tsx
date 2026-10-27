@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, InputHTMLAttributes, ReactElement, ReactNode } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
 import { TextHelper } from '../TextHelper';
@@ -50,7 +51,7 @@ interface TextFieldBaseProps
     SizingProps,
     Pick<DisplayProps, 'overflow'> {
   /** Inline styles for the root; accepts the `--perses-textfield-size-<step>` override custom properties. */
-  style?: TextFieldStyle;
+  style?: PersesCSSProperties<TextFieldStyle>;
   /** Hint or validation message, linked to the control through `aria-describedby`. */
   helperText?: ReactNode;
   /** Visual status. `error` also sets `aria-invalid` on the control. */

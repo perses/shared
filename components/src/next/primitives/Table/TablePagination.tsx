@@ -16,6 +16,7 @@ import { forwardRef, useCallback } from 'react';
 import type { ChangeEvent, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import { useComponents } from '../../contexts/ComponentsProvider';
+import type { PersesCSSProperties } from '../../types';
 import { ChevronLeftIcon, ChevronRightIcon, Icon } from '../Icon';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the table styles.
@@ -38,6 +39,7 @@ import './table.css';
  * <TablePagination previousIcon={<MyPrevIcon />} nextIcon={<MyNextIcon />} ... />
  */
 export interface TablePaginationProps extends HTMLAttributes<HTMLDivElement> {
+  style?: PersesCSSProperties;
   /** Total number of rows across all pages. */
   count: number;
   /** Current zero-based page index. */

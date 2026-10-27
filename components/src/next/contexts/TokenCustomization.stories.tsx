@@ -12,10 +12,19 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
-import type { CSSProperties, ReactElement } from 'react';
+import type { ReactElement } from 'react';
 
 import { defaultComponents, defaultIcons } from '../primitives/defaults';
+import type { PersesCSSProperties } from '../types';
 import { ComponentsProvider, useComponents } from './ComponentsProvider';
+
+const TOKEN_OVERRIDES: PersesCSSProperties = {
+  '--perses-status-solid-primary': '#7c3aed',
+  '--perses-status-bg-primary-hover': 'rgba(124, 58, 237, 0.15)',
+  '--perses-status-border-primary': '#7c3aed',
+  '--perses-status-bg-primary': 'rgba(124, 58, 237, 0.08)',
+  '--perses-radius-md': '4px',
+};
 
 function TokenDemo(): ReactElement {
   const {
@@ -45,17 +54,7 @@ function TokenDemo(): ReactElement {
 
 export const TokenCustomization: Story = () => (
   <ComponentsProvider components={defaultComponents} icons={defaultIcons}>
-    <div
-      style={
-        {
-          '--perses-status-solid-primary': '#7c3aed',
-          '--perses-status-bg-primary-hover': 'rgba(124, 58, 237, 0.15)',
-          '--perses-status-border-primary': '#7c3aed',
-          '--perses-status-bg-primary': 'rgba(124, 58, 237, 0.08)',
-          '--perses-radius-md': '4px',
-        } as CSSProperties
-      }
-    >
+    <div style={TOKEN_OVERRIDES}>
       <TokenDemo />
     </div>
   </ComponentsProvider>

@@ -14,6 +14,7 @@
 import { clsx } from 'clsx';
 import { forwardRef } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import { Text } from '../Text';
 import type { TextProps } from '../Text';
 import type { Status } from '../types';
@@ -22,6 +23,7 @@ import type { Status } from '../types';
 import './textHelper.css';
 
 export interface TextHelperProps extends Omit<TextProps, 'as' | 'size' | 'weight' | 'color'> {
+  style?: PersesCSSProperties;
   /** Visual status; does not announce messages or mark the associated control invalid. */
   status?: Status;
 }

@@ -112,6 +112,29 @@ describe('applyStyleProps', () => {
     expect(style).toEqual({ '--ps-p': 'var(--perses-spacing-md)', padding: '99px' });
   });
 
+  it('preserves mixed custom properties and lets caller variables override computed ones', () => {
+    const { style } = applyStyleProps({ p: 'md', width: { md: 400 } }, spacingAndSizing, {
+      color: 'red',
+      '--perses-bg-surface': 'white',
+      '--perses-selection-control-size-md': '1.5rem',
+      '--perses-checkbox-size-md': '24px',
+      '--app-accent': 'blue',
+      '--app-scale': 2,
+      '--ps-p': '2rem',
+      '--ps-width-md': '500px',
+    });
+    expect(style).toEqual({
+      color: 'red',
+      '--perses-bg-surface': 'white',
+      '--perses-selection-control-size-md': '1.5rem',
+      '--perses-checkbox-size-md': '24px',
+      '--app-accent': 'blue',
+      '--app-scale': 2,
+      '--ps-p': '2rem',
+      '--ps-width-md': '500px',
+    });
+  });
+
   it('ignores undefined prop values', () => {
     const { className, style } = applyStyleProps({ p: undefined, width: 10 }, spacingAndSizing);
     expect(className).toBe('ps-width');

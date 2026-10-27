@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 import { forwardRef, useCallback } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
 import type { ColorVariant, Size, Status } from '../types';
@@ -74,7 +75,7 @@ interface CheckboxBaseProps
   size?: Size;
   color?: ColorVariant | Status;
   variant?: CheckboxVariant;
-  style?: CheckboxStyle;
+  style?: PersesCSSProperties<CheckboxStyle>;
 }
 
 /**

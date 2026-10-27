@@ -11,14 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type {
-  ComponentType,
-  ForwardRefExoticComponent,
-  PropsWithoutRef,
-  ReactNode,
-  RefAttributes,
-  SVGProps,
-} from 'react';
+import type { ComponentType, ForwardRefExoticComponent, PropsWithoutRef, ReactNode, RefAttributes } from 'react';
 import { createContext } from 'react';
 
 import type { AlertProps } from '../primitives/Alert';
@@ -47,6 +40,7 @@ import type { TextProps } from '../primitives/Text';
 import type { TextFieldProps } from '../primitives/TextField';
 import type { TextHelperProps } from '../primitives/TextHelper';
 import type { TooltipProps } from '../primitives/Tooltip';
+import type { StyledSVGProps } from '../types';
 
 type RefComponent<Props, Element> = ForwardRefExoticComponent<PropsWithoutRef<Props> & RefAttributes<Element>>;
 
@@ -82,10 +76,10 @@ export interface PersesComponents {
 }
 
 export interface PersesIcons {
-  Error: ComponentType<SVGProps<SVGSVGElement>>;
-  Info: ComponentType<SVGProps<SVGSVGElement>>;
-  Success: ComponentType<SVGProps<SVGSVGElement>>;
-  Warning: ComponentType<SVGProps<SVGSVGElement>>;
+  Error: ComponentType<StyledSVGProps>;
+  Info: ComponentType<StyledSVGProps>;
+  Success: ComponentType<StyledSVGProps>;
+  Warning: ComponentType<StyledSVGProps>;
 }
 
 export interface ComponentsContextValue {

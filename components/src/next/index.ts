@@ -19,5 +19,7 @@ export type {
   ComponentsContextValue,
 } from './contexts/ComponentsProvider';
 
+export type { PersesCSSProperties } from './types';
+
 export { ThemeModeProvider } from './contexts/ThemeModeProvider';
 export type { ThemeMode, ThemeModeProviderProps } from './contexts/ThemeModeProvider';

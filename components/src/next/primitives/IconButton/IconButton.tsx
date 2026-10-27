@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import type { ButtonVariant } from '../Button/Button';
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
 import type { DisplayProps, SizingProps, SpacingProps } from '../system';
@@ -34,6 +35,7 @@ export interface IconButtonProps
     SpacingProps,
     SizingProps,
     DisplayProps {
+  style?: PersesCSSProperties;
   'aria-label': string;
   variant?: ButtonVariant;
   color?: ColorVariant | Status;

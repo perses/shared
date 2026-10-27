@@ -12,14 +12,16 @@
 // limitations under the License.
 
 import { forwardRef } from 'react';
-import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from 'react';
+import type { ForwardRefExoticComponent, RefAttributes } from 'react';
 
-export type IconComponent = ForwardRefExoticComponent<SVGProps<SVGSVGElement> & RefAttributes<SVGSVGElement>>;
+import type { StyledSVGProps } from '../../../types';
+
+export type IconComponent = ForwardRefExoticComponent<StyledSVGProps & RefAttributes<SVGSVGElement>>;
 
 export function createIcon(name: string, width: number, height: number, paths: string[]): IconComponent {
   const iconPaths = paths.map((path, index) => ({ key: `${name}-${index}`, path }));
 
-  const Component = forwardRef<SVGSVGElement, SVGProps<SVGSVGElement>>(function FontAwesomeIcon(props, ref) {
+  const Component = forwardRef<SVGSVGElement, StyledSVGProps>(function FontAwesomeIcon(props, ref) {
     return (
       <svg
         ref={ref}
