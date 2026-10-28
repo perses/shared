@@ -152,6 +152,19 @@ Common commands:
 6. Make changes to the shared libraries and see them reflected in your plugins.
 7. When done, run `./scripts/link-with-perses/link-with-perses.sh unlink --plugins` to restore the original dependencies in the plugins repo.
 
+## React compatibility
+
+The shared packages support React 18.3 and React 19. Development and release builds use React 18, and CI also runs
+type checks and tests with React 19.
+
+Remote plugins must consume both `react` and `react/jsx-runtime` as shared singletons from the host. Rebuild plugins
+with `react/jsx-runtime` in their Module Federation shared configuration before using them on a React 19 host:
+a bundled React 18 JSX runtime cannot run against the host's React 19 instance.
+
+The host now shares `use-resize-observer` v10. Plugins using this hook must upgrade to v10, use the named import
+`import { useResizeObserver } from 'use-resize-observer'`, and update their shared dependency configuration. The v9
+default export is not provided. Deploy the shared libraries and rebuilt plugins together.
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](./CONTRIBUTING.md) for details on our development process and how to submit pull requests.

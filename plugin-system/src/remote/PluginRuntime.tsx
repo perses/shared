@@ -20,6 +20,7 @@ import React, { useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import * as ReactHookForm from 'react-hook-form';
 import * as ReactRouterDOM from 'react-router-dom';
+import * as ReactJSXRuntime from 'react/jsx-runtime';
 
 import type { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
 
@@ -82,12 +83,21 @@ const getPluginRuntime = (): ModuleFederation => {
             requiredVersion: `^${React.version}`,
           },
         },
+        // Plugins must use the JSX runtime of the host's React: a bundled React 18 runtime crashes on a React 19 host.
+        'react/jsx-runtime': {
+          version: React.version,
+          lib: () => ReactJSXRuntime,
+          shareConfig: {
+            singleton: true,
+            requiredVersion: `^${React.version}`,
+          },
+        },
         'react-dom': {
-          version: '18.3.1',
+          version: ReactDOM.version,
           lib: () => ReactDOM,
           shareConfig: {
             singleton: true,
-            requiredVersion: `^18.3.1`,
+            requiredVersion: `^${ReactDOM.version}`,
           },
         },
         'react-router-dom': {
@@ -139,43 +149,43 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         '@perses-dev/client': {
-          version: '0.55.0',
+          version: '0.56.0-beta.0',
           lib: () => getHostSharedModule('@perses-dev/client'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0',
+            requiredVersion: '^0.56.0-beta.0',
           },
         },
         '@perses-dev/components': {
-          version: '0.55.0',
+          version: '0.56.0-beta.0',
           lib: () => getHostSharedModule('@perses-dev/components'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0',
+            requiredVersion: '^0.56.0-beta.0',
           },
         },
         '@perses-dev/plugin-system': {
-          version: '0.55.0',
+          version: '0.56.0-beta.0',
           lib: () => getHostSharedModule('@perses-dev/plugin-system'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0',
+            requiredVersion: '^0.56.0-beta.0',
           },
         },
         '@perses-dev/explore': {
-          version: '0.55.0',
+          version: '0.56.0-beta.0',
           lib: () => getHostSharedModule('@perses-dev/explore'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0',
+            requiredVersion: '^0.56.0-beta.0',
           },
         },
         '@perses-dev/dashboards': {
-          version: '0.55.0',
+          version: '0.56.0-beta.0',
           lib: () => getHostSharedModule('@perses-dev/dashboards'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.55.0',
+            requiredVersion: '^0.56.0-beta.0',
           },
         },
         // Below are the shared modules that are used by the plugins and are loaded asynchronously on demand using get rather than lib.
@@ -221,11 +231,11 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         'use-resize-observer': {
-          version: '9.1.0',
+          version: '10.0.0',
           get: createSharedModuleLoader(() => import('use-resize-observer')),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^9.1.0',
+            requiredVersion: '^10.0.0',
           },
         },
         'mdi-material-ui': {

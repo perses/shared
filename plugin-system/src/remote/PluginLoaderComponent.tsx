@@ -24,6 +24,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 
 import type { PersesPlugin, RemotePluginModule } from './PersesPlugin.types';
@@ -39,21 +40,21 @@ function PluginContainer<P>({
   pluginFn,
   props,
 }: {
-  pluginFn: (props: P | undefined) => JSX.Element;
+  pluginFn: (props: P | undefined) => ReactElement;
   props: P | undefined;
-}): JSX.Element {
+}): ReactElement {
   'use no memo'; // Remote plugin functions may call hooks; their invocation must run on every render.
 
   return pluginFn(props);
 }
 
-export function PluginLoaderComponent<P>({ plugin, props, field }: PluginLoaderProps<P>): JSX.Element | null {
+export function PluginLoaderComponent<P>({ plugin, props, field }: PluginLoaderProps<P>): ReactElement | null {
   // Reset loading state and plugin hooks together whenever the remote identity changes.
   const key = JSON.stringify([plugin.moduleName, plugin.name, plugin.registry, plugin.version, plugin.baseURL]);
   return <PluginLoaderSession key={key} plugin={plugin} props={props} field={field} />;
 }
 
-function PluginLoaderSession<P>({ plugin, props, field }: PluginLoaderProps<P>): JSX.Element | null {
+function PluginLoaderSession<P>({ plugin, props, field }: PluginLoaderProps<P>): ReactElement | null {
   const { loadPlugin } = usePluginRuntime({ plugin });
   const [pluginModule, setPluginModule] = useState<RemotePluginModule | null>(null);
   const [error, setError] = useState<Error | null>(null);
@@ -102,5 +103,5 @@ function PluginLoaderSession<P>({ plugin, props, field }: PluginLoaderProps<P>):
     throw new Error(`PluginLoaderComponent: Plugin ${plugin.name} export is not a function`);
   }
 
-  return <PluginContainer pluginFn={pluginFunction as (props: P | undefined) => JSX.Element} props={props} />;
+  return <PluginContainer pluginFn={pluginFunction as (props: P | undefined) => ReactElement} props={props} />;
 }

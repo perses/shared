@@ -22,7 +22,7 @@ interface UseVirtualizedTableKeyboardNavProps extends Omit<UseTableKeyboardNavPr
     startIndex: number;
     endIndex: number;
   }>;
-  virtualTable: RefObject<TableVirtuosoHandle>;
+  virtualTable: RefObject<TableVirtuosoHandle | null>;
   maxRows: number;
   maxColumns: number;
 }
