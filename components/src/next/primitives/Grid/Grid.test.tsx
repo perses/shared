@@ -89,6 +89,22 @@ describe('Grid', () => {
     expect(grid.style.getPropertyValue('--ps-overflow')).toBe('hidden');
   });
 
+  it('supports side-specific padding and rounded style props', () => {
+    render(
+      <Grid data-testid="grid" px="md" pt="sm" rounded="md">
+        Content
+      </Grid>,
+    );
+    const grid = screen.getByTestId('grid');
+    expect(grid).toHaveClass('ps-px');
+    expect(grid.style.getPropertyValue('--ps-px')).toBe('var(--perses-spacing-md)');
+    expect(grid).toHaveClass('ps-pt');
+    expect(grid.style.getPropertyValue('--ps-pt')).toBe('var(--perses-spacing-sm)');
+    expect(grid).toHaveClass('ps-rounded');
+    expect(grid.style.getPropertyValue('--ps-rounded')).toBe('var(--perses-radius-md)');
+    expect(grid).not.toHaveAttribute('rounded');
+  });
+
   it('lets the caller style win and merges className', () => {
     render(
       <Grid data-testid="grid" columns={12} spacing="sm" className="custom" style={STYLE_OVERRIDE}>
@@ -191,6 +207,20 @@ describe('GridItem', () => {
     expect(item.style.getPropertyValue('--ps-p')).toBe('var(--perses-spacing-md)');
     expect(item.style.getPropertyValue('--ps-min-width')).toBe('0px');
     expect(item.style.getPropertyValue('--ps-overflow')).toBe('auto');
+  });
+
+  it('supports side-specific padding and rounded style props', () => {
+    render(
+      <GridItem data-testid="item" pb="lg" rounded="md">
+        Content
+      </GridItem>,
+    );
+    const item = screen.getByTestId('item');
+    expect(item).toHaveClass('ps-pb');
+    expect(item.style.getPropertyValue('--ps-pb')).toBe('var(--perses-spacing-lg)');
+    expect(item).toHaveClass('ps-rounded');
+    expect(item.style.getPropertyValue('--ps-rounded')).toBe('var(--perses-radius-md)');
+    expect(item).not.toHaveAttribute('rounded');
   });
 
   it('lets the caller style win, merges className and forwards the ref', () => {

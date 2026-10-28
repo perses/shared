@@ -16,18 +16,25 @@ import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
-import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
-import type { DisplayProps, Responsive, SizingProps, SpacingProps, SpacingValue } from '../system';
+import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
+import type { DisplayProps, RadiusProps, Responsive, SizingProps, SpacingProps, SpacingValue } from '../system';
 
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared layout utility styles used by style props.
 import '../system/layout.css';
+// oxlint-disable-next-line import/no-unassigned-import -- Registers shared radius utility styles used by style props.
+import '../system/radius.css';
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared spacing utility styles used by style props.
 import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- Registers this component's styles.
 import './grid.css';
 
 export interface GridProps
-  extends HTMLAttributes<HTMLDivElement>, Omit<SpacingProps, 'gap'>, SizingProps, Pick<DisplayProps, 'overflow'> {
+  extends
+    HTMLAttributes<HTMLDivElement>,
+    Omit<SpacingProps, 'gap'>,
+    SizingProps,
+    RadiusProps,
+    Pick<DisplayProps, 'overflow'> {
   /** Number of equal-width columns. Defaults to `12`. */
   columns?: number;
   /** Space between rows and columns, as a spacing token or CSS length. */
@@ -35,7 +42,12 @@ export interface GridProps
   style?: PersesCSSProperties;
 }
 
-const GRID_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
+const GRID_STYLE_PROPS = compileStyleProps([
+  spacingProps,
+  sizingProps,
+  radiusProps,
+  { overflow: displayProps.overflow },
+]);
 
 /**
  * A column grid container. Children are placed in DOM order; use `GridItem` with `size` to span columns.

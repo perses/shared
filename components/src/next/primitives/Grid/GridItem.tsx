@@ -16,18 +16,28 @@ import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
-import { applyStyleProps, compileStyleProps, displayProps, gridProps, sizingProps, spacingProps } from '../system';
-import type { DisplayProps, Responsive, SizingProps, SpacingProps } from '../system';
+import {
+  applyStyleProps,
+  compileStyleProps,
+  displayProps,
+  gridProps,
+  radiusProps,
+  sizingProps,
+  spacingProps,
+} from '../system';
+import type { DisplayProps, RadiusProps, Responsive, SizingProps, SpacingProps } from '../system';
 
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared layout utility styles used by style props.
 import '../system/layout.css';
+// oxlint-disable-next-line import/no-unassigned-import -- Registers shared radius utility styles used by style props.
+import '../system/radius.css';
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared spacing utility styles used by style props.
 import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- Registers this component's styles.
 import './grid.css';
 
 export interface GridItemProps
-  extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, Pick<DisplayProps, 'overflow'> {
+  extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, RadiusProps, Pick<DisplayProps, 'overflow'> {
   /**
    * Number of columns to span, from `1` to the parent `Grid`'s `columns` (a larger span creates implicit
    * columns). Omitted (or omitted at the base of a responsive object) the item takes one column.
@@ -40,6 +50,7 @@ const GRID_ITEM_STYLE_PROPS = compileStyleProps([
   gridProps,
   spacingProps,
   sizingProps,
+  radiusProps,
   { overflow: displayProps.overflow },
 ]);
 
