@@ -250,6 +250,31 @@ describe('CardContent', () => {
 });
 
 describe('Card composition', () => {
+  it.each([
+    ['Card', Card],
+    ['CardHeader', CardHeader],
+    ['CardContent', CardContent],
+  ] as const)('applies physical-side padding props to the %s root without leaking attributes', (_name, Part) => {
+    render(
+      <Part data-testid="padded-card-part" p="lg" pt={0} pr="sm" pb={RESPONSIVE_PADDING} pl="5%">
+        Content
+      </Part>,
+    );
+    const root = screen.getByTestId('padded-card-part');
+    expect(root).toHaveClass('ps-p', 'ps-pt', 'ps-pr', 'ps-pb', 'ps-pb-md', 'ps-pl');
+    expect(root).toHaveStyle({
+      '--ps-p': 'var(--perses-spacing-lg)',
+      '--ps-pt': '0px',
+      '--ps-pr': 'var(--perses-spacing-sm)',
+      '--ps-pb': 'var(--perses-spacing-sm)',
+      '--ps-pb-md': 'var(--perses-spacing-xl)',
+      '--ps-pl': '5%',
+    });
+    for (const prop of ['p', 'pt', 'pr', 'pb', 'pl']) {
+      expect(root).not.toHaveAttribute(prop);
+    }
+  });
+
   it('renders a Panel-style card with header, end slot and content in order', () => {
     render(
       <Card as="section" aria-labelledby="t">

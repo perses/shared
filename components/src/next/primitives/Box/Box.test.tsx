@@ -19,6 +19,9 @@ const RESPONSIVE_WIDTH = { default: '100%', md: 400, lg: 'calc(30em + 4px)' };
 const OUTER_PADDING = { md: 100 };
 const MIDDLE_PADDING = { md: '50%' };
 const INNER_PADDING = { md: 'sm' };
+const SIDE_STYLE_OVERRIDE = { paddingBottom: 9, '--ps-pb': '2rem' };
+const RESPONSIVE_MARGIN_LEFT = { default: 'auto', md: -8, xl: 0 };
+const MARGIN_STYLE_OVERRIDE = { marginLeft: 9, '--ps-ml': '2rem' };
 
 describe('Box', () => {
   it('renders children', () => {
@@ -70,7 +73,23 @@ describe('Box', () => {
 
   it('accepts scalar pixels and CSS strings for spacing props', () => {
     render(
-      <Box p={24} px="5%" py="1rem" m="auto" mx={-8} my={0} gap="var(--custom-gap)">
+      <Box
+        p={24}
+        px="5%"
+        py="1rem"
+        pt={0}
+        pr="sm"
+        pb="calc(1rem + 4px)"
+        pl="var(--custom-padding)"
+        m="auto"
+        mx={-8}
+        my={0}
+        mt={-8}
+        mr="auto"
+        mb="md"
+        ml={0}
+        gap="var(--custom-gap)"
+      >
         Custom spacing
       </Box>,
     );
@@ -79,14 +98,41 @@ describe('Box', () => {
       '--ps-p': '24px',
       '--ps-px': '5%',
       '--ps-py': '1rem',
+      '--ps-pt': '0px',
+      '--ps-pr': 'var(--perses-spacing-sm)',
+      '--ps-pb': 'calc(1rem + 4px)',
+      '--ps-pl': 'var(--custom-padding)',
       '--ps-m': 'auto',
       '--ps-mx': '-8px',
       '--ps-my': '0px',
+      '--ps-mt': '-8px',
+      '--ps-mr': 'auto',
+      '--ps-mb': 'var(--perses-spacing-md)',
+      '--ps-ml': '0px',
       '--ps-gap': 'var(--custom-gap)',
     });
-    for (const prop of ['p', 'px', 'py', 'm', 'mx', 'my', 'gap']) {
+    expect(box).toHaveClass('ps-pt', 'ps-pr', 'ps-pb', 'ps-pl', 'ps-mt', 'ps-mr', 'ps-mb', 'ps-ml');
+    for (const prop of ['p', 'px', 'py', 'pt', 'pr', 'pb', 'pl', 'm', 'mx', 'my', 'mt', 'mr', 'mb', 'ml', 'gap']) {
       expect(box).not.toHaveAttribute(prop);
     }
+  });
+
+  it('applies responsive physical-side margins without forwarding them to the DOM', () => {
+    render(<Box ml={RESPONSIVE_MARGIN_LEFT}>Responsive margin</Box>);
+    const box = screen.getByText('Responsive margin');
+    expect(box).toHaveClass('ps-ml', 'ps-ml-md', 'ps-ml-xl');
+    expect(box).toHaveStyle({ '--ps-ml': 'auto', '--ps-ml-md': '-8px', '--ps-ml-xl': '0px' });
+    expect(box).not.toHaveAttribute('ml');
+  });
+
+  it('lets inline margin styles and variables override side props', () => {
+    render(
+      <Box ml="md" style={MARGIN_STYLE_OVERRIDE}>
+        Margin override
+      </Box>,
+    );
+    expect(screen.getByText('Margin override')).toHaveClass('ps-ml');
+    expect(screen.getByText('Margin override')).toHaveStyle({ marginLeft: '9px', '--ps-ml': '2rem' });
   });
 
   it('writes responsive padding on each nested box', () => {
@@ -231,6 +277,16 @@ describe('Box', () => {
     expect(box).toHaveClass('ps-p');
     expect(box).toHaveStyle({ '--ps-p': 'var(--perses-spacing-sm)' });
     expect(box).toHaveStyle({ color: 'rgb(255, 0, 0)' });
+  });
+
+  it('lets the style prop override a side utility and its generated variable', () => {
+    render(
+      <Box pb="md" style={SIDE_STYLE_OVERRIDE}>
+        Side override
+      </Box>,
+    );
+    expect(screen.getByText('Side override')).toHaveClass('ps-pb');
+    expect(screen.getByText('Side override')).toHaveStyle({ paddingBottom: '9px', '--ps-pb': '2rem' });
   });
 
   it('lets the style prop override a spacing utility', () => {

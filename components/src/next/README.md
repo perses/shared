@@ -121,6 +121,31 @@ When a component offers optional content before or after its main content, name 
 `endElement`. Use logical start/end rather than physical left/right, and the `Element` suffix rather than `Adornment`.
 These props provide content; `slotProps` only customizes styling.
 
+## Spacing
+
+Spacing-enabled primitives accept these padding and margin shorthands:
+
+| Property | All sides | Inline axis | Block axis | Physical sides |
+|----------|-----------|-------------|------------|----------------|
+| Padding | `p` | `px` | `py` | `pt`, `pr`, `pb`, `pl` |
+| Margin | `m` | `mx` | `my` | `mt`, `mr`, `mb`, `ml` |
+
+Values can be spacing tokens (`"sm"`), numeric pixels (`12`), CSS lengths or expressions (`"1rem"`, `"5%"`,
+`"var(--app-space)"`), or responsive objects (`{ default: 'sm', md: 0 }`). Margins also allow negative values and
+`"auto"`. Side props take single-side values; multi-value strings belong on all-sides or axis props.
+
+Axes are logical; `t`/`r`/`b`/`l` always mean physical top/right/bottom/left, unaffected by RTL or writing mode.
+Precedence is **component defaults → all sides → axes → individual sides → normal inline `style`**, regardless of JSX
+prop order. Unspecified sides retain existing values, and side overrides persist across later changes to broader props:
+
+```tsx
+<Box p={{ default: 'sm', xl: 'xl' }} pb={{ md: 0 }} m="md" ml="auto" mt={-8} />
+```
+
+Here, bottom padding stays zero from `md` onward, including at `xl`. Props target the same element as existing spacing
+props; use `slotProps` styles for internal parts, such as a TextField input. Use `style` for full CSS property names
+such as `marginTop`.
+
 ## Slots
 
 Components may expose `slotProps` to style named internal parts. Each slot accepts `SlotStyleProps` from

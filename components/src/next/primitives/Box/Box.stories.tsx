@@ -69,7 +69,23 @@ const spacingScale: SpacingScale[] = ['0', 'xs', 'sm', 'md', 'lg', 'xl', '2xl', 
 const paddingScaleCode = `// p accepts any spacing token: 0, xs, sm, md, lg, xl, 2xl, 3xl, 4xl
 <Box p="md">Content</Box>`;
 const paddingDirCode = `<Box px="lg" py="sm">horizontal lg, vertical sm</Box>`;
+const paddingSidesCode = `<Box p="lg" px="md" pt={0} pr="xl" pb="sm" pl="1rem">
+  Physical sides override axis and all-sides padding.
+</Box>`;
+const responsivePaddingSidesCode = `<Box p={{ default: 'sm', xl: 'xl' }} pb={{ md: 0 }}>
+  Bottom padding stays zero from md onward, including at xl.
+</Box>`;
+const responsivePaddingBase = { default: 'sm', xl: 'xl' } as const;
+const responsivePaddingBottom = { md: 0 };
 const marginDirCode = `<Box mx="lg" my="md">offset from its container</Box>`;
+const marginSidesCode = `<Box m="md" mx="lg" mt={-8} mr="auto" mb="sm" ml="1rem" width={240} p="sm">
+  Physical sides override axis and all-sides margins.
+</Box>`;
+const responsiveMarginSidesCode = `<Box m={{ default: 'sm', xl: 'xl' }} ml={{ default: 'auto', md: -8, xl: 0 }} width={240} p="sm">
+  Left margin: auto, then -8px at md, then zero at xl.
+</Box>`;
+const responsiveMarginBase = { default: 'sm', xl: 'xl' } as const;
+const responsiveMarginLeft = { default: 'auto', md: -8, xl: 0 };
 const gapCode = `<Box display="flex" gap="md">
   <Box p="sm">A</Box>
   <Box p="sm">B</Box>
@@ -94,12 +110,48 @@ export const Spacing: Story = () => (
       </Box>
     </Sample>
 
+    <Sample title="Physical-side padding (pt, pr, pb, pl)" code={paddingSidesCode}>
+      <p>
+        Individual sides override <code>px</code>/<code>py</code> and <code>p</code>, regardless of prop order. Left and
+        right remain physical sides in RTL.
+      </p>
+      <Box p="lg" px="md" pt={0} pr="xl" pb="sm" pl="1rem" style={outline}>
+        <span style={fill}>Physical sides override axis and all-sides padding.</span>
+      </Box>
+    </Sample>
+
+    <Sample title="Responsive side override" code={responsivePaddingSidesCode}>
+      <Box p={responsivePaddingBase} pb={responsivePaddingBottom} style={outline}>
+        <span style={fill}>Bottom padding stays zero from md onward, including at xl.</span>
+      </Box>
+    </Sample>
+
     <Sample title="Directional margin (mx, my)" code={marginDirCode}>
       <div style={sunken}>
         <Box mx="lg" my="md" style={outline}>
           offset from its container
         </Box>
       </div>
+    </Sample>
+
+    <Sample title="Physical-side margins (mt, mr, mb, ml)" code={marginSidesCode}>
+      <p>
+        Individual sides override <code>mx</code>/<code>my</code> and <code>m</code>. Negative margins and{' '}
+        <code>auto</code> are supported; left and right remain physical sides in RTL.
+      </p>
+      <Box p="lg" style={sunken}>
+        <Box m="md" mx="lg" mt={-8} mr="auto" mb="sm" ml="1rem" width={240} p="sm" style={outline}>
+          Physical sides override axis and all-sides margins.
+        </Box>
+      </Box>
+    </Sample>
+
+    <Sample title="Responsive margin side override" code={responsiveMarginSidesCode}>
+      <Box p="lg" style={sunken}>
+        <Box m={responsiveMarginBase} ml={responsiveMarginLeft} width={240} p="sm" style={outline}>
+          Left margin: auto, then -8px at md, then zero at xl.
+        </Box>
+      </Box>
     </Sample>
 
     <Sample title="Gap between flex children" code={gapCode}>
