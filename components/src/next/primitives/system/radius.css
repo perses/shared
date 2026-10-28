@@ -1,0 +1,291 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '@perses-dev/design-tokens/css/layers';
+
+/*
+ * Keep every rounded breakpoint before top/bottom sides, then right/left sides,
+ * then individual corners. Narrow overrides survive later broad breakpoints,
+ * and right/left win side intersections regardless of class order.
+ * Each class reads only its matching variable; no class means no radius reset.
+ */
+@layer perses.utilities {
+  .ps-rounded {
+    border-radius: var(--ps-rounded, initial);
+  }
+  .ps-rounded-xs {
+    border-radius: var(--ps-rounded-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-rounded-sm {
+      border-radius: var(--ps-rounded-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-rounded-md {
+      border-radius: var(--ps-rounded-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-rounded-lg {
+      border-radius: var(--ps-rounded-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-rounded-xl {
+      border-radius: var(--ps-rounded-xl, initial);
+    }
+  }
+
+  .ps-rounded-top {
+    border-top-left-radius: var(--ps-rounded-top, initial);
+    border-top-right-radius: var(--ps-rounded-top, initial);
+  }
+  .ps-rounded-top-xs {
+    border-top-left-radius: var(--ps-rounded-top-xs, initial);
+    border-top-right-radius: var(--ps-rounded-top-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-rounded-top-sm {
+      border-top-left-radius: var(--ps-rounded-top-sm, initial);
+      border-top-right-radius: var(--ps-rounded-top-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-rounded-top-md {
+      border-top-left-radius: var(--ps-rounded-top-md, initial);
+      border-top-right-radius: var(--ps-rounded-top-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-rounded-top-lg {
+      border-top-left-radius: var(--ps-rounded-top-lg, initial);
+      border-top-right-radius: var(--ps-rounded-top-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-rounded-top-xl {
+      border-top-left-radius: var(--ps-rounded-top-xl, initial);
+      border-top-right-radius: var(--ps-rounded-top-xl, initial);
+    }
+  }
+
+  .ps-rounded-bottom {
+    border-bottom-left-radius: var(--ps-rounded-bottom, initial);
+    border-bottom-right-radius: var(--ps-rounded-bottom, initial);
+  }
+  .ps-rounded-bottom-xs {
+    border-bottom-left-radius: var(--ps-rounded-bottom-xs, initial);
+    border-bottom-right-radius: var(--ps-rounded-bottom-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-rounded-bottom-sm {
+      border-bottom-left-radius: var(--ps-rounded-bottom-sm, initial);
+      border-bottom-right-radius: var(--ps-rounded-bottom-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-rounded-bottom-md {
+      border-bottom-left-radius: var(--ps-rounded-bottom-md, initial);
+      border-bottom-right-radius: var(--ps-rounded-bottom-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-rounded-bottom-lg {
+      border-bottom-left-radius: var(--ps-rounded-bottom-lg, initial);
+      border-bottom-right-radius: var(--ps-rounded-bottom-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-rounded-bottom-xl {
+      border-bottom-left-radius: var(--ps-rounded-bottom-xl, initial);
+      border-bottom-right-radius: var(--ps-rounded-bottom-xl, initial);
+    }
+  }
+
+  .ps-rounded-right {
+    border-top-right-radius: var(--ps-rounded-right, initial);
+    border-bottom-right-radius: var(--ps-rounded-right, initial);
+  }
+  .ps-rounded-right-xs {
+    border-top-right-radius: var(--ps-rounded-right-xs, initial);
+    border-bottom-right-radius: var(--ps-rounded-right-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-rounded-right-sm {
+      border-top-right-radius: var(--ps-rounded-right-sm, initial);
+      border-bottom-right-radius: var(--ps-rounded-right-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-rounded-right-md {
+      border-top-right-radius: var(--ps-rounded-right-md, initial);
+      border-bottom-right-radius: var(--ps-rounded-right-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-rounded-right-lg {
+      border-top-right-radius: var(--ps-rounded-right-lg, initial);
+      border-bottom-right-radius: var(--ps-rounded-right-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-rounded-right-xl {
+      border-top-right-radius: var(--ps-rounded-right-xl, initial);
+      border-bottom-right-radius: var(--ps-rounded-right-xl, initial);
+    }
+  }
+
+  .ps-rounded-left {
+    border-top-left-radius: var(--ps-rounded-left, initial);
+    border-bottom-left-radius: var(--ps-rounded-left, initial);
+  }
+  .ps-rounded-left-xs {
+    border-top-left-radius: var(--ps-rounded-left-xs, initial);
+    border-bottom-left-radius: var(--ps-rounded-left-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-rounded-left-sm {
+      border-top-left-radius: var(--ps-rounded-left-sm, initial);
+      border-bottom-left-radius: var(--ps-rounded-left-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-rounded-left-md {
+      border-top-left-radius: var(--ps-rounded-left-md, initial);
+      border-bottom-left-radius: var(--ps-rounded-left-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-rounded-left-lg {
+      border-top-left-radius: var(--ps-rounded-left-lg, initial);
+      border-bottom-left-radius: var(--ps-rounded-left-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-rounded-left-xl {
+      border-top-left-radius: var(--ps-rounded-left-xl, initial);
+      border-bottom-left-radius: var(--ps-rounded-left-xl, initial);
+    }
+  }
+
+  .ps-rounded-top-left {
+    border-top-left-radius: var(--ps-rounded-top-left, initial);
+  }
+  .ps-rounded-top-left-xs {
+    border-top-left-radius: var(--ps-rounded-top-left-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-rounded-top-left-sm {
+      border-top-left-radius: var(--ps-rounded-top-left-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-rounded-top-left-md {
+      border-top-left-radius: var(--ps-rounded-top-left-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-rounded-top-left-lg {
+      border-top-left-radius: var(--ps-rounded-top-left-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-rounded-top-left-xl {
+      border-top-left-radius: var(--ps-rounded-top-left-xl, initial);
+    }
+  }
+
+  .ps-rounded-top-right {
+    border-top-right-radius: var(--ps-rounded-top-right, initial);
+  }
+  .ps-rounded-top-right-xs {
+    border-top-right-radius: var(--ps-rounded-top-right-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-rounded-top-right-sm {
+      border-top-right-radius: var(--ps-rounded-top-right-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-rounded-top-right-md {
+      border-top-right-radius: var(--ps-rounded-top-right-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-rounded-top-right-lg {
+      border-top-right-radius: var(--ps-rounded-top-right-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-rounded-top-right-xl {
+      border-top-right-radius: var(--ps-rounded-top-right-xl, initial);
+    }
+  }
+
+  .ps-rounded-bottom-left {
+    border-bottom-left-radius: var(--ps-rounded-bottom-left, initial);
+  }
+  .ps-rounded-bottom-left-xs {
+    border-bottom-left-radius: var(--ps-rounded-bottom-left-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-rounded-bottom-left-sm {
+      border-bottom-left-radius: var(--ps-rounded-bottom-left-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-rounded-bottom-left-md {
+      border-bottom-left-radius: var(--ps-rounded-bottom-left-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-rounded-bottom-left-lg {
+      border-bottom-left-radius: var(--ps-rounded-bottom-left-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-rounded-bottom-left-xl {
+      border-bottom-left-radius: var(--ps-rounded-bottom-left-xl, initial);
+    }
+  }
+
+  .ps-rounded-bottom-right {
+    border-bottom-right-radius: var(--ps-rounded-bottom-right, initial);
+  }
+  .ps-rounded-bottom-right-xs {
+    border-bottom-right-radius: var(--ps-rounded-bottom-right-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-rounded-bottom-right-sm {
+      border-bottom-right-radius: var(--ps-rounded-bottom-right-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-rounded-bottom-right-md {
+      border-bottom-right-radius: var(--ps-rounded-bottom-right-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-rounded-bottom-right-lg {
+      border-bottom-right-radius: var(--ps-rounded-bottom-right-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-rounded-bottom-right-xl {
+      border-bottom-right-radius: var(--ps-rounded-bottom-right-xl, initial);
+    }
+  }
+}

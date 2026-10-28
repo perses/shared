@@ -16,12 +16,13 @@ import { forwardRef } from 'react';
 import type { CSSProperties, HTMLAttributes, MouseEventHandler, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
-import type { DisplayProps, SizingProps, SpacingProps } from '../system';
+import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import {
   applyStyleProps,
   compileStyleProps,
   displayProps,
   lengthTransform,
+  radiusProps,
   sizingProps,
   spacingProps,
 } from '../system';
@@ -30,6 +31,7 @@ import { ChipCloseButton } from './ChipCloseButton';
 import { useChipAction } from './useChipAction';
 
 import '../system/layout.css';
+import '../system/radius.css';
 import '../system/spacing.css';
 import './chip.css';
 
@@ -47,13 +49,18 @@ export interface ChipSlotProps {
 
 // `maxWidth` keeps its own meaning (the label's max width), so it is not a style prop here.
 const { maxWidth: _labelMaxWidth, ...chipSizingProps } = sizingProps;
-const CHIP_STYLE_PROPS = compileStyleProps([spacingProps, chipSizingProps, displayProps]);
+const CHIP_STYLE_PROPS = compileStyleProps([spacingProps, chipSizingProps, displayProps, radiusProps]);
 const CONTAINER_ARIA_PROPS = new Set(['aria-hidden', 'aria-live', 'aria-atomic', 'aria-relevant', 'aria-busy']);
 
 // Event handlers are typed against `HTMLElement` because, with `onClick` and `onClose` combined, the action (and so
 // `event.currentTarget`) is the label span rather than the root div.
 interface ChipBaseProps
-  extends Omit<HTMLAttributes<HTMLElement>, 'color'>, SpacingProps, Omit<SizingProps, 'maxWidth'>, DisplayProps {
+  extends
+    Omit<HTMLAttributes<HTMLElement>, 'color'>,
+    SpacingProps,
+    Omit<SizingProps, 'maxWidth'>,
+    DisplayProps,
+    RadiusProps {
   /**
    * Palette of the chip; `default` is the neutral default. Status values are visual only; convey state through
    * the label too.

@@ -20,6 +20,7 @@ import { AddIcon, Box, Checkbox } from './primitives';
 import type {
   AlertProps,
   AlertSlotProps,
+  BoxProps,
   CardHeaderProps,
   CardHeaderSlotProps,
   CheckboxProps,
@@ -28,7 +29,10 @@ import type {
   ChipProps,
   ChipSlotProps,
   ChipStyle,
+  CornerRadiusValue,
   IconProps,
+  RadiusProps,
+  RadiusValue,
   PersesCSSProperties as PrimitiveCSSProperties,
   SlotStyleProps as PrimitiveSlotStyleProps,
   SwitchProps,
@@ -89,6 +93,16 @@ type _SlotStylePrimitiveExport = AssertAssignable<SlotStyleProps, PrimitiveSlotS
 type _SlotStyleKeys = AssertNever<Exclude<keyof SlotStyleProps, 'className' | 'style'>>;
 type _TextFieldSlotKeys = AssertNever<Exclude<keyof TextFieldSlotProps, 'label' | 'wrapper' | 'input' | 'helper'>>;
 type _TextFieldSlotProp = AssertAssignable<NonNullable<TextFieldProps['slotProps']>, TextFieldSlotProps>;
+
+expectTypeOf<BoxProps['rounded']>().toEqualTypeOf<RadiusProps['rounded']>();
+expectTypeOf<BoxProps['roundedBottomRight']>().toEqualTypeOf<RadiusProps['roundedBottomRight']>();
+expectTypeOf<Exclude<CSSProperties['borderRadius'], undefined>>().toExtend<RadiusValue>();
+expectTypeOf<Exclude<CSSProperties['borderTopLeftRadius'], undefined>>().toExtend<CornerRadiusValue>();
+expectTypeOf({ rounded: { default: 'lg', md: 12, xl: 'var(--app-radius)' }, roundedTopLeft: 0 } satisfies RadiusProps);
+// @ts-expect-error Radius props require tokens, CSS values, or responsive objects, not booleans.
+expectTypeOf({ rounded: true } satisfies RadiusProps);
+// @ts-expect-error Responsive radius props use the existing named breakpoints.
+expectTypeOf({ roundedTop: { tablet: 'md' } } satisfies RadiusProps);
 
 expectTypeOf<AlertProps['slotProps']>().toEqualTypeOf<AlertSlotProps | undefined>();
 expectTypeOf<CardHeaderProps['slotProps']>().toEqualTypeOf<CardHeaderSlotProps | undefined>();

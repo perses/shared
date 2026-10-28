@@ -22,6 +22,8 @@ const INNER_PADDING = { md: 'sm' };
 const SIDE_STYLE_OVERRIDE = { paddingBottom: 9, '--ps-pb': '2rem' };
 const RESPONSIVE_MARGIN_LEFT = { default: 'auto', md: -8, xl: 0 };
 const MARGIN_STYLE_OVERRIDE = { marginLeft: 9, '--ps-ml': '2rem' };
+const RESPONSIVE_RADIUS = { default: 'sm', md: 12, xl: '1.5rem' };
+const RADIUS_STYLE_OVERRIDE = { borderTopLeftRadius: 9, '--ps-rounded': '2rem' };
 
 describe('Box', () => {
   it('renders children', () => {
@@ -154,6 +156,60 @@ describe('Box', () => {
     expect(screen.getByText('Outer')).toHaveStyle({ '--ps-p-md': '100px' });
     expect(screen.getByText('Middle')).toHaveStyle({ '--ps-p-md': '50%' });
     expect(screen.getByText('Inner')).toHaveStyle({ '--ps-p-md': 'var(--perses-spacing-sm)' });
+  });
+
+  it.each([
+    ['rounded', 'rounded'],
+    ['roundedTop', 'rounded-top'],
+    ['roundedRight', 'rounded-right'],
+    ['roundedBottom', 'rounded-bottom'],
+    ['roundedLeft', 'rounded-left'],
+    ['roundedTopLeft', 'rounded-top-left'],
+    ['roundedTopRight', 'rounded-top-right'],
+    ['roundedBottomLeft', 'rounded-bottom-left'],
+    ['roundedBottomRight', 'rounded-bottom-right'],
+  ] as const)('applies %s to the box without forwarding it to the DOM', (prop, name) => {
+    render(<Box {...{ [prop]: 'lg' }}>Rounded box</Box>);
+    const box = screen.getByText('Rounded box');
+    expect(box).toHaveClass(`ps-${name}`);
+    expect(box).toHaveStyle({ [`--ps-${name}`]: 'var(--perses-radius-lg)' });
+    expect(box).not.toHaveAttribute(prop);
+  });
+
+  it('combines responsive radius tokens, pixels, CSS values and explicit square corners', () => {
+    render(
+      <Box rounded={RESPONSIVE_RADIUS} roundedTopLeft={0} roundedBottomRight="var(--app-radius)">
+        Responsive radius
+      </Box>,
+    );
+    const box = screen.getByText('Responsive radius');
+    expect(box).toHaveClass(
+      'ps-rounded',
+      'ps-rounded-md',
+      'ps-rounded-xl',
+      'ps-rounded-top-left',
+      'ps-rounded-bottom-right',
+    );
+    expect(box).toHaveStyle({
+      '--ps-rounded': 'var(--perses-radius-sm)',
+      '--ps-rounded-md': '12px',
+      '--ps-rounded-xl': '1.5rem',
+      '--ps-rounded-top-left': '0px',
+      '--ps-rounded-bottom-right': 'var(--app-radius)',
+    });
+  });
+
+  it('preserves inline radius overrides alongside the radius utilities', () => {
+    render(
+      <Box rounded="lg" roundedTopLeft="none" style={RADIUS_STYLE_OVERRIDE}>
+        Inline radius
+      </Box>,
+    );
+    expect(screen.getByText('Inline radius')).toHaveStyle({
+      '--ps-rounded': '2rem',
+      '--ps-rounded-top-left': 'var(--perses-radius-none)',
+      borderTopLeftRadius: '9px',
+    });
   });
 
   it('applies directional spacing shorthands', () => {

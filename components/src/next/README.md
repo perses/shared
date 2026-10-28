@@ -146,6 +146,29 @@ Here, bottom padding stays zero from `md` onward, including at `xl`. Props targe
 props; use `slotProps` styles for internal parts, such as a TextField input. Use `style` for full CSS property names
 such as `marginTop`.
 
+## Border radius
+
+Use `rounded` for all corners, `roundedTop`/`roundedRight`/`roundedBottom`/`roundedLeft` for sides, and
+`roundedTopLeft`/`roundedTopRight`/`roundedBottomLeft`/`roundedBottomRight` for individual corners. Directions remain
+physical in RTL and other writing modes.
+
+Values accept radius tokens (`none`, `sm`, `md`, `lg`, `xl`, `full`), non-negative pixel numbers, CSS lengths,
+percentages or expressions, and responsive objects. Full `border-radius` shorthands, including slash syntax, belong on
+`rounded`; side and corner props accept one or two lengths describing a single corner.
+
+Precedence is **defaults → rounded → top/bottom → left/right → corners → inline styles on the same element**, independent
+of JSX order. Unspecified corners keep their defaults; narrower overrides persist across later breakpoints:
+
+```tsx
+<Box rounded={{ default: 'sm', xl: 'xl' }} roundedBottomRight={{ md: 0 }} />
+```
+
+Bottom-right stays square from `md` onward, including at `xl`. Rounding does not change overflow or clipping. Use inline
+styles for CSS-wide keywords such as `inherit` or `revert-layer`.
+
+See the Box Radius story for examples. Public types: `RadiusProps`, `RadiusValue`, and `CornerRadiusValue` from
+`@perses-dev/components/next/primitives`.
+
 ## Slots
 
 Components may expose `slotProps` to style named internal parts. Each slot accepts `SlotStyleProps` from

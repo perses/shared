@@ -27,6 +27,17 @@ initializes the same complete layer order before its own declarations:
 `@perses-dev/design-tokens/css/layers` is the public, order-only prelude. It contains no reset, selectors, or token values.
 Components use this export internally; consumers do not need a bootstrap import to initialize library order.
 
+## Border radius
+
+`tokens.radius.<step>` references `--perses-radius-<step>`, independently of spacing and control sizes.
+
+| Step | `none` | `sm` | `md` | `lg` | `xl` | `full` |
+|------|--------|------|------|------|------|--------|
+| Default | `0` | `2px` | `4px` | `8px` | `12px` | `9999px` |
+
+Override these variables globally or in a scoped container. Exported types: `RadiusScale` and `RadiusVar` (included in
+`PersesTokenVar`).
+
 ## Disabled opacity
 
 `tokens.opacity.disabled` references `var(--perses-opacity-disabled)`, which defaults to `0.5` in both light and dark modes.

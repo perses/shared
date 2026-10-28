@@ -32,24 +32,16 @@ export interface SpacingProps {
   p?: Responsive<SpacingValue>;
   px?: Responsive<SpacingValue>;
   py?: Responsive<SpacingValue>;
-  /** Physical top padding; overrides p and axis padding. */
   pt?: Responsive<SpacingValue>;
-  /** Physical right padding, including in RTL; overrides p and axis padding. */
   pr?: Responsive<SpacingValue>;
-  /** Physical bottom padding; overrides p and axis padding. */
   pb?: Responsive<SpacingValue>;
-  /** Physical left padding, including in RTL; overrides p and axis padding. */
   pl?: Responsive<SpacingValue>;
   m?: Responsive<SpacingValue>;
   mx?: Responsive<SpacingValue>;
   my?: Responsive<SpacingValue>;
-  /** Physical top margin; overrides m and axis margins. */
   mt?: Responsive<SpacingValue>;
-  /** Physical right margin, including in RTL; overrides m and axis margins. */
   mr?: Responsive<SpacingValue>;
-  /** Physical bottom margin; overrides m and axis margins. */
   mb?: Responsive<SpacingValue>;
-  /** Physical left margin, including in RTL; overrides m and axis margins. */
   ml?: Responsive<SpacingValue>;
   gap?: Responsive<SpacingValue>;
 }

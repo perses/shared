@@ -16,14 +16,13 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import { createElement, forwardRef } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
-import { applyStyleProps, compileStyleProps, sizingProps, spacingProps } from '../system';
-import type { SizingProps, SpacingProps } from '../system';
+import { applyStyleProps, compileStyleProps, radiusProps, sizingProps, spacingProps } from '../system';
+import type { RadiusProps, SizingProps, SpacingProps } from '../system';
 
-// oxlint-disable-next-line import/no-unassigned-import -- Registers shared layout utility styles used by style props.
 import '../system/layout.css';
-// oxlint-disable-next-line import/no-unassigned-import -- Registers shared spacing utility styles used by style props.
+import '../system/radius.css';
 import '../system/spacing.css';
-// oxlint-disable-next-line import/no-unassigned-import -- Registers this component's styles.
+
 import './card.css';
 
 export type CardVariant = 'elevated' | 'outline' | 'subtle';
@@ -34,11 +33,11 @@ export type CardHeaderElement = 'div' | 'header';
 /** Elements a `CardContent` may render as. */
 export type CardContentElement = 'div' | 'figure';
 
-const CARD_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps]);
-const CARD_HEADER_STYLE_PROPS = compileStyleProps([spacingProps]);
-const CARD_CONTENT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps]);
+const CARD_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, radiusProps]);
+const CARD_HEADER_STYLE_PROPS = compileStyleProps([spacingProps, radiusProps]);
+const CARD_CONTENT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, radiusProps]);
 
-export interface CardProps extends HTMLAttributes<HTMLElement>, SpacingProps, SizingProps {
+export interface CardProps extends HTMLAttributes<HTMLElement>, SpacingProps, SizingProps, RadiusProps {
   /** Surface treatment: `elevated` (shadow), `outline` (border, default), or `subtle` (no border or shadow). */
   variant?: CardVariant;
   /** Semantic element to render; defaults to `div`. Use `section` for labelled regions. */
@@ -84,7 +83,7 @@ export interface CardHeaderSlotProps {
   end?: SlotStyleProps;
 }
 
-export interface CardHeaderProps extends HTMLAttributes<HTMLElement>, SpacingProps {
+export interface CardHeaderProps extends HTMLAttributes<HTMLElement>, SpacingProps, RadiusProps {
   /** Trailing slot, typically actions; rendered after the title content. */
   endElement?: ReactNode;
   /** Semantic element to render; defaults to `div`. */
@@ -131,7 +130,7 @@ export const CardHeader = forwardRef<HTMLElement, CardHeaderProps>(function Card
   );
 });
 
-export interface CardContentProps extends HTMLAttributes<HTMLElement>, SpacingProps, SizingProps {
+export interface CardContentProps extends HTMLAttributes<HTMLElement>, SpacingProps, SizingProps, RadiusProps {
   /** Semantic element to render; defaults to `div`. Use `figure` for charts. */
   as?: CardContentElement;
   style?: PersesCSSProperties;

@@ -18,7 +18,10 @@ import { cloneElement, forwardRef, useId, useState } from 'react';
 import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
+import { applyStyleProps, compileStyleProps, radiusProps } from '../system';
+import type { RadiusProps } from '../system';
 
+import '../system/radius.css';
 import './tooltip.css';
 
 /** Mirrors --perses-spacing-sm (8px). */
@@ -26,15 +29,16 @@ const SIDE_OFFSET = 8;
 
 // Base UI caches arrow measurements, so hidden arrows must stay mounted and measurable for live toggles.
 const HIDDEN_ARROW_STYLE: CSSProperties = { visibility: 'hidden' };
+const TOOLTIP_STYLE_PROPS = compileStyleProps([radiusProps]);
 
 export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
 
 /**
- * Tooltip wraps a trigger and renders a popup, so it deliberately does not accept the shared style props
- * (spacing, sizing, display); style the trigger directly. Extra props and `ref` are applied to the popup.
+ * Tooltip wraps a trigger and renders a popup. Supports radius props, but not shared spacing, sizing, or display
+ * props. Extra props and `ref` apply to the popup.
  * The popup portals to document.body; ancestor-scoped themes and token overrides do not propagate to it.
  */
-export interface TooltipProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'> {
+export interface TooltipProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title' | 'children'>, RadiusProps {
   style?: PersesCSSProperties;
   /**
    * Popup content. It supplements, and should not replace, the trigger's accessible name.
@@ -57,12 +61,24 @@ export interface TooltipProps extends Omit<HTMLAttributes<HTMLDivElement>, 'titl
 }
 
 export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip(
-  { title, children, placement = 'top', offset = SIDE_OFFSET, delay = 400, hideArrow = false, id, className, ...rest },
+  {
+    title,
+    children,
+    placement = 'top',
+    offset = SIDE_OFFSET,
+    delay = 400,
+    hideArrow = false,
+    id,
+    className,
+    style,
+    ...props
+  },
   ref,
 ) {
   const generatedId = useId();
   const popupId = id ?? generatedId;
   const [open, setOpen] = useState(false);
+  const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, TOOLTIP_STYLE_PROPS, style);
 
   const disabled = title === '' || title === false || title === null || title === undefined;
 
@@ -78,7 +94,14 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(function Tooltip
       />
       <BaseTooltip.Portal>
         <BaseTooltip.Positioner className="ps-Tooltip__positioner" side={placement} sideOffset={offset}>
-          <BaseTooltip.Popup role="tooltip" {...rest} id={popupId} ref={ref} className={clsx('ps-Tooltip', className)}>
+          <BaseTooltip.Popup
+            role="tooltip"
+            {...rest}
+            id={popupId}
+            ref={ref}
+            className={clsx('ps-Tooltip', styleClassName, className)}
+            style={computedStyle}
+          >
             <BaseTooltip.Arrow className="ps-Tooltip__arrow" style={hideArrow ? HIDDEN_ARROW_STYLE : undefined} />
             {title}
           </BaseTooltip.Popup>

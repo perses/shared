@@ -17,12 +17,13 @@ import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, InputHTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
-import type { DisplayProps, SizingProps, SpacingProps } from '../system';
-import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
+import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
+import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
 import { TextHelper } from '../TextHelper';
 import type { Size, Status } from '../types';
 
 import '../system/layout.css';
+import '../system/radius.css';
 import '../system/spacing.css';
 import './textField.css';
 
@@ -52,6 +53,7 @@ export interface TextFieldSlotProps {
 // Only `overflow` from the display category: `display` stays fixed to inline-flex/flex by the stylesheet, so
 // compiling it would strip a `display` value from the DOM and let `.ps-display` override the default.
 const TEXT_FIELD_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
+const TEXT_FIELD_RADIUS_PROPS = compileStyleProps([radiusProps]);
 
 interface TextFieldBaseProps
   extends
@@ -61,6 +63,7 @@ interface TextFieldBaseProps
     >,
     SpacingProps,
     SizingProps,
+    RadiusProps,
     Pick<DisplayProps, 'overflow'> {
   /** Inline styles for the root; accepts the `--perses-textfield-size-<step>` override custom properties. */
   style?: PersesCSSProperties<TextFieldStyle>;
@@ -111,8 +114,8 @@ export type TextFieldProps = TextFieldBaseProps & TextFieldAccessibleName;
 
 /**
  * Text input with label, helper text and optional start/end elements. Spacing, sizing and `overflow` style props apply to the root
- * element and behave as documented on `Box`; `display` is fixed by the stylesheet. Native input attributes go to the
- * control. Use `slotProps` for internal part styling; native attributes, handlers, and `ref` stay on the control.
+ * element and behave as documented on `Box`; `display` is fixed by the stylesheet. Native attributes, handlers, and
+ * `ref` stay on the control.
  */
 export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldProps>(function TextField(
   {
@@ -144,10 +147,15 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     [status],
   );
   const {
+    className: radiusClassName,
+    style: radiusStyle,
+    rest: restWithoutRadius,
+  } = applyStyleProps(props, TEXT_FIELD_RADIUS_PROPS, slotProps?.wrapper?.style);
+  const {
     className: styleClassName,
     style: computedStyle,
     rest,
-  } = applyStyleProps(props, TEXT_FIELD_STYLE_PROPS, style);
+  } = applyStyleProps(restWithoutRadius, TEXT_FIELD_STYLE_PROPS, style);
   const { display: _display, ...restWithoutDisplay } = rest as typeof rest & { display?: unknown };
 
   return (
@@ -170,7 +178,10 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
           {label}
         </Field.Label>
       )}
-      <div className={clsx('ps-TextField__wrapper', slotProps?.wrapper?.className)} style={slotProps?.wrapper?.style}>
+      <div
+        className={clsx('ps-TextField__wrapper', radiusClassName, slotProps?.wrapper?.className)}
+        style={radiusStyle}
+      >
         {startElement && <span className="ps-TextField__adornment ps-TextField__adornment--start">{startElement}</span>}
         <Field.Control
           {...restWithoutDisplay}

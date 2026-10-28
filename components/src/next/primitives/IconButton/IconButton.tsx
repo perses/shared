@@ -18,23 +18,25 @@ import type { ButtonHTMLAttributes } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
 import type { ButtonVariant } from '../Button/Button';
-import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
-import type { DisplayProps, SizingProps, SpacingProps } from '../system';
+import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
+import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import type { ColorVariant, Size, Status } from '../types';
 
 import '../Button/buttonBase.css';
 import './iconButton.css';
 import '../system/layout.css';
+import '../system/radius.css';
 import '../system/spacing.css';
 
-const ICON_BUTTON_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
+const ICON_BUTTON_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps, radiusProps]);
 
 export interface IconButtonProps
   extends
     Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'aria-label' | 'color'>,
     SpacingProps,
     SizingProps,
-    DisplayProps {
+    DisplayProps,
+    RadiusProps {
   style?: PersesCSSProperties;
   'aria-label': string;
   variant?: ButtonVariant;

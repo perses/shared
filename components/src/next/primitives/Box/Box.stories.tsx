@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
-import type { SpacingScale } from '@perses-dev/design-tokens';
+import type { RadiusScale, SpacingScale } from '@perses-dev/design-tokens';
 import type { CSSProperties } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
@@ -53,7 +53,8 @@ export const Basic: Story = () => (
       <code>Box</code> is a layout primitive. It accepts responsive style props grouped into categories — spacing (
       <code>p</code>, <code>m</code>, <code>gap</code>), sizing (<code>width</code>…), flexbox (
       <code>flexDirection</code>
-      …) and display (<code>display</code>, <code>overflow</code>) — plus any native <code>div</code> attribute.
+      …), display (<code>display</code>, <code>overflow</code>) and radius (<code>rounded</code>…) — plus any native{' '}
+      <code>div</code> attribute.
     </p>
     <Sample title="Minimal usage" code={basicCode}>
       <Box p="md" style={outline}>
@@ -170,6 +171,122 @@ export const Spacing: Story = () => (
   </Stack>
 );
 Spacing.storyName = 'Spacing';
+
+const radiusScale: RadiusScale[] = ['none', 'sm', 'md', 'lg', 'xl', 'full'];
+const radiusScaleCode = `<Box rounded="lg" p="lg">Rounded corners</Box>`;
+const radiusSidesCode = `<Box roundedTop="xl" p="lg">Top</Box>
+<Box roundedRight="xl" p="lg">Right</Box>
+<Box roundedBottom="xl" p="lg">Bottom</Box>
+<Box roundedLeft="xl" p="lg">Left</Box>`;
+const radiusSides = [
+  { name: 'roundedTop', props: { roundedTop: 'xl' } },
+  { name: 'roundedRight', props: { roundedRight: 'xl' } },
+  { name: 'roundedBottom', props: { roundedBottom: 'xl' } },
+  { name: 'roundedLeft', props: { roundedLeft: 'xl' } },
+] as const;
+const radiusCornersCode = `<Box roundedTopLeft="xl" p="lg">Top-left</Box>
+<Box roundedTopRight="xl" p="lg">Top-right</Box>
+<Box roundedBottomLeft="xl" p="lg">Bottom-left</Box>
+<Box roundedBottomRight="xl" p="lg">Bottom-right</Box>`;
+const radiusCorners = [
+  { name: 'roundedTopLeft', props: { roundedTopLeft: 'xl' } },
+  { name: 'roundedTopRight', props: { roundedTopRight: 'xl' } },
+  { name: 'roundedBottomLeft', props: { roundedBottomLeft: 'xl' } },
+  { name: 'roundedBottomRight', props: { roundedBottomRight: 'xl' } },
+] as const;
+const radiusPrecedenceCode = `<Box rounded="sm" roundedTop="xl" roundedLeft="lg" roundedTopLeft={0} p="lg">
+  Square top-left, xl top-right, lg bottom-left, sm bottom-right.
+</Box>`;
+const radiusCssCode = `<Box rounded={18} p="lg">18px</Box>
+<Box rounded="2rem" p="lg">2rem</Box>
+<Box rounded="50%" width={96} height={96} display="flex" alignItems="center" justifyContent="center">50%</Box>
+<Box rounded="24px 8px / 8px 24px" p="lg">Elliptical shorthand</Box>
+<Box rounded="var(--app-radius)" style={{ '--app-radius': '1rem' }} p="lg">Custom property</Box>`;
+const customRadiusStyle = { ...outline, '--app-radius': '1rem' };
+const responsiveRadius = { default: 'sm', md: 16, xl: '2rem' } as const;
+const responsiveRadiusCorner = { md: 0 };
+const responsiveRadiusCode = `<Box rounded={{ default: 'sm', md: 16, xl: '2rem' }} roundedBottomRight={{ md: 0 }} p="lg">
+  Responsive corners
+</Box>`;
+
+export const Radius: Story = () => (
+  <Stack>
+    <p>
+      Accepts radius tokens, pixels, CSS values and responsive objects. Directions are physical; rounding does not clip
+      content.
+    </p>
+    <Sample title="Radius scale (none, sm, md, lg, xl, full)" code={radiusScaleCode}>
+      <div style={row}>
+        {radiusScale.map((token) => (
+          <Box key={token} rounded={token} p="lg" style={outline}>
+            {token}
+          </Box>
+        ))}
+      </div>
+    </Sample>
+    <Sample title="Round a side's two corners" code={radiusSidesCode}>
+      <div style={row}>
+        {radiusSides.map(({ name, props }) => (
+          <Box key={name} {...props} p="lg" style={outline}>
+            {name}
+          </Box>
+        ))}
+      </div>
+    </Sample>
+    <Sample title="Round individual corners" code={radiusCornersCode}>
+      <div style={row}>
+        {radiusCorners.map(({ name, props }) => (
+          <Box key={name} {...props} p="lg" style={outline}>
+            {name}
+          </Box>
+        ))}
+      </div>
+    </Sample>
+    <Sample title="Prop precedence" code={radiusPrecedenceCode}>
+      <p>
+        All corners → top/bottom → left/right → individual corners → inline styles. JSX order does not affect
+        precedence.
+      </p>
+      <Box rounded="sm" roundedTop="xl" roundedLeft="lg" roundedTopLeft={0} p="lg" style={outline}>
+        Square top-left, xl top-right, lg bottom-left, sm bottom-right.
+      </Box>
+    </Sample>
+    <Sample title="Numeric pixels and custom CSS radii" code={radiusCssCode}>
+      <div style={row}>
+        <Box rounded={18} p="lg" style={outline}>
+          18px
+        </Box>
+        <Box rounded="2rem" p="lg" style={outline}>
+          2rem
+        </Box>
+        <Box
+          rounded="50%"
+          width={96}
+          height={96}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          style={outline}
+        >
+          50%
+        </Box>
+        <Box rounded="24px 8px / 8px 24px" p="lg" style={outline}>
+          Elliptical shorthand
+        </Box>
+        <Box rounded="var(--app-radius)" p="lg" style={customRadiusStyle}>
+          Custom property
+        </Box>
+      </div>
+    </Sample>
+    <Sample title="Responsive rounding" code={responsiveRadiusCode}>
+      <p>Resize: sm → 16px at md → 2rem at xl. Bottom-right stays square from md onward.</p>
+      <Box rounded={responsiveRadius} roundedBottomRight={responsiveRadiusCorner} p="lg" style={outline}>
+        Responsive corners
+      </Box>
+    </Sample>
+  </Stack>
+);
+Radius.storyName = 'Radius';
 
 const sizeFixedCode = `<Box width={240} height={80}>240 × 80</Box>`;
 const sizeRelativeCode = `<Box width="50%">width 50%</Box>
