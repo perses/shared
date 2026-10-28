@@ -41,7 +41,7 @@ export interface TextFieldStyle extends CSSProperties {
 export interface TextFieldSlotProps {
   /** Visible label; rendered only when `label` is provided. */
   label?: SlotStyleProps;
-  /** Bordered wrapper around the control and adornments; accepts the `TextFieldStyle` size custom properties. */
+  /** Bordered wrapper around the control and start/end elements; accepts the `TextFieldStyle` size custom properties. */
   wrapper?: SlotStyleProps<TextFieldStyle>;
   /** Native input, or textarea when `multiline` is true. */
   input?: SlotStyleProps;
@@ -75,10 +75,10 @@ interface TextFieldBaseProps
   /** Renders a `textarea` instead of an `input`. */
   multiline?: boolean;
   rows?: number;
-  /** Decorative content before the control. Mark purely decorative icons `aria-hidden`. */
-  startAdornment?: ReactNode;
-  /** Decorative content after the control. Mark purely decorative icons `aria-hidden`. */
-  endAdornment?: ReactNode;
+  /** Content before the control. Mark purely decorative icons `aria-hidden`. */
+  startElement?: ReactNode;
+  /** Content after the control. Mark purely decorative icons `aria-hidden`. */
+  endElement?: ReactNode;
 }
 
 /**
@@ -110,7 +110,7 @@ type TextFieldAccessibleName =
 export type TextFieldProps = TextFieldBaseProps & TextFieldAccessibleName;
 
 /**
- * Text input with label, helper text and adornments. Spacing, sizing and `overflow` style props apply to the root
+ * Text input with label, helper text and optional start/end elements. Spacing, sizing and `overflow` style props apply to the root
  * element and behave as documented on `Box`; `display` is fixed by the stylesheet. Native input attributes go to the
  * control. Use `slotProps` for internal part styling; native attributes, handlers, and `ref` stay on the control.
  */
@@ -123,8 +123,8 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     size = 'md',
     multiline = false,
     rows,
-    startAdornment,
-    endAdornment,
+    startElement,
+    endElement,
     className,
     style,
     slotProps,
@@ -171,9 +171,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
         </Field.Label>
       )}
       <div className={clsx('ps-TextField__wrapper', slotProps?.wrapper?.className)} style={slotProps?.wrapper?.style}>
-        {startAdornment && (
-          <span className="ps-TextField__adornment ps-TextField__adornment--start">{startAdornment}</span>
-        )}
+        {startElement && <span className="ps-TextField__adornment ps-TextField__adornment--start">{startElement}</span>}
         <Field.Control
           {...restWithoutDisplay}
           ref={ref}
@@ -183,7 +181,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
           render={multiline ? renderTextarea : undefined}
           {...(multiline && { rows })}
         />
-        {endAdornment && <span className="ps-TextField__adornment ps-TextField__adornment--end">{endAdornment}</span>}
+        {endElement && <span className="ps-TextField__adornment ps-TextField__adornment--end">{endElement}</span>}
       </div>
       {helperText && (
         <Field.Description

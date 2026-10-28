@@ -115,6 +115,12 @@ Apply `--perses-opacity-disabled` (default `0.5`) once at the disabled group's r
 
 When zero-specificity defaults set the same property on the same element in the same layer, later rules win. Put base defaults before size defaults, and keep state overrides easy to identify. Avoid `!important` or increasingly specific selectors as a substitute for the layer and default/override structure.
 
+## Content elements
+
+When a component offers optional content before or after its main content, name the `ReactNode` props `startElement` and
+`endElement`. Use logical start/end rather than physical left/right, and the `Element` suffix rather than `Adornment`.
+These props provide content; `slotProps` only customizes styling.
+
 ## Slots
 
 Components may expose `slotProps` to style named internal parts. Each slot accepts `SlotStyleProps` from
