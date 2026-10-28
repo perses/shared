@@ -19,9 +19,17 @@ const spacingProps = [
   ['p', 'padding'],
   ['px', 'padding-inline'],
   ['py', 'padding-block'],
+  ['pt', 'padding-top'],
+  ['pr', 'padding-right'],
+  ['pb', 'padding-bottom'],
+  ['pl', 'padding-left'],
   ['m', 'margin'],
   ['mx', 'margin-inline'],
   ['my', 'margin-block'],
+  ['mt', 'margin-top'],
+  ['mr', 'margin-right'],
+  ['mb', 'margin-bottom'],
+  ['ml', 'margin-left'],
   ['gap', 'gap'],
 ] as const;
 const layoutProps = [
@@ -209,6 +217,86 @@ describe.each([...spacingProps, ...layoutProps])('%s responsive CSS', (prop, pro
       );
     },
   );
+});
+
+describe.each([
+  ['pt', 'padding-top', 'p', 'padding'],
+  ['pr', 'padding-right', 'p', 'padding'],
+  ['pb', 'padding-bottom', 'p', 'padding'],
+  ['pl', 'padding-left', 'p', 'padding'],
+  ['mt', 'margin-top', 'm', 'margin'],
+  ['mr', 'margin-right', 'm', 'margin'],
+  ['mb', 'margin-bottom', 'm', 'margin'],
+  ['ml', 'margin-left', 'm', 'margin'],
+])('%s physical-side precedence', (prop, property, broad, cssProperty) => {
+  it.each(['', '-xs', '-sm', '-md', '-lg', '-xl'])(
+    'keeps %s side values above all-sides and axis breakpoints',
+    (suffix) => {
+      const classes = [`ps-${prop}${suffix}`, `ps-${broad}y-xl`, `ps-${broad}x-xl`, `ps-${broad}-xl`, `ps-${broad}`];
+      const variables = {
+        [`--ps-${broad}`]: '4px',
+        [`--ps-${broad}-xl`]: '80px',
+        [`--ps-${broad}x-xl`]: '40px',
+        [`--ps-${broad}y-xl`]: '20px',
+        [`--ps-${prop}${suffix}`]: '0',
+      };
+      for (const width of [1536, 2400]) {
+        for (const orderedClasses of [classes, classes.toReversed()]) {
+          const style = spacingAt(width, orderedClasses, variables);
+          expect(style.getPropertyValue(property)).toBe('0px');
+          for (const [otherSide, expected] of [
+            [`${cssProperty}-top`, '20px'],
+            [`${cssProperty}-right`, '40px'],
+            [`${cssProperty}-bottom`, '20px'],
+            [`${cssProperty}-left`, '40px'],
+          ] as const) {
+            if (otherSide !== property) {
+              expect(style.getPropertyValue(otherSide)).toBe(expected);
+            }
+          }
+        }
+      }
+    },
+  );
+
+  it('preserves broader spacing below the first side breakpoint and carries the side override forward', () => {
+    const classes = [`ps-${prop}-md`, `ps-${broad}`];
+    const variables = { [`--ps-${broad}`]: '24px', [`--ps-${prop}-md`]: '0' };
+    expect(spacingAt(899.99, classes, variables).getPropertyValue(property)).toBe('24px');
+    for (const width of [900, 1200, 1536, 2400]) {
+      expect(spacingAt(width, classes, variables).getPropertyValue(property)).toBe('0px');
+    }
+  });
+
+  it('lets a later side value override its earlier value without changing other sides', () => {
+    const classes = [`ps-${prop}-xl`, `ps-${broad}`, `ps-${prop}-md`];
+    const variables = { [`--ps-${broad}`]: '24px', [`--ps-${prop}-md`]: '12px', [`--ps-${prop}-xl`]: '0' };
+    expect(spacingAt(1200, classes, variables).getPropertyValue(property)).toBe('12px');
+    const after = spacingAt(1536, classes, variables);
+    expect(after.getPropertyValue(property)).toBe('0px');
+    for (const side of [`${cssProperty}-top`, `${cssProperty}-right`, `${cssProperty}-bottom`, `${cssProperty}-left`]) {
+      if (side !== property) {
+        expect(after.getPropertyValue(side)).toBe('24px');
+      }
+    }
+  });
+});
+
+describe.each([
+  ['mt', 'margin-top'],
+  ['mr', 'margin-right'],
+  ['mb', 'margin-bottom'],
+  ['ml', 'margin-left'],
+])('%s margin values', (prop, property) => {
+  it.each(['auto', '-8px', '0px'])('applies %s without changing the other margins', (value) => {
+    const style = spacingAt(900, ['ps-m', `ps-${prop}-md`], { '--ps-m': '24px', [`--ps-${prop}-md`]: value });
+    expect(style.getPropertyValue(property)).toBe(value);
+    for (const side of ['margin-top', 'margin-right', 'margin-bottom', 'margin-left']) {
+      if (side !== property) {
+        expect(style.getPropertyValue(side)).toBe('24px');
+      }
+    }
+  });
 });
 
 describe.each([

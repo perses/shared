@@ -20,13 +20,19 @@ import { AddIcon, Box, Checkbox } from './primitives';
 import type {
   AlertProps,
   AlertSlotProps,
+  BoxProps,
+  CardHeaderProps,
+  CardHeaderSlotProps,
   CheckboxProps,
   CheckboxSlotProps,
   CheckboxStyle,
   ChipProps,
   ChipSlotProps,
   ChipStyle,
+  CornerRadiusValue,
   IconProps,
+  RadiusProps,
+  RadiusValue,
   PersesCSSProperties as PrimitiveCSSProperties,
   SlotStyleProps as PrimitiveSlotStyleProps,
   SwitchProps,
@@ -88,13 +94,25 @@ type _SlotStyleKeys = AssertNever<Exclude<keyof SlotStyleProps, 'className' | 's
 type _TextFieldSlotKeys = AssertNever<Exclude<keyof TextFieldSlotProps, 'label' | 'wrapper' | 'input' | 'helper'>>;
 type _TextFieldSlotProp = AssertAssignable<NonNullable<TextFieldProps['slotProps']>, TextFieldSlotProps>;
 
+expectTypeOf<BoxProps['rounded']>().toEqualTypeOf<RadiusProps['rounded']>();
+expectTypeOf<BoxProps['roundedBottomRight']>().toEqualTypeOf<RadiusProps['roundedBottomRight']>();
+expectTypeOf<Exclude<CSSProperties['borderRadius'], undefined>>().toExtend<RadiusValue>();
+expectTypeOf<Exclude<CSSProperties['borderTopLeftRadius'], undefined>>().toExtend<CornerRadiusValue>();
+expectTypeOf({ rounded: { default: 'lg', md: 12, xl: 'var(--app-radius)' }, roundedTopLeft: 0 } satisfies RadiusProps);
+// @ts-expect-error Radius props require tokens, CSS values, or responsive objects, not booleans.
+expectTypeOf({ rounded: true } satisfies RadiusProps);
+// @ts-expect-error Responsive radius props use the existing named breakpoints.
+expectTypeOf({ roundedTop: { tablet: 'md' } } satisfies RadiusProps);
+
 expectTypeOf<AlertProps['slotProps']>().toEqualTypeOf<AlertSlotProps | undefined>();
+expectTypeOf<CardHeaderProps['slotProps']>().toEqualTypeOf<CardHeaderSlotProps | undefined>();
 expectTypeOf<CheckboxProps['slotProps']>().toEqualTypeOf<CheckboxSlotProps | undefined>();
 expectTypeOf<ChipProps['slotProps']>().toEqualTypeOf<ChipSlotProps | undefined>();
 expectTypeOf<SwitchProps['slotProps']>().toEqualTypeOf<SwitchSlotProps | undefined>();
 expectTypeOf<TablePaginationProps['slotProps']>().toEqualTypeOf<TablePaginationSlotProps | undefined>();
 
 expectTypeOf<AlertSlotProps>().toEqualTypeOf<{ icon?: SlotStyleProps; message?: SlotStyleProps }>();
+expectTypeOf<CardHeaderSlotProps>().toEqualTypeOf<{ content?: SlotStyleProps; end?: SlotStyleProps }>();
 expectTypeOf<CheckboxSlotProps>().toEqualTypeOf<{
   control?: SlotStyleProps<CheckboxStyle>;
   indicator?: SlotStyleProps;
@@ -120,6 +138,8 @@ expectTypeOf<TablePaginationSlotProps>().toEqualTypeOf<{
 
 // @ts-expect-error Icon slots cannot replace the rendered icon.
 expectTypeOf({ icon: { render: 'svg' } } satisfies AlertSlotProps);
+// @ts-expect-error The end wrapper's content comes from endElement, not the slot.
+expectTypeOf({ end: { children: 'Actions' } } satisfies CardHeaderSlotProps);
 // @ts-expect-error Control IDs remain on the component's top-level API.
 expectTypeOf({ control: { id: 'different-control' } } satisfies CheckboxSlotProps);
 // @ts-expect-error Close callbacks remain on the component's top-level API.

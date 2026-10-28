@@ -26,7 +26,6 @@ samp {
 
 [data-perses-mode='dark'] {
   min-height: 100vh;
-  background: var(--perses-bg-default);
   color: var(--perses-text-primary);
 }
 
@@ -39,4 +38,38 @@ samp {
 [data-perses-mode='dark'] p,
 [data-perses-mode='dark'] label {
   color: var(--perses-text-primary);
+}
+
+/* ---- Card story demos ---- */
+.story-card-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--perses-spacing-lg);
+}
+
+.story-card-title {
+  margin: 0;
+  font-size: var(--perses-font-size-md);
+  font-weight: var(--perses-font-weight-medium);
+}
+
+.story-card-text {
+  margin: 0;
+}
+
+.story-card-panel-content {
+  flex-grow: 1;
+}
+
+.story-card-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: repeating-linear-gradient(
+    135deg,
+    transparent 0 var(--perses-spacing-sm),
+    var(--perses-bg-sunken) var(--perses-spacing-sm) var(--perses-spacing-lg)
+  );
 }

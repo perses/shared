@@ -16,21 +16,38 @@ import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
-import { applyStyleProps, compileStyleProps, displayProps, flexboxProps, sizingProps, spacingProps } from '../system';
-import type { DisplayProps, FlexboxProps, SizingProps, SpacingProps } from '../system';
+import {
+  applyStyleProps,
+  compileStyleProps,
+  displayProps,
+  flexboxProps,
+  radiusProps,
+  sizingProps,
+  spacingProps,
+} from '../system';
+import type { DisplayProps, FlexboxProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 
 import './box.css';
 import '../system/layout.css';
+import '../system/radius.css';
 import '../system/spacing.css';
 
-export type { Breakpoint, Responsive, ResponsiveObject, SpacingValue } from '../system';
+export type {
+  Breakpoint,
+  CornerRadiusValue,
+  RadiusProps,
+  RadiusValue,
+  Responsive,
+  ResponsiveObject,
+  SpacingValue,
+} from '../system';
 
 export interface BoxProps
-  extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, FlexboxProps, DisplayProps {
+  extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, FlexboxProps, DisplayProps, RadiusProps {
   style?: PersesCSSProperties;
 }
 
-const BOX_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, flexboxProps, displayProps]);
+const BOX_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, flexboxProps, displayProps, radiusProps]);
 
 export const Box = forwardRef<HTMLDivElement, BoxProps>(function Box({ className, style, children, ...rest }, ref) {
   const {

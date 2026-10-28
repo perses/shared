@@ -16,11 +16,28 @@ import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
-import { applyStyleProps, compileStyleProps, displayProps, flexboxProps, sizingProps, spacingProps } from '../system';
-import type { DisplayProps, FlexboxProps, Responsive, SizingProps, SpacingProps, SpacingValue } from '../system';
+import {
+  applyStyleProps,
+  compileStyleProps,
+  displayProps,
+  flexboxProps,
+  radiusProps,
+  sizingProps,
+  spacingProps,
+} from '../system';
+import type {
+  DisplayProps,
+  FlexboxProps,
+  RadiusProps,
+  Responsive,
+  SizingProps,
+  SpacingProps,
+  SpacingValue,
+} from '../system';
 
 import './stack.css';
 import '../system/layout.css';
+import '../system/radius.css';
 import '../system/spacing.css';
 
 export interface StackProps
@@ -28,6 +45,7 @@ export interface StackProps
     HTMLAttributes<HTMLDivElement>,
     Omit<SpacingProps, 'gap'>,
     SizingProps,
+    RadiusProps,
     Omit<FlexboxProps, 'flexDirection'>,
     Pick<DisplayProps, 'overflow'> {
   style?: PersesCSSProperties;
@@ -43,6 +61,7 @@ const STACK_STYLE_PROPS = compileStyleProps([
   spacingProps,
   sizingProps,
   flexboxProps,
+  radiusProps,
   { overflow: displayProps.overflow },
 ]);
 

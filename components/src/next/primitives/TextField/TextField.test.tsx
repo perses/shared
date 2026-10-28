@@ -142,14 +142,18 @@ describe('TextField', () => {
     expect(ref.current).toBeInstanceOf(HTMLTextAreaElement);
   });
 
-  it('renders startAdornment', () => {
-    render(<TextField label="Search" startAdornment={START_ICON} />);
-    expect(screen.getByTestId('start-icon')).toBeInTheDocument();
+  it.each([false, true])('renders startElement before the control (multiline=%s)', (multiline) => {
+    render(<TextField label="Search" multiline={multiline} startElement={START_ICON} />);
+    const input = screen.getByRole('textbox', { name: 'Search' });
+    expect(input.previousElementSibling).toContainElement(screen.getByTestId('start-icon'));
+    expect(input).not.toHaveAttribute('startelement');
   });
 
-  it('renders endAdornment', () => {
-    render(<TextField label="Search" endAdornment={END_ICON} />);
-    expect(screen.getByTestId('end-icon')).toBeInTheDocument();
+  it.each([false, true])('renders endElement after the control (multiline=%s)', (multiline) => {
+    render(<TextField label="Search" multiline={multiline} endElement={END_ICON} />);
+    const input = screen.getByRole('textbox', { name: 'Search' });
+    expect(input.nextElementSibling).toContainElement(screen.getByTestId('end-icon'));
+    expect(input).not.toHaveAttribute('endelement');
   });
 
   it('applies a plain width through a custom property', () => {
@@ -293,8 +297,10 @@ describe('TextField', () => {
       expect(screen.getByRole('textbox', { name: 'External label' })).toBeInTheDocument();
     });
 
-    it('does not include adornments or helper text in the accessible name', () => {
-      render(<TextField label="Amount" helperText="In dollars" startAdornment={DOLLAR} endAdornment={PERCENT} />);
+    it('does not include start/end elements or helper text in the accessible name', () => {
+      render(<TextField label="Amount" helperText="In dollars" startElement={DOLLAR} endElement={PERCENT} />);
+      expect(screen.getByText('$')).toBeInTheDocument();
+      expect(screen.getByText('%')).toBeInTheDocument();
       expect(screen.getByRole('textbox', { name: 'Amount' })).toBeInTheDocument();
     });
 

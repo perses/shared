@@ -11,11 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Barrel for the style-prop engine. CSS side effects (layout.css, spacing.css)
+// Barrel for the style-prop engine. CSS side effects (layout.css, spacing.css, radius.css)
 // are intentionally excluded so TS-only consumers do not pull in stylesheets;
 // import those directly where the component's styles are registered.
 export * from './display';
 export * from './flexbox';
+export * from './radius';
 export * from './responsive';
 export * from './sizing';
 export * from './spacing';

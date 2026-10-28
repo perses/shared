@@ -22,6 +22,8 @@ import { Icon } from '../Icon/Icon';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../Icon/icons';
 import type { DisplayProps } from '../system/display';
 import { displayProps } from '../system/display';
+import type { RadiusProps } from '../system/radius';
+import { radiusProps } from '../system/radius';
 import type { SizingProps } from '../system/sizing';
 import { sizingProps } from '../system/sizing';
 import type { SpacingProps } from '../system/spacing';
@@ -29,6 +31,7 @@ import { spacingProps } from '../system/spacing';
 import { applyStyleProps, compileStyleProps } from '../system/styleProps';
 
 import '../system/layout.css';
+import '../system/radius.css';
 import '../system/spacing.css';
 import './alert.css';
 
@@ -53,9 +56,10 @@ function isAlertSeverity(icon: unknown): icon is AlertSeverity {
   return typeof icon === 'string' && icon in SEVERITY_ICONS;
 }
 
-const ALERT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
+const ALERT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps, radiusProps]);
 
-export interface AlertProps extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, DisplayProps {
+export interface AlertProps
+  extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, DisplayProps, RadiusProps {
   style?: PersesCSSProperties;
   /** Styling-only overrides for internal parts; does not replace content, behavior, or accessibility attributes. */
   slotProps?: AlertSlotProps;

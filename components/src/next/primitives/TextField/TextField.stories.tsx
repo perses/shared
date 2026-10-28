@@ -105,19 +105,19 @@ export const States: Story = () => (
 );
 States.storyName = 'States';
 
-const adornmentsCode = `// Decorative icons should be aria-hidden; adornments are not part of the accessible name.
-<TextField label="Search" placeholder="Search..." startAdornment={<SearchIcon aria-hidden="true" />} />
-<TextField label="Amount" placeholder="0" startAdornment={<span>$</span>} endAdornment={<span>%</span>} />`;
+const elementsCode = `// Decorative icons should be aria-hidden; start/end elements are not part of the control's accessible name.
+<TextField label="Search" placeholder="Search..." startElement={<SearchIcon aria-hidden="true" />} />
+<TextField label="Amount" placeholder="0" startElement={<span>$</span>} endElement={<span>%</span>} />`;
 const multilineCode = `<TextField label="Comment" multiline rows={4} placeholder="Write a longer response..." fullWidth />`;
 const noLabelCode = `// Without a visible label, aria-label provides the accessible name.
 <TextField aria-label="Search dashboards" placeholder="Search..." />`;
 
-export const AdornmentsAndMultiline: Story = () => (
+export const ElementsAndMultiline: Story = () => (
   <Stack>
-    <Sample title="Adornments" code={adornmentsCode}>
+    <Sample title="Start and end elements" code={elementsCode}>
       <div style={columnStyle}>
-        <TextField label="Search" placeholder="Search..." startAdornment={searchIcon} />
-        <TextField label="Amount" placeholder="0" startAdornment={dollar} endAdornment={percent} />
+        <TextField label="Search" placeholder="Search..." startElement={searchIcon} />
+        <TextField label="Amount" placeholder="0" startElement={dollar} endElement={percent} />
       </div>
     </Sample>
 
@@ -130,7 +130,7 @@ export const AdornmentsAndMultiline: Story = () => (
     </Sample>
   </Stack>
 );
-AdornmentsAndMultiline.storyName = 'Adornments and multiline';
+ElementsAndMultiline.storyName = 'Elements and multiline';
 
 const querySlots: TextFieldSlotProps = {
   label: { style: { fontWeight: 'var(--perses-font-weight-bold)' } },
@@ -165,7 +165,7 @@ export const Slots: Story = () => (
           <code>label</code> — Visible label, when provided.
         </li>
         <li>
-          <code>wrapper</code> — Bordered control and adornment container.
+          <code>wrapper</code> — Bordered container for the control and start/end elements.
         </li>
         <li>
           <code>input</code> — Input or multiline textarea.

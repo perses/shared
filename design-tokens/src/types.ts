@@ -73,7 +73,9 @@ export type BorderWidthVar = `--perses-border-width-${BorderWidthScale}`;
 
 export type FocusRingVar = '--perses-focus-ring-width' | '--perses-focus-ring-offset' | '--perses-focus-ring-color';
 
-export type RadiusVar = `--perses-radius-${'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full'}`;
+export type RadiusScale = 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+
+export type RadiusVar = `--perses-radius-${RadiusScale}`;
 
 export type ShadowVar = '--perses-shadow-overlay';
 

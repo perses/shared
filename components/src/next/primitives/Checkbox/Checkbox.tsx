@@ -17,18 +17,20 @@ import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 import { forwardRef, useCallback } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
-import type { DisplayProps, SizingProps, SpacingProps } from '../system';
+import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import {
   applyStyleProps,
   compileStyleProps,
   displayProps,
   mergeControlStyle,
+  radiusProps,
   sizingProps,
   spacingProps,
 } from '../system';
 import type { ColorVariant, Size, Status } from '../types';
 
 import '../system/layout.css';
+import '../system/radius.css';
 import '../system/spacing.css';
 import './checkbox.css';
 
@@ -52,6 +54,7 @@ export interface CheckboxStyle extends CSSProperties {
 }
 
 const CHECKBOX_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
+const CHECKBOX_RADIUS_PROPS = compileStyleProps([radiusProps]);
 
 /** A checkbox must have an accessible name: a visible `label`, `aria-label` or `aria-labelledby`. */
 export type CheckboxAccessibleName = { label: ReactNode } | { 'aria-label': string } | { 'aria-labelledby': string };
@@ -71,7 +74,8 @@ interface CheckboxBaseProps
     Omit<HTMLAttributes<HTMLElement>, 'children' | 'color' | 'onChange' | 'style'>,
     SpacingProps,
     SizingProps,
-    DisplayProps {
+    DisplayProps,
+    RadiusProps {
   checked?: boolean;
   defaultChecked?: boolean;
   onCheckedChange?: (checked: boolean, details: CheckboxChangeEventDetails) => void;
@@ -99,9 +103,9 @@ interface CheckboxBaseProps
 }
 
 /**
- * Style props behave as documented on `Box`. They apply to the outermost element: the label wrapper when a `label` is
- * rendered, otherwise the checkbox control. `label` accepts any content (links, icons, stacks), so consumers own
- * the composition of supporting text and can reference it with `aria-describedby`.
+ * Spacing, sizing and display style props behave as documented on `Box`. They apply to the outermost element: the
+ * label wrapper when a `label` is rendered, otherwise the checkbox control. `label` accepts any content (links, icons,
+ * stacks), so consumers own the supporting text and can reference it with `aria-describedby`.
  */
 export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox(
   {
@@ -133,12 +137,21 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
   ref,
 ) {
   const hasLabel = label !== undefined;
-  const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, CHECKBOX_STYLE_PROPS, style);
+  const {
+    className: radiusClassName,
+    style: radiusStyle,
+    rest: restWithoutRadius,
+  } = applyStyleProps(props, CHECKBOX_RADIUS_PROPS);
+  const {
+    className: styleClassName,
+    style: computedStyle,
+    rest,
+  } = applyStyleProps(restWithoutRadius, CHECKBOX_STYLE_PROPS, style);
   const domProps = rest as HTMLAttributes<HTMLElement>;
   const callerClassName = clsx(styleClassName, className);
   const controlStyle = hasLabel
-    ? slotProps?.control?.style
-    : mergeControlStyle(slotProps?.control?.style, computedStyle);
+    ? mergeControlStyle(radiusStyle, slotProps?.control?.style ?? {})
+    : mergeControlStyle(slotProps?.control?.style, mergeControlStyle(radiusStyle, computedStyle));
   const handleCheckedChange = useCallback(
     (nextChecked: boolean, eventDetails: BaseCheckbox.Root.ChangeEventDetails): void => {
       onCheckedChange?.(nextChecked, { event: eventDetails.event });
@@ -164,7 +177,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
       uncheckedValue={uncheckedValue}
       form={form}
       inputRef={inputRef}
-      className={clsx('ps-Checkbox', !hasLabel && callerClassName, slotProps?.control?.className)}
+      className={clsx('ps-Checkbox', radiusClassName, !hasLabel && callerClassName, slotProps?.control?.className)}
       style={controlStyle}
       data-invalid={invalid ? '' : undefined}
       data-size={size}
