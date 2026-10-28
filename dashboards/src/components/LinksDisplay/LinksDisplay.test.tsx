@@ -141,6 +141,18 @@ describe('LinksDisplay', () => {
       expect(screen.getByText('Safe').closest('a')).toHaveAttribute('href', 'https://perses.dev/docs');
     });
 
+    it('explains why a link is disabled when hovering over it', async () => {
+      renderLinks(<LinksDisplay links={[{ name: 'Unsafe', url: javascriptUrl }]} variant="dashboard" />);
+
+      userEvent.hover(screen.getByText('Unsafe'));
+
+      expect(
+        await screen.findByText(
+          `This link is disabled because its URL uses a scheme that is not allowed: ${javascriptUrl}`,
+        ),
+      ).toBeInTheDocument();
+    });
+
     it('prevents the opened page from accessing the opener for links opening in a new tab', () => {
       renderLinks(
         <LinksDisplay links={[{ name: 'Docs', url: 'https://perses.dev', targetBlank: true }]} variant="dashboard" />,

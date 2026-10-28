@@ -27,6 +27,13 @@ describe('isSafeUrl', () => {
     '#panel-1',
     '',
     'mailto:perses@example.com',
+    'tel:+33100000000',
+    'sms:+33100000000',
+    'slack://channel?team=T123&id=C123',
+    'msteams:/l/channel/123',
+    'vscode://file/home/perses/main.go',
+    'vscode-insiders://file/home/perses/main.go',
+    'zoommtg://zoom.us/join?confno=123',
   ])('accepts %j', (url) => {
     expect(isSafeUrl(url)).toBe(true);
   });
@@ -46,6 +53,7 @@ describe('isSafeUrl', () => {
     'file:///etc/passwd',
     'blob:https://perses.dev/uuid',
     'ftp://perses.dev',
+    'ssh://perses.dev',
     'http://[invalid',
   ])('rejects %j', (url) => {
     expect(isSafeUrl(url)).toBe(false);

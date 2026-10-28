@@ -11,13 +11,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-const SAFE_URL_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
+// None of these schemes can execute a script in the current origin. Besides the web and communication schemes, it
+// includes the deep links of applications commonly used from dashboards, which are handed off to the operating system.
+// Keep it aligned with the list of the Perses API (internal/api/validate/link.go in perses/perses).
+const SAFE_URL_PROTOCOLS = new Set([
+  'http:',
+  'https:',
+  'mailto:',
+  'tel:',
+  'sms:',
+  'slack:',
+  'msteams:',
+  'vscode:',
+  'vscode-insiders:',
+  'zoommtg:',
+]);
 
 // Only used to resolve relative URLs, so that they are parsed the way a browser resolves them against the page.
 const RELATIVE_URL_BASE = 'http://perses.local';
 
 /**
- * Returns true when the URL is relative or uses the `http:`, `https:` or `mailto:` scheme,
+ * Returns true when the URL is relative or uses one of the allowed schemes (`http:`, `https:`, `mailto:`, `tel:`,
+ * `sms:`, `slack:`, `msteams:`, `vscode:`, `vscode-insiders:`, `zoommtg:`),
  * i.e. when it is safe to use as the `href` of a link built from user-provided data.
  * Any other scheme, such as `javascript:`, `data:` or `vbscript:`, is considered unsafe.
  *

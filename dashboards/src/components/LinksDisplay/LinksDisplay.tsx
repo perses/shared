@@ -116,10 +116,10 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
 }
 
 function LinkChip({ link }: { link: Link }): ReactElement {
-  const { url, name, tooltip, targetBlank, href } = useLink(link);
+  const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+    <InfoTooltip description={description} enterDelay={100}>
       <Chip
         label={name ?? url}
         component="a"
@@ -136,10 +136,10 @@ function LinkChip({ link }: { link: Link }): ReactElement {
 }
 
 function LinkButton({ link }: { link: Link }): ReactElement {
-  const { url, name, tooltip, targetBlank, href } = useLink(link);
+  const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+    <InfoTooltip description={description} enterDelay={100}>
       <IconButton
         component="a"
         aria-label={name ?? url}
@@ -156,10 +156,10 @@ function LinkButton({ link }: { link: Link }): ReactElement {
 }
 
 function LinkMenuItem({ link }: { link: Link }): ReactElement {
-  const { url, name, tooltip, targetBlank, href } = useLink(link);
+  const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+    <InfoTooltip description={description} enterDelay={100}>
       <MenuItem
         component={LinkComponent}
         href={href}
@@ -178,6 +178,15 @@ interface ResolvedLink extends Link {
    * (e.g. `javascript:`), so the link is rendered but cannot be followed.
    */
   href?: string;
+  /**
+   * Text displayed when hovering over the link: the tooltip (or the URL) of the link, or an explanation when the link
+   * is disabled.
+   */
+  description: string;
+}
+
+function getDisabledLinkDescription(url: string): string {
+  return `This link is disabled because its URL uses a scheme that is not allowed: ${url}`;
 }
 
 function useLink(link: Link): ResolvedLink {
@@ -189,10 +198,11 @@ function useLink(link: Link): ResolvedLink {
 
   // The URL must be sanitized after the interpolation, since variable values can be provided by the user (e.g. through
   // the URL query parameters).
-  if (link.renderVariables === false) {
-    return { ...link, href: sanitizeUrl(link.url) };
-  }
+  const resolvedLink =
+    link.renderVariables === false ? link : { ...link, url: interpolatedUrl ?? link.url, name, tooltip };
+  const href = sanitizeUrl(resolvedLink.url);
+  const description =
+    href === undefined ? getDisabledLinkDescription(resolvedLink.url) : (resolvedLink.tooltip ?? resolvedLink.url);
 
-  const url = interpolatedUrl ?? link.url;
-  return { ...link, url, name, tooltip, href: sanitizeUrl(url) };
+  return { ...resolvedLink, href, description };
 }
