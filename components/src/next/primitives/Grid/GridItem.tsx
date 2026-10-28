@@ -15,6 +15,7 @@ import { clsx } from 'clsx';
 import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import { applyStyleProps, compileStyleProps, displayProps, gridProps, sizingProps, spacingProps } from '../system';
 import type { DisplayProps, Responsive, SizingProps, SpacingProps } from '../system';
 
@@ -32,6 +33,7 @@ export interface GridItemProps
    * columns). Omitted (or omitted at the base of a responsive object) the item takes one column.
    */
   size?: Responsive<number>;
+  style?: PersesCSSProperties;
 }
 
 const GRID_ITEM_STYLE_PROPS = compileStyleProps([

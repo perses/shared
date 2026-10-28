@@ -13,8 +13,9 @@
 
 import { clsx } from 'clsx';
 import { forwardRef } from 'react';
-import type { CSSProperties, HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 
+import type { PersesCSSProperties } from '../../types';
 import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
 import type { DisplayProps, Responsive, SizingProps, SpacingProps, SpacingValue } from '../system';
 
@@ -31,6 +32,7 @@ export interface GridProps
   columns?: number;
   /** Space between rows and columns, as a spacing token or CSS length. */
   spacing?: Responsive<SpacingValue>;
+  style?: PersesCSSProperties;
 }
 
 const GRID_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
@@ -57,7 +59,7 @@ export const Grid = forwardRef<HTMLDivElement, GridProps>(function Grid(
   } = applyStyleProps({ ...rest, gap: spacing }, GRID_STYLE_PROPS, {
     '--ps-grid-columns': columns,
     ...style,
-  } as CSSProperties);
+  });
 
   return (
     <div ref={ref} {...domProps} className={clsx('ps-Grid', styleClassName, className)} style={computedStyle}>

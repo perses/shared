@@ -21,6 +21,7 @@ const RESPONSIVE_SPACING = { default: 'sm', md: 'xl' } as const;
 const RESPONSIVE_SIZE = { default: 12, md: 6 } as const;
 const PARTIAL_RESPONSIVE_SIZE = { md: 6, xl: undefined } as const;
 const STYLE_OVERRIDE = { gap: '99px' } as const;
+const CUSTOM_PROPERTY_STYLE = { '--perses-bg-surface': 'white', '--app-accent': 'blue' } as const;
 const ITEM_STYLE_OVERRIDE = { gridColumn: 'span 2' } as const;
 const CENTERED = { textAlign: 'center' } as const;
 const END = { textAlign: 'end' } as const;
@@ -99,6 +100,18 @@ describe('Grid', () => {
     expect(grid.style.gap).toBe('99px');
     expect(grid).toHaveClass('ps-Grid');
     expect(grid).toHaveClass('custom');
+  });
+
+  it('passes CSS custom properties through style alongside columns', () => {
+    render(
+      <Grid data-testid="grid" columns={24} style={CUSTOM_PROPERTY_STYLE}>
+        Content
+      </Grid>,
+    );
+    const grid = screen.getByTestId('grid');
+    expect(grid.style.getPropertyValue('--ps-grid-columns')).toBe('24');
+    expect(grid.style.getPropertyValue('--perses-bg-surface')).toBe('white');
+    expect(grid.style.getPropertyValue('--app-accent')).toBe('blue');
   });
 
   it('passes unregistered props to the DOM and forwards the ref', () => {
@@ -192,6 +205,18 @@ describe('GridItem', () => {
     expect(item).toHaveClass('ps-GridItem');
     expect(item).toHaveClass('custom');
     expect(ref.current).toBe(item);
+  });
+
+  it('passes CSS custom properties through style alongside size', () => {
+    render(
+      <GridItem data-testid="item" size={4} style={CUSTOM_PROPERTY_STYLE}>
+        Content
+      </GridItem>,
+    );
+    const item = screen.getByTestId('item');
+    expect(item.style.getPropertyValue('--ps-grid-column')).toBe('span 4');
+    expect(item.style.getPropertyValue('--perses-bg-surface')).toBe('white');
+    expect(item.style.getPropertyValue('--app-accent')).toBe('blue');
   });
 
   it('does not expose gridColumn as a prop', () => {
