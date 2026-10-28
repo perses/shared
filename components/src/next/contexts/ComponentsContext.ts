@@ -17,6 +17,7 @@ import { createContext } from 'react';
 import type { AlertProps } from '../primitives/Alert';
 import type { BoxProps } from '../primitives/Box';
 import type { ButtonProps } from '../primitives/Button';
+import type { CardContentProps, CardHeaderProps, CardProps } from '../primitives/Card';
 import type { CheckboxProps } from '../primitives/Checkbox';
 import type { ChipProps } from '../primitives/Chip';
 import type { DividerProps } from '../primitives/Divider';
@@ -57,6 +58,9 @@ export interface PersesComponents {
   Divider: ComponentType<DividerProps>;
   Spinner: ComponentType<SpinnerProps>;
   Box: RefComponent<BoxProps, HTMLDivElement>;
+  Card: RefComponent<CardProps, HTMLElement>;
+  CardHeader: RefComponent<CardHeaderProps, HTMLElement>;
+  CardContent: RefComponent<CardContentProps, HTMLElement>;
   Stack: RefComponent<StackProps, HTMLDivElement>;
   Switch: RefComponent<SwitchProps, HTMLElement>;
   Tooltip: RefComponent<TooltipProps, HTMLDivElement>;
@@ -109,6 +113,9 @@ export interface ComponentsProviderProps {
    *   Alert: MyAlert,
    *   Box: MyBox,
    *   Button: MyButton,
+   *   Card: MyCard,
+   *   CardHeader: MyCardHeader,
+   *   CardContent: MyCardContent,
    *   Chip: MyChip,
    *   IconButton: MyIconButton,
    *   Checkbox: MyCheckbox,

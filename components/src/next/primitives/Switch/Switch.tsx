@@ -22,17 +22,20 @@ import {
   compileStyleProps,
   displayProps,
   mergeControlStyle,
+  radiusProps,
   sizingProps,
   spacingProps,
 } from '../system';
-import type { DisplayProps, SizingProps, SpacingProps } from '../system';
+import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import type { ColorVariant, Size, Status } from '../types';
 
 import '../system/layout.css';
+import '../system/radius.css';
 import '../system/spacing.css';
 import './switch.css';
 
 const SWITCH_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
+const SWITCH_RADIUS_PROPS = compileStyleProps([radiusProps]);
 
 export interface SwitchStyle extends CSSProperties {
   /** Per-step size override; falls back to the shared selection-control scale. */
@@ -55,7 +58,8 @@ export interface SwitchProps
     Omit<HTMLAttributes<HTMLElement>, 'onChange' | 'children' | 'defaultChecked' | 'style'>,
     SpacingProps,
     SizingProps,
-    DisplayProps {
+    DisplayProps,
+    RadiusProps {
   /** Whether the switch is on. Omit and use `defaultChecked` for an uncontrolled switch. */
   checked?: boolean;
   /** The switch's initial state when uncontrolled. Ignored if `checked` is provided. */
@@ -133,7 +137,16 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
   },
   ref,
 ): ReactElement {
-  const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, SWITCH_STYLE_PROPS, style);
+  const {
+    className: radiusClassName,
+    style: radiusStyle,
+    rest: restWithoutRadius,
+  } = applyStyleProps(props, SWITCH_RADIUS_PROPS);
+  const {
+    className: styleClassName,
+    style: computedStyle,
+    rest,
+  } = applyStyleProps(restWithoutRadius, SWITCH_STYLE_PROPS, style);
   const generatedId = useId();
   const controlId = id ?? generatedId;
   const labelId = `${controlId}-label`;
@@ -141,8 +154,8 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
   const hasLabel = Boolean(label);
   const callerClassName = clsx(styleClassName, className);
   const controlStyle = hasLabel
-    ? slotProps?.control?.style
-    : mergeControlStyle(slotProps?.control?.style, computedStyle);
+    ? mergeControlStyle(radiusStyle, slotProps?.control?.style ?? {})
+    : mergeControlStyle(slotProps?.control?.style, mergeControlStyle(radiusStyle, computedStyle));
   const rootElement = useMemo(() => <span id={controlId} />, [controlId]);
 
   const root = (
@@ -165,7 +178,7 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
       aria-labelledby={ariaLabelledBy ?? (hasLabel && ariaLabel === undefined ? labelId : undefined)}
       data-size={size}
       data-color={color}
-      className={clsx('ps-Switch', !hasLabel && callerClassName, slotProps?.control?.className)}
+      className={clsx('ps-Switch', radiusClassName, !hasLabel && callerClassName, slotProps?.control?.className)}
       style={controlStyle}
     >
       <BaseSwitch.Thumb

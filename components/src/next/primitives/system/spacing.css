@@ -17,8 +17,9 @@
 
 /*
  * Each class reads only its matching custom property. Breakpoint values carry forward
- * until a later explicit breakpoint overrides them. Keep all rules for p before px/py
- * and m before mx/my so directional values win even over later broad breakpoints.
+ * until a later explicit breakpoint overrides them. Keep all rules for p before px/py,
+ * then physical sides, and m before mx/my, then physical sides, so more specific
+ * directions win even over later broad breakpoints.
  * Values are token references, numeric pixels, or literal CSS spacing values.
  */
 @layer perses.utilities {
@@ -103,6 +104,114 @@
     }
   }
 
+  .ps-pt {
+    padding-top: var(--ps-pt, initial);
+  }
+  .ps-pt-xs {
+    padding-top: var(--ps-pt-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-pt-sm {
+      padding-top: var(--ps-pt-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-pt-md {
+      padding-top: var(--ps-pt-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-pt-lg {
+      padding-top: var(--ps-pt-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-pt-xl {
+      padding-top: var(--ps-pt-xl, initial);
+    }
+  }
+
+  .ps-pr {
+    padding-right: var(--ps-pr, initial);
+  }
+  .ps-pr-xs {
+    padding-right: var(--ps-pr-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-pr-sm {
+      padding-right: var(--ps-pr-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-pr-md {
+      padding-right: var(--ps-pr-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-pr-lg {
+      padding-right: var(--ps-pr-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-pr-xl {
+      padding-right: var(--ps-pr-xl, initial);
+    }
+  }
+
+  .ps-pb {
+    padding-bottom: var(--ps-pb, initial);
+  }
+  .ps-pb-xs {
+    padding-bottom: var(--ps-pb-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-pb-sm {
+      padding-bottom: var(--ps-pb-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-pb-md {
+      padding-bottom: var(--ps-pb-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-pb-lg {
+      padding-bottom: var(--ps-pb-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-pb-xl {
+      padding-bottom: var(--ps-pb-xl, initial);
+    }
+  }
+
+  .ps-pl {
+    padding-left: var(--ps-pl, initial);
+  }
+  .ps-pl-xs {
+    padding-left: var(--ps-pl-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-pl-sm {
+      padding-left: var(--ps-pl-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-pl-md {
+      padding-left: var(--ps-pl-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-pl-lg {
+      padding-left: var(--ps-pl-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-pl-xl {
+      padding-left: var(--ps-pl-xl, initial);
+    }
+  }
+
   .ps-m {
     margin: var(--ps-m, initial);
   }
@@ -181,6 +290,114 @@
   @media (min-width: 1536px) {
     .ps-my-xl {
       margin-block: var(--ps-my-xl, initial);
+    }
+  }
+
+  .ps-mt {
+    margin-top: var(--ps-mt, initial);
+  }
+  .ps-mt-xs {
+    margin-top: var(--ps-mt-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-mt-sm {
+      margin-top: var(--ps-mt-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-mt-md {
+      margin-top: var(--ps-mt-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-mt-lg {
+      margin-top: var(--ps-mt-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-mt-xl {
+      margin-top: var(--ps-mt-xl, initial);
+    }
+  }
+
+  .ps-mr {
+    margin-right: var(--ps-mr, initial);
+  }
+  .ps-mr-xs {
+    margin-right: var(--ps-mr-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-mr-sm {
+      margin-right: var(--ps-mr-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-mr-md {
+      margin-right: var(--ps-mr-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-mr-lg {
+      margin-right: var(--ps-mr-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-mr-xl {
+      margin-right: var(--ps-mr-xl, initial);
+    }
+  }
+
+  .ps-mb {
+    margin-bottom: var(--ps-mb, initial);
+  }
+  .ps-mb-xs {
+    margin-bottom: var(--ps-mb-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-mb-sm {
+      margin-bottom: var(--ps-mb-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-mb-md {
+      margin-bottom: var(--ps-mb-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-mb-lg {
+      margin-bottom: var(--ps-mb-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-mb-xl {
+      margin-bottom: var(--ps-mb-xl, initial);
+    }
+  }
+
+  .ps-ml {
+    margin-left: var(--ps-ml, initial);
+  }
+  .ps-ml-xs {
+    margin-left: var(--ps-ml-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-ml-sm {
+      margin-left: var(--ps-ml-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-ml-md {
+      margin-left: var(--ps-ml-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-ml-lg {
+      margin-left: var(--ps-ml-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-ml-xl {
+      margin-left: var(--ps-ml-xl, initial);
     }
   }
 

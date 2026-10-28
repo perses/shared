@@ -66,8 +66,8 @@ describe('TextField CSS contracts', () => {
         disabled
         status="error"
         helperText="Hint"
-        startAdornment="$"
-        endAdornment="%"
+        startElement="$"
+        endElement="%"
       />,
     );
     const input = screen.getByRole('textbox', { name: 'Name' });
@@ -91,7 +91,7 @@ describe('TextField CSS contracts', () => {
       expect(getOpacity(element) || '1').toBe('1');
     }
 
-    rerender(<TextField label="Name" multiline={multiline} helperText="Hint" startAdornment="$" endAdornment="%" />);
+    rerender(<TextField label="Name" multiline={multiline} helperText="Hint" startElement="$" endElement="%" />);
     expect(root).not.toHaveAttribute('data-disabled');
     expect(getOpacity(root) || '1').toBe('1');
     expect(input).not.toBeDisabled();
@@ -100,7 +100,7 @@ describe('TextField CSS contracts', () => {
   });
 
   it.each([false, true])('does not dim read-only text (multiline=%s)', (multiline) => {
-    render(<TextField label="Name" multiline={multiline} readOnly helperText="Hint" startAdornment="$" />);
+    render(<TextField label="Name" multiline={multiline} readOnly helperText="Hint" startElement="$" />);
     const input = screen.getByRole('textbox', { name: 'Name' });
     expect(input).not.toBeDisabled();
     expect(input).toHaveAttribute('readonly');
@@ -196,7 +196,7 @@ describe('TextField CSS contracts', () => {
   it('inherits disabled text styling from a fieldset, including for a multiline control', () => {
     const { rerender } = render(
       <Fieldset.Root disabled>
-        <TextField label="Comment" multiline disabled={false} status="error" helperText="Hint" startAdornment="$" />
+        <TextField label="Comment" multiline disabled={false} status="error" helperText="Hint" startElement="$" />
       </Fieldset.Root>,
     );
     const helper = screen.getByText('Hint');
@@ -216,7 +216,7 @@ describe('TextField CSS contracts', () => {
 
     rerender(
       <Fieldset.Root>
-        <TextField label="Comment" multiline disabled={false} status="error" helperText="Hint" startAdornment="$" />
+        <TextField label="Comment" multiline disabled={false} status="error" helperText="Hint" startElement="$" />
       </Fieldset.Root>,
     );
     expect(helper).not.toHaveAttribute('data-disabled');

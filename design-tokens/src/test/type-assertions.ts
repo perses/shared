@@ -15,7 +15,14 @@
 // PersesTokenVar, `npm run type-check` will fail here.
 // This file is never executed — it only needs to pass tsc.
 
-import type { tokens, PersesTokenVar, SelectionControlSizeVar, SemanticOpacityVar } from '../index';
+import type {
+  tokens,
+  PersesTokenVar,
+  RadiusScale,
+  RadiusVar,
+  SelectionControlSizeVar,
+  SemanticOpacityVar,
+} from '../index';
 
 type ExtractVars<T> = T extends `var(${infer V})`
   ? V
@@ -33,6 +40,13 @@ type _SelectionControlSizeSm = AssertAssignable<'--perses-selection-control-size
 type _SelectionControlSizeMd = AssertAssignable<'--perses-selection-control-size-md', SelectionControlSizeVar>;
 type _SelectionControlSizeLg = AssertAssignable<'--perses-selection-control-size-lg', SelectionControlSizeVar>;
 type _SelectionControlSizeVars = AssertAssignable<SelectionControlSizeVar, PersesTokenVar>;
+
+type _RadiusScale = AssertAssignable<'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full', RadiusScale>;
+type _RadiusScaleMatchesTokens = AssertAssignable<RadiusScale, keyof typeof tokens.radius>;
+type _RadiusTokensMatchScale = AssertAssignable<keyof typeof tokens.radius, RadiusScale>;
+type _RadiusVars = AssertAssignable<`--perses-radius-${RadiusScale}`, RadiusVar>;
+type _RadiusVarsMatchScale = AssertAssignable<RadiusVar, `--perses-radius-${RadiusScale}`>;
+type _UnknownRadiusRejected = AssertAssignable<'xs' extends RadiusScale ? true : false, false>;
 
 type _OpacityDisabled = AssertAssignable<ExtractVars<typeof tokens.opacity.disabled>, PersesTokenVar>;
 type _OpacityDisabledVar = AssertAssignable<'--perses-opacity-disabled', PersesTokenVar>;

@@ -32,9 +32,17 @@ export interface SpacingProps {
   p?: Responsive<SpacingValue>;
   px?: Responsive<SpacingValue>;
   py?: Responsive<SpacingValue>;
+  pt?: Responsive<SpacingValue>;
+  pr?: Responsive<SpacingValue>;
+  pb?: Responsive<SpacingValue>;
+  pl?: Responsive<SpacingValue>;
   m?: Responsive<SpacingValue>;
   mx?: Responsive<SpacingValue>;
   my?: Responsive<SpacingValue>;
+  mt?: Responsive<SpacingValue>;
+  mr?: Responsive<SpacingValue>;
+  mb?: Responsive<SpacingValue>;
+  ml?: Responsive<SpacingValue>;
   gap?: Responsive<SpacingValue>;
 }
 
@@ -42,8 +50,16 @@ export const spacingProps: Record<keyof SpacingProps, StyleValueTransform<Spacin
   p: spacingTransform,
   px: spacingTransform,
   py: spacingTransform,
+  pt: spacingTransform,
+  pr: spacingTransform,
+  pb: spacingTransform,
+  pl: spacingTransform,
   m: spacingTransform,
   mx: spacingTransform,
   my: spacingTransform,
+  mt: spacingTransform,
+  mr: spacingTransform,
+  mb: spacingTransform,
+  ml: spacingTransform,
   gap: spacingTransform,
 };

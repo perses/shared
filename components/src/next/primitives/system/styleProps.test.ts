@@ -38,7 +38,7 @@ describe('applyStyleProps', () => {
     expect(style).toEqual({ '--ps-width': '100%', '--ps-width-md': '400px' });
   });
 
-  it.each(['p', 'px', 'py', 'm', 'mx', 'my', 'gap'] as const)(
+  it.each(['p', 'px', 'py', 'pt', 'pr', 'pb', 'pl', 'm', 'mx', 'my', 'mt', 'mr', 'mb', 'ml', 'gap'] as const)(
     'mixes tokens, pixels and CSS strings across responsive %s values',
     (prop) => {
       const { className, style } = applyStyleProps(
@@ -80,6 +80,13 @@ describe('applyStyleProps', () => {
     expect(style).toEqual({ '--ps-m': expected });
   });
 
+  it.each(['mt', 'mr', 'mb', 'ml'] as const)('supports auto, negative pixels and zero in responsive %s', (prop) => {
+    const { className, style, rest } = applyStyleProps({ [prop]: { default: 'auto', md: -8, xl: 0 } }, spacing);
+    expect(className).toBe(`ps-${prop} ps-${prop}-md ps-${prop}-xl`);
+    expect(style).toEqual({ [`--ps-${prop}`]: 'auto', [`--ps-${prop}-md`]: '-8px', [`--ps-${prop}-xl`]: '0px' });
+    expect(rest).toEqual({});
+  });
+
   it('emits only the provided breakpoint class without a base or filled larger values', () => {
     const { className, style } = applyStyleProps({ p: { md: 100 } }, spacing);
     expect(className).toBe('ps-p-md');
@@ -103,7 +110,22 @@ describe('applyStyleProps', () => {
   });
 
   it('returns unregistered props in rest and omits consumed ones', () => {
-    const { rest } = applyStyleProps({ p: 'md', id: 'x', role: 'group' }, spacing);
+    const { rest } = applyStyleProps(
+      {
+        p: 'md',
+        pt: 0,
+        pr: 'sm',
+        pb: { md: 'lg' },
+        pl: '5%',
+        mt: -8,
+        mr: 'auto',
+        mb: { md: 'lg' },
+        ml: 0,
+        id: 'x',
+        role: 'group',
+      },
+      spacing,
+    );
     expect(rest).toEqual({ id: 'x', role: 'group' });
   });
 

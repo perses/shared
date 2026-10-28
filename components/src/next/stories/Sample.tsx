@@ -18,7 +18,7 @@ const sectionStyle: CSSProperties = { display: 'flex', flexDirection: 'column', 
 const titleStyle: CSSProperties = { fontWeight: 600, color: 'var(--perses-text-primary)' };
 const cardStyle: CSSProperties = {
   border: '1px solid var(--perses-border-default)',
-  borderRadius: 6,
+  borderRadius: 'var(--perses-radius-md)',
   overflow: 'hidden',
   background: 'var(--perses-bg-default)',
 };
