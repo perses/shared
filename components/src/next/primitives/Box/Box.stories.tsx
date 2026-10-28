@@ -32,12 +32,12 @@ const fill: CSSProperties = { background: 'var(--perses-bg-sunken)' };
 const panel: CSSProperties = {
   border: '1px solid var(--perses-text-accent)',
   background: 'var(--perses-bg-surface)',
-  borderRadius: 4,
+  borderRadius: 'var(--perses-radius-md)',
 };
 const legend: CSSProperties = {
   background: 'var(--perses-bg-sunken)',
   color: 'var(--perses-text-primary)',
-  borderRadius: 4,
+  borderRadius: 'var(--perses-radius-md)',
   padding: '1rem',
   fontSize: '0.875rem',
   lineHeight: 1.6,

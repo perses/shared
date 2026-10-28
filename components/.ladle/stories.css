@@ -26,7 +26,6 @@ samp {
 
 [data-perses-mode='dark'] {
   min-height: 100vh;
-  background: var(--perses-bg-default);
   color: var(--perses-text-primary);
 }
 
