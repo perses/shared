@@ -22,7 +22,6 @@ import type { RadiusProps, SizingProps, SpacingProps } from '../system';
 import '../system/layout.css';
 import '../system/radius.css';
 import '../system/spacing.css';
-
 import './card.css';
 
 export type CardVariant = 'elevated' | 'outline' | 'subtle';
