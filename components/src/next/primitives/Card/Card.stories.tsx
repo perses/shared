@@ -43,14 +43,21 @@ const variantsCode = `<Card variant="elevated" width={320}>
   <CardHeader endElement={<Button size="sm" variant="outline">Edit</Button>}>
     <h4>Elevated</h4>
   </CardHeader>
-  <CardContent>Default variant; uses the overlay shadow token.</CardContent>
+  <CardContent>Uses the overlay shadow token.</CardContent>
 </Card>
 
-<Card variant="outlined" width={320}>
+<Card variant="outline" width={320}>
   <CardHeader endElement={<Button size="sm" variant="outline">Edit</Button>}>
-    <h4>Outlined</h4>
+    <h4>Outline</h4>
   </CardHeader>
-  <CardContent>Border instead of shadow; used by dashboard panels.</CardContent>
+  <CardContent>Default variant; border instead of shadow; used by dashboard panels.</CardContent>
+</Card>
+
+<Card variant="subtle" width={320}>
+  <CardHeader endElement={<Button size="sm" variant="outline">Edit</Button>}>
+    <h4>Subtle</h4>
+  </CardHeader>
+  <CardContent>A flat surface with no border or shadow.</CardContent>
 </Card>`;
 
 const EditButton = (
@@ -61,22 +68,30 @@ const EditButton = (
 
 export const AllVariants: Story = () => (
   <Stack>
-    <Sample title="elevated and outlined" code={variantsCode}>
+    <Sample title="elevated, outline, and subtle" code={variantsCode}>
       <div className="story-card-row">
         <Card variant="elevated" width={320}>
           <CardHeader endElement={EditButton}>
             <h4 className="story-card-title">Elevated</h4>
           </CardHeader>
           <CardContent>
-            <p className="story-card-text">Default variant; uses the overlay shadow token.</p>
+            <p className="story-card-text">Uses the overlay shadow token.</p>
           </CardContent>
         </Card>
-        <Card variant="outlined" width={320}>
+        <Card variant="outline" width={320}>
           <CardHeader endElement={EditButton}>
-            <h4 className="story-card-title">Outlined</h4>
+            <h4 className="story-card-title">Outline</h4>
           </CardHeader>
           <CardContent>
-            <p className="story-card-text">Border instead of shadow; used by dashboard panels.</p>
+            <p className="story-card-text">Default variant; border instead of shadow; used by dashboard panels.</p>
+          </CardContent>
+        </Card>
+        <Card variant="subtle" width={320}>
+          <CardHeader endElement={EditButton}>
+            <h4 className="story-card-title">Subtle</h4>
+          </CardHeader>
+          <CardContent>
+            <p className="story-card-text">A flat surface with no border or shadow.</p>
           </CardContent>
         </Card>
       </div>
@@ -85,7 +100,7 @@ export const AllVariants: Story = () => (
 );
 AllVariants.storyName = 'Variants';
 
-const panelCode = `<Card as="section" aria-labelledby="cpu-title" variant="outlined" width={420} height={260}>
+const panelCode = `<Card as="section" aria-labelledby="cpu-title" variant="outline" width={420} height={260}>
   <CardHeader as="header" py="sm" endElement={<Button size="sm" variant="ghost">⋯</Button>}>
     <h4 id="cpu-title">CPU usage</h4>
   </CardHeader>
@@ -108,7 +123,7 @@ export const Panel: Story = () => (
       content padding so the chart fills the card.
     </p>
     <Sample title="Panel composition" code={panelCode}>
-      <Card as="section" aria-labelledby="cpu-title" variant="outlined" width={420} height={260}>
+      <Card as="section" aria-labelledby="cpu-title" variant="outline" width={420} height={260}>
         <CardHeader as="header" py="sm" endElement={MenuButton}>
           <h4 id="cpu-title" className="story-card-title">
             CPU usage

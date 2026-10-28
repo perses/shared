@@ -51,11 +51,17 @@ describe('card.css', () => {
     expect(getRule(':where(.ps-CardContent)')).toContain('margin: 0;');
   });
 
-  it('elevated uses the overlay shadow token and outlined uses the border token', () => {
+  it('elevated uses the overlay shadow token and outline uses the border token', () => {
     expect(getRule(":where(.ps-Card[data-variant='elevated'])")).toContain('box-shadow: var(--perses-shadow-overlay);');
-    expect(getRule(":where(.ps-Card[data-variant='outlined'])")).toContain(
+    expect(getRule(":where(.ps-Card[data-variant='outline'])")).toContain(
       'border-color: var(--perses-border-default);',
     );
+  });
+
+  it('subtle removes both the border and shadow', () => {
+    const subtle = getRule(":where(.ps-Card[data-variant='subtle'])");
+    expect(subtle).toContain('border: none;');
+    expect(subtle).toContain('box-shadow: none;');
   });
 
   it('wraps sub-part padding defaults in :where()', () => {

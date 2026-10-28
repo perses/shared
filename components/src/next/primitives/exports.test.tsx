@@ -117,7 +117,7 @@ describe('primitives barrel exports', () => {
     const cardProps: CardProps = {};
     const cardHeaderProps: CardHeaderProps = {};
     const cardContentProps: CardContentProps = {};
-    const cardVariant: CardVariant = 'outlined';
+    const cardVariant: CardVariant = 'outline';
     const color: ColorVariant | Status = 'primary';
     const size: Size = 'md';
     const checkboxProps: CheckboxProps = { 'aria-label': 'Select' };
@@ -156,7 +156,7 @@ describe('primitives barrel exports', () => {
     expect(cardProps).toBeDefined();
     expect(cardHeaderProps).toBeDefined();
     expect(cardContentProps).toBeDefined();
-    expect(cardVariant).toBe('outlined');
+    expect(cardVariant).toBe('outline');
     expect(checkboxProps).toBeDefined();
     expect(checkboxColor).toBe('primary');
     expect(checkboxSize).toBe('md');

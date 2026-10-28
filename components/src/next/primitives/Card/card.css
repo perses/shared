@@ -33,8 +33,13 @@
     box-shadow: var(--perses-shadow-overlay);
   }
 
-  :where(.ps-Card[data-variant='outlined']) {
+  :where(.ps-Card[data-variant='outline']) {
     border-color: var(--perses-border-default);
+  }
+
+  :where(.ps-Card[data-variant='subtle']) {
+    border: none;
+    box-shadow: none;
   }
 
   /* ---- Header ---- */

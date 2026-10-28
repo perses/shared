@@ -30,18 +30,18 @@ describe('Card', () => {
     expect(el).toHaveTextContent('Body');
   });
 
-  it('defaults to the elevated variant', () => {
+  it('defaults to the outline variant', () => {
     render(<Card data-testid="card">Body</Card>);
-    expect(screen.getByTestId('card')).toHaveAttribute('data-variant', 'elevated');
+    expect(screen.getByTestId('card')).toHaveAttribute('data-variant', 'outline');
   });
 
-  it('sets data-variant for outlined', () => {
+  it.each(['elevated', 'outline', 'subtle'] as const)('sets data-variant for %s', (variant) => {
     render(
-      <Card data-testid="card" variant="outlined">
+      <Card data-testid="card" variant={variant}>
         Body
       </Card>,
     );
-    expect(screen.getByTestId('card')).toHaveAttribute('data-variant', 'outlined');
+    expect(screen.getByTestId('card')).toHaveAttribute('data-variant', variant);
   });
 
   it('merges className, forwards ref and rest props', () => {

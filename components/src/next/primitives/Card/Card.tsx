@@ -26,7 +26,7 @@ import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- Registers this component's styles.
 import './card.css';
 
-export type CardVariant = 'elevated' | 'outlined';
+export type CardVariant = 'elevated' | 'outline' | 'subtle';
 /** Elements a `Card` may render as; all share `HTMLAttributes<HTMLElement>`. */
 export type CardElement = 'div' | 'section' | 'article';
 /** Elements a `CardHeader` may render as. */
@@ -39,7 +39,7 @@ const CARD_HEADER_STYLE_PROPS = compileStyleProps([spacingProps]);
 const CARD_CONTENT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps]);
 
 export interface CardProps extends HTMLAttributes<HTMLElement>, SpacingProps, SizingProps {
-  /** Surface treatment: `elevated` (shadow) or `outlined` (border). */
+  /** Surface treatment: `elevated` (shadow), `outline` (border, default), or `subtle` (no border or shadow). */
   variant?: CardVariant;
   /** Semantic element to render; defaults to `div`. Use `section` for labelled regions. */
   as?: CardElement;
@@ -51,7 +51,7 @@ export interface CardProps extends HTMLAttributes<HTMLElement>, SpacingProps, Si
  * `as`; layout comes from style props.
  *
  * @example
- * <Card as="section" aria-labelledby="cpu-title" variant="outlined" height="100%">
+ * <Card as="section" aria-labelledby="cpu-title" variant="outline" height="100%">
  *   <CardHeader as="header" endElement={<IconButton aria-label="Menu"><MenuIcon /></IconButton>}>
  *     <Typography id="cpu-title" variant="h4">CPU</Typography>
  *   </CardHeader>
@@ -59,7 +59,7 @@ export interface CardProps extends HTMLAttributes<HTMLElement>, SpacingProps, Si
  * </Card>
  */
 export const Card = forwardRef<HTMLElement, CardProps>(function Card(
-  { as = 'div', variant = 'elevated', className, style, children, ...props },
+  { as = 'div', variant = 'outline', className, style, children, ...props },
   ref,
 ) {
   const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, CARD_STYLE_PROPS, style);
