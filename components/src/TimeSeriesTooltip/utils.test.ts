@@ -58,13 +58,13 @@ describe('assembleTransform', () => {
   });
 
   describe('when tooltip size is unknown (first render)', () => {
-    it('uses TOOLTIP_MAX_HEIGHT as fallback and flips above the cursor when it does not fit below', () => {
+    it('uses TOOLTIP_MAX_HEIGHT as fallback and clamps against the viewport bottom when it fits neither below nor above', () => {
       const mousePos = makeMousePos(800, 400);
       const result = parseTransform(assembleTransform(mousePos, null, 0, 0));
       expect(result).not.toBeNull();
       // The tooltip (650 tall at the fallback max size) does not fit below the cursor nor
-      // above it, so it falls back to the top of the viewport.
-      expect(result!.y).toBe(4);
+      // above it, so it falls back to the viewport bottom instead of hiding its top.
+      expect(result!.y).toBe(VIEWPORT_HEIGHT - TOOLTIP_MAX_HEIGHT - 16);
       // Worst-case bottom (y + max height) must still fit inside the viewport.
       expect(result!.y + TOOLTIP_MAX_HEIGHT).toBeLessThanOrEqual(VIEWPORT_HEIGHT);
     });
@@ -99,6 +99,20 @@ describe('assembleTransform', () => {
       // The whole tooltip ends above the cursor, so it never covers the hovered marker.
       expect(result!.y + 400).toBeLessThanOrEqual(650);
       expect(result!.y).toBe(650 - 400 - 16);
+    });
+
+    it('falls back to the viewport bottom when flipping would hide the tooltip top in a scrolled page', () => {
+      Object.defineProperty(window, 'scrollY', { configurable: true, value: 1000 });
+      try {
+        // Cursor 300px into the visible viewport; a 450px tooltip fits neither below nor above it.
+        const mousePos = makeMousePos(400, 1000 + 300);
+        const result = parseTransform(assembleTransform(mousePos, null, 450, 300));
+        expect(result).not.toBeNull();
+        expect(result!.y).toBe(1000 + VIEWPORT_HEIGHT - 450 - 16);
+        expect(result!.y).toBeGreaterThanOrEqual(1000);
+      } finally {
+        Object.defineProperty(window, 'scrollY', { configurable: true, value: 0 });
+      }
     });
 
     it('flips the tooltip to the left of the cursor when it would overflow the right edge', () => {
@@ -167,6 +181,37 @@ describe('assembleTransform', () => {
       const result = parseTransform(assembleTransform(mousePos, null, 0, 0, container));
       expect(result).not.toBeNull();
       expect(result!.y).toBe(4);
+    });
+
+    it('flips above the cursor inside a container when it does not fit below', () => {
+      const container = {
+        getBoundingClientRect: () =>
+          ({ top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400, x: 0, y: 0 }) as DOMRect,
+        scrollLeft: 0,
+        scrollTop: 0,
+        scrollHeight: 400,
+      } as unknown as Element;
+
+      const mousePos = makeMousePos(400, 300);
+      const result = parseTransform(assembleTransform(mousePos, null, 100, 200, container));
+      expect(result).not.toBeNull();
+      expect(result!.y).toBe(300 - 100 - 16);
+    });
+
+    it('falls back to the container bottom when flipping would hide the tooltip top in a scrolled container', () => {
+      const container = {
+        getBoundingClientRect: () =>
+          ({ top: 0, left: 0, width: 800, height: 400, right: 800, bottom: 400, x: 0, y: 0 }) as DOMRect,
+        scrollLeft: 0,
+        scrollTop: 200,
+        scrollHeight: 500,
+      } as unknown as Element;
+
+      // Cursor at page y 100 → container y 300; a 300px tooltip fits neither below nor above it.
+      const mousePos = makeMousePos(400, 100);
+      const result = parseTransform(assembleTransform(mousePos, null, 300, 200, container));
+      expect(result).not.toBeNull();
+      expect(result!.y).toBe(500 - 300 - 16);
     });
   });
 });

@@ -69,7 +69,7 @@ export function assembleTransform(
     if (y + effectiveHeight > containerBottom) {
       y = cursorBaseY - effectiveHeight - cursorPaddingY;
       // When it does not fit above the cursor either, fall back to the container bottom.
-      if (y + effectiveHeight > containerBottom) {
+      if (y < containerElement.scrollTop + TOOLTIP_PADDING / 2 || y + effectiveHeight > containerBottom) {
         y = Math.max(containerBottom - effectiveHeight - cursorPaddingY, TOOLTIP_PADDING / 2);
       }
     }
