@@ -21,11 +21,14 @@ import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import ExpandedIcon from 'mdi-material-ui/ChevronDown';
 import CollapsedIcon from 'mdi-material-ui/ChevronRight';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
+import EyeIcon from 'mdi-material-ui/EyeOutline';
+import EyeOffIcon from 'mdi-material-ui/EyeOffOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import type { ReactElement } from 'react';
 
 import { ARIA_LABEL_TEXT, TOOLTIP_TEXT } from '../../constants';
 import { usePanelGroupActions, useEditMode, useDeletePanelGroupDialog } from '../../context';
+import type { VisibilityNotice } from '../../utils';
 
 export interface GridTitleProps {
   panelGroupId: PanelGroupId;
@@ -36,14 +39,32 @@ export interface GridTitleProps {
     isOpen: boolean;
     onToggleOpen: () => void;
   };
+  /** Set in edit mode when the group has a visibility rule. */
+  visibilityNotice?: VisibilityNotice;
 }
 
 /**
  * Renders the title for a Grid section, optionally also supporting expanding
  * and collapsing
  */
+function VisibilityMark({ notice }: { notice: VisibilityNotice }): ReactElement {
+  const Icon = notice.hidden ? EyeOffIcon : EyeIcon;
+  return (
+    <InfoTooltip description={notice.description}>
+      <IconButton
+        size="small"
+        aria-label={notice.hidden ? 'Group hidden for the current selection' : 'Group shown for the current selection'}
+        onClick={(event) => event.stopPropagation()}
+        sx={{ ml: 0.5, color: notice.hidden ? 'warning.main' : 'text.secondary' }}
+      >
+        <Icon fontSize="small" />
+      </IconButton>
+    </InfoTooltip>
+  );
+}
+
 export function GridTitle(props: GridTitleProps): ReactElement {
-  const { panelGroupId, title: rawTitle, panelCount, collapse } = props;
+  const { panelGroupId, title: rawTitle, panelCount, collapse, visibilityNotice } = props;
 
   const title = useReplaceVariablesInString(rawTitle) as string;
 
@@ -82,6 +103,7 @@ export function GridTitle(props: GridTitleProps): ReactElement {
             {collapse.isOpen ? <ExpandedIcon /> : <CollapsedIcon />}
           </IconButton>
           {text}
+          {visibilityNotice && <VisibilityMark notice={visibilityNotice} />}
           {isEditMode && (
             <Stack direction="row" marginLeft="auto">
               <InfoTooltip description={TOOLTIP_TEXT.addPanelToGroup}>
@@ -151,7 +173,10 @@ export function GridTitle(props: GridTitleProps): ReactElement {
         </>
       ) : (
         // If we don't need expand/collapse, just render the title text
-        text
+        <>
+          {text}
+          {visibilityNotice && <VisibilityMark notice={visibilityNotice} />}
+        </>
       )}
     </Box>
   );

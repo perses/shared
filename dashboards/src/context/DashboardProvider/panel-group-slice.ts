@@ -156,6 +156,7 @@ export function convertLayoutsToPanelGroups(
       isCollapsed: layout.spec.display?.collapse?.open === false,
       repeatVariable,
       title: layout.spec.display?.title,
+      visibility: layout.kind === 'Grid' ? layout.spec.display?.visibility : undefined,
       itemLayouts,
       itemPanelKeys,
     };

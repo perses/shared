@@ -16,3 +16,4 @@ export * from './pluginVersioning';
 export * from './repeatLayoutUtils';
 export * from './gridLayoutUtils';
 export * from './timezone';
+export * from './visibilityUtils';
