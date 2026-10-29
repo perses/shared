@@ -14,8 +14,8 @@
 import type { ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
-import { compileStyleProps, displayProps, radiusProps, spacingProps } from '../system';
-import type { DisplayProps, RadiusProps, SpacingProps } from '../system';
+import { compileStyleProps, radiusProps, spacingProps } from '../system';
+import type { RadiusProps, SpacingProps } from '../system';
 import type { Size } from '../types';
 
 export type MenuItemSize = Extract<Size, 'sm' | 'md'>;
@@ -24,7 +24,7 @@ export type MenuItemSize = Extract<Size, 'sm' | 'md'>;
 export const MENU_ITEM_BASE_CLASS = 'ps-MenuItemBase';
 
 /** Props shared by every menu item kind (`MenuItem`, `MenuLinkItem`, `MenuCheckboxItem`). */
-export interface MenuItemBaseProps extends SpacingProps, DisplayProps, RadiusProps {
+export interface MenuItemBaseProps extends SpacingProps, RadiusProps {
   style?: PersesCSSProperties;
   /** Prevents activation and highlighting; sets `data-disabled`. */
   disabled?: boolean;
@@ -42,7 +42,7 @@ export interface MenuItemBaseProps extends SpacingProps, DisplayProps, RadiusPro
   endElement?: ReactNode;
 }
 
-export const MENU_ITEM_STYLE_PROPS = compileStyleProps([spacingProps, displayProps, radiusProps]);
+export const MENU_ITEM_STYLE_PROPS = compileStyleProps([spacingProps, radiusProps]);
 
 function hasContent(node: ReactNode): boolean {
   return node !== undefined && node !== null && typeof node !== 'boolean';

@@ -26,19 +26,24 @@ import { MenuCheckboxItem } from './MenuCheckboxItem';
 import { MenuItem } from './MenuItem';
 import { MenuLinkItem } from './MenuLinkItem';
 
-const row: CSSProperties = { display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' };
+const row: CSSProperties = {
+  display: 'flex',
+  gap: 'var(--perses-spacing-lg)',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+};
 const placementGrid: CSSProperties = {
   display: 'grid',
   gridTemplateColumns: 'repeat(4, max-content)',
-  gap: '1rem',
-  padding: '3rem 1rem',
+  gap: 'var(--perses-spacing-lg)',
+  padding: 'calc(var(--perses-spacing-xl) * 3) var(--perses-spacing-lg)',
   justifyContent: 'center',
 };
 const contextArea: CSSProperties = {
   display: 'grid',
   placeItems: 'center',
   height: '10rem',
-  border: '1px dashed var(--perses-border-default)',
+  border: 'var(--perses-border-width-sm) dashed var(--perses-border-default)',
   borderRadius: 'var(--perses-radius-md)',
   userSelect: 'none',
 };
@@ -280,7 +285,7 @@ const slotStylingCode = `const positionerSlots: MenuSlotProps = {
 };
 
 // The popup itself is the root: style it with className, style, or style props
-<Menu trigger={<Button variant="outline">Styled</Button>} slotProps={positionerSlots} minWidth="240px" p="sm" rounded="lg">
+<Menu trigger={<Button variant="outline">Styled</Button>} slotProps={positionerSlots} minWidth="15rem" p="sm" rounded="lg">
   <MenuItem>Edit</MenuItem>
 </Menu>`;
 
@@ -303,7 +308,7 @@ export const Slots: Story = () => (
       <Menu
         trigger={<Button variant="outline">Styled</Button>}
         slotProps={positionerSlots}
-        minWidth="240px"
+        minWidth="15rem"
         p="sm"
         rounded="lg"
       >
