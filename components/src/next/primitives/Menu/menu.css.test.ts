@@ -72,38 +72,43 @@ describe('menu.css', () => {
     expect(getRule(':where(.ps-Menu > .ps-Divider)')).toContain('margin: var(--perses-spacing-xs) 0;');
   });
 
-  it.each(['.ps-Menu', '.ps-MenuItem'])('keeps %s sizing independent of the optional document reset', (selector) => {
-    expect(getRule(`:where(${selector})`)).toContain('box-sizing: border-box;');
-  });
+  it.each(['.ps-Menu', '.ps-MenuItemBase'])(
+    'keeps %s sizing independent of the optional document reset',
+    (selector) => {
+      expect(getRule(`:where(${selector})`)).toContain('box-sizing: border-box;');
+    },
+  );
 
   it('sizes items with control-size and spacing tokens', () => {
-    const item = getRule(':where(.ps-MenuItem)');
+    const item = getRule(':where(.ps-MenuItemBase)');
     expect(item).toContain('min-height: var(--perses-control-size-md);');
     expect(item).toContain('padding: var(--perses-spacing-xs) var(--perses-spacing-md);');
     expect(item).toContain('gap: var(--perses-spacing-sm);');
     expect(item).toContain('text-decoration: none;');
     expect(item).toContain('user-select: none;');
 
-    const small = getRule(":where(.ps-MenuItem[data-size='sm'])");
+    const small = getRule(":where(.ps-MenuItemBase[data-size='sm'])");
     expect(small).toContain('min-height: var(--perses-control-size-sm);');
     expect(small).toContain('font-size: var(--perses-font-size-sm);');
   });
 
   it('styles item states through data attributes', () => {
-    expect(getRule(':where(.ps-MenuItem[data-highlighted])')).toContain('background-color: var(--perses-bg-sunken);');
-    expect(getRule(':where(.ps-MenuItem[data-selected])')).toContain(
+    expect(getRule(':where(.ps-MenuItemBase[data-highlighted])')).toContain(
+      'background-color: var(--perses-bg-sunken);',
+    );
+    expect(getRule(':where(.ps-MenuItemBase[data-selected])')).toContain(
       'background-color: var(--perses-status-bg-primary);',
     );
-    const disabled = getRule(':where(.ps-MenuItem[data-disabled])');
+    const disabled = getRule(':where(.ps-MenuItemBase[data-disabled])');
     expect(disabled).toContain('opacity: var(--perses-opacity-disabled);');
     expect(disabled).toContain('cursor: not-allowed;');
   });
 
   it('lets content grow and truncate while start and end stay fixed', () => {
-    const content = getRule(':where(.ps-MenuItem__content)');
+    const content = getRule(':where(.ps-MenuItemBase__content)');
     expect(content).toContain('flex: 1 1 auto;');
     expect(content).toContain('min-width: 0;');
-    expect(getRule(':where(.ps-MenuItem__start),\n  :where(.ps-MenuItem__end)')).toContain('flex-shrink: 0;');
+    expect(getRule(':where(.ps-MenuItemBase__start),\n  :where(.ps-MenuItemBase__end)')).toContain('flex-shrink: 0;');
   });
 
   it('uses design tokens for every color, spacing, and radius value', () => {

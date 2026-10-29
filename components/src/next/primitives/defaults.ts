@@ -22,7 +22,7 @@ import { Divider } from './Divider';
 import { Grid, GridItem } from './Grid';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons';
 import { IconButton } from './IconButton';
-import { Menu, MenuItem } from './Menu';
+import { Menu, MenuItem, MenuLinkItem } from './Menu';
 import { Spinner } from './Spinner';
 import { Stack } from './Stack';
 import { Switch } from './Switch';
@@ -62,6 +62,7 @@ export const defaultComponents: PersesComponents = {
   Tooltip,
   Menu,
   MenuItem,
+  MenuLinkItem,
   Table,
   TableHead,
   TableBody,

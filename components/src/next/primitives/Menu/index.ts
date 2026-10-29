@@ -13,4 +13,5 @@
 
 export * from './Menu';
 export * from './MenuItem';
+export * from './MenuLinkItem';
 export type { MenuItemBaseProps, MenuItemSize } from './menuItemShared';
