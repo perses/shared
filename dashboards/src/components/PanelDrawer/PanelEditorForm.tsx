@@ -26,7 +26,7 @@ import type { PanelEditorValues } from '@perses-dev/plugin-system';
 import { PluginKindSelect, usePluginEditor, useValidationSchemas } from '@perses-dev/plugin-system';
 import type { Definition, PanelDefinition, UnknownSpec } from '@perses-dev/spec';
 import type { ForwardedRef, ReactElement } from 'react';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
 
@@ -135,7 +135,18 @@ export const PanelEditorForm = forwardRef(function PanelEditorForm(
     }
   }
 
-  useImperativeHandle(ref, () => ({ requestClose: handleCancel }));
+  const annotationEditorFormRef = useRef<FormEditorHandle>(null);
+  useImperativeHandle(ref, () => ({
+    // While a panel annotation is being edited, let its form handle the request (going back to the annotations list,
+    // with confirmation if needed), as its changes are not part of the panel form until applied
+    requestClose: (): void => {
+      if (annotationEditorFormRef.current) {
+        annotationEditorFormRef.current.requestClose();
+      } else {
+        handleCancel();
+      }
+    },
+  }));
 
   const handlePanelDefinitionChange = (nextPanelDefStr: string): void => {
     const nextPanelDef: PanelDefinition = JSON.parse(nextPanelDefStr);
@@ -260,6 +271,7 @@ export const PanelEditorForm = forwardRef(function PanelEditorForm(
                 }}
                 onAnnotationsChange={(a) => setAnnotations(a)}
                 onJSONChange={handlePanelDefinitionChange}
+                annotationEditorFormRef={annotationEditorFormRef}
               />
             </ErrorBoundary>
           </Grid>
