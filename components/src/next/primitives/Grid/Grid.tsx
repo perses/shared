@@ -1,0 +1,81 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { clsx } from 'clsx';
+import { forwardRef } from 'react';
+import type { HTMLAttributes } from 'react';
+
+import type { PersesCSSProperties } from '../../types';
+import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
+import type { DisplayProps, RadiusProps, Responsive, SizingProps, SpacingProps, SpacingValue } from '../system';
+
+// oxlint-disable-next-line import/no-unassigned-import -- Registers shared layout utility styles used by style props.
+import '../system/layout.css';
+// oxlint-disable-next-line import/no-unassigned-import -- Registers shared radius utility styles used by style props.
+import '../system/radius.css';
+// oxlint-disable-next-line import/no-unassigned-import -- Registers shared spacing utility styles used by style props.
+import '../system/spacing.css';
+// oxlint-disable-next-line import/no-unassigned-import -- Registers this component's styles.
+import './grid.css';
+
+export interface GridProps
+  extends
+    HTMLAttributes<HTMLDivElement>,
+    Omit<SpacingProps, 'gap'>,
+    SizingProps,
+    RadiusProps,
+    Pick<DisplayProps, 'overflow'> {
+  /** Number of equal-width columns. Defaults to `12`. */
+  columns?: number;
+  /** Space between rows and columns, as a spacing token or CSS length. */
+  spacing?: Responsive<SpacingValue>;
+  style?: PersesCSSProperties;
+}
+
+const GRID_STYLE_PROPS = compileStyleProps([
+  spacingProps,
+  sizingProps,
+  radiusProps,
+  { overflow: displayProps.overflow },
+]);
+
+/**
+ * A column grid container. Children are placed in DOM order; use `GridItem` with `size` to span columns.
+ * Spacing is a CSS `gap`, so items never need padding workarounds.
+ *
+ * @example
+ * <Grid spacing="lg">
+ *   <GridItem size={12}>Title</GridItem>
+ *   <GridItem size={4}>Label</GridItem>
+ *   <GridItem size={8}>Field</GridItem>
+ * </Grid>
+ */
+export const Grid = forwardRef<HTMLDivElement, GridProps>(function Grid(
+  { columns, spacing, className, style, children, ...rest },
+  ref,
+) {
+  const {
+    className: styleClassName,
+    style: computedStyle,
+    rest: domProps,
+  } = applyStyleProps({ ...rest, gap: spacing }, GRID_STYLE_PROPS, {
+    '--ps-grid-columns': columns,
+    ...style,
+  });
+
+  return (
+    <div ref={ref} {...domProps} className={clsx('ps-Grid', styleClassName, className)} style={computedStyle}>
+      {children}
+    </div>
+  );
+});

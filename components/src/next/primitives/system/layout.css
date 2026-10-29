@@ -16,7 +16,7 @@
 @import '@perses-dev/design-tokens/css/layers';
 
 /*
- * Layout style props (display, flexbox, sizing). Each class reads only its matching
+ * Layout style props (display, flexbox, grid, sizing). Each class reads only its matching
  * custom property, set inline by styleProps.ts. Breakpoint values carry forward
  * until a later explicit breakpoint overrides them.
  */
@@ -180,6 +180,33 @@
   @media (min-width: 1536px) {
     .ps-flex-xl {
       flex: var(--ps-flex-xl, revert);
+    }
+  }
+
+  .ps-grid-column {
+    grid-column: var(--ps-grid-column, revert);
+  }
+  .ps-grid-column-xs {
+    grid-column: var(--ps-grid-column-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-grid-column-sm {
+      grid-column: var(--ps-grid-column-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-grid-column-md {
+      grid-column: var(--ps-grid-column-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-grid-column-lg {
+      grid-column: var(--ps-grid-column-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-grid-column-xl {
+      grid-column: var(--ps-grid-column-xl, revert);
     }
   }
 
