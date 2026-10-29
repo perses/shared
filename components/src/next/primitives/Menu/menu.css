@@ -100,6 +100,14 @@
     flex-shrink: 0;
   }
 
+  /* The indicator is decorative: the row owns the click, focus, and checked state. */
+  :where(.ps-MenuCheckboxItem__indicator) {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     :where(.ps-Menu) {
       transition: none;

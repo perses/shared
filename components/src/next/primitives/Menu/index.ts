@@ -12,6 +12,7 @@
 // limitations under the License.
 
 export * from './Menu';
+export * from './MenuCheckboxItem';
 export * from './MenuItem';
 export * from './MenuLinkItem';
 export type { MenuItemBaseProps, MenuItemSize } from './menuItemShared';

@@ -29,6 +29,7 @@ import type {
   ColorVariant,
   DividerProps,
   IconProps,
+  MenuCheckboxItemProps,
   MenuItemProps,
   MenuItemSize,
   MenuLinkItemProps,
@@ -64,6 +65,7 @@ import {
   Menu,
   MenuItem,
   MenuLinkItem,
+  MenuCheckboxItem,
   Spinner,
   Stack,
   Switch,
@@ -102,6 +104,7 @@ describe('primitives barrel exports', () => {
     expect(Menu).toBeDefined();
     expect(MenuItem).toBeDefined();
     expect(MenuLinkItem).toBeDefined();
+    expect(MenuCheckboxItem).toBeDefined();
     expect(Table).toBeDefined();
     expect(TableBody).toBeDefined();
     expect(TableCell).toBeDefined();
@@ -153,6 +156,7 @@ describe('primitives barrel exports', () => {
     const menuItemSize: MenuItemSize = 'sm';
     const menuItemProps: MenuItemProps = { size: menuItemSize, selected: true };
     const menuLinkItemProps: MenuLinkItemProps = { href: '/docs', target: '_blank', size: menuItemSize };
+    const menuCheckboxItemProps: MenuCheckboxItemProps = { checked: true, size: menuItemSize };
     const tableProps: TableProps = {};
     const tableRowProps: TableRowProps = {};
     const tableCellProps: TableCellProps = {};
@@ -193,6 +197,7 @@ describe('primitives barrel exports', () => {
     expect(menuProps).toBeDefined();
     expect(menuItemProps).toBeDefined();
     expect(menuLinkItemProps).toBeDefined();
+    expect(menuCheckboxItemProps).toBeDefined();
     expect(tableProps).toBeDefined();
     expect(tableRowProps).toBeDefined();
     expect(tableCellProps).toBeDefined();
