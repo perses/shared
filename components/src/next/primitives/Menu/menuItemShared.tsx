@@ -20,6 +20,9 @@ import type { Size } from '../types';
 
 export type MenuItemSize = Extract<Size, 'sm' | 'md'>;
 
+/** Class shared by every menu item kind so `menu.css` styles them once. */
+export const MENU_ITEM_BASE_CLASS = 'ps-MenuItemBase';
+
 /** Props shared by every menu item kind (`MenuItem`, `MenuLinkItem`, `MenuCheckboxItem`). */
 export interface MenuItemBaseProps extends SpacingProps, DisplayProps, RadiusProps {
   style?: PersesCSSProperties;
@@ -53,9 +56,9 @@ export function MenuItemContent({
 }: Pick<MenuItemBaseProps, 'startElement' | 'endElement'> & { children?: ReactNode }): ReactElement {
   return (
     <>
-      {hasContent(startElement) && <span className="ps-MenuItem__start">{startElement}</span>}
-      <span className="ps-MenuItem__content">{children}</span>
-      {hasContent(endElement) && <span className="ps-MenuItem__end">{endElement}</span>}
+      {hasContent(startElement) && <span className="ps-MenuItemBase__start">{startElement}</span>}
+      <span className="ps-MenuItemBase__content">{children}</span>
+      {hasContent(endElement) && <span className="ps-MenuItemBase__end">{endElement}</span>}
     </>
   );
 }

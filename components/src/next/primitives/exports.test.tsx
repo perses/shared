@@ -31,6 +31,7 @@ import type {
   IconProps,
   MenuItemProps,
   MenuItemSize,
+  MenuLinkItemProps,
   MenuPlacement,
   MenuProps,
   Size,
@@ -62,6 +63,7 @@ import {
   Icon,
   Menu,
   MenuItem,
+  MenuLinkItem,
   Spinner,
   Stack,
   Switch,
@@ -99,6 +101,7 @@ describe('primitives barrel exports', () => {
     expect(Tooltip).toBeDefined();
     expect(Menu).toBeDefined();
     expect(MenuItem).toBeDefined();
+    expect(MenuLinkItem).toBeDefined();
     expect(Table).toBeDefined();
     expect(TableBody).toBeDefined();
     expect(TableCell).toBeDefined();
@@ -149,6 +152,7 @@ describe('primitives barrel exports', () => {
     };
     const menuItemSize: MenuItemSize = 'sm';
     const menuItemProps: MenuItemProps = { size: menuItemSize, selected: true };
+    const menuLinkItemProps: MenuLinkItemProps = { href: '/docs', target: '_blank', size: menuItemSize };
     const tableProps: TableProps = {};
     const tableRowProps: TableRowProps = {};
     const tableCellProps: TableCellProps = {};
@@ -188,6 +192,7 @@ describe('primitives barrel exports', () => {
     expect(tooltipProps).toBeDefined();
     expect(menuProps).toBeDefined();
     expect(menuItemProps).toBeDefined();
+    expect(menuLinkItemProps).toBeDefined();
     expect(tableProps).toBeDefined();
     expect(tableRowProps).toBeDefined();
     expect(tableCellProps).toBeDefined();

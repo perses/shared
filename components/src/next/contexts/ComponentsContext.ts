@@ -22,7 +22,7 @@ import type { CheckboxProps } from '../primitives/Checkbox';
 import type { ChipProps } from '../primitives/Chip';
 import type { DividerProps } from '../primitives/Divider';
 import type { IconButtonProps } from '../primitives/IconButton';
-import type { MenuItemProps, MenuProps } from '../primitives/Menu';
+import type { MenuItemProps, MenuLinkItemProps, MenuProps } from '../primitives/Menu';
 import type { SpinnerProps } from '../primitives/Spinner';
 import type { StackProps } from '../primitives/Stack';
 import type { SwitchProps } from '../primitives/Switch';
@@ -67,6 +67,7 @@ export interface PersesComponents {
   Tooltip: RefComponent<TooltipProps, HTMLDivElement>;
   Menu: RefComponent<MenuProps, HTMLDivElement>;
   MenuItem: RefComponent<MenuItemProps, HTMLDivElement>;
+  MenuLinkItem: RefComponent<MenuLinkItemProps, HTMLAnchorElement>;
   Table: RefComponent<TableProps, HTMLTableElement>;
   TableHead: RefComponent<TableHeadProps, HTMLTableSectionElement>;
   TableBody: RefComponent<TableBodyProps, HTMLTableSectionElement>;
@@ -129,6 +130,7 @@ export interface ComponentsProviderProps {
    *   Tooltip: MyTooltip,
    *   Menu: MyMenu,
    *   MenuItem: MyMenuItem,
+   *   MenuLinkItem: MyMenuLinkItem,
    *   Table: MyTable,
    *   TableHead: MyTableHead,
    *   TableBody: MyTableBody,

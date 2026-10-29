@@ -53,8 +53,8 @@
     margin: var(--perses-spacing-xs) 0;
   }
 
-  /* ---- Items ---- */
-  :where(.ps-MenuItem) {
+  /* ---- Items (shared by MenuItem, MenuLinkItem, MenuCheckboxItem) ---- */
+  :where(.ps-MenuItemBase) {
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -69,32 +69,32 @@
     outline: 0;
   }
 
-  :where(.ps-MenuItem[data-size='sm']) {
+  :where(.ps-MenuItemBase[data-size='sm']) {
     min-height: var(--perses-control-size-sm);
     padding: 0 var(--perses-spacing-sm);
     font-size: var(--perses-font-size-sm);
   }
 
-  :where(.ps-MenuItem[data-highlighted]) {
+  :where(.ps-MenuItemBase[data-highlighted]) {
     background-color: var(--perses-bg-sunken);
   }
 
-  :where(.ps-MenuItem[data-selected]) {
+  :where(.ps-MenuItemBase[data-selected]) {
     background-color: var(--perses-status-bg-primary);
   }
 
-  :where(.ps-MenuItem[data-disabled]) {
+  :where(.ps-MenuItemBase[data-disabled]) {
     opacity: var(--perses-opacity-disabled);
     cursor: not-allowed;
   }
 
-  :where(.ps-MenuItem__content) {
+  :where(.ps-MenuItemBase__content) {
     flex: 1 1 auto;
     min-width: 0;
   }
 
-  :where(.ps-MenuItem__start),
-  :where(.ps-MenuItem__end) {
+  :where(.ps-MenuItemBase__start),
+  :where(.ps-MenuItemBase__end) {
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;

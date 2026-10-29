@@ -17,7 +17,7 @@ import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
 
 import { applyStyleProps } from '../system';
-import { MENU_ITEM_STYLE_PROPS, MenuItemContent } from './menuItemShared';
+import { MENU_ITEM_BASE_CLASS, MENU_ITEM_STYLE_PROPS, MenuItemContent } from './menuItemShared';
 import type { MenuItemBaseProps } from './menuItemShared';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared layout styles.
@@ -54,7 +54,7 @@ export const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(function MenuI
     <BaseMenu.Item
       {...rest}
       ref={ref}
-      className={clsx('ps-MenuItem', styleClassName, className)}
+      className={clsx(MENU_ITEM_BASE_CLASS, 'ps-MenuItem', styleClassName, className)}
       style={computedStyle}
       data-selected={selected ? '' : undefined}
       data-size={size}

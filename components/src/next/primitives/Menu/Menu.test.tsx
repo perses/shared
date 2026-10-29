@@ -71,7 +71,7 @@ describe('Menu', () => {
     expect(menu.parentElement).toHaveClass('ps-Menu__positioner');
     const items = screen.getAllByRole('menuitem');
     expect(items).toHaveLength(3);
-    for (const item of items) expect(item).toHaveClass('ps-MenuItem');
+    for (const item of items) expect(item).toHaveClass('ps-MenuItemBase', 'ps-MenuItem');
   });
 
   it('supports uncontrolled defaultOpen', async () => {
@@ -342,11 +342,11 @@ describe('MenuItem', () => {
     await openMenu();
     const item = screen.getByRole('menuitem', { name: 'Copy' });
     const [start, content, end] = item.children;
-    expect(start).toHaveClass('ps-MenuItem__start');
+    expect(start).toHaveClass('ps-MenuItemBase__start');
     expect(start).toContainElement(screen.getByTestId('start'));
-    expect(content).toHaveClass('ps-MenuItem__content');
+    expect(content).toHaveClass('ps-MenuItemBase__content');
     expect(content).toHaveTextContent('Copy');
-    expect(end).toHaveClass('ps-MenuItem__end');
+    expect(end).toHaveClass('ps-MenuItemBase__end');
     expect(end).toContainElement(screen.getByTestId('end'));
   });
 
@@ -358,8 +358,8 @@ describe('MenuItem', () => {
     ]);
     await openMenu();
     const item = screen.getByRole('menuitem', { name: 'Copy' });
-    expect(item.querySelector('.ps-MenuItem__start')).toBeNull();
-    expect(item.querySelector('.ps-MenuItem__end')).toBeNull();
+    expect(item.querySelector('.ps-MenuItemBase__start')).toBeNull();
+    expect(item.querySelector('.ps-MenuItemBase__end')).toBeNull();
   });
 
   it('renders falsy-but-valid children such as 0', async () => {
@@ -386,7 +386,7 @@ describe('MenuItem', () => {
     await openMenu();
     const item = screen.getByRole('menuitem', { name: 'Copy' });
     expect(ref.current).toBe(item);
-    expect(item).toHaveClass('ps-MenuItem', 'ps-py', 'ps-px', 'ps-rounded', 'custom');
+    expect(item).toHaveClass('ps-MenuItemBase', 'ps-MenuItem', 'ps-py', 'ps-px', 'ps-rounded', 'custom');
     expect(item).toHaveStyle({
       '--ps-py': 'var(--perses-spacing-sm)',
       '--ps-px': 'var(--perses-spacing-lg)',
