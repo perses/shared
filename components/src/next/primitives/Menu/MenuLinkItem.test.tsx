@@ -140,6 +140,7 @@ describe('MenuLinkItem', () => {
     );
     const link = getLink('Documentation');
     expect(link).toHaveAttribute('data-selected', '');
+    expect(link).toHaveAttribute('aria-current', 'true');
     expect(link).toHaveAttribute('data-size', 'sm');
     const [start, content, end] = link.children;
     expect(start).toHaveClass('ps-MenuItemBase__start');

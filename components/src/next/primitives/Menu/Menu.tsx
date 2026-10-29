@@ -107,6 +107,10 @@ export const Menu = forwardRef<HTMLDivElement, MenuProps>(function Menu(
   ref,
 ) {
   const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, MENU_STYLE_PROPS, style);
+  /**
+   * `aria-labelledby` beats `aria-label` in the accessible-name algorithm and Base UI always sets it to the
+   * trigger id, so a consumer `aria-label` only wins if that default is cleared (unless they also pass their own).
+   */
   const labelProps = rest['aria-label'] ? { 'aria-labelledby': rest['aria-labelledby'] } : undefined;
 
   return (
