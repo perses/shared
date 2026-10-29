@@ -35,7 +35,7 @@ function StatefulTitle(): ReactElement {
 const statefulTitle = <StatefulTitle />;
 
 function createRuntimeSlots(): {
-  injectedRef: RefObject<HTMLElement>;
+  injectedRef: RefObject<HTMLElement | null>;
   injectedHandler: ReturnType<typeof vi.fn>;
   runtimeSlots: CardHeaderSlotProps;
 } {

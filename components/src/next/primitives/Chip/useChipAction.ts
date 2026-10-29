@@ -19,10 +19,8 @@ interface UseChipActionOptions extends Pick<HTMLAttributes<HTMLElement>, 'onClic
   disabled: boolean;
 }
 
-const useLabelRef = () => useRef<HTMLSpanElement>(null);
-
 interface ChipAction {
-  labelRef: ReturnType<typeof useLabelRef>;
+  labelRef: { current: HTMLSpanElement | null };
   actionProps: HTMLAttributes<HTMLElement> | undefined;
   handleKeyDown: KeyboardEventHandler<HTMLElement>;
 }
@@ -34,7 +32,7 @@ export function useChipAction({
   onKeyDown,
   tabIndex,
 }: UseChipActionOptions): ChipAction {
-  const labelRef = useLabelRef();
+  const labelRef = useRef<HTMLSpanElement>(null);
   const interactive = Boolean(onClick);
 
   const handleClick = (event: MouseEvent<HTMLElement>): void => {
