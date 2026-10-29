@@ -111,6 +111,12 @@ describe('menu.css', () => {
     expect(getRule(':where(.ps-MenuItemBase__start),\n  :where(.ps-MenuItemBase__end)')).toContain('flex-shrink: 0;');
   });
 
+  it('makes the checkbox indicator decorative so the row owns pointer events', () => {
+    const indicator = getRule(':where(.ps-MenuCheckboxItem__indicator)');
+    expect(indicator).toContain('pointer-events: none;');
+    expect(indicator).toContain('flex-shrink: 0;');
+  });
+
   it('uses design tokens for every color, spacing, and radius value', () => {
     const literals = css.match(/#[0-9a-f]{3,8}\b|\b\d+px\b/gi) ?? [];
     expect(literals).toEqual([]);
