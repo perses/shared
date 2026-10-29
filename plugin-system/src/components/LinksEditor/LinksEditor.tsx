@@ -11,8 +11,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Divider, IconButton, Stack, Typography } from '@mui/material';
+import { Checkbox, Divider, FormControlLabel, IconButton, Stack, Typography } from '@mui/material';
 import { LinkEditorForm } from '@perses-dev/components';
+import type { Link } from '@perses-dev/spec';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import type { HTMLAttributes, ReactElement } from 'react';
@@ -61,59 +62,89 @@ export function LinksEditor({ control, ...props }: LinksEditorProps): ReactEleme
   );
 }
 
+type LinkWithState = Link & {
+  keepTime?: boolean;
+  includeVariables?: boolean;
+};
+
 function LinkControl({ control, index }: { control: Control<PanelEditorValues>; index: number }): ReactElement {
-  const defaultLink = { url: '', name: '', tooltip: '', renderVariables: false, targetBlank: false };
+  const defaultLink: LinkWithState = { url: '', name: '', tooltip: '', renderVariables: false, targetBlank: false };
   return (
     <Controller
       control={control}
       name={`panelDefinition.spec.links.${index}`}
       render={({ field, field: { value: link }, fieldState }) => {
-        const safeLink = link ?? defaultLink;
+        const safeLink = (link ?? defaultLink) as LinkWithState;
+        const update = (next: LinkWithState): void => {
+          field.onChange(next);
+        };
         return (
-          <LinkEditorForm
-            mode="inline"
-            url={{
-              onBlur: field.onBlur,
-              value: safeLink.url,
-              label: 'URL',
-              error: { hasError: !!fieldState.error, helperText: fieldState.error?.message },
-              onChange: (url) => {
-                field.onChange({ ...link, url });
-              },
-            }}
-            newTabOpen={{
-              onBlur: field.onBlur,
-              value: !!safeLink.targetBlank,
-              onChange: (targetBlank) => {
-                field.onChange({ ...link, targetBlank });
-              },
-              label: 'Open in new tab',
-            }}
-            name={{
-              onBlur: field.onBlur,
-              value: safeLink.name ?? '',
-              label: 'Name',
-              onChange: (name) => {
-                field.onChange({ ...link, name });
-              },
-            }}
-            renderVariables={{
-              onBlur: field.onBlur,
-              value: !!safeLink.renderVariables,
-              label: 'Render variables',
-              onChange: (renderVariables) => {
-                field.onChange({ ...link, renderVariables });
-              },
-            }}
-            tooltip={{
-              onBlur: field.onBlur,
-              value: safeLink.tooltip ?? '',
-              label: 'Tooltip',
-              onChange: (tooltip) => {
-                field.onChange({ ...link, tooltip });
-              },
-            }}
-          />
+          <Stack gap={1} flexGrow={1}>
+            <LinkEditorForm
+              mode="inline"
+              url={{
+                onBlur: field.onBlur,
+                value: safeLink.url,
+                label: 'URL',
+                error: { hasError: !!fieldState.error, helperText: fieldState.error?.message },
+                onChange: (url) => {
+                  update({ ...safeLink, url });
+                },
+              }}
+              newTabOpen={{
+                onBlur: field.onBlur,
+                value: !!safeLink.targetBlank,
+                onChange: (targetBlank) => {
+                  update({ ...safeLink, targetBlank });
+                },
+                label: 'Open in new tab',
+              }}
+              name={{
+                onBlur: field.onBlur,
+                value: safeLink.name ?? '',
+                label: 'Name',
+                onChange: (name) => {
+                  update({ ...safeLink, name });
+                },
+              }}
+              renderVariables={{
+                onBlur: field.onBlur,
+                value: !!safeLink.renderVariables,
+                label: 'Render variables',
+                onChange: (renderVariables) => {
+                  update({ ...safeLink, renderVariables });
+                },
+              }}
+              tooltip={{
+                onBlur: field.onBlur,
+                value: safeLink.tooltip ?? '',
+                label: 'Tooltip',
+                onChange: (tooltip) => {
+                  update({ ...safeLink, tooltip });
+                },
+              }}
+            />
+            <Stack direction="row" gap={1}>
+              <FormControlLabel
+                label="Keep current time range"
+                control={
+                  <Checkbox
+                    checked={safeLink.keepTime === true}
+                    onChange={(event) => update({ ...safeLink, keepTime: event.target.checked })}
+                  />
+                }
+              />
+              <FormControlLabel
+                label="Include current variables"
+                control={
+                  <Checkbox
+                    checked={safeLink.includeVariables === true}
+                    onChange={(event) => update({ ...safeLink, includeVariables: event.target.checked })}
+                  />
+                }
+              />
+            </Stack>
+          </Stack>
         );
       }}
     />

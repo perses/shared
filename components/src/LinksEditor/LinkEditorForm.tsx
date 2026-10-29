@@ -27,7 +27,7 @@ export interface LinkEditorFormField<T> {
 
 export interface LinkEditorFormProps {
   mode: 'inline' | 'modalEmbedded';
-  url: LinkEditorFormField<string>;
+  url: LinkEditorFormField<string> & { required?: boolean };
   name?: Omit<LinkEditorFormField<string>, 'error'>;
   tooltip?: Omit<LinkEditorFormField<string>, 'error'>;
   newTabOpen: Omit<LinkEditorFormField<boolean>, 'error'>;
@@ -48,7 +48,7 @@ export const LinkEditorForm = (props: LinkEditorFormProps): ReactElement => {
         placeholder={url.placeholder}
         multiline
         maxRows={5}
-        required
+        required={url.required !== false}
         fullWidth
         value={url.value}
       />
