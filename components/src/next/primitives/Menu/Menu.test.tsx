@@ -328,8 +328,10 @@ describe('MenuItem', () => {
     await openMenu();
     const [copy, paste] = screen.getAllByRole('menuitem');
     expect(copy).toHaveAttribute('data-selected', '');
+    expect(copy).toHaveAttribute('aria-current', 'true');
     expect(copy).toHaveAttribute('data-size', 'md');
     expect(paste).not.toHaveAttribute('data-selected');
+    expect(paste).not.toHaveAttribute('aria-current');
     expect(paste).toHaveAttribute('data-size', 'sm');
   });
 

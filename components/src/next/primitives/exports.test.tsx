@@ -34,6 +34,7 @@ import type {
   MenuCheckboxItemProps,
   MenuItemProps,
   MenuItemSize,
+  MenuAlign,
   MenuLinkItemProps,
   MenuPlacement,
   MenuProps,
@@ -156,10 +157,12 @@ describe('primitives barrel exports', () => {
     const switchProps: SwitchProps = {};
     const tooltipProps: TooltipProps = { title: 'tip', children: <button type="button">trigger</button> };
     const menuPlacement: MenuPlacement = 'bottom';
+    const menuAlign: MenuAlign = 'start';
     const menuProps: MenuProps = {
       trigger: <button type="button">open</button>,
       children: null,
       placement: menuPlacement,
+      align: menuAlign,
     };
     const menuItemSize: MenuItemSize = 'sm';
     const menuItemProps: MenuItemProps = { size: menuItemSize, selected: true };

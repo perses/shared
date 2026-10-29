@@ -65,6 +65,7 @@ export const MenuLinkItem = forwardRef<HTMLAnchorElement, MenuLinkItemProps>(fun
       className={clsx(MENU_ITEM_BASE_CLASS, 'ps-MenuLinkItem', styleClassName, className)}
       style={computedStyle}
       data-selected={selected ? '' : undefined}
+      aria-current={selected ? 'true' : undefined}
       data-size={size}
     >
       <MenuItemContent startElement={startElement} endElement={endElement}>

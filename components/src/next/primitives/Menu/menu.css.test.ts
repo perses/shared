@@ -53,6 +53,7 @@ describe('menu.css', () => {
     expect(popup).toContain('border: var(--perses-border-width-sm) solid var(--perses-border-default);');
     expect(popup).toContain('border-radius: var(--perses-radius-md);');
     expect(popup).toContain('box-shadow: var(--perses-shadow-overlay);');
+    expect(popup).toContain('max-height: var(--available-height);');
     expect(popup).toContain('overflow-y: auto;');
     expect(popup).toContain('transform-origin: var(--transform-origin);');
   });
@@ -102,6 +103,13 @@ describe('menu.css', () => {
     const disabled = getRule(':where(.ps-MenuItemBase[data-disabled])');
     expect(disabled).toContain('opacity: var(--perses-opacity-disabled);');
     expect(disabled).toContain('cursor: not-allowed;');
+  });
+
+  it('keeps the keyboard highlight visible on a selected item', () => {
+    const selectedHighlighted = ':where(.ps-MenuItemBase[data-selected][data-highlighted])';
+    expect(getRule(selectedHighlighted)).toContain('background-color: var(--perses-status-bg-primary-hover);');
+    expect(css.indexOf(selectedHighlighted)).toBeGreaterThan(css.indexOf(':where(.ps-MenuItemBase[data-selected])'));
+    expect(css.indexOf(selectedHighlighted)).toBeGreaterThan(css.indexOf(':where(.ps-MenuItemBase[data-highlighted])'));
   });
 
   it('lets content grow and truncate while start and end stay fixed', () => {

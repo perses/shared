@@ -28,7 +28,7 @@ export interface MenuItemBaseProps extends SpacingProps, DisplayProps, RadiusPro
   style?: PersesCSSProperties;
   /** Prevents activation and highlighting; sets `data-disabled`. */
   disabled?: boolean;
-  /** Marks the current choice visually (`data-selected`). Has no ARIA meaning. */
+  /** Marks the current choice: sets `data-selected` and `aria-current="true"`. */
   selected?: boolean;
   /** Row height and padding. Defaults to `md`. */
   size?: MenuItemSize;

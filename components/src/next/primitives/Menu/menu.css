@@ -35,6 +35,7 @@
     border: var(--perses-border-width-sm) solid var(--perses-border-default);
     border-radius: var(--perses-radius-md);
     box-shadow: var(--perses-shadow-overlay);
+    max-height: var(--available-height);
     overflow-y: auto;
     outline: 0;
     transform-origin: var(--transform-origin);
@@ -81,6 +82,10 @@
 
   :where(.ps-MenuItemBase[data-selected]) {
     background-color: var(--perses-status-bg-primary);
+  }
+
+  :where(.ps-MenuItemBase[data-selected][data-highlighted]) {
+    background-color: var(--perses-status-bg-primary-hover);
   }
 
   :where(.ps-MenuItemBase[data-disabled]) {

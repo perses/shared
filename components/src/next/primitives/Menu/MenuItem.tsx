@@ -57,6 +57,7 @@ export const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(function MenuI
       className={clsx(MENU_ITEM_BASE_CLASS, 'ps-MenuItem', styleClassName, className)}
       style={computedStyle}
       data-selected={selected ? '' : undefined}
+      aria-current={selected ? 'true' : undefined}
       data-size={size}
     >
       <MenuItemContent startElement={startElement} endElement={endElement}>
