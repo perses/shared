@@ -1,0 +1,108 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '@perses-dev/design-tokens/css/layers';
+
+@layer perses.components {
+  /* ---- Popup ---- */
+  :where(.ps-Menu__positioner) {
+    z-index: var(--perses-z-index-overlay);
+    outline: 0;
+  }
+
+  :where(.ps-Menu) {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    padding: var(--perses-spacing-xs) 0;
+    background-color: var(--perses-bg-overlay);
+    color: var(--perses-text-primary);
+    font-family: var(--perses-font-family);
+    font-size: var(--perses-font-size-md);
+    line-height: var(--perses-line-height-normal);
+    border: var(--perses-border-width-sm) solid var(--perses-border-default);
+    border-radius: var(--perses-radius-md);
+    box-shadow: var(--perses-shadow-overlay);
+    overflow-y: auto;
+    outline: 0;
+    transform-origin: var(--transform-origin);
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease;
+  }
+
+  :where(.ps-Menu[data-starting-style]),
+  :where(.ps-Menu[data-ending-style]) {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  :where(.ps-Menu > .ps-Divider) {
+    margin: var(--perses-spacing-xs) 0;
+  }
+
+  /* ---- Items ---- */
+  :where(.ps-MenuItem) {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: var(--perses-spacing-sm);
+    min-height: var(--perses-control-size-md);
+    padding: var(--perses-spacing-xs) var(--perses-spacing-md);
+    font: inherit;
+    color: inherit;
+    text-decoration: none;
+    cursor: default;
+    user-select: none;
+    outline: 0;
+  }
+
+  :where(.ps-MenuItem[data-size='sm']) {
+    min-height: var(--perses-control-size-sm);
+    padding: 0 var(--perses-spacing-sm);
+    font-size: var(--perses-font-size-sm);
+  }
+
+  :where(.ps-MenuItem[data-highlighted]) {
+    background-color: var(--perses-bg-sunken);
+  }
+
+  :where(.ps-MenuItem[data-selected]) {
+    background-color: var(--perses-status-bg-primary);
+  }
+
+  :where(.ps-MenuItem[data-disabled]) {
+    opacity: var(--perses-opacity-disabled);
+    cursor: not-allowed;
+  }
+
+  :where(.ps-MenuItem__content) {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  :where(.ps-MenuItem__start),
+  :where(.ps-MenuItem__end) {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :where(.ps-Menu) {
+      transition: none;
+    }
+  }
+}

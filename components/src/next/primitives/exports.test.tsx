@@ -29,6 +29,10 @@ import type {
   ColorVariant,
   DividerProps,
   IconProps,
+  MenuItemProps,
+  MenuItemSize,
+  MenuPlacement,
+  MenuProps,
   Size,
   SortDirection,
   SpacingValue,
@@ -56,6 +60,8 @@ import {
   Chip,
   Divider,
   Icon,
+  Menu,
+  MenuItem,
   Spinner,
   Stack,
   Switch,
@@ -91,6 +97,8 @@ describe('primitives barrel exports', () => {
     expect(Stack).toBeDefined();
     expect(Switch).toBeDefined();
     expect(Tooltip).toBeDefined();
+    expect(Menu).toBeDefined();
+    expect(MenuItem).toBeDefined();
     expect(Table).toBeDefined();
     expect(TableBody).toBeDefined();
     expect(TableCell).toBeDefined();
@@ -133,6 +141,14 @@ describe('primitives barrel exports', () => {
     const stackProps: StackProps = {};
     const switchProps: SwitchProps = {};
     const tooltipProps: TooltipProps = { title: 'tip', children: <button type="button">trigger</button> };
+    const menuPlacement: MenuPlacement = 'bottom';
+    const menuProps: MenuProps = {
+      trigger: <button type="button">open</button>,
+      children: null,
+      placement: menuPlacement,
+    };
+    const menuItemSize: MenuItemSize = 'sm';
+    const menuItemProps: MenuItemProps = { size: menuItemSize, selected: true };
     const tableProps: TableProps = {};
     const tableRowProps: TableRowProps = {};
     const tableCellProps: TableCellProps = {};
@@ -170,6 +186,8 @@ describe('primitives barrel exports', () => {
     expect(stackProps).toBeDefined();
     expect(switchProps).toBeDefined();
     expect(tooltipProps).toBeDefined();
+    expect(menuProps).toBeDefined();
+    expect(menuItemProps).toBeDefined();
     expect(tableProps).toBeDefined();
     expect(tableRowProps).toBeDefined();
     expect(tableCellProps).toBeDefined();
