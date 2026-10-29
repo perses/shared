@@ -24,6 +24,7 @@ export * from './Spinner';
 export * from './Stack';
 export * from './Switch';
 export * from './Tooltip';
+export * from './Menu';
 export * from './Table';
 export * from './TextField';
 export * from './Text';
