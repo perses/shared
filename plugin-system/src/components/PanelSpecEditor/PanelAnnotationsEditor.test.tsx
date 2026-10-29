@@ -32,7 +32,7 @@ describe('PanelAnnotationsEditor', () => {
     { display: { name: 'Deployments' }, plugin: { kind: 'StaticAnnotation', spec: {} } },
   ];
 
-  const renderComponent = (): { ref: RefObject<FormEditorHandle>; onChange: Mock } => {
+  const renderComponent = (): { ref: RefObject<FormEditorHandle | null>; onChange: Mock } => {
     const ref = createRef<FormEditorHandle>();
     const onChange = vi.fn();
     renderWithContext(<PanelAnnotationsEditor value={annotations} onChange={onChange} annotationEditorFormRef={ref} />);
