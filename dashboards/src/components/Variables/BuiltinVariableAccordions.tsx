@@ -15,6 +15,8 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  CircularProgress,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -31,10 +33,15 @@ import { useMemo } from 'react';
 
 type BuiltinVariableAccordionsProps = {
   builtinVariableDefinitions: BuiltinVariableDefinition[];
+  /**
+   * Displays a loading indicator after the accordions, e.g. while the builtin variables of the datasource plugins load.
+   */
+  isLoading?: boolean;
 };
 
 export function BuiltinVariableAccordions({
   builtinVariableDefinitions,
+  isLoading = false,
 }: BuiltinVariableAccordionsProps): ReactElement {
   const builtinVariablesBySource = useMemo(() => {
     const result: Record<string, BuiltinVariableDefinition[]> = {};
@@ -107,6 +114,14 @@ export function BuiltinVariableAccordions({
           </AccordionDetails>
         </Accordion>
       ))}
+      {isLoading && (
+        <Stack direction="row" alignItems="center" justifyContent="center" gap={1} py={1}>
+          <CircularProgress size="1rem" aria-label="Loading built-in variables" />
+          <Typography variant="body2" color="text.secondary">
+            Loading built-in variables…
+          </Typography>
+        </Stack>
+      )}
     </>
   );
 }

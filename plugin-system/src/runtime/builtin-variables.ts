@@ -14,6 +14,7 @@
 import type { BuiltinVariableDefinition } from '@perses-dev/spec';
 import { createContext, useContext, useMemo } from 'react';
 
+import { usePluginBuiltinVariableDefinitions } from './plugin-registry';
 import type { VariableStateMap } from './variables';
 
 export type BuiltinVariableSrv = {
@@ -58,7 +59,17 @@ export function useBuiltinVariableValues(names?: string[]): VariableStateMap {
   return values;
 }
 
+/**
+ * Returns the builtin variable definitions of the context and of the datasource plugins. The datasource plugins are
+ * loaded on first use: only use it where the definitions are displayed, e.g. in the variable editor.
+ */
 export function useBuiltinVariableDefinitions(): BuiltinVariableDefinition[] {
   const { variables } = useBuiltinVariableContext();
-  return variables;
+  const { data: datasourceVariables } = usePluginBuiltinVariableDefinitions();
+
+  return useMemo(() => {
+    if (!datasourceVariables?.length) return variables;
+    const names = new Set(variables.map((variable) => variable.spec.name));
+    return [...variables, ...datasourceVariables.filter((variable) => !names.has(variable.spec.name))];
+  }, [variables, datasourceVariables]);
 }

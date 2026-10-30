@@ -84,6 +84,10 @@ export function VariableEditor(props: {
   variableDefinitions: VariableDefinition[];
   externalVariableDefinitions: ExternalVariableDefinition[];
   builtinVariableDefinitions: BuiltinVariableDefinition[];
+  /**
+   * Whether builtin variable definitions are still loading, e.g. the ones of the datasource plugins.
+   */
+  isBuiltinVariableDefinitionsLoading?: boolean;
   onChange: (variableDefinitions: VariableDefinition[]) => void;
   onCancel: () => void;
 }): ReactElement {
@@ -421,7 +425,10 @@ export function VariableEditor(props: {
                     ),
                 )}
               {builtinVariableDefinitions && (
-                <BuiltinVariableAccordions builtinVariableDefinitions={builtinVariableDefinitions} />
+                <BuiltinVariableAccordions
+                  builtinVariableDefinitions={builtinVariableDefinitions}
+                  isLoading={props.isBuiltinVariableDefinitionsLoading}
+                />
               )}
             </Stack>
           </Box>

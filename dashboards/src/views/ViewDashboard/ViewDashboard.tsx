@@ -18,7 +18,6 @@ import {
   TimeRangeProviderWithQueryParams,
   useInitialRefreshInterval,
   useInitialTimeRange,
-  usePluginBuiltinVariableDefinitions,
 } from '@perses-dev/plugin-system';
 import type { BuiltinVariableDefinition } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
@@ -78,8 +77,6 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     () => resolveDashboardTimeZone(spec.timezone, userPreferenceTimezone),
     [spec.timezone, userPreferenceTimezone],
   );
-  const { data } = usePluginBuiltinVariableDefinitions();
-
   const builtinVariables = useMemo(() => {
     const result = [
       {
@@ -109,11 +106,8 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
         },
       } as BuiltinVariableDefinition,
     ];
-    if (data) {
-      data.forEach((def: BuiltinVariableDefinition) => result.push(def));
-    }
     return result;
-  }, [dashboardResource.metadata.name, dashboardResource.metadata.project, data]);
+  }, [dashboardResource.metadata.name, dashboardResource.metadata.project]);
 
   return (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>

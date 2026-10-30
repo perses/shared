@@ -167,22 +167,46 @@ export function useListPluginMetadata(
   });
 }
 
+// Query keys must be serializable: identifies each plugin registry by its `getPlugin` function, which is stable for the
+// lifetime of a registry, so that registries sharing a QueryClient do not share their cached results.
+const pluginRegistryIds = new WeakMap<PluginRegistryContextType['getPlugin'], number>();
+let nextPluginRegistryId = 0;
+
+function getPluginRegistryId(getPlugin: PluginRegistryContextType['getPlugin']): number {
+  let id = pluginRegistryIds.get(getPlugin);
+  if (id === undefined) {
+    id = nextPluginRegistryId++;
+    pluginRegistryIds.set(getPlugin, id);
+  }
+  return id;
+}
+
+/**
+ * Returns the builtin variable definitions of every installed datasource plugin. This loads every datasource plugin:
+ * only use it where the definitions are displayed, not while a dashboard loads.
+ */
 export function usePluginBuiltinVariableDefinitions(): UseQueryResult<BuiltinVariableDefinition[]> {
   const { getPlugin, listPluginMetadata } = usePluginRegistry();
 
   return useQuery({
-    queryKey: ['usePluginBuiltinVariableDefinitions'],
+    queryKey: ['usePluginBuiltinVariableDefinitions', getPluginRegistryId(getPlugin)],
     queryFn: async () => {
       const datasources = await listPluginMetadata(['Datasource']);
-      const datasourceNames = new Set(datasources.map((datasource) => datasource.spec.name));
-      const result: BuiltinVariableDefinition[] = [];
-      for (const name of datasourceNames) {
-        const plugin = await getPlugin({ kind: 'Datasource', name });
-        if (plugin.getBuiltinVariableDefinitions) {
-          plugin.getBuiltinVariableDefinitions().forEach((definition) => result.push(definition));
+      const datasourceNames = [...new Set(datasources.map((datasource) => datasource.spec.name))];
+      const plugins = await Promise.allSettled(datasourceNames.map((name) => getPlugin({ kind: 'Datasource', name })));
+      // A datasource plugin failing to load must not hide the builtin variables of the other ones.
+      return plugins.flatMap((plugin, index) => {
+        if (plugin.status === 'rejected') {
+          console.warn(
+            `Unable to load the builtin variables of the datasource plugin '${datasourceNames[index]}'`,
+            plugin.reason,
+          );
+          return [];
         }
-      }
-      return result;
+        return plugin.value.getBuiltinVariableDefinitions?.() ?? [];
+      });
     },
+    // The installed plugins do not change while the registry exists.
+    staleTime: Infinity,
   });
 }
