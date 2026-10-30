@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { marked } from 'marked';
+
 import { panelDescriptionToHTML } from './PanelDescriptionTooltip';
 
 describe('panelDescriptionToHTML', () => {
@@ -41,6 +43,34 @@ describe('panelDescriptionToHTML', () => {
     expect(html).not.toContain('<script');
     expect(html).not.toContain('onerror');
     expect(html).not.toContain('javascript:');
+  });
+
+  it.each([
+    ['style elements', 'foo\n\n<style>body{display:none}</style>', '<style'],
+    ['style elements inside svg', '<svg><style>body{display:none}</style></svg>', '<style'],
+    ['inline styles', '<div style="position:fixed;inset:0">overlay</div>', 'style='],
+    ['forms', '<form action="https://example.com"><input type="password"><button>go</button></form>', '<form'],
+    ['inputs', '<input type="password">', '<input'],
+    ['buttons', '<button>go</button>', '<button'],
+    ['textareas', '<textarea></textarea>', '<textarea'],
+    ['selects', '<select><option>a</option></select>', '<select'],
+    ['class attributes', '<span class="MuiBackdrop-root">x</span>', 'class='],
+    ['id attributes', '<span id="root">x</span>', 'id='],
+  ])('removes %s that could affect the page outside the tooltip', (_, description, forbidden) => {
+    expect(panelDescriptionToHTML(description)).not.toContain(forbidden);
+  });
+
+  it('renders task lists without input elements', () => {
+    expect(panelDescriptionToHTML('- [x] done\n- [ ] todo')).toBe('<ul>\n<li>☑ done</li>\n<li>☐ todo</li>\n</ul>\n');
+  });
+
+  it('is not affected by the global marked configuration', () => {
+    marked.use({ renderer: { strong: (): string => 'overridden' } });
+    try {
+      expect(panelDescriptionToHTML('**bold**')).toBe('<p><strong>bold</strong></p>\n');
+    } finally {
+      marked.setOptions(marked.getDefaults());
+    }
   });
 
   it('can be imported and falls back to escaped plain text when no DOM is available', async () => {

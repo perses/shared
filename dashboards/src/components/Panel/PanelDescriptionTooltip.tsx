@@ -15,9 +15,25 @@ import type { TooltipProps } from '@mui/material';
 import { Box, styled, Tooltip, tooltipClasses } from '@mui/material';
 import type { DOMPurify as DOMPurifyInstance } from 'dompurify';
 import DOMPurify from 'dompurify';
-import { marked } from 'marked';
+import { Marked } from 'marked';
 import type { ReactElement, ReactNode } from 'react';
 import { useMemo } from 'react';
+
+// Dedicated Marked instance, so that global `marked.use()` / `marked.setOptions()` calls elsewhere in the host
+// application do not change how descriptions are rendered.
+const descriptionMarked = new Marked({
+  gfm: true,
+  breaks: true,
+  renderer: {
+    // Task list items are rendered as text, since `<input>` elements are removed by the sanitizer.
+    checkbox: ({ checked }): string => (checked ? '☑' : '☐'),
+  },
+});
+
+// Elements and attributes that could affect the page outside the tooltip (which is portaled to `document.body`),
+// e.g. restyle or cover the application, or collect user input.
+const FORBIDDEN_TAGS = ['style', 'form', 'input', 'button', 'textarea', 'select'];
+const FORBIDDEN_ATTRIBUTES = ['style', 'class', 'id'];
 
 let descriptionPurifier: DOMPurifyInstance | undefined;
 
@@ -63,8 +79,12 @@ export function panelDescriptionToHTML(description: string): string {
   if (!purifier.isSupported) {
     return escapeHTML(description);
   }
-  const html = marked.parse(description, { gfm: true, breaks: true, async: false });
-  return purifier.sanitize(html, { ADD_ATTR: ['target', 'rel'] });
+  const html = descriptionMarked.parse(description, { async: false });
+  return purifier.sanitize(html, {
+    ADD_ATTR: ['target', 'rel'],
+    FORBID_TAGS: FORBIDDEN_TAGS,
+    FORBID_ATTR: FORBIDDEN_ATTRIBUTES,
+  });
 }
 
 export interface PanelDescriptionTooltipProps {
