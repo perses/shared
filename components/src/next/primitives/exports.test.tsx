@@ -73,6 +73,7 @@ import {
   TextField,
   TextHelper,
   Tooltip,
+  useResponsiveValue,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -91,6 +92,7 @@ describe('primitives barrel exports', () => {
     expect(Stack).toBeDefined();
     expect(Switch).toBeDefined();
     expect(Tooltip).toBeDefined();
+    expect(useResponsiveValue).toBeDefined();
     expect(Table).toBeDefined();
     expect(TableBody).toBeDefined();
     expect(TableCell).toBeDefined();

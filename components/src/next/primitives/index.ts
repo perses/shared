@@ -28,5 +28,6 @@ export * from './Table';
 export * from './TextField';
 export * from './Text';
 export * from './TextHelper';
+export { useResponsiveValue } from './system';
 export type { ColorVariant, Size, Status } from './types';
 export type { PersesCSSProperties, SlotStyleProps } from '../types';
