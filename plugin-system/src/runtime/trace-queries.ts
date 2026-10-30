@@ -21,12 +21,13 @@ import { usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
 import { useAllVariableValues } from './variables';
+
 export type TraceQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'TraceQuery', PluginSpec>;
 export const TRACE_QUERY_KEY = 'TraceQuery';
 
 /**
  * Run a trace query using a TraceQuery plugin and return the results
- * @param definitions: dashboard defintion for a trace query, written in Trace Query Language (TraceQL)
+ * @param definitions: dashboard definition for a trace query, written in Trace Query Language (TraceQL)
  * Documentation for TraceQL: https://grafana.com/docs/tempo/latest/traceql/
  */
 export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQueryResult<TraceData>> {
@@ -34,37 +35,35 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQ
   const context = useTraceQueryContext();
 
   const pluginLoaderResponse = usePlugins(
-    'TraceQuery',
-    definitions.map((d) => ({
-      kind: d.spec.plugin.kind,
-      version: d.spec.plugin.metadata?.version,
-      registry: d.spec.plugin.metadata?.registry,
+    TRACE_QUERY_KEY,
+    definitions.map(({ spec }) => ({
+      kind: spec.plugin.kind,
+      version: spec.plugin.metadata?.version,
+      registry: spec.plugin.metadata?.registry,
     })),
   );
 
-  // useQueries() handles data fetching from query plugins (e.g. traceQL queries, promQL queries)
-  // https://tanstack.com/query/v4/docs/react/reference/useQuery
   return useQueries({
-    queries: definitions.map((definition, idx) => {
-      const plugin = pluginLoaderResponse[idx]?.data;
-      const { queryEnabled, queryKey } = getQueryOptions({ context, definition, plugin });
-      const traceQueryKind = definition?.spec?.plugin?.kind;
+    queries: definitions.map((definition, index) => {
+      const plugin = pluginLoaderResponse[index]?.data;
+      const pluginLoadFailed = pluginLoaderResponse[index]?.isError ?? false;
+      const { queryEnabled, queryKey } = getQueryOptions({ plugin, pluginLoadFailed, definition, context });
       return {
         enabled: queryEnabled,
-        queryKey: queryKey,
+        queryKey,
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
         staleTime: Infinity,
+        structuralSharing: false,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<TraceData> => {
-          const plugin = await getPlugin({
+          const queryPlugin = await getPlugin({
             kind: TRACE_QUERY_KEY,
-            name: traceQueryKind,
+            name: definition.spec.plugin.kind,
             version: definition.spec.plugin.metadata?.version,
             registry: definition.spec.plugin.metadata?.registry,
           });
-          const data = await plugin.getTraceData(definition.spec.plugin.spec, context, signal);
-          return data;
+          return queryPlugin.getTraceData(definition.spec.plugin.spec, context, signal);
         },
       };
     }),
@@ -73,10 +72,12 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQ
 
 function getQueryOptions({
   plugin,
+  pluginLoadFailed,
   definition,
   context,
 }: {
   plugin?: TraceQueryPlugin;
+  pluginLoadFailed: boolean;
   definition: TraceQueryDefinition;
   context: TraceQueryContext;
 }): {
@@ -84,20 +85,16 @@ function getQueryOptions({
   queryEnabled: boolean;
 } {
   const { variableState, absoluteTimeRange } = context;
-
-  const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
+  const dependencies = plugin?.dependsOn?.(definition.spec.plugin.spec, context);
   const variableDependencies = dependencies?.variables;
-
-  const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
-  const variablesValueKey = getVariableValuesKey(filteredVariabledState);
+  const filteredVariableState = filterVariableStateMap(variableState, variableDependencies);
+  const variablesValueKey = getVariableValuesKey(filteredVariableState);
   const queryKey = ['query', TRACE_QUERY_KEY, definition, absoluteTimeRange, variablesValueKey] as const;
+  // Only declared dependencies delay the query; undeclared ones still rerun it through the cache key.
+  const waitToLoad = variableDependencies?.some((name) => variableState[name]?.loading) ?? false;
+  // Let the query function surface plugin loading errors once variable dependencies are ready.
+  const queryEnabled = (plugin !== undefined || pluginLoadFailed) && !waitToLoad;
 
-  let waitToLoad = false;
-  if (variableDependencies) {
-    waitToLoad = variableDependencies.some((v) => variableState[v]?.loading);
-  }
-
-  const queryEnabled = plugin !== undefined && !waitToLoad;
   return {
     queryKey,
     queryEnabled,

@@ -23,7 +23,7 @@ export type { VariableOption } from '@perses-dev/components';
 export interface GetVariableOptionsContext {
   variables: VariableStateMap;
   datasourceStore: DatasourceStore;
-  timeRange: AbsoluteTimeRange;
+  absoluteTimeRange: AbsoluteTimeRange;
 }
 
 /**

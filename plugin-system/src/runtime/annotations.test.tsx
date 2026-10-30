@@ -140,7 +140,7 @@ describe('annotation query cache', () => {
   });
 
   it.each([
-    ['declares no variables', definition],
+    ['omits the variable list', definition],
     ['has no dependsOn', definitionWithoutDependsOn],
   ])('does not wait for variables when the plugin %s', async (_, spec) => {
     runtime.variables = { cluster: { value: 'prod', loading: true } };
