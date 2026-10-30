@@ -159,5 +159,41 @@ describe('TimeRangeControls', () => {
     });
   });
 
+  describe('zoom buttons', () => {
+    const renderZoom = (pastDuration: DurationString): void => {
+      const timePresets: TimeOption[] = [
+        { display: 'Last 30 minutes', value: { pastDuration: '30m' } },
+        { display: 'Last 1 hour', value: { pastDuration: '1h' } },
+        { display: 'Last 6 hours', value: { pastDuration: '6h' } },
+      ];
+      renderWithContext(
+        <TimeRangeProviderBasic
+          initialRefreshInterval={testDefaultRefreshInterval}
+          initialTimeRange={{ pastDuration }}
+        >
+          <TimeRangeControls timeZone="local" onTimeZoneChange={() => undefined} timePresets={timePresets} />
+        </TimeRangeProviderBasic>,
+      );
+    };
+
+    it('should zoom out a "last X" range to the next larger preset', () => {
+      renderZoom('1h');
+      userEvent.click(screen.getByRole('button', { name: /zoom out/i }));
+      expect(screen.getByText('Last 6 hours')).toBeInTheDocument();
+    });
+
+    it('should zoom in a "last X" range to the next smaller preset', () => {
+      renderZoom('1h');
+      userEvent.click(screen.getByRole('button', { name: /zoom in/i }));
+      expect(screen.getByText('Last 30 minutes')).toBeInTheDocument();
+    });
+
+    it('should switch to an absolute range when there is no larger preset', () => {
+      renderZoom('6h');
+      userEvent.click(screen.getByRole('button', { name: /zoom out/i }));
+      expect(screen.queryByText('Last 6 hours')).not.toBeInTheDocument();
+    });
+  });
+
   // TODO: add additional tests for absolute time selection, other inputs, form validation, etc.
 });
