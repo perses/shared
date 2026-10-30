@@ -28,7 +28,7 @@ const { resolveAnnotations } = vi.hoisted(() => ({
   resolveAnnotations: vi.fn<
     (definitions: AnnotationSpec[]) => Array<{
       data?: AnnotationData[];
-      isLoading?: boolean;
+      isPending?: boolean;
       error?: Error;
     }>
   >(),
@@ -143,14 +143,14 @@ describe('usePanelAnnotationsWithData', () => {
 
   it('preserves empty results and omits annotations with no data yet', () => {
     resolveAnnotations.mockImplementation((definitions) =>
-      definitions.map((definition) => (definition.display.name === 'Deploys' ? { isLoading: true } : { data: [] })),
+      definitions.map((definition) => (definition.display.name === 'Deploys' ? { isPending: true } : { data: [] })),
     );
     const { result } = renderHook(() => usePanelAnnotationsWithData([panelDefinition]), { wrapper });
     expect(result.current).toEqual([{ definition: panelDefinition, data: [] }]);
   });
 
   it('keeps the same empty array across renders while no annotation has data', () => {
-    resolveAnnotations.mockImplementation((definitions) => definitions.map(() => ({ isLoading: true })));
+    resolveAnnotations.mockImplementation((definitions) => definitions.map(() => ({ isPending: true })));
     const { result, rerender } = renderHook(() => usePanelAnnotationsWithData([panelDefinition]), { wrapper });
     const firstResult = result.current;
     expect(firstResult).toEqual([]);
@@ -190,12 +190,12 @@ describe('usePanelAnnotationsWithData', () => {
   });
 
   it('reads loading and error states directly from the query results', () => {
-    resolveAnnotations.mockImplementation(() => [{ isLoading: true }]);
+    resolveAnnotations.mockImplementation(() => [{ isPending: true }]);
     const { result, rerender } = renderHook(() => useAnnotationSpecAndState('Deploys'), { wrapper });
     expect(result.current).toEqual({ definition: dashboardDefinition, state: { data: null, isPending: true } });
 
     const error = new Error('Request failed');
-    resolveAnnotations.mockImplementation(() => [{ isLoading: false, error }]);
+    resolveAnnotations.mockImplementation(() => [{ isPending: false, error }]);
     rerender();
     expect(result.current.state).toEqual({ data: null, isPending: false, error });
   });

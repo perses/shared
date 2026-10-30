@@ -28,7 +28,7 @@ export interface DataQueriesContextType {
   queryResults: QueryData[];
   refetchAll: () => void;
   isFetching: boolean;
-  isLoading: boolean;
+  isPending: boolean;
   errors: unknown[];
 }
 
@@ -41,17 +41,17 @@ export type QueryData<T = QueryDataType> = {
   definition: QueryDefinition;
   error: Error;
   isFetching: boolean;
-  isLoading: boolean;
+  isPending: boolean;
   refetch?: () => void;
 };
 
 export function transformQueryResults(results: UseQueryResult[], definitions: QueryDefinition[]): QueryData[] {
-  return results.map(({ data, isFetching, isLoading, refetch, error }, i) => {
+  return results.map(({ data, isFetching, isPending, refetch, error }, i) => {
     return {
       definition: definitions[i],
       data,
       isFetching,
-      isLoading,
+      isPending,
       refetch,
       error,
     } as QueryData;

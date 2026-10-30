@@ -13,7 +13,7 @@
 
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import { SelectionProvider, useSelection } from './SelectionProvider';
 
@@ -29,7 +29,7 @@ function TestConsumer({
 }: {
   getId?: (item: TestItem, index: number) => string;
   onRender?: (state: ReturnType<typeof useSelection<TestItem, string>>) => void;
-}): JSX.Element {
+}): ReactElement {
   const selection = useSelection<TestItem, string>({ getId });
   onRender?.(selection);
 
@@ -229,7 +229,7 @@ describe('SelectionProvider', () => {
       });
 
       it('should use index as default id when no getId provided', () => {
-        function IndexBasedConsumer(): JSX.Element {
+        function IndexBasedConsumer(): ReactElement {
           const selection = useSelection<TestItem, number>();
 
           return (
@@ -271,7 +271,7 @@ describe('SelectionProvider', () => {
 
   describe('multiple consumers', () => {
     it('should share selection state between consumers', () => {
-      function Consumer1(): JSX.Element {
+      function Consumer1(): ReactElement {
         const selection = useSelection<TestItem, string>({ getId: (item) => item.id });
         return (
           <div>
@@ -286,7 +286,7 @@ describe('SelectionProvider', () => {
         );
       }
 
-      function Consumer2(): JSX.Element {
+      function Consumer2(): ReactElement {
         const selection = useSelection<TestItem, string>({ getId: (item) => item.id });
         return (
           <div>

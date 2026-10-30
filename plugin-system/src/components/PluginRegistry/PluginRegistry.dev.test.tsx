@@ -17,7 +17,7 @@ import type { ReactElement, ReactNode } from 'react';
 
 import type { PluginModuleResource } from '../../model';
 import { dynamicImportPluginLoader } from '../../model';
-import { usePlugin } from '../../runtime';
+import { useListPluginMetadata, usePlugin } from '../../runtime';
 import { PluginRegistry } from './PluginRegistry';
 
 const PLUGIN_NAME = 'TestVariable';
@@ -75,7 +75,26 @@ function Consumer({ version }: { version?: string }): ReactElement {
   return <div>source: {(data as unknown as { source?: string })?.source}</div>;
 }
 
+function ListConsumer(): ReactElement {
+  const { data } = useListPluginMetadata(['Variable']);
+  return (
+    <ul>
+      {data?.map((plugin) => (
+        <li key={plugin.module.version}>
+          {plugin.module.version} {plugin.inDev ? 'dev' : 'installed'}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 describe('PluginRegistry dev plugin precedence', () => {
+  it('marks plugins served in dev when listing plugin metadata', async () => {
+    renderWithLoader(<ListConsumer />);
+    expect(await screen.findByText('1.0.0 dev', undefined, { timeout: 3000 })).toBeInTheDocument();
+    expect(screen.getByText('2.0.0 installed')).toBeInTheDocument();
+  });
+
   it('prefers a plugin served in dev over a newer installed one when no version is pinned', async () => {
     renderWithLoader(<Consumer />);
     expect(await screen.findByText('source: dev', undefined, { timeout: 3000 })).toBeInTheDocument();

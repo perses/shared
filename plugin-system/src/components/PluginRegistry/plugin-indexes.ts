@@ -78,7 +78,7 @@ export function usePluginIndexes(
           list = [];
           pluginMetadataByKind.set(kind, list);
         }
-        list.push({ ...pluginMetadata, module: resource.metadata });
+        list.push({ ...pluginMetadata, module: resource.metadata, ...(resource.status?.inDev ? { inDev: true } : {}) });
       }
     }
 

@@ -30,9 +30,14 @@ const GRID_ITEM_ID_SEPARATOR = '|';
  *
  * Positions are computed in the persisted 24 column grid, and only `x`/`y` are rewritten so that
  * extra fields such as `repeatVariable` are kept on the returned items.
+ *
+ * The compactor writes to the items it pushes down, so it gets copies: the given items can be frozen store state.
  */
 export function compactLayout(layout: PanelGroupItemLayout[]): PanelGroupItemLayout[] {
-  const compacted = verticalCompactor.compact(layout, GRID_LAYOUT_COLS.sm);
+  const compacted = verticalCompactor.compact(
+    layout.map((item) => ({ ...item })),
+    GRID_LAYOUT_COLS.sm,
+  );
   return layout.map((item, index) => {
     const next = compacted[index];
     if (!next || (next.x === item.x && next.y === item.y)) return item;

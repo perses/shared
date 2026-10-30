@@ -56,7 +56,7 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
   const { kind } = panelDefinition.spec.plugin;
   const {
     data: plugin,
-    isLoading,
+    isPending: isLoading,
     error,
   } = usePlugin('Panel', kind, {
     version: panelDefinition.spec.plugin.metadata?.version,

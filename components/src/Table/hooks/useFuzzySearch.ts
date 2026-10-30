@@ -13,33 +13,35 @@
 
 import type { FuzzyMatchThreshold } from '@perses-dev/components';
 import { rankings, rankItem } from '@tanstack/match-sorter-utils';
-import type { ExpandedState, FilterFn, TableOptions } from '@tanstack/react-table';
-import { getFilteredRowModel } from '@tanstack/react-table';
+import type { ExpandedState, FilterFn, RowData, TableOptions } from '@tanstack/react-table';
+import { tableOptions } from '@tanstack/react-table';
 import type { SetStateAction } from 'react';
 import { useCallback, useState } from 'react';
 
+import type { TableFeatures } from '../model/table-model';
+
 const getFuzzyFilterFunction =
-  (threshold: FuzzyMatchThreshold): FilterFn<unknown> =>
+  <TableData extends RowData>(threshold: FuzzyMatchThreshold): FilterFn<TableFeatures, TableData> =>
   (row, columnId, value, addMeta) => {
     const itemRank = rankItem(row.getValue(columnId), value, { threshold: rankings[threshold] });
-    addMeta({ itemRank });
+    addMeta?.({ itemRank });
     return itemRank.passed;
   };
 
-export interface UseFuzzySearchResult<TableData> {
+export interface UseFuzzySearchResult<TableData extends RowData> {
   globalFilter: string;
   setGlobalFilter: (value: string) => void;
   fuzzySearchOptions: Pick<
-    TableOptions<TableData>,
-    'filterFns' | 'globalFilterFn' | 'getFilteredRowModel' | 'filterFromLeafRows' | 'onGlobalFilterChange'
+    TableOptions<TableFeatures, TableData>,
+    'globalFilterFn' | 'filterFromLeafRows' | 'onGlobalFilterChange'
   >;
 }
 
 /**
- * Returns fuzzy search state and the corresponding `useReactTable` options.
+ * Returns fuzzy search state and the corresponding `useTable` options.
  * Filter options are disabled when `showSearch` is falsy.
  */
-export function useFuzzySearch<TableData>(
+export function useFuzzySearch<TableData extends RowData>(
   isSearchEnabled: boolean | undefined,
   threshold: FuzzyMatchThreshold,
   expanded: ExpandedState,
@@ -66,12 +68,10 @@ export function useFuzzySearch<TableData>(
   return {
     globalFilter,
     setGlobalFilter: handleGlobalFilterChange,
-    fuzzySearchOptions: {
-      filterFns: { fuzzy: getFuzzyFilterFunction(threshold) },
-      globalFilterFn: isSearchEnabled ? 'fuzzy' : undefined,
-      getFilteredRowModel: isSearchEnabled ? getFilteredRowModel() : undefined,
+    fuzzySearchOptions: tableOptions<TableFeatures, TableData>({
+      globalFilterFn: isSearchEnabled ? getFuzzyFilterFunction<TableData>(threshold) : undefined,
       filterFromLeafRows: isSearchEnabled,
       onGlobalFilterChange: handleGlobalFilterChange,
-    },
+    }),
   };
 }

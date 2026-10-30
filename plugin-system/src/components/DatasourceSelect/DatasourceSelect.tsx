@@ -57,7 +57,7 @@ export interface DatasourceSelectProps extends Omit<OutlinedSelectProps & BaseSe
  */
 export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
   const { datasourcePluginKind, value, project, readOnly, onChange, ...others } = props;
-  const { data, isLoading } = useListDatasourceSelectItems(datasourcePluginKind, project);
+  const { data, isPending } = useListDatasourceSelectItems(datasourcePluginKind, project);
   const variables = useVariableValues();
 
   const defaultValue = useMemo<VariableName | DatasourceSelectItemSelector>(() => {
@@ -107,7 +107,7 @@ export function DatasourceSelect(props: DatasourceSelectProps): ReactElement {
   }, [data, variables]);
 
   // While loading available values, just use an empty datasource option so MUI select doesn't warn about values out of range
-  const optionValue = isLoading
+  const optionValue = isPending
     ? emptyDatasourceOption
     : options.find((option) => option.value === selectorToOptionValue(defaultValue));
 

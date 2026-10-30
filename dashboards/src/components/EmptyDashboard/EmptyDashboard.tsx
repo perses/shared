@@ -47,7 +47,7 @@ export interface EmptyDashboardProps {
    * the default buttons will be displayed. Set to `false` to disable the default
    * buttons.
    */
-  actions?: JSX.Element | boolean;
+  actions?: ReactElement | boolean;
 
   /**
    * Handler for clicking the edit button when the dashboard is in "view" mode.

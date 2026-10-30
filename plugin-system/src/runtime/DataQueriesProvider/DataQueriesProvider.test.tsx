@@ -96,7 +96,7 @@ vi.mock('../plugin-registry', () => ({
         kind: 'SilencesQuery',
       },
     ],
-    isLoading: false,
+    isPending: false,
   })),
 }));
 
@@ -117,25 +117,48 @@ function createQueryContext(): DataQueriesContextType {
         definition: timeSeriesDefinition,
         data: MOCK_TIME_SERIES_DATA,
         isFetching: false,
-        isLoading: false,
+        isPending: false,
         error: new Error('Time series failed'),
       },
       {
         definition: traceDefinition,
         data: MOCK_TRACE_DATA,
         isFetching: true,
-        isLoading: false,
+        isPending: false,
         error: traceError,
       },
     ],
     errors: [new Error('Time series failed'), traceError],
     isFetching: true,
-    isLoading: false,
+    isPending: false,
     refetchAll: vi.fn(),
   };
 }
 
 describe('useDataQueries', (): void => {
+  it('reports pending queries only for the requested query type', () => {
+    const context = createQueryContext();
+    context.queryResults = context.queryResults.map((query) => ({
+      ...query,
+      isPending: query.definition.kind === 'TraceQuery',
+      isFetching: false,
+    }));
+    context.isPending = true;
+    context.isFetching = false;
+    const wrapper = ({ children }: React.PropsWithChildren): ReactElement => (
+      <DataQueriesContext.Provider value={context}>{children}</DataQueriesContext.Provider>
+    );
+    const { result, rerender } = renderHook(
+      ({ queryType }: { queryType: keyof QueryType }) => useDataQueries(queryType),
+      { wrapper, initialProps: { queryType: 'TimeSeriesQuery' as keyof QueryType } },
+    );
+
+    expect(result.current.isPending).toBe(false);
+    rerender({ queryType: 'TraceQuery' });
+    expect(result.current.isPending).toBe(true);
+    expect(result.current.isFetching).toBe(false);
+  });
+
   it('reuses chart transformations on local rerenders and updates them when query type or data changes', () => {
     let context = createQueryContext();
     const traceDefinition = context.queryDefinitions[1];

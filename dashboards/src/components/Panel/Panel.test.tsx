@@ -19,6 +19,9 @@ import type { PanelDefinition, QueryDefinition, VariableDefinition, VariableValu
 import { DEFAULT_ALL_VALUE } from '@perses-dev/spec';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactElement } from 'react';
+import type * as ResizeObserverModule from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 import { VariableProvider } from '../../context';
 import { renderWithContext } from '../../test';
@@ -96,7 +99,7 @@ function makeQueryResult(
     definition: testQueryDefinition,
     error: new Error(''),
     isFetching: false,
-    isLoading: false,
+    isPending: false,
     ...overrides,
   };
 }
@@ -109,7 +112,7 @@ function makeDataQueriesContext(
     queryResults,
     refetchAll: vi.fn(),
     isFetching: queryResults.some((result) => result.isFetching),
-    isLoading: queryResults.some((result) => result.isLoading),
+    isPending: queryResults.some((result) => result.isPending),
     errors: queryResults.flatMap((result) => (result.error.message ? [result.error] : [])),
   };
 }
@@ -118,7 +121,7 @@ vi.mock('@perses-dev/components', async () => {
   const actual = await vi.importActual<typeof ComponentsModule>('@perses-dev/components');
   return {
     ...actual,
-    InfoTooltip: ({ children, description }: { children: React.ReactNode; description: string }): JSX.Element => (
+    InfoTooltip: ({ children, description }: { children: React.ReactNode; description: string }): ReactElement => (
       <>
         {children}
         <div role="tooltip">{description}</div>
@@ -128,7 +131,7 @@ vi.mock('@perses-dev/components', async () => {
 });
 
 vi.mock('@mui/material/CircularProgress', () => {
-  return function MockCircularProgress(props: { 'aria-label'?: string }): JSX.Element {
+  return function MockCircularProgress(props: { 'aria-label'?: string }): ReactElement {
     return <div aria-label={props['aria-label'] || 'loading'} />;
   };
 });
@@ -140,13 +143,14 @@ vi.mock('@perses-dev/plugin-system', async () => {
     useDataQueriesContext: vi.fn(() => makeDataQueriesContext()),
     usePluginRegistry: vi.fn(() => ({
       getPlugin: vi.fn().mockResolvedValue({
-        PanelComponent: (): JSX.Element => <div>TimeSeriesChart panel</div>,
+        PanelComponent: (): ReactElement => <div>TimeSeriesChart panel</div>,
         actions: [
           {
-            component: ({ queryResults }: PluginSystemModule.PanelProps<unknown>): JSX.Element => (
+            component: ({ queryResults, contentDimensions }: PluginSystemModule.PanelProps<unknown>): ReactElement => (
               <button
                 aria-label="Export CSV"
                 data-testid="export-action"
+                data-content-dimensions={contentDimensions ? JSON.stringify(contentDimensions) : 'undefined'}
                 data-query-count={queryResults.length}
                 data-query-states={queryResults
                   .map((query) => (query.data === undefined ? 'unavailable' : 'ready'))
@@ -160,6 +164,14 @@ vi.mock('@perses-dev/plugin-system', async () => {
         ],
       }),
     })),
+  };
+});
+
+vi.mock('use-resize-observer', async () => {
+  const actual = await vi.importActual<typeof ResizeObserverModule>('use-resize-observer');
+  return {
+    ...actual,
+    useResizeObserver: vi.fn(actual.useResizeObserver),
   };
 });
 
@@ -235,7 +247,7 @@ describe('Panel', () => {
   it('passes pending, successful, and errored queries to plugin actions in order', async () => {
     vi.mocked(useDataQueriesContext).mockReturnValue(
       makeDataQueriesContext([
-        makeQueryResult({ isLoading: true }),
+        makeQueryResult({ isPending: true }),
         makeQueryResult({ data: { series: [{ name: 'test', values: [[1, 2]] }] } }),
         makeQueryResult({ error: new Error('query failed') }),
       ]),
@@ -251,6 +263,24 @@ describe('Panel', () => {
       );
     });
     vi.mocked(useDataQueriesContext).mockReturnValue(makeDataQueriesContext());
+  });
+
+  it.each([
+    { label: '0x0', measured: { width: 0, height: 0 }, expected: 'undefined' },
+    { label: '120x0', measured: { width: 120, height: 0 }, expected: 'undefined' },
+    { label: '120x80', measured: { width: 120, height: 80 }, expected: JSON.stringify({ width: 120, height: 80 }) },
+  ])('passes $expected content dimensions for a $label measurement', async ({ measured, expected }) => {
+    vi.mocked(useResizeObserver).mockReturnValue({ ref: vi.fn(), ...measured });
+
+    try {
+      await renderPanel();
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Export CSV' })).toHaveAttribute('data-content-dimensions', expected);
+      });
+    } finally {
+      vi.mocked(useResizeObserver).mockReset();
+    }
   });
 
   it('should render panel', async () => {

@@ -78,7 +78,7 @@ function makePluginQueryResult(
 ): UseQueryResult<VariablePlugin, Error> {
   return {
     data,
-    isLoading,
+    isPending: isLoading,
   } as UseQueryResult<VariablePlugin, Error>;
 }
 

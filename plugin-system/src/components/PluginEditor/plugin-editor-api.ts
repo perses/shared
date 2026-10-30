@@ -206,7 +206,7 @@ export function usePluginEditor(props: UsePluginEditorProps): {
 
   return {
     pendingSelection,
-    isLoading: selectionLoad.isLoading,
+    isLoading: selectionLoad.isPending,
     error: selectionLoad.error,
     onSelectionChange,
     onSpecChange,

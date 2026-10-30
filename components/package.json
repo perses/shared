@@ -1,6 +1,6 @@
 {
   "name": "@perses-dev/components",
-  "version": "0.55.0-rc.1",
+  "version": "0.56.0-beta.0",
   "description": "Common UI components used across Perses features",
   "license": "Apache-2.0",
   "homepage": "https://github.com/perses/perses/blob/main/README.md",
@@ -15,6 +15,7 @@
   "module": "dist/index.js",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "sideEffects": false,
   "scripts": {
     "clean": "rimraf dist/",
     "build": "concurrently \"npm:build:*\"",
@@ -31,14 +32,16 @@
     "@atlaskit/pragmatic-drag-and-drop": "^1.4.0",
     "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.0.3",
     "@codemirror/lang-json": "^6.0.1",
+    "@codemirror/lang-yaml": "^6.1.0",
+    "@codemirror/lint": "^6.9.7",
     "@date-fns/tz": "^1.4.1",
     "@fontsource/inter": "^5.0.0",
     "@mui/x-date-pickers": "^7.23.1",
-    "@perses-dev/spec": "0.3.0-rc.1",
-    "@perses-dev/client": "0.55.0-rc.1",
+    "@perses-dev/spec": "0.3.0",
+    "@perses-dev/client": "0.56.0-beta.0",
     "numbro": "^2.3.6",
     "@tanstack/match-sorter-utils": "^8.19.4",
-    "@tanstack/react-table": "^8.20.5",
+    "@tanstack/react-table": "^9.2.8",
     "@uiw/react-codemirror": "^4.19.1",
     "date-fns": "^4.1.0",
     "echarts": "5.5.0",
@@ -48,8 +51,11 @@
     "mdi-material-ui": "^7.9.2",
     "notistack": "^3.0.2",
     "react-colorful": "^5.6.1",
+    "react-compiler-runtime": "^1.0.0",
     "react-error-boundary": "^3.1.4",
-    "react-virtuoso": "^4.12.2"
+    "react-virtuoso": "^4.12.2",
+    "use-resize-observer": "^10.0.0",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.20"
@@ -58,9 +64,10 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^6.1.10",
+    "@mui/system": "^6.1.10",
     "lodash": "^4.17.21",
-    "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "react": "^18.3.0 || ^19.0.0",
+    "react-dom": "^18.3.0 || ^19.0.0"
   },
   "files": [
     "dist"

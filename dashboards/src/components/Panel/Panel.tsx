@@ -19,7 +19,7 @@ import { useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-sys
 import type { PanelDefinition } from '@perses-dev/spec';
 import type { ComponentType, ReactNode } from 'react';
 import { memo, useEffect, useId, useMemo, useState } from 'react';
-import useResizeObserver from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 import type { PanelGroupItemId } from '../../model';
 import { PanelContent } from './PanelContent';
@@ -97,7 +97,8 @@ export const Panel = memo(function Panel(props: PanelProps) {
   const { width, height } = useResizeObserver({ ref: contentElement });
 
   const contentDimensions = useMemo(() => {
-    if (width === undefined || height === undefined) return undefined;
+    // use-resize-observer v10 reports a measured 0 instead of undefined; plugins treat undefined as "not measured".
+    if (!width || !height) return undefined;
     return { width, height };
   }, [width, height]);
 
