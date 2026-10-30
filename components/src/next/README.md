@@ -146,6 +146,21 @@ Here, bottom padding stays zero from `md` onward, including at `xl`. Props targe
 props; use `slotProps` styles for internal parts, such as a TextField input. Use `style` for full CSS property names
 such as `marginTop`.
 
+### Responsive values in JS
+
+Responsive objects are resolved by the CSS cascade, so React never needs to know the viewport. The exception is a prop
+that changes **behaviour**, not just appearance: `Tabs orientation` must reach Base UI as a plain string so arrow-key
+handling and `data-orientation` agree. For those, resolve the object with `useResponsiveValue` from `primitives/system`:
+
+```tsx
+const orientation = useResponsiveValue(orientationProp); // { default: 'horizontal', md: 'vertical' } → 'vertical' at ≥ 900px
+```
+
+It applies the same mobile-first rule as the engine (largest matching breakpoint with a value wins, else `default`),
+subscribes to `matchMedia` only when given an object, and falls back to `default` without `window.matchMedia`
+(server rendering, jsdom). The breakpoint widths come from `system/breakpoints.ts`; `breakpoints.test.ts` keeps them
+equal to the `@media` rules in the engine CSS. Do not use the hook for visual props; add a registry entry instead.
+
 ## Border radius
 
 Use `rounded` for all corners, `roundedTop`/`roundedRight`/`roundedBottom`/`roundedLeft` for sides, and

@@ -23,3 +23,4 @@ export * from './responsive';
 export * from './sizing';
 export * from './spacing';
 export * from './styleProps';
+export * from './useResponsiveValue';
