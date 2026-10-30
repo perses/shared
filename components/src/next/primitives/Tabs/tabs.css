@@ -40,6 +40,45 @@
     border-inline-end: var(--perses-border-width-sm) solid var(--perses-border-default);
   }
 
+  /* ---- Variants ---- */
+  :where(.ps-TabList[data-variant='scrollable']) {
+    overflow: auto;
+    scrollbar-width: none;
+  }
+
+  :where(.ps-TabList[data-variant='scrollable'])::-webkit-scrollbar {
+    display: none;
+  }
+
+  :where(.ps-TabList[data-variant='scrollable'] .ps-Tab) {
+    flex-shrink: 0;
+  }
+
+  :where(.ps-TabList[data-variant='fullWidth'] .ps-Tab) {
+    flex: 1;
+  }
+
+  /* ---- Scroll buttons (sticky inside the scrolling list; `order` puts the back button first) ---- */
+  :where(.ps-TabList__scrollButton) {
+    position: sticky;
+    inset-inline-start: 0;
+    inset-inline-end: 0;
+    inset-block-start: 0;
+    inset-block-end: 0;
+    z-index: 1;
+    flex-shrink: 0;
+    align-self: center;
+    background-color: var(--perses-bg-surface);
+  }
+
+  :where(.ps-TabList__scrollButton[data-direction='back']) {
+    order: -1;
+  }
+
+  :where(.ps-TabList[data-orientation='vertical'] .ps-TabList__scrollButton) {
+    rotate: 90deg;
+  }
+
   /* ---- Tab ---- */
   :where(.ps-Tab) {
     box-sizing: border-box;
@@ -120,6 +159,10 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
+    :where(.ps-TabList[data-variant='scrollable']) {
+      scroll-behavior: smooth;
+    }
+
     :where(.ps-TabList__indicator) {
       transition:
         left 0.15s ease,

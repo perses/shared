@@ -85,9 +85,29 @@ describe('tabs.css', () => {
     expect(vertical).toContain('width: var(--perses-border-width-md);');
   });
 
-  it('only animates the indicator when motion is allowed', () => {
+  it('scrolls the list itself for the scrollable variant and stretches tabs for fullWidth', () => {
+    const scrollable = getRule(":where(.ps-TabList[data-variant='scrollable'])");
+    expect(scrollable).toContain('overflow: auto;');
+    expect(scrollable).toContain('scrollbar-width: none;');
+    expect(getRule(":where(.ps-TabList[data-variant='scrollable'] .ps-Tab)")).toContain('flex-shrink: 0;');
+    expect(getRule(":where(.ps-TabList[data-variant='fullWidth'] .ps-Tab)")).toContain('flex: 1;');
+  });
+
+  it('pins scroll buttons to the list edges and rotates them when vertical', () => {
+    const button = getRule(':where(.ps-TabList__scrollButton)');
+    expect(button).toContain('position: sticky;');
+    expect(button).toContain('background-color: var(--perses-bg-surface);');
+    expect(getRule(":where(.ps-TabList__scrollButton[data-direction='back'])")).toContain('order: -1;');
+    expect(getRule(":where(.ps-TabList[data-orientation='vertical'] .ps-TabList__scrollButton)")).toContain(
+      'rotate: 90deg;',
+    );
+  });
+
+  it('only animates the indicator and smooth scrolling when motion is allowed', () => {
     const reducedMotionBlock = css.slice(css.indexOf('@media (prefers-reduced-motion: no-preference)'));
     expect(reducedMotionBlock).toContain('transition:');
+    expect(reducedMotionBlock).toContain('scroll-behavior: smooth;');
     expect(getRule(':where(.ps-TabList__indicator)')).not.toContain('transition');
+    expect(getRule(":where(.ps-TabList[data-variant='scrollable'])")).not.toContain('scroll-behavior');
   });
 });
