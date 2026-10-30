@@ -12,8 +12,9 @@
 // limitations under the License.
 
 import { ErrorAlert, JSONEditor } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import type { AnnotationSpec, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
-import type { ReactElement } from 'react';
+import type { ReactElement, Ref } from 'react';
 import { forwardRef } from 'react';
 import type { Control } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
@@ -39,6 +40,10 @@ export interface PanelSpecEditorProps {
   onPluginSpecChange: (spec: UnknownSpec) => void;
   onAnnotationsChange: (annotations: AnnotationSpec[]) => void;
   onJSONChange: (panelDefinitionStr: string) => void;
+  /**
+   * Ref to the form of the panel annotation being edited, if any (see {@link PanelAnnotationsEditor}).
+   */
+  annotationEditorFormRef?: Ref<FormEditorHandle>;
 }
 
 export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>((props, ref): ReactElement | null => {
@@ -52,6 +57,7 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
     onPluginSpecChange,
     onAnnotationsChange,
     onJSONChange,
+    annotationEditorFormRef,
   } = props;
   const { kind } = panelDefinition.spec.plugin;
   const {
@@ -145,6 +151,7 @@ export const PanelSpecEditor = forwardRef<PluginEditorRef, PanelSpecEditorProps>
           render={({ field }) => (
             <PanelAnnotationsEditor
               value={panelDefinition.spec.annotations ?? []}
+              annotationEditorFormRef={annotationEditorFormRef}
               onChange={(annotations) => {
                 field.onChange(annotations);
                 onAnnotationsChange(annotations);

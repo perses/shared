@@ -23,11 +23,12 @@ import {
   getSubmitText,
   getTitleAction,
 } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import type { AnnotationSpec } from '@perses-dev/spec';
 import { useQueryClient } from '@tanstack/react-query';
 import InvertColorsIcon from 'mdi-material-ui/InvertColors';
-import type { DispatchWithoutAction, ReactElement } from 'react';
-import { useCallback, useState } from 'react';
+import type { DispatchWithoutAction, ForwardedRef, ReactElement } from 'react';
+import { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
 import type { Control, SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
 
@@ -92,16 +93,19 @@ interface AnnotationEditorFormProps {
   onDelete?: DispatchWithoutAction;
 }
 
-export function AnnotationEditorForm({
-  initialAnnotationSpec,
-  action,
-  isDraft,
-  isReadonly,
-  onActionChange,
-  onSave,
-  onClose,
-  onDelete,
-}: AnnotationEditorFormProps): ReactElement {
+export const AnnotationEditorForm = forwardRef(function AnnotationEditorForm(
+  {
+    initialAnnotationSpec,
+    action,
+    isDraft,
+    isReadonly,
+    onActionChange,
+    onSave,
+    onClose,
+    onDelete,
+  }: AnnotationEditorFormProps,
+  ref: ForwardedRef<FormEditorHandle>,
+): ReactElement {
   const queryClient = useQueryClient();
 
   const [isDiscardDialogOpened, setDiscardDialogOpened] = useState<boolean>(false);
@@ -143,6 +147,8 @@ export function AnnotationEditorForm({
       onClose();
     }
   }
+
+  useImperativeHandle(ref, () => ({ requestClose: handleCancel }));
 
   return (
     <FormProvider {...form}>
@@ -268,4 +274,4 @@ export function AnnotationEditorForm({
       />
     </FormProvider>
   );
-}
+});
