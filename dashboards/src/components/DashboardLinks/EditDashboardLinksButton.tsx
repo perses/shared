@@ -14,10 +14,11 @@
 import type { ButtonProps } from '@mui/material';
 import { Button } from '@mui/material';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import type { Link } from '@perses-dev/spec';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useDashboardLinks, useDashboardLinksActions } from '../../context';
@@ -58,6 +59,16 @@ export function EditDashboardLinksButton({
     setIsLinksEditorOpen(false);
   };
 
+  // Let the editor handle click out / Escape, so that it can ask for confirmation before discarding unsaved changes
+  const editorRef = useRef<FormEditorHandle>(null);
+  const handleDrawerClose = (): void => {
+    if (editorRef.current) {
+      editorRef.current.requestClose();
+    } else {
+      closeLinksEditor();
+    }
+  };
+
   return (
     <>
       <InfoTooltip description={TOOLTIP_TEXT.editLinks}>
@@ -75,11 +86,12 @@ export function EditDashboardLinksButton({
       </InfoTooltip>
       <Drawer
         isOpen={isLinksEditorOpen}
-        onClose={closeLinksEditor}
+        onClose={handleDrawerClose}
         PaperProps={{ sx: { width: '50%' } }}
         data-testid="dashboard-links-editor"
       >
         <DashboardLinksEditor
+          ref={editorRef}
           links={links}
           onCancel={closeLinksEditor}
           onChange={(updatedLinks: Link[]) => {

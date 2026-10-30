@@ -21,11 +21,12 @@ import {
   getSubmitText,
   getTitleAction,
 } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import type { PanelEditorValues } from '@perses-dev/plugin-system';
 import { PluginKindSelect, usePluginEditor, useValidationSchemas } from '@perses-dev/plugin-system';
 import type { Definition, PanelDefinition, UnknownSpec } from '@perses-dev/spec';
-import type { ReactElement } from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import type { ForwardedRef, ReactElement } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import type { SubmitHandler } from 'react-hook-form';
 import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
 
@@ -41,7 +42,10 @@ export interface PanelEditorFormProps {
   onClose: () => void;
 }
 
-export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
+export const PanelEditorForm = forwardRef(function PanelEditorForm(
+  props: PanelEditorFormProps,
+  ref: ForwardedRef<FormEditorHandle>,
+): ReactElement {
   const { initialValues, initialAction, panelKey, onSave, onClose } = props;
   const {
     panelDefinition,
@@ -130,6 +134,19 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
       onClose();
     }
   }
+
+  const annotationEditorFormRef = useRef<FormEditorHandle>(null);
+  useImperativeHandle(ref, () => ({
+    // While a panel annotation is being edited, let its form handle the request (going back to the annotations list,
+    // with confirmation if needed), as its changes are not part of the panel form until applied
+    requestClose: (): void => {
+      if (annotationEditorFormRef.current) {
+        annotationEditorFormRef.current.requestClose();
+      } else {
+        handleCancel();
+      }
+    },
+  }));
 
   const handlePanelDefinitionChange = (nextPanelDefStr: string): void => {
     const nextPanelDef: PanelDefinition = JSON.parse(nextPanelDefStr);
@@ -256,6 +273,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
                 }}
                 onAnnotationsChange={(a) => setAnnotations(a)}
                 onJSONChange={handlePanelDefinitionChange}
+                annotationEditorFormRef={annotationEditorFormRef}
               />
             </ErrorBoundary>
           </Grid>
@@ -274,7 +292,7 @@ export function PanelEditorForm(props: PanelEditorFormProps): ReactElement {
       </PanelEditorProvider>
     </FormProvider>
   );
-}
+});
 
 /**
  * The `id` attribute added to the `PanelEditorForm` component, allowing submit buttons to live outside the form.
