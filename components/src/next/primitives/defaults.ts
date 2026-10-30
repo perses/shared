@@ -36,6 +36,7 @@ import {
   TableRowExpandButton,
   TableSortLabel,
 } from './Table';
+import { Tab, TabList, TabPanel, Tabs } from './Tabs';
 import { Text } from './Text';
 import { TextField } from './TextField';
 import { TextHelper } from './TextHelper';
@@ -66,6 +67,10 @@ export const defaultComponents: PersesComponents = {
   TableRowExpandButton,
   TableSortLabel,
   TablePagination,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanel,
   TextField,
   Text,
   TextHelper,

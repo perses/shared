@@ -39,6 +39,14 @@ import type {
   TableCellProps,
   TableProps,
   TableRowProps,
+  TabListProps,
+  TabListVariant,
+  TabPanelProps,
+  TabProps,
+  TabsOrientation,
+  TabsProps,
+  TabStyle,
+  TabsValue,
   TextFieldProps,
   TextFieldStyle,
   TextHelperProps,
@@ -69,6 +77,10 @@ import {
   TableRow,
   TableRowExpandButton,
   TableSortLabel,
+  Tab,
+  TabList,
+  TabPanel,
+  Tabs,
   Text,
   TextField,
   TextHelper,
@@ -103,6 +115,10 @@ describe('primitives barrel exports', () => {
     expect(TableRow).toBeDefined();
     expect(TableRowExpandButton).toBeDefined();
     expect(TableSortLabel).toBeDefined();
+    expect(Tabs).toBeDefined();
+    expect(TabList).toBeDefined();
+    expect(Tab).toBeDefined();
+    expect(TabPanel).toBeDefined();
     expect(TextField).toBeDefined();
     expect(Text).toBeDefined();
     expect(TextHelper).toBeDefined();
@@ -141,6 +157,14 @@ describe('primitives barrel exports', () => {
     const sortDirection: SortDirection = 'asc';
     const sharedSize: Size = 'md';
     const sharedStatus: Status = 'error';
+    const tabsProps: TabsProps = { defaultValue: 'one' };
+    const tabsValue: TabsValue = 1;
+    const tabsOrientation: TabsOrientation = 'vertical';
+    const tabListProps: TabListProps = { 'aria-label': 'Sections' };
+    const tabListVariant: TabListVariant = 'scrollable';
+    const tabProps: TabProps = { value: 'one' };
+    const tabStyle: TabStyle = { '--perses-tab-min-height': '3rem' };
+    const tabPanelProps: TabPanelProps = { value: 'one' };
     const textFieldProps: TextFieldProps = { label: 'Name' };
     const textFieldStyle: TextFieldStyle = { '--perses-textfield-size-md': '2.5rem' };
     const textProps: TextProps = { as: 'p', size: 'sm', weight: 'medium', color: 'secondary' };
@@ -178,6 +202,14 @@ describe('primitives barrel exports', () => {
     expect(sortDirection).toBe('asc');
     expect(sharedSize).toBe('md');
     expect(sharedStatus).toBe('error');
+    expect(tabsProps).toBeDefined();
+    expect(tabsValue).toBe(1);
+    expect(tabsOrientation).toBe('vertical');
+    expect(tabListProps).toBeDefined();
+    expect(tabListVariant).toBe('scrollable');
+    expect(tabProps).toBeDefined();
+    expect(tabStyle).toBeDefined();
+    expect(tabPanelProps).toBeDefined();
     expect(textFieldProps).toBeDefined();
     expect(textFieldStyle).toBeDefined();
     expect(textProps).toBeDefined();

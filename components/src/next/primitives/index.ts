@@ -25,6 +25,7 @@ export * from './Stack';
 export * from './Switch';
 export * from './Tooltip';
 export * from './Table';
+export * from './Tabs';
 export * from './TextField';
 export * from './Text';
 export * from './TextHelper';

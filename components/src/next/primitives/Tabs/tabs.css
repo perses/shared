@@ -1,0 +1,131 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '@perses-dev/design-tokens/css/layers';
+
+@layer perses.components {
+  :where(.ps-Tabs) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  :where(.ps-Tabs[data-orientation='vertical']) {
+    flex-direction: row;
+  }
+
+  /* ---- List ---- */
+  :where(.ps-TabList) {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    border-bottom: var(--perses-border-width-sm) solid var(--perses-border-default);
+  }
+
+  :where(.ps-TabList[data-orientation='vertical']) {
+    flex-direction: column;
+    border-bottom: 0;
+    border-inline-end: var(--perses-border-width-sm) solid var(--perses-border-default);
+  }
+
+  /* ---- Tab ---- */
+  :where(.ps-Tab) {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--perses-spacing-sm);
+    min-height: var(--perses-tab-min-height, var(--perses-control-size-lg));
+    padding: 0 var(--perses-spacing-lg);
+    border: 0;
+    background: none;
+    font-family: var(--perses-font-family);
+    font-size: var(--perses-font-size-md);
+    font-weight: var(--perses-font-weight-medium);
+    line-height: var(--perses-line-height-relaxed);
+    color: var(--perses-text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    outline: 0;
+  }
+
+  :where(.ps-Tab[data-orientation='vertical']) {
+    justify-content: flex-start;
+  }
+
+  :where(.ps-Tab:hover) {
+    color: var(--perses-text-primary);
+    background-color: var(--perses-status-bg-default-hover);
+  }
+
+  :where(.ps-Tab[data-active]) {
+    color: var(--perses-status-text-primary);
+  }
+
+  :where(.ps-Tab:focus-visible) {
+    outline-width: var(--perses-focus-ring-width);
+    outline-style: solid;
+    outline-color: var(--perses-focus-ring-color);
+    outline-offset: calc(-1 * var(--perses-focus-ring-width));
+  }
+
+  :where(.ps-Tab[data-disabled]) {
+    opacity: var(--perses-opacity-disabled);
+    cursor: not-allowed;
+  }
+
+  :where(.ps-Tab__content) {
+    min-width: 0;
+  }
+
+  :where(.ps-Tab__start),
+  :where(.ps-Tab__end) {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* ---- Indicator (positioned from Base UI's --active-tab-* variables) ---- */
+  :where(.ps-TabList__indicator) {
+    position: absolute;
+    left: var(--active-tab-left);
+    bottom: 0;
+    width: var(--active-tab-width);
+    height: var(--perses-border-width-md);
+    background-color: var(--perses-status-solid-primary);
+    pointer-events: none;
+  }
+
+  :where(.ps-TabList__indicator[data-orientation='vertical']) {
+    left: auto;
+    bottom: auto;
+    inset-inline-end: 0;
+    top: var(--active-tab-top);
+    width: var(--perses-border-width-md);
+    height: var(--active-tab-height);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :where(.ps-TabList__indicator) {
+      transition:
+        left 0.15s ease,
+        top 0.15s ease,
+        width 0.15s ease,
+        height 0.15s ease;
+    }
+  }
+}
