@@ -27,11 +27,15 @@ const descriptionMarked = new Marked({
   renderer: {
     // Task list items are rendered as text, since `<input>` elements are removed by the sanitizer.
     checkbox: ({ checked }): string => (checked ? '☑' : '☐'),
+    // Raw HTML is not supported: it is displayed as text, so that e.g. `<host>:<port>` is not parsed as tags and
+    // then removed by the sanitizer.
+    html: ({ text }): string => escapeHTML(text),
   },
 });
 
 // Elements and attributes that could affect the page outside the tooltip (which is portaled to `document.body`),
-// e.g. restyle or cover the application, or collect user input.
+// e.g. restyle or cover the application, or collect user input. Raw HTML is already escaped by the renderer, so
+// this is a second layer of defense for the HTML produced from Markdown.
 const FORBIDDEN_TAGS = ['style', 'form', 'input', 'button', 'textarea', 'select'];
 const FORBIDDEN_ATTRIBUTES = ['style', 'class', 'id'];
 
@@ -59,7 +63,8 @@ function getDescriptionPurifier(): DOMPurifyInstance {
 
 /**
  * Escapes the HTML special characters of a text, so that it is displayed as-is instead of being interpreted as HTML.
- * Used as a safe fallback when DOMPurify is not supported and the rendered Markdown therefore cannot be sanitized.
+ * Used for raw HTML in descriptions, and as a safe fallback when DOMPurify is not supported and the rendered Markdown
+ * therefore cannot be sanitized.
  */
 function escapeHTML(text: string): string {
   return text
@@ -71,7 +76,7 @@ function escapeHTML(text: string): string {
 }
 
 /**
- * Converts a (GitHub Flavored) Markdown panel description into sanitized HTML.
+ * Converts a (GitHub Flavored) Markdown panel description into sanitized HTML. Raw HTML is displayed as text.
  * When HTML cannot be sanitized (no DOM available), the description is returned as escaped plain text.
  */
 export function panelDescriptionToHTML(description: string): string {

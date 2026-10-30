@@ -15,6 +15,13 @@ import { marked } from 'marked';
 
 import { panelDescriptionToHTML } from './PanelDescriptionTooltip';
 
+// Renders the HTML in a detached element, to check which elements and attributes the browser would actually create.
+function toElement(html: string): HTMLElement {
+  const element = document.createElement('div');
+  element.innerHTML = html;
+  return element;
+}
+
 describe('panelDescriptionToHTML', () => {
   it('keeps plain text descriptions unchanged', () => {
     expect(panelDescriptionToHTML('Simple description')).toBe('<p>Simple description</p>\n');
@@ -36,28 +43,49 @@ describe('panelDescriptionToHTML', () => {
     );
   });
 
-  it('sanitizes dangerous HTML', () => {
-    const html = panelDescriptionToHTML(
-      '<script>alert(1)</script><img src="x" onerror="alert(1)"><a href="javascript:alert(1)">click</a>',
+  it('displays raw HTML as text', () => {
+    expect(panelDescriptionToHTML('Expected format: <host>:<port>')).toBe(
+      '<p>Expected format: &lt;host&gt;:&lt;port&gt;</p>\n',
     );
-    expect(html).not.toContain('<script');
-    expect(html).not.toContain('onerror');
-    expect(html).not.toContain('javascript:');
+    expect(panelDescriptionToHTML('<div>\nblock\n</div>')).toBe('&lt;div&gt;\nblock\n&lt;/div&gt;');
+  });
+
+  it('still renders autolinks', () => {
+    expect(toElement(panelDescriptionToHTML('See <https://example.com>')).querySelector('a')).toHaveAttribute(
+      'href',
+      'https://example.com',
+    );
   });
 
   it.each([
-    ['style elements', 'foo\n\n<style>body{display:none}</style>', '<style'],
-    ['style elements inside svg', '<svg><style>body{display:none}</style></svg>', '<style'],
-    ['inline styles', '<div style="position:fixed;inset:0">overlay</div>', 'style='],
-    ['forms', '<form action="https://example.com"><input type="password"><button>go</button></form>', '<form'],
-    ['inputs', '<input type="password">', '<input'],
-    ['buttons', '<button>go</button>', '<button'],
-    ['textareas', '<textarea></textarea>', '<textarea'],
-    ['selects', '<select><option>a</option></select>', '<select'],
-    ['class attributes', '<span class="MuiBackdrop-root">x</span>', 'class='],
-    ['id attributes', '<span id="root">x</span>', 'id='],
-  ])('removes %s that could affect the page outside the tooltip', (_, description, forbidden) => {
-    expect(panelDescriptionToHTML(description)).not.toContain(forbidden);
+    ['scripts', '<script>alert(1)</script>', 'script'],
+    ['event handlers', '<img src="x" onerror="alert(1)">', '[onerror]'],
+    ['style elements', 'foo\n\n<style>body{display:none}</style>', 'style'],
+    ['style elements inside svg', '<svg><style>body{display:none}</style></svg>', 'svg, style'],
+    ['inline styles', '<div style="position:fixed;inset:0">overlay</div>', '[style]'],
+    ['forms', '<form action="https://example.com"><input type="password"><button>go</button></form>', 'form, input'],
+    ['buttons', '<button>go</button>', 'button'],
+    ['textareas', '<textarea></textarea>', 'textarea'],
+    ['selects', '<select><option>a</option></select>', 'select'],
+    ['class attributes', '<span class="MuiBackdrop-root">x</span>', '[class]'],
+    ['id attributes', '<span id="root">x</span>', '[id]'],
+  ])('does not create %s from raw HTML', (_, description, forbiddenSelector) => {
+    const element = toElement(panelDescriptionToHTML(description));
+    expect(element.querySelector(forbiddenSelector)).toBeNull();
+    // The raw HTML is still visible as text.
+    expect(element.textContent).toContain(description.trim().split('\n').pop());
+  });
+
+  it.each([
+    ['links', '[click](javascript:alert(1))'],
+    ['images', '![img](javascript:alert(1))'],
+  ])('removes javascript: URLs from Markdown %s', (_, description) => {
+    const element = toElement(panelDescriptionToHTML(description));
+    expect(element.querySelector('[href^="javascript:"], [src^="javascript:"]')).toBeNull();
+  });
+
+  it('removes class attributes produced from Markdown', () => {
+    expect(toElement(panelDescriptionToHTML('```js\nconst a = 1;\n```')).querySelector('[class]')).toBeNull();
   });
 
   it('renders task lists without input elements', () => {
