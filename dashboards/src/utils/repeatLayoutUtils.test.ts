@@ -229,6 +229,15 @@ describe('buildRepeatMeta', () => {
     expect(repeatMeta.size).toBe(0);
   });
 
+  test('returns the same references when no repeatVariable, whatever the variable values', () => {
+    const itemLayouts = [baseLayout];
+    const first = buildRepeatMeta(itemLayouts, variables);
+    const second = buildRepeatMeta(itemLayouts, { env: makeVariableState(['prod']) });
+    expect(first.expandedItemLayouts).toBe(itemLayouts);
+    expect(second.expandedItemLayouts).toBe(itemLayouts);
+    expect(second.repeatMeta).toBe(first.repeatMeta);
+  });
+
   test('expands height for horizontal repeat with multiple rows', () => {
     const layout: PanelGroupItemLayout = {
       ...baseLayout,
