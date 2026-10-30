@@ -47,6 +47,13 @@ export function usePluginRegistry(): PluginRegistryContextType {
 
 type UsePluginQueryKey = [string, PluginType | undefined, string, string, string];
 
+/**
+ * Plugin modules are imported once and cached by the plugin registry, so a loaded plugin never changes. Without this,
+ * every component mounting a plugin query refetches it, and the fetching state notifies every component using the same
+ * plugin, e.g. every panel of a dashboard each time a panel scrolls into view. Failed loads are still retried on mount.
+ */
+const PLUGIN_STALE_TIME = Infinity;
+
 // Allows consumers to pass useQuery options from react-query when loading a plugin
 type UsePluginOptions<T extends PluginType> = Omit<
   UseQueryOptions<PluginImplementation<T>, Error, PluginImplementation<T>, UsePluginQueryKey>,
@@ -79,6 +86,7 @@ export function usePlugin<T extends PluginType>(
   return useQuery({
     queryKey: ['getPlugin', pluginType, kind, version ?? '', registry ?? ''],
     queryFn: () => getPlugin({ kind: pluginType!, name: kind, version, registry }),
+    staleTime: PLUGIN_STALE_TIME,
     ...useQueryOptions,
   });
 }
@@ -126,6 +134,7 @@ export function usePlugins<T extends PluginType>(
       return {
         queryKey: ['getPlugin', pluginType, p.kind, p.version ?? '', p.registry ?? ''],
         queryFn: () => getPlugin({ kind: pluginType, name: p.kind, version: p.version, registry: p.registry }),
+        staleTime: PLUGIN_STALE_TIME,
       };
     }),
   });
