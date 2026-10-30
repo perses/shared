@@ -129,6 +129,11 @@ describe('Tabs', () => {
       expect(tab('One')).toHaveAttribute('aria-selected', 'true');
     });
 
+    it('exposes the variant as a data attribute', () => {
+      renderTabs({}, { variant: 'fullWidth' });
+      expect(screen.getByRole('tablist')).toHaveAttribute('data-variant', 'fullWidth');
+    });
+
     it('defaults to the first tab without defaultValue', () => {
       renderTabs({ defaultValue: undefined });
       expect(tab('One')).toHaveAttribute('aria-selected', 'true');
@@ -274,10 +279,10 @@ describe('Tabs', () => {
       render(
         <Tabs defaultValue="a" onValueChange={onValueChange}>
           <TabList>
-            <Tab value="a" render={<RouterLink to="/a" />}>
+            <Tab value="a" render={<RouterLink to="#a" />}>
               A
             </Tab>
-            <Tab value="b" render={<RouterLink to="/b" />}>
+            <Tab value="b" render={<RouterLink to="#b" />}>
               B
             </Tab>
           </TabList>
@@ -285,7 +290,7 @@ describe('Tabs', () => {
       );
       const link = tab('B');
       expect(link.tagName).toBe('A');
-      expect(link).toHaveAttribute('href', '/b');
+      expect(link).toHaveAttribute('href', '#b');
       expect(link).toHaveAttribute('data-router-link');
       expect(link).not.toHaveAttribute('type');
       await userEvent.click(link);
