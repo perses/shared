@@ -20,6 +20,10 @@ export interface DataQueriesProviderProps<Kind = unknown, PluginSpec = UnknownSp
   definitions: Array<QueryDefinition<Kind, PluginSpec>>;
   children?: ReactNode;
   options?: QueryOptions;
+  /**
+   * React Query options. `enabled` applies to the queries of every kind, the other options only apply to time series
+   * queries.
+   */
   queryOptions?: Omit<QueryObserverOptions, 'queryKey'>;
 }
 

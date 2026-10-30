@@ -79,28 +79,28 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
   const timeSeriesResults = useTimeSeriesQueries(timeSeriesQueries, options, queryOptions);
 
   const traceQueries = definitions.filter((definition) => definition.kind === 'TraceQuery') as TraceQueryDefinition[];
-  const traceResults = useTraceQueries(traceQueries);
+  const traceResults = useTraceQueries(traceQueries, queryOptions);
 
   const profileQueries = definitions.filter(
     (definition) => definition.kind === 'ProfileQuery',
   ) as ProfileQueryDefinition[];
-  const profileResults = useProfileQueries(profileQueries);
+  const profileResults = useProfileQueries(profileQueries, queryOptions);
 
   const logQueries = definitions.filter((definition) => definition.kind === 'LogQuery') as LogQueryDefinition[];
-  const logResults = useLogQueries(logQueries);
+  const logResults = useLogQueries(logQueries, queryOptions);
 
   const alertsQueries = definitions.filter(
     (definition) => definition.kind === 'AlertsQuery',
   ) as AlertsQueryDefinition[];
-  const alertsResults = useAlertsQueries(alertsQueries);
+  const alertsResults = useAlertsQueries(alertsQueries, queryOptions);
 
   const silencesQueries = definitions.filter(
     (definition) => definition.kind === 'SilencesQuery',
   ) as SilencesQueryDefinition[];
-  const silencesResults = useSilencesQueries(silencesQueries);
+  const silencesResults = useSilencesQueries(silencesQueries, queryOptions);
 
   const jsonQueries = definitions.filter((definition) => definition.kind === 'JsonQuery') as JsonQueryDefinition[];
-  const jsonResults = useJsonQueries(jsonQueries);
+  const jsonResults = useJsonQueries(jsonQueries, queryOptions);
 
   const refetchAll = useCallback(() => {
     timeSeriesResults.forEach((result) => result.refetch());

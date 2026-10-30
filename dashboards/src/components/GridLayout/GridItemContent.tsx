@@ -13,6 +13,7 @@
 
 import { Box, useForkRef } from '@mui/material';
 import { DataQueriesProvider, usePlugin, useSuggestedStepMs } from '@perses-dev/plugin-system';
+import type { QueryDefinition } from '@perses-dev/spec';
 import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
@@ -24,6 +25,8 @@ import { isPanelGroupItemIdEqual } from '../../model'; // TODO
 import type { PanelProps, PanelOptions } from '../Panel';
 import { Panel } from '../Panel';
 import { QueryViewerDialog } from '../QueryViewerDialog';
+
+const NO_QUERIES: QueryDefinition[] = [];
 
 export interface GridItemContentProps {
   panelGroupItemId: PanelGroupItemId;
@@ -136,7 +139,9 @@ export function GridItemContent(props: GridItemContentProps): ReactElement {
       }}
     >
       <DataQueriesProvider
-        definitions={queries ?? []}
+        // Queries of panels never displayed are not registered: React Query would otherwise create and garbage collect
+        // cache entries for every change of their key (time range, variables, width) while they cannot run.
+        definitions={(shouldQuery || shouldRender) && queries ? queries : NO_QUERIES}
         options={dataQueryProviderOptions.options}
         queryOptions={dataQueryProviderOptions.queryOptions}
       >
