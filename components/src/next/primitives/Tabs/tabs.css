@@ -106,9 +106,9 @@
     justify-content: flex-start;
   }
 
-  :where(.ps-Tab:hover) {
+  :where(.ps-Tab:hover:not([data-disabled])) {
     color: var(--perses-text-primary);
-    background-color: var(--perses-status-bg-default-hover);
+    background-color: var(--perses-status-bg-default);
   }
 
   :where(.ps-Tab[data-active]) {

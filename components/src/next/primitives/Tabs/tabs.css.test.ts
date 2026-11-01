@@ -72,6 +72,13 @@ describe('tabs.css', () => {
     expect(disabled).toContain('cursor: not-allowed;');
   });
 
+  it('hovers with the subtle default background so text stays readable, and skips disabled tabs', () => {
+    const hover = getRule(':where(.ps-Tab:hover:not([data-disabled]))');
+    expect(hover).toContain('color: var(--perses-text-primary);');
+    expect(hover).toContain('background-color: var(--perses-status-bg-default);');
+    expect(css).not.toContain('--perses-status-bg-default-hover');
+  });
+
   it('positions the indicator from Base UI variables per orientation', () => {
     const indicator = getRule(':where(.ps-TabList__indicator)');
     expect(indicator).toContain('position: absolute;');
