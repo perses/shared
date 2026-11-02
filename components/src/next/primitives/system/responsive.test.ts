@@ -31,6 +31,8 @@ const spacingProps = [
   ['mb', 'margin-bottom'],
   ['ml', 'margin-left'],
   ['gap', 'gap'],
+  ['row-gap', 'row-gap'],
+  ['column-gap', 'column-gap'],
 ] as const;
 const layoutProps = [
   ['display', 'display'],
@@ -135,6 +137,7 @@ function declarationsAt(width: number, classes: string[], variables: Declaration
 
 // Preserve declaration order and let CSSStyleDeclaration expand the shorthands.
 // Map logical axes to physical sides for the directional-precedence LTR fixtures.
+// Expand single-value gap fixtures because jsdom does not expand that shorthand.
 function spacingAt(width: number, classes: string[], variables: Declarations): CSSStyleDeclaration {
   const style = document.createElement('div').style;
   const axes: Record<string, string[]> = {
@@ -142,6 +145,7 @@ function spacingAt(width: number, classes: string[], variables: Declarations): C
     'padding-block': ['padding-top', 'padding-bottom'],
     'margin-inline': ['margin-left', 'margin-right'],
     'margin-block': ['margin-top', 'margin-bottom'],
+    gap: ['row-gap', 'column-gap'],
   };
   for (const [property, value] of matchingDeclarationsAt(width, classes, variables)) {
     for (const target of axes[property] ?? [property]) {
@@ -217,6 +221,53 @@ describe.each([...spacingProps, ...layoutProps])('%s responsive CSS', (prop, pro
       );
     },
   );
+});
+
+describe.each([
+  ['row-gap', 'column-gap'],
+  ['column-gap', 'row-gap'],
+])('%s precedence over gap', (axis, otherAxis) => {
+  it.each(['', '-xs', '-sm', '-md', '-lg', '-xl'])(
+    'keeps the %s axis override above even later general spacing breakpoints',
+    (suffix) => {
+      const classes = [`ps-${axis}${suffix}`, 'ps-gap-xl', 'ps-gap'];
+      const variables = { '--ps-gap': '8px', '--ps-gap-xl': '32px', [`--ps-${axis}${suffix}`]: '0' };
+      for (const width of [1536, 2400]) {
+        for (const orderedClasses of [classes, classes.toReversed()]) {
+          const style = spacingAt(width, orderedClasses, variables);
+          expect(style.getPropertyValue(axis)).toBe('0');
+          expect(style.getPropertyValue(otherAxis)).toBe('32px');
+        }
+      }
+    },
+  );
+
+  it('uses general spacing below the first axis breakpoint, then carries the override forward', () => {
+    const classes = ['ps-gap', `ps-${axis}-md`, 'ps-gap-lg'];
+    const variables = { '--ps-gap': '8px', '--ps-gap-lg': '32px', [`--ps-${axis}-md`]: '12px' };
+    for (const [width, expectedAxis, expectedOtherAxis] of [
+      [0, '8px', '8px'],
+      [899.99, '8px', '8px'],
+      [900, '12px', '8px'],
+      [1200, '12px', '32px'],
+      [2400, '12px', '32px'],
+    ] as const) {
+      const style = spacingAt(width, classes, variables);
+      expect(style.getPropertyValue(axis)).toBe(expectedAxis);
+      expect(style.getPropertyValue(otherAxis)).toBe(expectedOtherAxis);
+    }
+  });
+
+  it('applies later axis overrides without changing the other axis', () => {
+    const classes = [`ps-${axis}-xl`, 'ps-gap', `ps-${axis}-md`];
+    const variables = { '--ps-gap': '8px', [`--ps-${axis}-md`]: '12px', [`--ps-${axis}-xl`]: '24px' };
+    const before = spacingAt(1200, classes, variables);
+    expect(before.getPropertyValue(axis)).toBe('12px');
+    expect(before.getPropertyValue(otherAxis)).toBe('8px');
+    const after = spacingAt(1536, classes, variables);
+    expect(after.getPropertyValue(axis)).toBe('24px');
+    expect(after.getPropertyValue(otherAxis)).toBe('8px');
+  });
 });
 
 describe.each([

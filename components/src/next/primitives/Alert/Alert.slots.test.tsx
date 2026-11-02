@@ -66,7 +66,7 @@ function ProviderWrapper({ children }: { children: ReactNode }): ReactElement {
 }
 
 function createRuntimeSlots(): {
-  injectedRef: RefObject<HTMLElement>;
+  injectedRef: RefObject<HTMLElement | null>;
   injectedHandler: ReturnType<typeof vi.fn>;
   runtimeSlots: AlertSlotProps;
 } {
