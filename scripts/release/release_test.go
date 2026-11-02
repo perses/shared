@@ -13,59 +13,236 @@
 
 package main
 
-import "testing"
+import (
+	"os"
+	"os/exec"
+	"path/filepath"
+	"slices"
+	"strings"
+	"testing"
+)
 
 func TestReleaseSeries(t *testing.T) {
 	tests := []struct {
-		version    string
-		wantSeries string
-		wantBranch string
-		wantErr    bool
+		name           string
+		version        string
+		expectedSeries string
+		expectedBranch string
+		expectErr      bool
 	}{
-		{version: "0.56.0-beta.0", wantSeries: "v0.56", wantBranch: "release/v0.56"},
-		{version: "0.56.0-rc.1", wantSeries: "v0.56", wantBranch: "release/v0.56"},
-		{version: "0.56.0", wantSeries: "v0.56", wantBranch: "release/v0.56"},
-		{version: "0.56.12", wantSeries: "v0.56", wantBranch: "release/v0.56"},
-		{version: "1.0.0", wantSeries: "v1.0", wantBranch: "release/v1.0"},
-		{version: "v0.56.0", wantErr: true},
-		{version: "0.56", wantErr: true},
-		{version: "", wantErr: true},
+		{name: "beta", version: "0.56.0-beta.0", expectedSeries: "v0.56", expectedBranch: "release/v0.56"},
+		{name: "release candidate", version: "0.56.0-rc.1", expectedSeries: "v0.56", expectedBranch: "release/v0.56"},
+		{name: "final release", version: "0.56.0", expectedSeries: "v0.56", expectedBranch: "release/v0.56"},
+		{name: "patch release", version: "0.56.12", expectedSeries: "v0.56", expectedBranch: "release/v0.56"},
+		{name: "major release", version: "1.0.0", expectedSeries: "v1.0", expectedBranch: "release/v1.0"},
+		{name: "v prefix", version: "v0.56.0", expectErr: true},
+		{name: "missing patch", version: "0.56", expectErr: true},
+		{name: "empty", version: "", expectErr: true},
 	}
 
-	for _, test := range tests {
-		t.Run(test.version, func(t *testing.T) {
-			series, err := releaseSeries(test.version)
-			if test.wantErr {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			series, err := releaseSeries(tt.version)
+			if tt.expectErr {
 				if err == nil {
-					t.Fatalf("releaseSeries(%q) error = nil, want an error", test.version)
+					t.Fatalf("releaseSeries(%q) error = nil, expected an error", tt.version)
 				}
 				return
 			}
 			if err != nil {
-				t.Fatalf("releaseSeries(%q) error = %v", test.version, err)
+				t.Fatalf("releaseSeries(%q) error = %v", tt.version, err)
 			}
-			if series != test.wantSeries {
-				t.Errorf("releaseSeries(%q) = %q, want %q", test.version, series, test.wantSeries)
+			if series != tt.expectedSeries {
+				t.Errorf("releaseSeries(%q) = %q, expected %q", tt.version, series, tt.expectedSeries)
 			}
-			if branch := releaseBranch(series); branch != test.wantBranch {
-				t.Errorf("releaseBranch(%q) = %q, want %q", series, branch, test.wantBranch)
+			if branch := releaseBranch(series); branch != tt.expectedBranch {
+				t.Errorf("releaseBranch(%q) = %q, expected %q", series, branch, tt.expectedBranch)
 			}
 		})
 	}
 }
 
-func TestIsPrerelease(t *testing.T) {
-	tests := map[string]bool{
-		"0.56.0-beta.0": true,
-		"0.56.0-rc.1":   true,
-		"2.0.0-1":       true,
-		"0.56.0":        false,
-		"0.56.3":        false,
+func TestReleaseCommit(t *testing.T) {
+	tests := []struct {
+		name        string
+		setup       func(t *testing.T)
+		expectedErr string
+	}{
+		{
+			name:        "not on the release branch",
+			setup:       func(*testing.T) {},
+			expectedErr: `must be released from the branch release/v0.56, but the current branch is "main"`,
+		},
+		{
+			name: "release branch not pushed",
+			setup: func(t *testing.T) {
+				runGit(t, "checkout", "--quiet", "-b", "release/v0.56")
+			},
+			expectedErr: "unable to find the branch release/v0.56 on the remote origin",
+		},
+		{
+			name: "local commit not pushed",
+			setup: func(t *testing.T) {
+				runGit(t, "checkout", "--quiet", "-b", "release/v0.56")
+				runGit(t, "push", "--quiet", "origin", "release/v0.56")
+				commit(t, "[BUGFIX] local fix")
+			},
+			expectedErr: "is not in sync with origin/release/v0.56",
+		},
+		{
+			name: "release branch in sync",
+			setup: func(t *testing.T) {
+				runGit(t, "checkout", "--quiet", "-b", "release/v0.56")
+				runGit(t, "push", "--quiet", "origin", "release/v0.56")
+			},
+		},
 	}
 
-	for version, want := range tests {
-		if got := isPrerelease(version); got != want {
-			t.Errorf("isPrerelease(%q) = %t, want %t", version, got, want)
-		}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			initRepository(t)
+			tt.setup(t)
+
+			got, err := releaseCommit("v0.56", "origin")
+			if tt.expectedErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tt.expectedErr) {
+					t.Fatalf("releaseCommit() error = %v, expected an error containing %q", err, tt.expectedErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("releaseCommit() error = %v", err)
+			}
+			if expected := runGit(t, "rev-parse", "HEAD"); got != expected {
+				t.Errorf("releaseCommit() = %q, expected %q", got, expected)
+			}
+		})
 	}
+}
+
+func TestPreviousTag(t *testing.T) {
+	tests := []struct {
+		name     string
+		setup    func(t *testing.T)
+		expected string
+	}{
+		{
+			name:     "no tag",
+			setup:    func(*testing.T) {},
+			expected: "",
+		},
+		{
+			name: "closest tag when the series has no tag yet",
+			setup: func(t *testing.T) {
+				runGit(t, "tag", "v0.55.0")
+				commit(t, "[FEATURE] new feature")
+			},
+			expected: "v0.55.0",
+		},
+		{
+			name: "tag of the series when a tag of another series is closer",
+			setup: func(t *testing.T) {
+				runGit(t, "tag", "v0.56.0-beta.0")
+				commit(t, "[BUGFIX] fix released in v0.55.1")
+				runGit(t, "tag", "v0.55.1")
+				commit(t, "[FEATURE] new feature")
+			},
+			expected: "v0.56.0-beta.0",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			initRepository(t)
+			tt.setup(t)
+
+			got, err := previousTag("v0.56")
+			if err != nil {
+				t.Fatalf("previousTag() error = %v", err)
+			}
+			if got != tt.expected {
+				t.Errorf("previousTag() = %q, expected %q", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestGHReleaseArgs(t *testing.T) {
+	tests := []struct {
+		name     string
+		version  string
+		expected []string
+	}{
+		{
+			name:     "final release",
+			version:  "0.56.0",
+			expected: []string{"release", "create", "v0.56.0", "--target", "abc", "--title", "v0.56.0", "--notes", "notes"},
+		},
+		{
+			name:     "patch release",
+			version:  "0.56.3",
+			expected: []string{"release", "create", "v0.56.3", "--target", "abc", "--title", "v0.56.3", "--notes", "notes"},
+		},
+		{
+			name:    "beta",
+			version: "0.56.0-beta.0",
+			expected: []string{
+				"release", "create", "v0.56.0-beta.0", "--target", "abc", "--title", "v0.56.0-beta.0",
+				"--prerelease", "--notes", "notes",
+			},
+		},
+		{
+			name:    "release candidate",
+			version: "0.56.0-rc.1",
+			expected: []string{
+				"release", "create", "v0.56.0-rc.1", "--target", "abc", "--title", "v0.56.0-rc.1",
+				"--prerelease", "--notes", "notes",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			if got := ghReleaseArgs(tt.version, "abc", "notes"); !slices.Equal(got, tt.expected) {
+				t.Errorf("ghReleaseArgs(%q) = %q, expected %q", tt.version, got, tt.expected)
+			}
+		})
+	}
+}
+
+// initRepository creates a git repository with a single commit on the branch main and a bare remote named origin,
+// then moves into it. The user and system git configurations are ignored to keep the tests reproducible.
+func initRepository(t *testing.T) {
+	t.Helper()
+	t.Setenv("GIT_CONFIG_GLOBAL", os.DevNull)
+	t.Setenv("GIT_CONFIG_NOSYSTEM", "1")
+	t.Setenv("GIT_AUTHOR_NAME", "test")
+	t.Setenv("GIT_AUTHOR_EMAIL", "test@example.com")
+	t.Setenv("GIT_COMMITTER_NAME", "test")
+	t.Setenv("GIT_COMMITTER_EMAIL", "test@example.com")
+
+	dir := t.TempDir()
+	remote := filepath.Join(dir, "remote.git")
+	repository := filepath.Join(dir, "repository")
+	runGit(t, "init", "--quiet", "--bare", remote)
+	runGit(t, "init", "--quiet", "--initial-branch=main", repository)
+	t.Chdir(repository)
+	runGit(t, "remote", "add", "origin", remote)
+	commit(t, "initial commit")
+}
+
+func commit(t *testing.T, message string) {
+	t.Helper()
+	runGit(t, "commit", "--quiet", "--allow-empty", "-m", message)
+}
+
+func runGit(t *testing.T, args ...string) string {
+	t.Helper()
+	output, err := exec.Command("git", args...).CombinedOutput()
+	if err != nil {
+		t.Fatalf("git %s: %v\n%s", strings.Join(args, " "), err, output)
+	}
+	return strings.TrimSpace(string(output))
 }

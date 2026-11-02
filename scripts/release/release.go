@@ -23,6 +23,7 @@ import (
 
 	"github.com/perses/perses/scripts/pkg/changelog"
 	"github.com/perses/perses/scripts/pkg/command"
+	"github.com/perses/perses/scripts/pkg/git"
 	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
 )
@@ -43,87 +44,137 @@ func releaseBranch(series string) string {
 	return "release/" + series
 }
 
-func isPrerelease(version string) bool {
-	return strings.Contains(version, "-")
-}
-
-func mustGitOutput(args ...string) string {
+// gitOutput runs git with the given arguments and returns its trimmed standard output.
+func gitOutput(args ...string) (string, error) {
 	data, err := exec.Command("git", args...).Output()
 	if err != nil {
-		logrus.WithError(err).Fatalf("unable to run git %s", strings.Join(args, " "))
+		return "", fmt.Errorf("git %s: %w", strings.Join(args, " "), err)
 	}
-	return strings.TrimSpace(string(data))
+	return strings.TrimSpace(string(data)), nil
 }
 
-// checkReleaseBranch verifies that the current branch is the release branch of the given series and that it is in
-// sync with the remote, so the tag is created on the commit used to generate the changelog.
-func checkReleaseBranch(series string, remote string) string {
-	expectedBranch := releaseBranch(series)
-	if currentBranch := mustGitOutput("branch", "--show-current"); currentBranch != expectedBranch {
-		logrus.Fatalf("release series %s must be released from the branch %s, but the current branch is %q", series, expectedBranch, currentBranch)
+func tagExists(tag string) bool {
+	_, err := gitOutput("rev-parse", "--verify", "--quiet", "refs/tags/"+tag)
+	return err == nil
+}
+
+// releaseCommit returns the commit to tag: the HEAD of the release branch of the given series.
+// The local branch must be in sync with the remote, as the changelog is generated from the local history.
+func releaseCommit(series string, remote string) (string, error) {
+	branch := releaseBranch(series)
+	if current := git.CurrentBranch(); current != branch {
+		return "", fmt.Errorf("release series %s must be released from the branch %s, but the current branch is %q",
+			series, branch, current)
 	}
 
-	headCommit := mustGitOutput("rev-parse", "HEAD")
-	data, err := exec.Command("git", "rev-parse", "--verify", "--quiet", fmt.Sprintf("refs/remotes/%s/%s", remote, expectedBranch)).Output()
+	localCommit, err := gitOutput("rev-parse", "HEAD")
 	if err != nil {
-		logrus.Fatalf("unable to find the branch %s on the remote %s, make sure it has been pushed", expectedBranch, remote)
+		return "", err
 	}
-	if remoteCommit := strings.TrimSpace(string(data)); headCommit != remoteCommit {
-		logrus.Fatalf("the local branch %s (%s) is not in sync with %s/%s (%s), pull or push the changes first", expectedBranch, headCommit, remote, expectedBranch, remoteCommit)
+	remoteRef := fmt.Sprintf("refs/remotes/%s/%s", remote, branch)
+	remoteCommit, err := gitOutput("rev-parse", "--verify", "--quiet", remoteRef)
+	if err != nil {
+		return "", fmt.Errorf("unable to find the branch %s on the remote %s (not pushed?): %w", branch, remote, err)
 	}
-	return headCommit
+	if localCommit != remoteCommit {
+		return "", fmt.Errorf("the local branch %s (%s) is not in sync with %s/%s (%s)",
+			branch, localCommit, remote, branch, remoteCommit)
+	}
+	return localCommit, nil
 }
 
-func release(version string, series string, targetCommit string) {
-	releaseName := fmt.Sprintf("v%s", version)
-
-	// ensure the tag does not already exist
-	if execErr := command.Run("git", "rev-parse", "--verify", releaseName); execErr == nil {
-		logrus.Infof("release %s already exists", releaseName)
-		return
+// previousTag returns the closest tag reachable from HEAD, looking first at the tags of the given release series:
+// a tag of another series can be closer (e.g. when main has been merged into the release branch).
+// It returns an empty string when no tag is found.
+func previousTag(series string) (string, error) {
+	for _, pattern := range []string{series + ".*", "v*"} {
+		tag, err := gitOutput("describe", "--tags", "--abbrev=0", "--match", pattern)
+		if err == nil {
+			return tag, nil
+		}
+		// git describe exits with the code 128 when no tag matches the pattern
+		if exitErr, ok := errors.AsType[*exec.ExitError](err); !ok || exitErr.ExitCode() != 128 {
+			return "", err
+		}
 	}
+	return "", nil
+}
 
-	logrus.Infof("Creating release %s from the commit %s", releaseName, targetCommit)
+func generateChangelog(series string) (string, error) {
+	tag, err := previousTag(series)
+	if err != nil {
+		return "", fmt.Errorf("looking for the previous tag: %w", err)
+	}
+	if tag == "" {
+		logrus.Info("no previous tag found for libraries, skipping changelog generation")
+		return "First release", nil
+	}
+	logrus.Infof("previous tag for libraries is %s", tag)
+	return changelog.New(changelog.GetGitLogs(tag)).GenerateChangelog(), nil
+}
 
-	// create the GitHub release (and the associated tag) on the HEAD of the release branch
-	args := []string{"release", "create", releaseName, "--target", targetCommit, "-t", releaseName, "-n", generateChangelog(series)}
-	if isPrerelease(version) {
+// ghReleaseArgs returns the arguments of the gh command creating the GitHub release and its tag on the given commit.
+func ghReleaseArgs(version string, commit string, notes string) []string {
+	tag := "v" + version
+	args := []string{"release", "create", tag, "--target", commit, "--title", tag}
+	// Same rule as for the npm dist-tag: a version with a prerelease suffix (beta, rc...) is a prerelease.
+	if strings.Contains(version, "-") {
 		args = append(args, "--prerelease")
 	}
-	if execErr := command.Run("gh", args...); execErr != nil {
-		logrus.WithError(execErr).Fatalf("unable to create the release %s", releaseName)
-	}
-
-	logrus.Infof("✓ Successfully created release %s", releaseName)
+	return append(args, "--notes", notes)
 }
 
-func getPreviousTag(pattern string) string {
-	data, err := exec.Command("git", "describe", "--tags", "--abbrev=0", "--match", pattern).Output()
+func run(remote string, dryRun bool) error {
+	workspaces, err := npm.GetWorkspaces(".")
 	if err != nil {
-		var exitError *exec.ExitError
-		if errors.As(err, &exitError) && exitError.ExitCode() == 128 {
-			return ""
-		}
-		logrus.Fatal(err)
+		return fmt.Errorf("reading the workspaces: %w", err)
 	}
-	return strings.TrimSpace(string(data))
-}
+	if len(workspaces) == 0 {
+		return errors.New("no workspaces found in package.json")
+	}
+	logrus.Infof("Found %d workspace(s) in monorepo", len(workspaces))
 
-func generateChangelog(series string) string {
-	// Look first for a previous tag of the same series: tags of other series can be reachable too (e.g. when the
-	// main branch has been merged into the release branch) and would lead to an incorrect changelog.
-	previousTag := getPreviousTag(series + ".*")
-	if previousTag == "" {
-		previousTag = getPreviousTag("v*")
+	// All packages share the version of the root package.json.
+	version, err := npm.GetVersion(".")
+	if err != nil {
+		return fmt.Errorf("reading the version: %w", err)
 	}
-	if previousTag == "" {
-		logrus.Infof("no previous tag found for libraries, skipping changelog generation")
-		return "First release"
+	series, err := releaseSeries(version)
+	if err != nil {
+		return err
 	}
-	logrus.Infof("previous tag for libraries is %s", previousTag)
-	entries := changelog.GetGitLogs(previousTag)
 
-	return changelog.New(entries).GenerateChangelog()
+	// get all tags and the latest state of the release branch
+	if err := command.Run("git", "fetch", "--tags", remote); err != nil {
+		return fmt.Errorf("fetching the remote %s: %w", remote, err)
+	}
+
+	tag := "v" + version
+	if tagExists(tag) {
+		logrus.Infof("release %s already exists", tag)
+		return nil
+	}
+
+	commit, err := releaseCommit(series, remote)
+	if err != nil {
+		return err
+	}
+	notes, err := generateChangelog(series)
+	if err != nil {
+		return err
+	}
+	args := ghReleaseArgs(version, commit, notes)
+
+	if dryRun {
+		logrus.Infof("[dry-run] creating the release: `gh %s`", strings.Join(args, " "))
+		return nil
+	}
+	logrus.Infof("Creating release %s on the commit %s", tag, commit)
+	if err := command.Run("gh", args...); err != nil {
+		return fmt.Errorf("creating the release %s: %w", tag, err)
+	}
+	logrus.Infof("✓ Successfully created release %s", tag)
+	return nil
 }
 
 // This script generates the GitHub release of the libraries.
@@ -140,32 +191,17 @@ func generateChangelog(series string) string {
 //
 //	go run ./scripts/release
 //
-// NB: this script doesn't publish the libraries, a CI task is responsible for this once the GitHub release is published.
+// This will only print the release that would be created:
+//
+//	go run ./scripts/release --dry-run
+//
+// NB: this script doesn't publish the libraries, a CI task does it once the GitHub release is published.
 func main() {
-	remote := flag.String("remote", "origin", "Name of the git remote pointing to the perses/shared repository")
+	remote := flag.String("remote", "origin", "name of the git remote pointing to the perses/shared repository")
+	dryRun := flag.Bool("dry-run", false, "do not perform any changes, only print what would be done")
 	flag.Parse()
 
-	// Verify all workspaces exist
-	workspaces := npm.MustGetWorkspaces(".")
-	if len(workspaces) == 0 {
-		logrus.Fatal("no workspaces found in package.json")
+	if err := run(*remote, *dryRun); err != nil {
+		logrus.WithError(err).Fatal("unable to create the release")
 	}
-	logrus.Infof("Found %d workspace(s) in monorepo", len(workspaces))
-
-	// Get version from root package.json (all packages share the same version)
-	version := npm.MustGetVersion(".")
-	series, err := releaseSeries(version)
-	if err != nil {
-		logrus.WithError(err).Fatal("invalid version in package.json")
-	}
-
-	// get all tags and the latest state of the release branch
-	if err := exec.Command("git", "fetch", "--tags", *remote).Run(); err != nil {
-		logrus.WithError(err).Fatalf("unable to fetch the remote %s", *remote)
-	}
-
-	targetCommit := checkReleaseBranch(series, *remote)
-
-	// Create a single release for the monorepo
-	release(version, series, targetCommit)
 }

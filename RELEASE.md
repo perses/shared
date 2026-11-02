@@ -68,6 +68,7 @@ Pull down the latest updates of the release branch, then run [release.go](./scri
 ```bash
 git checkout release/v<major>.<minor>
 git pull origin release/v<major>.<minor>
+go run ./scripts/release --dry-run # optional, only prints the release that would be created
 go run ./scripts/release
 ```
 
