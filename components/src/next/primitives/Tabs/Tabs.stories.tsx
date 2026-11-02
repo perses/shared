@@ -20,12 +20,11 @@ import { Chip } from '../Chip';
 import { BookOpenIcon, CogIcon, EarthIcon, ViewColumnIcon } from '../Icon/icons';
 import { TextField } from '../TextField';
 import { Tab } from './Tab';
-import type { TabStyle } from './Tab';
 import { TabList } from './TabList';
 import type { TabListProps, TabListSlotProps } from './TabList';
 import { TabPanel } from './TabPanel';
 import { Tabs } from './Tabs';
-import type { TabsProps, TabsValue } from './Tabs';
+import type { TabsProps, TabStyle, TabsValue } from './Tabs';
 
 const narrow: CSSProperties = { width: '20rem' };
 const indicatorSlots: TabListSlotProps = {

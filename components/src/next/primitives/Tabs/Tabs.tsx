@@ -14,7 +14,7 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { clsx } from 'clsx';
 import { forwardRef } from 'react';
-import type { HTMLAttributes } from 'react';
+import type { CSSProperties, HTMLAttributes } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
 import {
@@ -43,6 +43,12 @@ const TABS_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayPr
 export type TabsValue = string | number;
 export type TabsOrientation = 'horizontal' | 'vertical';
 
+/** Custom properties read by every `Tab`; they inherit, so `Tabs` and `TabList` accept them too. */
+export interface TabStyle extends CSSProperties {
+  /** Row height; set it once on `Tabs` to size every tab. Defaults to `--perses-control-size-lg`. */
+  '--perses-tab-min-height'?: string;
+}
+
 export interface TabsProps
   extends
     Omit<HTMLAttributes<HTMLDivElement>, 'defaultValue' | 'style'>,
@@ -50,7 +56,7 @@ export interface TabsProps
     SizingProps,
     DisplayProps,
     RadiusProps {
-  style?: PersesCSSProperties;
+  style?: PersesCSSProperties<TabStyle>;
   /** Controlled active tab; `null` means no tab is active. */
   value?: TabsValue | null;
   /** Initial active tab when uncontrolled. Defaults to the first tab; `null` starts with no tab active. */

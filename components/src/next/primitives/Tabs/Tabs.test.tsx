@@ -331,6 +331,19 @@ describe('Tabs', () => {
       expect(tab('Label').querySelector('.ps-Tab__end')).toBeNull();
     });
 
+    it('omits the content wrapper for an icon-only tab so the flex gap does not add space', () => {
+      render(
+        <Tabs defaultValue="a">
+          <TabList>
+            <Tab value="a" aria-label="Settings" startElement={<span data-testid="icon" />} />
+          </TabList>
+        </Tabs>,
+      );
+      const element = tab('Settings');
+      expect(element.querySelector('.ps-Tab__content')).toBeNull();
+      expect([...element.children].map((child) => child.className)).toEqual(['ps-Tab__start']);
+    });
+
     it('renders a link tab through render while keeping the tab role and activation', async () => {
       const onValueChange = vi.fn();
       render(

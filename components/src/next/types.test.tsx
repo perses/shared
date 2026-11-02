@@ -38,8 +38,14 @@ import type {
   SwitchProps,
   SwitchSlotProps,
   SwitchStyle,
+  TabListProps,
+  TabListSlotProps,
   TablePaginationProps,
   TablePaginationSlotProps,
+  TabPanelProps,
+  TabProps,
+  TabsProps,
+  TabStyle,
   TextFieldProps,
   TextFieldSlotProps,
   TextFieldStyle,
@@ -59,6 +65,9 @@ interface ExtendedChipStyle extends ChipStyle {
   '--app-accent': string;
 }
 interface ExtendedSwitchStyle extends SwitchStyle {
+  '--app-accent': string;
+}
+interface ExtendedTabStyle extends TabStyle {
   '--app-accent': string;
 }
 interface ExtendedTextFieldStyle extends TextFieldStyle {
@@ -109,6 +118,7 @@ expectTypeOf<CardHeaderProps['slotProps']>().toEqualTypeOf<CardHeaderSlotProps |
 expectTypeOf<CheckboxProps['slotProps']>().toEqualTypeOf<CheckboxSlotProps | undefined>();
 expectTypeOf<ChipProps['slotProps']>().toEqualTypeOf<ChipSlotProps | undefined>();
 expectTypeOf<SwitchProps['slotProps']>().toEqualTypeOf<SwitchSlotProps | undefined>();
+expectTypeOf<TabListProps['slotProps']>().toEqualTypeOf<TabListSlotProps | undefined>();
 expectTypeOf<TablePaginationProps['slotProps']>().toEqualTypeOf<TablePaginationSlotProps | undefined>();
 
 expectTypeOf<AlertSlotProps>().toEqualTypeOf<{ icon?: SlotStyleProps; message?: SlotStyleProps }>();
@@ -128,6 +138,7 @@ expectTypeOf<SwitchSlotProps>().toEqualTypeOf<{
   thumb?: SlotStyleProps;
   label?: SlotStyleProps;
 }>();
+expectTypeOf<TabListSlotProps>().toEqualTypeOf<{ indicator?: SlotStyleProps; scrollButton?: SlotStyleProps }>();
 expectTypeOf<TablePaginationSlotProps>().toEqualTypeOf<{
   rowsPerPage?: SlotStyleProps;
   select?: SlotStyleProps;
@@ -148,6 +159,14 @@ expectTypeOf({ closeButton: { onClick: undefined } } satisfies ChipSlotProps);
 expectTypeOf({ control: { ref: undefined } } satisfies SwitchSlotProps);
 // @ts-expect-error Navigation disabled state is owned by pagination.
 expectTypeOf({ nextButton: { disabled: false } } satisfies TablePaginationSlotProps);
+// @ts-expect-error Scroll handlers remain on the component's top-level API.
+expectTypeOf({ scrollButton: { onClick: undefined } } satisfies TabListSlotProps);
+
+// The tab min-height variable inherits, so the root and list accept it alongside each tab.
+expectTypeOf({ '--perses-tab-min-height': '2rem' } satisfies NonNullable<TabsProps['style']>);
+expectTypeOf({ '--perses-tab-min-height': '2rem' } satisfies NonNullable<TabListProps['style']>);
+// Base UI owns the panel id so the matching tab's aria-controls stays correct.
+type _TabPanelIdOwnedByBaseUi = AssertFalse<'id' extends keyof TabPanelProps ? true : false>;
 
 expectTypeOf({ input: { className: 'query-input', style: { '--app-accent': 'blue' } } } satisfies TextFieldSlotProps);
 // @ts-expect-error Slot styling must not replace the input renderer.
@@ -211,6 +230,7 @@ type _TextFieldSizeRemainsTyped = AssertAssignable<
 type _ExtendedCheckboxStyleAccepted = AssertAssignable<ExtendedCheckboxStyle, NonNullable<CheckboxProps['style']>>;
 type _ExtendedChipStyleAccepted = AssertAssignable<ExtendedChipStyle, NonNullable<ChipProps['style']>>;
 type _ExtendedSwitchStyleAccepted = AssertAssignable<ExtendedSwitchStyle, NonNullable<SwitchProps['style']>>;
+type _ExtendedTabStyleAccepted = AssertAssignable<ExtendedTabStyle, NonNullable<TabProps['style']>>;
 type _ExtendedTextFieldStyleAccepted = AssertAssignable<ExtendedTextFieldStyle, NonNullable<TextFieldProps['style']>>;
 
 // @ts-expect-error Misspelled ordinary CSS properties must remain errors.

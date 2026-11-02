@@ -68,7 +68,7 @@ describe('tabs.css', () => {
     expect(focus).toContain('outline-width: var(--perses-focus-ring-width);');
     expect(focus).toContain('outline-color: var(--perses-focus-ring-color);');
     const disabled = getRule(':where(.ps-Tab[data-disabled])');
-    expect(disabled).toContain('opacity: var(--perses-opacity-disabled);');
+    expect(disabled).toContain('opacity: var(--perses-opacity-disabled, 0.5);');
     expect(disabled).toContain('cursor: not-allowed;');
   });
 
@@ -108,6 +108,24 @@ describe('tabs.css', () => {
     expect(getRule(":where(.ps-TabList[data-orientation='vertical'] .ps-TabList__scrollButton)")).toContain(
       'rotate: 90deg;',
     );
+  });
+
+  it('keeps scroll buttons out of the flow so tabs never shift and overflow measures only the tabs', () => {
+    const size = 'calc(-1 * var(--ps-tab-scroll-button-size))';
+    expect(getRule(':where(.ps-TabList__scrollButton)')).toContain(
+      '--ps-tab-scroll-button-size: var(--perses-control-size-sm);',
+    );
+    expect(getRule(":where(.ps-TabList__scrollButton[data-direction='back'])")).toContain(
+      `margin-inline-end: ${size};`,
+    );
+    expect(getRule(":where(.ps-TabList__scrollButton[data-direction='forward'])")).toContain(
+      `margin-inline-start: ${size};`,
+    );
+    const vertical = ":where(.ps-TabList[data-orientation='vertical'] .ps-TabList__scrollButton";
+    expect(getRule(`${vertical})`)).toContain('margin-inline: 0;');
+    expect(getRule(`${vertical}[data-direction='back'])`)).toContain(`margin-block-end: ${size};`);
+    expect(getRule(`${vertical}[data-direction='forward'])`)).toContain(`margin-block-start: ${size};`);
+    expect(getRule(':where(.ps-TabList__scrollButton:disabled)')).toContain('visibility: hidden;');
   });
 
   it('only animates the indicator and smooth scrolling when motion is allowed', () => {

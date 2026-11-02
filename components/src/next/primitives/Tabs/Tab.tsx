@@ -14,12 +14,12 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { clsx } from 'clsx';
 import { forwardRef } from 'react';
-import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'react';
+import type { HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
 import { applyStyleProps, compileStyleProps, radiusProps, sizingProps, spacingProps } from '../system';
 import type { RadiusProps, SizingProps, SpacingProps } from '../system';
-import type { TabsValue } from './Tabs';
+import type { TabStyle, TabsValue } from './Tabs';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared layout styles.
 import '../system/layout.css';
@@ -31,11 +31,6 @@ import '../system/spacing.css';
 import './tabs.css';
 
 const TAB_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, radiusProps]);
-
-export interface TabStyle extends CSSProperties {
-  /** Row height; inherits, so set it once on `Tabs` to size every tab. Defaults to `--perses-control-size-lg`. */
-  '--perses-tab-min-height'?: string;
-}
 
 export interface TabProps extends Omit<HTMLAttributes<HTMLElement>, 'style'>, SpacingProps, SizingProps, RadiusProps {
   style?: PersesCSSProperties<TabStyle>;
@@ -84,7 +79,7 @@ export const Tab = forwardRef<HTMLElement, TabProps>(function Tab(
       style={computedStyle}
     >
       {hasContent(startElement) && <span className="ps-Tab__start">{startElement}</span>}
-      <span className="ps-Tab__content">{children}</span>
+      {hasContent(children) && <span className="ps-Tab__content">{children}</span>}
       {hasContent(endElement) && <span className="ps-Tab__end">{endElement}</span>}
     </BaseTabs.Tab>
   );

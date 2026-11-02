@@ -20,6 +20,7 @@ import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import { applyStyleProps, compileStyleProps, displayProps, radiusProps, spacingProps } from '../system';
 import type { DisplayProps, RadiusProps, SpacingProps } from '../system';
 import { TabListScrollButtons } from './TabListScrollButtons';
+import type { TabStyle } from './Tabs';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared layout styles.
 import '../system/layout.css';
@@ -43,7 +44,7 @@ export interface TabListSlotProps {
 
 export interface TabListProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'style'>, SpacingProps, DisplayProps, RadiusProps {
-  style?: PersesCSSProperties;
+  style?: PersesCSSProperties<TabStyle>;
   /** Overflow behaviour: `scrollable` scrolls along the axis, `fullWidth` stretches tabs evenly. Defaults to `standard`. */
   variant?: TabListVariant;
   /**

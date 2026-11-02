@@ -32,8 +32,12 @@ import './tabs.css';
 
 const TAB_PANEL_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps, radiusProps]);
 
+/**
+ * Props for `TabPanel`. `id` is omitted because Base UI generates it and points the matching tab's
+ * `aria-controls` at it; a custom id would break that link.
+ */
 export interface TabPanelProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'style'>, SpacingProps, SizingProps, DisplayProps, RadiusProps {
+  extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'id'>, SpacingProps, SizingProps, DisplayProps, RadiusProps {
   style?: PersesCSSProperties;
   /** Matches the `Tab` that shows this panel. */
   value: TabsValue;

@@ -58,8 +58,13 @@
     flex: 1;
   }
 
-  /* ---- Scroll buttons (sticky inside the scrolling list; `order` puts the back button first) ---- */
+  /*
+   * ---- Scroll buttons ----
+   * The buttons float over the list edges without taking up space, so the tabs stay where they are whether or
+   * not the buttons are showing. A button is hidden while there is nothing left to scroll in its direction.
+   */
   :where(.ps-TabList__scrollButton) {
+    --ps-tab-scroll-button-size: var(--perses-control-size-sm);
     position: sticky;
     inset-inline-start: 0;
     inset-inline-end: 0;
@@ -71,12 +76,30 @@
     background-color: var(--perses-bg-surface);
   }
 
+  :where(.ps-TabList__scrollButton:disabled) {
+    visibility: hidden;
+  }
+
   :where(.ps-TabList__scrollButton[data-direction='back']) {
     order: -1;
+    margin-inline-end: calc(-1 * var(--ps-tab-scroll-button-size));
+  }
+
+  :where(.ps-TabList__scrollButton[data-direction='forward']) {
+    margin-inline-start: calc(-1 * var(--ps-tab-scroll-button-size));
   }
 
   :where(.ps-TabList[data-orientation='vertical'] .ps-TabList__scrollButton) {
     rotate: 90deg;
+    margin-inline: 0;
+  }
+
+  :where(.ps-TabList[data-orientation='vertical'] .ps-TabList__scrollButton[data-direction='back']) {
+    margin-block-end: calc(-1 * var(--ps-tab-scroll-button-size));
+  }
+
+  :where(.ps-TabList[data-orientation='vertical'] .ps-TabList__scrollButton[data-direction='forward']) {
+    margin-block-start: calc(-1 * var(--ps-tab-scroll-button-size));
   }
 
   /* ---- Tab ---- */
@@ -123,7 +146,7 @@
   }
 
   :where(.ps-Tab[data-disabled]) {
-    opacity: var(--perses-opacity-disabled);
+    opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
   }
 
