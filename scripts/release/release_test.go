@@ -63,6 +63,22 @@ func TestReleaseSeries(t *testing.T) {
 	}
 }
 
+func TestGitOutput(t *testing.T) {
+	initRepository(t)
+
+	if got, err := gitOutput("branch", "--show-current"); err != nil || got != "main" {
+		t.Errorf("gitOutput(branch --show-current) = (%q, %v), expected (\"main\", nil)", got, err)
+	}
+
+	_, err := gitOutput("rev-parse", "--verify", "unknown")
+	if err == nil {
+		t.Fatal("gitOutput(rev-parse --verify unknown) error = nil, expected an error")
+	}
+	if expected := "fatal: Needed a single revision"; !strings.Contains(err.Error(), expected) {
+		t.Errorf("gitOutput() error = %q, expected it to contain the git error %q", err, expected)
+	}
+}
+
 func TestReleaseCommit(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -79,7 +95,7 @@ func TestReleaseCommit(t *testing.T) {
 			setup: func(t *testing.T) {
 				runGit(t, "checkout", "--quiet", "-b", "release/v0.56")
 			},
-			expectedErr: "unable to find the branch release/v0.56 on the remote origin",
+			expectedErr: "unable to fetch the branch release/v0.56 from the remote origin",
 		},
 		{
 			name: "local commit not pushed",
@@ -93,6 +109,15 @@ func TestReleaseCommit(t *testing.T) {
 		{
 			name: "release branch in sync",
 			setup: func(t *testing.T) {
+				runGit(t, "checkout", "--quiet", "-b", "release/v0.56")
+				runGit(t, "push", "--quiet", "origin", "release/v0.56")
+			},
+		},
+		{
+			name: "release branch in sync in a single-branch clone",
+			setup: func(t *testing.T) {
+				// the configured refspec doesn't create the remote-tracking branch of the release branch
+				runGit(t, "config", "remote.origin.fetch", "+refs/heads/main:refs/remotes/origin/main")
 				runGit(t, "checkout", "--quiet", "-b", "release/v0.56")
 				runGit(t, "push", "--quiet", "origin", "release/v0.56")
 			},
@@ -175,29 +200,35 @@ func TestGHReleaseArgs(t *testing.T) {
 		expected []string
 	}{
 		{
-			name:     "final release",
-			version:  "0.56.0",
-			expected: []string{"release", "create", "v0.56.0", "--target", "abc", "--title", "v0.56.0", "--notes", "notes"},
+			name:    "final release",
+			version: "0.56.0",
+			expected: []string{
+				"release", "create", "v0.56.0", "--repo", "perses/shared", "--target", "abc", "--title", "v0.56.0",
+				"--notes", "notes",
+			},
 		},
 		{
-			name:     "patch release",
-			version:  "0.56.3",
-			expected: []string{"release", "create", "v0.56.3", "--target", "abc", "--title", "v0.56.3", "--notes", "notes"},
+			name:    "patch release",
+			version: "0.56.3",
+			expected: []string{
+				"release", "create", "v0.56.3", "--repo", "perses/shared", "--target", "abc", "--title", "v0.56.3",
+				"--notes", "notes",
+			},
 		},
 		{
 			name:    "beta",
 			version: "0.56.0-beta.0",
 			expected: []string{
-				"release", "create", "v0.56.0-beta.0", "--target", "abc", "--title", "v0.56.0-beta.0",
-				"--prerelease", "--notes", "notes",
+				"release", "create", "v0.56.0-beta.0", "--repo", "perses/shared", "--target", "abc", "--title",
+				"v0.56.0-beta.0", "--prerelease", "--notes", "notes",
 			},
 		},
 		{
 			name:    "release candidate",
 			version: "0.56.0-rc.1",
 			expected: []string{
-				"release", "create", "v0.56.0-rc.1", "--target", "abc", "--title", "v0.56.0-rc.1",
-				"--prerelease", "--notes", "notes",
+				"release", "create", "v0.56.0-rc.1", "--repo", "perses/shared", "--target", "abc", "--title",
+				"v0.56.0-rc.1", "--prerelease", "--notes", "notes",
 			},
 		},
 	}

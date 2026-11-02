@@ -14,6 +14,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"flag"
 	"fmt"
@@ -27,6 +28,9 @@ import (
 	"github.com/perses/perses/scripts/pkg/npm"
 	"github.com/sirupsen/logrus"
 )
+
+// repository is the GitHub repository in which the release is created, whatever the default repository of gh is.
+const repository = "perses/shared"
 
 var versionPattern = regexp.MustCompile(`^(\d+)\.(\d+)\.\d+(?:-[\w.]+)?$`)
 
@@ -45,12 +49,17 @@ func releaseBranch(series string) string {
 }
 
 // gitOutput runs git with the given arguments and returns its trimmed standard output.
+// On failure, the returned error contains the standard error of git.
 func gitOutput(args ...string) (string, error) {
 	data, err := exec.Command("git", args...).Output()
-	if err != nil {
-		return "", fmt.Errorf("git %s: %w", strings.Join(args, " "), err)
+	if err == nil {
+		return strings.TrimSpace(string(data)), nil
 	}
-	return strings.TrimSpace(string(data)), nil
+	cmdLine := "git " + strings.Join(args, " ")
+	if exitErr, ok := errors.AsType[*exec.ExitError](err); ok && len(bytes.TrimSpace(exitErr.Stderr)) > 0 {
+		return "", fmt.Errorf("%s: %w: %s", cmdLine, err, bytes.TrimSpace(exitErr.Stderr))
+	}
+	return "", fmt.Errorf("%s: %w", cmdLine, err)
 }
 
 func tagExists(tag string) bool {
@@ -67,14 +76,20 @@ func releaseCommit(series string, remote string) (string, error) {
 			series, branch, current)
 	}
 
+	// Fetch the branch with an explicit refspec: the configured one may not cover it (e.g. single-branch clone).
+	remoteRef := fmt.Sprintf("refs/remotes/%s/%s", remote, branch)
+	refspec := fmt.Sprintf("+refs/heads/%s:%s", branch, remoteRef)
+	if err := command.Run("git", "fetch", "--quiet", remote, refspec); err != nil {
+		return "", fmt.Errorf("unable to fetch the branch %s from the remote %s (not pushed?): %w", branch, remote, err)
+	}
+
 	localCommit, err := gitOutput("rev-parse", "HEAD")
 	if err != nil {
 		return "", err
 	}
-	remoteRef := fmt.Sprintf("refs/remotes/%s/%s", remote, branch)
-	remoteCommit, err := gitOutput("rev-parse", "--verify", "--quiet", remoteRef)
+	remoteCommit, err := gitOutput("rev-parse", "--verify", remoteRef)
 	if err != nil {
-		return "", fmt.Errorf("unable to find the branch %s on the remote %s (not pushed?): %w", branch, remote, err)
+		return "", err
 	}
 	if localCommit != remoteCommit {
 		return "", fmt.Errorf("the local branch %s (%s) is not in sync with %s/%s (%s)",
@@ -116,7 +131,7 @@ func generateChangelog(series string) (string, error) {
 // ghReleaseArgs returns the arguments of the gh command creating the GitHub release and its tag on the given commit.
 func ghReleaseArgs(version string, commit string, notes string) []string {
 	tag := "v" + version
-	args := []string{"release", "create", tag, "--target", commit, "--title", tag}
+	args := []string{"release", "create", tag, "--repo", repository, "--target", commit, "--title", tag}
 	// Same rule as for the npm dist-tag: a version with a prerelease suffix (beta, rc...) is a prerelease.
 	if strings.Contains(version, "-") {
 		args = append(args, "--prerelease")
@@ -144,7 +159,7 @@ func run(remote string, dryRun bool) error {
 		return err
 	}
 
-	// get all tags and the latest state of the release branch
+	// get all tags
 	if err := command.Run("git", "fetch", "--tags", remote); err != nil {
 		return fmt.Errorf("fetching the remote %s: %w", remote, err)
 	}
