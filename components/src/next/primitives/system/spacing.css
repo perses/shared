@@ -19,7 +19,8 @@
  * Each class reads only its matching custom property. Breakpoint values carry forward
  * until a later explicit breakpoint overrides them. Keep all rules for p before px/py,
  * then physical sides, and m before mx/my, then physical sides, so more specific
- * directions win even over later broad breakpoints.
+ * directions win even over later broad breakpoints. Likewise, keep row/column gap
+ * rules after all gap breakpoints so axis-specific spacing always wins.
  * Values are token references, numeric pixels, or literal CSS spacing values.
  */
 @layer perses.utilities {
@@ -425,6 +426,60 @@
   @media (min-width: 1536px) {
     .ps-gap-xl {
       gap: var(--ps-gap-xl, initial);
+    }
+  }
+
+  .ps-row-gap {
+    row-gap: var(--ps-row-gap, initial);
+  }
+  .ps-row-gap-xs {
+    row-gap: var(--ps-row-gap-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-row-gap-sm {
+      row-gap: var(--ps-row-gap-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-row-gap-md {
+      row-gap: var(--ps-row-gap-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-row-gap-lg {
+      row-gap: var(--ps-row-gap-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-row-gap-xl {
+      row-gap: var(--ps-row-gap-xl, initial);
+    }
+  }
+
+  .ps-column-gap {
+    column-gap: var(--ps-column-gap, initial);
+  }
+  .ps-column-gap-xs {
+    column-gap: var(--ps-column-gap-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-column-gap-sm {
+      column-gap: var(--ps-column-gap-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-column-gap-md {
+      column-gap: var(--ps-column-gap-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-column-gap-lg {
+      column-gap: var(--ps-column-gap-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-column-gap-xl {
+      column-gap: var(--ps-column-gap-xl, initial);
     }
   }
 }

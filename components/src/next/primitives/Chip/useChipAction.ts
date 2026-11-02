@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useCallback, useRef } from 'react';
-import type { HTMLAttributes, KeyboardEvent, KeyboardEventHandler, MouseEvent, RefObject } from 'react';
+import type { HTMLAttributes, KeyboardEvent, KeyboardEventHandler, MouseEvent } from 'react';
 
 interface UseChipActionOptions extends Pick<HTMLAttributes<HTMLElement>, 'onClick' | 'onKeyDown' | 'tabIndex'> {
   actionOnLabel: boolean;
@@ -20,7 +20,7 @@ interface UseChipActionOptions extends Pick<HTMLAttributes<HTMLElement>, 'onClic
 }
 
 interface ChipAction {
-  labelRef: RefObject<HTMLSpanElement>;
+  labelRef: { current: HTMLSpanElement | null };
   actionProps: HTMLAttributes<HTMLElement> | undefined;
   handleKeyDown: KeyboardEventHandler<HTMLElement>;
 }

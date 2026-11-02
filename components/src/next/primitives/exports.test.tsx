@@ -28,6 +28,8 @@ import type {
   ChipVariant,
   ColorVariant,
   DividerProps,
+  GridItemProps,
+  GridProps,
   IconProps,
   Size,
   SortDirection,
@@ -55,6 +57,8 @@ import {
   Checkbox,
   Chip,
   Divider,
+  Grid,
+  GridItem,
   Icon,
   Spinner,
   Stack,
@@ -86,6 +90,8 @@ describe('primitives barrel exports', () => {
     expect(Checkbox).toBeDefined();
     expect(Chip).toBeDefined();
     expect(Divider).toBeDefined();
+    expect(Grid).toBeDefined();
+    expect(GridItem).toBeDefined();
     expect(Icon).toBeDefined();
     expect(Spinner).toBeDefined();
     expect(Stack).toBeDefined();
@@ -128,6 +134,8 @@ describe('primitives barrel exports', () => {
     const chipVariant: ChipVariant = 'outline';
     const chipStyle: ChipStyle = { '--perses-chip-size-sm': '2.5rem' };
     const dividerProps: DividerProps = {};
+    const gridProps: GridProps = { columns: 24 };
+    const gridItemProps: GridItemProps = { size: 6 };
     const iconProps: IconProps = {};
     const spinnerProps: SpinnerProps = {};
     const stackProps: StackProps = {};
@@ -165,6 +173,8 @@ describe('primitives barrel exports', () => {
     expect(chipVariant).toBe('outline');
     expect(chipStyle).toBeDefined();
     expect(dividerProps).toBeDefined();
+    expect(gridProps.columns).toBe(24);
+    expect(gridItemProps.size).toBe(6);
     expect(iconProps).toBeDefined();
     expect(spinnerProps).toBeDefined();
     expect(stackProps).toBeDefined();
