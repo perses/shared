@@ -1310,4 +1310,111 @@ describe('table', () => {
       expect(getColumnSize()).toBe(initialSize);
     });
   });
+
+  describe('when enableColumnFilter is set on a column', () => {
+    type FilterTableData = { id: string; status: string; region: string };
+
+    const FILTER_DATA: FilterTableData[] = [
+      { id: 'r0', status: 'active', region: 'us-east' },
+      { id: 'r1', status: 'active', region: 'eu-west' },
+      { id: 'r2', status: 'inactive', region: 'us-east' },
+      { id: 'r3', status: 'inactive', region: 'us-west' },
+      { id: 'r4', status: 'active', region: 'ap-south' },
+    ];
+
+    const FILTER_COLUMNS: Array<TableColumnConfig<FilterTableData>> = [
+      { accessorKey: 'status', header: 'Status', enableColumnFilter: true },
+      { accessorKey: 'region', header: 'Region', enableColumnFilter: true },
+    ];
+
+    const renderFilterTable = (): RenderResult =>
+      render(
+        <VirtuosoMockContext.Provider value={{ viewportHeight: 600, itemHeight: MOCK_ITEM_HEIGHT }}>
+          <Table
+            data={FILTER_DATA}
+            columns={FILTER_COLUMNS}
+            height={600}
+            width={400}
+            rowSelection={{}}
+            onRowSelectionChange={vi.fn()}
+            onRowMouseOver={vi.fn()}
+            onRowMouseOut={vi.fn()}
+          />
+        </VirtuosoMockContext.Provider>,
+      );
+
+    test('renders a filter button in each filterable column header', () => {
+      renderFilterTable();
+      const columnHeaders = screen.getAllByRole('columnheader');
+      expect(columnHeaders).toHaveLength(FILTER_COLUMNS.length);
+      // Every header with enableColumnFilter should show a filter button.
+      for (const header of columnHeaders) {
+        expect(within(header).getByRole('button', { name: /filter column/i })).toBeInTheDocument();
+      }
+    });
+
+    test('columns without enableColumnFilter do not render a filter button', () => {
+      renderTable();
+      // COLUMNS has no enableColumnFilter; no filter buttons expected.
+      const filterButtons = screen.queryAllByRole('button', { name: /filter column/i });
+      expect(filterButtons).toHaveLength(0);
+    });
+
+    test('clicking the filter button opens a popover listing unique column values', () => {
+      renderFilterTable();
+      const [statusHeader] = screen.getAllByRole('columnheader');
+      if (!statusHeader) throw new Error('Missing status header');
+
+      userEvent.click(within(statusHeader).getByRole('button', { name: /filter column/i }));
+
+      // Unique status values are "active" and "inactive".
+      expect(screen.getByRole('checkbox', { name: 'active' })).toBeInTheDocument();
+      expect(screen.getByRole('checkbox', { name: 'inactive' })).toBeInTheDocument();
+      // Plus a "Select all" header item.
+      expect(screen.getByRole('checkbox', { name: 'Select all' })).toBeInTheDocument();
+    });
+
+    test('selecting a value checks the checkbox', () => {
+      renderFilterTable();
+      const [statusHeader] = screen.getAllByRole('columnheader');
+      if (!statusHeader) throw new Error('Missing status header');
+
+      userEvent.click(within(statusHeader).getByRole('button', { name: /filter column/i }));
+
+      const activeCheckbox = screen.getByRole('checkbox', { name: 'active' });
+      expect(activeCheckbox).not.toBeChecked();
+
+      userEvent.click(activeCheckbox);
+
+      expect(activeCheckbox).toBeChecked();
+    });
+
+    test('selecting all values marks the "Select all" checkbox as checked', () => {
+      renderFilterTable();
+      const [statusHeader] = screen.getAllByRole('columnheader');
+      if (!statusHeader) throw new Error('Missing status header');
+
+      userEvent.click(within(statusHeader).getByRole('button', { name: /filter column/i }));
+
+      // Before any selection — "Select all" is present and unchecked.
+      const selectAll = screen.getByRole('checkbox', { name: 'Select all' });
+      expect(selectAll).not.toBeChecked();
+      expect(selectAll).toHaveAttribute('data-indeterminate', 'false');
+    });
+
+    test('selecting a value checks its checkbox and marks the filter button as active', () => {
+      renderFilterTable();
+      const [statusHeader] = screen.getAllByRole('columnheader');
+      if (!statusHeader) throw new Error('Missing status header');
+
+      userEvent.click(within(statusHeader).getByRole('button', { name: /filter column/i }));
+
+      const activeCheckbox = screen.getByRole('checkbox', { name: 'active' });
+      expect(activeCheckbox).not.toBeChecked();
+
+      userEvent.click(activeCheckbox);
+
+      expect(activeCheckbox).toBeChecked();
+    });
+  });
 });
