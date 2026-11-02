@@ -32,4 +32,36 @@ describe('TableCell', () => {
       expect(await screen.findByRole('link', { name: 'prometheus_http_requests_total' })).toBeInTheDocument();
     });
   });
+
+  describe('data link URL sanitization', () => {
+    it('does not render a link when the data link uses a javascript: URL', () => {
+      render(
+        <TableCell
+          density="compact"
+          isFirstColumn={false}
+          isLastColumn={false}
+          dataLink={{ url: 'javascript:alert(document.domain)' }}
+        >
+          prometheus_http_requests_total
+        </TableCell>,
+      );
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+      expect(screen.getByText('prometheus_http_requests_total')).toBeInTheDocument();
+    });
+
+    it('does not render a link when the interpolated data link uses a javascript: URL', () => {
+      render(
+        <TableCell
+          density="compact"
+          isFirstColumn={false}
+          isLastColumn={false}
+          adjacentCellsValuesMap={{ scheme: 'javascript' }}
+          dataLink={{ url: '${__data.fields["scheme"]}:alert(document.domain)' }}
+        >
+          prometheus_http_requests_total
+        </TableCell>,
+      );
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    });
+  });
 });
