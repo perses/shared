@@ -27,14 +27,10 @@ const cell: CSSProperties = {
   padding: 'var(--perses-spacing-sm)',
   textAlign: 'center',
 };
-const field: CSSProperties = {
-  ...outline,
-  background: 'var(--perses-bg-sunken)',
-  padding: 'var(--perses-spacing-sm)',
-};
 
 const WIDE_SPAN = { default: 24, md: 18 } as const;
 const NARROW_SPAN = { default: 24, md: 6 } as const;
+const COLUMN_SPACING = { md: 'xl' } as const;
 // Every span that divides 12 evenly, repeated to fill its row: 1×12, 2×6, 3×4, 4×3, 6×2, 12×1.
 const SPAN_CELLS = [12, 6, 4, 3, 2, 1].flatMap((span) =>
   Array.from({ length: 12 / span }, (_, position) => ({ id: `${span}-${position}`, span })),
@@ -69,6 +65,40 @@ export const Basic: Story = () => (
   </Layout>
 );
 Basic.storyName = 'Basic';
+
+const spacingCode = `<Grid spacing="sm" rowSpacing="lg" columnSpacing={{ md: 'xl' }}>
+  <GridItem size={6}>First</GridItem>
+  <GridItem size={6}>Second</GridItem>
+  <GridItem size={6}>Third</GridItem>
+  <GridItem size={6}>Fourth</GridItem>
+</Grid>`;
+
+export const Spacing: Story = () => (
+  <Layout>
+    <p>
+      <code>spacing</code> sets both axes. <code>rowSpacing</code> and <code>columnSpacing</code> override their
+      respective axes and accept the same tokens, CSS lengths, numeric pixels, and responsive objects. Here rows always
+      use <code>lg</code>; columns use <code>sm</code> below <code>md</code> (900 px), then <code>xl</code>.
+    </p>
+    <Sample title="Independent row and column spacing" code={spacingCode}>
+      <Grid spacing="sm" rowSpacing="lg" columnSpacing={COLUMN_SPACING} p="sm" style={outline}>
+        <GridItem size={6} style={cell}>
+          First
+        </GridItem>
+        <GridItem size={6} style={cell}>
+          Second
+        </GridItem>
+        <GridItem size={6} style={cell}>
+          Third
+        </GridItem>
+        <GridItem size={6} style={cell}>
+          Fourth
+        </GridItem>
+      </Grid>
+    </Sample>
+  </Layout>
+);
+Spacing.storyName = 'Spacing';
 
 const columnsCode = `<Grid spacing="sm">
   <GridItem size={12}>12</GridItem>
@@ -143,36 +173,3 @@ export const Nested: Story = () => (
   </Layout>
 );
 Nested.storyName = 'Nested';
-
-const formCode = `<Grid spacing="lg">
-  <GridItem size={8}>Header name</GridItem>
-  <GridItem size={3}>Header value</GridItem>
-  <GridItem size={1}>×</GridItem>
-  <GridItem size={4}>Label</GridItem>
-  <GridItem size={12}>Input</GridItem>
-</Grid>`;
-
-export const FormLayout: Story = () => (
-  <Layout>
-    <Sample title="Form layout" code={formCode}>
-      <Grid spacing="lg" p="sm" style={outline}>
-        <GridItem size={8} style={field}>
-          Header name
-        </GridItem>
-        <GridItem size={3} style={field}>
-          Header value
-        </GridItem>
-        <GridItem size={1} style={cell}>
-          ×
-        </GridItem>
-        <GridItem size={4} style={field}>
-          Label
-        </GridItem>
-        <GridItem size={12} style={field}>
-          Input
-        </GridItem>
-      </Grid>
-    </Sample>
-  </Layout>
-);
-FormLayout.storyName = 'Form layout';

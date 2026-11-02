@@ -39,11 +39,16 @@ export interface GridProps
   columns?: number;
   /** Space between rows and columns, as a spacing token or CSS length. */
   spacing?: Responsive<SpacingValue>;
+  /** Row spacing; overrides `spacing` from its first provided breakpoint onward. */
+  rowSpacing?: Responsive<SpacingValue>;
+  /** Column spacing; overrides `spacing` from its first provided breakpoint onward. */
+  columnSpacing?: Responsive<SpacingValue>;
   style?: PersesCSSProperties;
 }
 
 const GRID_STYLE_PROPS = compileStyleProps([
   spacingProps,
+  { rowGap: spacingProps.gap, columnGap: spacingProps.gap },
   sizingProps,
   radiusProps,
   { overflow: displayProps.overflow },
@@ -52,6 +57,7 @@ const GRID_STYLE_PROPS = compileStyleProps([
 /**
  * A column grid container. Children are placed in DOM order; use `GridItem` with `size` to span columns.
  * Spacing is a CSS `gap`, so items never need padding workarounds.
+ * Use `rowSpacing` and `columnSpacing` to override either axis independently.
  *
  * @example
  * <Grid spacing="lg">
@@ -61,14 +67,14 @@ const GRID_STYLE_PROPS = compileStyleProps([
  * </Grid>
  */
 export const Grid = forwardRef<HTMLDivElement, GridProps>(function Grid(
-  { columns, spacing, className, style, children, ...rest },
+  { columns, spacing, rowSpacing, columnSpacing, className, style, children, ...rest },
   ref,
 ) {
   const {
     className: styleClassName,
     style: computedStyle,
     rest: domProps,
-  } = applyStyleProps({ ...rest, gap: spacing }, GRID_STYLE_PROPS, {
+  } = applyStyleProps({ ...rest, gap: spacing, rowGap: rowSpacing, columnGap: columnSpacing }, GRID_STYLE_PROPS, {
     '--ps-grid-columns': columns,
     ...style,
   });

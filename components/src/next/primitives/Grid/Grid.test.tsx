@@ -21,6 +21,9 @@ const RESPONSIVE_SPACING = { default: 'sm', md: 'xl' } as const;
 const RESPONSIVE_SIZE = { default: 12, md: 6 } as const;
 const PARTIAL_RESPONSIVE_SIZE = { md: 6, xl: undefined } as const;
 const STYLE_OVERRIDE = { gap: '99px' } as const;
+const AXIS_STYLE_OVERRIDE = { rowGap: '7px', columnGap: '9px' } as const;
+const RESPONSIVE_ROW_SPACING = { md: 'lg', xl: undefined } as const;
+const RESPONSIVE_COLUMN_SPACING = { default: 0, sm: 8 } as const;
 const CUSTOM_PROPERTY_STYLE = { '--perses-bg-surface': 'white', '--app-accent': 'blue' } as const;
 const ITEM_STYLE_OVERRIDE = { gridColumn: 'span 2' } as const;
 const CENTERED = { textAlign: 'center' } as const;
@@ -74,6 +77,89 @@ describe('Grid', () => {
     const grid = screen.getByTestId('grid');
     expect(grid.style.getPropertyValue('--ps-gap')).toBe('var(--perses-spacing-sm)');
     expect(grid.style.getPropertyValue('--ps-gap-md')).toBe('var(--perses-spacing-xl)');
+  });
+
+  it('maps independent axis spacing to gap utilities without forwarding the props to the DOM', () => {
+    render(
+      <Grid data-testid="grid" spacing="md" rowSpacing="lg" columnSpacing="2rem">
+        Content
+      </Grid>,
+    );
+    const grid = screen.getByTestId('grid');
+    expect(grid).toHaveClass('ps-gap', 'ps-row-gap', 'ps-column-gap');
+    expect(grid.style.getPropertyValue('--ps-gap')).toBe('var(--perses-spacing-md)');
+    expect(grid.style.getPropertyValue('--ps-row-gap')).toBe('var(--perses-spacing-lg)');
+    expect(grid.style.getPropertyValue('--ps-column-gap')).toBe('2rem');
+    expect(grid).not.toHaveAttribute('rowSpacing');
+    expect(grid).not.toHaveAttribute('columnSpacing');
+  });
+
+  it.each([
+    [{ rowSpacing: 8 }, 'row-gap'],
+    [{ columnSpacing: 8 }, 'column-gap'],
+  ] as const)('supports %j without general spacing', (props, axis) => {
+    render(<Grid data-testid="grid" {...props} />);
+    const grid = screen.getByTestId('grid');
+    expect(grid).toHaveClass(`ps-${axis}`);
+    expect(grid.style.getPropertyValue(`--ps-${axis}`)).toBe('8px');
+    expect(grid).not.toHaveClass('ps-gap');
+  });
+
+  it('preserves zero axis spacing rather than falling back to general spacing', () => {
+    render(<Grid data-testid="grid" spacing="lg" rowSpacing={0} columnSpacing={0} />);
+    const grid = screen.getByTestId('grid');
+    expect(grid.style.getPropertyValue('--ps-row-gap')).toBe('0px');
+    expect(grid.style.getPropertyValue('--ps-column-gap')).toBe('0px');
+  });
+
+  it('leaves general spacing unchanged when the axis props are undefined', () => {
+    render(<Grid data-testid="grid" spacing="md" rowSpacing={undefined} columnSpacing={undefined} />);
+    const grid = screen.getByTestId('grid');
+    expect(grid.style.getPropertyValue('--ps-gap')).toBe('var(--perses-spacing-md)');
+    expect(grid).not.toHaveClass('ps-row-gap', 'ps-column-gap');
+    expect(grid.style.getPropertyValue('--ps-row-gap')).toBe('');
+    expect(grid.style.getPropertyValue('--ps-column-gap')).toBe('');
+  });
+
+  it('writes responsive axis overrides only at their explicit breakpoints', () => {
+    render(
+      <Grid
+        data-testid="grid"
+        spacing={RESPONSIVE_SPACING}
+        rowSpacing={RESPONSIVE_ROW_SPACING}
+        columnSpacing={RESPONSIVE_COLUMN_SPACING}
+      />,
+    );
+    const grid = screen.getByTestId('grid');
+    expect(grid).toHaveClass('ps-gap', 'ps-gap-md', 'ps-row-gap-md', 'ps-column-gap', 'ps-column-gap-sm');
+    expect(grid).not.toHaveClass('ps-row-gap', 'ps-row-gap-xl');
+    expect(grid.style.getPropertyValue('--ps-gap')).toBe('var(--perses-spacing-sm)');
+    expect(grid.style.getPropertyValue('--ps-gap-md')).toBe('var(--perses-spacing-xl)');
+    expect(grid.style.getPropertyValue('--ps-row-gap')).toBe('');
+    expect(grid.style.getPropertyValue('--ps-row-gap-md')).toBe('var(--perses-spacing-lg)');
+    expect(grid.style.getPropertyValue('--ps-row-gap-xl')).toBe('');
+    expect(grid.style.getPropertyValue('--ps-column-gap')).toBe('0px');
+    expect(grid.style.getPropertyValue('--ps-column-gap-sm')).toBe('8px');
+  });
+
+  it('preserves explicit inline axis styles', () => {
+    render(<Grid data-testid="grid" spacing="md" rowSpacing="lg" columnSpacing="xl" style={AXIS_STYLE_OVERRIDE} />);
+    const grid = screen.getByTestId('grid');
+    expect(grid.style.getPropertyValue('--ps-row-gap')).toBe('var(--perses-spacing-lg)');
+    expect(grid.style.getPropertyValue('--ps-column-gap')).toBe('var(--perses-spacing-xl)');
+    expect(grid.style.rowGap).toBe('7px');
+    expect(grid.style.columnGap).toBe('9px');
+  });
+
+  it('removes axis overrides when their props are removed', () => {
+    const { rerender } = render(<Grid data-testid="grid" spacing="md" rowSpacing="lg" columnSpacing="xl" />);
+    const grid = screen.getByTestId('grid');
+    expect(grid).toHaveClass('ps-row-gap', 'ps-column-gap');
+    rerender(<Grid data-testid="grid" spacing="md" />);
+    expect(grid).not.toHaveClass('ps-row-gap', 'ps-column-gap');
+    expect(grid.style.getPropertyValue('--ps-row-gap')).toBe('');
+    expect(grid.style.getPropertyValue('--ps-column-gap')).toBe('');
+    expect(grid.style.getPropertyValue('--ps-gap')).toBe('var(--perses-spacing-md)');
   });
 
   it('supports sizing and overflow style props', () => {
