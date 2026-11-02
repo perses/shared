@@ -37,7 +37,6 @@ import {
 } from 'echarts/components';
 import type { ECharts, EChartsCoreOption } from 'echarts/core';
 import { init, connect, use as registerEChartsComponents } from 'echarts/core';
-import { LegacyGridContainLabel } from 'echarts/features';
 import { CanvasRenderer } from 'echarts/renderers';
 import debounce from 'lodash/debounce';
 import isEqual from 'lodash/isEqual';
@@ -60,8 +59,6 @@ registerEChartsComponents([
   EChartsCustomChart,
   EChartsHeatmapChart,
   GridComponent,
-  // Preserve the v5 layout of grids using containLabel.
-  LegacyGridContainLabel,
   TitleComponent,
   ToolboxComponent,
   TooltipComponent,

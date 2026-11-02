@@ -28,8 +28,6 @@ export function generateChartsTheme(
   const primaryTextColor = muiTheme.palette.text?.primary ?? DEFAULT_TEXT_COLOR;
 
   const muiConvertedTheme: EChartsTheme = {
-    // Preserve v5 label layout when using ECharts 6.
-    richInheritPlainLabel: false,
     title: {
       show: false,
     },
@@ -44,7 +42,6 @@ export function generateChartsTheme(
       bottom: 0,
       left: 20,
       containLabel: true,
-      outerBoundsMode: 'none',
     },
     // Accessible categorical palette from: https://davidmathlogic.com/colorblind
     color: [
@@ -57,7 +54,6 @@ export function generateChartsTheme(
       '#D55E00', // red
     ],
     categoryAxis: {
-      nameMoveOverlap: false,
       show: true,
       axisLabel: {
         show: true,
@@ -93,10 +89,8 @@ export function generateChartsTheme(
       },
     },
     timeAxis: {
-      nameMoveOverlap: false,
       show: true,
       axisLabel: {
-        showMaxLabel: false,
         show: true,
         color: primaryTextColor,
         margin: 15,
@@ -129,15 +123,7 @@ export function generateChartsTheme(
         },
       },
     },
-    // Log axes do not inherit valueAxis styling; retain their v5 defaults as well.
-    logAxis: {
-      nameMoveOverlap: false,
-      axisLabel: { color: primaryTextColor },
-      axisLine: { lineStyle: { color: '#6E7079' } },
-      splitLine: { lineStyle: { color: ['#E0E6F1'] } },
-    },
     valueAxis: {
-      nameMoveOverlap: false,
       show: true,
       axisLabel: {
         color: primaryTextColor,
@@ -145,7 +131,6 @@ export function generateChartsTheme(
       },
       axisLine: {
         show: false,
-        lineStyle: { color: '#6E7079' },
       },
       splitLine: {
         show: true,
@@ -157,9 +142,6 @@ export function generateChartsTheme(
       },
     },
     legend: {
-      top: 0,
-      bottom: 'auto',
-      itemGap: 10,
       orient: 'horizontal',
       textStyle: {
         color: primaryTextColor,
@@ -169,9 +151,6 @@ export function generateChartsTheme(
       },
       pageIconColor: muiTheme?.palette?.action?.active,
       pageIconInactiveColor: muiTheme?.palette?.action?.disabled,
-    },
-    visualMap: {
-      padding: 5,
     },
     toolbox: {
       show: true,
@@ -220,7 +199,6 @@ export function generateChartsTheme(
       },
     },
     bar: {
-      barGap: '20%',
       barMaxWidth: 150,
       itemStyle: {
         borderWidth: 0,
