@@ -172,6 +172,9 @@ expectTypeOf({ 'aria-label': 'Project' } satisfies TabListProps);
 expectTypeOf({ 'aria-labelledby': 'project-heading' } satisfies TabListProps);
 // @ts-expect-error A tab list without aria-label or aria-labelledby has no accessible name.
 expectTypeOf({ variant: 'scrollable' } satisfies TabListProps);
+// The list fixes display: flex and owns overflow through variant, so it offers neither as a style prop.
+type _TabListHasNoDisplayProps = AssertFalse<'display' extends keyof TabListProps ? true : false>;
+type _TabListHasNoOverflowProps = AssertFalse<'overflow' extends keyof TabListProps ? true : false>;
 
 expectTypeOf({ input: { className: 'query-input', style: { '--app-accent': 'blue' } } } satisfies TextFieldSlotProps);
 // @ts-expect-error Slot styling must not replace the input renderer.

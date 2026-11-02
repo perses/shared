@@ -17,13 +17,11 @@ import { forwardRef, useCallback, useRef } from 'react';
 import type { HTMLAttributes, ReactElement } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
-import { applyStyleProps, compileStyleProps, displayProps, radiusProps, spacingProps } from '../system';
-import type { DisplayProps, RadiusProps, SpacingProps } from '../system';
+import { applyStyleProps, compileStyleProps, radiusProps, spacingProps } from '../system';
+import type { RadiusProps, SpacingProps } from '../system';
 import { TabListScrollButtons } from './TabListScrollButtons';
 import type { TabStyle } from './Tabs';
 
-// oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared layout styles.
-import '../system/layout.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared radius styles.
 import '../system/radius.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared spacing styles.
@@ -31,7 +29,7 @@ import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the tabs styles.
 import './tabs.css';
 
-const TAB_LIST_STYLE_PROPS = compileStyleProps([spacingProps, displayProps, radiusProps]);
+const TAB_LIST_STYLE_PROPS = compileStyleProps([spacingProps, radiusProps]);
 
 export type TabListVariant = 'standard' | 'scrollable' | 'fullWidth';
 
@@ -48,11 +46,7 @@ export type TabListAccessibleName = { 'aria-label': string } | { 'aria-labelledb
 export type TabListProps = TabListBaseProps & TabListAccessibleName;
 
 interface TabListBaseProps
-  extends
-    Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'aria-label' | 'aria-labelledby'>,
-    SpacingProps,
-    DisplayProps,
-    RadiusProps {
+  extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'aria-label' | 'aria-labelledby'>, SpacingProps, RadiusProps {
   style?: PersesCSSProperties<TabStyle>;
   /** Overflow behaviour: `scrollable` scrolls along the axis, `fullWidth` stretches tabs evenly. Defaults to `standard`. */
   variant?: TabListVariant;
