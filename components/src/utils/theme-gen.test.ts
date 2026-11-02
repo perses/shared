@@ -46,6 +46,7 @@ describe('generateChartsTheme', () => {
             },
           },
           "bar": {
+            "barGap": "20%",
             "barMaxWidth": 150,
             "itemStyle": {
               "borderColor": "#e0e0e0",
@@ -76,6 +77,7 @@ describe('generateChartsTheme', () => {
               },
               "show": false,
             },
+            "nameMoveOverlap": false,
             "show": true,
             "splitArea": {
               "areaStyle": {
@@ -122,10 +124,13 @@ describe('generateChartsTheme', () => {
             "bottom": 0,
             "containLabel": true,
             "left": 20,
+            "outerBoundsMode": "none",
             "right": 20,
             "top": 5,
           },
           "legend": {
+            "bottom": "auto",
+            "itemGap": 10,
             "orient": "horizontal",
             "pageIconColor": "rgba(0, 0, 0, 0.54)",
             "pageIconInactiveColor": "rgba(0, 0, 0, 0.26)",
@@ -135,6 +140,7 @@ describe('generateChartsTheme', () => {
             "textStyle": {
               "color": "yellow",
             },
+            "top": 0,
           },
           "line": {
             "emphasis": {
@@ -150,6 +156,24 @@ describe('generateChartsTheme', () => {
             "symbol": "circle",
             "symbolSize": 4,
           },
+          "logAxis": {
+            "axisLabel": {
+              "color": "rgba(0, 0, 0, 0.87)",
+            },
+            "axisLine": {
+              "lineStyle": {
+                "color": "#6E7079",
+              },
+            },
+            "nameMoveOverlap": false,
+            "splitLine": {
+              "lineStyle": {
+                "color": [
+                  "#E0E6F1",
+                ],
+              },
+            },
+          },
           "markLine": {
             "itemStyle": {
               "color": "#9e9e9e",
@@ -161,6 +185,7 @@ describe('generateChartsTheme', () => {
             "symbol": "none",
             "symbolSize": 0,
           },
+          "richInheritPlainLabel": false,
           "textStyle": {
             "color": "rgba(0, 0, 0, 0.87)",
             "fontFamily": ""Roboto", "Helvetica", "Arial", sans-serif",
@@ -171,6 +196,7 @@ describe('generateChartsTheme', () => {
               "color": "rgba(0, 0, 0, 0.87)",
               "margin": 15,
               "show": true,
+              "showMaxLabel": false,
             },
             "axisLine": {
               "lineStyle": {
@@ -185,6 +211,7 @@ describe('generateChartsTheme', () => {
               },
               "show": false,
             },
+            "nameMoveOverlap": false,
             "show": true,
             "splitArea": {
               "areaStyle": {
@@ -228,8 +255,12 @@ describe('generateChartsTheme', () => {
               "margin": 12,
             },
             "axisLine": {
+              "lineStyle": {
+                "color": "#6E7079",
+              },
               "show": false,
             },
+            "nameMoveOverlap": false,
             "show": true,
             "splitLine": {
               "lineStyle": {
@@ -239,6 +270,9 @@ describe('generateChartsTheme', () => {
               },
               "show": true,
             },
+          },
+          "visualMap": {
+            "padding": 5,
           },
         },
         "noDataOption": {
