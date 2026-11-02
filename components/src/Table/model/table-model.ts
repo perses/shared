@@ -410,7 +410,7 @@ export interface TableCellConfig {
 // of `any`. Putting this in the model instead of a separate .d.ts file because
 // I couldn't get it to work properly that way and punted on figuring it out
 // after trying several things.
-declare module '@tanstack/table-core' {
+declare module '@tanstack/react-table' {
   interface ColumnMeta<TFeatures extends TableFeaturesBase, TData extends RowData, TValue> {
     align?: TableColumnConfig<TData>['align'];
     headerDescription?: TableColumnConfig<TData>['headerDescription'];

@@ -20,13 +20,15 @@ jobs:
       - uses: perses/github-actions@v0.13.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
-          enable_npm: true
           enable_go: true
-          nvmrc_path: './.nvmrc'
+      - uses: pnpm/setup@v2.1.0
+        with:
+          install: false
+          cache: true
       - name: install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       - name: build libraries
-        run: 'npm run build'
+        run: 'pnpm run build'
       - name: store libraries archives
         uses: actions/upload-artifact@v7
         with:
@@ -42,12 +44,13 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: ./.github/perses-ci/actions/setup_environment
+      - uses: pnpm/setup@v2.1.0
         with:
-          enable_npm: true
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run format:check
+          install: false
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run lint
+      - run: pnpm run format:check
 
   test-npm:
     name: 'test-npm'
@@ -56,11 +59,12 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: ./.github/perses-ci/actions/setup_environment
+      - uses: pnpm/setup@v2.1.0
         with:
-          enable_npm: true
-      - run: npm ci
-      - run: npm run test
+          install: false
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run test
 
   type-check:
     name: 'type-check'
@@ -69,11 +73,12 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: ./.github/perses-ci/actions/setup_environment
+      - uses: pnpm/setup@v2.1.0
         with:
-          enable_npm: true
-      - run: npm ci
-      - run: npm run type-check
+          install: false
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run type-check
 
   # Packages are developed against React 18 (the minimum supported version); also validate them against React 19.
   react-19:
@@ -83,13 +88,16 @@ jobs:
       - name: checkout
         uses: actions/checkout@v7
       - uses: perses/github-actions@v0.13.0
-      - uses: ./.github/perses-ci/actions/setup_environment
+      - uses: pnpm/setup@v2.1.0
         with:
-          enable_npm: true
-      - run: npm ci
-      - run: npm install --no-save react@^19 react-dom@^19 @types/react@^19 @types/react-dom@^19
-      - run: npm run type-check
-      - run: npm run test
+          install: false
+          cache: true
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm add --workspace-root --save-dev react@^19 react-dom@^19 @types/react@^19 @types/react-dom@^19
+      - name: Assert React 19 is installed
+        run: node -e "const v=require('react/package.json').version; if(!v.startsWith('19.')){console.error('Expected React 19, got',v);process.exit(1)}"
+      - run: pnpm run type-check
+      - run: pnpm run test
 
   release:
     name: 'release'
@@ -107,9 +115,11 @@ jobs:
       - uses: perses/github-actions@v0.13.0
       - uses: ./.github/perses-ci/actions/setup_environment
         with:
-          enable_npm: true
           enable_go: true
-          nvmrc_path: './.nvmrc'
+      - uses: pnpm/setup@v2.1.0
+        with:
+          install: false
+          cache: true
       - name: Download archive
         uses: actions/download-artifact@v8
         with:

@@ -1,0 +1,11 @@
+packages:
+  - components
+  - dashboards
+  - plugin-system
+  - explore
+  - client
+
+allowBuilds:
+  '@swc/core': true
+  core-js: false
+  esbuild: true

@@ -8,19 +8,19 @@ This monorepo manages the core UI libraries that power the Perses platform. Each
 
 ## Packages
 
-| Package | NPM | Description |
-|---------|-----|-------------|
-| [`@perses-dev/components`](./components) | [![npm version](https://badge.fury.io/js/@perses-dev%2Fcomponents.svg)](https://www.npmjs.com/package/@perses-dev/components) | Common UI components used across Perses features |
-| [`@perses-dev/dashboards`](./dashboards) | [![npm version](https://badge.fury.io/js/@perses-dev%2Fdashboards.svg)](https://www.npmjs.com/package/@perses-dev/dashboards) | The dashboards feature in Perses |
-| [`@perses-dev/explore`](./explore) | [![npm version](https://badge.fury.io/js/@perses-dev%2Fexplore.svg)](https://www.npmjs.com/package/@perses-dev/explore) | The explore feature in Perses |
-| [`@perses-dev/plugin-system`](./plugin-system) | [![npm version](https://badge.fury.io/js/@perses-dev%2Fplugin-system.svg)](https://www.npmjs.com/package/@perses-dev/plugin-system) | The plugin system for Perses |
+| Package                                        | NPM                                                                                                                                 | Description                                      |
+|------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|
+| [`@perses-dev/components`](./components)       | [![npm version](https://badge.fury.io/js/@perses-dev%2Fcomponents.svg)](https://www.npmjs.com/package/@perses-dev/components)       | Common UI components used across Perses features |
+| [`@perses-dev/dashboards`](./dashboards)       | [![npm version](https://badge.fury.io/js/@perses-dev%2Fdashboards.svg)](https://www.npmjs.com/package/@perses-dev/dashboards)       | The dashboards feature in Perses                 |
+| [`@perses-dev/explore`](./explore)             | [![npm version](https://badge.fury.io/js/@perses-dev%2Fexplore.svg)](https://www.npmjs.com/package/@perses-dev/explore)             | The explore feature in Perses                    |
+| [`@perses-dev/plugin-system`](./plugin-system) | [![npm version](https://badge.fury.io/js/@perses-dev%2Fplugin-system.svg)](https://www.npmjs.com/package/@perses-dev/plugin-system) | The plugin system for Perses                     |
 
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 24+
-- npm 11+
+- pnpm 12+
 
 ### Installation
 
@@ -29,44 +29,44 @@ Clone the repository and install dependencies:
 ```bash
 git clone https://github.com/perses/shared.git
 cd shared
-npm install
+pnpm install
 ```
 
 ### Development
 
-This monorepo uses [Turborepo](https://turbo.build/repo) for efficient task running and caching.
+This monorepo uses [pnpm workspaces](https://pnpm.io/workspaces) to run tasks across packages. Builds run in dependency order.
 
 #### Build all packages
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 #### Run tests
 
 ```bash
-npm run test
+pnpm run test
 ```
 
 #### Type checking
 
 ```bash
-npm run type-check
+pnpm run type-check
 ```
 
 #### Linting
 
 ```bash
 # Check for linting issues
-npm run lint
+pnpm run lint
 
 # Fix linting issues automatically
-npm run lint:fix
+pnpm run lint:fix
 ```
 
 The Oxlint configuration treats React Compiler rules as errors, including the recommended correctness rules and the
 compiler checks in the suspicious, performance, and restriction categories. React Doctor's `no-fetch-in-effect` and
-`no-derived-state` rules are also errors. Run `npm run doctor` for the full React Doctor project scan; pull requests and
+`no-derived-state` rules are also errors. Run `pnpm run doctor` for the full React Doctor project scan; pull requests and
 pushes to `main` also run that scan in GitHub Actions.
 
 #### Development mode
@@ -74,20 +74,17 @@ pushes to `main` also run that scan in GitHub Actions.
 Watch for changes and rebuild automatically:
 
 ```bash
-npm run start
+pnpm run start
 ```
 
 #### Clean build artifacts
 
 ```bash
 # Clean all build outputs
-npm run clean
+pnpm run clean
 
 # Clean and reinstall all dependencies
-npm run reinstall
-
-# Clear Turborepo cache
-npm run clear-turbo-cache
+pnpm run reinstall
 ```
 
 ### Linking with Local Projects
@@ -129,24 +126,24 @@ Common commands:
 ```
 
 > [!WARNING]
-> As the shared dependencies are file references, you cannot build for production while linked to local shared libraries. Make sure to unlink the shared libraries before building for production.
+> As the shared dependencies are local links, you cannot build for production while linked to local shared libraries. Make sure to unlink the shared libraries before building for production.
 
 #### Workflow for Perses UI Development
 
 1. Clone the perses repo [https://github.com/perses/perses](https://github.com/perses/perses)
-2. From the perses `ui` folder install the ui dependencies with `npm install`.
+2. From the perses `ui` folder install the ui dependencies with `pnpm install`.
 3. From the perses root folder, start the Perses API in dev mode with `./scripts/api_backend_dev.sh`.
-4. Clone this shared repo and install dependencies with `npm install`. ⚠️ Do not rename the cloned repo, otherwise it breaks the paths resolution on the perses repo side.
+4. Clone this shared repo and install dependencies with `pnpm install`. ⚠️ Do not rename the cloned repo, otherwise it breaks the paths resolution on the perses repo side.
 5. From the shared root folder, run `./scripts/link-with-perses/link-with-perses.sh link`. If your perses repo is in a different location than a sibling directory, use the `--perses` option to specify its location.
-6. From the perses `ui/app` folder, run `npm run start:shared` to start the Perses UI in dev mode using the linked shared libraries with hot module reloading.
+6. From the perses `ui/app` folder, run `pnpm run start:shared` to start the Perses UI in dev mode using the linked shared libraries with hot module reloading.
 7. Make changes to the shared libraries and see them reflected in your local Perses UI.
 8. When done, run `./scripts/link-with-perses/link-with-perses.sh unlink` to restore the original dependencies in the Perses UI.
 
 #### Workflow for Plugins Development
 
 1. Clone the plugins repo [https://github.com/perses/plugins](https://github.com/perses/plugins)
-2. From the plugins root folder install dependencies with `npm install`.
-3. Clone this shared repo and install dependencies with `npm install`.
+2. From the plugins root folder install dependencies with `pnpm install`.
+3. Clone this shared repo and install dependencies with `pnpm install`.
 4. From the shared root folder, run `./scripts/link-with-perses/link-with-perses.sh link --plugins`. If your plugins repo is in a different location than a sibling directory, use the `--plugins` option with the custom path.
 5. From the plugins root folder, run the appropriate development command for your plugin.
 6. Make changes to the shared libraries and see them reflected in your plugins.

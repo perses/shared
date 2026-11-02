@@ -18,11 +18,11 @@
   "sideEffects": false,
   "scripts": {
     "clean": "rimraf dist/",
-    "build": "concurrently \"npm:build:*\"",
+    "build": "concurrently \"pnpm run build:esm\" \"pnpm run build:types\"",
     "build:esm": "swc ./src -d dist --strip-leading-paths --config-file ../.swcrc",
     "build:types": "tsc --project tsconfig.build.json",
     "type-check": "tsc --noEmit",
-    "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
+    "start": "concurrently -P \"pnpm run build:esm {*}\" \"pnpm run build:types {*}\" -- --watch",
     "test": "cross-env TZ=UTC vitest run",
     "test:watch": "cross-env TZ=UTC vitest",
     "lint": "oxlint src",
@@ -30,13 +30,16 @@
   },
   "dependencies": {
     "@module-federation/enhanced": "^2.9.1",
-    "@perses-dev/client": "0.56.0-beta.0",
-    "@perses-dev/components": "0.56.0-beta.0",
+    "@perses-dev/client": "workspace:0.56.0-beta.0",
+    "@perses-dev/components": "workspace:0.56.0-beta.0",
     "@perses-dev/spec": "0.3.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
+    "echarts": "5.5.0",
     "fast-uri": "3.1.8",
     "immer": "^10.1.1",
+    "lodash": "^4.18.1",
+    "mdi-material-ui": "^7.9.4",
     "react-compiler-runtime": "^1.0.0",
     "react-hook-form": "^7.87.0",
     "semver": "^7.8.0",
@@ -57,6 +60,8 @@
     "dist"
   ],
   "devDependencies": {
-    "@types/semver": "^7.7.1"
+    "@types/lodash": "^4.17.24",
+    "@types/semver": "^7.7.1",
+    "react-router-dom": "^6.30.6"
   }
 }

@@ -51,9 +51,9 @@ The first version of a release series is `v<major>.<minor>.0-beta.0`.
 
 1. Create a branch based on the release branch `release/v<major>.<minor>`. This branch should use the naming pattern
    `<yourname>/release-v<major>.<minor>.<patch>`.
-2. Bump the version of the libraries by running [npm-bump.go](./scripts/npm-bump/npm-bump.go):
-   `go run ./scripts/npm-bump <new version>`. For example: `go run ./scripts/npm-bump 1.2.3`.
-3. Run `npm install`.
+2. Bump the version of the libraries by running [pnpm-bump.go](./scripts/pnpm-bump/pnpm-bump.go):
+   `go run ./scripts/pnpm-bump <new version>`. For example: `go run ./scripts/pnpm-bump 1.2.3`.
+3. Run `pnpm install`.
 4. [not yet automated] Update the version manually in `plugin-system/src/remote/PluginRuntime.tsx`.
 5. Commit these changes, either as a standalone commit ("Prepare release vX.Y.Z") or as part of your changes.
 6. Push the branch to GitHub and create a pull request with the release branch `release/v<major>.<minor>` as the base.
