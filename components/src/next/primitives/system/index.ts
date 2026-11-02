@@ -16,6 +16,7 @@
 // import those directly where the component's styles are registered.
 export * from './display';
 export * from './flexbox';
+export * from './grid';
 export * from './radius';
 export * from './responsive';
 export * from './sizing';
