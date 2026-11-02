@@ -44,6 +44,9 @@ importers:
       '@types/react-dom':
         specifier: ^18.0.0
         version: 18.3.7(@types/react@18.3.29)
+      '@types/testing-library__jest-dom':
+        specifier: ^5.14.9
+        version: 5.14.9
       concurrently:
         specifier: ^10.0.3
         version: 10.0.6
@@ -286,9 +289,15 @@ importers:
         specifier: ^4.3.3
         version: 4.5.7(@types/react@18.3.29)(immer@10.2.0)(react@18.3.1)
     devDependencies:
+      '@hookform/resolvers':
+        specifier: ^5.9.1
+        version: 5.9.1(@sinclair/typebox@0.34.49)(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@18.3.1))(zod@4.5.4)
       history:
         specifier: ^5.3.0
         version: 5.3.0
+      react-router-dom:
+        specifier: ^6.30.6
+        version: 6.30.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   explore:
     dependencies:
@@ -374,12 +383,21 @@ importers:
       date-fns-tz:
         specifier: ^3.2.0
         version: 3.2.0(date-fns@4.2.1)
+      echarts:
+        specifier: 5.5.0
+        version: 5.5.0
       fast-uri:
         specifier: 3.1.8
         version: 3.1.8
       immer:
         specifier: ^10.1.1
         version: 10.2.0
+      lodash:
+        specifier: ^4.18.1
+        version: 4.18.1
+      mdi-material-ui:
+        specifier: ^7.9.4
+        version: 7.9.4(@mui/material@6.5.0(@emotion/react@11.14.0(@types/react@18.3.29)(react@18.3.1)(supports-color@10.2.2))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.29)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.29)(react@18.3.1)(supports-color@10.2.2))(@types/react@18.3.29)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.3.0 || ^19.0.0
         version: 18.3.1
@@ -405,9 +423,15 @@ importers:
         specifier: ^4.5.4
         version: 4.5.4
     devDependencies:
+      '@types/lodash':
+        specifier: ^4.17.24
+        version: 4.17.24
       '@types/semver':
         specifier: ^7.7.1
         version: 7.7.1
+      react-router-dom:
+        specifier: ^6.30.6
+        version: 6.30.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
 packages:
 

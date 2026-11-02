@@ -5,8 +5,6 @@ packages:
   - explore
   - client
 
-nodeLinker: hoisted
-
 allowBuilds:
   '@swc/core': true
   core-js: false

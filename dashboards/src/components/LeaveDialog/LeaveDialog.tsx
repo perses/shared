@@ -13,9 +13,9 @@
 
 import type { DashboardResource } from '@perses-dev/client';
 import { DiscardChangesConfirmationDialog } from '@perses-dev/components';
-import type { BlockerFunction } from '@remix-run/router';
 import type { ReactElement, ReactNode } from 'react';
 import { useEffect } from 'react';
+import type { BlockerFunction } from 'react-router-dom';
 import { useBlocker } from 'react-router-dom';
 
 const handleRouteChange = (event: BeforeUnloadEvent): string => {
