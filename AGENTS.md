@@ -63,9 +63,9 @@ npm run build
 make checklicense
 ```
 
-Run CUE checks when schema-facing models or generated contracts change. The linking scripts are for local integration
-with sibling Perses repositories; linked builds are not valid release artifacts, so restore normal dependencies before
-final validation.
+Run CUE checks when schema-facing models or generated contracts change, and `make go-test` when Go scripts change. The
+linking scripts are for local integration with sibling Perses repositories; linked builds are not valid release
+artifacts, so restore normal dependencies before final validation.
 
 ## Completion checklist
 
