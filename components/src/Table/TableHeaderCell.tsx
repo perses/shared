@@ -11,12 +11,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { TableSortLabel, Typography, tableSortLabelClasses, Box, Divider } from '@mui/material';
+import { Box, Divider, TableSortLabel, tableSortLabelClasses, Typography } from '@mui/material';
 import type { ReactElement } from 'react';
 
 import type { SortDirection } from './model/table-model';
 import type { TableCellProps } from './TableCell';
 import { TableCell } from './TableCell';
+import type { TableColumnFilterDropdownProps } from './TableColumnFilterDropdown';
+import { TableColumnFilterDropdown } from './TableColumnFilterDropdown';
 
 export interface TableHeaderCellProps extends TableCellProps {
   /**
@@ -43,7 +45,15 @@ export interface TableHeaderCellProps extends TableCellProps {
    * When included, the header will include a resize handle (divider).
    */
   resizeConfig?: ResizeConfig;
+
+  /**
+   * Configuration for the column filter dropdown.
+   * When provided, the header will include a filter icon button.
+   */
+  filterConfig?: FilterConfig;
 }
+
+export type FilterConfig = TableColumnFilterDropdownProps;
 
 export interface ResizeConfig {
   /**
@@ -67,12 +77,13 @@ export function TableHeaderCell({
   nextSortDirection,
   children,
   resizeConfig,
+  filterConfig,
   ...cellProps
 }: TableHeaderCellProps): ReactElement {
   const showSortLabel = !!onSort;
 
   const headerText = (
-    <Typography noWrap variant="inherit" component="div" color="inherit">
+    <Typography noWrap variant="inherit" component="div" color="inherit" onFocus={(e) => e.stopPropagation()}>
       {children}
     </Typography>
   );
@@ -82,34 +93,46 @@ export function TableHeaderCell({
 
   return (
     <TableCell {...cellProps}>
-      {showSortLabel ? (
-        <TableSortLabel
-          onClick={onSort}
-          direction={direction}
-          active={isActive}
-          sx={{
-            // Overrides a default vertical alignment in the CSS that changes
-            // the header vertical rhythm in a way that's inconsistent with
-            // non-sorting headers.
-            verticalAlign: 'unset',
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'nowrap',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        {showSortLabel ? (
+          <TableSortLabel
+            onClick={onSort}
+            direction={direction}
+            active={isActive}
+            sx={{
+              // Overrides a default vertical alignment in the CSS that changes
+              // the header vertical rhythm in a way that's inconsistent with
+              // non-sorting headers.
+              verticalAlign: 'unset',
 
-            // Makes it possible to ellipsize the text if it's too long.
-            maxWidth: '100%',
+              // Makes it possible to ellipsize the text if it's too long.
+              maxWidth: '100%',
 
-            // Make the arrow visible when focused using the keyboard to assist
-            // with a11y.
-            '&:focus-visible': {
-              [`& .${tableSortLabelClasses.icon}`]: {
-                opacity: isActive ? 1 : 0.5,
+              // Make the arrow visible when focused using the keyboard to assist
+              // with a11y.
+              '&:focus-visible': {
+                [`& .${tableSortLabelClasses.icon}`]: {
+                  opacity: isActive ? 1 : 0.5,
+                },
               },
-            },
-          }}
-        >
-          {headerText}
-        </TableSortLabel>
-      ) : (
-        headerText
-      )}
+            }}
+          >
+            {headerText}
+          </TableSortLabel>
+        ) : (
+          headerText
+        )}
+        {filterConfig && <TableColumnFilterDropdown {...filterConfig} />}
+      </Box>
+
       {resizeConfig && (
         <Box
           onMouseDown={(e) => {

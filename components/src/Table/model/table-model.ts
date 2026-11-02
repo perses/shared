@@ -19,6 +19,7 @@ import type {
   CellContext,
   CellData,
   ColumnDef,
+  FilterFn,
   PaginationState,
   RowData,
   RowSelectionState,
@@ -28,14 +29,17 @@ import type {
   TableOptions,
 } from '@tanstack/react-table';
 import {
+  columnFacetingFeature,
   columnFilteringFeature,
   columnResizingFeature,
   columnSizingFeature,
   columnVisibilityFeature,
   createExpandedRowModel,
+  createFacetedUniqueValues,
   createFilteredRowModel,
   createPaginatedRowModel,
   createSortedRowModel,
+  filterFn_arrIncludesSome,
   globalFilteringFeature,
   metaHelper,
   rowExpandingFeature,
@@ -56,6 +60,12 @@ interface FuzzyFilterMeta {
   itemRank?: RankingInfo;
 }
 
+// Checks whether the cell's scalar value is present in the filter array.
+// Unlike arrIncludesSome (which expects the cell value itself to be an array),
+// this works with string/number columns where the filter is a list of allowed values.
+export const columnValueInFilterList: FilterFn<TableFeaturesBase, RowData> = (row, columnId, filterValue: unknown[]) =>
+  filterValue.includes(row.getValue(columnId));
+
 // Defined outside Table component so tableFeatures() is called once, not on every render.
 export const TABLE_FEATURES = tableFeatures({
   rowSortingFeature,
@@ -64,6 +74,7 @@ export const TABLE_FEATURES = tableFeatures({
   columnResizingFeature,
   columnSizingFeature,
   columnFilteringFeature,
+  columnFacetingFeature,
   globalFilteringFeature,
   rowExpandingFeature,
   rowPaginationFeature,
@@ -71,6 +82,7 @@ export const TABLE_FEATURES = tableFeatures({
   paginatedRowModel: createPaginatedRowModel(),
   expandedRowModel: createExpandedRowModel(),
   filteredRowModel: createFilteredRowModel(),
+  facetedUniqueValues: createFacetedUniqueValues(),
   filterMeta: metaHelper<FuzzyFilterMeta>(),
   // Registers TanStack Table's built-in sort functions so that columns without
   // an explicit `sortingFn` can rely on auto-detection (e.g. `datetime` for
@@ -82,6 +94,10 @@ export const TABLE_FEATURES = tableFeatures({
     datetime: sortFn_datetime,
     text: sortFn_text,
     textCaseSensitive: sortFn_textCaseSensitive,
+  },
+  filterFns: {
+    columnValueInFilterList,
+    arrIncludesSome: filterFn_arrIncludesSome,
   },
 });
 
@@ -417,6 +433,11 @@ declare module '@tanstack/table-core' {
     cellDescription?: TableColumnConfig<TData>['cellDescription'];
     dataLink?: TableColumnConfig<TData>['dataLink'];
   }
+
+  interface FilterFns {
+    columnValueInFilterList: FilterFn<TableFeaturesBase, RowData>;
+    arrIncludesSome: FilterFn<TableFeaturesBase, RowData>;
+  }
 }
 
 // Column link settings
@@ -433,7 +454,14 @@ export type DataLink = Omit<Link, 'name'>;
  */
 export interface TableColumnConfig<TableData extends RowData, TValue extends CellData = CellData> extends Pick<
   AccessorKeyColumnDef<TableFeatures, TableData, TValue>,
-  'accessorKey' | 'cell' | 'id' | 'enableResizing'
+  | 'accessorKey'
+  | 'cell'
+  | 'id'
+  | 'enableResizing'
+  | 'filterFn'
+  | 'enableColumnFilter'
+  | 'getUniqueValues'
+  | 'enableGlobalFilter'
 > {
   /**
    * Text to display in the header for the column.
@@ -507,6 +535,8 @@ export function persesColumnsToTanstackColumns<TableData extends RowData>(
       enableSorting,
       dataLink,
       enableResizing,
+      enableColumnFilter,
+      filterFn,
       sortingFn,
       ...otherProps
     }) => {
@@ -529,6 +559,8 @@ export function persesColumnsToTanstackColumns<TableData extends RowData>(
         enableSorting: !!enableSorting,
         ...(sortingFn ? { sortFn: sortingFn } : {}),
         enableResizing: isResizingEnabled,
+
+        ...(enableColumnFilter ? { enableColumnFilter, filterFn: filterFn ?? 'columnValueInFilterList' } : {}),
 
         // Open-ended store for extra metadata in TanStack Table, so you can bake
         // in your own features.
