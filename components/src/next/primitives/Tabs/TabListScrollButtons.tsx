@@ -65,13 +65,12 @@ function useScrollEdges(listRef: RefObject<HTMLElement | null>): ScrollEdges {
     update();
     list.addEventListener('scroll', update, { passive: true });
     const resizeObserver = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(update);
-    const observeChildren = (): void => {
-      for (const child of list.children) resizeObserver?.observe(child);
-    };
     resizeObserver?.observe(list);
-    observeChildren();
-    const mutationObserver = new MutationObserver(() => {
-      observeChildren();
+    for (const child of list.children) resizeObserver?.observe(child);
+    const mutationObserver = new MutationObserver((records) => {
+      for (const record of records) {
+        for (const node of record.addedNodes) if (node instanceof Element) resizeObserver?.observe(node);
+      }
       update();
     });
     mutationObserver.observe(list, { childList: true });
