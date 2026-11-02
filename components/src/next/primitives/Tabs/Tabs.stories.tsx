@@ -17,7 +17,7 @@ import type { AnchorHTMLAttributes, CSSProperties, ReactElement } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
 import { Chip } from '../Chip';
-import { BookOpenIcon, CogIcon, EarthIcon, ViewColumnIcon } from '../Icon/icons';
+import { BookOpenIcon, CogIcon, EarthIcon, ViewColumnIcon } from '../Icon';
 import { TextField } from '../TextField';
 import { Tab } from './Tab';
 import { TabList } from './TabList';

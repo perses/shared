@@ -231,6 +231,7 @@ describe('TabList scroll buttons', () => {
       <ComponentsProvider components={{ ...defaultComponents, IconButton: CustomIconButton }} icons={defaultIcons}>
         <Tabs defaultValue="one">
           <TabList
+            aria-label="Example"
             variant="scrollable"
             scrollButtons
             slotProps={{ scrollButton: { className: 'custom-scroll', style: { '--consumer-scroll': 'yes' } } }}
@@ -263,7 +264,7 @@ describe('TabList scroll buttons', () => {
   it('does not render or need a provider when scrollButtons is off or the variant is not scrollable', async () => {
     render(
       <Tabs defaultValue="one">
-        <TabList variant="scrollable">
+        <TabList aria-label="Example" variant="scrollable">
           <Tab value="one">One</Tab>
         </TabList>
       </Tabs>,

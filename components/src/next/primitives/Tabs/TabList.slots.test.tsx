@@ -61,7 +61,7 @@ describe('TabList slots', () => {
   it('renders the indicator after the tabs so it does not shift tab order', () => {
     render(
       <Tabs defaultValue="a">
-        <TabList>
+        <TabList aria-label="Example">
           <Tab value="a">A</Tab>
           <Tab value="b">B</Tab>
         </TabList>

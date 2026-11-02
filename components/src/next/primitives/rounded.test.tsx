@@ -69,7 +69,7 @@ const CONSUMERS = [
     name: 'Tabs',
     element: (
       <Tabs {...CONSUMER_PROPS} defaultValue="a">
-        <TabList>
+        <TabList aria-label="Tabs">
           <Tab value="a">Content</Tab>
         </TabList>
       </Tabs>
@@ -89,7 +89,7 @@ const CONSUMERS = [
     name: 'Tab',
     element: (
       <Tabs defaultValue="a">
-        <TabList>
+        <TabList aria-label="Tabs">
           <Tab {...CONSUMER_PROPS} value="a">
             Content
           </Tab>
@@ -101,7 +101,7 @@ const CONSUMERS = [
     name: 'TabPanel',
     element: (
       <Tabs defaultValue="a">
-        <TabList>
+        <TabList aria-label="Tabs">
           <Tab value="a">Tab</Tab>
         </TabList>
         <TabPanel {...CONSUMER_PROPS} value="a">

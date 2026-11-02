@@ -89,7 +89,7 @@ describe('Tabs', () => {
     it('keeps inactive panels mounted but hidden with keepMounted', () => {
       render(
         <Tabs defaultValue="a">
-          <TabList>
+          <TabList aria-label="Example">
             <Tab value="a">A</Tab>
             <Tab value="b">B</Tab>
           </TabList>
@@ -105,7 +105,7 @@ describe('Tabs', () => {
     it('keeps a keepMounted panel hidden when it has display styles, and restores them when active', async () => {
       render(
         <Tabs defaultValue="a">
-          <TabList>
+          <TabList aria-label="Example">
             <Tab value="a">A</Tab>
             <Tab value="b">B</Tab>
           </TabList>
@@ -127,7 +127,7 @@ describe('Tabs', () => {
     it('supports no active tab with value={null} and reports null when the active tab is removed', async () => {
       const { rerender } = render(
         <Tabs value={null} onValueChange={vi.fn()}>
-          <TabList>
+          <TabList aria-label="Example">
             <Tab value="a">A</Tab>
           </TabList>
           <TabPanel value="a">Panel a</TabPanel>
@@ -139,7 +139,7 @@ describe('Tabs', () => {
       const onValueChange = vi.fn();
       rerender(
         <Tabs defaultValue="b" onValueChange={onValueChange}>
-          <TabList>
+          <TabList aria-label="Example">
             <Tab value="a" disabled>
               A
             </Tab>
@@ -149,7 +149,7 @@ describe('Tabs', () => {
       );
       rerender(
         <Tabs defaultValue="b" onValueChange={onValueChange}>
-          <TabList>
+          <TabList aria-label="Example">
             <Tab value="a" disabled>
               A
             </Tab>
@@ -208,7 +208,7 @@ describe('Tabs', () => {
     it('respects a consumer id on the tab', () => {
       render(
         <Tabs defaultValue="a">
-          <TabList>
+          <TabList aria-label="Example">
             <Tab value="a" id="custom-tab">
               A
             </Tab>
@@ -235,7 +235,7 @@ describe('Tabs', () => {
       const onClick = vi.fn();
       render(
         <Tabs defaultValue="a">
-          <TabList>
+          <TabList aria-label="Example">
             <Tab value="a" onClick={onClick}>
               A
             </Tab>
@@ -304,7 +304,7 @@ describe('Tabs', () => {
     it('renders startElement before and endElement after the label', () => {
       render(
         <Tabs defaultValue="a">
-          <TabList>
+          <TabList aria-label="Example">
             <Tab value="a" startElement={<span data-testid="start" />} endElement={<span data-testid="end" />}>
               Label
             </Tab>
@@ -320,7 +320,7 @@ describe('Tabs', () => {
     it('omits empty start and end wrappers for falsy content', () => {
       render(
         <Tabs defaultValue="a">
-          <TabList>
+          <TabList aria-label="Example">
             <Tab value="a" startElement={false} endElement={null}>
               Label
             </Tab>
@@ -334,7 +334,7 @@ describe('Tabs', () => {
     it('omits the content wrapper for an icon-only tab so the flex gap does not add space', () => {
       render(
         <Tabs defaultValue="a">
-          <TabList>
+          <TabList aria-label="Example">
             <Tab value="a" aria-label="Settings" startElement={<span data-testid="icon" />} />
           </TabList>
         </Tabs>,
@@ -348,7 +348,7 @@ describe('Tabs', () => {
       const onValueChange = vi.fn();
       render(
         <Tabs defaultValue="a" onValueChange={onValueChange}>
-          <TabList>
+          <TabList aria-label="Example">
             <Tab value="a" render={<RouterLink to="#a" />}>
               A
             </Tab>
@@ -378,7 +378,7 @@ describe('Tabs', () => {
       const panelRef = createRef<HTMLDivElement>();
       render(
         <Tabs ref={rootRef} defaultValue="a" p="md" rounded="sm" className="root" style={{ color: 'red' }}>
-          <TabList ref={listRef} gap="sm" className="list" style={{ '--consumer': 'list' }}>
+          <TabList ref={listRef} aria-label="Example" gap="sm" className="list" style={{ '--consumer': 'list' }}>
             <Tab
               ref={tabRef}
               value="a"

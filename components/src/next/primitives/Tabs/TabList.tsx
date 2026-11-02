@@ -42,8 +42,17 @@ export interface TabListSlotProps {
   scrollButton?: SlotStyleProps;
 }
 
-export interface TabListProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'style'>, SpacingProps, DisplayProps, RadiusProps {
+/** A tab list must have an accessible name: `aria-label` or `aria-labelledby`. */
+export type TabListAccessibleName = { 'aria-label': string } | { 'aria-labelledby': string };
+
+export type TabListProps = TabListBaseProps & TabListAccessibleName;
+
+interface TabListBaseProps
+  extends
+    Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'aria-label' | 'aria-labelledby'>,
+    SpacingProps,
+    DisplayProps,
+    RadiusProps {
   style?: PersesCSSProperties<TabStyle>;
   /** Overflow behaviour: `scrollable` scrolls along the axis, `fullWidth` stretches tabs evenly. Defaults to `standard`. */
   variant?: TabListVariant;
@@ -63,7 +72,8 @@ export interface TabListProps
 }
 
 /**
- * The `role="tablist"` strip holding `Tab`s plus the active indicator. Give it an `aria-label` describing the set.
+ * The `role="tablist"` strip holding `Tab`s plus the active indicator. Requires an `aria-label` or
+ * `aria-labelledby` describing the set.
  */
 export const TabList = forwardRef<HTMLDivElement, TabListProps>(function TabList(
   {

@@ -167,6 +167,11 @@ expectTypeOf({ '--perses-tab-min-height': '2rem' } satisfies NonNullable<TabsPro
 expectTypeOf({ '--perses-tab-min-height': '2rem' } satisfies NonNullable<TabListProps['style']>);
 // Base UI owns the panel id so the matching tab's aria-controls stays correct.
 type _TabPanelIdOwnedByBaseUi = AssertFalse<'id' extends keyof TabPanelProps ? true : false>;
+// A tab list needs an accessible name from either aria attribute.
+expectTypeOf({ 'aria-label': 'Project' } satisfies TabListProps);
+expectTypeOf({ 'aria-labelledby': 'project-heading' } satisfies TabListProps);
+// @ts-expect-error A tab list without aria-label or aria-labelledby has no accessible name.
+expectTypeOf({ variant: 'scrollable' } satisfies TabListProps);
 
 expectTypeOf({ input: { className: 'query-input', style: { '--app-accent': 'blue' } } } satisfies TextFieldSlotProps);
 // @ts-expect-error Slot styling must not replace the input renderer.
