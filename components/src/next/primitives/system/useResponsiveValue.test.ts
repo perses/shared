@@ -96,6 +96,14 @@ describe('useResponsiveValue', () => {
     expect(result.current).toBe('b');
   });
 
+  it('returns undefined when nothing matches and there is no default, or the fallback when given', () => {
+    mockViewport(500);
+    const { result } = renderHook(() => useResponsiveValue({ md: 'vertical' }));
+    expect(result.current).toBeUndefined();
+    const withFallback = renderHook(() => useResponsiveValue({ md: 'vertical' }, 'horizontal'));
+    expect(withFallback.result.current).toBe('horizontal');
+  });
+
   it('re-renders when the viewport crosses a breakpoint', () => {
     const viewport = mockViewport(500);
     const { result } = renderHook(() => useResponsiveValue(orientation));

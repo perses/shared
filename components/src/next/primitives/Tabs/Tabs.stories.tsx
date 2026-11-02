@@ -164,7 +164,8 @@ export const Variants: Story = () => (
 );
 Variants.storyName = 'Variants';
 
-const statesCode = `// Type in both fields, switch tabs and come back: the keepMounted panel keeps its text, the other resets.
+const statesCode = `// value is TabsValue | null — null means no tab is active.
+// Type in both fields, switch tabs and come back: the keepMounted panel keeps its text, the other resets.
 <Tabs value={value} onValueChange={setValue}>
   <TabList aria-label="Project">
     <Tab value="overview">Overview</Tab>
@@ -176,7 +177,7 @@ const statesCode = `// Type in both fields, switch tabs and come back: the keepM
 </Tabs>`;
 
 function ControlledTabs(): ReactElement {
-  const [value, setValue] = useState<TabsValue>('Overview');
+  const [value, setValue] = useState<TabsValue | null>('Overview');
   return (
     <Stack>
       <Tabs value={value} onValueChange={setValue}>

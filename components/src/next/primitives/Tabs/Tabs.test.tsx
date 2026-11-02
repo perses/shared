@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRef, forwardRef, useState } from 'react';
@@ -19,7 +19,7 @@ import type { AnchorHTMLAttributes, ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { Tab, TabList, TabPanel, Tabs } from './index';
-import type { TabsProps } from './index';
+import type { TabsProps, TabsValue } from './index';
 
 function renderTabs(props: Partial<TabsProps> = {}, listProps: Record<string, unknown> = {}): RenderResult {
   return render(
@@ -53,7 +53,7 @@ const RouterLink = forwardRef<HTMLAnchorElement, AnchorHTMLAttributes<HTMLAnchor
 );
 
 function ControlledTabs(): ReactElement {
-  const [value, setValue] = useState<string | number>(0);
+  const [value, setValue] = useState<TabsValue | null>(0);
   return (
     <Tabs value={value} onValueChange={setValue}>
       <TabList aria-label="Numeric">
@@ -100,6 +100,63 @@ describe('Tabs', () => {
         </Tabs>,
       );
       expect(screen.getByText('Panel b')).not.toBeVisible();
+    });
+
+    it('keeps a keepMounted panel hidden when it has display styles, and restores them when active', async () => {
+      render(
+        <Tabs defaultValue="a">
+          <TabList>
+            <Tab value="a">A</Tab>
+            <Tab value="b">B</Tab>
+          </TabList>
+          <TabPanel value="a">Panel a</TabPanel>
+          <TabPanel value="b" keepMounted display="flex" style={{ display: 'grid' }}>
+            Panel b
+          </TabPanel>
+        </Tabs>,
+      );
+      const panel = screen.getByText('Panel b');
+      expect(panel).toHaveAttribute('hidden');
+      expect(panel).toHaveStyle({ display: 'none' });
+
+      await userEvent.click(screen.getByRole('tab', { name: 'B' }));
+      expect(panel).not.toHaveAttribute('hidden');
+      expect(panel).toHaveStyle({ display: 'grid' });
+    });
+
+    it('supports no active tab with value={null} and reports null when the active tab is removed', async () => {
+      const { rerender } = render(
+        <Tabs value={null} onValueChange={vi.fn()}>
+          <TabList>
+            <Tab value="a">A</Tab>
+          </TabList>
+          <TabPanel value="a">Panel a</TabPanel>
+        </Tabs>,
+      );
+      expect(tab('A')).not.toHaveAttribute('data-active');
+      expect(screen.queryByText('Panel a')).not.toBeInTheDocument();
+
+      const onValueChange = vi.fn();
+      rerender(
+        <Tabs defaultValue="b" onValueChange={onValueChange}>
+          <TabList>
+            <Tab value="a" disabled>
+              A
+            </Tab>
+            <Tab value="b">B</Tab>
+          </TabList>
+        </Tabs>,
+      );
+      rerender(
+        <Tabs defaultValue="b" onValueChange={onValueChange}>
+          <TabList>
+            <Tab value="a" disabled>
+              A
+            </Tab>
+          </TabList>
+        </Tabs>,
+      );
+      await waitFor(() => expect(onValueChange).toHaveBeenCalledWith(null, expect.anything()));
     });
 
     it('switches panels on click and reports the value', async () => {

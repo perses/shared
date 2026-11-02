@@ -194,6 +194,7 @@ describe('primitives barrel exports', () => {
     const sharedStatus: Status = 'error';
     const tabsProps: TabsProps = { defaultValue: 'one' };
     const tabsValue: TabsValue = 1;
+    const noTab: TabsProps['value'] = null;
     const tabsOrientation: TabsOrientation = 'vertical';
     const tabListProps: TabListProps = { 'aria-label': 'Sections' };
     const tabListVariant: TabListVariant = 'scrollable';
@@ -245,6 +246,7 @@ describe('primitives barrel exports', () => {
     expect(sharedStatus).toBe('error');
     expect(tabsProps).toBeDefined();
     expect(tabsValue).toBe(1);
+    expect(noTab).toBeNull();
     expect(tabsOrientation).toBe('vertical');
     expect(tabListProps).toBeDefined();
     expect(tabListVariant).toBe('scrollable');

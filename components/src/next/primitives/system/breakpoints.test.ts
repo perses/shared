@@ -12,13 +12,14 @@
 // limitations under the License.
 
 import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
 import { BREAKPOINT_MIN_WIDTH, BREAKPOINT_ORDER } from './breakpoints';
 
 function mediaQueryWidths(filename: string): number[] {
-  const source = readFileSync(new URL(filename, import.meta.url), 'utf8');
+  const source = readFileSync(resolve(__dirname, filename), 'utf8');
   const widths = [...source.matchAll(/@media \(min-width: (\d+)px\)/g)].map((match) => Number(match[1]));
   return [...new Set(widths)].toSorted((a, b) => a - b);
 }

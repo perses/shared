@@ -14,7 +14,7 @@
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { clsx } from 'clsx';
 import { forwardRef } from 'react';
-import type { HTMLAttributes } from 'react';
+import type { CSSProperties, HTMLAttributes } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
 import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
@@ -52,6 +52,10 @@ export const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(function TabPa
     rest,
   } = applyStyleProps(props, TAB_PANEL_STYLE_PROPS, style);
 
+  /** Inline `display: none` outranks the `display` style prop (utilities layer) and inline display styles. */
+  const panelStyle = (state: BaseTabs.Panel.State): CSSProperties =>
+    state.hidden ? { ...computedStyle, display: 'none' } : computedStyle;
+
   return (
     <BaseTabs.Panel
       {...rest}
@@ -59,7 +63,7 @@ export const TabPanel = forwardRef<HTMLDivElement, TabPanelProps>(function TabPa
       value={value}
       keepMounted={keepMounted}
       className={clsx('ps-TabPanel', styleClassName, className)}
-      style={computedStyle}
+      style={panelStyle}
     >
       {children}
     </BaseTabs.Panel>

@@ -51,11 +51,12 @@ export interface TabsProps
     DisplayProps,
     RadiusProps {
   style?: PersesCSSProperties;
-  /** Controlled active tab. */
-  value?: TabsValue;
-  /** Initial active tab when uncontrolled. Defaults to the first tab. */
-  defaultValue?: TabsValue;
-  onValueChange?: (value: TabsValue, eventDetails: BaseTabs.Root.ChangeEventDetails) => void;
+  /** Controlled active tab; `null` means no tab is active. */
+  value?: TabsValue | null;
+  /** Initial active tab when uncontrolled. Defaults to the first tab; `null` starts with no tab active. */
+  defaultValue?: TabsValue | null;
+  /** Receives `null` when the active tab is removed and no enabled tab can take its place. */
+  onValueChange?: (value: TabsValue | null, eventDetails: BaseTabs.Root.ChangeEventDetails) => void;
   /**
    * Layout axis; also selects the arrow keys that move focus. Accepts a responsive object resolved in JS
    * so `data-orientation` and keyboard handling always agree. Defaults to `horizontal`.
@@ -80,7 +81,7 @@ export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
   { value, defaultValue, onValueChange, orientation = 'horizontal', className, style, children, ...props },
   ref,
 ) {
-  const resolvedOrientation = useResponsiveValue(orientation);
+  const resolvedOrientation = useResponsiveValue(orientation, 'horizontal');
   const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, TABS_STYLE_PROPS, style);
 
   return (

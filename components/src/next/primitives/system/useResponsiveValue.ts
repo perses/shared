@@ -51,10 +51,10 @@ function getServerBreakpoint(): undefined {
   return undefined;
 }
 
-function resolve<T>(value: ResponsiveObject<T>, active: NamedBreakpoint | undefined): T {
+function resolve<T>(value: ResponsiveObject<T>, active: NamedBreakpoint | undefined): T | undefined {
   const candidates = active === undefined ? [] : LARGEST_FIRST.slice(LARGEST_FIRST.indexOf(active));
   const match = candidates.find((breakpoint) => value[breakpoint] !== undefined);
-  return (match === undefined ? value.default : value[match]) as T;
+  return match === undefined ? value.default : value[match];
 }
 
 /**
@@ -63,17 +63,22 @@ function resolve<T>(value: ResponsiveObject<T>, active: NamedBreakpoint | undefi
  * (for example keyboard semantics), not just appearance; purely visual props should stay on the CSS engine.
  *
  * A plain value is returned as-is without subscribing to media queries. Without `window.matchMedia` (server
- * rendering, jsdom) a responsive object resolves to its `default` entry.
+ * rendering, jsdom) a responsive object resolves to its `default` entry. Because `default` is optional, the result
+ * is `undefined` when nothing matches unless a `fallback` is given.
  *
  * @example
  * const orientation = useResponsiveValue({ default: 'horizontal', md: 'vertical' });
+ * const size = useResponsiveValue(props.size, 'md');
  */
-export function useResponsiveValue<T>(value: Responsive<T>): T {
+export function useResponsiveValue<T>(value: Responsive<T>): T | undefined;
+export function useResponsiveValue<T>(value: Responsive<T>, fallback: T): T;
+export function useResponsiveValue<T>(value: Responsive<T>, fallback?: T): T | undefined {
   const responsive = isResponsiveValue(value);
   const active = useSyncExternalStore(
     responsive ? subscribe : noopSubscribe,
     responsive ? getActiveBreakpoint : getServerBreakpoint,
     getServerBreakpoint,
   );
-  return responsive ? resolve(value, active) : value;
+  const resolved = responsive ? resolve(value, active) : value;
+  return resolved === undefined ? fallback : resolved;
 }

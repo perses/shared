@@ -31,17 +31,26 @@ function isVertical(list: HTMLElement): boolean {
   return list.dataset.orientation === 'vertical';
 }
 
+function isRtl(list: HTMLElement): boolean {
+  return getComputedStyle(list).direction === 'rtl';
+}
+
+/** Distance scrolled from the start edge; RTL lists report `scrollLeft` as 0 at the start and negative after. */
+function scrollPosition(list: HTMLElement, vertical: boolean): number {
+  return Math.abs(vertical ? list.scrollTop : list.scrollLeft);
+}
+
 function measure(list: HTMLElement): ScrollEdges {
   const vertical = isVertical(list);
-  const position = vertical ? list.scrollTop : list.scrollLeft;
+  const position = scrollPosition(list, vertical);
   const size = vertical ? list.clientHeight : list.clientWidth;
   const total = vertical ? list.scrollHeight : list.scrollWidth;
   return { back: position > 0, forward: Math.ceil(position + size) < total };
 }
 
 /**
- * Tracks whether the tab list can scroll backward or forward along its orientation axis, re-measuring on scroll and
- * on size changes of the list and its tabs.
+ * Tracks whether the tab list can scroll backward or forward along its orientation axis, re-measuring on scroll, on
+ * size changes of the list and its tabs, and when tabs are added or removed.
  */
 function useScrollEdges(listRef: RefObject<HTMLElement | null>): ScrollEdges {
   const [edges, setEdges] = useState(NO_SCROLL);
@@ -55,12 +64,21 @@ function useScrollEdges(listRef: RefObject<HTMLElement | null>): ScrollEdges {
     };
     update();
     list.addEventListener('scroll', update, { passive: true });
-    const observer = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(update);
-    observer?.observe(list);
-    for (const child of list.children) observer?.observe(child);
+    const resizeObserver = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(update);
+    const observeChildren = (): void => {
+      for (const child of list.children) resizeObserver?.observe(child);
+    };
+    resizeObserver?.observe(list);
+    observeChildren();
+    const mutationObserver = new MutationObserver(() => {
+      observeChildren();
+      update();
+    });
+    mutationObserver.observe(list, { childList: true });
     return (): void => {
       list.removeEventListener('scroll', update);
-      observer?.disconnect();
+      resizeObserver?.disconnect();
+      mutationObserver.disconnect();
     };
   }, [listRef]);
 
@@ -98,7 +116,8 @@ export function TabListScrollButtons({
       const list = listRef.current;
       if (!list) return;
       const vertical = isVertical(list);
-      const distance = direction * SCROLL_FRACTION * (vertical ? list.clientHeight : list.clientWidth);
+      const sign = !vertical && isRtl(list) ? -1 : 1;
+      const distance = sign * direction * SCROLL_FRACTION * (vertical ? list.clientHeight : list.clientWidth);
       list.scrollBy(vertical ? { top: distance } : { left: distance });
     },
     [listRef],
