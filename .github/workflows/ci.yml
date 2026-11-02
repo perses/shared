@@ -94,6 +94,8 @@ jobs:
           cache: true
       - run: pnpm install --frozen-lockfile
       - run: pnpm add --workspace-root --save-dev react@^19 react-dom@^19 @types/react@^19 @types/react-dom@^19
+      - name: Assert React 19 is installed
+        run: node -e "const v=require('react/package.json').version; if(!v.startsWith('19.')){console.error('Expected React 19, got',v);process.exit(1)}"
       - run: pnpm run type-check
       - run: pnpm run test
 

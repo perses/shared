@@ -17,8 +17,9 @@
     "format:check": "pnpm run format:root:check",
     "format:root": "oxfmt",
     "format:root:check": "oxfmt --check",
-    "type-check": "pnpm run build && pnpm -r --parallel --if-present run type-check",
-    "start": "pnpm run build && pnpm -r --parallel --if-present run start",
+    "build:types": "pnpm -r --if-present run build:types",
+    "type-check": "pnpm run build:types && pnpm -r --parallel --if-present run type-check",
+    "start": "pnpm -r --if-present run build && pnpm -r --parallel --if-present run start",
     "clean": "pnpm -r --parallel --if-present run clean",
     "reinstall": "pnpm clean && rm -rf **/node_modules && pnpm install",
     "doctor": "pnpm dlx react-doctor@latest"
