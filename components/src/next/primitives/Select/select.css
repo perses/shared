@@ -17,6 +17,7 @@
 
 @layer perses.components {
   :where(.ps-Select) {
+    box-sizing: border-box;
     display: inline-flex;
     flex-direction: column;
     gap: var(--perses-spacing-xs);
@@ -143,6 +144,7 @@
   }
 
   :where(.ps-Select__popup) {
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     min-width: var(--anchor-width);
@@ -169,6 +171,7 @@
 
   /* ---- Items ---- */
   :where(.ps-SelectItem) {
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     gap: var(--perses-spacing-sm);
