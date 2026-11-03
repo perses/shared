@@ -158,16 +158,17 @@ interface SelectMultipleProps {
 export type SelectProps = SelectBaseProps & SelectAccessibleName & (SelectSingleProps | SelectMultipleProps);
 
 /**
- * Dropdown that picks one or more `SelectItem`s. Carries its own `label`, `helperText` and `status` like
- * `TextField`, so a `<TextField select>` migrates by renaming. Spacing, sizing and `overflow` style props apply
- * to the root element and behave as documented on `Box`; radius props apply to the trigger; `display` is fixed by
- * the stylesheet. Native button attributes, handlers, and `ref` stay on the trigger.
+ * Dropdown that picks one or more `SelectItem`s, with an optional label and helper text. Spacing (`p`, `m`, …),
+ * sizing and `overflow` props style the root wrapper; radius props style the trigger. Values can be tokens
+ * (`"sm"`), pixel numbers (`12`), CSS lengths or responsive objects (`{ default: 'sm', md: 0 }`).
+ * Native button attributes, handlers, and `ref` stay on the trigger.
  *
- * The list portals to `document.body`; ancestor-scoped themes and token overrides do not propagate to it.
+ * The list portals to `document.body`, so ancestor-scoped themes and token overrides do not reach it.
  *
- * The trigger shows the selected item's `children`. It finds them by walking `children` for `SelectItem`
- * elements (through `SelectGroup` and fragments). Items rendered by your own wrapper components are not found and
- * show `String(value)` instead; pass `renderValue` in that case.
+ * While the list is closed the trigger shows the selected item's `children`, read from the `SelectItem` elements
+ * in `children` (through `SelectGroup` and fragments). If you write a custom component that returns a `SelectItem`
+ * (for example `<MyOption />`), its label cannot be read this way and the trigger falls back to `String(value)`;
+ * supply the text with `renderValue` in that case.
  *
  * @example
  * <Select label="Unit" value={unit} onValueChange={setUnit}>

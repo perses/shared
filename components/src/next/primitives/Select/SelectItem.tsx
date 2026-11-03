@@ -26,7 +26,7 @@ import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- Registers this component's styles.
 import './select.css';
 
-/** Values a `Select` can hold; numbers round-trip without string coercion. */
+/** The `value` of a `SelectItem`, and therefore what `Select` reports as selected. Numbers are not turned into strings. */
 export type SelectValue = string | number;
 
 const SELECT_ITEM_STYLE_PROPS = compileStyleProps([spacingProps]);
@@ -44,8 +44,8 @@ export interface SelectItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 's
 }
 
 /**
- * One option inside a `Select`. Its `children` are also shown in the trigger when selected. Spacing style props
- * apply to the option and behave as documented on `Box`.
+ * One option inside a `Select`. Its `children` are also shown in the trigger when selected. Spacing props
+ * (`p`, `m`, …) pad or offset the option row; values can be tokens, pixel numbers, CSS lengths or responsive objects.
  */
 export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(function SelectItem(
   { value, disabled, label, startElement, className, style, children, ...props },

@@ -34,8 +34,8 @@ export interface SelectGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, '
 }
 
 /**
- * Labelled group of `SelectItem`s inside a `Select` (`role="group"`). Spacing style props apply to the group and
- * behave as documented on `Box`.
+ * Labelled group of `SelectItem`s inside a `Select` (`role="group"`). Spacing props (`p`, `m`, …) pad or offset
+ * the group container; values can be tokens, pixel numbers, CSS lengths or responsive objects.
  */
 export const SelectGroup = forwardRef<HTMLDivElement, SelectGroupProps>(function SelectGroup(
   { label, className, style, children, ...props },
