@@ -22,8 +22,8 @@ import { useId, useState } from 'react';
 import { useVariableDefinitionStates } from '../../context';
 import type { DashboardLink } from './dashboard-link';
 import { isTagLink } from './dashboard-link';
-import { TagLinkMenu } from './TagLinkMenu';
 import { appendLinkState } from './tag-links';
+import { TagLinkMenu } from './TagLinkMenu';
 
 type LinksVariant = 'dashboard' | 'panel';
 
