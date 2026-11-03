@@ -183,7 +183,6 @@ export const Variants: Story = () => (
 Variants.storyName = 'Variants';
 
 const statesCode = `<Select label="Unit" helperText="Shown on every axis" placeholder="Choose a unit">…</Select>
-<Select label="Required" required placeholder="Choose a unit">…</Select>
 <Select label="Read only" readOnly defaultValue="bytes">…</Select>
 <Select label="Disabled" disabled defaultValue="bytes" helperText="This select is disabled">…</Select>
 <Select label="Disabled item" placeholder="Seconds cannot be picked">
@@ -195,12 +194,9 @@ const statesCode = `<Select label="Unit" helperText="Shown on every axis" placeh
 
 export const States: Story = () => (
   <Stack>
-    <Sample title="Helper text, required, read-only, disabled and unlabeled" code={statesCode}>
+    <Sample title="Helper text, read-only, disabled and unlabeled" code={statesCode}>
       <div style={columnStyle}>
         <Select label="Unit" helperText="Shown on every axis" placeholder="Choose a unit">
-          {units}
-        </Select>
-        <Select label="Required" required placeholder="Choose a unit">
           {units}
         </Select>
         <Select label="Read only" readOnly defaultValue="bytes">
