@@ -165,6 +165,10 @@ export type SelectProps = SelectBaseProps & SelectAccessibleName & (SelectSingle
  *
  * The list portals to `document.body`; ancestor-scoped themes and token overrides do not propagate to it.
  *
+ * The trigger shows the selected item's `children`. It finds them by walking `children` for `SelectItem`
+ * elements (through `SelectGroup` and fragments). Items rendered by your own wrapper components are not found and
+ * show `String(value)` instead; pass `renderValue` in that case.
+ *
  * @example
  * <Select label="Unit" value={unit} onValueChange={setUnit}>
  *   <SelectItem value="bytes">Bytes</SelectItem>
