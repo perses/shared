@@ -13,7 +13,7 @@
 
 import type { Theme } from '@mui/material';
 import { IconButton, Link as LinkComponent, Menu, MenuItem, Chip, capitalize, Stack } from '@mui/material';
-import { InfoTooltip } from '@perses-dev/components';
+import { InfoTooltip, sanitizeUrl } from '@perses-dev/components';
 import { useReplaceVariablesInString, useReplaceVariablesInUrl } from '@perses-dev/plugin-system';
 import type { Link } from '@perses-dev/spec';
 import LaunchIcon from 'mdi-material-ui/Launch';
@@ -116,16 +116,17 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
 }
 
 function LinkChip({ link }: { link: Link }): ReactElement {
-  const { url, name, tooltip, targetBlank } = useLink(link);
+  const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+    <InfoTooltip description={description} enterDelay={100}>
       <Chip
         label={name ?? url}
         component="a"
-        href={url}
+        href={href}
         target={targetBlank ? '_blank' : '_self'}
-        clickable
+        rel={targetBlank ? 'noopener noreferrer' : undefined}
+        clickable={href !== undefined}
         size="medium"
         icon={<LaunchIcon color="inherit" fontSize="small" />}
         sx={(theme) => ({ height: theme.spacing(3) })}
@@ -135,15 +136,17 @@ function LinkChip({ link }: { link: Link }): ReactElement {
 }
 
 function LinkButton({ link }: { link: Link }): ReactElement {
-  const { url, name, tooltip, targetBlank } = useLink(link);
+  const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+    <InfoTooltip description={description} enterDelay={100}>
       <IconButton
+        component="a"
         aria-label={name ?? url}
         size="small"
-        href={url}
+        href={href}
         target={targetBlank ? '_blank' : '_self'}
+        rel={targetBlank ? 'noopener noreferrer' : undefined}
         sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
       >
         <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
@@ -153,11 +156,16 @@ function LinkButton({ link }: { link: Link }): ReactElement {
 }
 
 function LinkMenuItem({ link }: { link: Link }): ReactElement {
-  const { url, name, tooltip, targetBlank } = useLink(link);
+  const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
-      <MenuItem component={LinkComponent} href={url} target={targetBlank ? '_blank' : '_self'}>
+    <InfoTooltip description={description} enterDelay={100}>
+      <MenuItem
+        component={LinkComponent}
+        href={href}
+        target={targetBlank ? '_blank' : '_self'}
+        rel={targetBlank ? 'noopener noreferrer' : undefined}
+      >
         {name ?? url}
       </MenuItem>
     </InfoTooltip>
@@ -169,14 +177,22 @@ interface ResolvedLink {
   name?: string;
   tooltip?: string;
   targetBlank?: boolean;
+  /** Undefined when the URL scheme is not allowed, so the link renders but cannot be followed. */
+  href?: string;
+  description: string;
+}
+
+function getDisabledLinkDescription(url: string): string {
+  return `This link is disabled because its URL uses a scheme that is not allowed: ${url}`;
 }
 
 function useLink(link: Link): ResolvedLink {
   const name = useReplaceVariablesInString(link.name);
   const tooltip = useReplaceVariablesInString(link.tooltip);
   const rawUrl = link.url ?? '';
-  // URL: URL-aware interpolation (also expands %24var inside query params).
   const interpolatedUrl = useReplaceVariablesInUrl(link.renderVariables === false ? undefined : rawUrl);
   const url = link.renderVariables === false ? rawUrl : (interpolatedUrl ?? rawUrl);
-  return { url, name, tooltip, targetBlank: link.targetBlank };
+  const href = sanitizeUrl(url);
+  const description = href === undefined ? getDisabledLinkDescription(url) : (tooltip ?? url);
+  return { url, name, tooltip, targetBlank: link.targetBlank, href, description };
 }

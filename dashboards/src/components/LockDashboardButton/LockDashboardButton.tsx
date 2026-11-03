@@ -41,7 +41,7 @@ import {
  */
 export function LockDashboardButton(): ReactElement {
   const { dashboard, setDashboard } = useDashboard();
-  const { data: pluginMetadata, isLoading } = useListPluginMetadata();
+  const { data: pluginMetadata, isPending } = useListPluginMetadata();
   const [pendingAction, setPendingAction] = useState<'lock' | 'unlock' | undefined>(undefined);
 
   const isLocked = useMemo(() => isDashboardLocked(dashboard), [dashboard]);
@@ -81,7 +81,7 @@ export function LockDashboardButton(): ReactElement {
           <span>
             <Button
               onClick={() => setPendingAction('lock')}
-              disabled={isLoading}
+              disabled={isPending}
               startIcon={<LockOutline />}
               variant="outlined"
               color="secondary"

@@ -16,7 +16,7 @@ import type { TimeSeries } from '@perses-dev/spec';
 import type { ECharts as EChartsInstance } from 'echarts/core';
 import type { MutableRefObject } from 'react';
 import { memo, useCallback, useLayoutEffect, useRef, useState } from 'react';
-import useResizeObserver from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 import type { FormatOptions, TimeChartSeriesMapping } from '../model';
 import type { NearbySeriesArray } from './nearby-series';

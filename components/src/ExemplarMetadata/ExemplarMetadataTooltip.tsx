@@ -16,7 +16,7 @@ import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import type { ReactElement } from 'react';
 import { Fragment } from 'react';
-import useResizeObserver from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 import { useTimeZone } from '../context/TimeZoneProvider';
 import type { FormatOptions } from '../model/units';

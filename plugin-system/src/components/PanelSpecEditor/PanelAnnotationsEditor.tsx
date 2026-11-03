@@ -27,13 +27,14 @@ import {
   styled,
 } from '@mui/material';
 import type { Action } from '@perses-dev/client';
+import type { FormEditorHandle } from '@perses-dev/components';
 import type { AnnotationSpec, Definition, UnknownSpec } from '@perses-dev/spec';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import AddIcon from 'mdi-material-ui/Plus';
 import TrashIcon from 'mdi-material-ui/TrashCan';
-import type { ReactElement } from 'react';
+import type { ReactElement, Ref } from 'react';
 import { useMemo, useState } from 'react';
 
 import { ValidationProvider } from '../../context';
@@ -63,6 +64,11 @@ export interface PanelAnnotationsEditorProps {
   value: AnnotationSpec[];
   onChange: (annotations: AnnotationSpec[]) => void;
   isReadonly?: boolean;
+  /**
+   * Ref to the form of the annotation being edited, if any. It is set only while an annotation is being edited, so
+   * that the panel editor can forward the close requests to it, instead of losing its unsaved changes.
+   */
+  annotationEditorFormRef?: Ref<FormEditorHandle>;
 }
 
 /**
@@ -71,7 +77,12 @@ export interface PanelAnnotationsEditorProps {
  * and propagates every committed change through `onChange`, so it fits the inline panel-editor flow
  * (no separate apply step).
  */
-export function PanelAnnotationsEditor({ value, onChange, isReadonly }: PanelAnnotationsEditorProps): ReactElement {
+export function PanelAnnotationsEditor({
+  value,
+  onChange,
+  isReadonly,
+  annotationEditorFormRef,
+}: PanelAnnotationsEditorProps): ReactElement {
   const [target, setTarget] = useState<EditTarget>(null);
   const [formAction, setFormAction] = useState<Action>('update');
 
@@ -124,6 +135,7 @@ export function PanelAnnotationsEditor({ value, onChange, isReadonly }: PanelAnn
     return (
       <ValidationProvider>
         <AnnotationEditorForm
+          ref={annotationEditorFormRef}
           initialAnnotationSpec={initialSpec}
           action={formAction}
           isDraft={true}

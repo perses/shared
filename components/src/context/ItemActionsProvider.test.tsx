@@ -13,7 +13,7 @@
 
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { ReactNode } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 
 import { ItemActionsProvider, useItemActions } from './ItemActionsProvider';
 
@@ -22,7 +22,7 @@ function TestConsumer({
   onRender,
 }: {
   onRender?: (state: ReturnType<typeof useItemActions<string>>) => void;
-}): JSX.Element {
+}): ReactElement {
   const actions = useItemActions<string>();
   onRender?.(actions);
 
@@ -358,7 +358,7 @@ describe('ItemActionsProvider', () => {
 
   describe('multiple consumers', () => {
     it('should share action state between consumers', async () => {
-      function Consumer1(): JSX.Element {
+      function Consumer1(): ReactElement {
         const actions = useItemActions<string>();
         const deleteStatus = actions.actionStatuses.get('delete');
 
@@ -375,7 +375,7 @@ describe('ItemActionsProvider', () => {
         );
       }
 
-      function Consumer2(): JSX.Element {
+      function Consumer2(): ReactElement {
         const actions = useItemActions<string>();
         const deleteStatus = actions.actionStatuses.get('delete');
 

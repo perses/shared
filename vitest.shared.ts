@@ -27,15 +27,11 @@ const repoRoot = fileURLToPath(new URL('.', import.meta.url));
 
 const sharedConfig = defineConfig({
   plugins: [tsconfigPaths({ projects: [resolve(repoRoot, 'tsconfig.vitest.json')] })],
-  resolve: {
-    alias: {
-      'use-resize-observer': 'use-resize-observer/polyfilled',
-    },
-  },
   test: {
     environment: 'jsdom',
     globals: true,
     include: ['src/**/*.test.{ts,tsx,js,jsx}', 'src/**/*.spec.{ts,tsx,js,jsx}'],
+    setupFiles: [resolve(repoRoot, 'vitest.setup.ts')],
   },
 });
 
