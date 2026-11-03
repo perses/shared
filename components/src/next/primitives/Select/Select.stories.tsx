@@ -99,12 +99,18 @@ const groupsCode = `<Select label="Time zone" defaultValue="utc" startElement={<
   </SelectGroup>
   <SelectGroup label="Americas">
     <SelectItem value="new-york" startElement={<EarthIcon aria-hidden="true" />}>New York</SelectItem>
+    <SelectItem value="los-angeles" startElement={<EarthIcon aria-hidden="true" />}>Los Angeles</SelectItem>
+  </SelectGroup>
+  <SelectGroup label="Europe">
+    <SelectItem value="paris" startElement={<EarthIcon aria-hidden="true" />}>Paris</SelectItem>
+    <SelectItem value="berlin" startElement={<EarthIcon aria-hidden="true" />}>Berlin</SelectItem>
   </SelectGroup>
 </Select>`;
 const renderValueCode = `// renderValue replaces the trigger content; numeric values stay numbers.
 <Select label="Refresh" defaultValue={30} renderValue={(value) => \`Every \${value}s\`}>
   <SelectItem value={5}>5 seconds</SelectItem>
   <SelectItem value={30}>30 seconds</SelectItem>
+  <SelectItem value={60}>60 seconds</SelectItem>
 </Select>
 
 // icon replaces the chevron; fullWidth stretches to the container.
@@ -186,11 +192,13 @@ const statesCode = `<Select label="Unit" helperText="Shown on every axis" placeh
 <Select label="Read only" readOnly defaultValue="bytes">…</Select>
 <Select label="Disabled" disabled defaultValue="bytes" helperText="This select is disabled">…</Select>
 <Select label="Disabled item" placeholder="Seconds cannot be picked">
+  <SelectItem value="bytes">Bytes</SelectItem>
   <SelectItem value="seconds" disabled>Seconds</SelectItem>
+  <SelectItem value="percent">Percent</SelectItem>
 </Select>
 
 // Without a visible label, aria-label provides the accessible name.
-<Select aria-label="Unit" placeholder="Unit">…</Select>`;
+<Select aria-label="Unit" placeholder="Unit" startElement={<MagnifyIcon aria-hidden="true" />}>…</Select>`;
 
 export const States: Story = () => (
   <Stack>

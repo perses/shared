@@ -23,9 +23,12 @@ export interface SelectItemOption {
 }
 
 /**
- * Collects `{ value, label }` pairs from the `SelectItem` elements in `children`, recursing through `SelectGroup`
- * and fragments, so the trigger can display the selected item's content. Items produced by
- * intermediate components are not visible here and fall back to `String(value)`; use `renderValue` for those.
+ * Builds the `{ value, label }` list the trigger uses to show the selected item's text while the list is closed.
+ * It reads the JSX in `children` for `SelectItem` elements, including ones nested in `SelectGroup` or fragments.
+ *
+ * It reads JSX only; it does not render components. If you write a custom component that returns a `SelectItem`
+ * (for example `<MyOption />`), its label cannot be read here and the trigger falls back to `String(value)`.
+ * Supply the trigger text with `renderValue` in that case.
  */
 export function collectItems(children: ReactNode): SelectItemOption[] {
   const items: SelectItemOption[] = [];
