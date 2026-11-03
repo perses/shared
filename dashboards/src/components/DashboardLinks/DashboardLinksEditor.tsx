@@ -186,7 +186,7 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
           <Button
             disabled={!isValid}
             variant="contained"
-            onClick={() => onChange(links.map((link) => normalizeDashboardLink(link)) as Link[])}
+            onClick={() => onChange(links.map((link) => normalizeDashboardLink(link)))}
           >
             Apply
           </Button>

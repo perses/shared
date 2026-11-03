@@ -13,16 +13,17 @@
 
 import type { Link } from '@perses-dev/spec';
 
-/**
- * Local shape until @perses-dev/spec publishes Link as URLLink | TagLink.
- * The installed package still requires url and has no tag fields.
- */
-export type DashboardLink = Omit<Link, 'url'> & {
+// Editor draft. A saved link is the spec union, which needs either a URL or tags.
+export interface DashboardLink {
+  name?: string;
   url?: string;
+  tooltip?: string;
+  renderVariables?: boolean;
+  targetBlank?: boolean;
   tags?: string[];
   keepTime?: boolean;
   includeVariables?: boolean;
-};
+}
 
 export function linkTags(link: DashboardLink): string[] {
   return (link.tags ?? []).map((tag) => tag.trim()).filter((tag) => tag.length > 0);
@@ -44,14 +45,15 @@ export function isDashboardLinkValid(link: DashboardLink): boolean {
   return tags.length > 0 && (link.name?.trim() ?? '') !== '';
 }
 
-export function normalizeDashboardLink(link: DashboardLink): DashboardLink {
+export function normalizeDashboardLink(link: DashboardLink): Link {
   const tags = linkTags(link);
   const url = link.url?.trim() ?? '';
   if (tags.length > 0 && url === '') {
     return {
-      name: link.name?.trim() || undefined,
+      name: link.name?.trim() ?? '',
       tooltip: link.tooltip,
       tags,
+      ...(link.targetBlank === undefined ? {} : { targetBlank: link.targetBlank }),
       keepTime: link.keepTime,
       includeVariables: link.includeVariables,
     };

@@ -13,7 +13,7 @@
 
 import { Checkbox, Divider, FormControlLabel, IconButton, Stack, Typography } from '@mui/material';
 import { LinkEditorForm } from '@perses-dev/components';
-import type { Link } from '@perses-dev/spec';
+import type { URLLink } from '@perses-dev/spec';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import type { HTMLAttributes, ReactElement } from 'react';
@@ -62,10 +62,7 @@ export function LinksEditor({ control, ...props }: LinksEditorProps): ReactEleme
   );
 }
 
-type LinkWithState = Link & {
-  keepTime?: boolean;
-  includeVariables?: boolean;
-};
+type LinkWithState = URLLink;
 
 function LinkControl({ control, index }: { control: Control<PanelEditorValues>; index: number }): ReactElement {
   const defaultLink: LinkWithState = { url: '', name: '', tooltip: '', renderVariables: false, targetBlank: false };
