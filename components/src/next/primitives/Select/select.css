@@ -35,6 +35,7 @@
 
   /* ---- Trigger carries the border, like the TextField wrapper ---- */
   :where(.ps-Select__trigger) {
+    box-sizing: border-box;
     display: flex;
     align-items: center;
     gap: var(--perses-spacing-xs);

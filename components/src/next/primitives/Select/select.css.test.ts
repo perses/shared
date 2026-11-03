@@ -96,8 +96,9 @@ describe('select.css', () => {
     ]);
   });
 
-  it('does not repeat the box-sizing reset', () => {
-    expect(source).not.toContain('box-sizing');
+  it('keeps trigger sizing independent of the optional document reset', () => {
+    const { trigger } = makeSelect();
+    expect(propertyFor(trigger, 'box-sizing')).toBe('border-box');
   });
 
   it.each(['xs', 'sm', 'md', 'lg'])(

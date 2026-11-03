@@ -115,6 +115,31 @@ Apply `--perses-opacity-disabled` (default `0.5`) once at the disabled group's r
 
 When zero-specificity defaults set the same property on the same element in the same layer, later rules win. Put base defaults before size defaults, and keep state overrides easy to identify. Avoid `!important` or increasingly specific selectors as a substitute for the layer and default/override structure.
 
+### Self-contained sizing
+
+The document reset in `@perses-dev/design-tokens/css/reset` is opt-in, so component CSS must not rely on it. A
+component that depends on the reset renders one way in a host that loads it and another way in a host that does not.
+Each component therefore sets the browser defaults it needs in its own base rule: `box-sizing: border-box` on elements
+whose size it constrains, and `margin: 0` on elements that can render as a tag with a user-agent margin. For example:
+
+```css
+@layer perses.components {
+  /* :where() keeps specificity at zero, so style props and consumer CSS still win. */
+  :where(.ps-CardContent) {
+    /* Declared sizes include padding and border, with or without the document reset. */
+    box-sizing: border-box;
+    /* Clears the user-agent margin when rendered as <figure>, <p> or a heading. */
+    margin: 0;
+  }
+}
+```
+
+## Variant names
+
+Reuse the shared vocabulary before adding a variant: `solid`, `outline`, `ghost`, `subtle`, `elevated`. Use the
+adjective form without `-ed` (`outline`, not `outlined`). Default to the most neutral variant. Variant names are public
+API; renaming one after release is a breaking change.
+
 ## Content elements
 
 When a component offers optional content before or after its main content, name the `ReactNode` props `startElement` and
@@ -145,6 +170,17 @@ prop order. Unspecified sides retain existing values, and side overrides persist
 Here, bottom padding stays zero from `md` onward, including at `xl`. Props target the same element as existing spacing
 props; use `slotProps` styles for internal parts, such as a TextField input. Use `style` for full CSS property names
 such as `marginTop`.
+
+### Axis and side variants
+
+A prop that sets both axes or all sides must also offer the narrower forms, named the same way as the engine:
+`spacing` → `rowSpacing`/`columnSpacing`, `p` → `px`/`py` → `pt`/`pr`/`pb`/`pl`, `rounded` → `roundedTop…` →
+`roundedTopLeft…`. The narrower prop overrides the broader one from its first provided breakpoint onward. Implement
+them by aliasing an existing transform in the component's registry rather than writing new conversion code:
+
+```ts
+const GRID_STYLE_PROPS = compileStyleProps([spacingProps, { rowGap: spacingProps.gap, columnGap: spacingProps.gap }]);
+```
 
 ## Border radius
 
