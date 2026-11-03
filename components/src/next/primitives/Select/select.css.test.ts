@@ -136,7 +136,7 @@ describe('select.css', () => {
     helper.className = 'ps-Text';
     helper.setAttribute('data-disabled', '');
     root.append(helper);
-    expect(propertyFor(root, 'opacity')).toBe('var(--perses-opacity-disabled)');
+    expect(propertyFor(root, 'opacity')).toBe('var(--perses-opacity-disabled, 0.5)');
     expect(propertyFor(helper, 'opacity')).toBe('1');
   });
 
