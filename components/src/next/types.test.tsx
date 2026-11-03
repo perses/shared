@@ -272,6 +272,7 @@ expectTypeOf({ '--perses-checkbox-size-md': 24 } satisfies PersesCSSProperties<C
 expectTypeOf({ '--perses-chip-border-style': 1 } satisfies PersesCSSProperties<ChipStyle>);
 
 expectTypeOf<NonNullable<TextFieldSlotProps['wrapper']>>().toEqualTypeOf<SlotStyleProps<TextFieldStyle>>();
+expectTypeOf<NonNullable<SelectSlotProps['trigger']>>().toEqualTypeOf<SlotStyleProps<SelectStyle>>();
 expectTypeOf({
   control: { style: { '--perses-checkbox-size-md': '24px', '--app-accent': 'blue' } },
 } satisfies CheckboxSlotProps);
@@ -281,6 +282,8 @@ expectTypeOf({ control: { style: { '--perses-checkbox-size-md': 24 } } } satisfi
 expectTypeOf({ control: { style: { '--perses-switch-size-md': 24 } } } satisfies SwitchSlotProps);
 // @ts-expect-error Typed slots check documented custom properties the same way as the top-level style.
 expectTypeOf({ wrapper: { style: { '--perses-textfield-size-md': 40 } } } satisfies TextFieldSlotProps);
+// @ts-expect-error Typed slots check documented custom properties the same way as the top-level style.
+expectTypeOf({ trigger: { style: { '--perses-select-size-md': 40 } } } satisfies SelectSlotProps);
 
 const MIXED_STYLE = {
   marginTop: 8,

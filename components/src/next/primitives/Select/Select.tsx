@@ -60,8 +60,8 @@ export interface SelectStyle extends CSSProperties {
 export interface SelectSlotProps {
   /** Visible label; rendered only when `label` is provided. */
   label?: SlotStyleProps;
-  /** The button that shows the selected value and opens the list. */
-  trigger?: SlotStyleProps;
+  /** The button that shows the selected value and opens the list; accepts the `SelectStyle` size overrides. */
+  trigger?: SlotStyleProps<SelectStyle>;
   /** The floating list; portaled to `document.body`. */
   popup?: SlotStyleProps;
   /** Supporting text; rendered only when `helperText` is provided. */
