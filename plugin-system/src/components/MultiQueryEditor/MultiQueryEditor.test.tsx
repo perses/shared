@@ -21,11 +21,11 @@ import { MultiQueryEditor } from './MultiQueryEditor';
 vi.mock('../../runtime', () => ({
   useListPluginMetadata: vi.fn(() => ({
     data: [{ kind: 'AlertsQuery', spec: { name: 'AlertManagerAlertsQuery' } }],
-    isLoading: false,
+    isPending: false,
   })),
   usePlugin: vi.fn(() => ({
     data: { createInitialOptions: (): { active: boolean } => ({ active: true }) },
-    isLoading: false,
+    isPending: false,
   })),
   usePluginRegistry: vi.fn(() => ({ defaultPluginKinds: { AlertsQuery: 'AlertManagerAlertsQuery' } })),
 }));

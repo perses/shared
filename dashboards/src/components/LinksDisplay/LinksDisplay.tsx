@@ -13,7 +13,7 @@
 
 import type { Theme } from '@mui/material';
 import { IconButton, Link as LinkComponent, Menu, MenuItem, Chip, capitalize, Stack } from '@mui/material';
-import { InfoTooltip } from '@perses-dev/components';
+import { InfoTooltip, sanitizeUrl } from '@perses-dev/components';
 import { useReplaceVariablesInString, useReplaceVariablesInUrl, useTimeRange } from '@perses-dev/plugin-system';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import type { MouseEvent, ReactElement } from 'react';
@@ -139,16 +139,17 @@ function linkKey(link: DashboardLink): string {
 }
 
 function LinkChip({ link }: { link: DashboardLink }): ReactElement {
-  const { url, name, tooltip, targetBlank } = useLink(link);
+  const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+    <InfoTooltip description={description} enterDelay={100}>
       <Chip
         label={name ?? url}
         component="a"
-        href={url}
+        href={href}
         target={targetBlank ? '_blank' : '_self'}
-        clickable
+        rel={targetBlank ? 'noopener noreferrer' : undefined}
+        clickable={href !== undefined}
         size="medium"
         icon={<LaunchIcon color="inherit" fontSize="small" />}
         sx={(theme) => ({ height: theme.spacing(3) })}
@@ -158,15 +159,17 @@ function LinkChip({ link }: { link: DashboardLink }): ReactElement {
 }
 
 function LinkButton({ link }: { link: DashboardLink }): ReactElement {
-  const { url, name, tooltip, targetBlank } = useLink(link);
+  const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+    <InfoTooltip description={description} enterDelay={100}>
       <IconButton
+        component="a"
         aria-label={name ?? url}
         size="small"
-        href={url}
+        href={href}
         target={targetBlank ? '_blank' : '_self'}
+        rel={targetBlank ? 'noopener noreferrer' : undefined}
         sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
       >
         <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
@@ -176,18 +179,40 @@ function LinkButton({ link }: { link: DashboardLink }): ReactElement {
 }
 
 function LinkMenuItem({ link }: { link: DashboardLink }): ReactElement {
-  const { url, name, tooltip, targetBlank } = useLink(link);
+  const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
-      <MenuItem component={LinkComponent} href={url} target={targetBlank ? '_blank' : '_self'}>
+    <InfoTooltip description={description} enterDelay={100}>
+      <MenuItem
+        component={LinkComponent}
+        href={href}
+        target={targetBlank ? '_blank' : '_self'}
+        rel={targetBlank ? 'noopener noreferrer' : undefined}
+      >
         {name ?? url}
       </MenuItem>
     </InfoTooltip>
   );
 }
 
-function useLink(link: DashboardLink): DashboardLink & { url: string } {
+interface ResolvedLink extends DashboardLink {
+  /**
+   * URL to use as the href of the link. It is undefined when the URL uses a scheme that is not allowed
+   * (e.g. `javascript:`), so the link is rendered but cannot be followed.
+   */
+  href?: string;
+  /**
+   * Text displayed when hovering over the link: the tooltip (or the URL) of the link, or an explanation when the link
+   * is disabled.
+   */
+  description: string;
+}
+
+function getDisabledLinkDescription(url: string): string {
+  return `This link is disabled because its URL uses a scheme that is not allowed: ${url}`;
+}
+
+function useLink(link: DashboardLink): ResolvedLink {
   // Name/tooltip: plain string interpolation (unencoded $var).
   const name = useReplaceVariablesInString(link.name);
   const tooltip = useReplaceVariablesInString(link.tooltip);
@@ -204,9 +229,11 @@ function useLink(link: DashboardLink): DashboardLink & { url: string } {
     variables,
   });
 
-  if (link.renderVariables === false) {
-    return { ...link, url };
-  }
+  // Sanitize after interpolation. Variable values can come from the URL query parameters.
+  const resolvedLink = link.renderVariables === false ? { ...link, url } : { ...link, url, name, tooltip };
+  const href = sanitizeUrl(resolvedLink.url);
+  const description =
+    href === undefined ? getDisabledLinkDescription(resolvedLink.url) : (resolvedLink.tooltip ?? resolvedLink.url);
 
-  return { ...link, url, name, tooltip };
+  return { ...resolvedLink, href, description };
 }

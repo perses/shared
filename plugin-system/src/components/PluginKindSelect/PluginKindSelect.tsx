@@ -144,7 +144,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
     enableRegistrySelection = false,
     ...others
   } = props;
-  const { data, isLoading } = useListPluginMetadata(pluginTypes);
+  const { data, isPending } = useListPluginMetadata(pluginTypes);
 
   const sortedData = useMemo(() => {
     const filtered = filteredQueryPlugins?.length
@@ -192,7 +192,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
 
   // Pass an empty value while options are still loading so MUI doesn't complain about us using an "out of range" value
   const value = useMemo(() => {
-    if (!propValue || isLoading) {
+    if (!propValue || isPending) {
       return '';
     }
     const optionValue = selectionToOptionValue(propValue);
@@ -205,7 +205,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
       (option) => option.selection.type === propValue.type && option.selection.kind === propValue.kind,
     );
     return fallback?.value ?? optionValue;
-  }, [propValue, isLoading, labelsByValue, options]);
+  }, [propValue, isPending, labelsByValue, options]);
 
   const handleChange = (event: { target: { value: string } }): void => {
     onChange?.(optionValueToSelection(event.target.value));
@@ -240,7 +240,7 @@ export const PluginKindSelect = forwardRef((props: PluginKindSelectProps, ref): 
       SelectProps={{ renderValue }}
       data-testid="plugin-kind-select"
     >
-      {isLoading && <MenuItem value="">Loading...</MenuItem>}
+      {isPending && <MenuItem value="">Loading...</MenuItem>}
       {options.map((option) => (
         <MenuItem data-testid="option" key={option.value} value={option.value}>
           {option.label}

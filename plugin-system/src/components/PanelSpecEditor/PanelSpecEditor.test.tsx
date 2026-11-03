@@ -29,7 +29,7 @@ describe('PanelSpecEditor', () => {
         queryResults: [],
         refetchAll: (): void => {},
         isFetching: false,
-        isLoading: false,
+        isPending: false,
         errors: [],
       };
       return <DataQueriesContext.Provider value={ctx}>{childProps.children}</DataQueriesContext.Provider>;

@@ -33,6 +33,7 @@ import {
   TextField,
 } from '@mui/material';
 import { InfoTooltip, LinkEditorForm } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import type { Link } from '@perses-dev/spec';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
@@ -40,8 +41,8 @@ import ChevronUp from 'mdi-material-ui/ChevronUp';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import AddIcon from 'mdi-material-ui/Plus';
 import TrashIcon from 'mdi-material-ui/TrashCan';
-import type { ReactElement } from 'react';
-import { useState } from 'react';
+import type { ForwardedRef, ReactElement } from 'react';
+import { forwardRef, useImperativeHandle, useState } from 'react';
 import { useImmer } from 'use-immer';
 
 import { useDiscardChangesConfirmationDialog } from '../../context';
@@ -74,11 +75,10 @@ const DEFAULT_LINK: Link = {
   targetBlank: true,
 };
 
-export function DashboardLinksEditor({
-  links: initialLinks,
-  onChange,
-  onCancel,
-}: DashboardLinksEditorProps): ReactElement {
+export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
+  { links: initialLinks, onChange, onCancel }: DashboardLinksEditorProps,
+  ref: ForwardedRef<FormEditorHandle>,
+): ReactElement {
   const [links, setLinks] = useImmer<DashboardLink[]>(initialLinks);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   // Stable per row, and moved with the row. key={index} would reuse kind and tagsText after a reorder.
@@ -103,6 +103,8 @@ export function DashboardLinksEditor({
       onCancel();
     }
   };
+
+  useImperativeHandle(ref, () => ({ requestClose: handleCancel }));
 
   const handleAdd = (): void => {
     setLinks((draft) => {
@@ -238,7 +240,7 @@ export function DashboardLinksEditor({
       </Box>
     </>
   );
-}
+});
 
 interface LinkTableRowProps {
   link: DashboardLink;

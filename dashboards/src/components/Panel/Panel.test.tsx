@@ -13,12 +13,21 @@
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import type * as ComponentsModule from '@perses-dev/components';
-import { DataQueriesProvider, TimeRangeProviderBasic, useDataQueriesContext } from '@perses-dev/plugin-system';
+import {
+  DataQueriesProvider,
+  TimeRangeProviderBasic,
+  useDataQueriesContext,
+  usePlugin,
+} from '@perses-dev/plugin-system';
 import type * as PluginSystemModule from '@perses-dev/plugin-system';
 import type { PanelDefinition, QueryDefinition, VariableDefinition, VariableValue } from '@perses-dev/spec';
 import { DEFAULT_ALL_VALUE } from '@perses-dev/spec';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactElement } from 'react';
+import { useSyncExternalStore } from 'react';
+import type * as ResizeObserverModule from 'use-resize-observer';
+import { useResizeObserver } from 'use-resize-observer';
 
 import { VariableProvider } from '../../context';
 import { renderWithContext } from '../../test';
@@ -89,6 +98,10 @@ const allVariableDefinitions: VariableDefinition[] = [
 ];
 const allVariableValues: Record<string, VariableValue> = { stack: DEFAULT_ALL_VALUE };
 
+function TestAction(): ReactElement {
+  return <button aria-label="Test action">Test</button>;
+}
+
 function makeQueryResult(
   overrides: Partial<ReturnType<typeof useDataQueriesContext>['queryResults'][number]> = {},
 ): ReturnType<typeof useDataQueriesContext>['queryResults'][number] {
@@ -96,7 +109,7 @@ function makeQueryResult(
     definition: testQueryDefinition,
     error: new Error(''),
     isFetching: false,
-    isLoading: false,
+    isPending: false,
     ...overrides,
   };
 }
@@ -109,7 +122,7 @@ function makeDataQueriesContext(
     queryResults,
     refetchAll: vi.fn(),
     isFetching: queryResults.some((result) => result.isFetching),
-    isLoading: queryResults.some((result) => result.isLoading),
+    isPending: queryResults.some((result) => result.isPending),
     errors: queryResults.flatMap((result) => (result.error.message ? [result.error] : [])),
   };
 }
@@ -118,7 +131,7 @@ vi.mock('@perses-dev/components', async () => {
   const actual = await vi.importActual<typeof ComponentsModule>('@perses-dev/components');
   return {
     ...actual,
-    InfoTooltip: ({ children, description }: { children: React.ReactNode; description: string }): JSX.Element => (
+    InfoTooltip: ({ children, description }: { children: React.ReactNode; description: string }): ReactElement => (
       <>
         {children}
         <div role="tooltip">{description}</div>
@@ -128,7 +141,7 @@ vi.mock('@perses-dev/components', async () => {
 });
 
 vi.mock('@mui/material/CircularProgress', () => {
-  return function MockCircularProgress(props: { 'aria-label'?: string }): JSX.Element {
+  return function MockCircularProgress(props: { 'aria-label'?: string }): ReactElement {
     return <div aria-label={props['aria-label'] || 'loading'} />;
   };
 });
@@ -138,15 +151,17 @@ vi.mock('@perses-dev/plugin-system', async () => {
   return {
     ...actual,
     useDataQueriesContext: vi.fn(() => makeDataQueriesContext()),
-    usePluginRegistry: vi.fn(() => ({
-      getPlugin: vi.fn().mockResolvedValue({
-        PanelComponent: (): JSX.Element => <div>TimeSeriesChart panel</div>,
+    usePlugin: vi.fn(() => ({
+      isLoading: false,
+      data: {
+        PanelComponent: (): ReactElement => <div>TimeSeriesChart panel</div>,
         actions: [
           {
-            component: ({ queryResults }: PluginSystemModule.PanelProps<unknown>): JSX.Element => (
+            component: ({ queryResults, contentDimensions }: PluginSystemModule.PanelProps<unknown>): ReactElement => (
               <button
                 aria-label="Export CSV"
                 data-testid="export-action"
+                data-content-dimensions={contentDimensions ? JSON.stringify(contentDimensions) : 'undefined'}
                 data-query-count={queryResults.length}
                 data-query-states={queryResults
                   .map((query) => (query.data === undefined ? 'unavailable' : 'ready'))
@@ -158,8 +173,16 @@ vi.mock('@perses-dev/plugin-system', async () => {
             location: 'header',
           },
         ],
-      }),
+      },
     })),
+  };
+});
+
+vi.mock('use-resize-observer', async () => {
+  const actual = await vi.importActual<typeof ResizeObserverModule>('use-resize-observer');
+  return {
+    ...actual,
+    useResizeObserver: vi.fn(actual.useResizeObserver),
   };
 });
 
@@ -212,7 +235,6 @@ describe('Panel', () => {
       </ThemeProvider>,
     );
 
-    // Wait for async effects (plugin actions loading) to complete
     await waitFor(() => {
       expect(screen.getByTestId('panel')).toBeInTheDocument();
     });
@@ -235,7 +257,7 @@ describe('Panel', () => {
   it('passes pending, successful, and errored queries to plugin actions in order', async () => {
     vi.mocked(useDataQueriesContext).mockReturnValue(
       makeDataQueriesContext([
-        makeQueryResult({ isLoading: true }),
+        makeQueryResult({ isPending: true }),
         makeQueryResult({ data: { series: [{ name: 'test', values: [[1, 2]] }] } }),
         makeQueryResult({ error: new Error('query failed') }),
       ]),
@@ -251,6 +273,84 @@ describe('Panel', () => {
       );
     });
     vi.mocked(useDataQueriesContext).mockReturnValue(makeDataQueriesContext());
+  });
+
+  it('renders the panel once per query update', async () => {
+    let queriesContext = makeDataQueriesContext([makeQueryResult()]);
+    let panelRenderCount = 0;
+    const listeners = new Set<() => void>();
+    const subscribe = (listener: () => void): (() => void) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    };
+    // Only Panel reads this context, so each call is one Panel render.
+    vi.mocked(useDataQueriesContext).mockImplementation(() => {
+      panelRenderCount += 1;
+      return useSyncExternalStore(subscribe, () => queriesContext);
+    });
+
+    try {
+      await renderPanel();
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Export CSV' })).toHaveAttribute('data-query-count', '1');
+      });
+      panelRenderCount = 0;
+
+      act(() => {
+        queriesContext = makeDataQueriesContext([makeQueryResult(), makeQueryResult()]);
+        listeners.forEach((listener) => listener());
+      });
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Export CSV' })).toHaveAttribute('data-query-count', '2');
+      });
+      expect(panelRenderCount).toBe(1);
+    } finally {
+      vi.mocked(useDataQueriesContext).mockReset();
+    }
+  });
+
+  it.each([
+    { label: 'no actions', actions: undefined, rendered: false },
+    { label: 'an action without location', actions: [{ component: TestAction }], rendered: true },
+    { label: 'a header action', actions: [{ component: TestAction, location: 'header' }], rendered: true },
+    { label: 'a non-header action', actions: [{ component: TestAction, location: 'other' }], rendered: false },
+  ])('renders header plugin actions for a plugin with $label', async ({ actions, rendered }) => {
+    vi.mocked(usePlugin).mockReturnValue({
+      isLoading: false,
+      data: { PanelComponent: (): ReactElement => <div>TimeSeriesChart panel</div>, actions },
+    } as unknown as ReturnType<typeof usePlugin>);
+
+    try {
+      await renderPanel();
+
+      expect(screen.getByText('TimeSeriesChart panel')).toBeInTheDocument();
+      if (rendered) {
+        expect(screen.getByRole('button', { name: 'Test action' })).toBeInTheDocument();
+      } else {
+        expect(screen.queryByRole('button', { name: 'Test action' })).not.toBeInTheDocument();
+      }
+    } finally {
+      vi.mocked(usePlugin).mockReset();
+    }
+  });
+
+  it.each([
+    { label: '0x0', measured: { width: 0, height: 0 }, expected: 'undefined' },
+    { label: '120x0', measured: { width: 120, height: 0 }, expected: 'undefined' },
+    { label: '120x80', measured: { width: 120, height: 80 }, expected: JSON.stringify({ width: 120, height: 80 }) },
+  ])('passes $expected content dimensions for a $label measurement', async ({ measured, expected }) => {
+    vi.mocked(useResizeObserver).mockReturnValue({ ref: vi.fn(), ...measured });
+
+    try {
+      await renderPanel();
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Export CSV' })).toHaveAttribute('data-content-dimensions', expected);
+      });
+    } finally {
+      vi.mocked(useResizeObserver).mockReset();
+    }
   });
 
   it('should render panel', async () => {
@@ -290,10 +390,32 @@ describe('Panel', () => {
     // Can hover to see panel description in tooltip
     userEvent.hover(descriptionButton);
 
-    const tooltip = await screen.findByRole('tooltip', { name: 'This is a fake panel - bar' });
-    expect(tooltip).toBeDefined();
+    const tooltip = await screen.findByTestId('panel-description-content');
     expect(tooltip).toHaveTextContent('This is a fake panel - bar');
     expect(descriptionButton.querySelector('svg')).toHaveAttribute('aria-describedby', 'info-tooltip');
+  });
+
+  it('renders panel description as markdown', async () => {
+    const panel = createTestPanel();
+    panel.spec.display = {
+      name: 'Fake Panel Title',
+      description:
+        '# Heading\n\nSome **bold** text for $foo\n\n- first item\n- second item\n\n[docs](https://example.com)',
+    };
+    await renderPanel(panel);
+
+    userEvent.hover(screen.getByRole('button', { name: /description/i }));
+
+    const content = await screen.findByTestId('panel-description-content');
+    expect(within(content).getByRole('heading', { name: 'Heading' })).toBeInTheDocument();
+    expect(content.querySelector('strong')).toHaveTextContent('bold');
+    expect(content).toHaveTextContent('Some bold text for bar');
+    expect(
+      within(content)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual(['first item', 'second item']);
+    expect(within(content).getByRole('link', { name: 'docs' })).toHaveAttribute('target', '_blank');
   });
 
   it('shows panel link', async () => {

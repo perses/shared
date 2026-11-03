@@ -161,7 +161,7 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
   const queryResults = useQueries({
     queries: listVariables.map((definition, index) => {
       const plugin = pluginResults[index]?.data;
-      const isPluginLoading = pluginResults[index]?.isLoading ?? true;
+      const isPluginLoading = pluginResults[index]?.isPending ?? true;
 
       const dependsOn = resolveDependsOnVariables(
         plugin,
@@ -198,7 +198,7 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
     [allVariables],
   );
 
-  return { initialVariableValues, isLoading: queryResults.some((r) => r.isLoading) };
+  return { initialVariableValues, isLoading: queryResults.some((r) => r.isPending) };
 }
 
 /**
