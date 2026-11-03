@@ -184,10 +184,12 @@
 
   :where(.ps-SelectItem[data-selected]) {
     background-color: var(--perses-status-bg-primary);
+    color: var(--perses-status-text-primary);
   }
 
+  /* The pale fill is already the hover shade, so a selected row shows hover with a ring instead of a darker fill. */
   :where(.ps-SelectItem[data-selected][data-highlighted]) {
-    background-color: var(--perses-status-bg-primary-hover);
+    box-shadow: inset 0 0 0 var(--perses-border-width-sm) var(--perses-status-border-primary);
   }
 
   :where(.ps-SelectItem[data-disabled]) {
