@@ -244,6 +244,19 @@ describe('Select', () => {
     expect(input).toHaveValue('seconds');
   });
 
+  it('associates the hidden input with an external form through the form attribute', () => {
+    render(
+      <>
+        <form id="settings" data-testid="settings" />
+        <Select label="Unit" name="unit" form="settings" defaultValue="bytes">
+          {units}
+        </Select>
+      </>,
+    );
+    const form = screen.getByTestId<HTMLFormElement>('settings');
+    expect(new FormData(form).get('unit')).toBe('bytes');
+  });
+
   it('renders startElement and endElement around the value', () => {
     renderSelect({ startElement: START_ICON, endElement: END_ICON, defaultValue: 'bytes' });
     const trigger = getTrigger();

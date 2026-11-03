@@ -194,6 +194,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
     readOnly,
     disabled,
     name,
+    form,
     placeholder,
     icon = chevronIcon,
     startElement,
@@ -262,6 +263,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
         defaultValue={defaultValue}
         onValueChange={handleValueChange}
         name={name}
+        form={form}
         required={required}
         readOnly={readOnly}
         disabled={disabled}
