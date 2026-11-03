@@ -226,6 +226,28 @@ describe('Select', () => {
     expect(root).toHaveAttribute('data-full-width');
   });
 
+  it('renders 0 as a label, helper text and adornment, and skips an empty string', () => {
+    renderSelect({ label: 0, helperText: 0, startElement: 0 });
+    const trigger = getTrigger('0');
+    expect(trigger).toHaveAccessibleDescription('0');
+    expect(getRoot('0').querySelector('.ps-Select__adornment--start')).toHaveTextContent('0');
+
+    renderSelect({ label: undefined, 'aria-label': 'Empty', helperText: '', startElement: '' });
+    const empty = getRoot('Empty');
+    expect(empty.querySelector('.ps-Select__helper')).toBeNull();
+    expect(empty.querySelector('.ps-Select__adornment--start')).toBeNull();
+  });
+
+  it('renders 0 as a SelectItem startElement', async () => {
+    renderSelect({}, [
+      <SelectItem key="bytes" value="bytes" startElement={0}>
+        Bytes
+      </SelectItem>,
+    ]);
+    await open();
+    expect(screen.getByRole('option', { name: /Bytes/ }).querySelector('.ps-SelectItem__start')).toHaveTextContent('0');
+  });
+
   it('applies every size and status combination', () => {
     const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
     const statuses: Array<Status | undefined> = [undefined, 'error', 'warning', 'success', 'info'];
