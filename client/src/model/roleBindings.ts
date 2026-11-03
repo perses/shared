@@ -14,7 +14,7 @@
 import type { Metadata, ProjectMetadata } from './resource';
 
 /**
- * Name of a `User` subject referring to every user known by Perses, including the users created after the role binding
+ * Name of a `User` subject referring to every authenticated user, including the users created after the role binding
  * (for example, at their first login through an OAuth/OIDC provider).
  */
 export const WILDCARD_USER = '*';
