@@ -68,6 +68,11 @@ export interface SelectSlotProps {
   helper?: SlotStyleProps;
 }
 
+/**
+ * Props shared by single and multiple selection. Spacing and sizing style props apply to the root; radius props
+ * apply to the trigger. From the display group only `overflow` is accepted: `display` is fixed by the stylesheet
+ * (`inline-flex`, or `flex` with `fullWidth`) and is ignored if passed.
+ */
 interface SelectBaseProps
   extends
     Omit<
