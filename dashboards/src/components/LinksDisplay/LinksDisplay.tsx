@@ -73,7 +73,7 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
       return (
         <Stack direction="row" spacing={1}>
           {links.map((link: Link) => (
-            <LinkChip key={link.url} link={link} />
+            <LinkChip key={link.url ?? link.name} link={link} />
           ))}
         </Stack>
       );
@@ -108,7 +108,7 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
         }}
       >
         {links.map((link: Link) => (
-          <LinkMenuItem key={link.url} link={link} />
+          <LinkMenuItem key={link.url ?? link.name} link={link} />
         ))}
       </Menu>
     </>
@@ -164,17 +164,19 @@ function LinkMenuItem({ link }: { link: Link }): ReactElement {
   );
 }
 
-function useLink(link: Link): Link {
-  // Name/tooltip: plain string interpolation (unencoded $var).
+interface ResolvedLink {
+  url: string;
+  name?: string;
+  tooltip?: string;
+  targetBlank?: boolean;
+}
+
+function useLink(link: Link): ResolvedLink {
   const name = useReplaceVariablesInString(link.name);
   const tooltip = useReplaceVariablesInString(link.tooltip);
+  const rawUrl = link.url ?? '';
   // URL: URL-aware interpolation (also expands %24var inside query params).
-  const interpolatedUrl = useReplaceVariablesInUrl(link.renderVariables === false ? undefined : link.url);
-  const url = link.renderVariables === false ? link.url : (interpolatedUrl ?? link.url);
-
-  if (link.renderVariables === false) {
-    return link;
-  }
-
-  return { ...link, url, name, tooltip };
+  const interpolatedUrl = useReplaceVariablesInUrl(link.renderVariables === false ? undefined : rawUrl);
+  const url = link.renderVariables === false ? rawUrl : (interpolatedUrl ?? rawUrl);
+  return { url, name, tooltip, targetBlank: link.targetBlank };
 }
