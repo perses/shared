@@ -20,7 +20,7 @@ import { DashboardProviderWithQueryParams } from './DashboardProvider/DashboardP
 import { useDashboard } from './useDashboard';
 import { VariableProviderWithQueryParams } from './VariableProvider';
 
-const visibility = { variable: 'phase', operator: '!=' as const, value: ['PRD'] };
+const visibility = { variable: 'phase', operator: 'notEquals' as const, value: ['PRD'] };
 const initialTimeRange = { pastDuration: '30m' as const };
 const captured: { dashboard?: DashboardResource } = {};
 

@@ -65,7 +65,7 @@ describe('GridLayout visibility', () => {
     render(<GridLayout panelGroupId={0} />);
     expect(Row).toHaveBeenCalledWith(
       expect.objectContaining({
-        visibilityNotice: { hidden: true, description: 'Shown when phase = DEV' },
+        visibilityNotice: { hidden: true, description: 'Shown when phase equals DEV' },
       }),
       {},
     );
@@ -77,7 +77,7 @@ describe('GridLayout visibility', () => {
     render(<GridLayout panelGroupId={0} />);
     expect(Row).toHaveBeenCalledWith(
       expect.objectContaining({
-        visibilityNotice: { hidden: false, description: 'Shown when phase = DEV' },
+        visibilityNotice: { hidden: false, description: 'Shown when phase equals DEV' },
       }),
       {},
     );

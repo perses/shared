@@ -62,8 +62,8 @@ describe('isPanelGroupVisible', () => {
     expect(isPanelGroupVisible(visibility, variables)).toBe(false);
   });
 
-  describe('!=', () => {
-    const notPrd: Visibility = { variable: 'phase', operator: '!=', value: ['PRD'] };
+  describe('notEquals', () => {
+    const notPrd: Visibility = { variable: 'phase', operator: 'notEquals', value: ['PRD'] };
 
     it('is visible when no selected value is listed', () => {
       expect(isPanelGroupVisible(notPrd, { phase: { value: 'DEV', loading: false } })).toBe(true);
@@ -81,8 +81,8 @@ describe('isPanelGroupVisible', () => {
     });
   });
 
-  describe('=~', () => {
-    const devLike: Visibility = { variable: 'phase', operator: '=~', value: ['DEV.*', 'TST'] };
+  describe('matches', () => {
+    const devLike: Visibility = { variable: 'phase', operator: 'matches', value: ['DEV.*', 'TST'] };
 
     it('is visible when a selected value matches a pattern', () => {
       expect(isPanelGroupVisible(devLike, { phase: { value: 'DEV2', loading: false } })).toBe(true);
@@ -95,19 +95,19 @@ describe('isPanelGroupVisible', () => {
     });
 
     it('treats an alternation as a whole', () => {
-      const alternation: Visibility = { variable: 'phase', operator: '=~', value: ['DEV|TST'] };
+      const alternation: Visibility = { variable: 'phase', operator: 'matches', value: ['DEV|TST'] };
       expect(isPanelGroupVisible(alternation, { phase: { value: 'TST', loading: false } })).toBe(true);
       expect(isPanelGroupVisible(alternation, { phase: { value: 'DEVTST', loading: false } })).toBe(false);
     });
 
     it('ignores an invalid pattern', () => {
-      const invalid: Visibility = { variable: 'phase', operator: '=~', value: ['('] };
+      const invalid: Visibility = { variable: 'phase', operator: 'matches', value: ['('] };
       expect(isPanelGroupVisible(invalid, { phase: { value: 'DEV', loading: false } })).toBe(false);
     });
   });
 
-  describe('!~', () => {
-    const notPrd: Visibility = { variable: 'phase', operator: '!~', value: ['PRD.*'] };
+  describe('notMatches', () => {
+    const notPrd: Visibility = { variable: 'phase', operator: 'notMatches', value: ['PRD.*'] };
 
     it('is visible when no selected value matches', () => {
       expect(isPanelGroupVisible(notPrd, { phase: { value: ['DEV', 'TST'], loading: false } })).toBe(true);
@@ -120,23 +120,23 @@ describe('isPanelGroupVisible', () => {
 });
 
 describe('visibilityNotice', () => {
-  const rule: Visibility = { variable: 'phase', operator: '!=', value: ['PRD'] };
+  const rule: Visibility = { variable: 'phase', operator: 'notEquals', value: ['PRD'] };
 
   it('describes the rule and whether the current selection hides the group', () => {
     expect(visibilityNotice(rule, { phase: { value: 'DEV', loading: false } })).toEqual({
       hidden: false,
-      description: 'Shown when phase != PRD',
+      description: 'Shown when phase notEquals PRD',
     });
     expect(visibilityNotice(rule, { phase: { value: 'PRD', loading: false } })).toEqual({
       hidden: true,
-      description: 'Shown when phase != PRD',
+      description: 'Shown when phase notEquals PRD',
     });
   });
 
-  it('defaults a missing operator to =', () => {
+  it('defaults a missing operator to equals', () => {
     expect(visibilityNotice({ variable: 'phase', value: ['DEV'] }, { phase: { value: 'DEV', loading: false } })).toEqual({
       hidden: false,
-      description: 'Shown when phase = DEV',
+      description: 'Shown when phase equals DEV',
     });
   });
 });
