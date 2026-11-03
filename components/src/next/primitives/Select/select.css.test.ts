@@ -96,9 +96,15 @@ describe('select.css', () => {
     ]);
   });
 
-  it('keeps trigger sizing independent of the optional document reset', () => {
-    const { trigger } = makeSelect();
-    expect(propertyFor(trigger, 'box-sizing')).toBe('border-box');
+  it('keeps sizing independent of the optional document reset', () => {
+    const { root, trigger } = makeSelect();
+    const popup = document.createElement('div');
+    popup.className = 'ps-Select__popup';
+    const item = document.createElement('div');
+    item.className = 'ps-SelectItem';
+    for (const element of [root, trigger, popup, item]) {
+      expect(propertyFor(element, 'box-sizing')).toBe('border-box');
+    }
   });
 
   it.each(['xs', 'sm', 'md', 'lg'])(
