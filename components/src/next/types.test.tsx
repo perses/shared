@@ -189,14 +189,14 @@ expectTypeOf({ item: { className: 'different-item' } } satisfies SelectSlotProps
 expectTypeOf({
   label: 'Unit',
   value: 'bytes',
-  onValueChange: (value: string | number | null) => value,
+  onValueChange: (value: string | number | null): string | number | null => value,
 } satisfies SelectProps);
 expectTypeOf({ 'aria-label': 'Unit', value: 1 } satisfies SelectProps);
 expectTypeOf({
   label: 'Unit',
   multiple: true,
   value: ['a', 1],
-  onValueChange: (value: (string | number)[]) => value,
+  onValueChange: (value: Array<string | number>): Array<string | number> => value,
 } satisfies SelectProps);
 // @ts-expect-error A Select needs a label, aria-label or aria-labelledby.
 expectTypeOf({ value: 'bytes' } satisfies SelectProps);
