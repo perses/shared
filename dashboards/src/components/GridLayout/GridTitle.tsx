@@ -21,8 +21,8 @@ import AddPanelIcon from 'mdi-material-ui/ChartBoxPlusOutline';
 import ExpandedIcon from 'mdi-material-ui/ChevronDown';
 import CollapsedIcon from 'mdi-material-ui/ChevronRight';
 import DeleteIcon from 'mdi-material-ui/DeleteOutline';
-import EyeIcon from 'mdi-material-ui/EyeOutline';
 import EyeOffIcon from 'mdi-material-ui/EyeOffOutline';
+import EyeIcon from 'mdi-material-ui/EyeOutline';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import type { ReactElement } from 'react';
 

@@ -134,7 +134,9 @@ describe('visibilityNotice', () => {
   });
 
   it('defaults a missing operator to equals', () => {
-    expect(visibilityNotice({ variable: 'phase', value: ['DEV'] }, { phase: { value: 'DEV', loading: false } })).toEqual({
+    expect(
+      visibilityNotice({ variable: 'phase', value: ['DEV'] }, { phase: { value: 'DEV', loading: false } }),
+    ).toEqual({
       hidden: false,
       description: 'Shown when phase equals DEV',
     });
