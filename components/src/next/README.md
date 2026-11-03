@@ -139,6 +139,31 @@ When zero-specificity defaults set the same property on the same element in the 
 
 Popups rendered in a portal (Menu, Tooltip) live outside the `ThemeModeProvider` wrapper and lose its tokens. Read `ThemeModeContext` and set `data-perses-mode` on the portaled element, as [Menu](./primitives/Menu/Menu.tsx) does. Use `data-perses-mode` only for colors and tokens, never for layout: it can land on any portaled element, so a layout rule keyed on it (such as `min-height: 100vh`) will resize popups.
 
+### Self-contained sizing
+
+The document reset in `@perses-dev/design-tokens/css/reset` is opt-in, so component CSS must not rely on it. A
+component that depends on the reset renders one way in a host that loads it and another way in a host that does not.
+Each component therefore sets the browser defaults it needs in its own base rule: `box-sizing: border-box` on elements
+whose size it constrains, and `margin: 0` on elements that can render as a tag with a user-agent margin. For example:
+
+```css
+@layer perses.components {
+  /* :where() keeps specificity at zero, so style props and consumer CSS still win. */
+  :where(.ps-CardContent) {
+    /* Declared sizes include padding and border, with or without the document reset. */
+    box-sizing: border-box;
+    /* Clears the user-agent margin when rendered as <figure>, <p> or a heading. */
+    margin: 0;
+  }
+}
+```
+
+## Variant names
+
+Reuse the shared vocabulary before adding a variant: `solid`, `outline`, `ghost`, `subtle`, `elevated`. Use the
+adjective form without `-ed` (`outline`, not `outlined`). Default to the most neutral variant. Variant names are public
+API; renaming one after release is a breaking change.
+
 ## Content elements
 
 When a component offers optional content before or after its main content, name the `ReactNode` props `startElement` and
@@ -184,6 +209,17 @@ It applies the same mobile-first rule as the engine (largest matching breakpoint
 subscribes to `matchMedia` only when given an object, and falls back to `default` without `window.matchMedia`
 (server rendering, jsdom). The breakpoint widths come from `system/breakpoints.ts`; `breakpoints.test.ts` keeps them
 equal to the `@media` rules in the engine CSS. Do not use the hook for visual props; add a registry entry instead.
+
+### Axis and side variants
+
+A prop that sets both axes or all sides must also offer the narrower forms, named the same way as the engine:
+`spacing` → `rowSpacing`/`columnSpacing`, `p` → `px`/`py` → `pt`/`pr`/`pb`/`pl`, `rounded` → `roundedTop…` →
+`roundedTopLeft…`. The narrower prop overrides the broader one from its first provided breakpoint onward. Implement
+them by aliasing an existing transform in the component's registry rather than writing new conversion code:
+
+```ts
+const GRID_STYLE_PROPS = compileStyleProps([spacingProps, { rowGap: spacingProps.gap, columnGap: spacingProps.gap }]);
+```
 
 ## Border radius
 
