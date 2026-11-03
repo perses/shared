@@ -15,7 +15,12 @@ import type { TimeSeriesData, TimeSeriesQueryDefinition, UnknownSpec } from '@pe
 import type { Query, QueryCache, QueryKey, QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { TimeSeriesDataQuery, TimeSeriesQueryContext, TimeSeriesQueryMode, TimeSeriesQueryPlugin } from '../model';
+import type {
+  TimeSeriesDataQuery,
+  TimeSeriesQueryContext,
+  TimeSeriesQueryMode,
+  TimeSeriesQueryPlugin,
+} from '../model';
 import { useDatasourceStore } from './datasources';
 import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
@@ -104,7 +109,52 @@ export const useTimeSeriesQuery = (
 };
 
 /**
+ * Enablement order:
+ * 1. window.__PERSES_QUERY_BATCH__ (force on/off for debug)
+ * 2. dashboard.spec.queryBatching.mode (preferred: off | panel | viewport | dashboard)
+ * 3. localStorage perses.queryBatch=1 (dev fallback)
+ */
+/** Exported for unit tests. */
+export function isQueryBatchEnabled(dashboardMode?: string): boolean {
+  if (typeof window !== 'undefined') {
+    try {
+      const w = window as unknown as { __PERSES_QUERY_BATCH__?: boolean };
+      if (typeof w.__PERSES_QUERY_BATCH__ === 'boolean') {
+        return w.__PERSES_QUERY_BATCH__;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  const mode = (dashboardMode ?? '').toLowerCase().trim();
+  if (mode === 'off' || mode === 'false' || mode === '0') {
+    return false;
+  }
+  if (
+    mode === 'panel' ||
+    mode === 'viewport' ||
+    mode === 'dashboard' ||
+    mode === 'on' ||
+    mode === 'true' ||
+    mode === '1'
+  ) {
+    return true;
+  }
+  if (typeof window === 'undefined') return false;
+  try {
+    return window.localStorage?.getItem('perses.queryBatch') === '1';
+  } catch {
+    return false;
+  }
+}
+
+// In-flight batch promises keyed by panel-level batch id (same time range + plugin kind).
+const inflightBatches = new Map<string, Promise<TimeSeriesData[]>>();
+
+/**
  * Runs multiple time series queries using plugins and returns the results.
+ * When batching is enabled and the plugin implements getTimeSeriesDataBatch, definitions
+ * sharing the same plugin kind are coalesced into one plugin call (same-panel batch).
  */
 export function useTimeSeriesQueries(
   definitions: TimeSeriesQueryDefinition[],
@@ -126,6 +176,15 @@ export function useTimeSeriesQueries(
       registry: d.spec.plugin.metadata?.registry,
     })),
   );
+
+  // Dashboard YAML: spec.queryBatching.mode — set by DashboardProvider on window for plugin-system.
+  const dashMode =
+    typeof window !== 'undefined'
+      ? (window as unknown as { __PERSES_DASHBOARD_QUERY_BATCHING_MODE__?: string })
+          .__PERSES_DASHBOARD_QUERY_BATCHING_MODE__
+      : undefined;
+  const batchOn = isQueryBatchEnabled(dashMode) && definitions.length > 1;
+
   return useQueries({
     queries: definitions.map((definition, idx) => {
       const plugin = pluginLoaderResponse[idx]?.data;
@@ -139,14 +198,36 @@ export function useTimeSeriesQueries(
         staleTime: Infinity,
         queryKey: queryKey,
         queryFn: async ({ signal }: { signal: AbortSignal }): Promise<TimeSeriesData> => {
-          const plugin = await getPlugin({
+          const loaded = (await getPlugin({
             kind: TIME_SERIES_QUERY_KEY,
             name: definition.spec.plugin.kind,
             version: definition.spec.plugin.metadata?.version,
             registry: definition.spec.plugin.metadata?.registry,
-          });
-          const data = await plugin.getTimeSeriesData(definition.spec.plugin.spec, context, signal);
-          return data;
+          })) as TimeSeriesQueryPlugin;
+
+          if (batchOn && typeof loaded.getTimeSeriesDataBatch === 'function') {
+            const sameKind = definitions.filter((d) => d.spec.plugin.kind === definition.spec.plugin.kind);
+            const batchKey = JSON.stringify({
+              kind: definition.spec.plugin.kind,
+              timeRange: context.timeRange,
+              suggestedStepMs: context.suggestedStepMs,
+              mode: context.mode,
+              specs: sameKind.map((d) => d.spec.plugin.spec),
+            });
+            let batchPromise = inflightBatches.get(batchKey);
+            if (!batchPromise) {
+              const specs = sameKind.map((d) => d.spec.plugin.spec);
+              batchPromise = loaded
+                .getTimeSeriesDataBatch!(specs, context, signal)
+                .finally(() => inflightBatches.delete(batchKey));
+              inflightBatches.set(batchKey, batchPromise);
+            }
+            const results = await batchPromise;
+            const pos = sameKind.findIndex((d) => d === definition);
+            return results[pos] ?? { series: [] };
+          }
+
+          return loaded.getTimeSeriesData(definition.spec.plugin.spec, context, signal);
         },
       } as QueryObserverOptions;
     }),
