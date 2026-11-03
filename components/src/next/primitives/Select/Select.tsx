@@ -232,7 +232,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
   const generatedId = useId();
   const triggerId = id ?? generatedId;
   const items = useMemo(() => collectItems(children), [children]);
-  if (placeholder != null && items.some((item) => item.value === '')) {
+  if (hasContent(placeholder) && items.some((item) => item.value === '')) {
     throw new Error(
       'Select: `placeholder` cannot be combined with a `SelectItem` whose value is "" because "" means nothing is selected. Give the item a value such as "all" or "none".',
     );
