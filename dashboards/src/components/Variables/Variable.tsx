@@ -81,12 +81,13 @@ export function useListVariableState(
   const loading = useMemo(() => variablesOptionsQuery.isFetching ?? false, [variablesOptionsQuery.isFetching]);
   const options = useMemo(() => variablesOptionsQuery.data ?? [], [variablesOptionsQuery.data]);
 
-  let initialValue = state?.value;
-
-  // Make sure initialValue is an array if allowMultiple is true
-  if (allowMultiple && !Array.isArray(initialValue)) {
-    initialValue = typeof initialValue === 'string' ? [initialValue] : [];
-  }
+  const initialValue = useMemo(() => {
+    const currentValue = state?.value;
+    if (allowMultiple && !Array.isArray(currentValue)) {
+      return typeof currentValue === 'string' ? [currentValue] : [];
+    }
+    return currentValue;
+  }, [allowMultiple, state?.value]);
 
   // Sort the provided list of options according to the method defined
   const sortedOptions = useMemo((): VariableOption[] => {
@@ -138,9 +139,8 @@ export function useListVariableState(
     // In the case Autocomplete.multiple equals false, Autocomplete.value expects a single object, not
     // an array, hence this conditional
     if (Array.isArray(value)) {
-      return viewOptions.filter((o) => {
-        return value?.includes(o.value);
-      });
+      const selectedValues = new Set(value);
+      return viewOptions.filter((option) => selectedValues.has(option.value));
     } else {
       return (
         viewOptions.find((o) => {
@@ -156,6 +156,8 @@ export function useListVariableState(
 const StyledPopper = (props: PopperProps): ReactElement => (
   <Popper {...props} sx={{ minWidth: 'fit-content' }} placement="bottom-start" />
 );
+
+const filterOptions = createFilterOptions<VariableOption>();
 
 const LETTER_HSIZE = 8; // approximation
 const ARROW_OFFSET = 40; // right offset for list variables (= take into account the dropdown toggle size)
@@ -188,11 +190,9 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
   const allowMultiple = definition?.spec.allowMultiple === true;
   const allowAllValue = definition?.spec.allowAllValue === true;
 
-  const filterOptions = createFilterOptions<VariableOption>({});
-
   const filteredOptions = useMemo(
     () => filterOptions(viewOptions, { inputValue, getOptionLabel: (o) => o.label }),
-    [inputValue, viewOptions, filterOptions],
+    [inputValue, viewOptions],
   );
 
   // Update value when changed
@@ -320,7 +320,6 @@ function ListVariable({ name, source }: VariableProps): ReactElement {
   }, [
     allowAllValue,
     allowMultiple,
-    filterOptions,
     inputValue,
     inputWidth,
     loading,
