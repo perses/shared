@@ -95,7 +95,11 @@ interface SelectBaseProps
   size?: Size;
   required?: boolean;
   readOnly?: boolean;
-  /** Shown in the trigger while nothing is selected. */
+  /**
+   * Shown in the trigger while nothing is selected. An empty string `""` counts as nothing selected (the same rule
+   * as a native `<select>`), so a `SelectItem` with `value=""` cannot be combined with a placeholder; `Select`
+   * throws in that case.
+   */
   placeholder?: ReactNode;
   /** Replaces the default chevron. */
   icon?: ReactNode;
@@ -227,6 +231,11 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
   const generatedId = useId();
   const triggerId = id ?? generatedId;
   const items = useMemo(() => collectItems(children), [children]);
+  if (placeholder != null && items.some((item) => item.value === '')) {
+    throw new Error(
+      'Select: `placeholder` cannot be combined with a `SelectItem` whose value is "" because "" means nothing is selected. Give the item a value such as "all" or "none".',
+    );
+  }
   const handleValueChange = useCallback(
     (next: SelectValue | SelectValue[] | null) => (onValueChange as ((value: typeof next) => void) | undefined)?.(next),
     [onValueChange],

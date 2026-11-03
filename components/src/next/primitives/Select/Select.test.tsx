@@ -175,6 +175,31 @@ describe('Select', () => {
     expect(getTrigger()).toHaveTextContent('None');
   });
 
+  it('throws when a placeholder is combined with an empty-string item', () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const message = /cannot be combined with a `SelectItem` whose value is ""/;
+
+    expect(() =>
+      renderSelect({ placeholder: 'Pick a unit' }, [
+        <SelectItem key="none" value="">
+          None
+        </SelectItem>,
+        ...units,
+      ]),
+    ).toThrow(message);
+
+    expect(() =>
+      renderSelect({ placeholder: 'Pick a unit' }, [
+        <SelectGroup key="g" label="Other">
+          <SelectItem value="">None</SelectItem>
+        </SelectGroup>,
+        ...units,
+      ]),
+    ).toThrow(message);
+
+    spy.mockRestore();
+  });
+
   it('keeps numeric values without coercion', async () => {
     const onValueChange = vi.fn();
     renderSelect({ onValueChange, defaultValue: 0 }, [
