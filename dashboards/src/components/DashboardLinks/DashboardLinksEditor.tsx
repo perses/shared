@@ -272,6 +272,7 @@ function LinkTableRow({
   const tagMode = kind === 'tags';
   const hasError = !isDashboardLinkValid(link);
   const targetLabel = tagMode ? (link.tags ?? []).join(', ') : link.url || '(no URL)';
+  const newTabLabel = link.targetBlank ? 'Yes' : 'No';
 
   return (
     <>
@@ -291,7 +292,7 @@ function LinkTableRow({
             {targetLabel}
           </InfoTooltip>
         </TableCell>
-        <TableCell>{tagMode ? '—' : link.targetBlank ? 'Yes' : 'No'}</TableCell>
+        <TableCell>{tagMode ? '—' : newTabLabel}</TableCell>
         <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
           <IconButton onClick={onMoveUp} disabled={isFirst} aria-label="Move link up">
             <ArrowUp />
