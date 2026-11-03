@@ -19,6 +19,7 @@ import { forwardRef, useCallback, useId, useMemo } from 'react';
 import type { ButtonHTMLAttributes, CSSProperties, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { hasContent } from '../hasContent';
 import { ChevronDownIcon, Icon } from '../Icon';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
@@ -286,7 +287,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
         onOpenChange={handleOpenChange}
         modal={false}
       >
-        {label && (
+        {hasContent(label) && (
           <Field.Label
             className={clsx('ps-Select__label', slotProps?.label?.className)}
             style={slotProps?.label?.style}
@@ -302,11 +303,15 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
           className={clsx('ps-Select__trigger', radiusClassName, slotProps?.trigger?.className)}
           style={radiusStyle}
         >
-          {startElement && <span className="ps-Select__adornment ps-Select__adornment--start">{startElement}</span>}
+          {hasContent(startElement) && (
+            <span className="ps-Select__adornment ps-Select__adornment--start">{startElement}</span>
+          )}
           <BaseSelect.Value className="ps-Select__value" placeholder={placeholder}>
             {renderValue}
           </BaseSelect.Value>
-          {endElement && <span className="ps-Select__adornment ps-Select__adornment--end">{endElement}</span>}
+          {hasContent(endElement) && (
+            <span className="ps-Select__adornment ps-Select__adornment--end">{endElement}</span>
+          )}
           <BaseSelect.Icon className="ps-Select__icon" render={renderIcon}>
             {icon}
           </BaseSelect.Icon>
@@ -327,7 +332,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
             </BaseSelect.Popup>
           </BaseSelect.Positioner>
         </BaseSelect.Portal>
-        {helperText && (
+        {hasContent(helperText) && (
           <Field.Description
             className={clsx('ps-Select__helper', slotProps?.helper?.className)}
             style={slotProps?.helper?.style}

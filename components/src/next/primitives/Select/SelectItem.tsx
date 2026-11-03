@@ -17,6 +17,7 @@ import { forwardRef } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
+import { hasContent } from '../hasContent';
 import { CheckIcon, Icon } from '../Icon';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
@@ -67,7 +68,7 @@ export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(function S
       className={clsx('ps-SelectItem', styleClassName, className)}
       style={computedStyle}
     >
-      {startElement && <span className="ps-SelectItem__start">{startElement}</span>}
+      {hasContent(startElement) && <span className="ps-SelectItem__start">{startElement}</span>}
       <BaseSelect.ItemText className="ps-SelectItem__text">{children}</BaseSelect.ItemText>
       <BaseSelect.ItemIndicator className="ps-SelectItem__indicator" render={renderIndicator} keepMounted>
         {checkIcon}

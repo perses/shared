@@ -170,6 +170,11 @@ When a component offers optional content before or after its main content, name 
 `endElement`. Use logical start/end rather than physical left/right, and the `Element` suffix rather than `Adornment`.
 These props provide content; `slotProps` only customizes styling.
 
+Guard optional `ReactNode` props (`label`, `helperText`, `startElement`, …) with `hasContent(prop)` from
+`primitives/hasContent.ts`, not a bare `prop && <wrapper>`. A bare check prints a stray `0` when the value is the
+number zero and skips the wrapper, which for `label` leaves the control without an accessible name. `hasContent`
+treats `0` as content and `''`, `false`, `null` and `undefined` as absent.
+
 ## Spacing
 
 Spacing-enabled primitives accept these padding and margin shorthands:
