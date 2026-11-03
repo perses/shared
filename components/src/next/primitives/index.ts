@@ -21,6 +21,7 @@ export * from './Divider';
 export * from './Grid';
 export * from './Icon';
 export * from './IconButton';
+export * from './Select';
 export * from './Spinner';
 export * from './Stack';
 export * from './Switch';

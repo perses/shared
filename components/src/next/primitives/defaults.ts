@@ -22,6 +22,7 @@ import { Divider } from './Divider';
 import { Grid, GridItem } from './Grid';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons';
 import { IconButton } from './IconButton';
+import { Select, SelectGroup, SelectItem } from './Select';
 import { Spinner } from './Spinner';
 import { Stack } from './Stack';
 import { Switch } from './Switch';
@@ -55,6 +56,9 @@ export const defaultComponents: PersesComponents = {
   Divider,
   Grid,
   GridItem,
+  Select,
+  SelectItem,
+  SelectGroup,
   Spinner,
   Stack,
   Switch,

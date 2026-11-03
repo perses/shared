@@ -35,6 +35,9 @@ import type {
   RadiusValue,
   PersesCSSProperties as PrimitiveCSSProperties,
   SlotStyleProps as PrimitiveSlotStyleProps,
+  SelectProps,
+  SelectSlotProps,
+  SelectStyle,
   SwitchProps,
   SwitchSlotProps,
   SwitchStyle,
@@ -56,6 +59,9 @@ interface ExtendedCheckboxStyle extends CheckboxStyle {
   '--app-accent': string;
 }
 interface ExtendedChipStyle extends ChipStyle {
+  '--app-accent': string;
+}
+interface ExtendedSelectStyle extends SelectStyle {
   '--app-accent': string;
 }
 interface ExtendedSwitchStyle extends SwitchStyle {
@@ -93,6 +99,8 @@ type _SlotStylePrimitiveExport = AssertAssignable<SlotStyleProps, PrimitiveSlotS
 type _SlotStyleKeys = AssertNever<Exclude<keyof SlotStyleProps, 'className' | 'style'>>;
 type _TextFieldSlotKeys = AssertNever<Exclude<keyof TextFieldSlotProps, 'label' | 'wrapper' | 'input' | 'helper'>>;
 type _TextFieldSlotProp = AssertAssignable<NonNullable<TextFieldProps['slotProps']>, TextFieldSlotProps>;
+type _SelectSlotKeys = AssertNever<Exclude<keyof SelectSlotProps, 'label' | 'trigger' | 'popup' | 'helper'>>;
+type _SelectSlotProp = AssertAssignable<NonNullable<SelectProps['slotProps']>, SelectSlotProps>;
 
 expectTypeOf<BoxProps['rounded']>().toEqualTypeOf<RadiusProps['rounded']>();
 expectTypeOf<BoxProps['roundedBottomRight']>().toEqualTypeOf<RadiusProps['roundedBottomRight']>();
@@ -167,6 +175,40 @@ expectTypeOf({ helper: { children: 'Different helper' } } satisfies TextFieldSlo
 // @ts-expect-error Only documented parts are styling targets; root styling stays top-level.
 expectTypeOf({ root: { className: 'different-root' } } satisfies TextFieldSlotProps);
 
+expectTypeOf({ trigger: { className: 'unit-trigger', style: { '--app-accent': 'blue' } } } satisfies SelectSlotProps);
+// @ts-expect-error Slot styling must not replace the trigger renderer.
+expectTypeOf({ trigger: { render: 'div' } } satisfies SelectSlotProps);
+// @ts-expect-error Refs remain on the component's top-level API.
+expectTypeOf({ trigger: { ref: undefined } } satisfies SelectSlotProps);
+// @ts-expect-error The popup's structure and role are owned by the component.
+expectTypeOf({ popup: { role: 'menu' } } satisfies SelectSlotProps);
+// @ts-expect-error Only documented parts are styling targets; items are styled through SelectItem.
+expectTypeOf({ item: { className: 'different-item' } } satisfies SelectSlotProps);
+
+// Accessible-name contract and the single/multiple discriminated union.
+expectTypeOf({
+  label: 'Unit',
+  value: 'bytes',
+  onValueChange: (value: string | number | null): string | number | null => value,
+} satisfies SelectProps);
+expectTypeOf({ 'aria-label': 'Unit', value: 1 } satisfies SelectProps);
+expectTypeOf({
+  label: 'Unit',
+  multiple: true,
+  value: ['a', 1],
+  onValueChange: (value: Array<string | number>): Array<string | number> => value,
+} satisfies SelectProps);
+// @ts-expect-error A Select needs a label, aria-label or aria-labelledby.
+expectTypeOf({ value: 'bytes' } satisfies SelectProps);
+// @ts-expect-error A visible label cannot be overridden by aria-label.
+expectTypeOf({ label: 'Unit', 'aria-label': 'Other' } satisfies SelectProps);
+// @ts-expect-error Single selection does not accept an array value.
+expectTypeOf({ label: 'Unit', value: ['bytes'] } satisfies SelectProps);
+// @ts-expect-error Multiple selection requires an array value.
+expectTypeOf({ label: 'Unit', multiple: true, value: 'bytes' } satisfies SelectProps);
+// @ts-expect-error The stylesheet fixes display; it is not a style prop here.
+expectTypeOf({ label: 'Unit', display: 'block' } satisfies SelectProps);
+
 type _ReactCompatible = AssertAssignable<PersesCSSProperties, CSSProperties>;
 type _ExistingReactStylesAccepted = AssertAssignable<CSSProperties, PersesCSSProperties>;
 type _PrimitiveExport = AssertAssignable<PersesCSSProperties, PrimitiveCSSProperties>;
@@ -204,12 +246,17 @@ type _SwitchSizeRemainsTyped = AssertAssignable<
   StyleValue<NonNullable<SwitchProps['style']>, '--perses-switch-size-md'>,
   string | undefined
 >;
+type _SelectSizeRemainsTyped = AssertAssignable<
+  StyleValue<NonNullable<SelectProps['style']>, '--perses-select-size-md'>,
+  string | undefined
+>;
 type _TextFieldSizeRemainsTyped = AssertAssignable<
   StyleValue<NonNullable<TextFieldProps['style']>, '--perses-textfield-size-md'>,
   string | undefined
 >;
 type _ExtendedCheckboxStyleAccepted = AssertAssignable<ExtendedCheckboxStyle, NonNullable<CheckboxProps['style']>>;
 type _ExtendedChipStyleAccepted = AssertAssignable<ExtendedChipStyle, NonNullable<ChipProps['style']>>;
+type _ExtendedSelectStyleAccepted = AssertAssignable<ExtendedSelectStyle, NonNullable<SelectProps['style']>>;
 type _ExtendedSwitchStyleAccepted = AssertAssignable<ExtendedSwitchStyle, NonNullable<SwitchProps['style']>>;
 type _ExtendedTextFieldStyleAccepted = AssertAssignable<ExtendedTextFieldStyle, NonNullable<TextFieldProps['style']>>;
 
@@ -225,6 +272,7 @@ expectTypeOf({ '--perses-checkbox-size-md': 24 } satisfies PersesCSSProperties<C
 expectTypeOf({ '--perses-chip-border-style': 1 } satisfies PersesCSSProperties<ChipStyle>);
 
 expectTypeOf<NonNullable<TextFieldSlotProps['wrapper']>>().toEqualTypeOf<SlotStyleProps<TextFieldStyle>>();
+expectTypeOf<NonNullable<SelectSlotProps['trigger']>>().toEqualTypeOf<SlotStyleProps<SelectStyle>>();
 expectTypeOf({
   control: { style: { '--perses-checkbox-size-md': '24px', '--app-accent': 'blue' } },
 } satisfies CheckboxSlotProps);
@@ -234,6 +282,8 @@ expectTypeOf({ control: { style: { '--perses-checkbox-size-md': 24 } } } satisfi
 expectTypeOf({ control: { style: { '--perses-switch-size-md': 24 } } } satisfies SwitchSlotProps);
 // @ts-expect-error Typed slots check documented custom properties the same way as the top-level style.
 expectTypeOf({ wrapper: { style: { '--perses-textfield-size-md': 40 } } } satisfies TextFieldSlotProps);
+// @ts-expect-error Typed slots check documented custom properties the same way as the top-level style.
+expectTypeOf({ trigger: { style: { '--perses-select-size-md': 40 } } } satisfies SelectSlotProps);
 
 const MIXED_STYLE = {
   marginTop: 8,

@@ -1,0 +1,247 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '@perses-dev/design-tokens/css/layers';
+
+@layer perses.components {
+  :where(.ps-Select) {
+    box-sizing: border-box;
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--perses-spacing-xs);
+    font-family: var(--perses-font-family);
+  }
+
+  :where(.ps-Select[data-full-width]) {
+    display: flex;
+    width: 100%;
+  }
+
+  :where(.ps-Select__label) {
+    font-size: var(--perses-font-size-sm);
+    color: var(--perses-text-secondary);
+  }
+
+  /* ---- Trigger carries the border, like the TextField wrapper ---- */
+  :where(.ps-Select__trigger) {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: var(--perses-spacing-xs);
+    min-height: var(--ps-select-size);
+    border: var(--perses-border-width-sm) solid var(--perses-border-default);
+    border-radius: var(--perses-radius-md);
+    background-color: var(--perses-bg-surface);
+    color: var(--perses-text-primary);
+    font-family: var(--perses-font-family);
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .ps-Select__trigger:focus-visible {
+    outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
+    outline-offset: var(--perses-focus-ring-offset);
+  }
+
+  :where(.ps-Select__value) {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :where(.ps-Select__trigger[data-placeholder] .ps-Select__value) {
+    color: var(--perses-text-secondary);
+  }
+
+  :where(.ps-Select__adornment),
+  :where(.ps-Select__icon) {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--perses-text-secondary);
+  }
+
+  :where(.ps-Select__trigger[data-popup-open] .ps-Select__icon) {
+    transform: rotate(180deg);
+  }
+
+  .ps-Select__trigger[data-readonly] {
+    cursor: default;
+  }
+
+  .ps-Select[data-disabled] {
+    opacity: var(--perses-opacity-disabled, 0.5);
+  }
+
+  .ps-Select[data-disabled] .ps-Text[data-disabled] {
+    opacity: 1;
+  }
+
+  .ps-Select__trigger[data-disabled] {
+    cursor: not-allowed;
+  }
+
+  /* Sized via --ps-select-size: per-component --perses-select-size-<step>, else the shared control-size token. */
+  :where(.ps-Select[data-size='xs'] .ps-Select__trigger) {
+    --ps-select-size: var(--perses-select-size-xs, var(--perses-control-size-xs));
+    padding: var(--perses-spacing-0) var(--perses-spacing-xs);
+    font-size: var(--perses-font-size-xs);
+  }
+
+  :where(.ps-Select[data-size='sm'] .ps-Select__trigger) {
+    --ps-select-size: var(--perses-select-size-sm, var(--perses-control-size-sm));
+    padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
+    font-size: var(--perses-font-size-xs);
+  }
+
+  :where(.ps-Select[data-size='md'] .ps-Select__trigger) {
+    --ps-select-size: var(--perses-select-size-md, var(--perses-control-size-md));
+    padding: var(--perses-spacing-sm) var(--perses-spacing-md);
+    font-size: var(--perses-font-size-sm);
+  }
+
+  :where(.ps-Select[data-size='lg'] .ps-Select__trigger) {
+    --ps-select-size: var(--perses-select-size-lg, var(--perses-control-size-lg));
+    padding: var(--perses-spacing-sm) var(--perses-spacing-lg);
+    font-size: var(--perses-font-size-md);
+  }
+
+  /* ---- Status variants ---- */
+  /* error and warning also thicken the border so status is not conveyed by colour alone */
+  .ps-Select[data-status='error'] .ps-Select__trigger {
+    border-color: var(--perses-status-border-error);
+    box-shadow: inset 0 0 0 var(--perses-border-width-sm) var(--perses-status-border-error);
+  }
+  .ps-Select[data-status='warning'] .ps-Select__trigger {
+    border-color: var(--perses-status-border-warning);
+    box-shadow: inset 0 0 0 var(--perses-border-width-sm) var(--perses-status-border-warning);
+  }
+  .ps-Select[data-status='success'] .ps-Select__trigger {
+    border-color: var(--perses-status-border-success);
+  }
+  .ps-Select[data-status='info'] .ps-Select__trigger {
+    border-color: var(--perses-status-border-info);
+  }
+
+  /* ---- Popup ---- */
+  :where(.ps-Select__positioner) {
+    z-index: var(--perses-z-index-overlay);
+    outline: 0;
+  }
+
+  :where(.ps-Select__popup) {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    min-width: var(--anchor-width);
+    max-height: var(--available-height);
+    padding: var(--perses-spacing-xs) 0;
+    overflow-y: auto;
+    background-color: var(--perses-bg-overlay);
+    color: var(--perses-text-primary);
+    font-family: var(--perses-font-family);
+    font-size: var(--perses-font-size-sm);
+    line-height: var(--perses-line-height-normal);
+    border: var(--perses-border-width-sm) solid var(--perses-border-default);
+    border-radius: var(--perses-radius-md);
+    box-shadow: var(--perses-shadow-overlay);
+    outline: 0;
+    transform-origin: var(--transform-origin);
+  }
+
+  :where(.ps-Select__popup[data-starting-style]),
+  :where(.ps-Select__popup[data-ending-style]) {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  /* ---- Items ---- */
+  :where(.ps-SelectItem) {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: var(--perses-spacing-sm);
+    min-height: var(--perses-control-size-sm);
+    padding: var(--perses-spacing-xs) var(--perses-spacing-md);
+    cursor: default;
+    user-select: none;
+    outline: 0;
+  }
+
+  :where(.ps-SelectItem[data-highlighted]) {
+    background-color: var(--perses-bg-sunken);
+  }
+
+  :where(.ps-SelectItem[data-selected]) {
+    background-color: var(--perses-status-bg-primary);
+    color: var(--perses-status-text-primary);
+  }
+
+  /* The pale fill is already the hover shade, so a selected row shows hover with a ring instead of a darker fill. */
+  :where(.ps-SelectItem[data-selected][data-highlighted]) {
+    box-shadow: inset 0 0 0 var(--perses-border-width-sm) var(--perses-status-border-primary);
+  }
+
+  :where(.ps-SelectItem[data-disabled]) {
+    opacity: var(--perses-opacity-disabled, 0.5);
+    cursor: not-allowed;
+  }
+
+  :where(.ps-SelectItem__text) {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  :where(.ps-SelectItem__start) {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* Always mounted so every row keeps the same width; only the selected row shows the check. */
+  :where(.ps-SelectItem__indicator) {
+    flex-shrink: 0;
+    visibility: hidden;
+  }
+
+  :where(.ps-SelectItem[data-selected] .ps-SelectItem__indicator) {
+    visibility: visible;
+  }
+
+  /* ---- Groups ---- */
+  :where(.ps-SelectGroup__label) {
+    position: sticky;
+    top: 0;
+    padding: var(--perses-spacing-xs) var(--perses-spacing-md);
+    background-color: var(--perses-bg-overlay);
+    color: var(--perses-text-secondary);
+    font-size: var(--perses-font-size-xs);
+    font-weight: var(--perses-font-weight-medium);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :where(.ps-Select__icon) {
+      transition: transform 0.15s ease;
+    }
+
+    :where(.ps-Select__popup) {
+      transition:
+        opacity 0.15s ease,
+        transform 0.15s ease;
+    }
+  }
+}
