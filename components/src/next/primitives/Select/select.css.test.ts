@@ -155,6 +155,18 @@ describe('select.css', () => {
     expect(propertyFor(popup, 'z-index')).toBe('');
   });
 
+  it('keeps the selected row on the pale primary fill when hovered so its text stays readable', () => {
+    const item = document.createElement('div');
+    item.className = 'ps-SelectItem';
+    item.setAttribute('data-selected', '');
+    document.body.append(item);
+    expect(propertyFor(item, 'background-color')).toBe('var(--perses-status-bg-primary)');
+    expect(propertyFor(item, 'color')).toBe('var(--perses-status-text-primary)');
+    item.setAttribute('data-highlighted', '');
+    expect(propertyFor(item, 'background-color')).toBe('var(--perses-status-bg-primary)');
+    expect(propertyFor(item, 'box-shadow')).toContain('var(--perses-status-border-primary)');
+  });
+
   it('shows the check indicator only on the selected item while keeping its space', () => {
     const item = document.createElement('div');
     item.className = 'ps-SelectItem';
