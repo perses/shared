@@ -198,7 +198,9 @@ export const Variants: Story = () => (
 );
 Variants.storyName = 'Variants';
 
-const statesCode = `<Select label="Unit" helperText="Shown on every axis" placeholder="Choose a unit">…</Select>
+const statesCode = `// placeholder shows while nothing is selected. "" also means "nothing selected", so never pair a
+// placeholder with <SelectItem value="">; use a value such as "all" or "none" instead (Select throws otherwise).
+<Select label="Unit" helperText="Shown on every axis" placeholder="Choose a unit">…</Select>
 <Select label="Read only" readOnly defaultValue="bytes">…</Select>
 <Select label="Disabled" disabled defaultValue="bytes" helperText="This select is disabled">…</Select>
 <Select label="Disabled item" placeholder="Seconds cannot be picked">
