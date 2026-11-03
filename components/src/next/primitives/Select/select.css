@@ -83,7 +83,7 @@
   }
 
   .ps-Select[data-disabled] {
-    opacity: var(--perses-opacity-disabled);
+    opacity: var(--perses-opacity-disabled, 0.5);
   }
 
   .ps-Select[data-disabled] .ps-Text[data-disabled] {
@@ -194,7 +194,7 @@
   }
 
   :where(.ps-SelectItem[data-disabled]) {
-    opacity: var(--perses-opacity-disabled);
+    opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
   }
 
