@@ -32,6 +32,11 @@ import type {
   GridProps,
   IconProps,
   Size,
+  SelectGroupProps,
+  SelectItemProps,
+  SelectProps,
+  SelectStyle,
+  SelectValue,
   SortDirection,
   SpacingValue,
   SpinnerProps,
@@ -60,6 +65,9 @@ import {
   Grid,
   GridItem,
   Icon,
+  Select,
+  SelectGroup,
+  SelectItem,
   Spinner,
   Stack,
   Switch,
@@ -93,6 +101,9 @@ describe('primitives barrel exports', () => {
     expect(Grid).toBeDefined();
     expect(GridItem).toBeDefined();
     expect(Icon).toBeDefined();
+    expect(Select).toBeDefined();
+    expect(SelectItem).toBeDefined();
+    expect(SelectGroup).toBeDefined();
     expect(Spinner).toBeDefined();
     expect(Stack).toBeDefined();
     expect(Switch).toBeDefined();
@@ -137,6 +148,11 @@ describe('primitives barrel exports', () => {
     const gridProps: GridProps = { columns: 24 };
     const gridItemProps: GridItemProps = { size: 6 };
     const iconProps: IconProps = {};
+    const selectValue: SelectValue = 'bytes';
+    const selectProps: SelectProps = { label: 'Unit', value: selectValue };
+    const selectItemProps: SelectItemProps = { value: 1 };
+    const selectGroupProps: SelectGroupProps = { label: 'Units' };
+    const selectStyle: SelectStyle = { '--perses-select-size-md': '2.5rem' };
     const spinnerProps: SpinnerProps = {};
     const stackProps: StackProps = {};
     const switchProps: SwitchProps = {};
@@ -176,6 +192,10 @@ describe('primitives barrel exports', () => {
     expect(gridProps.columns).toBe(24);
     expect(gridItemProps.size).toBe(6);
     expect(iconProps).toBeDefined();
+    expect(selectProps).toBeDefined();
+    expect(selectItemProps.value).toBe(1);
+    expect(selectGroupProps).toBeDefined();
+    expect(selectStyle).toBeDefined();
     expect(spinnerProps).toBeDefined();
     expect(stackProps).toBeDefined();
     expect(switchProps).toBeDefined();
