@@ -19,5 +19,5 @@ import type { ReactNode } from 'react';
  * `undefined` do not.
  */
 export function hasContent(node: ReactNode): boolean {
-  return node != null && node !== false && node !== '';
+  return node !== null && node !== undefined && node !== false && node !== '';
 }
