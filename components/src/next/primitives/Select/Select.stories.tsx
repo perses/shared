@@ -27,12 +27,22 @@ import type { SelectValue } from './SelectItem';
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
 const statuses: Array<Status | undefined> = [undefined, 'error', 'warning', 'success', 'info'];
 
-const columnStyle: CSSProperties = { display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'flex-start' };
-const rowStyle: CSSProperties = { display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-start' };
+const columnStyle: CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 'var(--perses-spacing-lg)',
+  alignItems: 'flex-start',
+};
+const rowStyle: CSSProperties = {
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: 'var(--perses-spacing-lg)',
+  alignItems: 'flex-start',
+};
 const gridStyle: CSSProperties = {
   display: 'grid',
   gridTemplateColumns: `repeat(${sizes.length}, max-content)`,
-  gap: '1rem',
+  gap: 'var(--perses-spacing-lg)',
 };
 const wideStyle: CSSProperties = { width: '24rem' };
 
