@@ -101,7 +101,7 @@ describe('menu.css', () => {
       'background-color: var(--perses-status-bg-primary);',
     );
     const disabled = getRule(':where(.ps-MenuItemBase[data-disabled])');
-    expect(disabled).toContain('opacity: var(--perses-opacity-disabled);');
+    expect(disabled).toContain('opacity: var(--perses-opacity-disabled, 0.5);');
     expect(disabled).toContain('cursor: not-allowed;');
   });
 

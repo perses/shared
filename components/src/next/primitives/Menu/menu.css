@@ -89,7 +89,7 @@
   }
 
   :where(.ps-MenuItemBase[data-disabled]) {
-    opacity: var(--perses-opacity-disabled);
+    opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
   }
 
