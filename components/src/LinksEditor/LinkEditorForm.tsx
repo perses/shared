@@ -27,7 +27,7 @@ export interface LinkEditorFormField<T> {
 
 export interface LinkEditorFormProps {
   mode: 'inline' | 'modalEmbedded';
-  url: LinkEditorFormField<string> & { required?: boolean };
+  url?: LinkEditorFormField<string>;
   name?: Omit<LinkEditorFormField<string>, 'error'>;
   tooltip?: Omit<LinkEditorFormField<string>, 'error'>;
   newTabOpen: Omit<LinkEditorFormField<boolean>, 'error'>;
@@ -39,19 +39,21 @@ export const LinkEditorForm = (props: LinkEditorFormProps): ReactElement => {
 
   return (
     <Stack direction="column" gap={2} flexGrow={1}>
-      <TextField
-        label={url.label}
-        error={url.error?.hasError}
-        helperText={url.error?.helperText}
-        onChange={url.onChange}
-        onBlur={url.onBlur}
-        placeholder={url.placeholder}
-        multiline
-        maxRows={5}
-        required={url.required !== false}
-        fullWidth
-        value={url.value}
-      />
+      {url && (
+        <TextField
+          label={url.label}
+          error={url.error?.hasError}
+          helperText={url.error?.helperText}
+          onChange={url.onChange}
+          onBlur={url.onBlur}
+          placeholder={url.placeholder}
+          multiline
+          maxRows={5}
+          required
+          fullWidth
+          value={url.value}
+        />
+      )}
       {(name || tooltip) && (
         <Stack gap={1} direction={mode === 'inline' ? 'row' : 'column'}>
           {name && (

@@ -139,60 +139,127 @@ function linkKey(link: DashboardLink): string {
 }
 
 function LinkChip({ link }: { link: DashboardLink }): ReactElement {
-  const { url, name, targetBlank, href, description } = useLink(link);
-
   return (
-    <InfoTooltip description={description} enterDelay={100}>
-      <Chip
-        label={name ?? url}
-        component="a"
-        href={href}
-        target={targetBlank ? '_blank' : '_self'}
-        rel={targetBlank ? 'noopener noreferrer' : undefined}
-        clickable={href !== undefined}
-        size="medium"
-        icon={<LaunchIcon color="inherit" fontSize="small" />}
-        sx={(theme) => ({ height: theme.spacing(3) })}
-      />
-    </InfoTooltip>
+    <ResolveLink link={link}>
+      {(resolved) => (
+        <InfoTooltip description={resolved.description} enterDelay={100}>
+          <Chip
+            label={resolved.name ?? resolved.url}
+            component="a"
+            href={resolved.href}
+            target={resolved.targetBlank ? '_blank' : '_self'}
+            rel={resolved.targetBlank ? 'noopener noreferrer' : undefined}
+            clickable={resolved.href !== undefined}
+            size="medium"
+            icon={<LaunchIcon color="inherit" fontSize="small" />}
+            sx={(theme) => ({ height: theme.spacing(3) })}
+          />
+        </InfoTooltip>
+      )}
+    </ResolveLink>
   );
 }
 
 function LinkButton({ link }: { link: DashboardLink }): ReactElement {
-  const { url, name, targetBlank, href, description } = useLink(link);
-
   return (
-    <InfoTooltip description={description} enterDelay={100}>
-      <IconButton
-        component="a"
-        aria-label={name ?? url}
-        size="small"
-        href={href}
-        target={targetBlank ? '_blank' : '_self'}
-        rel={targetBlank ? 'noopener noreferrer' : undefined}
-        sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
-      >
-        <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
-      </IconButton>
-    </InfoTooltip>
+    <ResolveLink link={link}>
+      {(resolved) => (
+        <InfoTooltip description={resolved.description} enterDelay={100}>
+          <IconButton
+            component="a"
+            aria-label={resolved.name ?? resolved.url}
+            size="small"
+            href={resolved.href}
+            target={resolved.targetBlank ? '_blank' : '_self'}
+            rel={resolved.targetBlank ? 'noopener noreferrer' : undefined}
+            sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
+          >
+            <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
+          </IconButton>
+        </InfoTooltip>
+      )}
+    </ResolveLink>
   );
 }
 
 function LinkMenuItem({ link }: { link: DashboardLink }): ReactElement {
-  const { url, name, targetBlank, href, description } = useLink(link);
-
   return (
-    <InfoTooltip description={description} enterDelay={100}>
-      <MenuItem
-        component={LinkComponent}
-        href={href}
-        target={targetBlank ? '_blank' : '_self'}
-        rel={targetBlank ? 'noopener noreferrer' : undefined}
-      >
-        {name ?? url}
-      </MenuItem>
-    </InfoTooltip>
+    <ResolveLink link={link}>
+      {(resolved) => (
+        <InfoTooltip description={resolved.description} enterDelay={100}>
+          <MenuItem
+            component={LinkComponent}
+            href={resolved.href}
+            target={resolved.targetBlank ? '_blank' : '_self'}
+            rel={resolved.targetBlank ? 'noopener noreferrer' : undefined}
+          >
+            {resolved.name ?? resolved.url}
+          </MenuItem>
+        </InfoTooltip>
+      )}
+    </ResolveLink>
   );
+}
+
+function ResolveLink({
+  link,
+  children,
+}: {
+  link: DashboardLink;
+  children: (resolved: ResolvedLink) => ReactElement;
+}): ReactElement {
+  const keepTime = link.keepTime === true;
+  const includeVariables = link.includeVariables === true;
+  if (keepTime && includeVariables) {
+    return <ResolveLinkTimeAndVariables link={link}>{children}</ResolveLinkTimeAndVariables>;
+  }
+  if (keepTime) {
+    return <ResolveLinkTime link={link}>{children}</ResolveLinkTime>;
+  }
+  if (includeVariables) {
+    return <ResolveLinkVariables link={link}>{children}</ResolveLinkVariables>;
+  }
+  return <ResolveLinkPlain link={link}>{children}</ResolveLinkPlain>;
+}
+
+function ResolveLinkPlain({
+  link,
+  children,
+}: {
+  link: DashboardLink;
+  children: (resolved: ResolvedLink) => ReactElement;
+}): ReactElement {
+  return children(usePlainLink(link));
+}
+
+function ResolveLinkTime({
+  link,
+  children,
+}: {
+  link: DashboardLink;
+  children: (resolved: ResolvedLink) => ReactElement;
+}): ReactElement {
+  return children(useLinkWithTime(link));
+}
+
+function ResolveLinkVariables({
+  link,
+  children,
+}: {
+  link: DashboardLink;
+  children: (resolved: ResolvedLink) => ReactElement;
+}): ReactElement {
+  return children(useLinkWithVariables(link));
+}
+
+function ResolveLinkTimeAndVariables({
+  link,
+  children,
+}: {
+  link: DashboardLink;
+  children: (resolved: ResolvedLink) => ReactElement;
+}): ReactElement {
+  return children(useLinkWithTimeAndVariables(link));
 }
 
 interface ResolvedLink extends DashboardLink {
@@ -212,25 +279,68 @@ function getDisabledLinkDescription(url: string): string {
   return `This link is disabled because its URL uses a scheme that is not allowed: ${url}`;
 }
 
-function useLink(link: DashboardLink): ResolvedLink {
+interface InterpolatedLink {
+  name: string | undefined;
+  tooltip: string | undefined;
+  baseUrl: string;
+}
+
+function useInterpolatedLink(link: DashboardLink): InterpolatedLink {
   // Name/tooltip: plain string interpolation (unencoded $var).
   const name = useReplaceVariablesInString(link.name);
   const tooltip = useReplaceVariablesInString(link.tooltip);
   // URL: URL-aware interpolation (also expands %24var inside query params).
   const interpolatedUrl = useReplaceVariablesInUrl(link.renderVariables === false ? undefined : link.url);
+  const baseUrl = link.renderVariables === false ? (link.url ?? '') : (interpolatedUrl ?? link.url ?? '');
+  return { name, tooltip, baseUrl };
+}
+
+function usePlainLink(link: DashboardLink): ResolvedLink {
+  const interpolated = useInterpolatedLink(link);
+  return finishResolvedLink(link, interpolated, interpolated.baseUrl);
+}
+
+function useLinkWithTime(link: DashboardLink): ResolvedLink {
+  const interpolated = useInterpolatedLink(link);
+  const { timeRange } = useTimeRange();
+  const url = appendLinkState(interpolated.baseUrl, {
+    keepTime: true,
+    includeVariables: false,
+    timeRange,
+  });
+  return finishResolvedLink(link, interpolated, url);
+}
+
+function useLinkWithVariables(link: DashboardLink): ResolvedLink {
+  const interpolated = useInterpolatedLink(link);
+  const variables = useVariableDefinitionStates();
+  const url = appendLinkState(interpolated.baseUrl, {
+    keepTime: false,
+    includeVariables: true,
+    variables,
+  });
+  return finishResolvedLink(link, interpolated, url);
+}
+
+function useLinkWithTimeAndVariables(link: DashboardLink): ResolvedLink {
+  const interpolated = useInterpolatedLink(link);
   const { timeRange } = useTimeRange();
   const variables = useVariableDefinitionStates();
-  const baseUrl = link.renderVariables === false ? (link.url ?? '') : (interpolatedUrl ?? link.url ?? '');
-  // keepTime and includeVariables apply after $var interpolation. A URL receives every current variable.
-  const url = appendLinkState(baseUrl, {
-    keepTime: link.keepTime === true,
-    includeVariables: link.includeVariables === true,
+  const url = appendLinkState(interpolated.baseUrl, {
+    keepTime: true,
+    includeVariables: true,
     timeRange,
     variables,
   });
+  return finishResolvedLink(link, interpolated, url);
+}
 
+function finishResolvedLink(link: DashboardLink, interpolated: InterpolatedLink, url: string): ResolvedLink {
   // Sanitize after interpolation. Variable values can come from the URL query parameters.
-  const resolvedLink = link.renderVariables === false ? { ...link, url } : { ...link, url, name, tooltip };
+  const resolvedLink =
+    link.renderVariables === false
+      ? { ...link, url }
+      : { ...link, url, name: interpolated.name, tooltip: interpolated.tooltip };
   const href = sanitizeUrl(resolvedLink.url);
   const description =
     href === undefined ? getDisabledLinkDescription(resolvedLink.url) : (resolvedLink.tooltip ?? resolvedLink.url);

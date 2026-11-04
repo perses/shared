@@ -14,15 +14,18 @@
 import type { Theme } from '@mui/material';
 import { Chip, IconButton, Menu, MenuItem } from '@mui/material';
 import { InfoTooltip } from '@perses-dev/components';
+import type { VariableStateMap } from '@perses-dev/plugin-system';
 import { useReplaceVariablesInString, useTimeRange } from '@perses-dev/plugin-system';
+import type { TimeRangeValue } from '@perses-dev/spec';
+import { useQuery } from '@tanstack/react-query';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import type { MouseEvent, ReactElement } from 'react';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
 import { useDashboard, useListProjectDashboards, useVariableDefinitionStates } from '../../context';
 import type { DashboardLink } from './dashboard-link';
-import { appBasePath, buildTagLinkHref, selectTagLinkTargets } from './tag-links';
 import type { TagLinkTarget } from './tag-links';
+import { appBasePath, buildTagLinkHref, selectTagLinkTargets } from './tag-links';
 
 type TagLinkAppearance = 'chip' | 'button' | 'item';
 
@@ -34,13 +37,7 @@ export function TagLinkMenu({
   appearance: TagLinkAppearance;
 }): ReactElement {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'ready'>('idle');
-  const [targets, setTargets] = useState<TagLinkTarget[]>([]);
-  const request = useRef(0);
   const { dashboard } = useDashboard();
-  const { timeRange } = useTimeRange();
-  const variables = useVariableDefinitionStates();
-  const listDashboards = useListProjectDashboards();
   const name = useReplaceVariablesInString(link.name) || link.name || 'Dashboards';
   const tooltip = useReplaceVariablesInString(link.tooltip);
   const project = 'project' in dashboard.metadata ? dashboard.metadata.project : '';
@@ -49,74 +46,27 @@ export function TagLinkMenu({
     event.stopPropagation();
     event.preventDefault();
     setAnchorEl(event.currentTarget);
-    const id = request.current + 1;
-    request.current = id;
-    setStatus('loading');
-    listDashboards(project)
-      .then((dashboards) => {
-        if (request.current !== id) {
-          return;
-        }
-        setTargets(
-          selectTagLinkTargets({
-            dashboards,
-            tags: link.tags ?? [],
-            project,
-            currentName: dashboard.metadata.name,
-          }),
-        );
-        setStatus('ready');
-      })
-      .catch(() => {
-        if (request.current !== id) {
-          return;
-        }
-        setTargets([]);
-        setStatus('error');
-      });
   };
 
   const handleClose = (): void => {
     setAnchorEl(null);
   };
 
-  const menu = (
-    <Menu
+  const popup = anchorEl && (
+    <TagLinkMenuPopup
       anchorEl={anchorEl}
-      open={Boolean(anchorEl)}
+      link={link}
+      project={project}
+      currentName={dashboard.metadata.name}
       onClose={handleClose}
-      onClick={(event) => event.stopPropagation()}
-    >
-      {status === 'loading' && <MenuItem disabled>Loading…</MenuItem>}
-      {status === 'error' && <MenuItem disabled>Could not load dashboards</MenuItem>}
-      {status === 'ready' && targets.length === 0 && <MenuItem disabled>No matching dashboards</MenuItem>}
-      {status === 'ready' &&
-        targets.map((target) => (
-          <MenuItem
-            key={target.name}
-            component="a"
-            href={buildTagLinkHref({
-              basePath: typeof window === 'undefined' ? '' : appBasePath(window.location.pathname),
-              project,
-              name: target.name,
-              keepTime: link.keepTime === true,
-              includeVariables: link.includeVariables === true,
-              timeRange,
-              variables,
-              destinationVariableNames: target.variableNames,
-            })}
-          >
-            {target.label}
-          </MenuItem>
-        ))}
-    </Menu>
+    />
   );
 
   if (appearance === 'item') {
     return (
       <>
         <MenuItem onClick={handleOpen}>{name}</MenuItem>
-        {menu}
+        {popup}
       </>
     );
   }
@@ -134,7 +84,7 @@ export function TagLinkMenu({
             <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
           </IconButton>
         </InfoTooltip>
-        {menu}
+        {popup}
       </>
     );
   }
@@ -151,7 +101,145 @@ export function TagLinkMenu({
           sx={(theme) => ({ height: theme.spacing(3) })}
         />
       </InfoTooltip>
-      {menu}
+      {popup}
     </>
   );
+}
+
+interface TagLinkMenuPopupProps {
+  anchorEl: HTMLElement;
+  link: DashboardLink;
+  project: string;
+  currentName: string;
+  onClose: () => void;
+}
+
+function TagLinkMenuPopup(props: TagLinkMenuPopupProps): ReactElement {
+  const keepTime = props.link.keepTime === true;
+  const includeVariables = props.link.includeVariables === true;
+  if (keepTime && includeVariables) {
+    return <TagLinkMenuPopupTimeAndVariables {...props} />;
+  }
+  if (keepTime) {
+    return <TagLinkMenuPopupTime {...props} />;
+  }
+  if (includeVariables) {
+    return <TagLinkMenuPopupVariables {...props} />;
+  }
+  return <TagLinkMenuFrame {...props} />;
+}
+
+function TagLinkMenuPopupTimeAndVariables(props: TagLinkMenuPopupProps): ReactElement {
+  const { timeRange } = useTimeRange();
+  const variables = useVariableDefinitionStates();
+  return <TagLinkMenuFrame {...props} timeRange={timeRange} variables={variables} />;
+}
+
+function TagLinkMenuPopupTime(props: TagLinkMenuPopupProps): ReactElement {
+  const { timeRange } = useTimeRange();
+  return <TagLinkMenuFrame {...props} timeRange={timeRange} />;
+}
+
+function TagLinkMenuPopupVariables(props: TagLinkMenuPopupProps): ReactElement {
+  const variables = useVariableDefinitionStates();
+  return <TagLinkMenuFrame {...props} variables={variables} />;
+}
+
+function TagLinkMenuFrame({
+  anchorEl,
+  link,
+  project,
+  currentName,
+  onClose,
+  timeRange,
+  variables,
+}: TagLinkMenuPopupProps & {
+  timeRange?: TimeRangeValue;
+  variables?: VariableStateMap;
+}): ReactElement {
+  const listDashboards = useListProjectDashboards();
+  const query = useQuery({
+    queryKey: ['tag-link-dashboards', project],
+    queryFn: () => listDashboards(project),
+    enabled: project !== '',
+  });
+  const basePath = typeof window === 'undefined' ? '' : appBasePath(window.location.pathname);
+  const targets =
+    query.data === undefined
+      ? []
+      : selectTagLinkTargets({
+          dashboards: query.data,
+          tags: link.tags ?? [],
+          project,
+          currentName,
+        });
+  const items = tagLinkMenuItems({
+    project,
+    pending: query.isPending,
+    failed: query.isError,
+    targets,
+    basePath,
+    keepTime: link.keepTime === true && timeRange !== undefined,
+    includeVariables: link.includeVariables === true && variables !== undefined,
+    timeRange,
+    variables,
+  });
+
+  return (
+    <Menu anchorEl={anchorEl} open onClose={onClose} onClick={(event) => event.stopPropagation()}>
+      {items}
+    </Menu>
+  );
+}
+
+function tagLinkMenuItems(input: {
+  project: string;
+  pending: boolean;
+  failed: boolean;
+  targets: TagLinkTarget[];
+  basePath: string;
+  keepTime: boolean;
+  includeVariables: boolean;
+  timeRange?: TimeRangeValue;
+  variables?: VariableStateMap;
+}): ReactElement[] {
+  if (input.project === '' || (!input.pending && !input.failed && input.targets.length === 0)) {
+    return [
+      <MenuItem key="empty" disabled>
+        No matching dashboards
+      </MenuItem>,
+    ];
+  }
+  if (input.pending) {
+    return [
+      <MenuItem key="loading" disabled>
+        Loading…
+      </MenuItem>,
+    ];
+  }
+  if (input.failed) {
+    return [
+      <MenuItem key="error" disabled>
+        Could not load dashboards
+      </MenuItem>,
+    ];
+  }
+  return input.targets.map((target) => (
+    <MenuItem
+      key={target.name}
+      component="a"
+      href={buildTagLinkHref({
+        basePath: input.basePath,
+        project: input.project,
+        name: target.name,
+        keepTime: input.keepTime,
+        includeVariables: input.includeVariables,
+        timeRange: input.timeRange,
+        variables: input.variables,
+        destinationVariableNames: target.variableNames,
+      })}
+    >
+      {target.label}
+    </MenuItem>
+  ));
 }

@@ -84,8 +84,8 @@ export function buildTagLinkHref(input: {
   name: string;
   keepTime: boolean;
   includeVariables: boolean;
-  timeRange: TimeRangeValue;
-  variables: Record<string, { value: VariableValue }>;
+  timeRange?: TimeRangeValue;
+  variables?: Record<string, { value: VariableValue }>;
   destinationVariableNames: string[];
 }): string {
   const base = input.basePath.endsWith('/') ? input.basePath.slice(0, -1) : input.basePath;
@@ -102,8 +102,8 @@ export function appendLinkState(
   input: {
     keepTime: boolean;
     includeVariables: boolean;
-    timeRange: TimeRangeValue;
-    variables: Record<string, { value: VariableValue }>;
+    timeRange?: TimeRangeValue;
+    variables?: Record<string, { value: VariableValue }>;
   },
 ): string {
   if ((!input.keepTime && !input.includeVariables) || url === '') {
@@ -125,15 +125,15 @@ function appendLinkParams(
   input: {
     keepTime: boolean;
     includeVariables: boolean;
-    timeRange: TimeRangeValue;
-    variables: Record<string, { value: VariableValue }>;
+    timeRange?: TimeRangeValue;
+    variables?: Record<string, { value: VariableValue }>;
   },
   allowed?: Set<string>,
 ): void {
-  if (input.keepTime) {
+  if (input.keepTime && input.timeRange) {
     appendTimeRange(params, input.timeRange);
   }
-  if (!input.includeVariables) {
+  if (!input.includeVariables || !input.variables) {
     return;
   }
   for (const name of Object.keys(input.variables).toSorted()) {
