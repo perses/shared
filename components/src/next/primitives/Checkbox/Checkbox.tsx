@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Checkbox as BaseCheckbox } from '@base-ui/react/checkbox';
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 import { forwardRef, useCallback } from 'react';
 
@@ -28,11 +28,14 @@ import {
   spacingProps,
 } from '../system';
 import type { ColorVariant, Size, Status } from '../types';
+import { CheckboxMark, CheckboxVisual } from './CheckboxVisual';
 
+// oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared layout styles.
 import '../system/layout.css';
+// oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared radius styles.
 import '../system/radius.css';
+// oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared spacing styles.
 import '../system/spacing.css';
-import './checkbox.css';
 
 export type CheckboxLabelPosition = 'start' | 'end';
 export type CheckboxVariant = 'subtle' | 'solid' | 'outline';
@@ -162,6 +165,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
   const control = (
     <BaseCheckbox.Root
       {...domProps}
+      render={<CheckboxVisual />}
       ref={ref}
       id={id}
       checked={checked}
@@ -177,7 +181,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
       uncheckedValue={uncheckedValue}
       form={form}
       inputRef={inputRef}
-      className={clsx('ps-Checkbox', radiusClassName, !hasLabel && callerClassName, slotProps?.control?.className)}
+      className={clsx(radiusClassName, !hasLabel && callerClassName, slotProps?.control?.className)}
       style={controlStyle}
       data-invalid={invalid ? '' : undefined}
       data-size={size}
@@ -188,7 +192,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
         className={clsx('ps-Checkbox__indicator', slotProps?.indicator?.className)}
         style={slotProps?.indicator?.style}
       >
-        <span className="ps-Checkbox__mark" aria-hidden="true" />
+        <CheckboxMark />
       </BaseCheckbox.Indicator>
     </BaseCheckbox.Root>
   );

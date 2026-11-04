@@ -31,6 +31,13 @@ import type {
   GridItemProps,
   GridProps,
   IconProps,
+  MenuCheckboxItemProps,
+  MenuItemProps,
+  MenuItemSize,
+  MenuAlign,
+  MenuLinkItemProps,
+  MenuPlacement,
+  MenuProps,
   Size,
   SortDirection,
   SpacingValue,
@@ -60,6 +67,10 @@ import {
   Grid,
   GridItem,
   Icon,
+  Menu,
+  MenuItem,
+  MenuLinkItem,
+  MenuCheckboxItem,
   Spinner,
   Stack,
   Switch,
@@ -97,6 +108,10 @@ describe('primitives barrel exports', () => {
     expect(Stack).toBeDefined();
     expect(Switch).toBeDefined();
     expect(Tooltip).toBeDefined();
+    expect(Menu).toBeDefined();
+    expect(MenuItem).toBeDefined();
+    expect(MenuLinkItem).toBeDefined();
+    expect(MenuCheckboxItem).toBeDefined();
     expect(Table).toBeDefined();
     expect(TableBody).toBeDefined();
     expect(TableCell).toBeDefined();
@@ -141,6 +156,18 @@ describe('primitives barrel exports', () => {
     const stackProps: StackProps = {};
     const switchProps: SwitchProps = {};
     const tooltipProps: TooltipProps = { title: 'tip', children: <button type="button">trigger</button> };
+    const menuPlacement: MenuPlacement = 'bottom';
+    const menuAlign: MenuAlign = 'start';
+    const menuProps: MenuProps = {
+      trigger: <button type="button">open</button>,
+      children: null,
+      placement: menuPlacement,
+      align: menuAlign,
+    };
+    const menuItemSize: MenuItemSize = 'sm';
+    const menuItemProps: MenuItemProps = { size: menuItemSize, selected: true };
+    const menuLinkItemProps: MenuLinkItemProps = { href: '/docs', target: '_blank', size: menuItemSize };
+    const menuCheckboxItemProps: MenuCheckboxItemProps = { checked: true, size: menuItemSize };
     const tableProps: TableProps = {};
     const tableRowProps: TableRowProps = {};
     const tableCellProps: TableCellProps = {};
@@ -180,6 +207,10 @@ describe('primitives barrel exports', () => {
     expect(stackProps).toBeDefined();
     expect(switchProps).toBeDefined();
     expect(tooltipProps).toBeDefined();
+    expect(menuProps).toBeDefined();
+    expect(menuItemProps).toBeDefined();
+    expect(menuLinkItemProps).toBeDefined();
+    expect(menuCheckboxItemProps).toBeDefined();
     expect(tableProps).toBeDefined();
     expect(tableRowProps).toBeDefined();
     expect(tableCellProps).toBeDefined();

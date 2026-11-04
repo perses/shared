@@ -165,6 +165,12 @@
     cursor: default;
   }
 
+  /* Decorative indicators inherit disabled opacity from their interactive owner. */
+  :where(.ps-Checkbox[data-decorative]) {
+    opacity: 1;
+    cursor: inherit;
+  }
+
   :where(.ps-Checkbox[data-invalid]:not([data-checked]):not([data-indeterminate])) {
     border-color: var(--perses-status-border-error);
   }
