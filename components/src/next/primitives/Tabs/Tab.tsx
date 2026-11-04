@@ -44,7 +44,8 @@ export interface TabProps extends Omit<HTMLAttributes<HTMLElement>, 'style'>, Sp
   endElement?: ReactNode;
   /**
    * Render a different element in place of the native `<button>`, e.g. a router `Link`. Base UI keeps
-   * `role="tab"` and keyboard activation on it.
+   * `role="tab"` and keyboard activation on it. The element must forward its ref: the `TabList` indicator
+   * measures the active tab through it, so a component that drops the ref renders without an indicator.
    */
   render?: ReactElement;
 }

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { Story } from '@ladle/react';
-import { useState } from 'react';
+import { forwardRef, useState } from 'react';
 import type { AnchorHTMLAttributes, CSSProperties, ReactElement } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
@@ -210,13 +210,21 @@ export const States: Story = () => (
 );
 States.storyName = 'States';
 
-const linkCode = `// Any anchor-like element (e.g. a router Link) keeps role="tab" and keyboard activation
+const linkCode = `// Any anchor-like element that forwards its ref (e.g. a router Link) keeps role="tab",
+// keyboard activation and the indicator
 <Tab value="dashboards" render={<Link to="/projects/demo/dashboards" />}>Dashboards</Tab>`;
 
-/** Stand-in for a router `Link`: forwards everything Base UI injects onto a plain anchor. */
-function DemoLink({ children, ...props }: AnchorHTMLAttributes<HTMLAnchorElement>): ReactElement {
-  return <a {...props}>{children}</a>;
-}
+/** Stand-in for a router `Link`: forwards the ref and everything Base UI injects onto a plain anchor. */
+const DemoLink = forwardRef<HTMLAnchorElement, AnchorHTMLAttributes<HTMLAnchorElement>>(function DemoLink(
+  { children, ...props },
+  ref,
+) {
+  return (
+    <a ref={ref} {...props}>
+      {children}
+    </a>
+  );
+});
 
 export const LinkTabs: Story = () => (
   <Stack>
