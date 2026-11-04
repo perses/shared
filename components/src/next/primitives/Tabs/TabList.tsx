@@ -31,7 +31,7 @@ import './tabs.css';
 
 const TAB_LIST_STYLE_PROPS = compileStyleProps([spacingProps, radiusProps]);
 
-export type TabListVariant = 'standard' | 'scrollable' | 'fullWidth';
+export type TabListVariant = 'standard' | 'fullWidth';
 
 export interface TabListSlotProps {
   /** The bar that slides under (or beside) the active tab. */
@@ -48,16 +48,19 @@ export type TabListProps = TabListBaseProps & TabListAccessibleName;
 interface TabListBaseProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'aria-label' | 'aria-labelledby'>, SpacingProps, RadiusProps {
   style?: PersesCSSProperties<TabStyle>;
-  /** Overflow behaviour: `scrollable` scrolls along the axis, `fullWidth` stretches tabs evenly. Defaults to `standard`. */
+  /**
+   * How tabs take up space: `standard` keeps each tab at its natural width and the list scrolls along
+   * its axis when they overflow; `fullWidth` stretches tabs evenly to fill the list. Defaults to `standard`.
+   */
   variant?: TabListVariant;
   /**
-   * Show scroll buttons at the list edges while a `scrollable` list overflows. Uses `IconButton` from
+   * Show scroll buttons at the list edges while the list overflows. Uses `IconButton` from
    * `ComponentsProvider`. Defaults to `false`.
    */
   scrollButtons?: boolean;
-  /** Icon for the backward scroll button. Defaults to a left chevron, rotated when vertical. */
+  /** Icon for the backward scroll button. Defaults to a left chevron, or an up chevron when vertical. */
   scrollBackIcon?: ReactElement;
-  /** Icon for the forward scroll button. Defaults to a right chevron, rotated when vertical. */
+  /** Icon for the forward scroll button. Defaults to a right chevron, or a down chevron when vertical. */
   scrollForwardIcon?: ReactElement;
   /** Activate a tab as soon as it receives focus instead of on Enter/Space. Defaults to `false`. */
   activateOnFocus?: boolean;
@@ -105,7 +108,7 @@ export const TabList = forwardRef<HTMLDivElement, TabListProps>(function TabList
       data-variant={variant}
     >
       {children}
-      {scrollButtons && variant === 'scrollable' && (
+      {scrollButtons && (
         <TabListScrollButtons
           listRef={listRef}
           slotProps={slotProps?.scrollButton}

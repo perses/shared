@@ -197,7 +197,7 @@ describe('primitives barrel exports', () => {
     const noTab: TabsProps['value'] = null;
     const tabsOrientation: TabsOrientation = 'vertical';
     const tabListProps: TabListProps = { 'aria-label': 'Sections' };
-    const tabListVariant: TabListVariant = 'scrollable';
+    const tabListVariant: TabListVariant = 'fullWidth';
     const tabProps: TabProps = { value: 'one' };
     const tabStyle: TabStyle = { '--perses-tab-min-height': '3rem' };
     const tabPanelProps: TabPanelProps = { value: 'one' };
@@ -249,7 +249,7 @@ describe('primitives barrel exports', () => {
     expect(noTab).toBeNull();
     expect(tabsOrientation).toBe('vertical');
     expect(tabListProps).toBeDefined();
-    expect(tabListVariant).toBe('scrollable');
+    expect(tabListVariant).toBe('fullWidth');
     expect(tabProps).toBeDefined();
     expect(tabStyle).toBeDefined();
     expect(tabPanelProps).toBeDefined();

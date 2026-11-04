@@ -20,6 +20,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ComponentsProvider } from '../../contexts/ComponentsProvider';
 import { defaultComponents, defaultIcons } from '../defaults';
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon } from '../Icon';
 import type { IconButtonProps } from '../IconButton';
 import { Tab, TabList, Tabs } from './index';
 import type { TabListProps } from './index';
@@ -45,10 +46,22 @@ function Wrapper({ children }: { children: ReactNode }): ReactElement {
   );
 }
 
+/** Markup of an icon rendered on its own, for comparing against what a scroll button shows. */
+function svgOf(icon: ReactElement): string {
+  const { container, unmount } = render(icon);
+  const html = container.innerHTML;
+  unmount();
+  return html;
+}
+
+function buttonSvgs(): string[] {
+  return scrollButtons().map((button) => button.querySelector('svg')?.outerHTML ?? '');
+}
+
 function renderScrollable(props: Partial<TabListProps> = {}, orientation?: 'vertical'): RenderResult {
   return render(
     <Tabs defaultValue="one" orientation={orientation}>
-      <TabList aria-label="Scroll" variant="scrollable" scrollButtons {...props}>
+      <TabList aria-label="Scroll" scrollButtons {...props}>
         <Tab value="one">One</Tab>
         <Tab value="two">Two</Tab>
       </TabList>
@@ -81,7 +94,7 @@ async function setGeometry(
 function DynamicTabs({ count }: { count: number }): ReactElement {
   return (
     <Tabs defaultValue={0}>
-      <TabList aria-label="Scroll" variant="scrollable" scrollButtons>
+      <TabList aria-label="Scroll" scrollButtons>
         {Array.from({ length: count }, (_, index) => (
           <Tab key={index} value={index}>
             Tab {index}
@@ -232,7 +245,6 @@ describe('TabList scroll buttons', () => {
         <Tabs defaultValue="one">
           <TabList
             aria-label="Example"
-            variant="scrollable"
             scrollButtons
             slotProps={{ scrollButton: { className: 'custom-scroll', style: { '--consumer-scroll': 'yes' } } }}
           >
@@ -261,10 +273,21 @@ describe('TabList scroll buttons', () => {
     expect(screen.getByTestId('back-icon').parentElement).toHaveClass('ps-Icon');
   });
 
-  it('does not render or need a provider when scrollButtons is off or the variant is not scrollable', async () => {
+  it('defaults to left/right chevrons horizontally and up/down chevrons vertically', async () => {
+    const horizontal = renderScrollable();
+    await setGeometry(screen.getByRole('tablist'), { position: 50, total: 300 });
+    expect(buttonSvgs()).toEqual([svgOf(<ChevronLeftIcon />), svgOf(<ChevronRightIcon />)]);
+    horizontal.unmount();
+
+    renderScrollable({}, 'vertical');
+    await setGeometry(screen.getByRole('tablist'), { position: 50, total: 300 }, true);
+    expect(buttonSvgs()).toEqual([svgOf(<ChevronUpIcon />), svgOf(<ChevronDownIcon />)]);
+  });
+
+  it('does not render or need a provider when scrollButtons is off', async () => {
     render(
       <Tabs defaultValue="one">
-        <TabList aria-label="Example" variant="scrollable">
+        <TabList aria-label="Example">
           <Tab value="one">One</Tab>
         </TabList>
       </Tabs>,

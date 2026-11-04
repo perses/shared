@@ -17,7 +17,7 @@ import type { AnchorHTMLAttributes, CSSProperties, ReactElement } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
 import { Chip } from '../Chip';
-import { BookOpenIcon, CogIcon, EarthIcon, ViewColumnIcon } from '../Icon';
+import { ArrowDownIcon, ArrowUpIcon, BookOpenIcon, CogIcon, EarthIcon, ViewColumnIcon } from '../Icon';
 import { TextField } from '../TextField';
 import { Tab } from './Tab';
 import { TabList } from './TabList';
@@ -82,16 +82,18 @@ Basic.storyName = 'Basic';
 const orientationCode = `// orientation: 'horizontal' (default) | 'vertical' | { default: 'horizontal', md: 'vertical' }
 <Tabs defaultValue="overview" orientation="vertical">…</Tabs>
 <Tabs defaultValue="overview" orientation={{ default: 'horizontal', md: 'vertical' }}>…</Tabs>`;
-const scrollableCode = `// variant: 'standard' (default) | 'scrollable' | 'fullWidth'
-<TabList aria-label="Project" variant="scrollable" scrollButtons>
-  …many tabs…
-</TabList>
+const scrollableCode = `// variant: 'standard' (default) | 'fullWidth'
+// Every list scrolls when its tabs overflow; scrollButtons adds mouse affordances
+<TabList aria-label="Project">…many tabs…</TabList>
+<TabList aria-label="Project" scrollButtons>…many tabs…</TabList>
 <TabList aria-label="Project" variant="fullWidth">…</TabList>`;
 const contentCode = `<Tab value="overview" startElement={<BookOpenIcon />}>Overview</Tab>
 <Tab value="datasources" endElement={<Chip size="xs">3</Chip>}>Datasources</Tab>`;
 
 type ProjectTabsProps = Pick<TabsProps, 'orientation'> &
-  Pick<TabListProps, 'variant' | 'scrollButtons' | 'slotProps'> & { tabStyle?: TabStyle };
+  Pick<TabListProps, 'variant' | 'scrollButtons' | 'scrollBackIcon' | 'scrollForwardIcon' | 'slotProps' | 'style'> & {
+    tabStyle?: TabStyle;
+  };
 
 function ProjectTabs({ orientation, tabStyle, ...listProps }: ProjectTabsProps): ReactElement {
   return (
@@ -119,10 +121,13 @@ export const Variants: Story = () => (
       </Stack>
     </Sample>
 
-    <Sample title="Scrollable with scroll buttons, and fullWidth" code={scrollableCode}>
+    <Sample title="Overflow — scrolls by default, with scrollButtons, and fullWidth" code={scrollableCode}>
       <Stack>
         <div style={narrow}>
-          <ProjectTabs variant="scrollable" scrollButtons />
+          <ProjectTabs />
+        </div>
+        <div style={narrow}>
+          <ProjectTabs scrollButtons />
         </div>
         <Tabs defaultValue="Overview">
           <TabList aria-label="Project" variant="fullWidth">
@@ -246,9 +251,55 @@ export const LinkTabs: Story = () => (
 );
 LinkTabs.storyName = 'Link tabs';
 
+const scrollButtonsCode = `// Swap the icons…
+<TabList aria-label="Project" scrollButtons scrollBackIcon={<ArrowUpIcon />} scrollForwardIcon={<ArrowDownIcon />}>
+// …or restyle the buttons (className and style only; the host IconButton stays in charge of behaviour)
+<TabList
+  aria-label="Project"
+  scrollButtons
+  slotProps={{
+    scrollButton: {
+      style: {
+        color: 'var(--perses-status-text-primary)',
+        backgroundColor: 'var(--perses-status-bg-primary)',
+        borderRadius: 'var(--perses-radius-full)',
+      },
+    },
+  }}
+>`;
+
+const styledScrollButtons: TabListSlotProps = {
+  scrollButton: {
+    style: {
+      color: 'var(--perses-status-text-primary)',
+      backgroundColor: 'var(--perses-status-bg-primary)',
+      borderRadius: 'var(--perses-radius-full)',
+    },
+  },
+};
+
+export const ScrollButtons: Story = () => (
+  <Stack>
+    <Sample title="Custom scroll icons (vertical)" code={scrollButtonsCode}>
+      <ProjectTabs
+        orientation="vertical"
+        scrollButtons
+        scrollBackIcon={<ArrowUpIcon />}
+        scrollForwardIcon={<ArrowDownIcon />}
+        style={{ maxHeight: '12rem' }}
+      />
+    </Sample>
+    <Sample title="Styled scroll buttons via slotProps.scrollButton" code={scrollButtonsCode}>
+      <div style={narrow}>
+        <ProjectTabs scrollButtons slotProps={styledScrollButtons} />
+      </div>
+    </Sample>
+  </Stack>
+);
+ScrollButtons.storyName = 'Scroll buttons';
+
 const slotsCode = `<TabList
   aria-label="Project"
-  variant="scrollable"
   scrollButtons
   slotProps={{
     indicator: { style: { height: 'var(--perses-spacing-xs)', borderRadius: 'var(--perses-radius-full)' } },
@@ -261,7 +312,7 @@ export const Slots: Story = () => (
   <Stack>
     <Sample title="slotProps.indicator, slotProps.scrollButton and TabStyle" code={slotsCode}>
       <div style={narrow}>
-        <ProjectTabs variant="scrollable" scrollButtons slotProps={indicatorSlots} tabStyle={compactTab} />
+        <ProjectTabs scrollButtons slotProps={indicatorSlots} tabStyle={compactTab} />
       </div>
     </Sample>
   </Stack>

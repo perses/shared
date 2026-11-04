@@ -93,22 +93,20 @@ describe('tabs.css', () => {
     expect(vertical).toContain('width: var(--perses-border-width-md);');
   });
 
-  it('scrolls the list itself for the scrollable variant and stretches tabs for fullWidth', () => {
-    const scrollable = getRule(":where(.ps-TabList[data-variant='scrollable'])");
-    expect(scrollable).toContain('overflow: auto;');
-    expect(scrollable).toContain('scrollbar-width: none;');
-    expect(getRule(":where(.ps-TabList[data-variant='scrollable'] .ps-Tab)")).toContain('flex-shrink: 0;');
+  it('scrolls every list on overflow, keeps standard tabs at natural width and stretches fullWidth tabs', () => {
+    const list = getRule(':where(.ps-TabList)');
+    expect(list).toContain('overflow: auto;');
+    expect(list).toContain('scrollbar-width: none;');
+    expect(getRule(':where(.ps-TabList)::-webkit-scrollbar')).toContain('display: none;');
+    expect(getRule(":where(.ps-TabList[data-variant='standard'] .ps-Tab)")).toContain('flex-shrink: 0;');
     expect(getRule(":where(.ps-TabList[data-variant='fullWidth'] .ps-Tab)")).toContain('flex: 1;');
   });
 
-  it('pins scroll buttons to the list edges and rotates them when vertical', () => {
+  it('pins scroll buttons to the list edges', () => {
     const button = getRule(':where(.ps-TabList__scrollButton)');
     expect(button).toContain('position: sticky;');
     expect(button).toContain('background-color: var(--perses-bg-surface);');
     expect(getRule(":where(.ps-TabList__scrollButton[data-direction='back'])")).toContain('order: -1;');
-    expect(getRule(":where(.ps-TabList[data-orientation='vertical'] .ps-TabList__scrollButton)")).toContain(
-      'rotate: 90deg;',
-    );
   });
 
   it('keeps scroll buttons out of the flow so tabs never shift and overflow measures only the tabs', () => {
@@ -134,6 +132,6 @@ describe('tabs.css', () => {
     expect(reducedMotionBlock).toContain('transition:');
     expect(reducedMotionBlock).toContain('scroll-behavior: smooth;');
     expect(getRule(':where(.ps-TabList__indicator)')).not.toContain('transition');
-    expect(getRule(":where(.ps-TabList[data-variant='scrollable'])")).not.toContain('scroll-behavior');
+    expect(getRule(':where(.ps-TabList)')).not.toContain('scroll-behavior');
   });
 });

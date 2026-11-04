@@ -17,14 +17,15 @@ import type { ReactElement, RefObject } from 'react';
 
 import { useComponents } from '../../contexts/ComponentsProvider';
 import type { SlotStyleProps } from '../../types';
-import { ChevronLeftIcon, ChevronRightIcon, Icon } from '../Icon';
+import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, ChevronUpIcon, Icon } from '../Icon';
 
-interface ScrollEdges {
+interface ScrollState {
   back: boolean;
   forward: boolean;
+  vertical: boolean;
 }
 
-const NO_SCROLL: ScrollEdges = { back: false, forward: false };
+const NO_SCROLL: ScrollState = { back: false, forward: false, vertical: false };
 const SCROLL_FRACTION = 0.8;
 
 function isVertical(list: HTMLElement): boolean {
@@ -40,27 +41,31 @@ function scrollPosition(list: HTMLElement, vertical: boolean): number {
   return Math.abs(vertical ? list.scrollTop : list.scrollLeft);
 }
 
-function measure(list: HTMLElement): ScrollEdges {
+function measure(list: HTMLElement): ScrollState {
   const vertical = isVertical(list);
   const position = scrollPosition(list, vertical);
   const size = vertical ? list.clientHeight : list.clientWidth;
   const total = vertical ? list.scrollHeight : list.scrollWidth;
-  return { back: position > 0, forward: Math.ceil(position + size) < total };
+  return { back: position > 0, forward: Math.ceil(position + size) < total, vertical };
+}
+
+function sameState(a: ScrollState, b: ScrollState): boolean {
+  return a.back === b.back && a.forward === b.forward && a.vertical === b.vertical;
 }
 
 /**
- * Tracks whether the tab list can scroll backward or forward along its orientation axis, re-measuring on scroll, on
- * size changes of the list and its tabs, and when tabs are added or removed.
+ * Tracks the list orientation and whether it can scroll backward or forward along that axis, re-measuring on
+ * scroll, on size changes of the list and its tabs, when tabs are added or removed, and when the orientation changes.
  */
-function useScrollEdges(listRef: RefObject<HTMLElement | null>): ScrollEdges {
-  const [edges, setEdges] = useState(NO_SCROLL);
+function useScrollState(listRef: RefObject<HTMLElement | null>): ScrollState {
+  const [state, setState] = useState(NO_SCROLL);
 
   useEffect(() => {
     const list = listRef.current;
     if (!list) return undefined;
     const update = (): void => {
       const next = measure(list);
-      setEdges((prev) => (prev.back === next.back && prev.forward === next.forward ? prev : next));
+      setState((prev) => (sameState(prev, next) ? prev : next));
     };
     update();
     list.addEventListener('scroll', update, { passive: true });
@@ -73,7 +78,7 @@ function useScrollEdges(listRef: RefObject<HTMLElement | null>): ScrollEdges {
       }
       update();
     });
-    mutationObserver.observe(list, { childList: true });
+    mutationObserver.observe(list, { childList: true, attributes: true, attributeFilter: ['data-orientation'] });
     return (): void => {
       list.removeEventListener('scroll', update);
       resizeObserver?.disconnect();
@@ -81,11 +86,8 @@ function useScrollEdges(listRef: RefObject<HTMLElement | null>): ScrollEdges {
     };
   }, [listRef]);
 
-  return edges;
+  return state;
 }
-
-const defaultBackIcon = <ChevronLeftIcon />;
-const defaultForwardIcon = <ChevronRightIcon />;
 
 interface TabListScrollButtonsProps {
   listRef: RefObject<HTMLDivElement | null>;
@@ -95,20 +97,20 @@ interface TabListScrollButtonsProps {
 }
 
 /**
- * Mouse-only scroll affordance for `variant="scrollable"`: two provider-resolved `IconButton`s pinned to the list
+ * Mouse-only scroll affordance for `scrollButtons`: two provider-resolved `IconButton`s pinned to the list
  * edges, rendered only while the list overflows. They are hidden from assistive technology because keyboard users
  * reach off-screen tabs with the arrow keys, which scroll the focused tab into view.
  */
 export function TabListScrollButtons({
   listRef,
   slotProps,
-  backIcon = defaultBackIcon,
-  forwardIcon = defaultForwardIcon,
+  backIcon,
+  forwardIcon,
 }: TabListScrollButtonsProps): ReactElement | null {
   const {
     components: { IconButton },
   } = useComponents();
-  const edges = useScrollEdges(listRef);
+  const edges = useScrollState(listRef);
 
   const scrollBy = useCallback(
     (direction: -1 | 1) => {
@@ -141,7 +143,7 @@ export function TabListScrollButtons({
         disabled={!edges.back}
         onClick={scrollBack}
       >
-        <Icon>{backIcon}</Icon>
+        <Icon>{backIcon ?? (edges.vertical ? <ChevronUpIcon /> : <ChevronLeftIcon />)}</Icon>
       </IconButton>
       <IconButton
         className={className}
@@ -155,7 +157,7 @@ export function TabListScrollButtons({
         disabled={!edges.forward}
         onClick={scrollForward}
       >
-        <Icon>{forwardIcon}</Icon>
+        <Icon>{forwardIcon ?? (edges.vertical ? <ChevronDownIcon /> : <ChevronRightIcon />)}</Icon>
       </IconButton>
     </>
   );
