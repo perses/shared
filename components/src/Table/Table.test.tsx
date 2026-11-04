@@ -12,8 +12,10 @@
 // limitations under the License.
 
 import type { RenderResult } from '@testing-library/react';
-import { render, screen, getAllByRole, within } from '@testing-library/react';
+import { fireEvent, render, screen, getAllByRole, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactElement } from 'react';
+import { useState } from 'react';
 import { VirtuosoMockContext } from 'react-virtuoso';
 
 import type { TableCellConfigs, TableColumnConfig, TableProps } from './model/table-model';
@@ -123,6 +125,67 @@ const renderTable = ({
 const LARGE_TABLE_OVERALL_ROWS = 100;
 const LARGE_TABLE_VISIBLE_ROWS = 5;
 const LARGE_TABLE_DATA = generateMockTableData(LARGE_TABLE_OVERALL_ROWS);
+
+const STATEFUL_TABLE_DATA = generateMockTableData(3);
+const STATEFUL_TABLE_VIRTUOSO_CONTEXT = { viewportHeight: 600, itemHeight: MOCK_ITEM_HEIGHT };
+
+/**
+ * Feeds table state changes back into the table like a real consumer does, so
+ * tests cover re-renders driven by state rather than only the emitted events.
+ */
+function StatefulTable(props: Partial<TableProps<MockTableData>>): ReactElement {
+  const [rowSelection, setRowSelection] = useState<NonNullable<TableProps<MockTableData>['rowSelection']>>({});
+  const [sorting, setSorting] = useState<NonNullable<TableProps<MockTableData>['sorting']>>([]);
+
+  return (
+    <VirtuosoMockContext.Provider value={STATEFUL_TABLE_VIRTUOSO_CONTEXT}>
+      <Table
+        data={STATEFUL_TABLE_DATA}
+        columns={COLUMNS}
+        height={600}
+        width={300}
+        checkboxSelection
+        rowSelection={rowSelection}
+        onRowSelectionChange={setRowSelection}
+        sorting={sorting}
+        onSortingChange={setSorting}
+        {...props}
+      />
+    </VirtuosoMockContext.Provider>
+  );
+}
+
+const RESIZABLE_COLUMN_CONFIG = { enableResizing: true };
+const COLUMN_FILTER_TOOLBAR_CONFIG = { isColumnFilterEnabled: true };
+
+function getColumnHeader(index: number): HTMLElement {
+  const columnHeader = screen.getAllByRole('columnheader')[index];
+  if (!columnHeader) {
+    throw new Error(`Cannot find column header at index: ${index}.`);
+  }
+  return columnHeader;
+}
+
+function getHeaderCheckbox(): HTMLElement {
+  return within(getColumnHeader(0)).getByRole('checkbox');
+}
+
+function getSortButton(): HTMLElement {
+  return within(getColumnHeader(2)).getByRole('button');
+}
+
+function getSortIcon(): HTMLElement {
+  return within(getColumnHeader(2)).getByTestId('ArrowDownwardIcon');
+}
+
+function getResizeHandle(): HTMLElement {
+  // Query on each use because uncompiled re-renders can remount the header row.
+  const resizeHandle = within(getColumnHeader(2)).getByRole('separator').parentElement;
+  if (!resizeHandle) {
+    throw new Error('Cannot find resize handle');
+  }
+  return resizeHandle;
+}
 
 const renderLargeTable = (): void => {
   const height = LARGE_TABLE_VISIBLE_ROWS * MOCK_ITEM_HEIGHT;
@@ -662,7 +725,24 @@ describe('table', () => {
         '0': true,
         '1': true,
         '2': true,
-      };
+      } as const;
+
+      test('header checkbox is checked and not indeterminate', () => {
+        renderTable({
+          data: data,
+          checkboxSelection: true,
+          rowSelection: allCheckboxRowSelection,
+        });
+
+        const table = screen.getByRole('table');
+        const headerCheckbox = within(table).getAllByRole('checkbox')[0];
+        if (!headerCheckbox) {
+          throw new Error('Missing header checkbox');
+        }
+
+        expect(headerCheckbox).toBeChecked();
+        expect(headerCheckbox).not.toHaveAttribute('data-indeterminate', 'true');
+      });
 
       // Able to test the standard and legend with modified together.
       // Testing un-modified legend separately because it behaves differently.
@@ -1164,5 +1244,70 @@ describe('table', () => {
     expect(cell4).not.toHaveTextContent('test');
     expect(cell4.firstChild).not.toHaveStyle({ 'background-color': 'rgb(255, 0, 0)' });
     expect(cell4.firstChild).not.toHaveStyle({ color: 'green' });
+  });
+
+  describe('when the parent feeds table state back in', () => {
+    test('header checkbox toggles between all and none on repeated clicks', () => {
+      render(<StatefulTable />);
+
+      for (let i = 0; i < 2; i++) {
+        userEvent.click(getHeaderCheckbox());
+        expect(getHeaderCheckbox()).toBeChecked();
+        screen.getAllByRole('checkbox').forEach((checkbox) => expect(checkbox).toBeChecked());
+
+        userEvent.click(getHeaderCheckbox());
+        expect(getHeaderCheckbox()).not.toBeChecked();
+        screen.getAllByRole('checkbox').forEach((checkbox) => expect(checkbox).not.toBeChecked());
+      }
+    });
+
+    test('sort indicator follows repeated header clicks', () => {
+      render(<StatefulTable />);
+
+      userEvent.click(getSortButton());
+      expect(getSortButton()).toHaveClass('Mui-active');
+      expect(getSortIcon()).toHaveClass('MuiTableSortLabel-iconDirectionDesc');
+
+      userEvent.click(getSortButton());
+      expect(getSortButton()).toHaveClass('Mui-active');
+      expect(getSortIcon()).toHaveClass('MuiTableSortLabel-iconDirectionAsc');
+
+      userEvent.click(getSortButton());
+      expect(getSortButton()).not.toHaveClass('Mui-active');
+    });
+
+    test('column visibility menu reflects toggled columns', () => {
+      render(<StatefulTable tableToolbarConfig={COLUMN_FILTER_TOOLBAR_CONFIG} />);
+      userEvent.click(screen.getByRole('button', { expanded: false }));
+      const menuItem = within(screen.getByRole('menu')).getByText('Value').closest('li');
+      if (!menuItem) {
+        throw new Error('Cannot find column visibility menu item');
+      }
+
+      userEvent.click(menuItem);
+      expect(within(menuItem).getByRole('checkbox')).not.toBeChecked();
+      expect(within(screen.getByRole('table', { hidden: true })).queryByText('Value')).not.toBeInTheDocument();
+
+      userEvent.click(menuItem);
+      expect(within(menuItem).getByRole('checkbox')).toBeChecked();
+      expect(within(screen.getByRole('table', { hidden: true })).getByText('Value')).toBeInTheDocument();
+    });
+
+    test('resizing a column updates its size and double clicking the handle resets it', () => {
+      const { container } = render(<StatefulTable defaultColumnConfig={RESIZABLE_COLUMN_CONFIG} />);
+      const getColumnSize = (): string =>
+        (container.querySelector('[style*="--col-value-size"]') as HTMLElement).style.getPropertyValue(
+          '--col-value-size',
+        );
+      const initialSize = getColumnSize();
+
+      fireEvent.mouseDown(getResizeHandle(), { clientX: 100 });
+      fireEvent.mouseMove(document, { clientX: 150 });
+      fireEvent.mouseUp(document, { clientX: 150 });
+      expect(getColumnSize()).toBe(String(Number(initialSize) + 50));
+
+      fireEvent.mouseDown(getResizeHandle(), { detail: 2 });
+      expect(getColumnSize()).toBe(initialSize);
+    });
   });
 });

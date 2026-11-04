@@ -142,4 +142,51 @@ describe('getCommonTimeScale', () => {
       stepMs: 1200,
     });
   });
+
+  test('does not mutate the input time ranges', () => {
+    // Reproduces perses/perses#4594: one query already refreshed to the new (24h) range while another still holds
+    // the previous (7d) range. The first query's time range (cached query result) must not be widened in place.
+    const refreshedTimeRange = {
+      start: new Date('2023-03-27T17:00:00Z'),
+      end: new Date('2023-03-28T17:00:00Z'),
+    };
+    const staleTimeRange = {
+      start: new Date('2023-03-21T17:00:00Z'),
+      end: new Date('2023-03-28T16:00:00Z'),
+    };
+    const refreshedStartMs = refreshedTimeRange.start.getTime();
+    const refreshedEndMs = refreshedTimeRange.end.getTime();
+    const staleStartMs = staleTimeRange.start.getTime();
+    const staleEndMs = staleTimeRange.end.getTime();
+
+    const seriesData: Array<TimeSeriesData | undefined> = [
+      { timeRange: refreshedTimeRange, stepMs: 3600, series: [] },
+      { timeRange: staleTimeRange, stepMs: 3600, series: [] },
+    ];
+
+    expect(getCommonTimeScale(seriesData)).toEqual({
+      startMs: staleStartMs,
+      endMs: refreshedEndMs,
+      rangeMs: refreshedEndMs - staleStartMs,
+      stepMs: 3600,
+    });
+
+    expect(refreshedTimeRange.start.getTime()).toBe(refreshedStartMs);
+    expect(refreshedTimeRange.end.getTime()).toBe(refreshedEndMs);
+    expect(staleTimeRange.start.getTime()).toBe(staleStartMs);
+    expect(staleTimeRange.end.getTime()).toBe(staleEndMs);
+
+    // Once the stale query refreshes, the common time scale must reflect only the new range.
+    expect(
+      getCommonTimeScale([
+        { timeRange: refreshedTimeRange, stepMs: 3600, series: [] },
+        { timeRange: { ...refreshedTimeRange }, stepMs: 3600, series: [] },
+      ]),
+    ).toEqual({
+      startMs: refreshedStartMs,
+      endMs: refreshedEndMs,
+      rangeMs: refreshedEndMs - refreshedStartMs,
+      stepMs: 3600,
+    });
+  });
 });

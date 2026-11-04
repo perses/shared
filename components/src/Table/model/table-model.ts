@@ -13,19 +13,79 @@
 
 import type { Theme } from '@mui/material';
 import type { Link } from '@perses-dev/spec';
-import type { rankings } from '@tanstack/match-sorter-utils';
+import type { RankingInfo, rankings } from '@tanstack/match-sorter-utils';
 import type {
   AccessorKeyColumnDef,
   CellContext,
+  CellData,
   ColumnDef,
-  CoreOptions,
-  FilterFn,
   PaginationState,
   RowData,
   RowSelectionState,
+  SortFnOption,
   SortingState,
+  TableFeatures as TableFeaturesBase,
+  TableOptions,
+} from '@tanstack/react-table';
+import {
+  columnFilteringFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnVisibilityFeature,
+  createExpandedRowModel,
+  createFilteredRowModel,
+  createPaginatedRowModel,
+  createSortedRowModel,
+  globalFilteringFeature,
+  metaHelper,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  rowSelectionFeature,
+  rowSortingFeature,
+  sortFn_alphanumeric,
+  sortFn_alphanumericCaseSensitive,
+  sortFn_basic,
+  sortFn_datetime,
+  sortFn_text,
+  sortFn_textCaseSensitive,
+  tableFeatures,
 } from '@tanstack/react-table';
 import type { CSSProperties, ReactNode } from 'react';
+
+interface FuzzyFilterMeta {
+  itemRank?: RankingInfo;
+}
+
+// Defined outside Table component so tableFeatures() is called once, not on every render.
+export const TABLE_FEATURES = tableFeatures({
+  rowSortingFeature,
+  rowSelectionFeature,
+  columnVisibilityFeature,
+  columnResizingFeature,
+  columnSizingFeature,
+  columnFilteringFeature,
+  globalFilteringFeature,
+  rowExpandingFeature,
+  rowPaginationFeature,
+  sortedRowModel: createSortedRowModel(),
+  paginatedRowModel: createPaginatedRowModel(),
+  expandedRowModel: createExpandedRowModel(),
+  filteredRowModel: createFilteredRowModel(),
+  filterMeta: metaHelper<FuzzyFilterMeta>(),
+  // Registers TanStack Table's built-in sort functions so that columns without
+  // an explicit `sortingFn` can rely on auto-detection (e.g. `datetime` for
+  // `Date` values, `alphanumeric`/`text` for strings) instead of throwing/warning
+  sortFns: {
+    alphanumeric: sortFn_alphanumeric,
+    alphanumericCaseSensitive: sortFn_alphanumericCaseSensitive,
+    basic: sortFn_basic,
+    datetime: sortFn_datetime,
+    text: sortFn_text,
+    textCaseSensitive: sortFn_textCaseSensitive,
+  },
+});
+
+export type TableFeatures = typeof TABLE_FEATURES;
 
 export const DEFAULT_COLUMN_WIDTH = 150;
 export const DEFAULT_COLUMN_MIN_WIDTH = 60;
@@ -47,7 +107,7 @@ export type TableRowEventOpts = {
   index: number;
 };
 
-export interface TableProps<TableData> {
+export interface TableProps<TableData extends RowData, CellValueType extends CellData = CellData> {
   /**
    * Height of the table.
    */
@@ -69,7 +129,7 @@ export interface TableProps<TableData> {
    * be rendered as a column header and impact the rendering of cells within
    * table rows.
    */
-  columns: Array<TableColumnConfig<TableData>>;
+  columns: Array<TableColumnConfig<TableData, CellValueType>>;
 
   /**
    * Custom render cell configurations. Each entry of the object should be an
@@ -165,7 +225,7 @@ export interface TableProps<TableData> {
    * value is used to key `rowSelection`. If this value is not set, the index
    * is used as the unique identifier.
    */
-  getRowId?: CoreOptions<TableData>['getRowId'];
+  getRowId?: TableOptions<TableFeatures, TableData>['getRowId'];
 
   /**
    * Function used to determine the color of the checkbox when `checkboxSelection`
@@ -176,7 +236,7 @@ export interface TableProps<TableData> {
   /**
    * Item actions to render for each row.
    */
-  getItemActions?: ({ id, data }: { id: string; data: unknown }) => ReactNode[];
+  getItemActions?: ({ id, data }: { id: string; data: TableData }) => ReactNode[];
 
   /**
    * Item actions should be created
@@ -351,18 +411,11 @@ export interface TableCellConfig {
 // I couldn't get it to work properly that way and punted on figuring it out
 // after trying several things.
 declare module '@tanstack/table-core' {
-  interface ColumnMeta<TData extends RowData, TValue> {
+  interface ColumnMeta<TFeatures extends TableFeaturesBase, TData extends RowData, TValue> {
     align?: TableColumnConfig<TData>['align'];
     headerDescription?: TableColumnConfig<TData>['headerDescription'];
     cellDescription?: TableColumnConfig<TData>['cellDescription'];
     dataLink?: TableColumnConfig<TData>['dataLink'];
-  }
-}
-
-declare module '@tanstack/react-table' {
-  //add fuzzy filter to the filterFns. Allows us to use "fuzzy" as a value for `globalFilterFn` in our table options.
-  interface FilterFns {
-    fuzzy: FilterFn<unknown>;
   }
 }
 
@@ -378,9 +431,9 @@ export type DataLink = Omit<Link, 'name'>;
  * Cell values default to `unknown`. In cell callbacks, use `getValue<ValueType>()`
  * when the column's value type is known, or narrow the value before using it.
  */
-export interface TableColumnConfig<TableData> extends Pick<
-  AccessorKeyColumnDef<TableData>,
-  'accessorKey' | 'cell' | 'sortingFn' | 'id' | 'enableResizing'
+export interface TableColumnConfig<TableData extends RowData, TValue extends CellData = CellData> extends Pick<
+  AccessorKeyColumnDef<TableFeatures, TableData, TValue>,
+  'accessorKey' | 'cell' | 'id' | 'enableResizing'
 > {
   /**
    * Text to display in the header for the column.
@@ -400,7 +453,7 @@ export interface TableColumnConfig<TableData> extends Pick<
    * If set to `true`, it will use the value generated by the `cell` prop if it
    * can be treated as a string.
    */
-  cellDescription?: ((props: CellContext<TableData, unknown>) => string) | boolean | undefined;
+  cellDescription?: ((props: CellContext<TableFeatures, TableData, TValue>) => string) | boolean | undefined;
 
   /**
    * When `true`, the column will be sortable.
@@ -408,6 +461,12 @@ export interface TableColumnConfig<TableData> extends Pick<
    */
   enableSorting?: boolean;
 
+  /**
+   * The sorting function to use with this column.
+   * - A `string` referencing a built-in sorting function
+   * - A custom sorting function
+   */
+  sortingFn?: SortFnOption<TableFeatures, TableData>;
   /**
    * Text to display when hovering over the header text. This can be useful for
    * providing additional information about the column when you want to keep the
@@ -435,12 +494,22 @@ export interface TableColumnConfig<TableData> extends Pick<
 /**
  * Takes in a perses table column and transforms it into a tanstack column.
  */
-export function persesColumnsToTanstackColumns<TableData>(
+export function persesColumnsToTanstackColumns<TableData extends RowData>(
   columns: Array<TableColumnConfig<TableData>>,
   defaultColumnConfig?: DefaultColumnConfig,
-): Array<ColumnDef<TableData>> {
+): Array<ColumnDef<TableFeatures, TableData>> {
   return columns.map(
-    ({ width, align, headerDescription, cellDescription, enableSorting, dataLink, enableResizing, ...otherProps }) => {
+    ({
+      width,
+      align,
+      headerDescription,
+      cellDescription,
+      enableSorting,
+      dataLink,
+      enableResizing,
+      sortingFn,
+      ...otherProps
+    }) => {
       const isResizingEnabled = enableResizing ?? defaultColumnConfig?.enableResizing ?? false;
       const sizeProps =
         width === 'auto' || width === undefined
@@ -458,6 +527,7 @@ export function persesColumnsToTanstackColumns<TableData>(
 
         // Default sorting to false, so it is very explicitly set per column.
         enableSorting: !!enableSorting,
+        ...(sortingFn ? { sortFn: sortingFn } : {}),
         enableResizing: isResizingEnabled,
 
         // Open-ended store for extra metadata in TanStack Table, so you can bake
@@ -473,12 +543,12 @@ export function persesColumnsToTanstackColumns<TableData>(
   );
 }
 
-function getUserProvidedSizeProps<TableData>(
+function getUserProvidedSizeProps(
   isResizingEnabled: boolean,
   width: number,
   minWidth?: number,
   maxWidth?: number,
-): Pick<ColumnDef<TableData>, 'size' | 'minSize' | 'maxSize'> {
+): Pick<ColumnDef<TableFeatures, RowData>, 'size' | 'minSize' | 'maxSize'> {
   // When resizing is enabled, we need to set min and max size to ensure the column can be resized within a reasonable range.
   return isResizingEnabled
     ? {
@@ -491,11 +561,11 @@ function getUserProvidedSizeProps<TableData>(
       };
 }
 
-function getDefaultSizeProps<TableData>(
+function getDefaultSizeProps(
   isResizingEnabled: boolean,
   minWidth?: number,
   maxWidth?: number,
-): Pick<ColumnDef<TableData>, 'size' | 'minSize' | 'maxSize'> {
+): Pick<ColumnDef<TableFeatures, RowData>, 'size' | 'minSize' | 'maxSize'> {
   return isResizingEnabled
     ? {
         // When resizing is enabled, we need to set a default size for the column

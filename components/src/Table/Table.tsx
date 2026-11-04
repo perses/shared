@@ -14,27 +14,23 @@
 import { Stack, useTheme } from '@mui/material';
 import type {
   ColumnDef,
+  ColumnVisibilityState,
   ExpandedState,
   OnChangeFn,
   Row,
+  RowData,
   RowSelectionState,
   SortingState,
   Table as TanstackTable,
-  VisibilityState,
 } from '@tanstack/react-table';
-import {
-  getCoreRowModel,
-  getExpandedRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from '@tanstack/react-table';
+import { useTable } from '@tanstack/react-table';
 import type { ReactElement } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 
 import { useFuzzySearch } from './hooks/useFuzzySearch';
-import type { TableProps } from './model/table-model';
-import { DEFAULT_COLUMN_WIDTH, persesColumnsToTanstackColumns } from './model/table-model';
+import type { TableProps, TableFeatures } from './model/table-model';
+import { DEFAULT_COLUMN_WIDTH, persesColumnsToTanstackColumns, TABLE_FEATURES } from './model/table-model';
+export type { TableFeatures } from './model/table-model';
 import { TableCheckbox } from './TableCheckbox';
 import { VirtualizedTable } from './VirtualizedTable';
 
@@ -45,8 +41,8 @@ const DEFAULT_GET_ROW_ID = (data: unknown, index: number): string => {
 // Setting these defaults one enables them to be consistent across renders instead
 // of being recreated every time, which can be important for perf because react
 // does not do deep equality checking for objects and arrays.
-const DEFAULT_ROW_SELECTION: NonNullable<TableProps<unknown>['rowSelection']> = {};
-const DEFAULT_SORTING: NonNullable<TableProps<unknown>['sorting']> = [];
+const DEFAULT_ROW_SELECTION: NonNullable<TableProps<Record<string, unknown>>['rowSelection']> = {};
+const DEFAULT_SORTING: NonNullable<TableProps<Record<string, unknown>>['sorting']> = [];
 
 /**
  * Component used to render tabular data in Perses use cases. This component is
@@ -54,7 +50,7 @@ const DEFAULT_SORTING: NonNullable<TableProps<unknown>['sorting']> = [];
  *
  * **Note: This component is currently experimental and is likely to have significant breaking changes in the near future. Use with caution outside of the core Perses codebase.**
  */
-export function Table<TableData>({
+export function Table<TableData extends RowData>({
   data,
   columns,
   cellConfigs,
@@ -80,8 +76,6 @@ export function Table<TableData>({
   defaultColumnConfig,
   ...otherProps
 }: TableProps<TableData>): ReactElement {
-  'use no memo'; // TanStack Table v8 uses a mutable instance that automatic memoization cannot track.
-
   const theme = useTheme();
 
   const hasSubRows = !!getSubRows;
@@ -95,7 +89,7 @@ export function Table<TableData>({
     setExpanded,
   );
 
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(
+  const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>(
     hiddenColumns?.reduce((acc, columnId) => ({ ...acc, [columnId]: false }), {}) ?? {},
   );
 
@@ -106,7 +100,7 @@ export function Table<TableData>({
   };
 
   const handleRowSelectionEvent = useCallback(
-    (table: TanstackTable<TableData>, row: Row<TableData>, isModified: boolean) => {
+    (table: TanstackTable<TableFeatures, TableData>, row: Row<TableFeatures, TableData>, isModified: boolean) => {
       if (rowSelectionVariant === 'standard' || isModified) {
         row.toggleSelected();
       } else {
@@ -128,10 +122,14 @@ export function Table<TableData>({
   );
 
   const handleCheckboxChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>, table: TanstackTable<TableData>, row: Row<TableData>) => {
+    (
+      e: React.ChangeEvent<HTMLInputElement>,
+      table: TanstackTable<TableFeatures, TableData>,
+      row: Row<TableFeatures, TableData>,
+    ) => {
       const nativePointerEvent =
         e.nativeEvent && (e.nativeEvent instanceof MouseEvent || e.nativeEvent instanceof KeyboardEvent)
-          ? (e.nativeEvent as PointerEvent)
+          ? e.nativeEvent
           : undefined;
       const isModifed = !!nativePointerEvent?.metaKey || !!nativePointerEvent?.shiftKey;
       handleRowSelectionEvent(table, row, isModifed);
@@ -144,7 +142,7 @@ export function Table<TableData>({
     onSortingChange?.(newSorting);
   };
 
-  const actionsColumn: ColumnDef<TableData> = useMemo(() => {
+  const actionsColumn: ColumnDef<TableFeatures, TableData> = useMemo(() => {
     return {
       id: 'itemActions',
       header: 'Actions',
@@ -160,7 +158,7 @@ export function Table<TableData>({
     };
   }, [getItemActions]);
 
-  const checkboxColumn: ColumnDef<TableData> = useMemo(() => {
+  const checkboxColumn: ColumnDef<TableFeatures, TableData> = useMemo(() => {
     return {
       id: 'checkboxRowSelect',
       size: 28,
@@ -168,7 +166,7 @@ export function Table<TableData>({
         return (
           <TableCheckbox
             checked={table.getIsAllRowsSelected()}
-            indeterminate={table.getIsSomeRowsSelected()}
+            indeterminate={table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()}
             onChange={table.getToggleAllRowsSelectedHandler()}
             color={theme.palette.text.primary}
             density={density}
@@ -193,7 +191,7 @@ export function Table<TableData>({
     };
   }, [theme.palette.text.primary, density, getCheckboxColor, handleCheckboxChange]);
 
-  const tableColumns: Array<ColumnDef<TableData>> = useMemo(() => {
+  const tableColumns: Array<ColumnDef<TableFeatures, TableData>> = useMemo(() => {
     const initTableColumns = persesColumnsToTanstackColumns(columns, defaultColumnConfig);
 
     if (hasItemActions) {
@@ -207,25 +205,20 @@ export function Table<TableData>({
     return initTableColumns;
   }, [columns, defaultColumnConfig, hasItemActions, checkboxSelection, actionsColumn, checkboxColumn]);
 
-  // Oxlint still checks incompatible APIs inside functions opted out of compilation above.
-  // oxlint-disable-next-line react/incompatible-library
-  const table = useReactTable({
-    data,
+  const table = useTable({
+    features: TABLE_FEATURES,
+    ...fuzzySearchOptions,
+    data: data,
     columns: tableColumns,
     getRowId: getRowId,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: pagination ? getPaginationRowModel() : undefined,
-    // without this setting, the getPaginationRowModel setting persists and it is not possible to switch from paginated to unpaginated
-    // can be removed once https://github.com/TanStack/table/pull/5974 is merged
+    // manualPagination: true disables the paginated row model for this render,
+    // allowing switching between paginated and unpaginated at runtime.
     manualPagination: !pagination,
     enableRowSelection: !!checkboxSelection,
     onRowSelectionChange: handleRowSelectionChange,
     onSortingChange: handleSortingChange,
     onColumnVisibilityChange: setColumnVisibility,
     getSubRows: getSubRows,
-    getExpandedRowModel: hasSubRows ? getExpandedRowModel() : undefined,
-    ...fuzzySearchOptions,
     // For now, defaulting to sort by descending first. We can expose the ability
     // to customize it if/when we have use cases for it.
     sortDescFirst: true,
@@ -241,13 +234,14 @@ export function Table<TableData>({
     },
   });
 
+  // Use the row's stable core table rather than `table`, whose identity changes
+  // with every state update and would otherwise remount all virtualized rows.
   const handleRowClick = useCallback(
-    (e: React.MouseEvent<HTMLDivElement, MouseEvent>, rowId: string) => {
-      const row = table.getRow(rowId);
+    (e: React.MouseEvent<HTMLDivElement, MouseEvent>, row: Row<TableFeatures, TableData>) => {
       const isModifiedClick = e.metaKey || e.shiftKey;
-      handleRowSelectionEvent(table, row, isModifiedClick);
+      handleRowSelectionEvent(row.table, row, isModifiedClick);
     },
-    [handleRowSelectionEvent, table],
+    [handleRowSelectionEvent],
   );
 
   return (
@@ -257,15 +251,10 @@ export function Table<TableData>({
       defaultColumnWidth={defaultColumnWidth}
       defaultColumnHeight={defaultColumnHeight}
       onRowClick={handleRowClick}
-      rows={table.getRowModel().rows}
-      columns={table.getVisibleFlatColumns()}
-      columnSizing={table.getState().columnSizing}
-      columnSizingInfo={table.getState().columnSizingInfo}
-      headers={table.getHeaderGroups()}
+      table={table}
       cellConfigs={cellConfigs}
       pagination={pagination}
       onPaginationChange={onPaginationChange}
-      rowCount={table.getRowCount()}
       toolbarConfig={{
         isSearchEnabled: tableToolbarConfig?.isSearchEnabled,
         globalFilter,

@@ -12,16 +12,16 @@
 // limitations under the License.
 
 import { Box, TablePagination, TableRow as MuiTableRow } from '@mui/material';
-import type { Column, ColumnSizingInfoState, ColumnSizingState, HeaderGroup, Row } from '@tanstack/react-table';
+import type { ReactTable, Row, RowData } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
 import type { ReactElement } from 'react';
-import { useMemo, useRef } from 'react';
+import { forwardRef, useMemo, useRef } from 'react';
 import type { TableComponents, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
 import { TableVirtuoso } from 'react-virtuoso';
 
 import { useVirtualizedTableKeyboardNav } from './hooks/useVirtualizedTableKeyboardNav';
 import { InnerTable } from './InnerTable';
-import type { TableCellConfigs, TableProps, TableRowEventOpts } from './model/table-model';
+import type { TableCellConfigs, TableFeatures, TableProps, TableRowEventOpts } from './model/table-model';
 import { TableBody } from './TableBody';
 import type { TableCellProps } from './TableCell';
 import { TableCell } from './TableCell';
@@ -38,18 +38,68 @@ type TableCellPosition = {
   column: number;
 };
 
-export type VirtualizedTableProps<TableData> = Required<
+type TableContext<TableData extends RowData> = {
+  width: number | string;
+  density: VirtualizedTableProps<TableData>['density'];
+  onTableKeyDown: React.KeyboardEventHandler<HTMLTableElement>;
+  onTableBlur: React.FocusEventHandler<HTMLTableElement>;
+  onRowClick: VirtualizedTableProps<TableData>['onRowClick'];
+  onRowMouseOver: VirtualizedTableProps<TableData>['onRowMouseOver'];
+  onRowMouseOut: VirtualizedTableProps<TableData>['onRowMouseOut'];
+};
+
+// Defined outside VirtualizedTable so the object reference is stable and
+// TableVirtuoso never remounts its internal components due to a changed prop.
+// Props that vary per-render are passed via the `context` prop instead.
+const VirtuosoTableComponents: TableComponents<Row<TableFeatures, RowData>, TableContext<RowData>> = {
+  Scroller: forwardRef(({ context: _, ...props }, ref) => <VirtualizedTableContainer {...props} ref={ref} />),
+  Table: ({ context, ...props }): ReactElement => (
+    <InnerTable
+      {...props}
+      width={context.width}
+      density={context.density}
+      onKeyDown={context.onTableKeyDown}
+      onBlur={context.onTableBlur}
+    />
+  ),
+  TableHead: forwardRef(({ context: _, ...props }, ref) => <TableHead {...props} ref={ref} />),
+  TableFoot: forwardRef(({ context: _, ...props }, ref) => <TableFoot {...props} ref={ref} />),
+  TableRow: ({ item, context, ...props }): ReactElement | null => {
+    if (!item) {
+      return null;
+    }
+
+    const rowEventOpts: TableRowEventOpts = { id: item.id, index: item.index };
+
+    return (
+      <TableRow
+        {...props}
+        onClick={(e) => context.onRowClick(e, item)}
+        density={context.density}
+        onMouseOver={(e) => {
+          context.onRowMouseOver?.(e, rowEventOpts);
+        }}
+        onMouseOut={(e) => {
+          context.onRowMouseOut?.(e, rowEventOpts);
+        }}
+      />
+    );
+  },
+  TableBody: forwardRef(({ context: _, ...props }, ref) => <TableBody {...props} ref={ref} />),
+};
+
+export type VirtualizedTableProps<TableData extends RowData> = Required<
   Pick<TableProps<TableData>, 'height' | 'width' | 'density' | 'defaultColumnHeight' | 'defaultColumnWidth'>
 > &
   Pick<TableProps<TableData>, 'onRowMouseOver' | 'onRowMouseOut' | 'pagination' | 'onPaginationChange'> & {
-    onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, id: string) => void;
-    rows: Array<Row<TableData>>;
-    columns: Array<Column<TableData, unknown>>;
-    headers: Array<HeaderGroup<TableData>>;
-    columnSizing: ColumnSizingState;
-    columnSizingInfo: ColumnSizingInfoState;
+    onRowClick: (e: React.MouseEvent<HTMLDivElement, MouseEvent>, row: Row<TableFeatures, TableData>) => void;
+    /**
+     * The value returned by `useTable`. Its identity changes whenever table
+     * state or options change, unlike the row, column, and header objects it
+     * returns, which keep their identities across state changes.
+     */
+    table: ReactTable<TableFeatures, TableData>;
     cellConfigs?: TableCellConfigs;
-    rowCount: number;
     toolbarConfig: Pick<
       TableToolbarProps<TableData>,
       | 'isSearchEnabled'
@@ -67,7 +117,7 @@ export type VirtualizedTableProps<TableData> = Required<
 // Separating out the virtualized table because we may want a paginated table
 // in the future that does not need virtualization, and we'd likely lay them
 // out differently.
-export function VirtualizedTable<TableData>({
+export function VirtualizedTable<TableData extends RowData>({
   width,
   height,
   density,
@@ -76,16 +126,18 @@ export function VirtualizedTable<TableData>({
   onRowClick,
   onRowMouseOver,
   onRowMouseOut,
-  rows,
-  columns,
-  headers,
+  table,
   cellConfigs,
   pagination,
   onPaginationChange,
-  rowCount,
   toolbarConfig,
 }: VirtualizedTableProps<TableData>): ReactElement {
-  'use no memo'; // TanStack Table row and column getters read mutable state behind stable identities.
+  // Rows, columns, and headers keep their identities when table state such as
+  // selection, sorting, or sizing changes. Anything that reads that state
+  // through their methods must call `table` directly in the same expression or
+  // callback, so the React Compiler invalidates it whenever `table` changes.
+  const rows = table.getRowModel().rows;
+  const columnCount = table.getVisibleFlatColumns().length;
 
   const virtuosoRef = useRef<TableVirtuosoHandle>(null);
   // Use a ref for these values because they are only needed for keyboard
@@ -106,7 +158,7 @@ export function VirtualizedTable<TableData>({
 
     // We add 1 here for the header.
     maxRows: rows.length + 1,
-    maxColumns: columns.length,
+    maxColumns: columnCount,
   });
 
   const getFocusState = (cellPosition: TableCellPosition): TableCellProps['focusState'] => {
@@ -117,57 +169,18 @@ export function VirtualizedTable<TableData>({
     return 'none';
   };
 
-  const VirtuosoTableComponents: TableComponents<TableData> = useMemo(() => {
-    return {
-      Scroller: VirtualizedTableContainer,
-      Table: (props): ReactElement => {
-        return (
-          <InnerTable
-            {...props}
-            width={width}
-            density={density}
-            onKeyDown={keyboardNav.onTableKeyDown}
-            onBlur={keyboardNav.onTableBlur}
-          />
-        );
-      },
-      TableHead,
-      TableFoot,
-      TableRow: ({ item: _item, ...props }): ReactElement | null => {
-        const index = props['data-index'];
-        const row = rows[index];
-        if (!row) {
-          return null;
-        }
-
-        const rowEventOpts: TableRowEventOpts = { id: row.id, index: row.index };
-
-        return (
-          <TableRow
-            {...props}
-            onClick={(e) => onRowClick(e, row.id)}
-            density={density}
-            onMouseOver={(e) => {
-              onRowMouseOver?.(e, rowEventOpts);
-            }}
-            onMouseOut={(e) => {
-              onRowMouseOut?.(e, rowEventOpts);
-            }}
-          />
-        );
-      },
-      TableBody,
-    };
-  }, [
-    density,
-    keyboardNav.onTableKeyDown,
-    keyboardNav.onTableBlur,
-    onRowClick,
-    onRowMouseOut,
-    onRowMouseOver,
-    rows,
-    width,
-  ]);
+  const tableContext: TableContext<TableData> = useMemo(
+    () => ({
+      width,
+      density,
+      onTableKeyDown: keyboardNav.onTableKeyDown,
+      onTableBlur: keyboardNav.onTableBlur,
+      onRowClick,
+      onRowMouseOver,
+      onRowMouseOut,
+    }),
+    [width, density, keyboardNav.onTableKeyDown, keyboardNav.onTableBlur, onRowClick, onRowMouseOver, onRowMouseOut],
+  );
 
   const handleChangePage = (_event: React.MouseEvent<HTMLButtonElement> | null, newPage: number): void => {
     if (!pagination || !onPaginationChange) return;
@@ -186,7 +199,7 @@ export function VirtualizedTable<TableData>({
    * and pass the column sizes down as CSS variables to the <table> element.
    */
   const columnSizeVars: { [key: string]: number } = {};
-  headers.forEach((headerGroup) => {
+  table.getHeaderGroups().forEach((headerGroup) => {
     headerGroup.headers
       .filter((header) => header.column.getCanResize())
       .forEach((header) => {
@@ -200,8 +213,9 @@ export function VirtualizedTable<TableData>({
       <TableToolbar {...toolbarConfig} width={width} />
       <TableVirtuoso
         ref={virtuosoRef}
-        totalCount={rows.length}
-        components={VirtuosoTableComponents}
+        data={rows}
+        components={VirtuosoTableComponents as TableComponents<Row<TableFeatures, TableData>, TableContext<TableData>>}
+        context={tableContext}
         // Note: this value is impacted by overscan. See this issue if overscan
         // is added.
         // https://github.com/petyosi/react-virtuoso/issues/118#issuecomment-642156138
@@ -209,7 +223,7 @@ export function VirtualizedTable<TableData>({
         fixedHeaderContent={() => {
           return (
             <>
-              {headers.map((headerGroup) => {
+              {table.getHeaderGroups().map((headerGroup) => {
                 return (
                   <TableRow key={headerGroup.id} density={density}>
                     {headerGroup.headers.map((header, i, headers) => {
@@ -246,7 +260,7 @@ export function VirtualizedTable<TableData>({
                             header.column.getCanResize()
                               ? {
                                   resizeHandler: header.getResizeHandler(),
-                                  resetSizeHandler: header.column.resetSize,
+                                  resetSizeHandler: () => header.column.resetSize(),
                                   isResizing: header.column.getIsResizing(),
                                 }
                               : undefined
@@ -267,8 +281,8 @@ export function VirtualizedTable<TableData>({
             ? (): ReactElement => (
                 <MuiTableRow sx={{ backgroundColor: (theme) => theme.palette.background.default }}>
                   <TablePagination
-                    colSpan={columns.length}
-                    count={rowCount}
+                    colSpan={table.getVisibleFlatColumns().length}
+                    count={table.getRowCount()}
                     page={pagination.pageIndex}
                     rowsPerPage={pagination.pageSize}
                     onPageChange={handleChangePage}
@@ -279,7 +293,7 @@ export function VirtualizedTable<TableData>({
             : undefined
         }
         itemContent={(index) => {
-          const row = rows[index];
+          const row = table.getRowModel().rows[index];
           if (!row) {
             return null;
           }

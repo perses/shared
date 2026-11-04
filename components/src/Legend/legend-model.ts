@@ -41,11 +41,11 @@ export interface LegendItem {
 /**
  * State of selected items in the legend.
  * - When "ALL", all legend items are selected, but not visually highlighted.
- * - Otherwise, it is a Record that associates legend item ids with a boolean
+ * - Otherwise, it is a Record that associates legend item ids with a `true`
  *   value. When the associated entry for a legend item is `true`, that item
  *   will be treated as selected and visually highlighted.
  */
-export type SelectedLegendItemState = Record<LegendItem['id'], boolean> | 'ALL';
+export type SelectedLegendItemState = Record<LegendItem['id'], true> | 'ALL';
 
 export function isLegendItemVisuallySelected(item: LegendItem, selectedItems: SelectedLegendItemState): boolean {
   // In the "ALL" case, technically all legend items are selected, but we do

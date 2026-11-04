@@ -19,7 +19,7 @@ import { useState } from 'react';
 import type { TableToolbarProps } from './TableToolbar';
 import { TableToolbar } from './TableToolbar';
 
-function TableToolbarWrapper(props: Partial<TableToolbarProps<unknown>> = {}): ReactElement {
+function TableToolbarWrapper(props: Partial<TableToolbarProps<Record<string, unknown>>> = {}): ReactElement {
   const [globalFilter, setGlobalFilter] = useState('');
 
   return (

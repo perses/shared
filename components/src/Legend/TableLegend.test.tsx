@@ -264,7 +264,7 @@ describe('TableLegend', () => {
   describe('when one selected', () => {
     const selectedItems = {
       two: true,
-    };
+    } as const;
 
     test('selected items have checked checkboxes', () => {
       renderTableLegend({

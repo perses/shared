@@ -13,12 +13,12 @@
 
 import type { Theme } from '@mui/material';
 import { IconButton, Link as LinkComponent, Menu, MenuItem, Chip, capitalize, Stack } from '@mui/material';
-import { InfoTooltip } from '@perses-dev/components';
+import { InfoTooltip, sanitizeUrl } from '@perses-dev/components';
 import { useReplaceVariablesInString, useReplaceVariablesInUrl } from '@perses-dev/plugin-system';
 import type { Link } from '@perses-dev/spec';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import type { MouseEvent, ReactElement } from 'react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 type LinksVariant = 'dashboard' | 'panel';
 
@@ -28,6 +28,7 @@ interface LinksProps {
 }
 
 export function LinksDisplay({ links, variant }: LinksProps): ReactElement | null {
+  const buttonId = `${variant}-links-button-${useId()}`;
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isMenuOpened = Boolean(anchorEl);
   const handleOpenMenu = (event: MouseEvent<HTMLButtonElement>): void => {
@@ -85,7 +86,7 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
       <InfoTooltip description={`${links.length} links`} enterDelay={100}>
         <IconButton
           aria-label={`${capitalize(variant)}-links`}
-          id={`${variant}-links-button`}
+          id={buttonId}
           size="small"
           onClick={handleOpenMenu}
           sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
@@ -103,7 +104,7 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
         open={isMenuOpened}
         onClose={handleClose}
         MenuListProps={{
-          'aria-labelledby': `${variant}-links-button`,
+          'aria-labelledby': buttonId,
         }}
       >
         {links.map((link: Link) => (
@@ -115,16 +116,17 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
 }
 
 function LinkChip({ link }: { link: Link }): ReactElement {
-  const { url, name, tooltip, targetBlank } = useLink(link);
+  const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+    <InfoTooltip description={description} enterDelay={100}>
       <Chip
         label={name ?? url}
         component="a"
-        href={url}
+        href={href}
         target={targetBlank ? '_blank' : '_self'}
-        clickable
+        rel={targetBlank ? 'noopener noreferrer' : undefined}
+        clickable={href !== undefined}
         size="medium"
         icon={<LaunchIcon color="inherit" fontSize="small" />}
         sx={(theme) => ({ height: theme.spacing(3) })}
@@ -134,15 +136,17 @@ function LinkChip({ link }: { link: Link }): ReactElement {
 }
 
 function LinkButton({ link }: { link: Link }): ReactElement {
-  const { url, name, tooltip, targetBlank } = useLink(link);
+  const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
+    <InfoTooltip description={description} enterDelay={100}>
       <IconButton
+        component="a"
         aria-label={name ?? url}
         size="small"
-        href={url}
+        href={href}
         target={targetBlank ? '_blank' : '_self'}
+        rel={targetBlank ? 'noopener noreferrer' : undefined}
         sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
       >
         <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
@@ -152,28 +156,53 @@ function LinkButton({ link }: { link: Link }): ReactElement {
 }
 
 function LinkMenuItem({ link }: { link: Link }): ReactElement {
-  const { url, name, tooltip, targetBlank } = useLink(link);
+  const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
-    <InfoTooltip description={tooltip ?? url} enterDelay={100}>
-      <MenuItem component={LinkComponent} href={url} target={targetBlank ? '_blank' : '_self'}>
+    <InfoTooltip description={description} enterDelay={100}>
+      <MenuItem
+        component={LinkComponent}
+        href={href}
+        target={targetBlank ? '_blank' : '_self'}
+        rel={targetBlank ? 'noopener noreferrer' : undefined}
+      >
         {name ?? url}
       </MenuItem>
     </InfoTooltip>
   );
 }
 
-function useLink(link: Link): Link {
+interface ResolvedLink extends Link {
+  /**
+   * URL to use as the href of the link. It is undefined when the URL uses a scheme that is not allowed
+   * (e.g. `javascript:`), so the link is rendered but cannot be followed.
+   */
+  href?: string;
+  /**
+   * Text displayed when hovering over the link: the tooltip (or the URL) of the link, or an explanation when the link
+   * is disabled.
+   */
+  description: string;
+}
+
+function getDisabledLinkDescription(url: string): string {
+  return `This link is disabled because its URL uses a scheme that is not allowed: ${url}`;
+}
+
+function useLink(link: Link): ResolvedLink {
   // Name/tooltip: plain string interpolation (unencoded $var).
   const name = useReplaceVariablesInString(link.name);
   const tooltip = useReplaceVariablesInString(link.tooltip);
   // URL: URL-aware interpolation (also expands %24var inside query params).
   const interpolatedUrl = useReplaceVariablesInUrl(link.renderVariables === false ? undefined : link.url);
-  const url = link.renderVariables === false ? link.url : (interpolatedUrl ?? link.url);
 
-  if (link.renderVariables === false) {
-    return link;
-  }
+  // The URL must be sanitized after the interpolation, since variable values can be provided by the user (e.g. through
+  // the URL query parameters).
+  const resolvedLink =
+    link.renderVariables === false ? link : { ...link, url: interpolatedUrl ?? link.url, name, tooltip };
+  const href = sanitizeUrl(resolvedLink.url);
+  const description =
+    href === undefined ? getDisabledLinkDescription(resolvedLink.url) : (resolvedLink.tooltip ?? resolvedLink.url);
 
-  return { ...link, url, name, tooltip };
+  return { ...resolvedLink, href, description };
 }

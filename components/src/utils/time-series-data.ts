@@ -67,9 +67,10 @@ export function getCommonTimeScale(
       // Keep track of query steps so we can calculate a common one for the graph
       steps.push(data.stepMs);
 
-      // If we don't have an overall time range yet, just start with this one
+      // If we don't have an overall time range yet, start with a copy of this one.
+      // Copy to avoid mutating the input (e.g. cached query results) when widening the range below.
       if (timeRange === undefined) {
-        timeRange = data.timeRange;
+        timeRange = { ...data.timeRange };
         continue;
       }
 

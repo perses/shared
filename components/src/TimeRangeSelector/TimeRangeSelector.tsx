@@ -97,6 +97,9 @@ export function TimeRangeSelector({
   const localOffset = getGMTOffset('local');
   const tzAutocompleteOptions = tzOptions.map((o) => ({ id: o.value, label: o.display }));
   const tzAutocompleteValue = tzAutocompleteOptions.find((option) => option.id === timeZone);
+  const displayValue =
+    timeOptions.find((opt) => formatTimeRange(opt.value, timeZone) === formatTimeRange(value, timeZone))?.display ??
+    formatTimeRange(value, timeZone);
 
   return (
     <>
@@ -155,16 +158,13 @@ export function TimeRangeSelector({
           IconComponent={Calendar}
           renderValue={() => (
             <Stack direction="row" alignItems="center" spacing={1}>
-              <span>
-                {timeOptions.find((opt) => formatTimeRange(opt.value, timeZone) === formatTimeRange(value, timeZone))
-                  ?.display ?? formatTimeRange(value, timeZone)}
-              </span>
+              <span>{displayValue}</span>
               {tzOffset !== localOffset && (
                 <Box sx={{ typography: 'caption', color: 'text.secondary' }}>· {tzOffset}</Box>
               )}
             </Stack>
           )}
-          inputProps={{ 'aria-label': `Select time range. Currently set to ${value}` }}
+          inputProps={{ 'aria-label': `Select time range. Currently set to ${displayValue}` }}
           sx={{
             '.MuiSelect-icon': { marginTop: '1px', transform: 'none' },
             '.MuiSelect-select.MuiSelect-outlined.MuiInputBase-input': { paddingRight: '36px' },

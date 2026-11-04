@@ -42,7 +42,7 @@ describe('isLegendItemVisuallySelected', () => {
     ).toBeFalsy();
   });
 
-  it('does not highlight the item when it is false in the selected object', () => {
+  it('does not highlight the item when it is absent from the selected object', () => {
     expect(
       isLegendItemVisuallySelected(
         {
@@ -51,7 +51,6 @@ describe('isLegendItemVisuallySelected', () => {
           color: 'red',
         },
         {
-          one: false,
           two: true,
         },
       ),

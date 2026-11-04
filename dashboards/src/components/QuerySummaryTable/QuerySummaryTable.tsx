@@ -48,11 +48,11 @@ export function QuerySummaryTable(props: QuerySummaryTableProps): ReactElement |
   // for displaying a summary of recent query results
   const queryClient = useQueryClient();
   const queries = queryClient.getQueryCache().findAll();
-  const activeQueries = queries.filter((query) => query.state.status === 'loading');
+  const activeQueries = queries.filter((query) => query.state.status === 'pending');
   const completedQueries = queries.filter((query) => query.state.status === 'success');
   const querySummary = useActiveTimeSeriesQueries();
 
-  if (datasourceClient.isLoading === true) {
+  if (datasourceClient.isPending === true) {
     return null;
   }
 
