@@ -149,53 +149,53 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         '@perses-dev/client': {
-          version: '0.56.0-beta.0',
+          version: '0.56.0-beta.1',
           lib: () => getHostSharedModule('@perses-dev/client'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.56.0-beta.0',
+            requiredVersion: '^0.56.0-beta.1',
           },
         },
         '@perses-dev/components': {
-          version: '0.56.0-beta.0',
+          version: '0.56.0-beta.1',
           lib: () => getHostSharedModule('@perses-dev/components'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.56.0-beta.0',
+            requiredVersion: '^0.56.0-beta.1',
           },
         },
         '@perses-dev/plugin-system': {
-          version: '0.56.0-beta.0',
+          version: '0.56.0-beta.1',
           lib: () => getHostSharedModule('@perses-dev/plugin-system'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.56.0-beta.0',
+            requiredVersion: '^0.56.0-beta.1',
           },
         },
         '@perses-dev/explore': {
-          version: '0.56.0-beta.0',
+          version: '0.56.0-beta.1',
           lib: () => getHostSharedModule('@perses-dev/explore'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.56.0-beta.0',
+            requiredVersion: '^0.56.0-beta.1',
           },
         },
         '@perses-dev/dashboards': {
-          version: '0.56.0-beta.0',
+          version: '0.56.0-beta.1',
           lib: () => getHostSharedModule('@perses-dev/dashboards'),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^0.56.0-beta.0',
+            requiredVersion: '^0.56.0-beta.1',
           },
         },
         // Below are the shared modules that are used by the plugins and are loaded asynchronously on demand using get rather than lib.
         // This is to avoid loading the modules if they are not used by the plugin.
         echarts: {
-          version: '5.5.0',
+          version: '6.1.0',
           get: createSharedModuleLoader(() => import('echarts')),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^5.5.0',
+            requiredVersion: '^6.1.0',
           },
         },
         'date-fns': {
@@ -249,11 +249,11 @@ const getPluginRuntime = (): ModuleFederation => {
           },
         },
         immer: {
-          version: '10.2.0',
+          version: '11.2.9',
           get: createSharedModuleLoader(() => import('immer')),
           shareConfig: {
             singleton: true,
-            requiredVersion: '^10.1.1',
+            requiredVersion: '^11.2.9',
           },
         },
       },
