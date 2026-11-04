@@ -177,6 +177,20 @@
     height: var(--active-tab-height);
   }
 
+  @media (forced-colors: active) {
+    :where(.ps-Tab[data-active]) {
+      color: Highlight;
+    }
+
+    :where(.ps-Tab:focus-visible) {
+      outline-color: Highlight;
+    }
+
+    :where(.ps-TabList__indicator) {
+      background-color: Highlight;
+    }
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     :where(.ps-TabList) {
       scroll-behavior: smooth;

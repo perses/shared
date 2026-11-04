@@ -127,6 +127,15 @@ describe('tabs.css', () => {
     expect(getRule(':where(.ps-TabList__scrollButton:disabled)')).toContain('visibility: hidden;');
   });
 
+  it('falls back to system Highlight for the active tab, focus ring and indicator in forced-colors mode', () => {
+    const start = css.indexOf('@media (forced-colors: active)');
+    expect(start).toBeGreaterThan(-1);
+    const block = css.slice(start, css.indexOf('@media (prefers-reduced-motion'));
+    expect(block).toMatch(/:where\(\.ps-Tab\[data-active\]\) \{\s*color: Highlight;/);
+    expect(block).toMatch(/:where\(\.ps-Tab:focus-visible\) \{\s*outline-color: Highlight;/);
+    expect(block).toMatch(/:where\(\.ps-TabList__indicator\) \{\s*background-color: Highlight;/);
+  });
+
   it('only animates the indicator and smooth scrolling when motion is allowed', () => {
     const reducedMotionBlock = css.slice(css.indexOf('@media (prefers-reduced-motion: no-preference)'));
     expect(reducedMotionBlock).toContain('transition:');
