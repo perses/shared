@@ -55,6 +55,7 @@ describe('tabs.css', () => {
 
   it('resets the tab button and exposes the min-height override variable', () => {
     const tab = getRule(':where(.ps-Tab)');
+    expect(tab).toContain('box-sizing: border-box;');
     expect(tab).toContain('border: 0;');
     expect(tab).toContain('background: none;');
     expect(tab).toContain('min-height: var(--perses-tab-min-height, var(--perses-control-size-lg));');
