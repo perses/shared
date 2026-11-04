@@ -17,23 +17,9 @@ import type { RoleBinding, RoleBindingSpec, Subject } from '../model';
 import { WILDCARD_USER } from '../model';
 import { nameSchema, metadataSchema, projectMetadataSchema } from './metadata';
 
-// The name of a subject is the name of a user, or WILDCARD_USER to refer to every user.
-// The other names are validated by nameSchema, to keep its error messages.
-const subjectNameSchema = z.string().superRefine((name, ctx) => {
-  if (name === WILDCARD_USER) {
-    return;
-  }
-  const result = nameSchema.safeParse(name);
-  if (!result.success) {
-    for (const issue of result.error.issues) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: issue.message });
-    }
-  }
-});
-
 export const subjectSchema: z.ZodType<Subject, Subject> = z.object({
   kind: z.enum(['User']),
-  name: subjectNameSchema,
+  name: z.union([z.literal(WILDCARD_USER), nameSchema]),
 });
 
 export const roleBindingSpecSchema: z.ZodType<RoleBindingSpec, RoleBindingSpec> = z.object({
