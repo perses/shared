@@ -39,7 +39,7 @@
     "@tanstack/hotkeys": "^0.8.0",
     "@tanstack/react-hotkeys": "^0.9.1",
     "dompurify": "^3.4.17",
-    "immer": "^10.1.1",
+    "immer": "^11.2.9",
     "marked": "^15.0.12",
     "mdi-material-ui": "^7.9.2",
     "react-compiler-runtime": "^1.0.0",
