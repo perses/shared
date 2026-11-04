@@ -16,6 +16,21 @@ import { resolve } from 'path';
 
 // jsdom does not apply layered styles, so assert selector-scoped CSS contracts.
 const css = readFileSync(resolve(__dirname, './menu.css'), 'utf-8').replace(/\/\*[\s\S]*?\*\//g, '');
+const style = document.createElement('style');
+
+// Menu row rules have zero specificity in one layer; matching declarations win in source order.
+function propertyFor(element: Element, property: string, forcedColors = false): string {
+  const rules = Array.from(style.sheet?.cssRules ?? [])
+    .flatMap((rule) => {
+      if (rule instanceof CSSMediaRule) {
+        return forcedColors && /\(forced-colors:\s*active\)/.test(rule.conditionText) ? Array.from(rule.cssRules) : [];
+      }
+      return [rule];
+    })
+    .filter((rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && element.matches(rule.selectorText));
+  expect(rules.length).toBeGreaterThan(0);
+  return rules.reduce((value, rule) => rule.style.getPropertyValue(property) || value, '');
+}
 
 function getRule(selector: string): string {
   const rule = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].find(
@@ -26,17 +41,32 @@ function getRule(selector: string): string {
 }
 
 describe('menu.css', () => {
+  beforeAll(() => {
+    // Unwrap only the unsupported layer; preserve media conditions and selectors for CSSOM inspection.
+    style.textContent = css
+      .replace(/@import\s+[^;]+;/g, '')
+      .replace('@layer perses.components {', '')
+      .replace(/}\s*$/, '');
+    document.head.append(style);
+  });
+
+  afterAll(() => {
+    style.remove();
+  });
+
   it('scopes every rule to the components layer', () => {
     expect(css).toContain('@layer perses.components {');
   });
 
-  it('wraps every selector in :where() so style props win', () => {
+  it('wraps defaults in :where()', () => {
     const selectors = [...css.matchAll(/([^{};]+)\{/g)]
       .map(([, selector]) => selector?.trim() ?? '')
       .filter((selector) => !selector.startsWith('@'));
     expect(selectors.length).toBeGreaterThan(0);
     for (const selector of selectors) {
-      for (const part of selector.split(',')) expect(part.trim()).toMatch(/^:where\(/);
+      for (const part of selector.split(',')) {
+        expect(part.trim()).toMatch(/^:where\(/);
+      }
     }
   });
 
@@ -83,33 +113,58 @@ describe('menu.css', () => {
   it('sizes items with control-size and spacing tokens', () => {
     const item = getRule(':where(.ps-MenuItemBase)');
     expect(item).toContain('min-height: var(--perses-control-size-md);');
-    expect(item).toContain('padding: var(--perses-spacing-xs) var(--perses-spacing-md);');
+    expect(item).toContain('padding: var(--perses-spacing-xs);');
+    expect(item).toContain('border-radius: var(--perses-radius-md);');
     expect(item).toContain('gap: var(--perses-spacing-sm);');
     expect(item).toContain('text-decoration: none;');
     expect(item).toContain('user-select: none;');
 
     const small = getRule(":where(.ps-MenuItemBase[data-size='sm'])");
     expect(small).toContain('min-height: var(--perses-control-size-sm);');
+    expect(small).toContain('padding: 0 var(--perses-spacing-sm);');
     expect(small).toContain('font-size: var(--perses-font-size-sm);');
   });
 
-  it('styles item states through data attributes', () => {
-    expect(getRule(':where(.ps-MenuItemBase[data-highlighted])')).toContain(
-      'background-color: var(--perses-bg-sunken);',
-    );
-    expect(getRule(':where(.ps-MenuItemBase[data-selected])')).toContain(
-      'background-color: var(--perses-status-bg-primary);',
-    );
+  it('keeps selection neutral and dims disabled items', () => {
+    const item = document.createElement('div');
+    item.className = 'ps-MenuItemBase';
+    item.setAttribute('data-selected', '');
+    expect(propertyFor(item, 'background-color')).toBe('');
+    expect(propertyFor(item, 'color')).toBe('inherit');
     const disabled = getRule(':where(.ps-MenuItemBase[data-disabled])');
     expect(disabled).toContain('opacity: var(--perses-opacity-disabled, 0.5);');
     expect(disabled).toContain('cursor: not-allowed;');
   });
 
-  it('keeps the keyboard highlight visible on a selected item', () => {
-    const selectedHighlighted = ':where(.ps-MenuItemBase[data-selected][data-highlighted])';
-    expect(getRule(selectedHighlighted)).toContain('background-color: var(--perses-status-bg-primary-hover);');
-    expect(css.indexOf(selectedHighlighted)).toBeGreaterThan(css.indexOf(':where(.ps-MenuItemBase[data-selected])'));
-    expect(css.indexOf(selectedHighlighted)).toBeGreaterThan(css.indexOf(':where(.ps-MenuItemBase[data-highlighted])'));
+  it.each([
+    ['ps-MenuItem', false],
+    ['ps-MenuItem', true],
+    ['ps-MenuLinkItem', false],
+    ['ps-MenuLinkItem', true],
+    ['ps-MenuCheckboxItem', false],
+    ['ps-MenuCheckboxItem', true],
+  ] as const)('keeps keyboard focus visible without tinting %s (selected=%s)', (className, selected) => {
+    const item = document.createElement(className === 'ps-MenuLinkItem' ? 'a' : 'div');
+    item.className = `ps-MenuItemBase ${className}`;
+    item.tabIndex = -1;
+    if (selected) item.setAttribute('data-selected', '');
+    document.body.append(item);
+
+    try {
+      expect(propertyFor(item, 'outline')).toBe('0');
+      item.focus();
+      expect(item).toHaveFocus();
+      expect(propertyFor(item, 'outline')).toBe('var(--perses-focus-ring-width) solid var(--perses-text-primary)');
+      expect(propertyFor(item, 'outline-offset')).toBe('calc(-1 * var(--perses-focus-ring-offset))');
+      expect(propertyFor(item, 'outline-color', true)).toBe('Highlight');
+      expect(propertyFor(item, 'background-color')).toBe('');
+      expect(propertyFor(item, 'color')).toBe('inherit');
+
+      item.blur();
+      expect(propertyFor(item, 'outline')).toBe('0');
+    } finally {
+      item.remove();
+    }
   });
 
   it('lets content grow and truncate while start and end stay fixed', () => {

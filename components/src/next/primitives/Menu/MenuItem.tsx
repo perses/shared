@@ -29,19 +29,18 @@ import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the menu styles.
 import './menu.css';
 
-export interface MenuItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style'>, MenuItemBaseProps {}
+export interface MenuItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'color'>, MenuItemBaseProps {}
 
 /**
  * An action row inside a `Menu` (`role="menuitem"`). Activating it calls `onClick` and closes the menu
- * unless `closeOnClick={false}`. Keyboard navigation, typeahead, and highlighting come from Base UI
- * (`data-highlighted`, `data-disabled`).
+ * unless `closeOnClick={false}`. Keyboard navigation, typeahead, and focus management come from Base UI.
  *
  * @example
  * <MenuItem startElement={<CopyIcon />} onClick={copy}>Copy</MenuItem>
  * <MenuItem selected={unit === 'bytes'} onClick={() => setUnit('bytes')}>Bytes</MenuItem>
  */
 export const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(function MenuItem(
-  { selected, size = 'md', startElement, endElement, className, style, children, ...props },
+  { selected, size = 'sm', color = 'default', startElement, endElement, className, style, children, ...props },
   ref,
 ) {
   const {
@@ -57,10 +56,11 @@ export const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(function MenuI
       className={clsx(MENU_ITEM_BASE_CLASS, 'ps-MenuItem', styleClassName, className)}
       style={computedStyle}
       data-selected={selected ? '' : undefined}
-      aria-current={selected ? 'true' : undefined}
+      aria-current={rest['aria-current'] ?? (selected ? 'true' : undefined)}
       data-size={size}
+      data-color={color}
     >
-      <MenuItemContent startElement={startElement} endElement={endElement}>
+      <MenuItemContent startElement={startElement} endElement={endElement} selected={selected}>
         {children}
       </MenuItemContent>
     </BaseMenu.Item>

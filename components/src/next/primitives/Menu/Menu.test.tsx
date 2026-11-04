@@ -17,6 +17,7 @@ import userEvent from '@testing-library/user-event';
 import { createRef, useState } from 'react';
 import type { ReactElement } from 'react';
 
+import { ThemeModeProvider } from '../../contexts/ThemeModeProvider';
 import { Divider } from '../Divider';
 import { Menu } from './Menu';
 import type { MenuProps } from './Menu';
@@ -178,19 +179,93 @@ describe('Menu', () => {
     expect(menu).toHaveAccessibleName('Row actions');
   });
 
+  describe('theme mode across the portal', () => {
+    it.each(['light', 'dark'] as const)('propagates %s mode to the body-portaled positioner', async (mode) => {
+      const documentMode = document.documentElement.getAttribute('data-perses-mode');
+      const bodyMode = document.body.getAttribute('data-perses-mode');
+      const { container } = render(
+        <ThemeModeProvider mode={mode}>
+          <Menu trigger={trigger}>{defaultItems()}</Menu>
+        </ThemeModeProvider>,
+      );
+      const menu = await openMenu();
+      expect(document.body).toContainElement(menu);
+      expect(container).not.toContainElement(menu);
+      expect(menu.parentElement).toHaveAttribute('data-perses-mode', mode);
+      expect(menu.closest('[data-perses-mode]')).toBe(menu.parentElement);
+      expect(document.documentElement.getAttribute('data-perses-mode')).toBe(documentMode);
+      expect(document.body.getAttribute('data-perses-mode')).toBe(bodyMode);
+    });
+
+    it('updates mode on an already-open popup without remounting it', async () => {
+      const { rerender } = render(
+        <ThemeModeProvider mode="dark">
+          <Menu trigger={trigger}>{defaultItems()}</Menu>
+        </ThemeModeProvider>,
+      );
+      const menu = await openMenu();
+      const positioner = menu.parentElement;
+      expect(positioner).toHaveAttribute('data-perses-mode', 'dark');
+      await userEvent.keyboard('{ArrowDown}');
+      const focusedItem = screen.getByRole('menuitem', { name: 'Copy' });
+      expect(focusedItem).toHaveFocus();
+
+      rerender(
+        <ThemeModeProvider mode="light">
+          <Menu trigger={trigger}>{defaultItems()}</Menu>
+        </ThemeModeProvider>,
+      );
+      expect(screen.getByRole('menu')).toBe(menu);
+      expect(menu.parentElement).toBe(positioner);
+      expect(positioner).toHaveAttribute('data-perses-mode', 'light');
+      expect(focusedItem).toHaveFocus();
+    });
+
+    it('keeps nested provider modes independent using the nearest provider', async () => {
+      const { container } = render(
+        <ThemeModeProvider mode="dark">
+          <Menu defaultOpen trigger={<button type="button">Dark menu</button>}>
+            <MenuItem>Copy</MenuItem>
+          </Menu>
+          <ThemeModeProvider mode="light">
+            <Menu defaultOpen trigger={<button type="button">Light menu</button>}>
+              <MenuItem>Paste</MenuItem>
+            </Menu>
+          </ThemeModeProvider>
+        </ThemeModeProvider>,
+      );
+      const darkMenu = await screen.findByRole('menu', { name: 'Dark menu' });
+      const lightMenu = await screen.findByRole('menu', { name: 'Light menu' });
+      expect(container).not.toContainElement(darkMenu);
+      expect(container).not.toContainElement(lightMenu);
+      expect(darkMenu.parentElement).toHaveAttribute('data-perses-mode', 'dark');
+      expect(lightMenu.parentElement).toHaveAttribute('data-perses-mode', 'light');
+      expect(document.documentElement).not.toHaveAttribute('data-perses-mode');
+      expect(document.body).not.toHaveAttribute('data-perses-mode');
+    });
+
+    it('does not force a mode boundary when no provider is present', async () => {
+      renderMenu();
+      const menu = await openMenu();
+      expect(menu.parentElement).not.toHaveAttribute('data-perses-mode');
+      expect(menu).not.toHaveAttribute('data-perses-mode');
+      expect(menu.closest('[data-perses-mode]')).toBeNull();
+    });
+  });
+
   describe('keyboard', () => {
-    it('moves highlight with arrow keys, Home, and End', async () => {
+    it('moves focus with arrow keys, Home, and End', async () => {
       renderMenu();
       await openMenu();
       const [copy, paste, del] = screen.getAllByRole('menuitem');
       await userEvent.keyboard('{ArrowDown}');
-      expect(copy).toHaveAttribute('data-highlighted');
+      expect(copy).toHaveFocus();
       await userEvent.keyboard('{ArrowDown}');
-      expect(paste).toHaveAttribute('data-highlighted');
+      expect(paste).toHaveFocus();
       await userEvent.keyboard('{End}');
-      expect(del).toHaveAttribute('data-highlighted');
+      expect(del).toHaveFocus();
       await userEvent.keyboard('{Home}');
-      expect(copy).toHaveAttribute('data-highlighted');
+      expect(copy).toHaveFocus();
     });
 
     it('activates an item with Enter', async () => {
@@ -210,7 +285,7 @@ describe('Menu', () => {
       const menu = await openMenu();
       expect(menu.querySelector('[role="separator"]')).toHaveClass('ps-Divider');
       await userEvent.keyboard('{ArrowDown}{ArrowDown}');
-      expect(screen.getByRole('menuitem', { name: 'Delete' })).toHaveAttribute('data-highlighted');
+      expect(screen.getByRole('menuitem', { name: 'Delete' })).toHaveFocus();
     });
 
     it('uses label for typeahead when children are not plain text', async () => {
@@ -224,7 +299,7 @@ describe('Menu', () => {
       ]);
       await openMenu();
       await userEvent.keyboard('d');
-      expect(screen.getAllByRole('menuitem')[1]).toHaveAttribute('data-highlighted');
+      await waitFor(() => expect(screen.getAllByRole('menuitem')[1]).toHaveFocus());
     });
   });
 
@@ -321,7 +396,7 @@ describe('MenuItem', () => {
       <MenuItem key="a" selected>
         Copy
       </MenuItem>,
-      <MenuItem key="b" size="sm">
+      <MenuItem key="b" size="md">
         Paste
       </MenuItem>,
     ]);
@@ -329,10 +404,86 @@ describe('MenuItem', () => {
     const [copy, paste] = screen.getAllByRole('menuitem');
     expect(copy).toHaveAttribute('data-selected', '');
     expect(copy).toHaveAttribute('aria-current', 'true');
-    expect(copy).toHaveAttribute('data-size', 'md');
+    expect(copy).toHaveAttribute('data-size', 'sm');
     expect(paste).not.toHaveAttribute('data-selected');
     expect(paste).not.toHaveAttribute('aria-current');
-    expect(paste).toHaveAttribute('data-size', 'sm');
+    expect(paste).toHaveAttribute('data-size', 'md');
+  });
+
+  it.each([false, true, undefined])('adds only a decorative trailing check when selected=%s', async (selected) => {
+    renderMenu({}, [
+      <MenuItem key="choice" selected={selected} endElement={<kbd>Shortcut</kbd>}>
+        Choice
+      </MenuItem>,
+    ]);
+    await openMenu();
+    const item = screen.getByRole('menuitem', { name: 'Choice Shortcut' });
+    const end = item.querySelector('.ps-MenuItemBase__end');
+    expect(end).toHaveTextContent('Shortcut');
+    const check = item.querySelector('.ps-MenuItemBase__selected');
+    if (selected) {
+      expect(check).toHaveAttribute('aria-hidden', 'true');
+      expect(check?.querySelector('svg')).toHaveAttribute('focusable', 'false');
+      expect(item.lastElementChild).toBe(check);
+      expect(check?.previousElementSibling).toBe(end);
+    } else {
+      expect(check).toBeNull();
+    }
+    expect(item.querySelectorAll('input, button, [role="checkbox"], [tabindex]')).toHaveLength(0);
+  });
+
+  it('removes the selection check when selected is cleared without replacing the item', async () => {
+    const { rerender } = renderMenu({}, [
+      <MenuItem key="choice" selected>
+        Choice
+      </MenuItem>,
+    ]);
+    await openMenu();
+    const item = screen.getByRole('menuitem', { name: 'Choice' });
+    expect(item.querySelector('.ps-MenuItemBase__selected')).not.toBeNull();
+    rerender(
+      <Menu trigger={trigger}>
+        <MenuItem key="choice">Choice</MenuItem>
+      </Menu>,
+    );
+    expect(screen.getByRole('menuitem', { name: 'Choice' })).toBe(item);
+    expect(item.querySelector('.ps-MenuItemBase__selected')).toBeNull();
+    expect(item).not.toHaveAttribute('data-selected');
+    expect(item).not.toHaveAttribute('aria-current');
+  });
+
+  it.each([
+    { selected: true, ariaCurrent: 'page', expected: 'page' },
+    { selected: false, ariaCurrent: 'page', expected: 'page' },
+    { selected: undefined, ariaCurrent: 'page', expected: 'page' },
+    { selected: true, ariaCurrent: false, expected: 'false' },
+    { selected: false, ariaCurrent: false, expected: 'false' },
+    { selected: undefined, ariaCurrent: false, expected: 'false' },
+  ] as const)(
+    'preserves explicit aria-current=$ariaCurrent with selected=$selected',
+    async ({ selected, ariaCurrent, expected }) => {
+      renderMenu({}, [
+        <MenuItem key="a" selected={selected} aria-current={ariaCurrent}>
+          Copy
+        </MenuItem>,
+      ]);
+      await openMenu();
+      expect(screen.getByRole('menuitem', { name: 'Copy' })).toHaveAttribute('aria-current', expected);
+    },
+  );
+
+  it.each([
+    { selected: true, expected: 'true' },
+    { selected: false, expected: null },
+    { selected: undefined, expected: null },
+  ])('defaults aria-current from selected=$selected when omitted', async ({ selected, expected }) => {
+    renderMenu({}, [
+      <MenuItem key="a" selected={selected}>
+        Copy
+      </MenuItem>,
+    ]);
+    await openMenu();
+    expect(screen.getByRole('menuitem', { name: 'Copy' }).getAttribute('aria-current')).toBe(expected);
   });
 
   it('renders startElement and endElement around the content', async () => {
@@ -375,7 +526,7 @@ describe('MenuItem', () => {
     await openMenu();
     const toggle = screen.getByRole('menuitem', { name: 'Dark mode' });
     await userEvent.keyboard('{ArrowDown}{ArrowDown}');
-    expect(toggle).toHaveAttribute('data-highlighted');
+    expect(toggle).toHaveFocus();
   });
 
   it('forwards ref, className, and style props without leaking them', async () => {

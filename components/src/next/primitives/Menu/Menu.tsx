@@ -14,9 +14,10 @@
 import { Menu as BaseMenu } from '@base-ui/react/menu';
 import type { MenuPositionerProps, MenuRootProps } from '@base-ui/react/menu';
 import { clsx } from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useContext } from 'react';
 import type { HTMLAttributes, ReactElement, ReactNode } from 'react';
 
+import { ThemeModeContext } from '../../contexts/ThemeModeProvider';
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import { applyStyleProps, compileStyleProps, radiusProps, sizingProps, spacingProps } from '../system';
 import type { RadiusProps, SizingProps, SpacingProps } from '../system';
@@ -43,10 +44,11 @@ export interface MenuSlotProps {
 
 /**
  * Style props, `className`, `style`, extra props and `ref` apply to the popup (`role="menu"`).
- * The popup portals to document.body; ancestor-scoped themes and token overrides do not propagate to it.
+ * The popup portals to document.body and propagates the nearest ThemeModeProvider mode.
+ * Without a provider it inherits the document theme; other ancestor token overrides do not cross the portal.
  */
 export interface MenuProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'children'>, SpacingProps, SizingProps, RadiusProps {
+  extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'color'>, SpacingProps, SizingProps, RadiusProps {
   style?: PersesCSSProperties;
   /**
    * Element that opens the menu, e.g. an `IconButton`. It must render a native button and accept a ref.
@@ -76,7 +78,8 @@ export interface MenuProps
 
 /**
  * An action menu opened from a trigger. Items are `MenuItem`, `MenuLinkItem`, or `MenuCheckboxItem`;
- * use `Select` instead when the user picks a value for a form field.
+ * use `Select` instead when the user picks a value for a form field. The popup is neutral;
+ * set `color` on individual items to color only their selection indicator.
  *
  * @example
  * <Menu trigger={<IconButton aria-label="More actions"><MoreIcon /></IconButton>}>
@@ -106,6 +109,7 @@ export const Menu = forwardRef<HTMLDivElement, MenuProps>(function Menu(
   },
   ref,
 ) {
+  const mode = useContext(ThemeModeContext);
   const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, MENU_STYLE_PROPS, style);
   /**
    * `aria-labelledby` beats `aria-label` in the accessible-name algorithm and Base UI always sets it to the
@@ -120,6 +124,7 @@ export const Menu = forwardRef<HTMLDivElement, MenuProps>(function Menu(
         <BaseMenu.Positioner
           className={clsx('ps-Menu__positioner', slotProps?.positioner?.className)}
           style={slotProps?.positioner?.style}
+          data-perses-mode={mode}
           side={placement}
           align={align}
           sideOffset={offset}

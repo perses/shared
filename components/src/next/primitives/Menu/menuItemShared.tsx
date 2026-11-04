@@ -14,9 +14,10 @@
 import type { ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
+import { CheckIcon } from '../Icon/icons/CheckIcon';
 import { compileStyleProps, radiusProps, spacingProps } from '../system';
 import type { RadiusProps, SpacingProps } from '../system';
-import type { Size } from '../types';
+import type { ColorVariant, Size, Status } from '../types';
 
 export type MenuItemSize = Extract<Size, 'sm' | 'md'>;
 
@@ -26,9 +27,11 @@ export const MENU_ITEM_BASE_CLASS = 'ps-MenuItemBase';
 /** Props shared by every menu item kind (`MenuItem`, `MenuLinkItem`, `MenuCheckboxItem`). */
 export interface MenuItemBaseProps extends SpacingProps, RadiusProps {
   style?: PersesCSSProperties;
-  /** Prevents activation and highlighting; sets `data-disabled`. */
+  /** Semantic color for the selection indicator, without tinting the row. Defaults to `default`. */
+  color?: ColorVariant | Status;
+  /** Prevents activation and keyboard focus; sets `data-disabled`. */
   disabled?: boolean;
-  /** Marks the current choice: sets `data-selected` and `aria-current="true"`. */
+  /** Marks the current choice with a trailing check, `data-selected`, and `aria-current="true"`, without tinting the row. */
   selected?: boolean;
   /** Row height and padding. Defaults to `md`. */
   size?: MenuItemSize;
@@ -38,7 +41,7 @@ export interface MenuItemBaseProps extends SpacingProps, RadiusProps {
   label?: string;
   /** Leading content, typically an icon. */
   startElement?: ReactNode;
-  /** Trailing content, typically a shortcut hint or secondary action. */
+  /** Trailing content, typically a shortcut hint or secondary action, rendered before the selection check. */
   endElement?: ReactNode;
 }
 
@@ -48,17 +51,23 @@ function hasContent(node: ReactNode): boolean {
   return node !== undefined && node !== null && typeof node !== 'boolean';
 }
 
-/** Renders the shared start / content / end layout of a menu item. */
+/** Renders the shared start / content / end layout and optional selection check. */
 export function MenuItemContent({
   startElement,
   endElement,
+  selected,
   children,
-}: Pick<MenuItemBaseProps, 'startElement' | 'endElement'> & { children?: ReactNode }): ReactElement {
+}: Pick<MenuItemBaseProps, 'startElement' | 'endElement' | 'selected'> & { children?: ReactNode }): ReactElement {
   return (
     <>
       {hasContent(startElement) && <span className="ps-MenuItemBase__start">{startElement}</span>}
       <span className="ps-MenuItemBase__content">{children}</span>
       {hasContent(endElement) && <span className="ps-MenuItemBase__end">{endElement}</span>}
+      {selected && (
+        <span className="ps-MenuItemBase__selected" aria-hidden="true">
+          <CheckIcon />
+        </span>
+      )}
     </>
   );
 }

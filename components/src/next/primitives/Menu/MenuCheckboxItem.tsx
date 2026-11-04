@@ -13,11 +13,11 @@
 
 import { Menu as BaseMenu } from '@base-ui/react/menu';
 import { clsx } from 'clsx';
-import { forwardRef, useCallback, useId } from 'react';
+import { forwardRef, useCallback } from 'react';
 import type { HTMLAttributes } from 'react';
 
-import { useComponents } from '../../contexts/ComponentsProvider';
-import type { CheckboxChangeEventDetails } from '../Checkbox';
+import type { CheckboxChangeEventDetails, CheckboxProps } from '../Checkbox';
+import { CheckboxMark, CheckboxVisual } from '../Checkbox/CheckboxVisual';
 import { applyStyleProps } from '../system';
 import { MENU_ITEM_BASE_CLASS, MENU_ITEM_STYLE_PROPS, MenuItemContent } from './menuItemShared';
 import type { MenuItemBaseProps } from './menuItemShared';
@@ -33,10 +33,12 @@ import './menu.css';
 
 export interface MenuCheckboxItemProps
   extends
-    Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'onChange'>,
-    Omit<MenuItemBaseProps, 'selected' | 'closeOnClick'> {
+    Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'onChange' | 'color'>,
+    Omit<MenuItemBaseProps, 'selected' | 'closeOnClick'>,
+    Pick<CheckboxProps, 'variant'> {
   checked?: boolean;
   defaultChecked?: boolean;
+  readonly?: boolean;
   onCheckedChange?: (checked: boolean, details: CheckboxChangeEventDetails) => void;
   /** Close the menu when the item is toggled. Defaults to `false` so several options can be toggled in a row. */
   closeOnClick?: boolean;
@@ -44,8 +46,11 @@ export interface MenuCheckboxItemProps
 
 /**
  * A toggle row inside a `Menu` (`role="menuitemcheckbox"`, `aria-checked`). The row is the only interactive
- * element; the leading box is the `Checkbox` from `useComponents()` rendered as a non-interactive indicator so
- * it matches the standalone control. Requires a `ComponentsProvider`.
+ * element; the leading box shares the standalone `Checkbox` presentation without rendering another control or
+ * registering with an enclosing field. It uses the same checkbox tokens and CSS classes, not the provider's `Checkbox`.
+ * `variant` (`subtle`, `solid`, `outline`) styles only the indicator and defaults to `subtle`.
+ * `color` matches the standalone Checkbox palette and styles only the indicator;
+ * it defaults to `default` independently of other items.
  *
  * @example
  * <MenuCheckboxItem checked={visible.has('id')} onCheckedChange={(on) => toggle('id', on)}>
@@ -59,10 +64,12 @@ export const MenuCheckboxItem = forwardRef<HTMLDivElement, MenuCheckboxItemProps
     onCheckedChange,
     closeOnClick = false,
     disabled = false,
-    size = 'md',
+    readonly = false,
+    size = 'sm',
+    variant = 'subtle',
+    color = 'default',
     startElement,
     endElement,
-    id: idProp,
     className,
     style,
     children,
@@ -70,11 +77,6 @@ export const MenuCheckboxItem = forwardRef<HTMLDivElement, MenuCheckboxItemProps
   },
   ref,
 ) {
-  const {
-    components: { Checkbox },
-  } = useComponents();
-  const fallbackId = useId();
-  const id = idProp === undefined ? fallbackId : idProp;
   const {
     className: styleClassName,
     style: computedStyle,
@@ -92,7 +94,6 @@ export const MenuCheckboxItem = forwardRef<HTMLDivElement, MenuCheckboxItemProps
     <BaseMenu.CheckboxItem
       {...rest}
       ref={ref}
-      id={id}
       checked={checked}
       defaultChecked={defaultChecked}
       onCheckedChange={handleCheckedChange}
@@ -101,21 +102,30 @@ export const MenuCheckboxItem = forwardRef<HTMLDivElement, MenuCheckboxItemProps
       className={clsx(MENU_ITEM_BASE_CLASS, 'ps-MenuCheckboxItem', styleClassName, className)}
       style={computedStyle}
       data-size={size}
+      data-color={color}
     >
       <BaseMenu.CheckboxItemIndicator
         keepMounted
         className="ps-MenuCheckboxItem__indicator"
         render={(indicatorProps, state) => (
           <span {...indicatorProps}>
-            <Checkbox
-              checked={state.checked}
-              disabled={disabled}
-              size={size}
-              readOnly
-              tabIndex={-1}
+            <CheckboxVisual
+              decorative
               aria-hidden
-              aria-labelledby={id}
-            />
+              data-checked={state.checked ? '' : undefined}
+              data-unchecked={state.checked ? undefined : ''}
+              data-disabled={disabled ? '' : undefined}
+              data-readonly={readonly ? '' : undefined}
+              data-size={size}
+              data-color={color}
+              data-variant={variant}
+            >
+              {state.checked && (
+                <span className="ps-Checkbox__indicator">
+                  <CheckboxMark />
+                </span>
+              )}
+            </CheckboxVisual>
           </span>
         )}
       />

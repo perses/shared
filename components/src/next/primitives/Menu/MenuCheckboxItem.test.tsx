@@ -14,17 +14,28 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { createRef, forwardRef, useState } from 'react';
+import { createRef, useState } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 
 import { ComponentsProvider } from '../../contexts/ComponentsProvider';
 import type { CheckboxProps } from '../Checkbox';
 import { defaultComponents, defaultIcons } from '../defaults';
+import { TextField } from '../TextField';
 import { Menu } from './Menu';
 import { MenuCheckboxItem } from './MenuCheckboxItem';
 import { MenuItem } from './MenuItem';
 
 const trigger = <button type="button">Open</button>;
+const variants: Array<NonNullable<CheckboxProps['variant']>> = ['subtle', 'solid', 'outline'];
+const colors: Array<NonNullable<CheckboxProps['color']>> = [
+  'default',
+  'primary',
+  'secondary',
+  'error',
+  'warning',
+  'success',
+  'info',
+];
 
 function Wrapper({ children }: { children: ReactNode }): ReactElement {
   return (
@@ -66,24 +77,69 @@ describe('MenuCheckboxItem', () => {
     const item = getItem('Show ID');
     expect(item).toHaveAttribute('aria-checked', 'true');
     expect(item).toHaveClass('ps-MenuItemBase', 'ps-MenuCheckboxItem');
-    expect(item).toHaveAttribute('data-size', 'md');
+    expect(item).toHaveAttribute('data-size', 'sm');
     expect(item).toHaveAttribute('data-checked');
 
     const box = getIndicatorBox(item);
     expect(box).toHaveAttribute('aria-hidden', 'true');
-    expect(box).toHaveAttribute('tabindex', '-1');
-    expect(box).toHaveAttribute('aria-checked', 'true');
-    expect(box).toHaveAttribute('data-size', 'md');
+    expect(box).not.toHaveAttribute('tabindex');
+    expect(box).not.toHaveAttribute('role');
+    expect(box).not.toHaveAttribute('aria-checked');
+    expect(box).toHaveAttribute('data-checked');
+    expect(box).toHaveAttribute('data-size', 'sm');
+    expect(box).toHaveAttribute('data-variant', 'subtle');
+    expect(box).toHaveAttribute('data-color', 'default');
     expect(box.parentElement).toHaveClass('ps-MenuCheckboxItem__indicator');
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument();
   });
 
-  it('is the only tab stop in the row', async () => {
+  it('does not render nested controls or tab stops', async () => {
     await renderOpenMenu(<MenuCheckboxItem>Show ID</MenuCheckboxItem>);
     const item = getItem('Show ID');
-    const focusable = item.querySelectorAll('[tabindex]:not([tabindex="-1"]), button:not([tabindex="-1"]), input');
-    for (const element of focusable) expect(element).toHaveAttribute('tabindex', '-1');
+    expect(item.querySelectorAll('input, button, [role="checkbox"], [tabindex]')).toHaveLength(0);
   });
+
+  it.each([
+    ['', false],
+    ['', true],
+    ['up', false],
+    ['up', true],
+  ] as const)(
+    'does not register its indicator with an enclosing TextField (value=%s, checked=%s)',
+    async (value, defaultChecked) => {
+      render(
+        <TextField
+          id="query"
+          label="Query"
+          defaultValue={value}
+          endElement={
+            <Menu trigger={trigger}>
+              <MenuCheckboxItem defaultChecked={defaultChecked}>Show ID</MenuCheckboxItem>
+            </Menu>
+          }
+        />,
+        { wrapper: Wrapper },
+      );
+      const input = screen.getByRole('textbox', { name: 'Query' });
+      const field = input.closest('.ps-TextField');
+      expect(document.querySelectorAll('[id="query"]')).toHaveLength(1);
+      expect(field).not.toHaveAttribute('data-dirty');
+      expect(field?.hasAttribute('data-filled')).toBe(value !== '');
+
+      await userEvent.click(screen.getByRole('button', { name: 'Open' }));
+      const item = await screen.findByRole('menuitemcheckbox', { name: 'Show ID' });
+      expect(document.querySelectorAll('[id="query"]')).toHaveLength(1);
+      expect(field?.hasAttribute('data-filled')).toBe(value !== '');
+      expect(field).not.toHaveAttribute('data-dirty');
+
+      await userEvent.click(item);
+      expect(item).toHaveAttribute('aria-checked', String(!defaultChecked));
+      expect(input).toHaveValue(value);
+      expect(field).not.toHaveAttribute('data-dirty');
+      expect(field?.hasAttribute('data-filled')).toBe(value !== '');
+      expect(document.querySelectorAll('[id="query"]')).toHaveLength(1);
+    },
+  );
 
   it('toggles with a click, reports the change, and keeps the menu open by default', async () => {
     const onCheckedChange = vi.fn();
@@ -93,7 +149,7 @@ describe('MenuCheckboxItem', () => {
     await userEvent.click(item);
     expect(onCheckedChange).toHaveBeenCalledWith(true, { event: expect.any(Object) });
     expect(item).toHaveAttribute('aria-checked', 'true');
-    expect(getIndicatorBox(item)).toHaveAttribute('aria-checked', 'true');
+    expect(getIndicatorBox(item)).toHaveAttribute('data-checked');
     expect(screen.getByRole('menu')).toBeInTheDocument();
   });
 
@@ -117,7 +173,7 @@ describe('MenuCheckboxItem', () => {
     await renderOpenMenu(<MenuCheckboxItem>Show ID</MenuCheckboxItem>);
     const item = getItem('Show ID');
     await userEvent.keyboard('{ArrowDown}');
-    expect(item).toHaveAttribute('data-highlighted');
+    expect(item).toHaveFocus();
     await userEvent.keyboard(' ');
     expect(item).toHaveAttribute('aria-checked', 'true');
     await userEvent.keyboard('{Enter}');
@@ -161,24 +217,77 @@ describe('MenuCheckboxItem', () => {
     expect(getIndicatorBox(item)).toHaveAttribute('data-size', 'sm');
   });
 
-  it('renders the Checkbox registered in ComponentsProvider', async () => {
-    const CustomCheckbox = forwardRef<HTMLElement, CheckboxProps>(function CustomCheckbox({ checked }, ref) {
-      return <span ref={ref} data-testid="custom-checkbox" data-on={checked ? '' : undefined} />;
+  describe.each(variants)('checkbox variant=%s', (variant) => {
+    it.each(colors)('styles the row and indicator with color=%s while preserving toggling', async (color) => {
+      await renderOpenMenu(
+        <MenuCheckboxItem variant={variant} color={color} defaultChecked>
+          Show ID
+        </MenuCheckboxItem>,
+      );
+      const item = getItem('Show ID');
+      const box = getIndicatorBox(item);
+      expect(box).toHaveAttribute('data-variant', variant);
+      expect(box).toHaveAttribute('data-color', color);
+      expect(item).not.toHaveAttribute('variant');
+      expect(item).not.toHaveAttribute('color');
+      expect(item).not.toHaveAttribute('data-variant');
+      expect(item).toHaveAttribute('data-color', color);
+      expect(item.querySelector('input')).toBeNull();
+
+      await userEvent.click(item);
+      expect(item).toHaveAttribute('aria-checked', 'false');
+      expect(box).not.toHaveAttribute('data-checked');
+      expect(box).toHaveAttribute('data-variant', variant);
+      expect(box).toHaveAttribute('data-color', color);
     });
+  });
+
+  it('updates indicator appearance and restores neutral defaults when colors are removed', async () => {
+    const { rerender } = await renderOpenMenu(
+      <MenuCheckboxItem variant="solid" color="primary" checked>
+        Show ID
+      </MenuCheckboxItem>,
+    );
+    const item = getItem('Show ID');
+    const box = getIndicatorBox(item);
+    expect(box).toHaveAttribute('data-variant', 'solid');
+    expect(box).toHaveAttribute('data-color', 'primary');
+
+    rerender(
+      <Menu trigger={trigger}>
+        <MenuCheckboxItem variant="outline" color="success" checked>
+          Show ID
+        </MenuCheckboxItem>
+      </Menu>,
+    );
+    expect(getItem('Show ID')).toBe(item);
+    expect(getIndicatorBox(item)).toBe(box);
+    expect(box).toHaveAttribute('data-variant', 'outline');
+    expect(box).toHaveAttribute('data-color', 'success');
+
+    rerender(
+      <Menu trigger={trigger}>
+        <MenuCheckboxItem checked>Show ID</MenuCheckboxItem>
+      </Menu>,
+    );
+    expect(box).toHaveAttribute('data-variant', 'subtle');
+    expect(box).toHaveAttribute('data-color', 'default');
+    expect(item).toHaveAttribute('data-color', 'default');
+    expect(item).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('renders and toggles without requiring ComponentsProvider', async () => {
     render(
-      <ComponentsProvider components={{ ...defaultComponents, Checkbox: CustomCheckbox }} icons={defaultIcons}>
-        <Menu trigger={trigger}>
-          <MenuCheckboxItem defaultChecked>Show ID</MenuCheckboxItem>
-        </Menu>
-      </ComponentsProvider>,
+      <Menu trigger={trigger}>
+        <MenuCheckboxItem defaultChecked>Show ID</MenuCheckboxItem>
+      </Menu>,
     );
     await userEvent.click(screen.getByRole('button', { name: 'Open' }));
     const item = await screen.findByRole('menuitemcheckbox', { name: 'Show ID' });
-    const custom = screen.getByTestId('custom-checkbox');
-    expect(item).toContainElement(custom);
-    expect(custom).toHaveAttribute('data-on');
+    expect(getIndicatorBox(item)).toHaveAttribute('data-checked');
     await userEvent.click(item);
-    expect(custom).not.toHaveAttribute('data-on');
+    expect(item).toHaveAttribute('aria-checked', 'false');
+    expect(getIndicatorBox(item)).not.toHaveAttribute('data-checked');
   });
 
   it('renders start and end elements after the indicator', async () => {
@@ -198,7 +307,7 @@ describe('MenuCheckboxItem', () => {
   it('participates in arrow-key navigation alongside other items', async () => {
     await renderOpenMenu([<MenuItem key="a">Copy</MenuItem>, <MenuCheckboxItem key="b">Show ID</MenuCheckboxItem>]);
     await userEvent.keyboard('{ArrowDown}{ArrowDown}');
-    expect(getItem('Show ID')).toHaveAttribute('data-highlighted');
+    expect(getItem('Show ID')).toHaveFocus();
   });
 
   it('forwards ref, id, className, and style props without leaking them', async () => {
@@ -211,7 +320,7 @@ describe('MenuCheckboxItem', () => {
     const item = getItem('Show ID');
     expect(ref.current).toBe(item);
     expect(item).toHaveAttribute('id', 'show-id');
-    expect(getIndicatorBox(item)).toHaveAttribute('aria-labelledby', 'show-id');
+    expect(getIndicatorBox(item)).not.toHaveAttribute('aria-labelledby');
     expect(item).toHaveClass('ps-py', 'ps-rounded', 'custom');
     expect(item).toHaveStyle({
       '--ps-py': 'var(--perses-spacing-sm)',

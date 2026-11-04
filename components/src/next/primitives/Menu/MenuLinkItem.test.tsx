@@ -59,7 +59,7 @@ describe('MenuLinkItem', () => {
     expect(link).toHaveAttribute('rel', 'noopener');
     expect(link).toHaveClass('ps-MenuItemBase', 'ps-MenuLinkItem');
     expect(link).not.toHaveClass('ps-MenuItem');
-    expect(link).toHaveAttribute('data-size', 'md');
+    expect(link).toHaveAttribute('data-size', 'sm');
   });
 
   it('renders a router link through the render prop while keeping menu item behaviour', async () => {
@@ -74,7 +74,7 @@ describe('MenuLinkItem', () => {
     expect(link).toHaveAttribute('href', '/profile');
     expect(link).toHaveClass('ps-MenuLinkItem');
     await userEvent.keyboard('{ArrowDown}{ArrowDown}');
-    expect(link).toHaveAttribute('data-highlighted');
+    expect(link).toHaveFocus();
   });
 
   it('closes the menu after activation by default', async () => {
@@ -110,7 +110,7 @@ describe('MenuLinkItem', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('still highlights when wrapped in a Tooltip', async () => {
+  it('still receives keyboard focus when wrapped in a Tooltip', async () => {
     await renderOpenMenu([
       <MenuItem key="a">Copy</MenuItem>,
       <Tooltip key="b" title="Opens in a new tab">
@@ -121,7 +121,7 @@ describe('MenuLinkItem', () => {
     ]);
     const link = getLink('Documentation');
     await userEvent.keyboard('{ArrowDown}{ArrowDown}');
-    expect(link).toHaveAttribute('data-highlighted');
+    expect(link).toHaveFocus();
     await userEvent.hover(link);
     expect(await screen.findByRole('tooltip')).toHaveTextContent('Opens in a new tab');
   });
@@ -131,7 +131,7 @@ describe('MenuLinkItem', () => {
       <MenuLinkItem
         href="/docs"
         selected
-        size="sm"
+        size="md"
         startElement={<span data-testid="start" />}
         endElement={<span data-testid="end" />}
       >
@@ -141,12 +141,84 @@ describe('MenuLinkItem', () => {
     const link = getLink('Documentation');
     expect(link).toHaveAttribute('data-selected', '');
     expect(link).toHaveAttribute('aria-current', 'true');
-    expect(link).toHaveAttribute('data-size', 'sm');
+    expect(link).toHaveAttribute('data-size', 'md');
     const [start, content, end] = link.children;
     expect(start).toHaveClass('ps-MenuItemBase__start');
     expect(content).toHaveClass('ps-MenuItemBase__content');
     expect(content).toHaveTextContent('Documentation');
     expect(end).toHaveClass('ps-MenuItemBase__end');
+  });
+
+  it.each([false, true, undefined])('adds only a decorative trailing check when selected=%s', async (selected) => {
+    await renderOpenMenu(
+      <MenuLinkItem href="#docs" selected={selected} endElement={<kbd>Shortcut</kbd>}>
+        Documentation
+      </MenuLinkItem>,
+    );
+    const item = getLink('Documentation Shortcut');
+    const end = item.querySelector('.ps-MenuItemBase__end');
+    expect(end).toHaveTextContent('Shortcut');
+    const check = item.querySelector('.ps-MenuItemBase__selected');
+    if (selected) {
+      expect(check).toHaveAttribute('aria-hidden', 'true');
+      expect(check?.querySelector('svg')).toHaveAttribute('focusable', 'false');
+      expect(item.lastElementChild).toBe(check);
+      expect(check?.previousElementSibling).toBe(end);
+    } else {
+      expect(check).toBeNull();
+    }
+    expect(item.querySelectorAll('input, button, [role="checkbox"], [tabindex]')).toHaveLength(0);
+  });
+
+  it('removes the selection check when selected is cleared without replacing the link', async () => {
+    const { rerender } = await renderOpenMenu(
+      <MenuLinkItem href="#docs" selected>
+        Documentation
+      </MenuLinkItem>,
+    );
+    const item = getLink('Documentation');
+    expect(item.querySelector('.ps-MenuItemBase__selected')).not.toBeNull();
+    rerender(
+      <Menu trigger={trigger}>
+        <MenuLinkItem href="#docs">Documentation</MenuLinkItem>
+      </Menu>,
+    );
+    expect(getLink('Documentation')).toBe(item);
+    expect(item.querySelector('.ps-MenuItemBase__selected')).toBeNull();
+    expect(item).not.toHaveAttribute('data-selected');
+    expect(item).not.toHaveAttribute('aria-current');
+  });
+
+  it.each([
+    { selected: true, ariaCurrent: 'page', expected: 'page' },
+    { selected: false, ariaCurrent: 'page', expected: 'page' },
+    { selected: undefined, ariaCurrent: 'page', expected: 'page' },
+    { selected: true, ariaCurrent: false, expected: 'false' },
+    { selected: false, ariaCurrent: false, expected: 'false' },
+    { selected: undefined, ariaCurrent: false, expected: 'false' },
+  ] as const)(
+    'preserves explicit aria-current=$ariaCurrent with selected=$selected',
+    async ({ selected, ariaCurrent, expected }) => {
+      await renderOpenMenu(
+        <MenuLinkItem href="/docs" selected={selected} aria-current={ariaCurrent}>
+          Documentation
+        </MenuLinkItem>,
+      );
+      expect(getLink('Documentation')).toHaveAttribute('aria-current', expected);
+    },
+  );
+
+  it.each([
+    { selected: true, expected: 'true' },
+    { selected: false, expected: null },
+    { selected: undefined, expected: null },
+  ])('defaults aria-current from selected=$selected when omitted', async ({ selected, expected }) => {
+    await renderOpenMenu(
+      <MenuLinkItem href="/docs" selected={selected}>
+        Documentation
+      </MenuLinkItem>,
+    );
+    expect(getLink('Documentation').getAttribute('aria-current')).toBe(expected);
   });
 
   it('forwards ref, className, and style props without leaking them', async () => {

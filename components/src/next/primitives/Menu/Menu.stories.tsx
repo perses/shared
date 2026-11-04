@@ -92,10 +92,12 @@ const itemKindsCode = `<Menu trigger={<IconButton aria-label="More actions" vari
   <Divider />
   <MenuItem startElement={<TrashIcon />}>Delete</MenuItem>
 </Menu>`;
-const sizesCode = `// size: 'sm' | 'md' (default) — set on each item
-<Menu trigger={<Button variant="outline">Compact</Button>}>
-  <MenuItem size="sm">Edit</MenuItem>
-  <MenuCheckboxItem size="sm">Dense rows</MenuCheckboxItem>
+const itemColorsCode = `<Menu trigger={<Button variant="outline">Actions</Button>}>
+  <MenuItem selected>Selected action</MenuItem>
+  <MenuLinkItem href="/docs" color="primary" selected>Documentation</MenuLinkItem>
+  <MenuCheckboxItem color="success" defaultChecked>Show legend</MenuCheckboxItem>
+  <MenuItem color="error">Delete</MenuItem>
+  <MenuItem>Another neutral action</MenuItem>
 </Menu>`;
 const placementsCode = `// placement: 'top' | 'bottom' (default) | 'left' | 'right'
 // align: 'start' (default) | 'center' | 'end'
@@ -137,17 +139,30 @@ export const Variants: Story = () => (
       </Menu>
     </Sample>
 
-    <Sample title="Sizes" code={sizesCode}>
-      <div style={row}>
-        <Menu trigger={<Button variant="outline">Default</Button>}>
-          <MenuItem>Edit</MenuItem>
-          <MenuCheckboxItem>Dense rows</MenuCheckboxItem>
-        </Menu>
-        <Menu trigger={<Button variant="outline">Compact</Button>}>
-          <MenuItem size="sm">Edit</MenuItem>
-          <MenuCheckboxItem size="sm">Dense rows</MenuCheckboxItem>
-        </Menu>
-      </div>
+    <Sample title="Item colors" code={itemColorsCode}>
+      <p>
+        The menu stays neutral. Each item uses the <code>default</code> color unless you set its <code>color</code>
+        to color only its selection indicator. Selection adds a trailing check after any <code>endElement</code>,
+        without changing the background or label color. Keyboard focus uses an outline instead of a tinted row.
+      </p>
+      <Menu trigger={<Button variant="outline">Item colors</Button>}>
+        <MenuItem selected>Selected action</MenuItem>
+        <MenuItem>Not selected action</MenuItem>
+        <MenuItem>Not selected action</MenuItem>
+        <MenuItem color="error" selected>
+          Selected action with color
+        </MenuItem>
+        <MenuLinkItem href="https://perses.dev" target="_blank" color="primary" startElement={<OpenInNewIcon />}>
+          Documentation
+        </MenuLinkItem>
+        <MenuCheckboxItem color="success" defaultChecked>
+          Show legend
+        </MenuCheckboxItem>
+        <MenuItem color="error" startElement={<TrashIcon />}>
+          Delete
+        </MenuItem>
+        <MenuItem>Another neutral action</MenuItem>
+      </Menu>
     </Sample>
 
     <Sample title="Placement and alignment" code={placementsCode}>
@@ -164,7 +179,7 @@ export const Variants: Story = () => (
 Variants.storyName = 'Variants';
 
 const statesCode = `<Menu trigger={<Button variant="outline">States</Button>}>
-  <MenuItem selected>Selected</MenuItem>
+  <MenuItem selected color="primary" endElement={<kbd>⌘1</kbd>}>Selected</MenuItem>
   <MenuItem disabled>Disabled</MenuItem>
   <MenuCheckboxItem checked disabled>Checked and disabled</MenuCheckboxItem>
   <MenuItem closeOnClick={false}>Stays open</MenuItem>
@@ -195,13 +210,15 @@ function ControlledMenu(): ReactElement {
 export const States: Story = () => (
   <Stack>
     <p>
-      Item state is exposed as <code>data-highlighted</code>, <code>data-selected</code>, <code>data-disabled</code>,
-      and <code>data-checked</code> for host CSS. The popup carries <code>data-open</code>/<code>data-closed</code> and{' '}
-      <code>data-side</code>/<code>data-align</code>.
+      Item state is exposed as <code>data-selected</code>, <code>data-disabled</code>, and <code>data-checked</code> for
+      host CSS. The popup carries <code>data-open</code>/<code>data-closed</code> and <code>data-side</code>/
+      <code>data-align</code>.
     </p>
     <Sample title="Item states" code={statesCode}>
       <Menu trigger={<Button variant="outline">States</Button>}>
-        <MenuItem selected>Selected</MenuItem>
+        <MenuItem selected color="primary" endElement={<kbd>⌘1</kbd>}>
+          Selected
+        </MenuItem>
         <MenuItem disabled>Disabled</MenuItem>
         <MenuCheckboxItem checked disabled>
           Checked and disabled

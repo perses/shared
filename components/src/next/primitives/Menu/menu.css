@@ -26,7 +26,7 @@
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    padding: var(--perses-spacing-xs) 0;
+    padding: var(--perses-spacing-xs);
     background-color: var(--perses-bg-overlay);
     color: var(--perses-text-primary);
     font-family: var(--perses-font-family);
@@ -54,6 +54,36 @@
     margin: var(--perses-spacing-xs) 0;
   }
 
+  /* Only selection indicators use the item palette; rows stay neutral. */
+
+  :where(.ps-MenuItemBase[data-color='default']) {
+    --ps-menu-check-color: var(--perses-status-text-default);
+  }
+
+  :where(.ps-MenuItemBase[data-color='primary']) {
+    --ps-menu-check-color: var(--perses-status-text-primary);
+  }
+
+  :where(.ps-MenuItemBase[data-color='secondary']) {
+    --ps-menu-check-color: var(--perses-status-text-secondary);
+  }
+
+  :where(.ps-MenuItemBase[data-color='error']) {
+    --ps-menu-check-color: var(--perses-status-text-error);
+  }
+
+  :where(.ps-MenuItemBase[data-color='warning']) {
+    --ps-menu-check-color: var(--perses-status-text-warning);
+  }
+
+  :where(.ps-MenuItemBase[data-color='success']) {
+    --ps-menu-check-color: var(--perses-status-text-success);
+  }
+
+  :where(.ps-MenuItemBase[data-color='info']) {
+    --ps-menu-check-color: var(--perses-status-text-info);
+  }
+
   /* ---- Items (shared by MenuItem, MenuLinkItem, MenuCheckboxItem) ---- */
   :where(.ps-MenuItemBase) {
     box-sizing: border-box;
@@ -61,7 +91,8 @@
     align-items: center;
     gap: var(--perses-spacing-sm);
     min-height: var(--perses-control-size-md);
-    padding: var(--perses-spacing-xs) var(--perses-spacing-md);
+    padding: var(--perses-spacing-xs);
+    border-radius: var(--perses-radius-md);
     font: inherit;
     color: inherit;
     text-decoration: none;
@@ -76,21 +107,19 @@
     font-size: var(--perses-font-size-sm);
   }
 
-  :where(.ps-MenuItemBase[data-highlighted]) {
-    background-color: var(--perses-bg-sunken);
-  }
-
-  :where(.ps-MenuItemBase[data-selected]) {
-    background-color: var(--perses-status-bg-primary);
-  }
-
-  :where(.ps-MenuItemBase[data-selected][data-highlighted]) {
-    background-color: var(--perses-status-bg-primary-hover);
+  :where(.ps-MenuItemBase:focus-visible) {
+    outline: var(--perses-focus-ring-width) solid var(--perses-text-primary);
+    /* Keep the ring inside the row so the scrollable popup does not clip it. */
+    outline-offset: calc(-1 * var(--perses-focus-ring-offset));
   }
 
   :where(.ps-MenuItemBase[data-disabled]) {
     opacity: var(--perses-opacity-disabled, 0.5);
     cursor: not-allowed;
+  }
+
+  :where(.ps-MenuItemBase:hover:not(:disabled):not([aria-disabled='true'])) {
+    background-color: var(--perses-status-bg-default);
   }
 
   :where(.ps-MenuItemBase__content) {
@@ -105,12 +134,30 @@
     flex-shrink: 0;
   }
 
+  :where(.ps-MenuItemBase__selected) {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--ps-menu-check-color);
+    pointer-events: none;
+  }
+
   /* The indicator is decorative: the row owns the click, focus, and checked state. */
   :where(.ps-MenuCheckboxItem__indicator) {
     display: inline-flex;
     align-items: center;
     flex-shrink: 0;
     pointer-events: none;
+  }
+
+  @media (forced-colors: active) {
+    :where(.ps-MenuItemBase__selected) {
+      color: CanvasText;
+    }
+
+    :where(.ps-MenuItemBase:focus-visible) {
+      outline-color: Highlight;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

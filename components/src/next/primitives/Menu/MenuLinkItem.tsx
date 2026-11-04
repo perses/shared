@@ -30,10 +30,10 @@ import '../system/spacing.css';
 import './menu.css';
 
 export interface MenuLinkItemProps
-  extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'style'>, Omit<MenuItemBaseProps, 'disabled'> {
+  extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'style' | 'color'>, Omit<MenuItemBaseProps, 'disabled'> {
   /**
    * Element to render instead of the default `<a>`, for router links.
-   * Base UI merges the menu item props (role, keyboard handling, highlight) onto it.
+   * Base UI merges the menu item props (role, keyboard handling, focus management) onto it.
    */
   render?: ReactElement;
 }
@@ -48,7 +48,18 @@ export interface MenuLinkItemProps
  * <MenuLinkItem render={<Link to="/profile" />} startElement={<UserIcon />}>Profile</MenuLinkItem>
  */
 export const MenuLinkItem = forwardRef<HTMLAnchorElement, MenuLinkItemProps>(function MenuLinkItem(
-  { selected, size = 'md', closeOnClick = true, startElement, endElement, className, style, children, ...props },
+  {
+    selected,
+    size = 'sm',
+    color = 'default',
+    closeOnClick = true,
+    startElement,
+    endElement,
+    className,
+    style,
+    children,
+    ...props
+  },
   ref,
 ) {
   const {
@@ -65,10 +76,11 @@ export const MenuLinkItem = forwardRef<HTMLAnchorElement, MenuLinkItemProps>(fun
       className={clsx(MENU_ITEM_BASE_CLASS, 'ps-MenuLinkItem', styleClassName, className)}
       style={computedStyle}
       data-selected={selected ? '' : undefined}
-      aria-current={selected ? 'true' : undefined}
+      aria-current={rest['aria-current'] ?? (selected ? 'true' : undefined)}
       data-size={size}
+      data-color={color}
     >
-      <MenuItemContent startElement={startElement} endElement={endElement}>
+      <MenuItemContent startElement={startElement} endElement={endElement} selected={selected}>
         {children}
       </MenuItemContent>
     </BaseMenu.LinkItem>
