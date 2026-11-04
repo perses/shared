@@ -86,6 +86,10 @@ const scrollableCode = `// variant: 'standard' (default) | 'fullWidth'
 // Every list scrolls when its tabs overflow; scrollButtons adds mouse affordances
 <TabList aria-label="Project">…many tabs…</TabList>
 <TabList aria-label="Project" scrollButtons>…many tabs…</TabList>
+// Vertical lists scroll too; default icons become up/down chevrons, or pass your own
+<Tabs orientation="vertical">
+  <TabList aria-label="Project" scrollButtons scrollBackIcon={<ArrowUpIcon />} scrollForwardIcon={<ArrowDownIcon />} style={{ maxHeight: '12rem' }}>
+</Tabs>
 <TabList aria-label="Project" variant="fullWidth">…</TabList>`;
 const contentCode = `<Tab value="overview" startElement={<BookOpenIcon />}>Overview</Tab>
 <Tab value="datasources" endElement={<Chip size="xs">3</Chip>}>Datasources</Tab>`;
@@ -129,6 +133,13 @@ export const Variants: Story = () => (
         <div style={narrow}>
           <ProjectTabs scrollButtons />
         </div>
+        <ProjectTabs
+          orientation="vertical"
+          scrollButtons
+          scrollBackIcon={<ArrowUpIcon />}
+          scrollForwardIcon={<ArrowDownIcon />}
+          style={{ maxHeight: '12rem' }}
+        />
         <Tabs defaultValue="Overview">
           <TabList aria-label="Project" variant="fullWidth">
             <Tab value="Overview">Overview</Tab>
@@ -250,53 +261,6 @@ export const LinkTabs: Story = () => (
   </Stack>
 );
 LinkTabs.storyName = 'Link tabs';
-
-const scrollButtonsCode = `// Swap the icons…
-<TabList aria-label="Project" scrollButtons scrollBackIcon={<ArrowUpIcon />} scrollForwardIcon={<ArrowDownIcon />}>
-// …or restyle the buttons (className and style only; the host IconButton stays in charge of behaviour)
-<TabList
-  aria-label="Project"
-  scrollButtons
-  slotProps={{
-    scrollButton: {
-      style: {
-        color: 'var(--perses-status-text-primary)',
-        backgroundColor: 'var(--perses-status-bg-primary)',
-        borderRadius: 'var(--perses-radius-full)',
-      },
-    },
-  }}
->`;
-
-const styledScrollButtons: TabListSlotProps = {
-  scrollButton: {
-    style: {
-      color: 'var(--perses-status-text-primary)',
-      backgroundColor: 'var(--perses-status-bg-primary)',
-      borderRadius: 'var(--perses-radius-full)',
-    },
-  },
-};
-
-export const ScrollButtons: Story = () => (
-  <Stack>
-    <Sample title="Custom scroll icons (vertical)" code={scrollButtonsCode}>
-      <ProjectTabs
-        orientation="vertical"
-        scrollButtons
-        scrollBackIcon={<ArrowUpIcon />}
-        scrollForwardIcon={<ArrowDownIcon />}
-        style={{ maxHeight: '12rem' }}
-      />
-    </Sample>
-    <Sample title="Styled scroll buttons via slotProps.scrollButton" code={scrollButtonsCode}>
-      <div style={narrow}>
-        <ProjectTabs scrollButtons slotProps={styledScrollButtons} />
-      </div>
-    </Sample>
-  </Stack>
-);
-ScrollButtons.storyName = 'Scroll buttons';
 
 const slotsCode = `<TabList
   aria-label="Project"
