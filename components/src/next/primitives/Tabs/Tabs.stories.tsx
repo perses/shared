@@ -174,7 +174,7 @@ const statesCode = `// value is TabsValue | null — null means no tab is active
   <TabList aria-label="Project">
     <Tab value="overview">Overview</Tab>
     <Tab value="dashboards">Dashboards</Tab>
-    <Tab value="secrets" disabled>Secrets</Tab>
+    <Tab value="secrets" disabled endElement={<Chip size="xs">0</Chip>}>Secrets</Tab>
   </TabList>
   <TabPanel value="overview" keepMounted><TextField label="Kept while hidden" /></TabPanel>
   <TabPanel value="dashboards"><TextField label="Reset when hidden" /></TabPanel>
@@ -188,7 +188,7 @@ function ControlledTabs(): ReactElement {
         <TabList aria-label="Project">
           <Tab value="Overview">Overview</Tab>
           <Tab value="Dashboards">Dashboards</Tab>
-          <Tab value="Secrets" disabled>
+          <Tab value="Secrets" disabled endElement={<Chip size="xs">0</Chip>}>
             Secrets
           </Tab>
         </TabList>
