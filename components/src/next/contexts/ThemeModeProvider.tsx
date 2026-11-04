@@ -11,9 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { createContext } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 
 export type ThemeMode = 'dark' | 'light';
+
+/** @internal Carries the nearest explicit mode across React portals. */
+export const ThemeModeContext = createContext<ThemeMode | undefined>(undefined);
 
 export interface ThemeModeProviderProps {
   mode: ThemeMode;
@@ -21,5 +25,9 @@ export interface ThemeModeProviderProps {
 }
 
 export function ThemeModeProvider({ mode, children }: ThemeModeProviderProps): ReactElement {
-  return <div data-perses-mode={mode}>{children}</div>;
+  return (
+    <ThemeModeContext.Provider value={mode}>
+      <div data-perses-mode={mode}>{children}</div>
+    </ThemeModeContext.Provider>
+  );
 }
