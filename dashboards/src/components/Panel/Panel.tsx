@@ -15,10 +15,10 @@ import type { CardProps } from '@mui/material';
 import { Card, CardContent } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, ItemActionsProvider, SelectionProvider, combineSx } from '@perses-dev/components';
 import type { ActionOptions } from '@perses-dev/plugin-system';
-import { useDataQueriesContext, usePluginRegistry } from '@perses-dev/plugin-system';
+import { useDataQueriesContext, usePlugin } from '@perses-dev/plugin-system';
 import type { PanelDefinition } from '@perses-dev/spec';
 import type { ComponentType, ReactNode } from 'react';
-import { memo, useEffect, useId, useMemo, useState } from 'react';
+import { memo, useId, useMemo, useState } from 'react';
 import { useResizeObserver } from 'use-resize-observer';
 
 import type { PanelGroupItemId } from '../../model';
@@ -65,6 +65,8 @@ export type PanelExtraProps = {
   panelGroupItemId?: PanelGroupItemId;
 };
 
+const NO_PLUGIN_ACTIONS: ReactNode[] = [];
+
 /**
  * Renders a PanelDefinition's content inside of a Card.
  *
@@ -103,76 +105,30 @@ export const Panel = memo(function Panel(props: PanelProps) {
   }, [width, height]);
 
   const { queryResults } = useDataQueriesContext();
-  const { getPlugin } = usePluginRegistry();
+  // Shares the cached plugin query of the panel content: no extra request and no extra render once loaded.
+  const { data: plugin } = usePlugin('Panel', definition.spec.plugin.kind, {
+    version: definition.spec.plugin.metadata?.version,
+    registry: definition.spec.plugin.metadata?.registry,
+  });
 
-  const panelPropsForActions = useMemo(() => {
-    return {
+  const pluginActions = useMemo((): ReactNode[] => {
+    const headerActions = Array.isArray(plugin?.actions)
+      ? plugin.actions.filter((action) => !action.location || action.location === 'header')
+      : [];
+    if (headerActions.length === 0) return NO_PLUGIN_ACTIONS;
+
+    // Actions also receive pending or failed queries, despite PanelProps requiring data.
+    const actionProps = {
       spec: definition.spec.plugin.spec,
-      queryResults: queryResults.map((query) => ({
-        definition: query.definition,
-        data: query.data,
-      })),
+      queryResults: queryResults.map((query) => ({ definition: query.definition, data: query.data })),
       contentDimensions,
       definition,
     };
-  }, [definition, contentDimensions, queryResults]);
-
-  // Load plugin actions from the plugin
-  const [pluginActions, setPluginActions] = useState<ReactNode[]>([]);
-
-  useEffect(() => {
-    const loadPluginActions = async (): Promise<void> => {
-      const panelPluginKind = definition.spec.plugin.kind;
-
-      if (!panelPluginKind || !panelPropsForActions || !getPlugin || typeof getPlugin !== 'function') {
-        setPluginActions([]);
-        return;
-      }
-
-      try {
-        const plugin = await getPlugin({
-          kind: 'Panel',
-          name: panelPluginKind,
-          version: definition.spec.plugin.metadata?.version,
-          registry: definition.spec.plugin.metadata?.registry,
-        });
-
-        // More defensive checking for plugin and actions
-        if (
-          !plugin ||
-          typeof plugin !== 'object' ||
-          !plugin.actions ||
-          !Array.isArray(plugin.actions) ||
-          plugin.actions.length === 0
-        ) {
-          setPluginActions([]);
-          return;
-        }
-
-        // Render plugin actions in header location
-        const headerActions = plugin.actions
-          .filter((action) => !action.location || action.location === 'header')
-          .map((action, index): ReactNode | null => {
-            // Actions also receive pending or failed queries, despite PanelProps requiring data.
-            const ActionComponent = action.component as ComponentType<typeof panelPropsForActions>;
-            try {
-              return <ActionComponent key={`plugin-action-${index}`} {...panelPropsForActions} />;
-            } catch (error) {
-              console.warn(`Failed to render plugin action ${index}:`, error);
-              return null;
-            }
-          })
-          .filter((item): item is ReactNode => Boolean(item));
-
-        setPluginActions(headerActions);
-      } catch (error) {
-        console.warn('Failed to load plugin actions:', error);
-        setPluginActions([]);
-      }
-    };
-
-    loadPluginActions();
-  }, [definition.spec.plugin, panelPropsForActions, getPlugin]);
+    return headerActions.map((action, index) => {
+      const ActionComponent = action.component as ComponentType<typeof actionProps>;
+      return <ActionComponent key={`plugin-action-${index}`} {...actionProps} />;
+    });
+  }, [plugin, definition, contentDimensions, queryResults]);
 
   const handleMouseEnter: CardProps['onMouseEnter'] = (e) => {
     onMouseEnter?.(e);

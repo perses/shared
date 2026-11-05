@@ -34,6 +34,17 @@ describe('compactLayout', () => {
     expect(result[2]).toEqual({ ...beside, y: 0 });
   });
 
+  it('does not mutate frozen items when a pushed item pushes the next one', () => {
+    const repeated: PanelGroupItemLayout = { i: 'a', x: 0, y: 0, w: 24, h: 16 };
+    const below = Object.freeze<PanelGroupItemLayout>({ i: 'b', x: 0, y: 8, w: 12, h: 8 });
+    const belowBelow = Object.freeze<PanelGroupItemLayout>({ i: 'c', x: 0, y: 16, w: 12, h: 8 });
+
+    const result = compactLayout([repeated, below, belowBelow]);
+
+    expect(result[1]).toEqual({ ...below, y: 16 });
+    expect(result[2]).toEqual({ ...belowBelow, y: 24 });
+  });
+
   it('removes vertical gaps and keeps horizontal positions', () => {
     const layout: PanelGroupItemLayout[] = [
       { i: 'a', x: 6, y: 5, w: 6, h: 2 },

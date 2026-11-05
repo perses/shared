@@ -14,11 +14,12 @@
 import type { ButtonProps } from '@mui/material';
 import { Button } from '@mui/material';
 import { Drawer, InfoTooltip } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import { useBuiltinVariableDefinitions } from '@perses-dev/plugin-system';
 import type { BuiltinVariableDefinition, VariableDefinition } from '@perses-dev/spec';
 import PencilIcon from 'mdi-material-ui/PencilOutline';
 import type { ReactElement } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { TOOLTIP_TEXT, editButtonStyle } from '../../constants';
 import { useExternalVariableDefinitions, useVariableDefinitionActions, useVariableDefinitions } from '../../context';
@@ -62,6 +63,16 @@ export function EditVariablesButton({
     setIsVariableEditorOpen(false);
   };
 
+  // Let the editor handle click out / Escape, so that it can ask for confirmation before discarding unsaved changes
+  const editorRef = useRef<FormEditorHandle>(null);
+  const handleDrawerClose = (): void => {
+    if (editorRef.current) {
+      editorRef.current.requestClose();
+    } else {
+      closeVariableEditor();
+    }
+  };
+
   return (
     <>
       <InfoTooltip description={TOOLTIP_TEXT.editVariables}>
@@ -79,11 +90,12 @@ export function EditVariablesButton({
       </InfoTooltip>
       <Drawer
         isOpen={isVariableEditorOpen}
-        onClose={closeVariableEditor}
+        onClose={handleDrawerClose}
         PaperProps={{ sx: { width: '50%' } }}
         data-testid="variable-editor"
       >
         <VariableEditor
+          ref={editorRef}
           variableDefinitions={variableDefinitions}
           externalVariableDefinitions={externalVariableDefinitions}
           builtinVariableDefinitions={builtinVariableDefinitions}
