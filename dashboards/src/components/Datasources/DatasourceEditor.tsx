@@ -26,22 +26,26 @@ import {
 } from '@mui/material';
 import type { Action, DatasourceDefinition } from '@perses-dev/client';
 import { createTestDatasourceConnection } from '@perses-dev/client';
+import type { FormEditorHandle } from '@perses-dev/components';
 import { DatasourceEditorForm, ValidationProvider } from '@perses-dev/plugin-system';
 import type { DatasourceSpec } from '@perses-dev/spec';
 import PencilIcon from 'mdi-material-ui/Pencil';
 import AddIcon from 'mdi-material-ui/Plus';
 import TrashIcon from 'mdi-material-ui/TrashCan';
-import type { ReactElement } from 'react';
-import { useMemo, useState } from 'react';
+import type { ForwardedRef, ReactElement } from 'react';
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useImmer } from 'use-immer';
 
 import { useDashboard, useDiscardChangesConfirmationDialog } from '../../context';
 
-export function DatasourceEditor(props: {
-  datasources: Record<string, DatasourceSpec>;
-  onChange: (datasources: Record<string, DatasourceSpec>) => void;
-  onCancel: () => void;
-}): ReactElement {
+export const DatasourceEditor = forwardRef(function DatasourceEditor(
+  props: {
+    datasources: Record<string, DatasourceSpec>;
+    onChange: (datasources: Record<string, DatasourceSpec>) => void;
+    onCancel: () => void;
+  },
+  ref: ForwardedRef<FormEditorHandle>,
+): ReactElement {
   const [datasources, setDatasources] = useImmer(props.datasources);
   const [datasourceFormAction, setDatasourceFormAction] = useState<Action>('update');
   const [datasourceEdit, setDatasourceEdit] = useState<DatasourceDefinition | null>(null);
@@ -84,6 +88,12 @@ export function DatasourceEditor(props: {
     }
   };
 
+  const formRef = useRef<FormEditorHandle>(null);
+  useImperativeHandle(ref, () => ({
+    // While an item is being edited, let its form handle the request (going back to the list, with confirmation if needed)
+    requestClose: (): void => (formRef.current ? formRef.current.requestClose() : handleCancel()),
+  }));
+
   const removeDatasource = (name: string): void => {
     setDatasources((draft) => {
       delete draft[name];
@@ -111,6 +121,7 @@ export function DatasourceEditor(props: {
       {datasourceEdit ? (
         <ValidationProvider>
           <DatasourceEditorForm
+            ref={formRef}
             initialDatasourceDefinition={datasourceEdit}
             action={datasourceFormAction}
             isDraft={true}
@@ -207,4 +218,4 @@ export function DatasourceEditor(props: {
       )}
     </>
   );
-}
+});

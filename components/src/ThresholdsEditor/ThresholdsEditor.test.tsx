@@ -14,11 +14,43 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { produce } from 'immer';
+import type { ReactElement } from 'react';
+import { useCallback, useState } from 'react';
 
 import { ChartsProvider } from '../context/ChartsProvider';
 import type { ThresholdOptions } from '../model';
 import { testChartsTheme } from '../test-utils';
 import { ThresholdsEditor } from './ThresholdsEditor';
+
+// Keeps the thresholds in state, like a real parent of this controlled component
+function StatefulThresholdsEditor({
+  initialThresholds,
+  onChange,
+}: {
+  initialThresholds: ThresholdOptions;
+  onChange: (thresholds: ThresholdOptions) => void;
+}): ReactElement {
+  const [value, setValue] = useState(initialThresholds);
+  const handleChange = useCallback(
+    (next: ThresholdOptions): void => {
+      setValue(next);
+      onChange(next);
+    },
+    [onChange],
+  );
+  return (
+    <ChartsProvider chartsTheme={testChartsTheme}>
+      <ThresholdsEditor thresholds={value} onChange={handleChange} />
+    </ChartsProvider>
+  );
+}
+
+function renderStatefulThresholdEditor(
+  thresholds: ThresholdOptions,
+  onChange: (thresholds: ThresholdOptions) => void,
+): void {
+  render(<StatefulThresholdsEditor initialThresholds={thresholds} onChange={onChange} />);
+}
 
 describe('ThresholdsEditor', () => {
   const renderThresholdEditor = (thresholds: ThresholdOptions, onChange = vi.fn()): void => {
@@ -83,7 +115,7 @@ describe('ThresholdsEditor', () => {
   });
 
   it('should trigger onChange when input blurs', async () => {
-    renderThresholdEditor(thresholds, onChange);
+    renderStatefulThresholdEditor(thresholds, onChange);
     const input = await screen.findByLabelText('T1');
     userEvent.clear(input);
     userEvent.type(input, '25');

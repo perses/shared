@@ -17,6 +17,7 @@ import type { ReactElement } from 'react';
 import { useEffect, useMemo, useRef } from 'react';
 
 import { hasDataFieldPatterns, replaceDataFields } from '../utils/data-field-interpolation';
+import { sanitizeUrl } from '../utils/url';
 import type { DataLink, TableCellAlignment, TableDensity } from './model/table-model';
 import { getTableCellLayout } from './model/table-model';
 
@@ -93,7 +94,7 @@ export function TableCell({
   ...otherProps
 }: TableCellProps): ReactElement {
   const theme = useTheme();
-  const elRef = useRef<HTMLTableCellElement>();
+  const elRef = useRef<HTMLTableCellElement>(null);
 
   const isHeader = variant === 'head';
 
@@ -127,11 +128,13 @@ export function TableCell({
   const modifiedDataLink = useMemo((): DataLink | undefined => {
     if (!dataLink) return undefined;
 
-    if (adjacentCellsValuesMap && hasDataFieldPatterns(dataLink.url)) {
-      const { text } = replaceDataFields(dataLink.url, adjacentCellsValuesMap, { urlEncode: true });
-      return { ...dataLink, url: text };
+    let url = dataLink.url;
+    if (adjacentCellsValuesMap && hasDataFieldPatterns(url)) {
+      url = replaceDataFields(url, adjacentCellsValuesMap, { urlEncode: true }).text;
     }
-    return dataLink;
+    const safeUrl = sanitizeUrl(url);
+    if (safeUrl === undefined) return undefined;
+    return { ...dataLink, url: safeUrl };
   }, [dataLink, adjacentCellsValuesMap]);
 
   return (

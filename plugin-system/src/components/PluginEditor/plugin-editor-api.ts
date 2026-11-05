@@ -127,6 +127,8 @@ export function usePluginEditor(props: UsePluginEditorProps): {
             version: selection.metadata?.version,
             registry: selection.metadata?.registry,
           }),
+        // Same as usePlugin(): a loaded plugin never changes.
+        staleTime: Infinity,
       }),
   });
   const pendingSelection = selectionLoad.isSuccess ? undefined : selectionLoad.variables;
@@ -206,7 +208,7 @@ export function usePluginEditor(props: UsePluginEditorProps): {
 
   return {
     pendingSelection,
-    isLoading: selectionLoad.isLoading,
+    isLoading: selectionLoad.isPending,
     error: selectionLoad.error,
     onSelectionChange,
     onSpecChange,
