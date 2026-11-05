@@ -24,6 +24,7 @@ import { Chip } from './Chip';
 import { defaultComponents, defaultIcons } from './defaults';
 import { IconButton } from './IconButton';
 import { Stack } from './Stack';
+import { Tab, TabList, TabPanel, Tabs } from './Tabs';
 import { Text } from './Text';
 import { TextHelper } from './TextHelper';
 import { Tooltip } from './Tooltip';
@@ -64,6 +65,51 @@ const CONSUMERS = [
   { name: 'Chip', element: <Chip {...CONSUMER_PROPS}>Content</Chip> },
   { name: 'IconButton', element: <IconButton {...CONSUMER_PROPS}>Content</IconButton> },
   { name: 'Stack', element: <Stack {...CONSUMER_PROPS}>Content</Stack> },
+  {
+    name: 'Tabs',
+    element: (
+      <Tabs {...CONSUMER_PROPS} defaultValue="a">
+        <TabList aria-label="Tabs">
+          <Tab value="a">Content</Tab>
+        </TabList>
+      </Tabs>
+    ),
+  },
+  {
+    name: 'TabList',
+    element: (
+      <Tabs defaultValue="a">
+        <TabList {...CONSUMER_PROPS}>
+          <Tab value="a">Content</Tab>
+        </TabList>
+      </Tabs>
+    ),
+  },
+  {
+    name: 'Tab',
+    element: (
+      <Tabs defaultValue="a">
+        <TabList aria-label="Tabs">
+          <Tab {...CONSUMER_PROPS} value="a">
+            Content
+          </Tab>
+        </TabList>
+      </Tabs>
+    ),
+  },
+  {
+    name: 'TabPanel',
+    element: (
+      <Tabs defaultValue="a">
+        <TabList aria-label="Tabs">
+          <Tab value="a">Tab</Tab>
+        </TabList>
+        <TabPanel {...CONSUMER_PROPS} value="a">
+          Content
+        </TabPanel>
+      </Tabs>
+    ),
+  },
   { name: 'Text', element: <Text {...CONSUMER_PROPS}>Content</Text> },
   { name: 'TextHelper', element: <TextHelper {...CONSUMER_PROPS}>Content</TextHelper> },
 ];

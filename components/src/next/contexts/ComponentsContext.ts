@@ -39,6 +39,7 @@ import type {
   TableRowProps,
   TableSortLabelProps,
 } from '../primitives/Table';
+import type { TabListProps, TabPanelProps, TabProps, TabsProps } from '../primitives/Tabs';
 import type { TextProps } from '../primitives/Text';
 import type { TextFieldProps } from '../primitives/TextField';
 import type { TextHelperProps } from '../primitives/TextHelper';
@@ -82,6 +83,10 @@ export interface PersesComponents {
   TableRowExpandButton: RefComponent<TableRowExpandButtonProps, HTMLButtonElement>;
   TableSortLabel: RefComponent<TableSortLabelProps, HTMLButtonElement>;
   TablePagination: RefComponent<TablePaginationProps, HTMLDivElement>;
+  Tabs: RefComponent<TabsProps, HTMLDivElement>;
+  TabList: RefComponent<TabListProps, HTMLDivElement>;
+  Tab: RefComponent<TabProps, HTMLElement>;
+  TabPanel: RefComponent<TabPanelProps, HTMLDivElement>;
   TextField: RefComponent<TextFieldProps, HTMLInputElement | HTMLTextAreaElement>;
   Text: RefComponent<TextProps, HTMLElement>;
   TextHelper: RefComponent<TextHelperProps, HTMLParagraphElement>;
@@ -148,6 +153,10 @@ export interface ComponentsProviderProps {
    *   TableRowExpandButton: MyTableRowExpandButton,
    *   TableSortLabel: MyTableSortLabel,
    *   TablePagination: MyTablePagination,
+   *   Tabs: MyTabs,
+   *   TabList: MyTabList,
+   *   Tab: MyTab,
+   *   TabPanel: MyTabPanel,
    *   TextField: MyTextField,
    *   Text: MyText,
    *   TextHelper: MyTextHelper,

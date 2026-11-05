@@ -14,6 +14,7 @@
 // Barrel for the style-prop engine. CSS side effects (layout.css, spacing.css, radius.css)
 // are intentionally excluded so TS-only consumers do not pull in stylesheets;
 // import those directly where the component's styles are registered.
+export * from './breakpoints';
 export * from './display';
 export * from './flexbox';
 export * from './grid';
@@ -22,3 +23,4 @@ export * from './responsive';
 export * from './sizing';
 export * from './spacing';
 export * from './styleProps';
+export * from './useResponsiveValue';
