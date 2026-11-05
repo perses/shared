@@ -24,7 +24,8 @@ samp {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-[data-perses-mode='dark'] {
+/* Scoped to the page wrapper: data-perses-mode also lands on portaled popups, which must keep their own size. */
+#ladle-root > [data-perses-mode='dark'] {
   min-height: 100vh;
   color: var(--perses-text-primary);
 }
