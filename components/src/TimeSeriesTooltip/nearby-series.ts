@@ -519,16 +519,15 @@ export function getNearbySeriesData({
   if (pointInGrid !== null) {
     const chartModel = chart['_model'];
     const yAxisScale = chartModel.getComponent('yAxis').axis.scale;
-    const isLogScale = yAxisScale.type === 'log';
-    let yInterval = yAxisScale._interval;
-    // For log scales, convert from log-space extent to actual data range and use 1% as the interval.
-    if (isLogScale && yAxisScale.base) {
-      const logBase = yAxisScale.base;
-      const extent = yAxisScale._extent;
-      // e.g. extent [0, 2] → 10^0..10^2
-      const actualMin = logBase ** extent[0];
-      const actualMax = logBase ** extent[1];
-      yInterval = (actualMax - actualMin) / 100;
+    let yInterval: number;
+    if (yAxisScale.type === 'log') {
+      // A log scale's ticks are evenly spaced in log space, so use 1% of the data range as the interval.
+      // getExtent() returns the extent in data space, e.g. [1, 100] for a base 10 axis showing 10^0..10^2.
+      const [min, max] = yAxisScale.getExtent();
+      yInterval = (max - min) / 100;
+    } else {
+      // The tick step of the linear (interval) scale, which ECharts 6.1 keeps in the scale's config.
+      yInterval = yAxisScale.getConfig().interval;
     }
     const totalSeries = data.length;
     const yBuffer = getYBuffer({ yInterval, totalSeries, showAllSeries });
