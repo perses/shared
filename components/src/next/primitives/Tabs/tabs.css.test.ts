@@ -45,11 +45,11 @@ describe('tabs.css', () => {
     expect(getRule(":where(.ps-Tabs[data-orientation='vertical'])")).toContain('flex-direction: row;');
     const list = getRule(':where(.ps-TabList)');
     expect(list).toContain('position: relative;');
-    expect(list).toContain('border-bottom: var(--perses-border-width-sm) solid var(--perses-border-default);');
+    expect(list).toContain('border-bottom: var(--ps-tabs-baseline-width) solid var(--perses-border-default);');
     const verticalList = getRule(":where(.ps-TabList[data-orientation='vertical'])");
     expect(verticalList).toContain('flex-direction: column;');
     expect(verticalList).toContain(
-      'border-inline-end: var(--perses-border-width-sm) solid var(--perses-border-default);',
+      'border-inline-end: var(--ps-tabs-baseline-width) solid var(--perses-border-default);',
     );
   });
 
@@ -64,7 +64,7 @@ describe('tabs.css', () => {
   });
 
   it('styles active, focus-visible and disabled states with tokens', () => {
-    expect(getRule(':where(.ps-Tab[data-active])')).toContain('color: var(--perses-status-text-primary);');
+    expect(getRule(':where(.ps-Tab[data-active])')).toContain('color: var(--ps-tabs-color-text);');
     const focus = getRule(':where(.ps-Tab:focus-visible)');
     expect(focus).toContain('outline-width: var(--perses-focus-ring-width);');
     expect(focus).toContain('outline-color: var(--perses-focus-ring-color);');
@@ -86,7 +86,7 @@ describe('tabs.css', () => {
     expect(indicator).toContain('left: var(--active-tab-left);');
     expect(indicator).toContain('width: var(--active-tab-width);');
     expect(indicator).toContain('height: var(--perses-border-width-md);');
-    expect(indicator).toContain('background-color: var(--perses-status-solid-primary);');
+    expect(indicator).toContain('background-color: var(--ps-tabs-color-solid);');
     const vertical = getRule(":where(.ps-TabList__indicator[data-orientation='vertical'])");
     expect(vertical).toContain('top: var(--active-tab-top);');
     expect(vertical).toContain('height: var(--active-tab-height);');
@@ -102,38 +102,53 @@ describe('tabs.css', () => {
     expect(getRule(":where(.ps-TabList[data-variant='fullWidth'] .ps-Tab)")).toContain('flex: 1;');
   });
 
-  it('pins scroll buttons to the list edges', () => {
+  it('pins the overlay to the viewport without intercepting tab interactions', () => {
+    const overlay = getRule(':where(.ps-TabList__scrollButtons)');
+    expect(overlay).toContain('position: sticky;');
+    expect(overlay).toContain('inset: 0;');
+    expect(overlay).toContain('pointer-events: none;');
+    expect(overlay).toContain('flex-direction: inherit;');
+    expect(overlay).toContain('justify-content: space-between;');
     const button = getRule(':where(.ps-TabList__scrollButton)');
-    expect(button).toContain('position: sticky;');
     expect(button).toContain('background-color: var(--perses-bg-surface);');
-    expect(getRule(":where(.ps-TabList__scrollButton[data-direction='back'])")).toContain('order: -1;');
-  });
-
-  it('keeps scroll buttons out of the flow so tabs never shift and overflow measures only the tabs', () => {
-    const size = 'calc(-1 * var(--ps-tab-scroll-button-size))';
-    expect(getRule(':where(.ps-TabList__scrollButton)')).toContain(
-      '--ps-tab-scroll-button-size: var(--perses-control-size-sm);',
-    );
-    expect(getRule(":where(.ps-TabList__scrollButton[data-direction='back'])")).toContain(
-      `margin-inline-end: ${size};`,
-    );
-    expect(getRule(":where(.ps-TabList__scrollButton[data-direction='forward'])")).toContain(
-      `margin-inline-start: ${size};`,
-    );
-    const vertical = ":where(.ps-TabList[data-orientation='vertical'] .ps-TabList__scrollButton";
-    expect(getRule(`${vertical})`)).toContain('margin-inline: 0;');
-    expect(getRule(`${vertical}[data-direction='back'])`)).toContain(`margin-block-end: ${size};`);
-    expect(getRule(`${vertical}[data-direction='forward'])`)).toContain(`margin-block-start: ${size};`);
+    expect(button).toContain('pointer-events: auto;');
     expect(getRule(':where(.ps-TabList__scrollButton:disabled)')).toContain('visibility: hidden;');
   });
 
-  it('falls back to system Highlight for the active tab, focus ring and indicator in forced-colors mode', () => {
+  it('overlays affordances in one grid cell and inherits gaps only into the tab strip', () => {
+    const list = getRule(':where(.ps-TabList)');
+    expect(list).toContain('display: grid;');
+    expect(list).toContain('grid-template: minmax(0, 1fr) / minmax(0, 1fr);');
+    const tabs = getRule(':where(.ps-TabList__tabs)');
+    expect(tabs).toContain('grid-area: 1 / 1;');
+    expect(tabs).toContain('gap: inherit;');
+    expect(tabs).toContain('flex-direction: inherit;');
+    expect(getRule(':where(.ps-TabList__scrollButtons)')).toContain('grid-area: 1 / 1;');
+  });
+
+  it('marks selection with a CanvasText shape and focus with a Highlight ring in forced-colors mode', () => {
     const start = css.indexOf('@media (forced-colors: active)');
     expect(start).toBeGreaterThan(-1);
     const block = css.slice(start, css.indexOf('@media (prefers-reduced-motion'));
-    expect(block).toMatch(/:where\(\.ps-Tab\[data-active\]\) \{\s*color: Highlight;/);
-    expect(block).toMatch(/:where\(\.ps-Tab:focus-visible\) \{\s*outline-color: Highlight;/);
-    expect(block).toMatch(/:where\(\.ps-TabList__indicator\) \{\s*background-color: Highlight;/);
+    expect(block).toMatch(/:where\(\.ps-Tab\[data-active\]\) \{\s*color: CanvasText;\s*\}/);
+    expect(block).toMatch(/:where\(\.ps-Tab\[data-active\]\)::after \{[^}]*background-color: CanvasText;/);
+    expect(block).toMatch(/:where\(\.ps-Tab:focus-visible\) \{[^}]*outline-color: Highlight;/);
+    expect(block).toMatch(/:where\(\.ps-TabList__indicator\) \{\s*background-color: CanvasText;/);
+    expect(block).not.toMatch(/\[data-active\][^{]*\{[^}]*outline/);
+  });
+
+  it('keeps neutral selection distinct from idle text and hover fills', () => {
+    const neutral = getRule(
+      ":where(.ps-Tabs[data-color='default']),\n  :where(.ps-Tab[data-color='default']),\n  :where(.ps-TabList:has(> .ps-TabList__tabs .ps-Tab[data-active][data-color='default']) > .ps-TabList__indicator)",
+    );
+    expect(neutral).toContain('--ps-tabs-color-text: var(--perses-text-primary);');
+    expect(neutral).toContain('--ps-tabs-color-ring: var(--perses-border-control);');
+    expect(getRule(':where(.ps-Tabs[data-color]),\n  :where(.ps-Tab[data-color])')).toContain(
+      '--ps-tabs-color-ring: transparent;',
+    );
+    expect(getRule(":where(.ps-Tab[data-variant='subtle'][data-active])")).toContain(
+      'box-shadow: inset 0 0 0 var(--perses-border-width-sm) var(--ps-tabs-color-ring);',
+    );
   });
 
   it('only animates the indicator and smooth scrolling when motion is allowed', () => {

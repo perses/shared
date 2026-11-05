@@ -13,7 +13,7 @@
 
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { clsx } from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useCallback, useRef } from 'react';
 import type { CSSProperties, HTMLAttributes } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
@@ -27,6 +27,8 @@ import {
   useResponsiveValue,
 } from '../system';
 import type { DisplayProps, RadiusProps, Responsive, SizingProps, SpacingProps } from '../system';
+import type { ColorVariant, Status } from '../types';
+import { TabsVariantContext } from './TabsVariantContext';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared layout styles.
 import '../system/layout.css';
@@ -38,36 +40,53 @@ import '../system/spacing.css';
 import './tabs.css';
 
 const TABS_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps, radiusProps]);
+// Base UI 1.x falls back to the first enabled tab (reason 'missing') when an explicit `defaultValue`
+// matches no tab; its own implicit default is value 0. This unmatched sentinel opts into the fallback.
+const IMPLICIT_DEFAULT_VALUE = Symbol('implicit-default-tab');
 
 /** Identifier shared by a `Tab` and its `TabPanel`. */
 export type TabsValue = string | number;
 export type TabsOrientation = 'horizontal' | 'vertical';
+/** Appearance, independent of `TabList` sizing. */
+export type TabsVariant = 'line' | 'subtle' | 'enclosed' | 'outline' | 'plain';
 
-/** Custom properties read by every `Tab`; they inherit, so `Tabs` and `TabList` accept them too. */
+/** Tab properties that also inherit from `Tabs` and `TabList`. */
 export interface TabStyle extends CSSProperties {
-  /** Row height; set it once on `Tabs` to size every tab. Defaults to `--perses-control-size-lg`. */
+  /** Tab height; defaults to `--perses-control-size-lg`. */
   '--perses-tab-min-height'?: string;
 }
 
 export interface TabsProps
   extends
-    Omit<HTMLAttributes<HTMLDivElement>, 'defaultValue' | 'style'>,
+    Omit<HTMLAttributes<HTMLDivElement>, 'color' | 'defaultValue' | 'style'>,
     SpacingProps,
     SizingProps,
     DisplayProps,
     RadiusProps {
   style?: PersesCSSProperties<TabStyle>;
+  /**
+   * Appearance only; defaults to `line`. For `plain`, supply a visible active cue through
+   * `data-active` CSS or `TabList`'s indicator slot.
+   */
+  variant?: TabsVariant;
+  /** Selected-state palette, overridable by individual tabs. Defaults to `primary`. */
+  color?: ColorVariant | Status;
   /** Controlled active tab; `null` means no tab is active. */
   value?: TabsValue | null;
-  /** Initial active tab when uncontrolled. Defaults to the first tab; `null` starts with no tab active. */
+  /** Uncontrolled selection; defaults to the first enabled tab. `null` starts unselected. */
   defaultValue?: TabsValue | null;
-  /** Receives `null` when the active tab is removed and no enabled tab can take its place. */
+  /**
+   * Receives `null` when the active tab is removed and no enabled tab can take its place. When `value`
+   * and `defaultValue` are omitted, also called after mount with reason `'initial'` for the first
+   * enabled tab, since no tab is selected on the first render.
+   */
   onValueChange?: (value: TabsValue | null, eventDetails: BaseTabs.Root.ChangeEventDetails) => void;
   /**
-   * Layout axis; also selects the arrow keys that move focus. Accepts a responsive object resolved in JS
-   * so `data-orientation` and keyboard handling always agree. Defaults to `horizontal`.
+   * Layout and navigation axis; accepts responsive values. Defaults to `horizontal`.
    */
   orientation?: Responsive<TabsOrientation>;
+  /** Reading and navigation direction; inherits from the DOM when omitted. */
+  dir?: HTMLAttributes<HTMLDivElement>['dir'];
 }
 
 /**
@@ -84,24 +103,51 @@ export interface TabsProps
  * </Tabs>
  */
 export const Tabs = forwardRef<HTMLDivElement, TabsProps>(function Tabs(
-  { value, defaultValue, onValueChange, orientation = 'horizontal', className, style, children, ...props },
+  {
+    value,
+    defaultValue,
+    onValueChange,
+    orientation = 'horizontal',
+    variant = 'line',
+    color = 'primary',
+    dir,
+    className,
+    style,
+    children,
+    ...props
+  },
   ref,
 ) {
   const resolvedOrientation = useResponsiveValue(orientation, 'horizontal');
   const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, TABS_STYLE_PROPS, style);
+  const initialSelectionPending = useRef(value === undefined && defaultValue === undefined);
+  const handleValueChange = useCallback(
+    (nextValue: TabsValue | null, eventDetails: BaseTabs.Root.ChangeEventDetails): void => {
+      if (initialSelectionPending.current) {
+        initialSelectionPending.current = false;
+        // Preserve initial-selection semantics despite the sentinel.
+        eventDetails.reason = eventDetails.reason === 'missing' ? 'initial' : eventDetails.reason;
+      }
+      onValueChange?.(nextValue, eventDetails);
+    },
+    [onValueChange],
+  );
 
   return (
     <BaseTabs.Root
       {...rest}
       ref={ref}
+      dir={dir}
       value={value}
-      defaultValue={defaultValue}
-      onValueChange={onValueChange}
+      defaultValue={defaultValue === undefined ? IMPLICIT_DEFAULT_VALUE : defaultValue}
+      onValueChange={handleValueChange}
       orientation={resolvedOrientation}
+      data-variant={variant}
+      data-color={color}
       className={clsx('ps-Tabs', styleClassName, className)}
       style={computedStyle}
     >
-      {children}
+      <TabsVariantContext.Provider value={variant}>{children}</TabsVariantContext.Provider>
     </BaseTabs.Root>
   );
 });

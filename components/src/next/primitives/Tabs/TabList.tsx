@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { DirectionProvider } from '@base-ui/react/direction-provider';
 import { Tabs as BaseTabs } from '@base-ui/react/tabs';
 import { clsx } from 'clsx';
-import { forwardRef, useCallback, useRef } from 'react';
+import { forwardRef, useCallback, useState } from 'react';
 import type { HTMLAttributes, ReactElement } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
@@ -21,6 +22,7 @@ import { applyStyleProps, compileStyleProps, radiusProps, spacingProps } from '.
 import type { RadiusProps, SpacingProps } from '../system';
 import { TabListScrollButtons } from './TabListScrollButtons';
 import type { TabStyle } from './Tabs';
+import { useTabsDirection } from './useTabsDirection';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared radius styles.
 import '../system/radius.css';
@@ -34,7 +36,9 @@ const TAB_LIST_STYLE_PROPS = compileStyleProps([spacingProps, radiusProps]);
 export type TabListVariant = 'standard' | 'fullWidth';
 
 export interface TabListSlotProps {
-  /** The bar that slides under (or beside) the active tab. */
+  /**
+   * Active underline or side bar. Hidden outside `line`; set `style.display` to `block` to opt in.
+   */
   indicator?: SlotStyleProps;
   /** Both scroll buttons rendered by `scrollButtons`. */
   scrollButton?: SlotStyleProps;
@@ -49,29 +53,25 @@ interface TabListBaseProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'style' | 'aria-label' | 'aria-labelledby'>, SpacingProps, RadiusProps {
   style?: PersesCSSProperties<TabStyle>;
   /**
-   * How tabs take up space: `standard` keeps each tab at its natural width and the list scrolls along
-   * its axis when they overflow; `fullWidth` stretches tabs evenly to fill the list. Defaults to `standard`.
+   * Sizing: `standard` (default) uses natural widths; `fullWidth` shares space evenly.
+   * All lists scroll on overflow.
    */
   variant?: TabListVariant;
   /**
-   * Show scroll buttons at the list edges while the list overflows. Uses `IconButton` from
-   * `ComponentsProvider`. Defaults to `false`.
+   * Show provider-resolved `IconButton`s at overflowing edges. Defaults to `false`.
    */
   scrollButtons?: boolean;
-  /** Icon for the backward scroll button. Defaults to a left chevron, or an up chevron when vertical. */
+  /** Icon for backward scrolling. Defaults to a start-facing chevron, or an up chevron when vertical. */
   scrollBackIcon?: ReactElement;
-  /** Icon for the forward scroll button. Defaults to a right chevron, or a down chevron when vertical. */
+  /** Icon for forward scrolling. Defaults to an end-facing chevron, or a down chevron when vertical. */
   scrollForwardIcon?: ReactElement;
-  /** Activate a tab as soon as it receives focus instead of on Enter/Space. Defaults to `false`. */
+  /** Activate on focus instead of Enter/Space. Defaults to `false`. */
   activateOnFocus?: boolean;
   /** Styling-only overrides for internal parts. */
   slotProps?: TabListSlotProps;
 }
 
-/**
- * The `role="tablist"` strip holding `Tab`s plus the active indicator. Requires an `aria-label` or
- * `aria-labelledby` describing the set.
- */
+/** Tab strip and indicator. Requires `aria-label` or `aria-labelledby`. */
 export const TabList = forwardRef<HTMLDivElement, TabListProps>(function TabList(
   {
     variant = 'standard',
@@ -88,10 +88,12 @@ export const TabList = forwardRef<HTMLDivElement, TabListProps>(function TabList
   ref,
 ) {
   const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, TAB_LIST_STYLE_PROPS, style);
-  const listRef = useRef<HTMLDivElement | null>(null);
+
+  const [listElement, setListElement] = useState<HTMLDivElement | null>(null);
+  const direction = useTabsDirection(listElement, props.dir);
   const setListRef = useCallback(
     (node: HTMLDivElement | null) => {
-      listRef.current = node;
+      setListElement(node);
       if (typeof ref === 'function') ref(node);
       else if (ref) ref.current = node;
     },
@@ -99,27 +101,29 @@ export const TabList = forwardRef<HTMLDivElement, TabListProps>(function TabList
   );
 
   return (
-    <BaseTabs.List
-      {...rest}
-      ref={setListRef}
-      activateOnFocus={activateOnFocus}
-      className={clsx('ps-TabList', styleClassName, className)}
-      style={computedStyle}
-      data-variant={variant}
-    >
-      {children}
-      {scrollButtons && (
-        <TabListScrollButtons
-          listRef={listRef}
-          slotProps={slotProps?.scrollButton}
-          backIcon={scrollBackIcon}
-          forwardIcon={scrollForwardIcon}
+    <DirectionProvider direction={direction}>
+      <BaseTabs.List
+        {...rest}
+        ref={setListRef}
+        activateOnFocus={activateOnFocus}
+        className={clsx('ps-TabList', styleClassName, className)}
+        style={computedStyle}
+        data-variant={variant}
+      >
+        <div className="ps-TabList__tabs">{children}</div>
+        {scrollButtons && (
+          <TabListScrollButtons
+            list={listElement}
+            slotProps={slotProps?.scrollButton}
+            backIcon={scrollBackIcon}
+            forwardIcon={scrollForwardIcon}
+          />
+        )}
+        <BaseTabs.Indicator
+          className={clsx('ps-TabList__indicator', slotProps?.indicator?.className)}
+          style={slotProps?.indicator?.style}
         />
-      )}
-      <BaseTabs.Indicator
-        className={clsx('ps-TabList__indicator', slotProps?.indicator?.className)}
-        style={slotProps?.indicator?.style}
-      />
-    </BaseTabs.List>
+      </BaseTabs.List>
+    </DirectionProvider>
   );
 });

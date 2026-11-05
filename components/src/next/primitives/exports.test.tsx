@@ -56,6 +56,7 @@ import type {
   TabsProps,
   TabStyle,
   TabsValue,
+  TabsVariant,
   TextFieldProps,
   TextFieldStyle,
   TextHelperProps,
@@ -192,7 +193,8 @@ describe('primitives barrel exports', () => {
     const sortDirection: SortDirection = 'asc';
     const sharedSize: Size = 'md';
     const sharedStatus: Status = 'error';
-    const tabsProps: TabsProps = { defaultValue: 'one' };
+    const tabsVariant: TabsVariant = 'enclosed';
+    const tabsProps: TabsProps = { defaultValue: 'one', variant: tabsVariant };
     const tabsValue: TabsValue = 1;
     const noTab: TabsProps['value'] = null;
     const tabsOrientation: TabsOrientation = 'vertical';
@@ -245,6 +247,7 @@ describe('primitives barrel exports', () => {
     expect(sharedSize).toBe('md');
     expect(sharedStatus).toBe('error');
     expect(tabsProps).toBeDefined();
+    expect(tabsProps.variant).toBe('enclosed');
     expect(tabsValue).toBe(1);
     expect(noTab).toBeNull();
     expect(tabsOrientation).toBe('vertical');

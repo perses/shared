@@ -24,8 +24,13 @@ samp {
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
-/* Scoped to the page wrapper: data-perses-mode also lands on portaled popups, which must keep their own size. */
-#ladle-root > [data-perses-mode='dark'] {
+/*
+ * Scoped to the page wrapper: data-perses-mode also lands on portaled popups, which must keep their own size.
+ * The wrapper sits under #ladle-root in preview mode, .ladle-main in the full UI, and #root in iframe mode.
+ */
+#ladle-root > [data-perses-mode='dark'],
+.ladle-main > [data-perses-mode='dark'],
+#root > [data-perses-mode='dark'] {
   min-height: 100vh;
   color: var(--perses-text-primary);
 }

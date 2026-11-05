@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import type { RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRef, forwardRef, useState } from 'react';
@@ -40,6 +40,12 @@ function renderTabs(props: Partial<TabsProps> = {}, listProps: Record<string, un
 
 function tab(name: string): HTMLElement {
   return screen.getByRole('tab', { name });
+}
+
+async function pressKey(key: string): Promise<void> {
+  await act(async () => {
+    await userEvent.keyboard(key);
+  });
 }
 
 const RouterLink = forwardRef<HTMLAnchorElement, AnchorHTMLAttributes<HTMLAnchorElement> & { to: string }>(
@@ -124,8 +130,8 @@ describe('Tabs', () => {
       expect(panel).toHaveStyle({ display: 'grid' });
     });
 
-    it('supports no active tab with value={null} and reports null when the active tab is removed', async () => {
-      const { rerender } = render(
+    it('supports no active tab with value={null}', () => {
+      render(
         <Tabs value={null} onValueChange={vi.fn()}>
           <TabList aria-label="Example">
             <Tab value="a">A</Tab>
@@ -135,9 +141,11 @@ describe('Tabs', () => {
       );
       expect(tab('A')).not.toHaveAttribute('data-active');
       expect(screen.queryByText('Panel a')).not.toBeInTheDocument();
+    });
 
+    it('reports null when the active tab is removed and no enabled tabs remain', async () => {
       const onValueChange = vi.fn();
-      rerender(
+      const { rerender } = render(
         <Tabs defaultValue="b" onValueChange={onValueChange}>
           <TabList aria-label="Example">
             <Tab value="a" disabled>
@@ -145,8 +153,13 @@ describe('Tabs', () => {
             </Tab>
             <Tab value="b">B</Tab>
           </TabList>
+          <TabPanel value="b">Panel b</TabPanel>
         </Tabs>,
       );
+      expect(tab('B')).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByRole('tabpanel')).toHaveTextContent('Panel b');
+      expect(onValueChange).not.toHaveBeenCalled();
+
       rerender(
         <Tabs defaultValue="b" onValueChange={onValueChange}>
           <TabList aria-label="Example">
@@ -157,6 +170,9 @@ describe('Tabs', () => {
         </Tabs>,
       );
       await waitFor(() => expect(onValueChange).toHaveBeenCalledWith(null, expect.anything()));
+      expect(onValueChange).toHaveBeenCalledTimes(1);
+      expect(tab('A')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByRole('tabpanel')).not.toBeInTheDocument();
     });
 
     it('switches panels on click and reports the value', async () => {
@@ -194,6 +210,74 @@ describe('Tabs', () => {
     it('defaults to the first tab without defaultValue', () => {
       renderTabs({ defaultValue: undefined });
       expect(tab('One')).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('selects the first enabled tab even when a later tab has value zero', () => {
+      const onValueChange = vi.fn();
+      render(
+        <Tabs onValueChange={onValueChange}>
+          <TabList aria-label="Numeric">
+            <Tab value={3} disabled>
+              Disabled
+            </Tab>
+            <Tab value={1}>First</Tab>
+            <Tab value={0}>Second</Tab>
+          </TabList>
+          <TabPanel value={1}>Panel first</TabPanel>
+          <TabPanel value={0}>Panel second</TabPanel>
+        </Tabs>,
+      );
+      expect(tab('First')).toHaveAttribute('aria-selected', 'true');
+      expect(tab('Second')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.getByRole('tabpanel')).toHaveTextContent('Panel first');
+      expect(onValueChange).toHaveBeenCalledExactlyOnceWith(1, expect.objectContaining({ reason: 'initial' }));
+    });
+
+    it.each([
+      { name: 'zero', defaultValue: 0, firstDisabled: false, selected: 'Zero', panel: 'Panel zero' },
+      { name: 'disabled', defaultValue: 1, firstDisabled: true, selected: 'First', panel: 'Panel first' },
+      { name: 'null', defaultValue: null, firstDisabled: false, selected: undefined, panel: undefined },
+    ])('honors an explicit $name default value', ({ defaultValue, firstDisabled, selected, panel }) => {
+      const onValueChange = vi.fn();
+      render(
+        <Tabs defaultValue={defaultValue} onValueChange={onValueChange}>
+          <TabList aria-label="Numeric">
+            <Tab value={1} disabled={firstDisabled}>
+              First
+            </Tab>
+            <Tab value={0}>Zero</Tab>
+          </TabList>
+          <TabPanel value={1}>Panel first</TabPanel>
+          <TabPanel value={0}>Panel zero</TabPanel>
+        </Tabs>,
+      );
+      expect(tab('First')).toHaveAttribute('aria-selected', String(selected === 'First'));
+      expect(tab('Zero')).toHaveAttribute('aria-selected', String(selected === 'Zero'));
+      if (panel === undefined) expect(screen.queryByRole('tabpanel')).not.toBeInTheDocument();
+      else expect(screen.getByRole('tabpanel')).toHaveTextContent(panel);
+      expect(onValueChange).not.toHaveBeenCalled();
+    });
+
+    it('starts with no selection when all tabs are disabled', () => {
+      const onValueChange = vi.fn();
+      render(
+        <Tabs onValueChange={onValueChange}>
+          <TabList aria-label="Disabled">
+            <Tab value={1} disabled>
+              First
+            </Tab>
+            <Tab value={0} disabled>
+              Zero
+            </Tab>
+          </TabList>
+          <TabPanel value={1}>Panel first</TabPanel>
+          <TabPanel value={0}>Panel zero</TabPanel>
+        </Tabs>,
+      );
+      expect(tab('First')).toHaveAttribute('aria-selected', 'false');
+      expect(tab('Zero')).toHaveAttribute('aria-selected', 'false');
+      expect(screen.queryByRole('tabpanel')).not.toBeInTheDocument();
+      expect(onValueChange).toHaveBeenCalledExactlyOnceWith(null, expect.objectContaining({ reason: 'initial' }));
     });
   });
 
@@ -253,12 +337,12 @@ describe('Tabs', () => {
       renderTabs({ onValueChange });
       await userEvent.click(tab('One'));
       onValueChange.mockClear();
-      await userEvent.keyboard('{ArrowRight}');
+      await pressKey('{ArrowRight}');
       expect(tab('Two')).toHaveFocus();
       expect(onValueChange).not.toHaveBeenCalled();
-      await userEvent.keyboard(' ');
+      await pressKey(' ');
       expect(onValueChange.mock.calls[0]?.[0]).toBe('two');
-      await userEvent.keyboard('{ArrowLeft}');
+      await pressKey('{ArrowLeft}');
       expect(tab('One')).toHaveFocus();
     });
 
@@ -266,7 +350,7 @@ describe('Tabs', () => {
       const onValueChange = vi.fn();
       renderTabs({ onValueChange }, { activateOnFocus: true });
       await userEvent.click(tab('One'));
-      await userEvent.keyboard('{ArrowRight}');
+      await pressKey('{ArrowRight}');
       expect(onValueChange.mock.calls[0]?.[0]).toBe('two');
     });
 
@@ -274,11 +358,11 @@ describe('Tabs', () => {
       const onValueChange = vi.fn();
       renderTabs({ onValueChange });
       await userEvent.click(tab('One'));
-      await userEvent.keyboard('{End}');
+      await pressKey('{End}');
       expect(tab('Three')).toHaveFocus();
-      await userEvent.keyboard(' ');
+      await pressKey(' ');
       expect(onValueChange).not.toHaveBeenCalled();
-      await userEvent.keyboard('{Home}');
+      await pressKey('{Home}');
       expect(tab('One')).toHaveFocus();
     });
 
@@ -286,11 +370,11 @@ describe('Tabs', () => {
       renderTabs({ orientation: 'vertical' });
       expect(screen.getByRole('tablist').parentElement).toHaveAttribute('data-orientation', 'vertical');
       await userEvent.click(tab('One'));
-      await userEvent.keyboard('{ArrowRight}');
+      await pressKey('{ArrowRight}');
       expect(tab('One')).toHaveFocus();
-      await userEvent.keyboard('{ArrowDown}');
+      await pressKey('{ArrowDown}');
       expect(tab('Two')).toHaveFocus();
-      await userEvent.keyboard('{ArrowUp}');
+      await pressKey('{ArrowUp}');
       expect(tab('One')).toHaveFocus();
     });
 
@@ -365,7 +449,7 @@ describe('Tabs', () => {
       expect(link).not.toHaveAttribute('type');
       await userEvent.click(link);
       expect(onValueChange.mock.calls[0]?.[0]).toBe('b');
-      await userEvent.keyboard('{ArrowLeft}');
+      await pressKey('{ArrowLeft}');
       expect(tab('A')).toHaveFocus();
     });
   });

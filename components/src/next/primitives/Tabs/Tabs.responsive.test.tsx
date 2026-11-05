@@ -53,6 +53,12 @@ function mockViewport(initialWidth: number): { resize: (width: number) => void }
 
 const orientation = { default: 'horizontal', md: 'vertical' } as const;
 
+async function pressKey(key: string): Promise<void> {
+  await act(async () => {
+    await userEvent.keyboard(key);
+  });
+}
+
 function renderResponsiveTabs(): void {
   render(
     <Tabs defaultValue="one" orientation={orientation}>
@@ -100,15 +106,15 @@ describe('Tabs responsive orientation', () => {
     const two = screen.getByRole('tab', { name: 'Two' });
 
     await userEvent.click(one);
-    await userEvent.keyboard('{ArrowRight}');
+    await pressKey('{ArrowRight}');
     expect(one).toHaveFocus();
-    await userEvent.keyboard('{ArrowDown}');
+    await pressKey('{ArrowDown}');
     expect(two).toHaveFocus();
 
     viewport.resize(700);
-    await userEvent.keyboard('{ArrowDown}');
+    await pressKey('{ArrowDown}');
     expect(two).toHaveFocus();
-    await userEvent.keyboard('{ArrowLeft}');
+    await pressKey('{ArrowLeft}');
     expect(one).toHaveFocus();
   });
 

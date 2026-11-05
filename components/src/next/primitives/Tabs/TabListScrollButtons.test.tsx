@@ -91,10 +91,16 @@ async function setGeometry(
   await act(async () => fireEvent.scroll(list));
 }
 
-function DynamicTabs({ count }: { count: number }): ReactElement {
+function DynamicTabs({
+  count,
+  scrollButtons: enabled = true,
+}: {
+  count: number;
+  scrollButtons?: boolean;
+}): ReactElement {
   return (
     <Tabs defaultValue={0}>
-      <TabList aria-label="Scroll" scrollButtons>
+      <TabList aria-label="Scroll" scrollButtons={enabled}>
         {Array.from({ length: count }, (_, index) => (
           <Tab key={index} value={index}>
             Tab {index}
@@ -115,6 +121,20 @@ describe('TabList scroll buttons', () => {
     resizeCallbacks.length = 0;
     observe.mockClear();
     disconnect.mockClear();
+  });
+
+  it('preserves tab identity, selection and keyboard focus when scroll affordances toggle', async () => {
+    const { rerender } = render(<DynamicTabs count={2} scrollButtons={false} />, { wrapper: Wrapper });
+    const second = screen.getByRole('tab', { name: 'Tab 1' });
+    await userEvent.click(second);
+    expect(second).toHaveFocus();
+
+    for (const enabled of [true, false, true]) {
+      rerender(<DynamicTabs count={2} scrollButtons={enabled} />);
+      expect(screen.getByRole('tab', { name: 'Tab 1' })).toBe(second);
+      expect(second).toHaveAttribute('aria-selected', 'true');
+      expect(second).toHaveFocus();
+    }
   });
 
   it('renders nothing until the list overflows, then shows mouse-only buttons at each edge', async () => {
@@ -281,6 +301,68 @@ describe('TabList scroll buttons', () => {
 
     renderScrollable({}, 'vertical');
     await setGeometry(screen.getByRole('tablist'), { position: 50, total: 300 }, true);
+    expect(buttonSvgs()).toEqual([svgOf(<ChevronUpIcon />), svgOf(<ChevronDownIcon />)]);
+  });
+
+  it('points horizontal default chevrons in the actual RTL scroll directions', async () => {
+    renderScrollable({ style: { direction: 'rtl' } });
+    await setGeometry(screen.getByRole('tablist'), { position: -50, total: 300 });
+    expect(buttonSvgs()).toEqual([svgOf(<ChevronRightIcon />), svgOf(<ChevronLeftIcon />)]);
+  });
+
+  it('updates chevrons and scroll movement when inherited direction changes without scrolling', async () => {
+    render(
+      <div dir="ltr">
+        <Tabs defaultValue={null}>
+          <TabList aria-label="Scroll" scrollButtons>
+            <Tab value="one">One</Tab>
+            <Tab value="two">Two</Tab>
+          </TabList>
+        </Tabs>
+      </div>,
+      { wrapper: Wrapper },
+    );
+    const list = screen.getByRole('tablist');
+    const scrollBy = vi.fn();
+    Object.defineProperty(list, 'scrollBy', { value: scrollBy, configurable: true });
+    await setGeometry(list, { total: 300 });
+    expect(buttonSvgs()).toEqual([svgOf(<ChevronLeftIcon />), svgOf(<ChevronRightIcon />)]);
+
+    const ancestor = list.closest('[dir]');
+    expect(ancestor).not.toBeNull();
+    await act(async () => {
+      ancestor?.setAttribute('dir', 'rtl');
+    });
+
+    expect(buttonSvgs()).toEqual([svgOf(<ChevronRightIcon />), svgOf(<ChevronLeftIcon />)]);
+    await userEvent.click(scrollButtons()[1] as HTMLElement);
+    expect(scrollBy).toHaveBeenLastCalledWith({ left: -80 });
+  });
+
+  it('updates default icons when the list style direction changes without scrolling', async () => {
+    renderScrollable();
+    const list = screen.getByRole('tablist');
+    await setGeometry(list, { position: 50, total: 300 });
+    expect(buttonSvgs()).toEqual([svgOf(<ChevronLeftIcon />), svgOf(<ChevronRightIcon />)]);
+
+    await act(async () => {
+      list.style.direction = 'rtl';
+    });
+    expect(buttonSvgs()).toEqual([svgOf(<ChevronRightIcon />), svgOf(<ChevronLeftIcon />)]);
+  });
+
+  it('keeps vertical chevrons and consumer icons unchanged in RTL', async () => {
+    const vertical = renderScrollable({ style: { direction: 'rtl' } }, 'vertical');
+    await setGeometry(screen.getByRole('tablist'), { position: 50, total: 300 }, true);
+    expect(buttonSvgs()).toEqual([svgOf(<ChevronUpIcon />), svgOf(<ChevronDownIcon />)]);
+    vertical.unmount();
+
+    renderScrollable({
+      style: { direction: 'rtl' },
+      scrollBackIcon: <ChevronUpIcon />,
+      scrollForwardIcon: <ChevronDownIcon />,
+    });
+    await setGeometry(screen.getByRole('tablist'), { position: -50, total: 300 });
     expect(buttonSvgs()).toEqual([svgOf(<ChevronUpIcon />), svgOf(<ChevronDownIcon />)]);
   });
 

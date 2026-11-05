@@ -29,23 +29,27 @@ import type {
   ChipProps,
   ChipSlotProps,
   ChipStyle,
+  ColorVariant,
   CornerRadiusValue,
   IconProps,
   RadiusProps,
   RadiusValue,
   PersesCSSProperties as PrimitiveCSSProperties,
   SlotStyleProps as PrimitiveSlotStyleProps,
+  Status,
   SwitchProps,
   SwitchSlotProps,
   SwitchStyle,
   TabListProps,
   TabListSlotProps,
+  TabListVariant,
   TablePaginationProps,
   TablePaginationSlotProps,
   TabPanelProps,
   TabProps,
   TabsProps,
   TabStyle,
+  TabsVariant,
   TextFieldProps,
   TextFieldSlotProps,
   TextFieldStyle,
@@ -161,6 +165,30 @@ expectTypeOf({ control: { ref: undefined } } satisfies SwitchSlotProps);
 expectTypeOf({ nextButton: { disabled: false } } satisfies TablePaginationSlotProps);
 // @ts-expect-error Scroll handlers remain on the component's top-level API.
 expectTypeOf({ scrollButton: { onClick: undefined } } satisfies TabListSlotProps);
+
+expectTypeOf<TabsProps['color']>().toEqualTypeOf<ColorVariant | Status | undefined>();
+expectTypeOf<TabProps['color']>().toEqualTypeOf<ColorVariant | Status | undefined>();
+expectTypeOf({ color: 'secondary' } satisfies TabsProps);
+expectTypeOf({ value: 'errors', color: 'error' } satisfies TabProps);
+// @ts-expect-error Tabs colors are semantic palettes, not raw CSS colors.
+expectTypeOf({ color: '#ff0000' } satisfies TabsProps);
+// @ts-expect-error Tab overrides use the same bounded palettes as the root.
+expectTypeOf({ value: 'errors', color: 'red' } satisfies TabProps);
+
+expectTypeOf<TabsVariant>().toEqualTypeOf<'line' | 'subtle' | 'enclosed' | 'outline' | 'plain'>();
+expectTypeOf<TabsProps['variant']>().toEqualTypeOf<TabsVariant | undefined>();
+expectTypeOf<TabListVariant>().toEqualTypeOf<'standard' | 'fullWidth'>();
+expectTypeOf<TabListProps['variant']>().toEqualTypeOf<TabListVariant | undefined>();
+expectTypeOf({ variant: 'plain' } satisfies TabsProps);
+expectTypeOf({ 'aria-label': 'Project', variant: 'fullWidth' } satisfies TabListProps);
+// @ts-expect-error List sizing is not a root appearance.
+expectTypeOf({ variant: 'fullWidth' } satisfies TabsProps);
+// @ts-expect-error Root appearances do not replace the list's sizing API.
+expectTypeOf({ 'aria-label': 'Project', variant: 'enclosed' } satisfies TabListProps);
+// @ts-expect-error Appearance is a bounded union, not an arbitrary string.
+expectTypeOf({ variant: 'solid' } satisfies TabsProps);
+// @ts-expect-error Visual variants do not accept responsive objects.
+expectTypeOf({ variant: { default: 'line', md: 'subtle' } } satisfies TabsProps);
 
 // The tab min-height variable inherits, so the root and list accept it alongside each tab.
 expectTypeOf({ '--perses-tab-min-height': '2rem' } satisfies NonNullable<TabsProps['style']>);

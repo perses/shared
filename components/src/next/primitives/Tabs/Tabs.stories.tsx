@@ -17,24 +17,25 @@ import type { AnchorHTMLAttributes, CSSProperties, ReactElement } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
 import { Chip } from '../Chip';
-import { ArrowDownIcon, ArrowUpIcon, BookOpenIcon, CogIcon, EarthIcon, ViewColumnIcon } from '../Icon';
+import { BookOpenIcon, ViewColumnIcon } from '../Icon';
 import { TextField } from '../TextField';
 import { Tab } from './Tab';
 import { TabList } from './TabList';
 import type { TabListProps, TabListSlotProps } from './TabList';
 import { TabPanel } from './TabPanel';
 import { Tabs } from './Tabs';
-import type { TabsProps, TabStyle, TabsValue } from './Tabs';
+import type { TabsProps, TabStyle, TabsValue, TabsVariant } from './Tabs';
 
 const narrow: CSSProperties = { width: '20rem' };
-const indicatorSlots: TabListSlotProps = {
-  indicator: { style: { height: 'var(--perses-spacing-xs)', borderRadius: 'var(--perses-radius-full)' } },
+const compactTab: TabStyle = { '--perses-tab-min-height': '2.25rem' };
+const sections = ['Overview', 'Dashboards', 'Settings'];
+const overflowSections = ['Overview', 'Dashboards', 'Datasources', 'Variables', 'Secrets', 'Roles', 'Role bindings'];
+const customSlots: TabListSlotProps = {
+  indicator: {
+    style: { display: 'block', height: 'var(--perses-spacing-xs)', borderRadius: 'var(--perses-radius-full)' },
+  },
   scrollButton: { style: { color: 'var(--perses-status-text-primary)' } },
 };
-
-const compactTab: TabStyle = { '--perses-tab-min-height': '2.25rem' };
-
-const sections = ['Overview', 'Dashboards', 'Datasources', 'Variables', 'Secrets', 'Roles', 'Role bindings'];
 
 function Section({ name }: { name: string }): ReactElement {
   return (
@@ -44,24 +45,69 @@ function Section({ name }: { name: string }): ReactElement {
   );
 }
 
-const basicCode = `<Tabs defaultValue="overview">
+const DemoLink = forwardRef<HTMLAnchorElement, AnchorHTMLAttributes<HTMLAnchorElement>>(function DemoLink(
+  { children, ...props },
+  ref,
+) {
+  return (
+    <a ref={ref} {...props}>
+      {children}
+    </a>
+  );
+});
+
+const basicCode = `<Tabs defaultValue="Overview">
   <TabList aria-label="Project">
-    <Tab value="overview">Overview</Tab>
-    <Tab value="dashboards">Dashboards</Tab>
-    <Tab value="settings">Settings</Tab>
+    <Tab value="Overview">Overview</Tab>
+    <Tab value="Dashboards">Dashboards</Tab>
+    <Tab value="Settings">Settings</Tab>
   </TabList>
-  <TabPanel value="overview" p="md">…</TabPanel>
-  <TabPanel value="dashboards" p="md">…</TabPanel>
-  <TabPanel value="settings" p="md">…</TabPanel>
+  <TabPanel value="Overview" p="md">Overview content</TabPanel>
+  <TabPanel value="Dashboards" p="md">Dashboards content</TabPanel>
+  <TabPanel value="Settings" p="md">Settings content</TabPanel>
+</Tabs>`;
+
+const contentCode = `const DemoLink = forwardRef<HTMLAnchorElement, AnchorHTMLAttributes<HTMLAnchorElement>>(
+  ({ children, ...props }, ref) => <a ref={ref} {...props}>{children}</a>,
+);
+
+<Tabs defaultValue="Overview">
+  <TabList aria-label="Project links">
+    <Tab value="Overview" render={<DemoLink href="#overview" />} startElement={<BookOpenIcon />}>
+      Overview
+    </Tab>
+    <Tab value="Dashboards" render={<DemoLink href="#dashboards" />}
+      startElement={<ViewColumnIcon />} endElement={<Chip size="xs">3</Chip>}>
+      Dashboards
+    </Tab>
+  </TabList>
+  <TabPanel value="Overview" p="md">Overview content</TabPanel>
+  <TabPanel value="Dashboards" p="md">Dashboards content</TabPanel>
+</Tabs>`;
+
+const nestedCode = `<Tabs variant="enclosed" defaultValue="Overview">
+  <TabList aria-label="Project sections">
+    <Tab value="Overview">Overview</Tab>
+    <Tab value="Settings">Settings</Tab>
+  </TabList>
+  <TabPanel value="Overview" p="md">
+    <Tabs defaultValue="Summary">
+      <TabList aria-label="Overview details">
+        <Tab value="Summary">Summary</Tab>
+        <Tab value="Activity">Activity</Tab>
+      </TabList>
+      <TabPanel value="Summary" p="md">Summary content</TabPanel>
+      <TabPanel value="Activity" p="md">Activity content</TabPanel>
+    </Tabs>
+  </TabPanel>
+  <TabPanel value="Settings" p="md">Settings content</TabPanel>
 </Tabs>`;
 
 export const Basic: Story = () => (
   <Stack>
     <p>
-      <code>Tabs</code> switches between panels of content. Put <code>Tab</code>s inside a <code>TabList</code> and one{' '}
-      <code>TabPanel</code> per value; the active tab, keyboard navigation and ARIA wiring are handled for you. Inactive
-      panels are unmounted unless you set <code>keepMounted</code>. Style props on every part behave exactly as
-      documented on <code>Box</code>.
+      Compose <code>Tab</code>s inside a named <code>TabList</code> with one <code>TabPanel</code> per value. Selection,
+      keyboard navigation and ARIA are automatic; style props follow <code>Box</code>.
     </p>
     <Sample title="Minimal usage" code={basicCode}>
       <Tabs defaultValue="Overview">
@@ -75,103 +121,140 @@ export const Basic: Story = () => (
         <Section name="Settings" />
       </Tabs>
     </Sample>
+    <Sample title="Custom content and rendering" code={contentCode}>
+      <p>
+        Add icons or badges with <code>startElement</code>/<code>endElement</code>. Custom renderers must forward props
+        and the ref; set <code>nativeButton</code> for custom button components, not links.
+      </p>
+      <Tabs defaultValue="Overview">
+        <TabList aria-label="Project links">
+          <Tab value="Overview" render={<DemoLink href="#overview" />} startElement={<BookOpenIcon />}>
+            Overview
+          </Tab>
+          <Tab
+            value="Dashboards"
+            render={<DemoLink href="#dashboards" />}
+            startElement={<ViewColumnIcon />}
+            endElement={<Chip size="xs">3</Chip>}
+          >
+            Dashboards
+          </Tab>
+        </TabList>
+        <Section name="Overview" />
+        <Section name="Dashboards" />
+      </Tabs>
+    </Sample>
+    <Sample title="Nested tabs" code={nestedCode}>
+      <p>
+        Nest a complete tab set inside a panel. Each root owns its selection and appearance; the inner tabs default to{' '}
+        <code>line</code>.
+      </p>
+      <Tabs variant="enclosed" defaultValue="Overview">
+        <TabList aria-label="Project sections">
+          <Tab value="Overview">Overview</Tab>
+          <Tab value="Settings">Settings</Tab>
+        </TabList>
+        <TabPanel value="Overview" p="md">
+          <Tabs defaultValue="Summary">
+            <TabList aria-label="Overview details">
+              <Tab value="Summary">Summary</Tab>
+              <Tab value="Activity">Activity</Tab>
+            </TabList>
+            <TabPanel value="Summary" p="md">
+              Summary content
+            </TabPanel>
+            <TabPanel value="Activity" p="md">
+              Activity content
+            </TabPanel>
+          </Tabs>
+        </TabPanel>
+        <TabPanel value="Settings" p="md">
+          Settings content
+        </TabPanel>
+      </Tabs>
+    </Sample>
   </Stack>
 );
 Basic.storyName = 'Basic';
 
-const orientationCode = `// orientation: 'horizontal' (default) | 'vertical' | { default: 'horizontal', md: 'vertical' }
-<Tabs defaultValue="overview" orientation="vertical">…</Tabs>
-<Tabs defaultValue="overview" orientation={{ default: 'horizontal', md: 'vertical' }}>…</Tabs>`;
-const scrollableCode = `// variant: 'standard' (default) | 'fullWidth'
-// Every list scrolls when its tabs overflow; scrollButtons adds mouse affordances
-<TabList aria-label="Project">…many tabs…</TabList>
-<TabList aria-label="Project" scrollButtons>…many tabs…</TabList>
-// Vertical lists scroll too; default icons become up/down chevrons, or pass your own
-<Tabs orientation="vertical">
-  <TabList aria-label="Project" scrollButtons scrollBackIcon={<ArrowUpIcon />} scrollForwardIcon={<ArrowDownIcon />} style={{ maxHeight: '12rem' }}>
-</Tabs>
-<TabList aria-label="Project" variant="fullWidth">…</TabList>`;
-const contentCode = `<Tab value="overview" startElement={<BookOpenIcon />}>Overview</Tab>
-<Tab value="datasources" endElement={<Chip size="xs">3</Chip>}>Datasources</Tab>`;
+const appearances: Array<{ variant: TabsVariant; description: string }> = [
+  { variant: 'line', description: 'Baseline and sliding underline (default).' },
+  { variant: 'subtle', description: 'Soft, rounded selected fill; no baseline.' },
+  { variant: 'enclosed', description: 'Muted, padded rail with a distinct selected surface.' },
+  { variant: 'outline', description: 'Baseline around the selection, open toward the panel.' },
+  { variant: 'plain', description: 'No built-in active cue; shown with a consumer-provided indicator. See Slots.' },
+];
 
-type ProjectTabsProps = Pick<TabsProps, 'orientation'> &
-  Pick<TabListProps, 'variant' | 'scrollButtons' | 'scrollBackIcon' | 'scrollForwardIcon' | 'slotProps' | 'style'> & {
-    tabStyle?: TabStyle;
-  };
-
-function ProjectTabs({ orientation, tabStyle, ...listProps }: ProjectTabsProps): ReactElement {
-  return (
-    <Tabs defaultValue={sections[0]} orientation={orientation}>
-      <TabList aria-label="Project" {...listProps}>
-        {sections.map((name) => (
-          <Tab key={name} value={name} style={tabStyle}>
-            {name}
-          </Tab>
-        ))}
-      </TabList>
-      {sections.map((name) => (
-        <Section key={name} name={name} />
-      ))}
-    </Tabs>
-  );
+function appearanceCode(variant: TabsVariant): string {
+  const indicator =
+    variant === 'plain'
+      ? ` slotProps={{ indicator: { style: {
+    display: 'block', height: 'var(--perses-spacing-xs)', borderRadius: 'var(--perses-radius-full)',
+  } } }}`
+      : '';
+  return `<Tabs variant="${variant}" defaultValue="Overview">
+  <TabList aria-label="${variant} appearance"${indicator}>
+    <Tab value="Overview">Overview</Tab>
+    <Tab value="Dashboards">Dashboards</Tab>
+    <Tab value="Settings" disabled>Settings</Tab>
+  </TabList>
+  <TabPanel value="Overview" p="md">Overview content</TabPanel>
+  <TabPanel value="Dashboards" p="md">Dashboards content</TabPanel>
+  <TabPanel value="Settings" p="md">Settings content</TabPanel>
+</Tabs>`;
 }
+
+const colorsCode = `<Tabs variant="subtle" color="secondary" defaultValue="Overview">
+  <TabList aria-label="Project colors">
+    <Tab value="Overview">Overview</Tab>
+    <Tab value="Errors" color="error">Errors</Tab>
+    <Tab value="Settings" color="default">Settings</Tab>
+  </TabList>
+  <TabPanel value="Overview" p="md">Overview content</TabPanel>
+  <TabPanel value="Errors" p="md">Errors content</TabPanel>
+  <TabPanel value="Settings" p="md">Settings content</TabPanel>
+</Tabs>`;
 
 export const Variants: Story = () => (
   <Stack>
-    <Sample title="Orientation — vertical and responsive (resize the window)" code={orientationCode}>
-      <Stack>
-        <ProjectTabs orientation="vertical" />
-        <ProjectTabs orientation={{ default: 'horizontal', md: 'vertical' }} />
-      </Stack>
-    </Sample>
-
-    <Sample title="Overflow — scrolls by default, with scrollButtons, and fullWidth" code={scrollableCode}>
-      <Stack>
-        <div style={narrow}>
-          <ProjectTabs />
-        </div>
-        <div style={narrow}>
-          <ProjectTabs scrollButtons />
-        </div>
-        <ProjectTabs
-          orientation="vertical"
-          scrollButtons
-          scrollBackIcon={<ArrowUpIcon />}
-          scrollForwardIcon={<ArrowDownIcon />}
-          style={{ maxHeight: '12rem' }}
-        />
-        <Tabs defaultValue="Overview">
-          <TabList aria-label="Project" variant="fullWidth">
+    <p>
+      <code>Tabs.variant</code> controls appearance; <code>TabList.variant</code> controls sizing. Nested tabs default
+      independently to <code>line</code>.
+    </p>
+    {appearances.map(({ variant, description }) => (
+      <Sample key={variant} title={variant} code={appearanceCode(variant)}>
+        <p>{description}</p>
+        <Tabs variant={variant} defaultValue="Overview">
+          <TabList aria-label={`${variant} appearance`} slotProps={variant === 'plain' ? customSlots : undefined}>
             <Tab value="Overview">Overview</Tab>
             <Tab value="Dashboards">Dashboards</Tab>
-            <Tab value="Settings">Settings</Tab>
+            <Tab value="Settings" disabled>
+              Settings
+            </Tab>
           </TabList>
           <Section name="Overview" />
           <Section name="Dashboards" />
           <Section name="Settings" />
         </Tabs>
-      </Stack>
-    </Sample>
-
-    <Sample title="startElement and endElement" code={contentCode}>
-      <Tabs defaultValue="Overview">
-        <TabList aria-label="Project">
-          <Tab value="Overview" startElement={<BookOpenIcon />}>
-            Overview
+      </Sample>
+    ))}
+    <Sample title="Group color and per-tab overrides" code={colorsCode}>
+      <p>
+        <code>Tabs.color</code> defaults to <code>primary</code>. Override individual selected tabs with{' '}
+        <code>Tab.color</code>; <code>default</code> selects neutral. Borders stay neutral.
+      </p>
+      <Tabs variant="subtle" color="secondary" defaultValue="Overview">
+        <TabList aria-label="Project colors">
+          <Tab value="Overview">Overview</Tab>
+          <Tab value="Errors" color="error">
+            Errors
           </Tab>
-          <Tab value="Dashboards" startElement={<ViewColumnIcon />}>
-            Dashboards
-          </Tab>
-          <Tab value="Datasources" startElement={<EarthIcon />} endElement={<Chip size="xs">3</Chip>}>
-            Datasources
-          </Tab>
-          <Tab value="Settings" startElement={<CogIcon />}>
+          <Tab value="Settings" color="default">
             Settings
           </Tab>
         </TabList>
         <Section name="Overview" />
-        <Section name="Dashboards" />
-        <Section name="Datasources" />
+        <Section name="Errors" />
         <Section name="Settings" />
       </Tabs>
     </Sample>
@@ -179,17 +262,107 @@ export const Variants: Story = () => (
 );
 Variants.storyName = 'Variants';
 
-const statesCode = `// value is TabsValue | null — null means no tab is active.
-// Type in both fields, switch tabs and come back: the keepMounted panel keeps its text, the other resets.
-<Tabs value={value} onValueChange={setValue}>
+const orientationCode = `<Tabs defaultValue="Overview" orientation={{ default: 'horizontal', md: 'vertical' }}>
   <TabList aria-label="Project">
-    <Tab value="overview">Overview</Tab>
-    <Tab value="dashboards">Dashboards</Tab>
-    <Tab value="secrets" disabled endElement={<Chip size="xs">0</Chip>}>Secrets</Tab>
+    <Tab value="Overview">Overview</Tab>
+    <Tab value="Dashboards">Dashboards</Tab>
+    <Tab value="Settings">Settings</Tab>
   </TabList>
-  <TabPanel value="overview" keepMounted><TextField label="Kept while hidden" /></TabPanel>
-  <TabPanel value="dashboards"><TextField label="Reset when hidden" /></TabPanel>
+  <TabPanel value="Overview" p="md">Overview content</TabPanel>
+  <TabPanel value="Dashboards" p="md">Dashboards content</TabPanel>
+  <TabPanel value="Settings" p="md">Settings content</TabPanel>
 </Tabs>`;
+
+const scrollableCode = `const sections = ['Overview', 'Dashboards', 'Datasources', 'Variables', 'Secrets', 'Roles', 'Role bindings'];
+
+<div style={{ width: '20rem' }}>
+  <Tabs defaultValue={sections[0]}>
+    <TabList aria-label="Project" scrollButtons>
+      {sections.map((name) => <Tab key={name} value={name}>{name}</Tab>)}
+    </TabList>
+    {sections.map((name) => <TabPanel key={name} value={name} p="md">{name} content</TabPanel>)}
+  </Tabs>
+</div>`;
+
+const fullWidthCode = `<Tabs defaultValue="Overview">
+  <TabList aria-label="Project" variant="fullWidth">
+    <Tab value="Overview">Overview</Tab>
+    <Tab value="Dashboards">Dashboards</Tab>
+    <Tab value="Settings">Settings</Tab>
+  </TabList>
+  <TabPanel value="Overview" p="md">Overview content</TabPanel>
+  <TabPanel value="Dashboards" p="md">Dashboards content</TabPanel>
+  <TabPanel value="Settings" p="md">Settings content</TabPanel>
+</Tabs>`;
+
+type ProjectTabsProps = Pick<TabsProps, 'orientation'> &
+  Pick<TabListProps, 'variant' | 'scrollButtons'> & { items?: string[] };
+
+function ProjectTabs({ orientation, items = sections, ...listProps }: ProjectTabsProps): ReactElement {
+  return (
+    <Tabs defaultValue={items[0]} orientation={orientation}>
+      <TabList aria-label="Project" {...listProps}>
+        {items.map((name) => (
+          <Tab key={name} value={name}>
+            {name}
+          </Tab>
+        ))}
+      </TabList>
+      {items.map((name) => (
+        <Section key={name} name={name} />
+      ))}
+    </Tabs>
+  );
+}
+
+export const Layout: Story = () => (
+  <Stack>
+    <Sample title="Responsive orientation (resize the window)" code={orientationCode}>
+      <p>
+        <code>orientation</code> changes layout and navigation keys. This example becomes vertical at <code>md</code>;
+        use <code>vertical</code> for a fixed vertical layout.
+      </p>
+      <ProjectTabs orientation={{ default: 'horizontal', md: 'vertical' }} />
+    </Sample>
+    <Sample title="Overflow with scroll buttons" code={scrollableCode}>
+      <p>
+        All lists scroll on overflow. <code>scrollButtons</code> adds mouse controls; keyboard navigation reveals
+        focused tabs. Vertical lists use up/down chevrons.
+      </p>
+      <div style={narrow}>
+        <ProjectTabs items={overflowSections} scrollButtons />
+      </div>
+    </Sample>
+    <Sample title="Full-width sizing" code={fullWidthCode}>
+      <p>
+        Set <code>TabList.variant</code> to <code>fullWidth</code> to share space evenly; <code>standard</code> keeps
+        natural widths.
+      </p>
+      <ProjectTabs variant="fullWidth" />
+    </Sample>
+  </Stack>
+);
+Layout.storyName = 'Layout';
+
+const statesCode = `const [value, setValue] = useState<TabsValue | null>('Overview');
+
+<>
+  <Tabs value={value} onValueChange={setValue}>
+    <TabList aria-label="Project">
+      <Tab value="Overview">Overview</Tab>
+      <Tab value="Dashboards">Dashboards</Tab>
+      <Tab value="Secrets" disabled>Secrets</Tab>
+    </TabList>
+    <TabPanel value="Overview" p="md" keepMounted>
+      <TextField label="Kept while hidden (keepMounted)" placeholder="Type, switch tab, come back" />
+    </TabPanel>
+    <TabPanel value="Dashboards" p="md">
+      <TextField label="Reset when hidden" placeholder="Type, switch tab, come back" />
+    </TabPanel>
+    <TabPanel value="Secrets" p="md">Secrets content</TabPanel>
+  </Tabs>
+  <p>Active value: <code>{String(value)}</code></p>
+</>`;
 
 function ControlledTabs(): ReactElement {
   const [value, setValue] = useState<TabsValue | null>('Overview');
@@ -199,7 +372,7 @@ function ControlledTabs(): ReactElement {
         <TabList aria-label="Project">
           <Tab value="Overview">Overview</Tab>
           <Tab value="Dashboards">Dashboards</Tab>
-          <Tab value="Secrets" disabled endElement={<Chip size="xs">0</Chip>}>
+          <Tab value="Secrets" disabled>
             Secrets
           </Tab>
         </TabList>
@@ -209,6 +382,7 @@ function ControlledTabs(): ReactElement {
         <TabPanel value="Dashboards" p="md">
           <TextField label="Reset when hidden" placeholder="Type, switch tab, come back" />
         </TabPanel>
+        <Section name="Secrets" />
       </Tabs>
       <p>
         Active value: <code>{String(value)}</code>
@@ -219,66 +393,63 @@ function ControlledTabs(): ReactElement {
 
 export const States: Story = () => (
   <Stack>
-    <Sample title="Controlled, disabled and keepMounted" code={statesCode}>
+    <p>
+      Control selection with <code>value</code>/<code>onValueChange</code>; <code>null</code> means no selection.
+      Disabled tabs remain arrow-key focusable but cannot activate. Inactive panels unmount unless{' '}
+      <code>keepMounted</code> is set.
+    </p>
+    <Sample title="Controlled selection and panel state" code={statesCode}>
       <ControlledTabs />
     </Sample>
   </Stack>
 );
 States.storyName = 'States';
 
-const linkCode = `// Any anchor-like element that forwards its ref (e.g. a router Link) keeps role="tab",
-// keyboard activation and the indicator
-<Tab value="dashboards" render={<Link to="/projects/demo/dashboards" />}>Dashboards</Tab>`;
+const slotsCode = `const sections = ['Overview', 'Dashboards', 'Datasources', 'Variables', 'Secrets', 'Roles', 'Role bindings'];
+const customSlots: TabListSlotProps = {
+  indicator: {
+    style: { display: 'block', height: 'var(--perses-spacing-xs)', borderRadius: 'var(--perses-radius-full)' },
+  },
+  scrollButton: { style: { color: 'var(--perses-status-text-primary)' } },
+};
 
-/** Stand-in for a router `Link`: forwards the ref and everything Base UI injects onto a plain anchor. */
-const DemoLink = forwardRef<HTMLAnchorElement, AnchorHTMLAttributes<HTMLAnchorElement>>(function DemoLink(
-  { children, ...props },
-  ref,
-) {
-  return (
-    <a ref={ref} {...props}>
-      {children}
-    </a>
-  );
-});
-
-export const LinkTabs: Story = () => (
-  <Stack>
-    <Sample title="Tabs that navigate" code={linkCode}>
-      <Tabs defaultValue="Overview">
-        <TabList aria-label="Project">
-          <Tab value="Overview" render={<DemoLink href="#overview" />}>
-            Overview
-          </Tab>
-          <Tab value="Dashboards" render={<DemoLink href="#dashboards" />}>
-            Dashboards
-          </Tab>
-        </TabList>
-        <Section name="Overview" />
-        <Section name="Dashboards" />
-      </Tabs>
-    </Sample>
-  </Stack>
-);
-LinkTabs.storyName = 'Link tabs';
-
-const slotsCode = `<TabList
-  aria-label="Project"
-  scrollButtons
-  slotProps={{
-    indicator: { style: { height: 'var(--perses-spacing-xs)', borderRadius: 'var(--perses-radius-full)' } },
-    scrollButton: { style: { color: 'var(--perses-status-text-primary)' } },
-  }}
->
-<Tab value="overview" style={{ '--perses-tab-min-height': '2.25rem' }}>Overview</Tab>`;
+<div style={{ width: '20rem' }}>
+  <Tabs variant="plain" defaultValue={sections[0]} style={{ '--perses-tab-min-height': '2.25rem' }}>
+    <TabList aria-label="Project" scrollButtons slotProps={customSlots}>
+      {sections.map((name) => <Tab key={name} value={name}>{name}</Tab>)}
+    </TabList>
+    {sections.map((name) => <TabPanel key={name} value={name} p="md">{name} content</TabPanel>)}
+  </Tabs>
+</div>`;
 
 export const Slots: Story = () => (
   <Stack>
-    <Sample title="slotProps.indicator, slotProps.scrollButton and TabStyle" code={slotsCode}>
+    <p>
+      <code>plain</code> retains active text color, ARIA, focus and disabled behavior, but requires a visible active cue
+      beyond color. Use <code>data-active</code> CSS or enable the indicator with{' '}
+      <code>slotProps.indicator.style.display</code> set to <code>block</code>.
+    </p>
+    <Sample title="Custom indicator, scroll buttons and tab height" code={slotsCode}>
       <div style={narrow}>
-        <ProjectTabs scrollButtons slotProps={indicatorSlots} tabStyle={compactTab} />
+        <Tabs variant="plain" defaultValue={overflowSections[0]} style={compactTab}>
+          <TabList aria-label="Project" scrollButtons slotProps={customSlots}>
+            {overflowSections.map((name) => (
+              <Tab key={name} value={name}>
+                {name}
+              </Tab>
+            ))}
+          </TabList>
+          {overflowSections.map((name) => (
+            <Section key={name} name={name} />
+          ))}
+        </Tabs>
       </div>
     </Sample>
+    <p>
+      <code>indicator</code> styles the active cue; <code>scrollButton</code> styles both overflow buttons. Preserve
+      Base UI geometry (<code>--active-tab-*</code>) and use Perses tokens. Set <code>--perses-tab-min-height</code> on
+      the root to size every tab.
+    </p>
   </Stack>
 );
 Slots.storyName = 'Slots';
