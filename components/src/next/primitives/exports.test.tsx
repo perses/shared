@@ -48,6 +48,15 @@ import type {
   TableCellProps,
   TableProps,
   TableRowProps,
+  TabListProps,
+  TabListVariant,
+  TabPanelProps,
+  TabProps,
+  TabsOrientation,
+  TabsProps,
+  TabStyle,
+  TabsValue,
+  TabsVariant,
   TextFieldProps,
   TextFieldStyle,
   TextHelperProps,
@@ -84,10 +93,15 @@ import {
   TableRow,
   TableRowExpandButton,
   TableSortLabel,
+  Tab,
+  TabList,
+  TabPanel,
+  Tabs,
   Text,
   TextField,
   TextHelper,
   Tooltip,
+  useResponsiveValue,
 } from './index';
 
 describe('primitives barrel exports', () => {
@@ -112,6 +126,7 @@ describe('primitives barrel exports', () => {
     expect(MenuItem).toBeDefined();
     expect(MenuLinkItem).toBeDefined();
     expect(MenuCheckboxItem).toBeDefined();
+    expect(useResponsiveValue).toBeDefined();
     expect(Table).toBeDefined();
     expect(TableBody).toBeDefined();
     expect(TableCell).toBeDefined();
@@ -122,6 +137,10 @@ describe('primitives barrel exports', () => {
     expect(TableRow).toBeDefined();
     expect(TableRowExpandButton).toBeDefined();
     expect(TableSortLabel).toBeDefined();
+    expect(Tabs).toBeDefined();
+    expect(TabList).toBeDefined();
+    expect(Tab).toBeDefined();
+    expect(TabPanel).toBeDefined();
     expect(TextField).toBeDefined();
     expect(Text).toBeDefined();
     expect(TextHelper).toBeDefined();
@@ -174,6 +193,16 @@ describe('primitives barrel exports', () => {
     const sortDirection: SortDirection = 'asc';
     const sharedSize: Size = 'md';
     const sharedStatus: Status = 'error';
+    const tabsVariant: TabsVariant = 'enclosed';
+    const tabsProps: TabsProps = { defaultValue: 'one', variant: tabsVariant };
+    const tabsValue: TabsValue = 1;
+    const noTab: TabsProps['value'] = null;
+    const tabsOrientation: TabsOrientation = 'vertical';
+    const tabListProps: TabListProps = { 'aria-label': 'Sections' };
+    const tabListVariant: TabListVariant = 'fullWidth';
+    const tabProps: TabProps = { value: 'one' };
+    const tabStyle: TabStyle = { '--perses-tab-min-height': '3rem' };
+    const tabPanelProps: TabPanelProps = { value: 'one' };
     const textFieldProps: TextFieldProps = { label: 'Name' };
     const textFieldStyle: TextFieldStyle = { '--perses-textfield-size-md': '2.5rem' };
     const textProps: TextProps = { as: 'p', size: 'sm', weight: 'medium', color: 'secondary' };
@@ -217,6 +246,16 @@ describe('primitives barrel exports', () => {
     expect(sortDirection).toBe('asc');
     expect(sharedSize).toBe('md');
     expect(sharedStatus).toBe('error');
+    expect(tabsProps).toBeDefined();
+    expect(tabsProps.variant).toBe('enclosed');
+    expect(tabsValue).toBe(1);
+    expect(noTab).toBeNull();
+    expect(tabsOrientation).toBe('vertical');
+    expect(tabListProps).toBeDefined();
+    expect(tabListVariant).toBe('fullWidth');
+    expect(tabProps).toBeDefined();
+    expect(tabStyle).toBeDefined();
+    expect(tabPanelProps).toBeDefined();
     expect(textFieldProps).toBeDefined();
     expect(textFieldStyle).toBeDefined();
     expect(textProps).toBeDefined();

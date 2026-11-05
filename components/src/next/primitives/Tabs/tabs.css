@@ -1,0 +1,463 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '@perses-dev/design-tokens/css/layers';
+
+@layer perses.components {
+  :where(.ps-Tabs) {
+    /* Reset appearance at every root, including nested tab sets. */
+    --ps-tabs-baseline-width: var(--perses-border-width-sm);
+    --ps-tabs-list-background: transparent;
+    --ps-tabs-list-padding: 0px;
+    --ps-tabs-list-radius: 0px;
+    --ps-tabs-tab-radius: 0px;
+    --ps-tabs-active-background: initial;
+    --ps-tabs-indicator-display: block;
+    --ps-tabs-outline-display: none;
+    --ps-tabs-forced-active-bar: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  :where(.ps-Tabs[data-orientation='vertical']) {
+    flex-direction: row;
+  }
+
+  /* ---- Palette ---- */
+  :where(.ps-Tabs[data-color]),
+  :where(.ps-Tab[data-color]) {
+    --ps-tabs-color-ring: transparent;
+  }
+
+  /*
+   * Neutral status text matches idle tabs and its fill matches hover, so neutral selection uses
+   * primary text and a ring.
+   */
+  :where(.ps-Tabs[data-color='default']),
+  :where(.ps-Tab[data-color='default']),
+  :where(.ps-TabList:has(> .ps-TabList__tabs .ps-Tab[data-active][data-color='default']) > .ps-TabList__indicator) {
+    --ps-tabs-color-text: var(--perses-text-primary);
+    --ps-tabs-color-bg: var(--perses-status-bg-default);
+    --ps-tabs-color-solid: var(--perses-status-solid-default);
+    --ps-tabs-color-ring: var(--perses-border-control);
+  }
+
+  :where(.ps-Tabs[data-color='primary']),
+  :where(.ps-Tab[data-color='primary']),
+  :where(.ps-TabList:has(> .ps-TabList__tabs .ps-Tab[data-active][data-color='primary']) > .ps-TabList__indicator) {
+    --ps-tabs-color-text: var(--perses-status-text-primary);
+    --ps-tabs-color-bg: var(--perses-status-bg-primary);
+    --ps-tabs-color-solid: var(--perses-status-solid-primary);
+  }
+
+  :where(.ps-Tabs[data-color='secondary']),
+  :where(.ps-Tab[data-color='secondary']),
+  :where(.ps-TabList:has(> .ps-TabList__tabs .ps-Tab[data-active][data-color='secondary']) > .ps-TabList__indicator) {
+    --ps-tabs-color-text: var(--perses-status-text-secondary);
+    --ps-tabs-color-bg: var(--perses-status-bg-secondary);
+    --ps-tabs-color-solid: var(--perses-status-solid-secondary);
+  }
+
+  :where(.ps-Tabs[data-color='error']),
+  :where(.ps-Tab[data-color='error']),
+  :where(.ps-TabList:has(> .ps-TabList__tabs .ps-Tab[data-active][data-color='error']) > .ps-TabList__indicator) {
+    --ps-tabs-color-text: var(--perses-status-text-error);
+    --ps-tabs-color-bg: var(--perses-status-bg-error);
+    --ps-tabs-color-solid: var(--perses-status-solid-error);
+  }
+
+  :where(.ps-Tabs[data-color='warning']),
+  :where(.ps-Tab[data-color='warning']),
+  :where(.ps-TabList:has(> .ps-TabList__tabs .ps-Tab[data-active][data-color='warning']) > .ps-TabList__indicator) {
+    --ps-tabs-color-text: var(--perses-status-text-warning);
+    --ps-tabs-color-bg: var(--perses-status-bg-warning);
+    --ps-tabs-color-solid: var(--perses-status-solid-warning);
+  }
+
+  :where(.ps-Tabs[data-color='success']),
+  :where(.ps-Tab[data-color='success']),
+  :where(.ps-TabList:has(> .ps-TabList__tabs .ps-Tab[data-active][data-color='success']) > .ps-TabList__indicator) {
+    --ps-tabs-color-text: var(--perses-status-text-success);
+    --ps-tabs-color-bg: var(--perses-status-bg-success);
+    --ps-tabs-color-solid: var(--perses-status-solid-success);
+  }
+
+  :where(.ps-Tabs[data-color='info']),
+  :where(.ps-Tab[data-color='info']),
+  :where(.ps-TabList:has(> .ps-TabList__tabs .ps-Tab[data-active][data-color='info']) > .ps-TabList__indicator) {
+    --ps-tabs-color-text: var(--perses-status-text-info);
+    --ps-tabs-color-bg: var(--perses-status-bg-info);
+    --ps-tabs-color-solid: var(--perses-status-solid-info);
+  }
+
+  /* ---- Appearance (independent of TabList sizing) ---- */
+  :where(.ps-Tabs[data-variant='subtle']) {
+    --ps-tabs-baseline-width: 0px;
+    --ps-tabs-tab-radius: var(--perses-radius-md);
+
+    --ps-tabs-indicator-display: none;
+    --ps-tabs-forced-active-bar: block;
+  }
+
+  :where(.ps-Tabs[data-variant='enclosed']) {
+    --ps-tabs-baseline-width: 0px;
+    --ps-tabs-list-background: var(--perses-bg-sunken);
+    --ps-tabs-list-padding: var(--perses-spacing-xs);
+    --ps-tabs-list-radius: var(--perses-radius-lg);
+    --ps-tabs-tab-radius: var(--perses-radius-md);
+    --ps-tabs-active-background: var(--perses-bg-default);
+    --ps-tabs-indicator-display: none;
+    --ps-tabs-forced-active-bar: block;
+  }
+
+  :where(.ps-Tabs[data-variant='outline']) {
+    --ps-tabs-baseline-width: 0px;
+    --ps-tabs-indicator-display: none;
+    --ps-tabs-outline-display: block;
+    --ps-tabs-forced-active-bar: block;
+  }
+
+  :where(.ps-Tabs[data-variant='plain']) {
+    --ps-tabs-baseline-width: 0px;
+    --ps-tabs-indicator-display: none;
+  }
+
+  /* ---- List ---- */
+  :where(.ps-TabList) {
+    position: relative;
+    display: grid;
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+    flex-direction: row;
+    align-items: stretch;
+    overflow: auto;
+    scrollbar-width: none;
+    padding: var(--ps-tabs-list-padding);
+    border-radius: var(--ps-tabs-list-radius);
+    border-bottom: var(--ps-tabs-baseline-width) solid var(--perses-border-default);
+    background-color: var(--ps-tabs-list-background);
+  }
+
+  :where(.ps-TabList)::-webkit-scrollbar {
+    display: none;
+  }
+
+  :where(.ps-TabList[data-orientation='vertical']) {
+    flex-direction: column;
+    border-bottom: 0;
+    border-inline-end: var(--ps-tabs-baseline-width) solid var(--perses-border-default);
+  }
+
+  /* Keep the unselected outline baseline pinned while tabs scroll. */
+  :where(.ps-TabList)::before {
+    content: '';
+    display: var(--ps-tabs-outline-display);
+    grid-area: 1 / 1;
+    position: sticky;
+    inset: 0;
+    min-width: 0;
+    min-height: 0;
+    contain: size;
+    z-index: 1;
+    border-block-end: var(--perses-border-width-sm) solid var(--perses-border-default);
+    pointer-events: none;
+  }
+
+  :where(.ps-TabList[data-orientation='vertical'])::before {
+    border-block-end: 0;
+    border-inline-end: var(--perses-border-width-sm) solid var(--perses-border-default);
+  }
+
+  :where(.ps-TabList:has(.ps-Tab[data-active]))::before {
+    display: none;
+  }
+
+  /* ---- List sizing ---- */
+  :where(.ps-TabList[data-variant='standard'] .ps-Tab) {
+    flex-shrink: 0;
+  }
+
+  :where(.ps-TabList[data-variant='fullWidth'] .ps-Tab) {
+    flex: 1;
+  }
+
+  /* Overlay controls without extra gaps or overflow; keep the list as Base UI's scroll/indicator reference. */
+
+  :where(.ps-TabList__tabs) {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: inherit;
+    align-items: inherit;
+    justify-content: inherit;
+    gap: inherit;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  /* Carry trailing padding inside the strip; grid scrolling otherwise omits it. */
+  :where(.ps-TabList[data-variant='standard'] > .ps-TabList__tabs) {
+    box-sizing: border-box;
+    padding-inline-end: inherit;
+  }
+
+  :where(.ps-TabList[data-variant='standard'][data-orientation='vertical'] > .ps-TabList__tabs) {
+    padding-inline-end: 0;
+    padding-block-end: inherit;
+  }
+
+  :where(.ps-TabList[data-orientation='vertical'] > .ps-TabList__tabs) {
+    width: auto;
+    min-width: 0;
+    height: max-content;
+    min-height: 100%;
+  }
+
+  :where(.ps-TabList[data-variant='fullWidth'] > .ps-TabList__tabs) {
+    width: auto;
+    min-width: 0;
+    height: auto;
+    min-height: 0;
+  }
+
+  :where(.ps-TabList__scrollButtons) {
+    grid-area: 1 / 1;
+    position: sticky;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: inherit;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 0;
+    min-height: 0;
+    contain: size;
+    overflow: clip;
+    pointer-events: none;
+  }
+
+  :where(.ps-TabList__scrollButton) {
+    flex-shrink: 0;
+    background-color: var(--perses-bg-surface);
+    pointer-events: auto;
+  }
+
+  :where(.ps-TabList__scrollButton:disabled) {
+    visibility: hidden;
+  }
+
+  /* ---- Tab ---- */
+  :where(.ps-Tab) {
+    box-sizing: border-box;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--perses-spacing-sm);
+    min-height: var(--perses-tab-min-height, var(--perses-control-size-lg));
+    padding: 0 var(--perses-spacing-lg);
+    border: 0;
+    border-radius: var(--ps-tabs-tab-radius);
+    background: none;
+    font-family: var(--perses-font-family);
+    font-size: var(--perses-font-size-md);
+    font-weight: var(--perses-font-weight-medium);
+    line-height: var(--perses-line-height-relaxed);
+    color: var(--perses-text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    outline: 0;
+  }
+
+  :where(.ps-Tab[data-orientation='vertical']) {
+    justify-content: flex-start;
+  }
+
+  :where(.ps-Tab:hover:not([data-disabled])) {
+    color: var(--perses-text-primary);
+    background-color: var(--perses-status-bg-default);
+  }
+
+  /* Resolve subtle fills on the tab so local palette overrides apply. */
+  :where(.ps-Tab[data-variant='subtle']) {
+    --ps-tabs-active-background: var(--ps-tabs-color-bg);
+  }
+
+  :where(.ps-Tab[data-variant='subtle'][data-active]) {
+    box-shadow: inset 0 0 0 var(--perses-border-width-sm) var(--ps-tabs-color-ring);
+  }
+
+  :where(.ps-Tab[data-active]) {
+    color: var(--ps-tabs-color-text);
+    background-color: var(--ps-tabs-active-background, transparent);
+  }
+
+  :where(.ps-Tab[data-active]:hover:not([data-disabled])) {
+    background-color: var(--ps-tabs-active-background, var(--perses-status-bg-default));
+  }
+
+  /* Shadow segments avoid surface-colored masks and extra scrollable overflow. */
+  :where(.ps-Tab[data-active])::before {
+    content: '';
+    display: var(--ps-tabs-outline-display);
+    position: absolute;
+    inset: 0;
+    border: var(--perses-border-width-sm) solid var(--perses-border-default);
+    border-block-end: 0;
+    border-start-start-radius: var(--perses-radius-md);
+    border-start-end-radius: var(--perses-radius-md);
+    pointer-events: none;
+  }
+
+  :where(.ps-Tab[data-active])::after {
+    content: '';
+    display: var(--ps-tabs-outline-display);
+    position: absolute;
+    inset: auto 0 0;
+    height: var(--perses-border-width-sm);
+    /* Keep the rail above later siblings' hover fills. */
+    z-index: 1;
+    box-shadow: 0 0 0 100vmax var(--perses-border-default);
+    /* Exclude the opening to prevent antialiased seams at fractional device pixels. */
+    clip-path: polygon(
+      -100vmax 0,
+      0 0,
+      0 100%,
+      100% 100%,
+      100% 0,
+      calc(100% + 100vmax) 0,
+      calc(100% + 100vmax) 100%,
+      -100vmax 100%
+    );
+    pointer-events: none;
+  }
+
+  :where(.ps-Tab[data-active][data-orientation='vertical'])::before {
+    border-block-end: var(--perses-border-width-sm) solid var(--perses-border-default);
+    border-inline-end: 0;
+    border-start-end-radius: 0;
+    border-end-start-radius: var(--perses-radius-md);
+  }
+
+  :where(.ps-Tab[data-active][data-orientation='vertical'])::after {
+    inset: auto;
+    inset-block: 0;
+    inset-inline-end: 0;
+    width: var(--perses-border-width-sm);
+    height: auto;
+    clip-path: polygon(
+      0 -100vmax,
+      100% -100vmax,
+      100% 0,
+      0 0,
+      0 100%,
+      100% 100%,
+      100% calc(100% + 100vmax),
+      0 calc(100% + 100vmax)
+    );
+  }
+
+  :where(.ps-Tab:focus-visible) {
+    outline-width: var(--perses-focus-ring-width);
+    outline-style: solid;
+    outline-color: var(--perses-focus-ring-color);
+    outline-offset: calc(-1 * var(--perses-focus-ring-width));
+  }
+
+  :where(.ps-Tab[data-disabled]) {
+    opacity: var(--perses-opacity-disabled, 0.5);
+    cursor: not-allowed;
+  }
+
+  :where(.ps-Tab__content) {
+    min-width: 0;
+  }
+
+  :where(.ps-Tab__start),
+  :where(.ps-Tab__end) {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* ---- Indicator (positioned from Base UI's --active-tab-* variables) ---- */
+  :where(.ps-TabList__indicator) {
+    display: var(--ps-tabs-indicator-display);
+    position: absolute;
+    left: var(--active-tab-left);
+    bottom: 0;
+    width: var(--active-tab-width);
+    height: var(--perses-border-width-md);
+    background-color: var(--ps-tabs-color-solid);
+    pointer-events: none;
+  }
+
+  :where(.ps-TabList__indicator[data-orientation='vertical']) {
+    left: auto;
+    bottom: auto;
+    inset-inline-end: 0;
+    top: var(--active-tab-top);
+    width: var(--perses-border-width-md);
+    height: var(--active-tab-height);
+  }
+
+  @media (forced-colors: active) {
+    :where(.ps-Tab[data-active]) {
+      color: CanvasText;
+    }
+
+    /* A panel-facing bar, never an outline, keeps selection distinct from the Highlight focus ring. */
+    :where(.ps-Tab[data-active])::after {
+      display: var(--ps-tabs-forced-active-bar);
+      inset: auto 0 0;
+      height: var(--perses-border-width-md);
+      background-color: CanvasText;
+      box-shadow: none;
+      clip-path: none;
+    }
+
+    :where(.ps-Tab[data-active][data-orientation='vertical'])::after {
+      inset: auto;
+      inset-block: 0;
+      inset-inline-end: 0;
+      width: var(--perses-border-width-md);
+      height: auto;
+    }
+
+    :where(.ps-Tab:focus-visible) {
+      outline-width: var(--perses-focus-ring-width);
+      outline-color: Highlight;
+      outline-offset: calc(-1 * var(--perses-focus-ring-width));
+    }
+
+    :where(.ps-TabList__indicator) {
+      background-color: CanvasText;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    :where(.ps-TabList) {
+      scroll-behavior: smooth;
+    }
+
+    :where(.ps-TabList__indicator) {
+      transition:
+        left 0.15s ease,
+        top 0.15s ease,
+        width 0.15s ease,
+        height 0.15s ease;
+    }
+  }
+}
