@@ -154,7 +154,7 @@ describe('menu.css', () => {
       expect(propertyFor(item, 'outline')).toBe('0');
       item.focus();
       expect(item).toHaveFocus();
-      expect(propertyFor(item, 'outline')).toBe('var(--perses-focus-ring-width) solid var(--perses-text-primary)');
+      expect(propertyFor(item, 'outline')).toBe('var(--perses-focus-ring-width) solid var(--perses-focus-ring-color)');
       expect(propertyFor(item, 'outline-offset')).toBe('calc(-1 * var(--perses-focus-ring-offset))');
       expect(propertyFor(item, 'outline-color', true)).toBe('Highlight');
       expect(propertyFor(item, 'background-color')).toBe('');

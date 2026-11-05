@@ -113,7 +113,31 @@ Keep selectors for focus, disabled, multiline, and status overrides outside `:wh
 
 Apply `--perses-opacity-disabled` (default `0.5`) once at the disabled group's root, preserving status and custom colors without dimming labels or helpers again. Checkbox and Switch dim their label wrapper based on the control's effective Base UI disabled state, including inheritance; unlabeled controls dim themselves.
 
+If a nested part also fades (for example a decorative checkbox inside a disabled menu item), mark it `data-decorative` and skip the fade on it so the row is not dimmed twice.
+
+Selected, hovered, and focused must look different from each other:
+
+- **Selected:** show a check mark or other shape, never color alone. A `color` prop tints this indicator, not the whole
+  row. In `forced-colors`, use `CanvasText`.
+- **Hovered:** use a faint `--perses-status-bg-default` background, and skip it when disabled.
+- **Focused (`:focus-visible`):** use `--perses-focus-ring-width` and `--perses-focus-ring-offset` with
+  `--perses-focus-ring-color`. In `forced-colors`, use `Highlight`.
+
+```css
+:where(.ps-Example:focus-visible) {
+  outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
+  outline-offset: var(--perses-focus-ring-offset);
+}
+```
+
+When the element sits in a scrolling or clipping container, such as a menu popup, use a negative outline offset so the
+ring stays inside the element and is not clipped.
+
 When zero-specificity defaults set the same property on the same element in the same layer, later rules win. Put base defaults before size defaults, and keep state overrides easy to identify. Avoid `!important` or increasingly specific selectors as a substitute for the layer and default/override structure.
+
+### Portaled components
+
+Popups rendered in a portal (Menu, Tooltip) live outside the `ThemeModeProvider` wrapper and lose its tokens. Read `ThemeModeContext` and set `data-perses-mode` on the portaled element, as [Menu](./primitives/Menu/Menu.tsx) does. Use `data-perses-mode` only for colors and tokens, never for layout: it can land on any portaled element, so a layout rule keyed on it (such as `min-height: 100vh`) will resize popups.
 
 ## Content elements
 
@@ -192,4 +216,14 @@ uses the component's own custom properties, type it as `SlotStyleProps<Component
 - Preserve visible focus indicators and accessible disabled/error behavior.
 - Keep stories and focused tests aligned with public behavior. CSS-source contract tests, such as
   [`controlSize.test.ts`](./primitives/controlSize.test.ts), may need selector updates when adding `:where()`.
+- Re-read story prose and JSDoc after behavior changes so defaults and descriptions stay accurate.
 - Run the affected workspace's checks and the repository validation required by the contributor guide.
+
+### Visual pass in Ladle before requesting review
+
+- Portaled popups open beside their trigger, in both dark and light mode.
+- Popup and page backgrounds are distinguishable in light mode. If you change a shared overlay token, check every component that uses it (Menu, Tooltip).
+- Selected, hovered, and focused states are distinct, including in `forced-colors` mode.
+- Density: padding applies on all four sides, and `sm` is the default size.
+- Disabled content fades once, not twice.
+- Compare before and after: run Ladle on the parent commit and on your branch (a `git worktree` on a second port works), and attach both screenshots to the PR.
