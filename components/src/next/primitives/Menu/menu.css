@@ -108,7 +108,7 @@
   }
 
   :where(.ps-MenuItemBase:focus-visible) {
-    outline: var(--perses-focus-ring-width) solid var(--perses-text-primary);
+    outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
     /* Keep the ring inside the row so the scrollable popup does not clip it. */
     outline-offset: calc(-1 * var(--perses-focus-ring-offset));
   }
