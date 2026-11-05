@@ -39,6 +39,7 @@ import {
   useDisableAutoRefreshSetting,
   useAutoRefreshIntervalsOptions,
 } from '../../runtime/TimeRangeProvider/TimeRangeSettingsProvider';
+import { fromDurationToMillis, getNeighbourRelativeTimeRange } from './zoomRelativeTimeRange';
 
 const DEFAULT_HEIGHT = '34px';
 
@@ -103,20 +104,6 @@ export function TimeRangeControls({
     [setRefreshInterval],
   );
 
-  const fromDurationToMillis = (strDuration: string): number => {
-    const duration = parseDurationString(strDuration);
-    const millis =
-      ((duration.seconds ?? 0) +
-        (duration.minutes ?? 0) * 60 +
-        (duration.hours ?? 0) * 3600 +
-        (duration.days ?? 0) * 86400 +
-        (duration.weeks ?? 0) * 7 * 86400 +
-        (duration.months ?? 0) * 30.436875 * 86400 + // avg month duration is ok for zoom purposes
-        (duration.years ?? 0) * 365.2425 * 86400) * // avg year duration is ok for zoom purposes
-      1000; // to milliseconds
-    return millis;
-  };
-
   // Function to double current time range, adding 50% before current start and 50% after current end
   const doubleTimeRange = (): AbsoluteTimeRange => {
     let newStart, newEnd, extendEndsBy;
@@ -166,30 +153,10 @@ export function TimeRangeControls({
     return { start: newStart, end: newEnd };
   };
 
-  // For a "last X" range, zoom to the neighbouring "last Y" preset instead of freezing it into absolute timestamps.
-  // Returns undefined when the range is not a "last X" one or when there is no preset left in that direction.
-  const neighbourRelativeTimeRange = (direction: 'in' | 'out'): RelativeTimeRange | undefined => {
-    if (!('pastDuration' in timeRange) || timeRange.end !== undefined) {
-      return undefined;
-    }
-    const currentMs = fromDurationToMillis(timeRange.pastDuration);
-    let best: { value: RelativeTimeRange; ms: number } | undefined;
-    for (const option of timePresetsValue) {
-      if (option.value.end !== undefined) {
-        continue;
-      }
-      const ms = fromDurationToMillis(option.value.pastDuration);
-      const isCandidate = direction === 'out' ? ms > currentMs : ms < currentMs;
-      const isCloser = best === undefined || (direction === 'out' ? ms < best.ms : ms > best.ms);
-      if (isCandidate && isCloser) {
-        best = { value: option.value, ms };
-      }
-    }
-    return best?.value;
-  };
-
-  const setHalfTimeRange = (): void => setTimeRange(neighbourRelativeTimeRange('in') ?? halfTimeRange());
-  const setDoubleTimeRange = (): void => setTimeRange(neighbourRelativeTimeRange('out') ?? doubleTimeRange());
+  const setHalfTimeRange = (): void =>
+    setTimeRange(getNeighbourRelativeTimeRange(timeRange, timePresetsValue, 'in') ?? halfTimeRange());
+  const setDoubleTimeRange = (): void =>
+    setTimeRange(getNeighbourRelativeTimeRange(timeRange, timePresetsValue, 'out') ?? doubleTimeRange());
 
   const handleTimeZoneChange = useCallback(
     (tz: TimeZoneOption) => {
