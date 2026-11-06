@@ -63,8 +63,11 @@ vi.mock('@perses-dev/components', () => ({
 const mockSetTimeRange = vi.fn();
 const mockRefresh = vi.fn();
 const mockSetDashboard = vi.fn();
+const mockGetNeighbourRelativeTimeRange = vi.fn();
 
 vi.mock('@perses-dev/plugin-system', () => ({
+  getNeighbourRelativeTimeRange: (...args: unknown[]): unknown => mockGetNeighbourRelativeTimeRange(...args),
+  useTimeRangeOptionsSetting: (): [] => [],
   useTimeRange: (): {
     timeRange: { pastDuration: string };
     setTimeRange: typeof mockSetTimeRange;
@@ -358,5 +361,50 @@ describe('useDashboardShortcuts toggle edit mode behavior', () => {
     await waitFor(() => {
       expect(mockSetEditMode).toHaveBeenCalledWith(true);
     });
+  });
+});
+
+describe('useDashboardShortcuts zoom behavior', () => {
+  beforeEach(() => {
+    mockIsEditMode = false;
+    latestHotkeyConfigs = [];
+    latestSequenceConfigs = [];
+    vi.clearAllMocks();
+    mockGetNeighbourRelativeTimeRange.mockReturnValue(undefined);
+  });
+
+  it('zooms out to the neighbouring relative preset when there is one', () => {
+    mockGetNeighbourRelativeTimeRange.mockReturnValue({ pastDuration: '1h' });
+    renderHook(() => useDashboardShortcuts({ isReadonly: false }));
+
+    act(() => {
+      triggerSequence(['T', 'O']);
+    });
+
+    expect(mockGetNeighbourRelativeTimeRange).toHaveBeenCalledWith({ pastDuration: '30m' }, [], 'out');
+    expect(mockSetTimeRange).toHaveBeenCalledWith({ pastDuration: '1h' });
+  });
+
+  it('zooms in to the neighbouring relative preset when there is one', () => {
+    mockGetNeighbourRelativeTimeRange.mockReturnValue({ pastDuration: '15m' });
+    renderHook(() => useDashboardShortcuts({ isReadonly: false }));
+
+    act(() => {
+      triggerSequence(['T', 'I']);
+    });
+
+    expect(mockGetNeighbourRelativeTimeRange).toHaveBeenCalledWith({ pastDuration: '30m' }, [], 'in');
+    expect(mockSetTimeRange).toHaveBeenCalledWith({ pastDuration: '15m' });
+  });
+
+  it('falls back to an absolute range when there is no neighbouring preset', () => {
+    renderHook(() => useDashboardShortcuts({ isReadonly: false }));
+
+    act(() => {
+      triggerSequence(['T', 'O']);
+    });
+
+    const [range] = mockSetTimeRange.mock.calls[0] ?? [];
+    expect(range.end.getTime() - range.start.getTime()).toBe(60 * 60 * 1000);
   });
 });
