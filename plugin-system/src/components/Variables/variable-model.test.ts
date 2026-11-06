@@ -92,7 +92,6 @@ vi.mock('../../runtime', async () => {
     useAllVariableValues: vi.fn(),
     useTimeRange: vi.fn().mockReturnValue({
       absoluteTimeRange: { start: new Date('2023-01-01T00:00:00Z'), end: new Date('2023-01-02T00:00:00Z') },
-      refreshKey: 'refresh-key',
     }),
   };
 });
@@ -138,7 +137,7 @@ describe('useListVariablePluginValues', () => {
     const expectedCtx = {
       datasourceStore: {},
       variables: {},
-      timeRange: expect.any(Object),
+      absoluteTimeRange: expect.any(Object),
     };
 
     expect(getVariableOptionsMock).toHaveBeenCalledWith(
@@ -181,7 +180,7 @@ describe('useListVariablePluginValues', () => {
     const expectedCtx = {
       datasourceStore: {},
       variables: allVariableDepsWithoutSelf,
-      timeRange: expect.any(Object),
+      absoluteTimeRange: expect.any(Object),
     };
 
     expect(getVariableOptionsMock).toHaveBeenCalledWith(
@@ -240,6 +239,18 @@ describe('useResolveListVariableValues', () => {
       VarA: 'opt1',
       VarB: 'opt1',
     });
+    expect(getVariableOptionsMock).toHaveBeenCalledWith(
+      {},
+      {
+        datasourceStore: {},
+        variables: {},
+        absoluteTimeRange: {
+          start: new Date('2023-01-01T00:00:00Z'),
+          end: new Date('2023-01-02T00:00:00Z'),
+        },
+      },
+      expect.any(AbortSignal),
+    );
   });
 
   it('should resolve dependent variable after its dependency resolves', async () => {

@@ -14,14 +14,20 @@
 import type { UnknownSpec, ProfileData, AbsoluteTimeRange } from '@perses-dev/spec';
 import type { Query, QueryKey } from '@tanstack/react-query';
 
-import type { DatasourceStore } from '../runtime';
+import type { DatasourceStore, VariableStateMap } from '../runtime';
 import type { Plugin } from './plugin-base';
+
+/** Dashboard variables used to evaluate a profile query. */
+export interface ProfileQueryPluginDependencies {
+  variables?: string[];
+}
 
 /**
  * A plugin for running profile queries.
  */
 export interface ProfileQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
   getProfileData: (spec: Spec, ctx: ProfileQueryContext, abortSignal?: AbortSignal) => Promise<ProfileData>;
+  dependsOn?: (spec: Spec, ctx: ProfileQueryContext) => ProfileQueryPluginDependencies;
 }
 
 /**
@@ -29,7 +35,10 @@ export interface ProfileQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
  */
 export interface ProfileQueryContext {
   datasourceStore: DatasourceStore;
-  absoluteTimeRange?: AbsoluteTimeRange;
+  /** Required absolute time range over which to query profile data. */
+  absoluteTimeRange: AbsoluteTimeRange;
+  /** Current dashboard and built-in variable values. */
+  variableState: VariableStateMap;
 }
 
 export type ProfileDataQuery = Query<ProfileData, unknown, ProfileData, QueryKey>;
