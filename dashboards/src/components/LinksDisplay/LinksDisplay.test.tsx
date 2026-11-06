@@ -18,9 +18,10 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 
-import { VariableProvider } from '../../context';
-import { renderWithContext } from '../../test';
+import { AnnotationProvider, DashboardCatalogProvider, DashboardProvider, VariableProvider } from '../../context';
+import { getTestDashboard, renderWithContext } from '../../test';
 import { LinksDisplay } from './LinksDisplay';
+import type { TagLinkDashboard } from './tag-links';
 
 const testTheme = createTheme({
   transitions: { create: () => 'none' },
@@ -153,6 +154,50 @@ describe('LinksDisplay', () => {
       ).toBeInTheDocument();
     });
 
+    it('leaves a URL unchanged when keepTime and includeVariables are off', () => {
+      renderLinks(<LinksDisplay links={[{ name: 'Docs', url: 'https://perses.dev/docs' }]} variant="dashboard" />, [
+        { kind: 'TextVariable', spec: { name: 'env', value: 'prod' } },
+      ]);
+
+      expect(screen.getByText('Docs').closest('a')).toHaveAttribute('href', 'https://perses.dev/docs');
+    });
+
+    it('appends the time range only when keepTime is set', () => {
+      renderLinks(
+        <LinksDisplay links={[{ name: 'Docs', url: 'https://perses.dev/docs', keepTime: true }]} variant="dashboard" />,
+        [{ kind: 'TextVariable', spec: { name: 'env', value: 'prod' } }],
+      );
+
+      expect(screen.getByText('Docs').closest('a')).toHaveAttribute('href', 'https://perses.dev/docs?start=1h');
+    });
+
+    it('appends variables only when includeVariables is set', () => {
+      renderLinks(
+        <LinksDisplay
+          links={[{ name: 'Docs', url: 'https://perses.dev/docs', includeVariables: true }]}
+          variant="dashboard"
+        />,
+        [{ kind: 'TextVariable', spec: { name: 'env', value: 'prod' } }],
+      );
+
+      expect(screen.getByText('Docs').closest('a')).toHaveAttribute('href', 'https://perses.dev/docs?var-env=prod');
+    });
+
+    it('appends the time range and variables when both flags are set', () => {
+      renderLinks(
+        <LinksDisplay
+          links={[{ name: 'Docs', url: 'https://perses.dev/docs', keepTime: true, includeVariables: true }]}
+          variant="dashboard"
+        />,
+        [{ kind: 'TextVariable', spec: { name: 'env', value: 'prod' } }],
+      );
+
+      expect(screen.getByText('Docs').closest('a')).toHaveAttribute(
+        'href',
+        'https://perses.dev/docs?start=1h&var-env=prod',
+      );
+    });
+
     it('prevents the opened page from accessing the opener for links opening in a new tab', () => {
       renderLinks(
         <LinksDisplay links={[{ name: 'Docs', url: 'https://perses.dev', targetBlank: true }]} variant="dashboard" />,
@@ -161,6 +206,64 @@ describe('LinksDisplay', () => {
       const link = screen.getByText('Docs').closest('a');
       expect(link).toHaveAttribute('target', '_blank');
       expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    });
+  });
+
+  describe('tag links', () => {
+    const catalog: TagLinkDashboard[] = [
+      {
+        kind: 'Dashboard',
+        metadata: { name: 'Node Stats', project: 'perses', tags: ['ops'] },
+        spec: { display: { name: 'Node Stats' } },
+      },
+      {
+        kind: 'Dashboard',
+        metadata: { name: 'service detail', project: 'perses', tags: ['ops'] },
+        spec: { display: { name: 'Service detail' } },
+      },
+      { kind: 'Dashboard', metadata: { name: 'other', project: 'perses', tags: ['unrelated'] } },
+    ];
+
+    function renderTagLink(link: { name: string; tags: string[]; keepTime?: boolean }): {
+      listDashboards: ReturnType<typeof vi.fn>;
+    } {
+      const listDashboards = vi.fn().mockResolvedValue(catalog);
+      renderLinks(
+        <AnnotationProvider initialAnnotationSpecs={[]}>
+          <DashboardProvider initialState={{ dashboardResource: getTestDashboard() }}>
+            <DashboardCatalogProvider listDashboards={listDashboards}>
+              <LinksDisplay links={[link]} variant="dashboard" />
+            </DashboardCatalogProvider>
+          </DashboardProvider>
+        </AnnotationProvider>,
+      );
+      return { listDashboards };
+    }
+
+    it('loads matching dashboards when the menu opens', async () => {
+      const { listDashboards } = renderTagLink({ name: 'Related', tags: ['ops'] });
+
+      expect(listDashboards).not.toHaveBeenCalled();
+      userEvent.click(screen.getByText('Related'));
+
+      expect(await screen.findByRole('menuitem', { name: 'Service detail' })).toHaveAttribute(
+        'href',
+        '/projects/perses/dashboards/service%20detail',
+      );
+      expect(screen.queryByRole('menuitem', { name: 'Node Stats' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('menuitem', { name: 'other' })).not.toBeInTheDocument();
+      expect(listDashboards).toHaveBeenCalledWith('perses');
+    });
+
+    it('keeps the current time range on a tag link when keepTime is set', async () => {
+      renderTagLink({ name: 'Related', tags: ['ops'], keepTime: true });
+
+      userEvent.click(screen.getByText('Related'));
+
+      expect(await screen.findByRole('menuitem', { name: 'Service detail' })).toHaveAttribute(
+        'href',
+        '/projects/perses/dashboards/service%20detail?start=1h',
+      );
     });
   });
 });
