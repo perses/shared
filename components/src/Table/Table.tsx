@@ -43,6 +43,7 @@ const DEFAULT_GET_ROW_ID = (data: unknown, index: number): string => {
 // does not do deep equality checking for objects and arrays.
 const DEFAULT_ROW_SELECTION: NonNullable<TableProps<Record<string, unknown>>['rowSelection']> = {};
 const DEFAULT_SORTING: NonNullable<TableProps<Record<string, unknown>>['sorting']> = [];
+const DEFAULT_EXPANDED: NonNullable<TableProps<Record<string, unknown>>['expanded']> = {};
 
 /**
  * Component used to render tabular data in Perses use cases. This component is
@@ -70,6 +71,8 @@ export function Table<TableData extends RowData>({
   onPaginationChange,
   rowSelectionVariant = 'standard',
   getSubRows,
+  expanded = DEFAULT_EXPANDED,
+  onExpandedChange,
   hiddenColumns,
   tableToolbarConfig,
   columnResizeMode = 'onChange',
@@ -80,14 +83,27 @@ export function Table<TableData extends RowData>({
 
   const hasSubRows = !!getSubRows;
 
-  const [expanded, setExpanded] = useState<ExpandedState>({});
+  // While a search is active every row starts expanded so matches are visible. That expansion stays inside the table
+  // and is never reported, so the caller's `expanded` reappears unchanged once the search is cleared.
+  const [searchExpanded, setSearchExpanded] = useState<ExpandedState>(true);
+  const expandAllForSearch = useCallback(() => setSearchExpanded(true), []);
 
   const { globalFilter, setGlobalFilter, fuzzySearchOptions } = useFuzzySearch<TableData>(
     tableToolbarConfig?.isSearchEnabled,
     tableToolbarConfig?.fuzzyMatchThreshold ?? 'CONTAINS',
-    expanded,
-    setExpanded,
+    expandAllForSearch,
   );
+
+  const isSearchActive = !!tableToolbarConfig?.isSearchEnabled && globalFilter !== '';
+
+  const handleExpandedChange: OnChangeFn<ExpandedState> = (expandedUpdater) => {
+    if (isSearchActive) {
+      setSearchExpanded(expandedUpdater);
+      return;
+    }
+    const newExpanded = typeof expandedUpdater === 'function' ? expandedUpdater(expanded) : expandedUpdater;
+    onExpandedChange?.(newExpanded);
+  };
 
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityState>(
     hiddenColumns?.reduce((acc, columnId) => ({ ...acc, [columnId]: false }), {}) ?? {},
@@ -223,14 +239,16 @@ export function Table<TableData extends RowData>({
     // to customize it if/when we have use cases for it.
     sortDescFirst: true,
     columnResizeMode,
-    onExpandedChange: setExpanded,
+    onExpandedChange: handleExpandedChange,
+    // The caller owns the expanded rows (e.g. to persist them), so new data must not reset them.
+    autoResetExpanded: false,
     state: {
       rowSelection,
       sorting,
       globalFilter: tableToolbarConfig?.isSearchEnabled ? globalFilter : undefined,
       columnVisibility,
       ...(pagination ? { pagination } : {}),
-      expanded,
+      expanded: isSearchActive ? searchExpanded : expanded,
     },
   });
 
@@ -262,7 +280,8 @@ export function Table<TableData extends RowData>({
         isColumnFilterEnabled: tableToolbarConfig?.isColumnFilterEnabled,
         columns: table.getAllColumns(),
         columnFilterMenuMaxHeight: tableToolbarConfig?.columnFilterMenuMaxHeight,
-        isExpandAllEnabled: hasSubRows,
+        // rows can only be expanded when the caller handles the change
+        isExpandAllEnabled: hasSubRows && !!onExpandedChange,
         isAllExpanded: table.getIsAllRowsExpanded(),
         onExpandAllChange: table.getToggleAllRowsExpandedHandler(),
       }}
