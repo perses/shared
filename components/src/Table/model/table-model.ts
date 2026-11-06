@@ -19,6 +19,7 @@ import type {
   CellContext,
   CellData,
   ColumnDef,
+  ExpandedState,
   PaginationState,
   RowData,
   RowSelectionState,
@@ -244,9 +245,28 @@ export interface TableProps<TableData extends RowData, CellValueType extends Cel
   hasItemActions?: boolean;
 
   /**
-   * Returns the sub rows for a given row, or `undefined` if there are none.
+   * Returns the sub rows for a given row, or `undefined` if there are none. Outside of a search, rows can only be
+   * expanded when `expanded` and `onExpandedChange` are set too. Also set `getRowId`: the default id is the row's index
+   * among its siblings, so a sub row and a top-level row can share an id.
    */
   getSubRows?: (originalRow: TableData, index: number) => undefined | TableData[];
+
+  /**
+   * State of the expanded rows in the table, keyed by row id (see `getRowId`), or `true` when every row is expanded.
+   * The expanded rows are a controlled value: the table does not keep its own copy, so rows with `getSubRows` only
+   * expand when this prop is managed together with `onExpandedChange`, and the "expand all" toolbar button is only
+   * shown then. The table never resets it when `data` changes.
+   *
+   * While a search is active, rows are expanded independently of this value so that matches are visible. Once the
+   * search is cleared the table shows this value again.
+   */
+  expanded?: ExpandedState;
+
+  /**
+   * Callback fired with the new expanded rows when the user expands or collapses rows outside of a search. The new
+   * value is computed from the `expanded` prop of the last render.
+   */
+  onExpandedChange?: (expanded: ExpandedState) => void;
 
   /**
    * List of column ids that should be hidden when the table is initially rendered.

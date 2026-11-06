@@ -13,9 +13,8 @@
 
 import type { FuzzyMatchThreshold } from '@perses-dev/components';
 import { rankings, rankItem } from '@tanstack/match-sorter-utils';
-import type { ExpandedState, FilterFn, RowData, TableOptions } from '@tanstack/react-table';
+import type { FilterFn, RowData, TableOptions } from '@tanstack/react-table';
 import { tableOptions } from '@tanstack/react-table';
-import type { SetStateAction } from 'react';
 import { useCallback, useState } from 'react';
 
 import type { TableFeatures } from '../model/table-model';
@@ -39,31 +38,24 @@ export interface UseFuzzySearchResult<TableData extends RowData> {
 
 /**
  * Returns fuzzy search state and the corresponding `useTable` options.
- * Filter options are disabled when `showSearch` is falsy.
+ * Filter options are disabled when `isSearchEnabled` is falsy.
+ * `onSearchStart` is called when the query goes from empty to non-empty.
  */
 export function useFuzzySearch<TableData extends RowData>(
   isSearchEnabled: boolean | undefined,
   threshold: FuzzyMatchThreshold,
-  expanded: ExpandedState,
-  setExpanded: (value: SetStateAction<ExpandedState>) => void,
+  onSearchStart: () => void,
 ): UseFuzzySearchResult<TableData> {
   const [globalFilter, setGlobalFilter] = useState('');
-  const [prevExpandedState, setPrevExpandedState] = useState<ExpandedState>(expanded);
 
-  // expand all rows when a search query is entered, and restore previous expansion state when the query is cleared
   const handleGlobalFilterChange = useCallback(
     (value: string): void => {
-      setGlobalFilter((prev) => {
-        if (!prev) {
-          setPrevExpandedState(expanded);
-          setExpanded(true);
-        } else if (prev && !value) {
-          setExpanded(prevExpandedState);
-        }
-        return value;
-      });
+      if (!globalFilter && value) {
+        onSearchStart();
+      }
+      setGlobalFilter(value);
     },
-    [expanded, prevExpandedState, setExpanded],
+    [globalFilter, onSearchStart],
   );
   return {
     globalFilter,
