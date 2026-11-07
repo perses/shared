@@ -149,7 +149,7 @@
     flex-direction: column;
     min-width: var(--anchor-width);
     max-height: var(--available-height);
-    padding: var(--perses-spacing-xs) 0;
+    padding: var(--perses-spacing-xs);
     overflow-y: auto;
     background-color: var(--perses-bg-overlay);
     color: var(--perses-text-primary);
@@ -176,7 +176,8 @@
     align-items: center;
     gap: var(--perses-spacing-sm);
     min-height: var(--perses-control-size-sm);
-    padding: var(--perses-spacing-xs) var(--perses-spacing-md);
+    padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
+    border-radius: var(--perses-radius-md);
     cursor: default;
     user-select: none;
     outline: 0;
@@ -220,7 +221,7 @@
   :where(.ps-SelectGroup__label) {
     position: sticky;
     top: 0;
-    padding: var(--perses-spacing-xs) var(--perses-spacing-md);
+    padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
     background-color: var(--perses-bg-overlay);
     color: var(--perses-text-secondary);
     font-size: var(--perses-font-size-xs);

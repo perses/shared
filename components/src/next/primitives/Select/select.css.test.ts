@@ -163,6 +163,21 @@ describe('select.css', () => {
     expect(propertyFor(popup, 'z-index')).toBe('');
   });
 
+  it('insets the popup and rounds each row so the ring and rows share the Menu density', () => {
+    const popup = document.createElement('div');
+    popup.className = 'ps-Select__popup';
+    const item = document.createElement('div');
+    item.className = 'ps-SelectItem';
+    const label = document.createElement('div');
+    label.className = 'ps-SelectGroup__label';
+    popup.append(label, item);
+    document.body.append(popup);
+    expect(propertyFor(popup, 'padding')).toBe('var(--perses-spacing-xs)');
+    expect(propertyFor(item, 'padding')).toBe('var(--perses-spacing-xs) var(--perses-spacing-sm)');
+    expect(propertyFor(item, 'border-radius')).toBe('var(--perses-radius-md)');
+    expect(propertyFor(label, 'padding')).toBe(propertyFor(item, 'padding'));
+  });
+
   it('marks the highlighted row with an inset focus ring instead of a fill', () => {
     const item = document.createElement('div');
     item.className = 'ps-SelectItem';
