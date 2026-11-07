@@ -23,12 +23,13 @@ const css = source
   .replace(/}\s*$/, '');
 const style = document.createElement('style');
 
+// jsdom cannot evaluate media queries, so every block would match; skip forced-colors to read default-mode values.
 function styleRules(): CSSStyleRule[] {
   const rules: CSSStyleRule[] = [];
   const visit = (list: CSSRuleList): void => {
     for (const rule of Array.from(list)) {
       if (rule instanceof CSSStyleRule) rules.push(rule);
-      else if (rule instanceof CSSMediaRule) visit(rule.cssRules);
+      else if (rule instanceof CSSMediaRule && !rule.conditionText.includes('forced-colors')) visit(rule.cssRules);
     }
   };
   visit(style.sheet?.cssRules ?? new CSSRuleList());
@@ -162,16 +163,28 @@ describe('select.css', () => {
     expect(propertyFor(popup, 'z-index')).toBe('');
   });
 
-  it('keeps the selected row on the pale primary fill when hovered so its text stays readable', () => {
+  it('marks the highlighted row with an inset focus ring instead of a fill', () => {
+    const item = document.createElement('div');
+    item.className = 'ps-SelectItem';
+    item.setAttribute('data-highlighted', '');
+    document.body.append(item);
+    expect(propertyFor(item, 'outline')).toBe('var(--perses-focus-ring-width) solid var(--perses-focus-ring-color)');
+    expect(propertyFor(item, 'outline-offset')).toBe('calc(-1 * var(--perses-focus-ring-offset))');
+    expect(propertyFor(item, 'background-color')).toBe('');
+  });
+
+  it('keeps the selected row neutral and lets the check carry the selection colour', () => {
     const item = document.createElement('div');
     item.className = 'ps-SelectItem';
     item.setAttribute('data-selected', '');
+    const indicator = document.createElement('span');
+    indicator.className = 'ps-SelectItem__indicator';
+    item.append(indicator);
     document.body.append(item);
-    expect(propertyFor(item, 'background-color')).toBe('var(--perses-status-bg-primary)');
-    expect(propertyFor(item, 'color')).toBe('var(--perses-status-text-primary)');
-    item.setAttribute('data-highlighted', '');
-    expect(propertyFor(item, 'background-color')).toBe('var(--perses-status-bg-primary)');
-    expect(propertyFor(item, 'box-shadow')).toContain('var(--perses-status-border-primary)');
+    expect(propertyFor(item, 'background-color')).toBe('');
+    expect(propertyFor(item, 'color')).toBe('');
+    expect(propertyFor(item, 'box-shadow')).toBe('');
+    expect(propertyFor(indicator, 'color')).toBe('var(--perses-status-text-primary)');
   });
 
   it('shows the check indicator only on the selected item while keeping its space', () => {
@@ -186,13 +199,21 @@ describe('select.css', () => {
     expect(propertyFor(indicator, 'visibility')).toBe('visible');
   });
 
+  it('restates the focus ring and check in system colours when colours are forced', () => {
+    const forced = source.slice(source.indexOf('@media (forced-colors: active)'));
+    expect(forced).toMatch(/\.ps-Select__trigger:focus-visible\)[\s\S]*?outline-color: Highlight/);
+    expect(forced).toMatch(/\.ps-SelectItem\[data-highlighted\]\)[\s\S]*?outline-color: Highlight/);
+    expect(forced).toMatch(/\.ps-SelectItem__indicator\)[\s\S]*?color: CanvasText/);
+  });
+
   it('only animates when the user has not asked for reduced motion', () => {
     const mediaRules = Array.from(style.sheet?.cssRules ?? []).filter(
       (rule): rule is CSSMediaRule => rule instanceof CSSMediaRule,
     );
-    expect(mediaRules.map((rule) => rule.conditionText)).toEqual(['(prefers-reduced-motion: no-preference)']);
+    const motion = mediaRules.find((rule) => rule.conditionText === '(prefers-reduced-motion: no-preference)');
+    expect(motion).toBeDefined();
     const transitions = styleRules().filter((rule) => rule.style.transition);
     expect(transitions.length).toBeGreaterThan(0);
-    for (const rule of transitions) expect(rule.parentRule).toBe(mediaRules[0]);
+    for (const rule of transitions) expect(rule.parentRule).toBe(motion);
   });
 });

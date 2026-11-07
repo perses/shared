@@ -182,18 +182,11 @@
     outline: 0;
   }
 
+  /* Items never take DOM focus: Base UI marks the keyboard/pointer cursor with data-highlighted, so it carries
+     the focus ring. The ring sits inside the row so the scrolling popup cannot clip it. */
   :where(.ps-SelectItem[data-highlighted]) {
-    background-color: var(--perses-bg-sunken);
-  }
-
-  :where(.ps-SelectItem[data-selected]) {
-    background-color: var(--perses-status-bg-primary);
-    color: var(--perses-status-text-primary);
-  }
-
-  /* The pale fill is already the hover shade, so a selected row shows hover with a ring instead of a darker fill. */
-  :where(.ps-SelectItem[data-selected][data-highlighted]) {
-    box-shadow: inset 0 0 0 var(--perses-border-width-sm) var(--perses-status-border-primary);
+    outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
+    outline-offset: calc(-1 * var(--perses-focus-ring-offset));
   }
 
   :where(.ps-SelectItem[data-disabled]) {
@@ -212,10 +205,11 @@
     flex-shrink: 0;
   }
 
-  /* Always mounted so every row keeps the same width; only the selected row shows the check. */
+  /* Always mounted so every row keeps the same width; the check is the only selection signal, so the row stays neutral. */
   :where(.ps-SelectItem__indicator) {
     flex-shrink: 0;
     visibility: hidden;
+    color: var(--perses-status-text-primary);
   }
 
   :where(.ps-SelectItem[data-selected] .ps-SelectItem__indicator) {
@@ -231,6 +225,17 @@
     color: var(--perses-text-secondary);
     font-size: var(--perses-font-size-xs);
     font-weight: var(--perses-font-weight-medium);
+  }
+
+  @media (forced-colors: active) {
+    :where(.ps-Select__trigger:focus-visible),
+    :where(.ps-SelectItem[data-highlighted]) {
+      outline-color: Highlight;
+    }
+
+    :where(.ps-SelectItem__indicator) {
+      color: CanvasText;
+    }
   }
 
   @media (prefers-reduced-motion: no-preference) {
