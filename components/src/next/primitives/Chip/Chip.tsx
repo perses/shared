@@ -16,6 +16,7 @@ import { forwardRef } from 'react';
 import type { CSSProperties, HTMLAttributes, MouseEventHandler, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { hasContent } from '../hasContent';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import {
   applyStyleProps,
@@ -212,7 +213,7 @@ export const Chip = forwardRef<HTMLDivElement, ChipProps>(function Chip(
       data-clickable={interactive ? '' : undefined}
       data-disabled={disabled ? '' : undefined}
     >
-      {startElement && (
+      {hasContent(startElement) && (
         <span className={clsx('ps-Chip__start', slotProps?.start?.className)} style={slotProps?.start?.style}>
           {startElement}
         </span>
