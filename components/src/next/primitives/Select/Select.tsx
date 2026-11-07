@@ -15,9 +15,10 @@ import { Field } from '@base-ui/react/field';
 import { Select as BaseSelect } from '@base-ui/react/select';
 import type { SelectPositionerProps } from '@base-ui/react/select';
 import { clsx } from 'clsx';
-import { forwardRef, useCallback, useId, useMemo } from 'react';
+import { forwardRef, useCallback, useContext, useId, useMemo } from 'react';
 import type { ButtonHTMLAttributes, CSSProperties, ReactElement, ReactNode } from 'react';
 
+import { ThemeModeContext } from '../../contexts/ThemeModeProvider';
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import { hasContent } from '../hasContent';
 import { ChevronDownIcon, Icon } from '../Icon';
@@ -173,7 +174,8 @@ export type SelectProps = SelectBaseProps & SelectAccessibleName & (SelectSingle
  * (`"sm"`), pixel numbers (`12`), CSS lengths or responsive objects (`{ default: 'sm', md: 0 }`).
  * Native button attributes, handlers, and `ref` stay on the trigger.
  *
- * The list portals to `document.body`, so ancestor-scoped themes and token overrides do not reach it.
+ * The list portals to `document.body` and propagates the nearest `ThemeModeProvider` mode so it stays dark on a
+ * dark page. Without a provider it inherits the document theme; other ancestor token overrides do not cross the portal.
  *
  * While the list is closed the trigger shows the selected item's `children`, read from the `SelectItem` elements
  * in `children` (through `SelectGroup` and fragments). If you write a custom component that returns a `SelectItem`
@@ -230,6 +232,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
   ref,
 ) {
   const generatedId = useId();
+  const mode = useContext(ThemeModeContext);
   const triggerId = id ?? generatedId;
   const items = useMemo(() => collectItems(children), [children]);
   if (hasContent(placeholder) && items.some((item) => item.value === '')) {
@@ -319,6 +322,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
         <BaseSelect.Portal>
           <BaseSelect.Positioner
             className="ps-Select__positioner"
+            data-perses-mode={mode}
             side={placement}
             align={align}
             sideOffset={offset}
