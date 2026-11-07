@@ -178,6 +178,21 @@ describe('select.css', () => {
     expect(propertyFor(label, 'padding')).toBe(propertyFor(item, 'padding'));
   });
 
+  it('flips only the default chevron while the list is open', () => {
+    const trigger = document.createElement('button');
+    trigger.className = 'ps-Select__trigger';
+    trigger.setAttribute('data-popup-open', '');
+    const icon = document.createElement('span');
+    icon.className = 'ps-Select__icon';
+    const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    chevron.setAttribute('class', 'ps-Select__chevron');
+    icon.append(chevron);
+    trigger.append(icon);
+    document.body.append(trigger);
+    expect(propertyFor(chevron, 'transform')).toBe('rotate(180deg)');
+    expect(propertyFor(icon, 'transform')).toBe('');
+  });
+
   it('marks the highlighted row with an inset focus ring instead of a fill', () => {
     const item = document.createElement('div');
     item.className = 'ps-SelectItem';

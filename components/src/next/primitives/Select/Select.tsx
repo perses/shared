@@ -40,7 +40,7 @@ import './select.css';
 
 /** Mirrors --perses-spacing-xs (4px). */
 const SIDE_OFFSET = 4;
-const chevronIcon = <ChevronDownIcon />;
+const chevronIcon = <ChevronDownIcon className="ps-Select__chevron" />;
 const renderIcon = <Icon />;
 
 // Only `overflow` from the display category: `display` stays fixed to inline-flex/flex by the stylesheet.
@@ -103,7 +103,7 @@ interface SelectBaseProps
    * throws in that case.
    */
   placeholder?: ReactNode;
-  /** Replaces the default chevron. */
+  /** Replaces the default chevron. Only the default chevron flips while the list is open; a custom icon stays still. */
   icon?: ReactNode;
   /** Content before the value. Mark purely decorative icons `aria-hidden`. */
   startElement?: ReactNode;

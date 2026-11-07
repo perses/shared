@@ -332,6 +332,18 @@ describe('Select', () => {
     expect(getTrigger().querySelector('.ps-Select__icon')).toContainElement(screen.getByTestId('custom-icon'));
   });
 
+  it('marks only the default chevron for rotation', () => {
+    const { rerender } = render(<Select label="Unit">{units}</Select>);
+    expect(getTrigger().querySelector('.ps-Select__icon .ps-Select__chevron')).toBeInTheDocument();
+
+    rerender(
+      <Select label="Unit" icon={CUSTOM_ICON}>
+        {units}
+      </Select>,
+    );
+    expect(getTrigger().querySelector('.ps-Select__chevron')).toBeNull();
+  });
+
   it('supports controlled open state', async () => {
     const onOpenChange = vi.fn();
     const { rerender } = render(

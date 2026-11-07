@@ -75,7 +75,8 @@
     color: var(--perses-text-secondary);
   }
 
-  :where(.ps-Select__trigger[data-popup-open] .ps-Select__icon) {
+  /* Only the default chevron flips; a consumer icon is left as drawn. */
+  :where(.ps-Select__trigger[data-popup-open] .ps-Select__chevron) {
     transform: rotate(180deg);
   }
 
@@ -240,7 +241,7 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    :where(.ps-Select__icon) {
+    :where(.ps-Select__chevron) {
       transition: transform 0.15s ease;
     }
 
