@@ -27,7 +27,7 @@ import {
 } from '@mui/material';
 import { InfoTooltip, LinkEditorForm } from '@perses-dev/components';
 import type { FormEditorHandle } from '@perses-dev/components';
-import type { Link } from '@perses-dev/spec';
+import type { Link, URLLink } from '@perses-dev/spec';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ChevronUp from 'mdi-material-ui/ChevronUp';
@@ -44,6 +44,18 @@ export interface DashboardLinksEditorProps {
   links: Link[];
   onChange: (links: Link[]) => void;
   onCancel: () => void;
+}
+
+function urlLink(link: Link, patch: Partial<URLLink> = {}): URLLink {
+  return {
+    name: patch.name ?? link.name,
+    tooltip: patch.tooltip ?? link.tooltip,
+    url: patch.url ?? link.url ?? '',
+    renderVariables: patch.renderVariables ?? link.renderVariables,
+    targetBlank: patch.targetBlank ?? link.targetBlank,
+    keepTime: link.keepTime,
+    includeVariables: link.includeVariables,
+  };
 }
 
 const DEFAULT_LINK: Link = {
@@ -136,7 +148,7 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
     });
   };
 
-  const isValid = links.every((link) => link.url.trim().length > 0);
+  const isValid = links.every((link) => (link.url ?? '').trim().length > 0);
 
   return (
     <>
@@ -231,7 +243,8 @@ function LinkTableRow({
   onMoveDown,
 }: LinkTableRowProps): ReactElement {
   const displayName = link.name?.trim() || `Link ${index + 1}`;
-  const hasError = link.url.trim().length === 0;
+  const url = link.url ?? '';
+  const hasError = url.trim().length === 0;
 
   return (
     <>
@@ -247,8 +260,8 @@ function LinkTableRow({
             color: hasError ? 'error.main' : undefined,
           }}
         >
-          <InfoTooltip description={link.url} enterDelay={100}>
-            {link.url || '(no URL)'}
+          <InfoTooltip description={url} enterDelay={100}>
+            {url || '(no URL)'}
           </InfoTooltip>
         </TableCell>
         <TableCell>{link.targetBlank ? 'Yes' : 'No'}</TableCell>
@@ -274,31 +287,31 @@ function LinkTableRow({
               <LinkEditorForm
                 mode="modalEmbedded"
                 url={{
-                  value: link.url,
+                  value: url,
                   label: 'URL',
                   error: { hasError: hasError, helperText: hasError ? 'URL is required' : undefined },
                   placeholder: 'https://example.com/dashboard?var=$variable',
-                  onChange: (url) => onUpdate({ ...link, url }),
+                  onChange: (nextUrl) => onUpdate(urlLink(link, { url: nextUrl })),
                 }}
                 name={{
                   value: link.name ?? '',
                   label: 'Display Name',
-                  onChange: (name) => onUpdate({ ...link, name }),
+                  onChange: (name) => onUpdate(urlLink(link, { name })),
                 }}
                 tooltip={{
                   value: link.tooltip ?? '',
                   label: 'Tooltip',
-                  onChange: (tooltip) => onUpdate({ ...link, tooltip }),
+                  onChange: (tooltip) => onUpdate(urlLink(link, { tooltip })),
                 }}
                 renderVariables={{
                   value: link.renderVariables ?? true,
                   label: 'Replace variables in URL',
-                  onChange: (renderVariables) => onUpdate({ ...link, renderVariables }),
+                  onChange: (renderVariables) => onUpdate(urlLink(link, { renderVariables })),
                 }}
                 newTabOpen={{
                   value: link.targetBlank ?? true,
                   label: 'Open in new tab',
-                  onChange: (targetBlank) => onUpdate({ ...link, targetBlank }),
+                  onChange: (targetBlank) => onUpdate(urlLink(link, { targetBlank })),
                 }}
               />
             </Box>
