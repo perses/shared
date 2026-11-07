@@ -230,7 +230,11 @@
   }
 
   @media (forced-colors: active) {
-    :where(.ps-Select__trigger:focus-visible),
+    /* Same specificity as the focus rule above; a :where() restatement would always lose to it. */
+    .ps-Select__trigger:focus-visible {
+      outline-color: Highlight;
+    }
+
     :where(.ps-SelectItem[data-highlighted]) {
       outline-color: Highlight;
     }

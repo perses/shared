@@ -231,7 +231,9 @@ describe('select.css', () => {
 
   it('restates the focus ring and check in system colours when colours are forced', () => {
     const forced = source.slice(source.indexOf('@media (forced-colors: active)'));
-    expect(forced).toMatch(/\.ps-Select__trigger:focus-visible\)[\s\S]*?outline-color: Highlight/);
+    // The default focus rule is deliberately specific, so its forced-colors restatement must not be in :where().
+    expect(forced).toMatch(/\n\s*\.ps-Select__trigger:focus-visible \{[^}]*outline-color: Highlight/);
+    expect(forced).not.toContain(':where(.ps-Select__trigger:focus-visible)');
     expect(forced).toMatch(/\.ps-SelectItem\[data-highlighted\]\)[\s\S]*?outline-color: Highlight/);
     expect(forced).toMatch(/\.ps-SelectItem__indicator\)[\s\S]*?color: CanvasText/);
   });
