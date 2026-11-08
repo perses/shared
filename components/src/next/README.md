@@ -149,20 +149,15 @@ whose size it constrains, and `margin: 0` on elements that can render as a tag w
 ```css
 @layer perses.components {
   /* :where() keeps specificity at zero, so style props and consumer CSS still win. */
-  :where(.ps-CardContent) {
-    /* Declared sizes include padding and border, with or without the document reset. */
+  :where(.ps-Select__trigger) {
+    /* min-height and padding add up the same way with or without the document reset. */
     box-sizing: border-box;
-    /* Clears the user-agent margin when rendered as <figure>, <p> or a heading. */
-    margin: 0;
+    min-height: var(--ps-select-size);
   }
 }
 ```
 
-## Variant names
-
-Reuse the shared vocabulary before adding a variant: `solid`, `outline`, `ghost`, `subtle`, `elevated`. Use the
-adjective form without `-ed` (`outline`, not `outlined`). Default to the most neutral variant. Variant names are public
-API; renaming one after release is a breaking change.
+[`select.css.test.ts`](./primitives/Select/select.css.test.ts) shows how to assert this for every sized part.
 
 ## Content elements
 
@@ -214,17 +209,6 @@ It applies the same mobile-first rule as the engine (largest matching breakpoint
 subscribes to `matchMedia` only when given an object, and falls back to `default` without `window.matchMedia`
 (server rendering, jsdom). The breakpoint widths come from `system/breakpoints.ts`; `breakpoints.test.ts` keeps them
 equal to the `@media` rules in the engine CSS. Do not use the hook for visual props; add a registry entry instead.
-
-### Axis and side variants
-
-A prop that sets both axes or all sides must also offer the narrower forms, named the same way as the engine:
-`spacing` → `rowSpacing`/`columnSpacing`, `p` → `px`/`py` → `pt`/`pr`/`pb`/`pl`, `rounded` → `roundedTop…` →
-`roundedTopLeft…`. The narrower prop overrides the broader one from its first provided breakpoint onward. Implement
-them by aliasing an existing transform in the component's registry rather than writing new conversion code:
-
-```ts
-const GRID_STYLE_PROPS = compileStyleProps([spacingProps, { rowGap: spacingProps.gap, columnGap: spacingProps.gap }]);
-```
 
 ## Border radius
 
