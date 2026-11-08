@@ -502,6 +502,18 @@ describe('Select', () => {
       await userEvent.click(option);
       expect(onValueChange).not.toHaveBeenCalled();
     });
+
+    it('keeps disabled items reachable with arrow keys without selecting them', async () => {
+      const onValueChange = vi.fn();
+      renderSelect({ onValueChange });
+      await open();
+      await userEvent.keyboard('{ArrowDown>3/}');
+      const option = screen.getByRole('option', { name: 'Percent' });
+      expect(option).toHaveAttribute('data-highlighted');
+      await userEvent.keyboard('{Enter}');
+      expect(onValueChange).not.toHaveBeenCalled();
+      expect(screen.getByRole('listbox')).toBeInTheDocument();
+    });
   });
 
   describe('theme mode across the portal', () => {

@@ -236,7 +236,8 @@ ${code('label="Unit" helperText="Shown on every axis" defaultValue="bytes"')}`;
 const readOnlyCode = code('label="Unit" readOnly defaultValue="bytes"');
 const disabledCode = `// The whole control fades once; adornments inherit the fade instead of stacking their own.
 ${code('label="Time zone" disabled startElement={<EarthIcon aria-hidden="true" />} endElement={<Chip size="xs">+00:00</Chip>} defaultValue="utc"')}`;
-const disabledItemCode = `<Select label="Unit" placeholder="Seconds cannot be picked">
+const disabledItemCode = `// A disabled item cannot be selected, but arrow keys still reach it so screen readers announce it.
+<Select label="Unit" placeholder="Seconds cannot be picked">
   <SelectItem value="bytes">Bytes</SelectItem>
   <SelectItem value="seconds" disabled startElement={<EarthIcon aria-hidden="true" />}>Seconds</SelectItem>
   <SelectItem value="percent">Percent</SelectItem>

@@ -37,6 +37,10 @@ const renderIndicator = <Icon />;
 export interface SelectItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style'>, SpacingProps {
   style?: PersesCSSProperties;
   value: SelectValue;
+  /**
+   * Prevents selection by pointer, keyboard and typeahead. The item stays in the list and keyboard users can still
+   * arrow onto it, so a screen reader announces why it is unavailable instead of the option silently vanishing.
+   */
   disabled?: boolean;
   /** Plain-text label used for typeahead and the hidden form input when `children` is not plain text. */
   label?: string;
