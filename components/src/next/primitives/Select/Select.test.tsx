@@ -237,6 +237,12 @@ describe('Select', () => {
     }
   });
 
+  it('forwards the size to the portaled popup', async () => {
+    renderSelect({ size: 'lg' });
+    const listbox = await open();
+    expect(listbox).toHaveAttribute('data-size', 'lg');
+  });
+
   it('defaults to the md size', () => {
     renderSelect();
     expect(getRoot()).toHaveAttribute('data-size', 'md');

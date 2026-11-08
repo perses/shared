@@ -87,7 +87,7 @@ function code(attrs: string, children = '…'): string {
   return `<Select ${attrs}>${children}</Select>`;
 }
 
-const sizeCode = `// size: 'xs' | 'sm' | 'md' | 'lg'
+const sizeCode = `// size: 'xs' | 'sm' | 'md' | 'lg'. The popup text and row height follow the trigger.
 ${code('label="Unit" size="lg" defaultValue="bytes"')}`;
 const statusCode = `// status: 'error' | 'warning' | 'success' | 'info'. status="error" also sets aria-invalid.
 ${code('label="Unit" status="error" defaultValue="bytes"')}`;

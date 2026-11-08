@@ -164,6 +164,17 @@
     transform-origin: var(--transform-origin);
   }
 
+  /* The popup is portaled, so it carries its own data-size. Text follows the trigger; rows never drop below
+     the sm control height so they stay easy to hit. md matches Menu's default density. */
+  :where(.ps-Select__popup[data-size='xs']),
+  :where(.ps-Select__popup[data-size='sm']) {
+    font-size: var(--perses-font-size-xs);
+  }
+
+  :where(.ps-Select__popup[data-size='lg']) {
+    font-size: var(--perses-font-size-md);
+  }
+
   :where(.ps-Select__popup[data-starting-style]),
   :where(.ps-Select__popup[data-ending-style]) {
     opacity: 0;
@@ -182,6 +193,11 @@
     cursor: default;
     user-select: none;
     outline: 0;
+  }
+
+  /* Declared after the base item rule so the lg row height wins at equal (zero) specificity. */
+  :where(.ps-Select__popup[data-size='lg'] .ps-SelectItem) {
+    min-height: var(--perses-control-size-md);
   }
 
   /* Items never take DOM focus: Base UI marks the keyboard/pointer cursor with data-highlighted, so it carries

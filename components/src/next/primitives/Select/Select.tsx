@@ -94,6 +94,7 @@ interface SelectBaseProps
   /** Visual status. `error` also sets `aria-invalid` on the trigger. */
   status?: Status;
   fullWidth?: boolean;
+  /** Trigger height and text size. The popup text and row height follow it; `md` keeps Menu's default density. */
   size?: Size;
   required?: boolean;
   readOnly?: boolean;
@@ -331,6 +332,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
             <BaseSelect.Popup
               className={clsx('ps-Select__popup', slotProps?.popup?.className)}
               style={slotProps?.popup?.style}
+              data-size={size}
             >
               {children}
             </BaseSelect.Popup>

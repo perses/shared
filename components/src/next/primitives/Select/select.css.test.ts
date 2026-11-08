@@ -119,6 +119,23 @@ describe('select.css', () => {
     },
   );
 
+  it.each([
+    ['xs', 'var(--perses-font-size-xs)', 'var(--perses-control-size-sm)'],
+    ['sm', 'var(--perses-font-size-xs)', 'var(--perses-control-size-sm)'],
+    ['md', 'var(--perses-font-size-sm)', 'var(--perses-control-size-sm)'],
+    ['lg', 'var(--perses-font-size-md)', 'var(--perses-control-size-md)'],
+  ])('scales the %s popup text and row height with the trigger', (size, fontSize, rowHeight) => {
+    const popup = document.createElement('div');
+    popup.className = 'ps-Select__popup';
+    popup.setAttribute('data-size', size);
+    const item = document.createElement('div');
+    item.className = 'ps-SelectItem';
+    popup.append(item);
+    document.body.append(popup);
+    expect(propertyFor(popup, 'font-size')).toBe(fontSize);
+    expect(propertyFor(item, 'min-height')).toBe(rowHeight);
+  });
+
   it('stretches the root and trigger when fullWidth is set', () => {
     const { root } = makeSelect({ 'data-full-width': 'true' });
     expect(propertyFor(root, 'display')).toBe('flex');
