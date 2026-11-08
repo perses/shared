@@ -20,9 +20,10 @@ describe('hasContent', () => {
     expect(hasContent(<span>Name</span>)).toBe(true);
   });
 
-  it('treats empty string, false, null and undefined as absent', () => {
+  it('treats empty string, booleans, null and undefined as absent', () => {
     expect(hasContent('')).toBe(false);
     expect(hasContent(false)).toBe(false);
+    expect(hasContent(true)).toBe(false);
     expect(hasContent(null)).toBe(false);
     expect(hasContent(undefined)).toBe(false);
   });

@@ -15,9 +15,9 @@ import type { ReactNode } from 'react';
 
 /**
  * Whether an optional `ReactNode` prop should render its wrapper element. Unlike a plain `node && …` check, the
- * number `0` counts as content (React would otherwise print a stray "0"), while `''`, `false`, `null` and
- * `undefined` do not.
+ * number `0` counts as content (React would otherwise print a stray "0"), while `''`, booleans, `null` and
+ * `undefined` do not: React renders all of them as nothing, so the wrapper would be empty but still take up space.
  */
 export function hasContent(node: ReactNode): boolean {
-  return node !== null && node !== undefined && node !== false && node !== '';
+  return node !== null && node !== undefined && typeof node !== 'boolean' && node !== '';
 }

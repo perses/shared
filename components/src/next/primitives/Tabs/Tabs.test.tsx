@@ -411,10 +411,13 @@ describe('Tabs', () => {
             <Tab value="b" startElement="" endElement="">
               Other
             </Tab>
+            <Tab value="c" startElement={true} endElement={true}>
+              Third
+            </Tab>
           </TabList>
         </Tabs>,
       );
-      for (const name of ['Label', 'Other']) {
+      for (const name of ['Label', 'Other', 'Third']) {
         expect(tab(name).querySelector('.ps-Tab__start')).toBeNull();
         expect(tab(name).querySelector('.ps-Tab__end')).toBeNull();
       }

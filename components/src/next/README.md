@@ -168,7 +168,8 @@ These props provide content; `slotProps` only customizes styling.
 Guard optional `ReactNode` props (`label`, `helperText`, `startElement`, …) with `hasContent(prop)` from
 `primitives/hasContent.ts`, not a bare `prop && <wrapper>`. A bare check prints a stray `0` when the value is the
 number zero and skips the wrapper, which for `label` leaves the control without an accessible name. `hasContent`
-treats `0` as content and `''`, `false`, `null` and `undefined` as absent.
+treats `0` as content and `''`, `true`, `false`, `null` and `undefined` as absent, because React renders those as
+nothing and an empty wrapper would still take up `gap` space.
 
 ## Spacing
 

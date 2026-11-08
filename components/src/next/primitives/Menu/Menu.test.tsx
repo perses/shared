@@ -511,9 +511,12 @@ describe('MenuItem', () => {
       <MenuItem key="b" startElement="" endElement="">
         Paste
       </MenuItem>,
+      <MenuItem key="c" startElement={true} endElement={true}>
+        Cut
+      </MenuItem>,
     ]);
     await openMenu();
-    for (const name of ['Copy', 'Paste']) {
+    for (const name of ['Copy', 'Paste', 'Cut']) {
       const item = screen.getByRole('menuitem', { name });
       expect(item.querySelector('.ps-MenuItemBase__start')).toBeNull();
       expect(item.querySelector('.ps-MenuItemBase__end')).toBeNull();
