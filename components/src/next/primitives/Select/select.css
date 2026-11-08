@@ -258,6 +258,12 @@
     :where(.ps-SelectItem__indicator) {
       color: CanvasText;
     }
+
+    /* Forced colours drop box-shadow and recolour borders, so thicken the border itself instead. */
+    .ps-Select[data-status='error'] .ps-Select__trigger,
+    .ps-Select[data-status='warning'] .ps-Select__trigger {
+      border-width: var(--perses-border-width-md);
+    }
   }
 
   @media (prefers-reduced-motion: no-preference) {

@@ -255,6 +255,13 @@ describe('select.css', () => {
     expect(forced).toMatch(/\.ps-SelectItem__indicator\)[\s\S]*?color: CanvasText/);
   });
 
+  it('thickens the error and warning border when colours are forced, since box-shadow is dropped', () => {
+    const forced = source.slice(source.indexOf('@media (forced-colors: active)'));
+    expect(forced).toMatch(
+      /\.ps-Select\[data-status='error'\] \.ps-Select__trigger,\s*\.ps-Select\[data-status='warning'\] \.ps-Select__trigger \{\s*border-width: var\(--perses-border-width-md\)/,
+    );
+  });
+
   it('only animates when the user has not asked for reduced motion', () => {
     const mediaRules = Array.from(style.sheet?.cssRules ?? []).filter(
       (rule): rule is CSSMediaRule => rule instanceof CSSMediaRule,
