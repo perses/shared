@@ -16,7 +16,8 @@ import { useState } from 'react';
 import type { CSSProperties, ReactElement } from 'react';
 
 import { Sample, Stack } from '../../stories/Sample';
-import { EarthIcon, MagnifyIcon, UnfoldMoreIcon } from '../Icon';
+import { Chip } from '../Chip';
+import { EarthIcon, UnfoldMoreIcon } from '../Icon';
 import type { Size, Status } from '../types';
 import { Select } from './Select';
 import type { SelectSlotProps } from './Select';
@@ -25,30 +26,19 @@ import { SelectItem } from './SelectItem';
 import type { SelectValue } from './SelectItem';
 
 const sizes: Size[] = ['xs', 'sm', 'md', 'lg'];
-const statuses: Array<Status | undefined> = [undefined, 'error', 'warning', 'success', 'info'];
+const statuses: Status[] = ['error', 'warning', 'success', 'info'];
 
-const columnStyle: CSSProperties = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 'var(--perses-spacing-lg)',
-  alignItems: 'flex-start',
-};
 const rowStyle: CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
   gap: 'var(--perses-spacing-lg)',
   alignItems: 'flex-start',
 };
-const gridStyle: CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: `repeat(${sizes.length}, max-content)`,
-  gap: 'var(--perses-spacing-lg)',
-};
 const wideStyle: CSSProperties = { width: '24rem' };
 
 const earthIcon = <EarthIcon aria-hidden="true" />;
-const magnifyIcon = <MagnifyIcon aria-hidden="true" />;
 const unfoldIcon = <UnfoldMoreIcon />;
+const offsetChip = <Chip size="xs">+00:00</Chip>;
 
 const units = (
   <>
@@ -93,146 +83,216 @@ export const Basic: Story = () => (
 );
 Basic.storyName = 'Basic';
 
-const variantsCode = `// size:   'xs' | 'sm' | 'md' | 'lg'
-// status: 'error' | 'warning' | 'success' | 'info'
-// status="error" also sets aria-invalid; helperText is linked via aria-describedby.
-<Select label="Unit" size="lg" status="error" helperText="Pick a unit" defaultValue="bytes">…</Select>`;
+function code(attrs: string, children = '…'): string {
+  return `<Select ${attrs}>${children}</Select>`;
+}
+
+const sizeCode = `// size: 'xs' | 'sm' | 'md' | 'lg'
+${code('label="Unit" size="lg" defaultValue="bytes"')}`;
+const statusCode = `// status: 'error' | 'warning' | 'success' | 'info'. status="error" also sets aria-invalid.
+${code('label="Unit" status="error" defaultValue="bytes"')}`;
+const fullWidthCode = `// fullWidth stretches the root and trigger to the container.
+${code('label="Dashboard" fullWidth defaultValue="overview"')}`;
 const multipleCode = `// multiple: value is an array; the trigger joins the selected labels.
 <Select label="Columns" multiple defaultValue={['alertname', 'severity']}>
   <SelectItem value="alertname">alertname</SelectItem>
   <SelectItem value="severity">severity</SelectItem>
   <SelectItem value="instance">instance</SelectItem>
 </Select>`;
-const groupsCode = `<Select label="Time zone" defaultValue="utc" startElement={<EarthIcon aria-hidden="true" />}>
-  <SelectGroup label="Universal">
-    <SelectItem value="utc">UTC</SelectItem>
-  </SelectGroup>
-  <SelectGroup label="Americas">
-    <SelectItem value="new-york" startElement={<EarthIcon aria-hidden="true" />}>New York</SelectItem>
-    <SelectItem value="los-angeles" startElement={<EarthIcon aria-hidden="true" />}>Los Angeles</SelectItem>
-  </SelectGroup>
-  <SelectGroup label="Europe">
-    <SelectItem value="paris" startElement={<EarthIcon aria-hidden="true" />}>Paris</SelectItem>
-    <SelectItem value="berlin" startElement={<EarthIcon aria-hidden="true" />}>Berlin</SelectItem>
-  </SelectGroup>
-</Select>`;
 const renderValueCode = `// renderValue replaces the trigger content; numeric values stay numbers.
 <Select label="Refresh" defaultValue={30} renderValue={(value) => \`Every \${value}s\`}>
   <SelectItem value={5}>5 seconds</SelectItem>
   <SelectItem value={30}>30 seconds</SelectItem>
   <SelectItem value={60}>60 seconds</SelectItem>
-</Select>
+</Select>`;
+const iconCode = `// icon replaces the chevron. Only the default chevron flips while the list is open; a custom icon stays still.
+${code('label="Unit" icon={<UnfoldMoreIcon />} defaultValue="bytes"')}`;
+const adornmentsCode = `// startElement and endElement sit inside the trigger, around the value.
+${code('label="Time zone" startElement={<EarthIcon aria-hidden="true" />} endElement={<Chip size="xs">+00:00</Chip>} defaultValue="utc"')}`;
+const groupsCode = `<Select label="Time zone" defaultValue="utc">
+  <SelectGroup label="Universal">
+    <SelectItem value="utc">UTC</SelectItem>
+  </SelectGroup>
+  <SelectGroup label="Americas">
+    <SelectItem value="new-york">New York</SelectItem>
+    <SelectItem value="los-angeles">Los Angeles</SelectItem>
+  </SelectGroup>
+</Select>`;
+const itemStartCode = `<Select label="Region" defaultValue="eu">
+  <SelectItem value="eu" startElement={<EarthIcon aria-hidden="true" />}>Europe</SelectItem>
+  <SelectItem value="us" startElement={<EarthIcon aria-hidden="true" />}>Americas</SelectItem>
+</Select>`;
 
-// icon replaces the chevron; fullWidth stretches to the container.
-<Select label="Dashboard" placeholder="Choose…" icon={<UnfoldMoreIcon />} fullWidth>…</Select>`;
+const timeZones = (
+  <>
+    <SelectItem value="utc">UTC</SelectItem>
+    <SelectItem value="new-york">New York</SelectItem>
+    <SelectItem value="paris">Paris</SelectItem>
+  </>
+);
 
 export const Variants: Story = () => (
   <Stack>
-    <Sample title="Sizes and statuses" code={variantsCode}>
-      <div style={gridStyle}>
-        {statuses.map((status) =>
-          sizes.map((size) => (
-            <Select
-              key={`${status ?? 'default'}-${size}`}
-              label={`${status ?? 'default'} / ${size}`}
-              status={status}
-              size={size}
-              helperText={status ? `This select has ${status} status` : undefined}
-              defaultValue="bytes"
-            >
-              {units}
-            </Select>
-          )),
-        )}
+    <Sample title="size" code={sizeCode}>
+      <div style={rowStyle}>
+        {sizes.map((size) => (
+          <Select key={size} label={size} size={size} defaultValue="bytes">
+            {units}
+          </Select>
+        ))}
       </div>
     </Sample>
 
-    <Sample title="Multiple selection" code={multipleCode}>
-      <Select label="Columns" multiple defaultValue={['alertname', 'severity']}>
-        <SelectItem value="alertname">alertname</SelectItem>
-        <SelectItem value="severity">severity</SelectItem>
-        <SelectItem value="instance">instance</SelectItem>
-      </Select>
+    <Sample title="status" code={statusCode}>
+      <div style={rowStyle}>
+        {statuses.map((status) => (
+          <Select key={status} label={status} status={status} defaultValue="bytes">
+            {units}
+          </Select>
+        ))}
+      </div>
     </Sample>
 
-    <Sample title="Groups, start elements and item icons" code={groupsCode}>
-      <Select label="Time zone" defaultValue="utc" startElement={earthIcon}>
-        <SelectGroup label="Universal">
-          <SelectItem value="utc">UTC</SelectItem>
-        </SelectGroup>
-        <SelectGroup label="Americas">
-          <SelectItem value="new-york" startElement={earthIcon}>
-            New York
-          </SelectItem>
-          <SelectItem value="los-angeles" startElement={earthIcon}>
-            Los Angeles
-          </SelectItem>
-        </SelectGroup>
-        <SelectGroup label="Europe">
-          <SelectItem value="paris" startElement={earthIcon}>
-            Paris
-          </SelectItem>
-          <SelectItem value="berlin" startElement={earthIcon}>
-            Berlin
-          </SelectItem>
-        </SelectGroup>
-      </Select>
+    <Sample title="fullWidth" code={fullWidthCode}>
+      <div style={wideStyle}>
+        <Select label="Dashboard" fullWidth defaultValue="overview">
+          <SelectItem value="overview">Overview</SelectItem>
+          <SelectItem value="latency">Latency</SelectItem>
+        </Select>
+      </div>
     </Sample>
 
-    <Sample title="renderValue, custom icon and fullWidth" code={renderValueCode}>
+    <Sample title="multiple" code={multipleCode}>
+      <div style={rowStyle}>
+        <Select label="Columns" multiple defaultValue={['alertname', 'severity']}>
+          <SelectItem value="alertname">alertname</SelectItem>
+          <SelectItem value="severity">severity</SelectItem>
+          <SelectItem value="instance">instance</SelectItem>
+        </Select>
+      </div>
+    </Sample>
+
+    <Sample title="renderValue" code={renderValueCode}>
       <div style={rowStyle}>
         <Select label="Refresh" defaultValue={30} renderValue={(value) => `Every ${String(value)}s`}>
           <SelectItem value={5}>5 seconds</SelectItem>
           <SelectItem value={30}>30 seconds</SelectItem>
           <SelectItem value={60}>60 seconds</SelectItem>
         </Select>
-        <div style={wideStyle}>
-          <Select label="Dashboard" placeholder="Choose…" icon={unfoldIcon} fullWidth>
-            <SelectItem value="overview">Overview</SelectItem>
-            <SelectItem value="latency">Latency</SelectItem>
-          </Select>
-        </div>
+      </div>
+    </Sample>
+
+    <Sample title="icon" code={iconCode}>
+      <div style={rowStyle}>
+        <Select label="Unit" icon={unfoldIcon} defaultValue="bytes">
+          {units}
+        </Select>
+      </div>
+    </Sample>
+
+    <Sample title="startElement and endElement" code={adornmentsCode}>
+      <div style={rowStyle}>
+        <Select label="Time zone" startElement={earthIcon} endElement={offsetChip} defaultValue="utc">
+          {timeZones}
+        </Select>
+      </div>
+    </Sample>
+
+    <Sample title="SelectGroup" code={groupsCode}>
+      <div style={rowStyle}>
+        <Select label="Time zone" defaultValue="utc">
+          <SelectGroup label="Universal">
+            <SelectItem value="utc">UTC</SelectItem>
+          </SelectGroup>
+          <SelectGroup label="Americas">
+            <SelectItem value="new-york">New York</SelectItem>
+            <SelectItem value="los-angeles">Los Angeles</SelectItem>
+          </SelectGroup>
+        </Select>
+      </div>
+    </Sample>
+
+    <Sample title="SelectItem startElement" code={itemStartCode}>
+      <div style={rowStyle}>
+        <Select label="Region" defaultValue="eu">
+          <SelectItem value="eu" startElement={earthIcon}>
+            Europe
+          </SelectItem>
+          <SelectItem value="us" startElement={earthIcon}>
+            Americas
+          </SelectItem>
+        </Select>
       </div>
     </Sample>
   </Stack>
 );
 Variants.storyName = 'Variants';
 
-const statesCode = `// placeholder shows while nothing is selected. "" also means "nothing selected", so never pair a
+const placeholderCode = `// placeholder shows while nothing is selected. "" also means "nothing selected", so never pair a
 // placeholder with <SelectItem value="">; use a value such as "all" or "none" instead (Select throws otherwise).
-<Select label="Unit" helperText="Shown on every axis" placeholder="Choose a unit">…</Select>
-<Select label="Read only" readOnly defaultValue="bytes">…</Select>
-<Select label="Disabled" disabled defaultValue="bytes" helperText="This select is disabled">…</Select>
-<Select label="Disabled item" placeholder="Seconds cannot be picked">
+${code('label="Unit" placeholder="Choose a unit"')}`;
+const helperTextCode = `// helperText is linked to the trigger via aria-describedby.
+${code('label="Unit" helperText="Shown on every axis" defaultValue="bytes"')}`;
+const readOnlyCode = code('label="Unit" readOnly defaultValue="bytes"');
+const disabledCode = `// The whole control fades once; adornments inherit the fade instead of stacking their own.
+${code('label="Time zone" disabled startElement={<EarthIcon aria-hidden="true" />} endElement={<Chip size="xs">+00:00</Chip>} defaultValue="utc"')}`;
+const disabledItemCode = `<Select label="Unit" placeholder="Seconds cannot be picked">
   <SelectItem value="bytes">Bytes</SelectItem>
-  <SelectItem value="seconds" disabled>Seconds</SelectItem>
+  <SelectItem value="seconds" disabled startElement={<EarthIcon aria-hidden="true" />}>Seconds</SelectItem>
   <SelectItem value="percent">Percent</SelectItem>
-</Select>
-
-// Without a visible label, aria-label provides the accessible name.
-<Select aria-label="Unit" placeholder="Unit" startElement={<MagnifyIcon aria-hidden="true" />}>…</Select>`;
+</Select>`;
+const ariaLabelCode = `// Without a visible label, aria-label provides the accessible name.
+${code('aria-label="Unit" placeholder="Unit"')}`;
 
 export const States: Story = () => (
   <Stack>
-    <Sample title="Helper text, read-only, disabled and unlabeled" code={statesCode}>
-      <div style={columnStyle}>
-        <Select label="Unit" helperText="Shown on every axis" placeholder="Choose a unit">
+    <Sample title="placeholder" code={placeholderCode}>
+      <div style={rowStyle}>
+        <Select label="Unit" placeholder="Choose a unit">
           {units}
         </Select>
-        <Select label="Read only" readOnly defaultValue="bytes">
+      </div>
+    </Sample>
+
+    <Sample title="helperText" code={helperTextCode}>
+      <div style={rowStyle}>
+        <Select label="Unit" helperText="Shown on every axis" defaultValue="bytes">
           {units}
         </Select>
-        <Select label="Disabled" disabled defaultValue="bytes" helperText="This select is disabled">
+      </div>
+    </Sample>
+
+    <Sample title="readOnly" code={readOnlyCode}>
+      <div style={rowStyle}>
+        <Select label="Unit" readOnly defaultValue="bytes">
           {units}
         </Select>
-        <Select label="Disabled item" placeholder="Seconds cannot be picked">
+      </div>
+    </Sample>
+
+    <Sample title="disabled" code={disabledCode}>
+      <div style={rowStyle}>
+        <Select label="Time zone" disabled startElement={earthIcon} endElement={offsetChip} defaultValue="utc">
+          {timeZones}
+        </Select>
+      </div>
+    </Sample>
+
+    <Sample title="SelectItem disabled" code={disabledItemCode}>
+      <div style={rowStyle}>
+        <Select label="Unit" placeholder="Seconds cannot be picked">
           <SelectItem value="bytes">Bytes</SelectItem>
-          <SelectItem value="seconds" disabled>
+          <SelectItem value="seconds" disabled startElement={earthIcon}>
             Seconds
           </SelectItem>
           <SelectItem value="percent">Percent</SelectItem>
         </Select>
-        <Select aria-label="Unit" placeholder="Unit" startElement={magnifyIcon}>
+      </div>
+    </Sample>
+
+    <Sample title="aria-label" code={ariaLabelCode}>
+      <div style={rowStyle}>
+        <Select aria-label="Unit" placeholder="Unit">
           {units}
         </Select>
       </div>
@@ -281,13 +341,15 @@ export const Slots: Story = () => (
       </ul>
     </div>
     <Sample title="Styling slots" code={slotStylingCode}>
-      <Select label="Metric" defaultValue="up" helperText="Pick a metric name" slotProps={querySlots}>
-        <SelectItem value="up">up</SelectItem>
-        <SelectItem value="node_cpu_seconds_total">node_cpu_seconds_total</SelectItem>
-        <SelectItem value="http_requests_total">http_requests_total</SelectItem>
-        <SelectItem value="process_resident_memory_bytes">process_resident_memory_bytes</SelectItem>
-        <SelectItem value="go_goroutines">go_goroutines</SelectItem>
-      </Select>
+      <div style={rowStyle}>
+        <Select label="Metric" defaultValue="up" helperText="Pick a metric name" slotProps={querySlots}>
+          <SelectItem value="up">up</SelectItem>
+          <SelectItem value="node_cpu_seconds_total">node_cpu_seconds_total</SelectItem>
+          <SelectItem value="http_requests_total">http_requests_total</SelectItem>
+          <SelectItem value="process_resident_memory_bytes">process_resident_memory_bytes</SelectItem>
+          <SelectItem value="go_goroutines">go_goroutines</SelectItem>
+        </Select>
+      </div>
     </Sample>
   </Stack>
 );
