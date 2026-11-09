@@ -14,6 +14,7 @@
 export * from './annotations';
 export * from './builtin-variables';
 export * from './datasources';
+export * from './explorer';
 export * from './plugin-registry';
 export * from './variables';
 export * from './TimeRangeProvider';
