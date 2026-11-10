@@ -17,6 +17,7 @@ import type { AlertsQueryPlugin } from './alerts-queries';
 import type { AnnotationPlugin } from './annotations';
 import type { DatasourcePlugin } from './datasource';
 import type { ExplorePlugin } from './explore';
+import type { ExpressionQueryPlugin } from './expression-queries';
 import type { JsonQueryPlugin } from './json-queries';
 import type { LogQueryPlugin } from './log-queries';
 import type { PanelPlugin } from './panels';
@@ -111,6 +112,7 @@ export interface SupportedPlugins {
   AlertsQuery: AlertsQueryPlugin;
   SilencesQuery: SilencesQueryPlugin;
   JsonQuery: JsonQueryPlugin;
+  ExpressionQuery: ExpressionQueryPlugin;
   Datasource: DatasourcePlugin;
   Explore: ExplorePlugin;
 }

@@ -56,6 +56,11 @@ vi.mock('../json-queries', () => ({
   useJsonQueries: vi.fn().mockImplementation(() => [{ data: MOCK_JSON_DATA }]),
 }));
 
+vi.mock('../expression-queries', () => ({
+  EXPRESSION_QUERY_KEY: 'ExpressionQuery',
+  useExpressionQueries: vi.fn().mockImplementation(() => []),
+}));
+
 vi.mock('../plugin-registry', () => ({
   useListPluginMetadata: vi.fn().mockImplementation(() => ({
     data: [

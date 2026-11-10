@@ -18,6 +18,7 @@ export * from './plugin-registry';
 export * from './variables';
 export * from './TimeRangeProvider';
 export * from './time-series-queries';
+export * from './expression-queries';
 export * from './trace-queries';
 export * from './profile-queries';
 export * from './alerts-queries';

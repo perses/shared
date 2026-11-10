@@ -32,6 +32,10 @@ vi.mock('../log-queries', () => ({ useLogQueries: (): unknown[] => mocks.noResul
 vi.mock('../alerts-queries', () => ({ useAlertsQueries: (): unknown[] => mocks.noResults }));
 vi.mock('../silences-queries', () => ({ useSilencesQueries: (): unknown[] => mocks.noResults }));
 vi.mock('../json-queries', () => ({ useJsonQueries: (): unknown[] => mocks.noResults }));
+vi.mock('../expression-queries', () => ({
+  EXPRESSION_QUERY_KEY: 'ExpressionQuery',
+  useExpressionQueries: (): unknown[] => mocks.noResults,
+}));
 
 const cachedQuery: QueryDefinition = { kind: 'TimeSeriesQuery', spec: { plugin: { kind: 'Cached', spec: {} } } };
 const slowQuery: QueryDefinition = { kind: 'TimeSeriesQuery', spec: { plugin: { kind: 'Slow', spec: {} } } };

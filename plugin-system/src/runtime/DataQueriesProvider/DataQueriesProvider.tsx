@@ -17,6 +17,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo } from 'reac
 
 import type { AlertsQueryDefinition } from '../alerts-queries';
 import { useAlertsQueries } from '../alerts-queries';
+import type { ExpressionQueryInputState } from '../expression-queries';
+import { EXPRESSION_QUERY_KEY, useExpressionQueries } from '../expression-queries';
 import type { JsonQueryDefinition } from '../json-queries';
 import { useJsonQueries } from '../json-queries';
 import type { LogQueryDefinition } from '../log-queries';
@@ -29,7 +31,7 @@ import { useTimeSeriesQueries } from '../time-series-queries';
 import type { TraceQueryDefinition } from '../trace-queries';
 import { useTraceQueries } from '../trace-queries';
 import { useUsageMetrics } from '../UsageMetricsProvider';
-import type { DataQueriesProviderProps, UseDataQueryResults, DataQueriesContextType, QueryData } from './model';
+import type { DataQueriesContextType, DataQueriesProviderProps, QueryData, UseDataQueryResults } from './model';
 import { transformQueryResults } from './model';
 
 export const DataQueriesContext = createContext<DataQueriesContextType | undefined>(undefined);
@@ -72,11 +74,20 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
 
   const usageMetrics = useUsageMetrics();
 
-  // Filter definitions for time series query and other future query plugins
-  const timeSeriesQueries = definitions.filter(
-    (definition) => definition.kind === 'TimeSeriesQuery',
-  ) as TimeSeriesQueryDefinition[];
+  // Filter definitions for time series query and other future query plugins, keeping original indices.
+  const timeSeriesQueryEntries = definitions.flatMap((definition, originalIdx) =>
+    definition.kind === 'TimeSeriesQuery' ? [{ definition: definition as TimeSeriesQueryDefinition, originalIdx }] : [],
+  );
+  const timeSeriesQueries = timeSeriesQueryEntries.map((e) => e.definition);
   const timeSeriesResults = useTimeSeriesQueries(timeSeriesQueries, options, queryOptions);
+
+  // Expressions are computed from the results of the other queries, referenced by their index in `definitions`.
+  const expressionQueries = definitions.filter((definition) => definition.kind === EXPRESSION_QUERY_KEY);
+  const expressionInputs: Array<ExpressionQueryInputState | undefined> = Array.from({ length: definitions.length });
+  timeSeriesQueryEntries.forEach(({ originalIdx }, filteredIdx) => {
+    expressionInputs[originalIdx] = timeSeriesResults[filteredIdx];
+  });
+  const expressionResults = useExpressionQueries(definitions, expressionInputs, options, queryOptions);
 
   const traceQueries = definitions.filter((definition) => definition.kind === 'TraceQuery') as TraceQueryDefinition[];
   const traceResults = useTraceQueries(traceQueries);
@@ -121,6 +132,7 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
       ...transformQueryResults(alertsResults, alertsQueries),
       ...transformQueryResults(silencesResults, silencesQueries),
       ...transformQueryResults(jsonResults, jsonQueries),
+      ...transformQueryResults(expressionResults, expressionQueries),
     ];
 
     return {
@@ -144,6 +156,8 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
     jsonResults,
     timeSeriesQueries,
     timeSeriesResults,
+    expressionQueries,
+    expressionResults,
     traceQueries,
     traceResults,
     definitions,
