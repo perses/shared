@@ -73,10 +73,17 @@ export function TableColumnFilterDropdown({
   // reset the visible text.
   const [searchKey, setSearchKey] = useState(0);
 
-  const sortedEntries = useMemo(
-    () => [...uniqueValues.entries()].toSorted(([a], [b]) => compareFilterValues(a, b)),
-    [uniqueValues],
-  );
+  const sortedEntries = useMemo(() => {
+    const entries = new Map(uniqueValues);
+    // Inject selected values that have since disappeared from the data so they
+    // remain visible and unchecking them is always possible.
+    for (const v of filterValues) {
+      if (!entries.has(v)) {
+        entries.set(v, 0);
+      }
+    }
+    return [...entries.entries()].toSorted(([a], [b]) => compareFilterValues(a, b));
+  }, [uniqueValues, filterValues]);
 
   const visibleEntries = useMemo(() => {
     if (!searchQuery) return sortedEntries;
@@ -118,14 +125,14 @@ export function TableColumnFilterDropdown({
   const handlePopoverKeyUp = useCallback((e: React.KeyboardEvent) => e.stopPropagation(), []);
 
   const handleToggleAll = useCallback((): void => {
-    if (allVisibleSelected) {
+    if (isActive) {
       const visibleSet = new Set(visibleEntries.map(([v]) => v));
       onFilterChange(filterValues.filter((v) => !visibleSet.has(v)));
     } else {
       const toAdd = visibleEntries.map(([v]) => v).filter((v) => !filterValues.includes(v));
       onFilterChange([...filterValues, ...toAdd]);
     }
-  }, [allVisibleSelected, filterValues, onFilterChange, visibleEntries]);
+  }, [isActive, filterValues, onFilterChange, visibleEntries]);
 
   const handleToggleValue = useCallback(
     (value: unknown): void => {
@@ -138,7 +145,7 @@ export function TableColumnFilterDropdown({
     [filterValues, onFilterChange],
   );
 
-  const selectAllLabel = allVisibleSelected ? 'Clear all' : 'Select all';
+  const selectAllLabel = isActive ? 'Clear all' : 'Select all';
 
   const handleSearchClear = useCallback(() => {
     setSearchQuery('');

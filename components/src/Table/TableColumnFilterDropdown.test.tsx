@@ -37,6 +37,29 @@ function DropdownWrapper({
   );
 }
 
+// Wrapper whose uniqueValues can be swapped after mount to simulate a data
+// change (e.g. a panel refresh that returns a different set of label values).
+function ControlledDropdownWrapper({
+  initialUniqueValues,
+  initialFilterValues = initialFilter,
+}: {
+  initialUniqueValues: Map<unknown, number>;
+  initialFilterValues?: unknown[];
+}): ReactElement {
+  const [uniqueValues, setUniqueValues] = React.useState(initialUniqueValues);
+  const [filterValues, setFilterValues] = useState<unknown[]>(initialFilterValues);
+  return (
+    <>
+      <button onClick={() => setUniqueValues(new Map())}>clear data</button>
+      <TableColumnFilterDropdown
+        uniqueValues={uniqueValues}
+        filterValues={filterValues}
+        onFilterChange={setFilterValues}
+      />
+    </>
+  );
+}
+
 const STATUS_VALUES = new Map<unknown, number>([
   ['active', 3],
   ['inactive', 2],
@@ -127,15 +150,17 @@ describe('TableColumnFilterDropdown', () => {
       expect(activeCheckbox).not.toBeChecked();
     });
 
-    test('selecting a subset marks "Select all" as indeterminate', () => {
+    test('selecting a subset marks the toggle-all checkbox as indeterminate', () => {
       render(<DropdownWrapper uniqueValues={STATUS_VALUES} />);
       openDropdown();
 
       userEvent.click(screen.getByRole('checkbox', { name: 'active' }));
 
-      const selectAll = screen.getByRole('checkbox', { name: 'Select all' });
-      expect(selectAll).not.toBeChecked();
-      expect(selectAll).toHaveAttribute('data-indeterminate', 'true');
+      // With a partial selection the button now shows "Clear all" (isActive=true)
+      // and is indeterminate because not all visible values are selected.
+      const clearAll = screen.getByRole('checkbox', { name: 'Clear all' });
+      expect(clearAll).not.toBeChecked();
+      expect(clearAll).toHaveAttribute('data-indeterminate', 'true');
     });
   });
 
@@ -210,6 +235,47 @@ describe('TableColumnFilterDropdown', () => {
       expect(screen.getByRole('checkbox', { name: 'eu-west' })).toBeChecked();
 
       vi.useRealTimers();
+    });
+  });
+
+  describe('stale filter values (data changes after filter is applied)', () => {
+    test('stale selected values remain visible in the list with a count of 0 after data changes', () => {
+      render(
+        <ControlledDropdownWrapper initialUniqueValues={STATUS_VALUES} initialFilterValues={['active', 'inactive']} />,
+      );
+
+      userEvent.click(screen.getByRole('button', { name: 'clear data' }));
+      openDropdown();
+
+      expect(screen.getByRole('checkbox', { name: 'active' })).toBeChecked();
+      expect(screen.getByRole('checkbox', { name: 'inactive' })).toBeChecked();
+    });
+
+    test('the header filter icon remains active when only stale values are selected', () => {
+      render(<ControlledDropdownWrapper initialUniqueValues={STATUS_VALUES} initialFilterValues={['active']} />);
+
+      userEvent.click(screen.getByRole('button', { name: 'clear data' }));
+
+      // filterValues is still non-empty so the filter button should be present and
+      // openable (its active/highlighted styling is visual-only and not ARIA-testable).
+      expect(screen.getByRole('button', { name: /filter column/i })).toBeInTheDocument();
+      openDropdown();
+      expect(screen.getByRole('checkbox', { name: 'Clear all' })).toBeInTheDocument();
+    });
+
+    test('"Clear all" is shown and clears stale values', () => {
+      render(<ControlledDropdownWrapper initialUniqueValues={STATUS_VALUES} initialFilterValues={['active']} />);
+
+      userEvent.click(screen.getByRole('button', { name: 'clear data' }));
+      openDropdown();
+
+      const clearAll = screen.getByRole('checkbox', { name: 'Clear all' });
+      expect(clearAll).toBeInTheDocument();
+
+      userEvent.click(clearAll);
+
+      expect(screen.getByRole('checkbox', { name: 'Select all' })).toBeInTheDocument();
+      expect(screen.queryByRole('checkbox', { name: 'active' })).not.toBeInTheDocument();
     });
   });
 
