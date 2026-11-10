@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { RenderResult } from '@testing-library/react';
-import { fireEvent, render, screen, getAllByRole, within } from '@testing-library/react';
+import { fireEvent, render, screen, getAllByRole, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import { useState } from 'react';
@@ -1309,5 +1309,181 @@ describe('table', () => {
       fireEvent.mouseDown(getResizeHandle(), { detail: 2 });
       expect(getColumnSize()).toBe(initialSize);
     });
+  });
+});
+
+type TreeRow = { id: string; label: string; children?: TreeRow[] };
+
+const TREE_DATA: TreeRow[] = [
+  { id: 'team-a', label: 'Team A', children: [{ id: 'team-a/overview', label: 'A overview' }] },
+  { id: 'team-b', label: 'Team B', children: [{ id: 'team-b/overview', label: 'B overview' }] },
+];
+
+const TREE_COLUMNS: Array<TableColumnConfig<TreeRow>> = [
+  {
+    accessorKey: 'label',
+    header: 'Label',
+    cell: ({ row, getValue }) =>
+      row.getCanExpand() ? (
+        <button onClick={row.getToggleExpandedHandler()}>{`toggle ${getValue<string>()}`}</button>
+      ) : (
+        getValue<string>()
+      ),
+  },
+];
+
+const TREE_VIRTUOSO_CONTEXT = { viewportHeight: 600, itemHeight: MOCK_ITEM_HEIGHT };
+const TREE_TOOLBAR_CONFIG = { isSearchEnabled: true };
+const getTreeRowId = (row: TreeRow): string => row.id;
+const getTreeSubRows = (row: TreeRow): TreeRow[] | undefined => row.children;
+
+type TreeTableProps = Partial<Pick<TableProps<TreeRow>, 'data' | 'expanded' | 'onExpandedChange'>>;
+
+function TreeTable({ data = TREE_DATA, ...props }: TreeTableProps): ReactElement {
+  return (
+    <VirtuosoMockContext.Provider value={TREE_VIRTUOSO_CONTEXT}>
+      <Table
+        data={data}
+        columns={TREE_COLUMNS}
+        height={600}
+        width={300}
+        getRowId={getTreeRowId}
+        getSubRows={getTreeSubRows}
+        tableToolbarConfig={TREE_TOOLBAR_CONFIG}
+        {...props}
+      />
+    </VirtuosoMockContext.Provider>
+  );
+}
+
+type TreeExpanded = NonNullable<TableProps<TreeRow>['expanded']>;
+
+const NO_EXPANDED_TREE_ROWS: TreeExpanded = {};
+const IGNORE_STORE = (): void => {};
+
+/**
+ * Owns the expanded rows like a real consumer does, and reports every change it stores.
+ */
+function StatefulTreeTable({
+  initialExpanded = NO_EXPANDED_TREE_ROWS,
+  onStore = IGNORE_STORE,
+}: {
+  initialExpanded?: TreeExpanded;
+  onStore?: (expanded: TreeExpanded) => void;
+}): ReactElement {
+  const [expanded, setExpanded] = useState(initialExpanded);
+  return (
+    <TreeTable
+      expanded={expanded}
+      onExpandedChange={(newExpanded) => {
+        onStore(newExpanded);
+        setExpanded(newExpanded);
+      }}
+    />
+  );
+}
+
+describe('table with sub rows', () => {
+  test('renders the rows given by `expanded`', () => {
+    render(<TreeTable expanded={{ 'team-b': true }} />);
+
+    expect(screen.queryByText('A overview')).not.toBeInTheDocument();
+    expect(screen.getByText('B overview')).toBeInTheDocument();
+  });
+
+  test('does not expand rows on its own when `expanded` is not managed by the caller', () => {
+    render(<TreeTable />);
+
+    userEvent.click(screen.getByRole('button', { name: 'toggle Team A' }));
+
+    expect(screen.queryByText('A overview')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'expand all rows' })).not.toBeInTheDocument();
+  });
+
+  test('reports toggles through `onExpandedChange`', () => {
+    const onExpandedChange = vi.fn();
+    render(<TreeTable expanded={{ 'team-b': true }} onExpandedChange={onExpandedChange} />);
+
+    userEvent.click(screen.getByRole('button', { name: 'toggle Team A' }));
+
+    expect(onExpandedChange).toHaveBeenCalledTimes(1);
+    expect(onExpandedChange).toHaveBeenCalledWith({ 'team-a': true, 'team-b': true });
+  });
+
+  test('expands and collapses rows when the caller feeds `expanded` back in', () => {
+    render(<StatefulTreeTable />);
+
+    userEvent.click(screen.getByRole('button', { name: 'toggle Team A' }));
+    expect(screen.getByText('A overview')).toBeInTheDocument();
+    expect(screen.queryByText('B overview')).not.toBeInTheDocument();
+
+    userEvent.click(screen.getByRole('button', { name: 'toggle Team A' }));
+    expect(screen.queryByText('A overview')).not.toBeInTheDocument();
+  });
+
+  test('reports every row expanded when expand all is clicked', () => {
+    const onStore = vi.fn();
+    render(<StatefulTreeTable onStore={onStore} />);
+
+    userEvent.click(screen.getByRole('button', { name: 'expand all rows' }));
+
+    expect(onStore).toHaveBeenLastCalledWith(true);
+    expect(screen.getByText('A overview')).toBeInTheDocument();
+    expect(screen.getByText('B overview')).toBeInTheDocument();
+  });
+
+  test('keeps the caller expanded rows when the data changes', async () => {
+    const onExpandedChange = vi.fn();
+    const { rerender } = render(
+      <TreeTable data={TREE_DATA} expanded={{ 'team-a': true }} onExpandedChange={onExpandedChange} />,
+    );
+
+    // same rows in a new array, like a refetch
+    rerender(<TreeTable data={[...TREE_DATA]} expanded={{ 'team-a': true }} onExpandedChange={onExpandedChange} />);
+    // the table schedules its resets after the render, so let them run
+    await waitFor(() => expect(screen.getByText('A overview')).toBeInTheDocument());
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(onExpandedChange).not.toHaveBeenCalled();
+  });
+
+  test('expands every row during a search without reporting it, and shows the caller rows again when cleared', async () => {
+    const onStore = vi.fn();
+    render(<StatefulTreeTable initialExpanded={{ 'team-a': true }} onStore={onStore} />);
+    const searchInput = screen.getByRole('textbox', { name: 'search table' });
+
+    userEvent.type(searchInput, 'overview');
+    expect(await screen.findByText('B overview')).toBeInTheDocument();
+    expect(screen.getByText('A overview')).toBeInTheDocument();
+
+    // toggling during the search only affects the search view
+    userEvent.click(screen.getByRole('button', { name: 'toggle Team A' }));
+    expect(screen.queryByText('A overview')).not.toBeInTheDocument();
+
+    userEvent.clear(searchInput);
+    await waitFor(() => expect(screen.queryByText('B overview')).not.toBeInTheDocument());
+    expect(screen.getByText('A overview')).toBeInTheDocument();
+    expect(onStore).not.toHaveBeenCalled();
+  });
+
+  test('expands every row again on the next search, whatever was collapsed in the previous one', async () => {
+    const onStore = vi.fn();
+    render(<StatefulTreeTable onStore={onStore} />);
+    const searchInput = screen.getByRole('textbox', { name: 'search table' });
+
+    // only Team A's sub row matches, so Team B is hidden while the search is active
+    userEvent.type(searchInput, 'A overview');
+    expect(await screen.findByText('A overview')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'toggle Team B' })).not.toBeInTheDocument();
+    userEvent.click(screen.getByRole('button', { name: 'collapse all rows' }));
+    expect(screen.queryByText('A overview')).not.toBeInTheDocument();
+
+    userEvent.clear(searchInput);
+    // the search input is debounced: wait until the cleared query reaches the table
+    expect(await screen.findByRole('button', { name: 'toggle Team B' })).toBeInTheDocument();
+    userEvent.type(searchInput, 'A overview');
+
+    expect(await screen.findByText('A overview')).toBeInTheDocument();
+    expect(onStore).not.toHaveBeenCalled();
   });
 });
