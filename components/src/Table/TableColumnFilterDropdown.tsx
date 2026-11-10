@@ -28,7 +28,8 @@ import Close from 'mdi-material-ui/Close';
 import FilterVariant from 'mdi-material-ui/FilterVariant';
 import Magnify from 'mdi-material-ui/Magnify';
 import type { ReactElement } from 'react';
-import React, { useCallback, useId, useMemo, useRef, useState } from 'react';
+import React, { forwardRef, useCallback, useId, useMemo, useRef, useState } from 'react';
+import { Virtuoso } from 'react-virtuoso';
 
 import { TextField } from '../controls';
 
@@ -43,11 +44,13 @@ export interface TableColumnFilterDropdownProps {
   onFilterChange: (values: unknown[]) => void;
 }
 
+const LIST_MAX_VISIBLE_ITEMS = 10;
+
 const styles = {
   popoverAnchorOrigin: { vertical: 'bottom', horizontal: 'left' },
   popoverTransformOrigin: { vertical: 'top', horizontal: 'left' },
   search: { px: 1, pt: 1, pb: 0.5 },
-  list: { minWidth: 160, maxWidth: 280, maxHeight: 280, overflowY: 'auto' },
+  list: { minWidth: 160, maxWidth: 280, overflowY: 'auto' },
   listItem: { px: 1, cursor: 'pointer', userSelect: 'none' },
   checkbox: { p: 0, mr: 1 },
 } as const;
@@ -57,6 +60,17 @@ function compareFilterValues(a: unknown, b: unknown): number {
   if (typeof a === 'number') return -1;
   if (typeof b === 'number') return 1;
   return String(a).localeCompare(String(b));
+}
+
+interface FilterItemContext {
+  filterValues: unknown[];
+  onToggle: (value: unknown) => void;
+}
+
+function renderFilterItem(_: number, [value]: [unknown, number], context: FilterItemContext): ReactElement {
+  const label = String(value);
+  const checked = context.filterValues.includes(value);
+  return <FilterItem label={label} value={value} checked={checked} onToggle={context.onToggle} />;
 }
 
 export function TableColumnFilterDropdown({
@@ -72,6 +86,26 @@ export function TableColumnFilterDropdown({
   // `TextField` keeps its own debounced internal value, so clearing `searchQuery` alone does not
   // reset the visible text.
   const [searchKey, setSearchKey] = useState(0);
+  const [itemHeight, setItemHeight] = useState(0);
+  const selectAllObserverRef = useRef<ResizeObserver | null>(null);
+
+  const handleSelectAllRef = useCallback((node: HTMLLabelElement | null) => {
+    if (!node) {
+      selectAllObserverRef.current?.disconnect();
+      selectAllObserverRef.current = null;
+      return;
+    }
+
+    selectAllObserverRef.current?.disconnect();
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setItemHeight(entry.contentRect.height);
+      }
+    });
+    selectAllObserverRef.current = observer;
+    observer.observe(node);
+    setItemHeight(node.getBoundingClientRect().height);
+  }, []);
 
   const sortedEntries = useMemo(() => {
     const entries = new Map(uniqueValues);
@@ -218,6 +252,7 @@ export function TableColumnFilterDropdown({
         <Divider />
         <List dense disablePadding aria-labelledby={labelId} sx={styles.list}>
           <FilterItem
+            ref={handleSelectAllRef}
             id={labelId}
             label={selectAllLabel}
             checked={allVisibleSelected}
@@ -225,13 +260,13 @@ export function TableColumnFilterDropdown({
             onToggle={handleToggleAll}
           />
           <Divider />
-          {visibleEntries.map(([value]) => {
-            const label = String(value);
-            const checked = filterValues.includes(value);
-            return (
-              <FilterItem key={label} label={label} value={value} checked={checked} onToggle={handleToggleValue} />
-            );
-          })}
+          <Virtuoso
+            style={{ height: Math.min(visibleEntries.length, LIST_MAX_VISIBLE_ITEMS) * itemHeight }}
+            fixedItemHeight={itemHeight || undefined}
+            data={visibleEntries}
+            context={{ filterValues, onToggle: handleToggleValue }}
+            itemContent={renderFilterItem}
+          />
         </List>
       </Popover>
     </>
@@ -247,7 +282,10 @@ interface FilterItemProps {
   onToggle: (value: unknown) => void;
 }
 
-function FilterItem({ id, label, value, checked, indeterminate, onToggle }: FilterItemProps): ReactElement {
+const FilterItem = forwardRef<HTMLLabelElement, FilterItemProps>(function FilterItem(
+  { id, label, value, checked, indeterminate, onToggle }: FilterItemProps,
+  ref,
+): ReactElement {
   const checkboxId = useId();
   const checkboxSlotProps = useMemo(() => ({ input: { id: checkboxId } }), [checkboxId]);
   const handleChange = useCallback(() => onToggle(value), [onToggle, value]);
@@ -263,7 +301,7 @@ function FilterItem({ id, label, value, checked, indeterminate, onToggle }: Filt
   );
 
   return (
-    <ListItem id={id} disablePadding sx={styles.listItem} component="label" htmlFor={checkboxId}>
+    <ListItem ref={ref} id={id} disablePadding sx={styles.listItem} component="label" htmlFor={checkboxId}>
       <Checkbox
         size="small"
         checked={checked}
@@ -276,4 +314,4 @@ function FilterItem({ id, label, value, checked, indeterminate, onToggle }: Filt
       <ListItemText primary={itemLabel} />
     </ListItem>
   );
-}
+});

@@ -11,10 +11,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render as rtlRender, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import React, { useState } from 'react';
+import { VirtuosoMockContext } from 'react-virtuoso';
 
 import { TableColumnFilterDropdown } from './TableColumnFilterDropdown';
 
@@ -80,6 +81,26 @@ const MIXED_VALUES = new Map<unknown, number>([
   [2, 1],
   ['cherry', 1],
 ]);
+
+const VIRTUOSO_TEST_CONTEXT = { viewportHeight: 360, itemHeight: 36 };
+const originalGetBoundingClientRect = HTMLElement.prototype.getBoundingClientRect;
+
+beforeEach(() => {
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement): DOMRect {
+    if (this instanceof HTMLLabelElement) {
+      return DOMRect.fromRect({ width: 200, height: this.id ? 48 : 36 });
+    }
+    return originalGetBoundingClientRect.call(this);
+  });
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+function render(ui: ReactElement): ReturnType<typeof rtlRender> {
+  return rtlRender(<VirtuosoMockContext.Provider value={VIRTUOSO_TEST_CONTEXT}>{ui}</VirtuosoMockContext.Provider>);
+}
 
 function openDropdown(): void {
   userEvent.click(screen.getByRole('button', { name: /filter column/i }));
