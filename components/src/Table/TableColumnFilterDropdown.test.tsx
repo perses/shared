@@ -18,10 +18,11 @@ import React, { useState } from 'react';
 
 import { TableColumnFilterDropdown } from './TableColumnFilterDropdown';
 
+const initialFilter: unknown[] = [];
 // Stateful wrapper so filterValues updates propagate back into the component.
 function DropdownWrapper({
   uniqueValues,
-  initialFilterValues = [],
+  initialFilterValues = initialFilter,
 }: {
   uniqueValues: Map<unknown, number>;
   initialFilterValues?: unknown[];
@@ -48,6 +49,15 @@ const REGION_VALUES = new Map<unknown, number>([
   ['us-west', 1],
 ]);
 
+// Numbers before strings, numbers sorted numerically, strings sorted alphabetically.
+const MIXED_VALUES = new Map<unknown, number>([
+  ['banana', 1],
+  [10, 1],
+  ['apple', 1],
+  [2, 1],
+  ['cherry', 1],
+]);
+
 function openDropdown(): void {
   userEvent.click(screen.getByRole('button', { name: /filter column/i }));
 }
@@ -57,6 +67,15 @@ function typeSearch(value: string): void {
   const input = screen.getByRole('textbox', { hidden: true });
   fireEvent.change(input, { target: { value } });
   act(() => vi.advanceTimersByTime(300));
+}
+
+function getDropdownLabels(): string[] {
+  const checkboxes = screen.getAllByRole('checkbox');
+  // First entry is "Select all", remainder are values.
+  return checkboxes.slice(1).map((cb) => {
+    const label = document.querySelector(`label[for="${cb.id}"]`);
+    return label?.textContent?.trim() ?? '';
+  });
 }
 
 describe('TableColumnFilterDropdown', () => {
@@ -76,17 +95,11 @@ describe('TableColumnFilterDropdown', () => {
     expect(screen.getByRole('checkbox', { name: 'inactive' })).toBeInTheDocument();
   });
 
-  test('values are sorted alphabetically', () => {
-    render(<DropdownWrapper uniqueValues={REGION_VALUES} />);
+  test('values are sorted: numbers numerically first, then strings alphabetically', () => {
+    render(<DropdownWrapper uniqueValues={MIXED_VALUES} />);
     openDropdown();
 
-    const checkboxes = screen.getAllByRole('checkbox');
-    // First entry is "Select all", remainder sorted.
-    const labels = checkboxes.slice(1).map((cb) => {
-      const label = document.querySelector(`label[for="${cb.id}"]`);
-      return label?.textContent?.trim() ?? '';
-    });
-    expect(labels).toEqual(['ap-south', 'eu-west', 'us-east', 'us-west']);
+    expect(getDropdownLabels()).toEqual(['2', '10', 'apple', 'banana', 'cherry']);
   });
 
   describe('single-value selection', () => {

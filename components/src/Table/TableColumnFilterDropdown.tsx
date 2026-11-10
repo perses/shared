@@ -52,6 +52,13 @@ const styles = {
   checkbox: { p: 0, mr: 1 },
 } as const;
 
+function compareFilterValues(a: unknown, b: unknown): number {
+  if (typeof a === 'number' && typeof b === 'number') return a - b;
+  if (typeof a === 'number') return -1;
+  if (typeof b === 'number') return 1;
+  return String(a).localeCompare(String(b));
+}
+
 export function TableColumnFilterDropdown({
   uniqueValues,
   filterValues,
@@ -67,7 +74,7 @@ export function TableColumnFilterDropdown({
   const [searchKey, setSearchKey] = useState(0);
 
   const sortedEntries = useMemo(
-    () => [...uniqueValues.entries()].toSorted(([a], [b]) => String(a).localeCompare(String(b))),
+    () => [...uniqueValues.entries()].toSorted(([a], [b]) => compareFilterValues(a, b)),
     [uniqueValues],
   );
 
