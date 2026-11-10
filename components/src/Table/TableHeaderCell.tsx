@@ -98,38 +98,39 @@ export function TableHeaderCell({
           display: 'flex',
           flexWrap: 'nowrap',
           flexDirection: 'row',
-          justifyContent: 'space-between',
           alignItems: 'center',
         }}
       >
-        {showSortLabel ? (
-          <TableSortLabel
-            onClick={onSort}
-            direction={direction}
-            active={isActive}
-            sx={{
-              // Overrides a default vertical alignment in the CSS that changes
-              // the header vertical rhythm in a way that's inconsistent with
-              // non-sorting headers.
-              verticalAlign: 'unset',
+        <Box textAlign={cellProps.align} flexGrow={1}>
+          {showSortLabel ? (
+            <TableSortLabel
+              onClick={onSort}
+              direction={direction}
+              active={isActive}
+              sx={{
+                // Overrides a default vertical alignment in the CSS that changes
+                // the header vertical rhythm in a way that's inconsistent with
+                // non-sorting headers.
+                verticalAlign: 'unset',
 
-              // Makes it possible to ellipsize the text if it's too long.
-              maxWidth: '100%',
+                // Makes it possible to ellipsize the text if it's too long.
+                maxWidth: '100%',
 
-              // Make the arrow visible when focused using the keyboard to assist
-              // with a11y.
-              '&:focus-visible': {
-                [`& .${tableSortLabelClasses.icon}`]: {
-                  opacity: isActive ? 1 : 0.5,
+                // Make the arrow visible when focused using the keyboard to assist
+                // with a11y.
+                '&:focus-visible': {
+                  [`& .${tableSortLabelClasses.icon}`]: {
+                    opacity: isActive ? 1 : 0.5,
+                  },
                 },
-              },
-            }}
-          >
-            {headerText}
-          </TableSortLabel>
-        ) : (
-          headerText
-        )}
+              }}
+            >
+              {headerText}
+            </TableSortLabel>
+          ) : (
+            headerText
+          )}
+        </Box>
         {filterConfig && <TableColumnFilterDropdown {...filterConfig} />}
       </Box>
 
