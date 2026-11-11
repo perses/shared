@@ -10,8 +10,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Divider, IconButton, Portal, Stack, Typography } from '@mui/material';
-import type { Exemplar, Labels } from '@perses-dev/spec';
+import { Box, Divider, IconButton, Link, Portal, Stack, Typography } from '@mui/material';
+import type { Exemplar, ExemplarLink, Labels } from '@perses-dev/spec';
+import LaunchIcon from 'mdi-material-ui/Launch';
 import Pin from 'mdi-material-ui/Pin';
 import PinOutline from 'mdi-material-ui/PinOutline';
 import type { ReactElement } from 'react';
@@ -31,6 +32,7 @@ import {
   useMousePosition,
 } from '../TimeSeriesTooltip';
 import type { CursorCoordinates } from '../TimeSeriesTooltip/tooltip-model';
+import { sanitizeUrl } from '../utils/url';
 
 export interface ExemplarMetadataTooltipProps {
   exemplar: Exemplar;
@@ -50,9 +52,10 @@ export interface ExemplarMetadataTooltipProps {
 }
 
 /**
- * Tooltip showing an exemplar's metadata (series labels, exemplar labels, value and timestamp).
+ * Tooltip showing an exemplar's metadata (links, series labels, exemplar labels, value and timestamp).
  * Follows the mouse while hovering an exemplar marker and can be pinned in place, the same way
- * the annotation tooltip works.
+ * the annotation tooltip works. The links of the exemplar (e.g. to its trace in a tracing UI) open
+ * in a new tab; they can only be reached once the tooltip is pinned.
  */
 export function ExemplarMetadataTooltip({
   exemplar,
@@ -84,6 +87,13 @@ export function ExemplarMetadataTooltip({
   // Only sections with content take part in the layout, so no divider is left dangling
   // when a label set is empty.
   const sections: Array<{ key: string; content: ReactElement }> = [];
+  // Links come first: they are the main action of the tooltip and must not be pushed out of
+  // view by long label sets. The URLs are built from exemplar labels, i.e. from data that is
+  // not controlled by Perses, so an unsafe one (e.g. javascript:) is never rendered as a link.
+  const safeLinks = (exemplar.links ?? []).filter((link) => sanitizeUrl(link.url) !== undefined);
+  if (safeLinks.length > 0) {
+    sections.push({ key: 'links', content: <LinkList links={safeLinks} /> });
+  }
   if (seriesLabels && Object.keys(seriesLabels).length > 0) {
     sections.push({ key: 'series-labels', content: <LabelGrid title="Series labels" labels={seriesLabels} /> });
   }
@@ -165,6 +175,34 @@ export function ExemplarMetadataTooltip({
         </Stack>
       </Box>
     </Portal>
+  );
+}
+
+function LinkList({ links }: { links: ExemplarLink[] }): ReactElement {
+  return (
+    <Box>
+      <Typography variant="overline" component="div">
+        Links
+      </Typography>
+      <Stack component="ul" spacing={0.25} sx={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        {links.map((link) => (
+          <Box component="li" key={`${link.name ?? ''}|${link.url}`}>
+            <Link
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="body1"
+              color="inherit"
+              fontWeight={700}
+              sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, wordBreak: 'break-all' }}
+            >
+              {link.name ?? link.url}
+              <LaunchIcon aria-hidden sx={{ fontSize: 14, flexShrink: 0 }} />
+            </Link>
+          </Box>
+        ))}
+      </Stack>
+    </Box>
   );
 }
 
