@@ -111,7 +111,7 @@ export function getFormattedMultipleYAxes(
       position: 'right' as const,
       // Dynamic offset based on cumulative width of preceding axis labels
       offset: cumulativeOffset,
-      boundaryGap: [0, '10%'] as [number, string],
+      boundaryGap: [0, '10%'],
       axisLabel: {
         formatter: (value: number): string => {
           return formatValue(value, format);
@@ -121,7 +121,7 @@ export function getFormattedMultipleYAxes(
         show: false, // Hide grid lines for right-side axes to reduce visual noise
       },
       show: baseAxis?.show,
-    };
+    } satisfies Readonly<YAXisComponentOption>;
     const rightAxisConfig: YAXisComponentOption = isLogScale
       ? { ...commonOptions, type: 'log', logBase }
       : { ...commonOptions, type: 'value' };
