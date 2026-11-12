@@ -98,6 +98,9 @@ export function getFormattedMultipleYAxes(
   );
   axes.push(baseAxisConfig);
 
+  // Right-side axes inherit the log scale of the base axis so all axes share the same scale type
+  const logBase = baseAxis?.type === 'log' && 'logBase' in baseAxis ? baseAxis.logBase : undefined;
+
   // Calculate cumulative offsets based on actual formatted label widths
   let cumulativeOffset = 0;
 
@@ -119,7 +122,7 @@ export function getFormattedMultipleYAxes(
       },
       show: baseAxis?.show,
     };
-    axes.push(rightAxisConfig);
+    axes.push(baseAxis?.type === 'log' ? { ...rightAxisConfig, type: 'log', logBase } : rightAxisConfig);
     // For subsequent axes, add the width of the previous axis's labels
     if (maxValues) {
       cumulativeOffset += estimateLabelWidth(format, maxValues[index] ?? 1000) + AXIS_LABEL_PADDING;
