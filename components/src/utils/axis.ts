@@ -98,14 +98,17 @@ export function getFormattedMultipleYAxes(
   );
   axes.push(baseAxisConfig);
 
+  // Right-side axes inherit the log scale of the base axis so all axes share the same scale type
+  const isLogScale = baseAxis?.type === 'log';
+  const logBase = isLogScale && 'logBase' in baseAxis ? baseAxis.logBase : undefined;
+
   // Calculate cumulative offsets based on actual formatted label widths
   let cumulativeOffset = 0;
 
   // Additional Y axes (right side) for each unique format
   additionalFormats.forEach((format, index) => {
-    const rightAxisConfig: YAXisComponentOption = {
-      type: 'value',
-      position: 'right',
+    const commonOptions = {
+      position: 'right' as const,
       // Dynamic offset based on cumulative width of preceding axis labels
       offset: cumulativeOffset,
       boundaryGap: [0, '10%'],
@@ -118,7 +121,10 @@ export function getFormattedMultipleYAxes(
         show: false, // Hide grid lines for right-side axes to reduce visual noise
       },
       show: baseAxis?.show,
-    };
+    } satisfies Readonly<YAXisComponentOption>;
+    const rightAxisConfig: YAXisComponentOption = isLogScale
+      ? { ...commonOptions, type: 'log', logBase }
+      : { ...commonOptions, type: 'value' };
     axes.push(rightAxisConfig);
     // For subsequent axes, add the width of the previous axis's labels
     if (maxValues) {
