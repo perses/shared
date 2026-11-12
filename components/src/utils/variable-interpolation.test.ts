@@ -295,3 +295,20 @@ describe('replaceVariables() with custom formats', () => {
     });
   });
 });
+
+describe('replaceVariable() inserts the value as is', () => {
+  it.each([
+    ['a$&b', 'x a$&b y'],
+    ['$$', 'x $$ y'],
+    ["$'", "x $' y"],
+    ['$`', 'x $` y'],
+    ['foo$', 'x foo$ y'],
+  ])('keeps the value %j unchanged', (value, expected) => {
+    expect(replaceVariable('x $var1 y', 'var1', value)).toEqual(expected);
+    expect(replaceVariable('x ${var1} y', 'var1', value)).toEqual(expected);
+  });
+
+  it('keeps the values of a multi-value variable unchanged', () => {
+    expect(replaceVariables('x $var1 y', { var1: { value: ['a$&b', 'c'], loading: false } })).toEqual('x (a$&b|c) y');
+  });
+});

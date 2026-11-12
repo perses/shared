@@ -466,3 +466,12 @@ describe('interpolateQueryParams()', () => {
     });
   });
 });
+
+describe('interpolateQueryParams() inserts the values as is', () => {
+  it('keeps the values of a multi-value variable unchanged', () => {
+    const state: VariableStateMap = { region: { value: ['a$&b', '$$'], loading: false } };
+
+    expect(interpolateQueryParams({ region: '$region' }, state)).toEqual({ region: ['a$&b', '$$'] });
+    expect(interpolateQueryParams({ region: '${region}' }, state)).toEqual({ region: ['a$&b', '$$'] });
+  });
+});
