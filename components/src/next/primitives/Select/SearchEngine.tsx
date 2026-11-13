@@ -14,7 +14,7 @@
 import { Combobox } from '@base-ui/react/combobox';
 import { Field } from '@base-ui/react/field';
 import { clsx } from 'clsx';
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import type { MouseEvent, ReactElement, ReactNode, Ref } from 'react';
 
 import { hasContent } from '../hasContent';
@@ -76,12 +76,20 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
   const values = useMemo(() => options.map((option) => option.value), [options]);
   const selectedValues = isMultipleValue(value) ? value : [];
   const labelOf = (selected: SelectValue): string => optionsByValue.get(selected)?.label ?? String(selected);
-  const initialText = !multiple && !isEmptySelection(value) ? labelOf(value as SelectValue) : '';
+  const selectedLabel = !multiple && !isEmptySelection(value) ? labelOf(value as SelectValue) : '';
   const [inputValue, setInputValue] = useControllableState<string>(
     search.inputValue,
-    search.defaultInputValue ?? initialText,
+    search.defaultInputValue ?? selectedLabel,
     search.onInputValueChange,
   );
+  const typedTextIsControlled = search.inputValue !== undefined;
+  // Base UI stops syncing the text with the selection once `inputValue` is passed, so the closed field is kept in
+  // step here: after an outside value change, a form reset, a clear, or a selection the parent did not accept.
+  // While the list is open the text belongs to the user.
+  useEffect(() => {
+    if (multiple || typedTextIsControlled || open) return;
+    if (inputValue !== selectedLabel) setInputValue(selectedLabel);
+  }, [multiple, typedTextIsControlled, open, inputValue, selectedLabel, setInputValue]);
   const { filter } = search;
   const baseFilter = useMemo(() => {
     if (!filter) return filter;

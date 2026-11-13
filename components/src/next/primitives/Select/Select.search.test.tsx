@@ -148,6 +148,44 @@ describe('Select searchable', () => {
     expect(getTrigger()).toHaveValue('Seconds');
   });
 
+  it('shows the new label when a controlled value changes while the list is closed', () => {
+    const { rerender } = render(
+      <Select label="Unit" searchable value="bytes">
+        {units}
+      </Select>,
+    );
+    expect(getTrigger()).toHaveValue('Bytes');
+
+    rerender(
+      <Select label="Unit" searchable value="seconds">
+        {units}
+      </Select>,
+    );
+
+    expect(getTrigger()).toHaveValue('Seconds');
+  });
+
+  it('restores the selected label when the list closes after typing', async () => {
+    renderSelect({ searchable: true, defaultValue: 'seconds' });
+
+    await userEvent.type(getTrigger(), 'by');
+    await userEvent.keyboard('{Escape}');
+
+    expect(getTrigger()).toHaveValue('Seconds');
+  });
+
+  it('keeps showing the controlled label when the parent does not accept a selection', async () => {
+    const onValueChange = vi.fn();
+    renderSelect({ searchable: true, value: 'bytes', onValueChange });
+    await open();
+
+    await userEvent.click(screen.getByRole('option', { name: 'Seconds' }));
+
+    expect(onValueChange).toHaveBeenCalledWith('seconds');
+    await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
+    await waitFor(() => expect(getTrigger()).toHaveValue('Bytes'));
+  });
+
   it('keeps the typed text and the open list after a multiple selection', async () => {
     const onValueChange = vi.fn();
     renderSelect({ searchable: true, multiple: true, onValueChange });
