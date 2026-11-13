@@ -286,13 +286,14 @@ type SelectSearchProps =
       inputValue?: string;
       /**
        * Initial typed text. In single mode, while the list is closed and `inputValue` is uncontrolled, the text
-       * resyncs to the selected item's label, so `defaultInputValue` only takes effect when the list starts open (for
-       * example with `defaultOpen`). Use controlled `inputValue` to keep other text while the list is closed.
+       * resyncs to the selected item's label (or to empty when nothing is selected), so `defaultInputValue` only takes
+       * effect when the list starts open (for example with `defaultOpen`). Use controlled `inputValue` to keep other
+       * text while the list is closed.
        */
       defaultInputValue?: string;
       /**
-       * Called when the typed text changes, including when `Select` resets it, for example to the selected label after a
-       * selection or to an empty string after clearing.
+       * Called when the typed text changes, including when `Select` resets it, for example to the selected label
+       * after a selection or to an empty string after clearing.
        */
       onInputValueChange?: (inputValue: string) => void;
     };

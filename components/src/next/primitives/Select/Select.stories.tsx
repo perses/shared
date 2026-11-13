@@ -628,14 +628,17 @@ function searchMetrics(query: string): SelectItemData[] {
 
 function AsyncSearchSelect(): ReactElement {
   const [query, setQuery] = useState('');
+  const [resolvedQuery, setResolvedQuery] = useState('');
   const [items, setItems] = useState<SelectItemData[]>(() => searchMetrics(''));
-  const [loading, setLoading] = useState(false);
   const [value, setValue] = useState<SelectValue | null>(null);
+  // Loading until the results for the current query arrive. Deriving it (rather than a flag set on input) cannot get
+  // stuck when the text is set to the value it already has, which Base UI does when an item is picked.
+  const loading = resolvedQuery !== query;
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setItems(searchMetrics(query));
-      setLoading(false);
+      setResolvedQuery(query);
     }, SEARCH_DELAY_MS);
     return (): void => clearTimeout(timer);
   }, [query]);
@@ -649,10 +652,7 @@ function AsyncSearchSelect(): ReactElement {
       loading={loading}
       value={value}
       onValueChange={setValue}
-      onInputValueChange={(next) => {
-        setLoading(true);
-        setQuery(next);
-      }}
+      onInputValueChange={setQuery}
       placeholder="Search metrics"
       helperText="Results come from a simulated server after each keystroke"
     />
@@ -663,14 +663,16 @@ const asyncSearchCode = `// filter={null} turns off local filtering: the consume
 // A selected value that drops out of \`items\` keeps its label.
 function AsyncSearchSelect() {
   const [query, setQuery] = useState('');
+  const [resolvedQuery, setResolvedQuery] = useState('');
   const [items, setItems] = useState(() => searchMetrics(''));
-  const [loading, setLoading] = useState(false);
   const [value, setValue] = useState<SelectValue | null>(null);
+  // Loading until the results for the current query arrive; it cannot get stuck on an unchanged query.
+  const loading = resolvedQuery !== query;
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setItems(searchMetrics(query));
-      setLoading(false);
+      setResolvedQuery(query);
     }, 400);
     return () => clearTimeout(timer);
   }, [query]);
@@ -684,10 +686,7 @@ function AsyncSearchSelect() {
       loading={loading}
       value={value}
       onValueChange={setValue}
-      onInputValueChange={(next) => {
-        setLoading(true);
-        setQuery(next);
-      }}
+      onInputValueChange={setQuery}
     />
   );
 }`;
@@ -799,6 +798,7 @@ function ListHeaderSelect() {
           <Button
             size="xs"
             variant="ghost"
+            disabled={matching.length === 0}
             onClick={() => setSelected([...new Set([...selected, ...matching.map((item) => item.value)])])}
           >
             Select all ({matching.length})
