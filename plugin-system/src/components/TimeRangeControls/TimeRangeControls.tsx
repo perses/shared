@@ -39,6 +39,7 @@ import {
   useDisableAutoRefreshSetting,
   useAutoRefreshIntervalsOptions,
 } from '../../runtime/TimeRangeProvider/TimeRangeSettingsProvider';
+import { fromDurationToMillis, getNeighbourRelativeTimeRange } from './zoomRelativeTimeRange';
 
 const DEFAULT_HEIGHT = '34px';
 
@@ -103,20 +104,6 @@ export function TimeRangeControls({
     [setRefreshInterval],
   );
 
-  const fromDurationToMillis = (strDuration: string): number => {
-    const duration = parseDurationString(strDuration);
-    const millis =
-      ((duration.seconds ?? 0) +
-        (duration.minutes ?? 0) * 60 +
-        (duration.hours ?? 0) * 3600 +
-        (duration.days ?? 0) * 86400 +
-        (duration.weeks ?? 0) * 7 * 86400 +
-        (duration.months ?? 0) * 30.436875 * 86400 + // avg month duration is ok for zoom purposes
-        (duration.years ?? 0) * 365.2425 * 86400) * // avg year duration is ok for zoom purposes
-      1000; // to milliseconds
-    return millis;
-  };
-
   // Function to double current time range, adding 50% before current start and 50% after current end
   const doubleTimeRange = (): AbsoluteTimeRange => {
     let newStart, newEnd, extendEndsBy;
@@ -166,8 +153,10 @@ export function TimeRangeControls({
     return { start: newStart, end: newEnd };
   };
 
-  const setHalfTimeRange = (): void => setTimeRange(halfTimeRange());
-  const setDoubleTimeRange = (): void => setTimeRange(doubleTimeRange());
+  const setHalfTimeRange = (): void =>
+    setTimeRange(getNeighbourRelativeTimeRange(timeRange, timePresetsValue, 'in') ?? halfTimeRange());
+  const setDoubleTimeRange = (): void =>
+    setTimeRange(getNeighbourRelativeTimeRange(timeRange, timePresetsValue, 'out') ?? doubleTimeRange());
 
   const handleTimeZoneChange = useCallback(
     (tz: TimeZoneOption) => {
