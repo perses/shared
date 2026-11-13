@@ -46,6 +46,18 @@ describe('TextField', () => {
     expect(screen.getByText('Required')).toBeInTheDocument();
   });
 
+  it('renders 0 as a label and helper text, and skips an empty string', () => {
+    render(<TextField label={0} helperText={0} startElement={0} />);
+    expect(screen.getByRole('textbox', { name: '0' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toHaveAccessibleDescription('0');
+    expect(document.querySelector('.ps-TextField__adornment--start')).toHaveTextContent('0');
+
+    render(<TextField aria-label="Empty" helperText="" startElement="" />);
+    const empty = screen.getByRole('textbox', { name: 'Empty' });
+    expect(empty.closest('.ps-TextField')?.querySelector('.ps-TextField__helper')).toBeNull();
+    expect(empty.closest('.ps-TextField')?.querySelector('.ps-TextField__adornment--start')).toBeNull();
+  });
+
   it('sets data-status="error" when status is error', () => {
     render(<TextField label="Name" status="error" />);
     expect(getRoot()).toHaveAttribute('data-status', 'error');

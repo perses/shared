@@ -24,6 +24,7 @@ import type { DividerProps } from '../primitives/Divider';
 import type { GridItemProps, GridProps } from '../primitives/Grid';
 import type { IconButtonProps } from '../primitives/IconButton';
 import type { MenuCheckboxItemProps, MenuItemProps, MenuLinkItemProps, MenuProps } from '../primitives/Menu';
+import type { SelectGroupProps, SelectItemProps, SelectProps } from '../primitives/Select';
 import type { SpinnerProps } from '../primitives/Spinner';
 import type { StackProps } from '../primitives/Stack';
 import type { SwitchProps } from '../primitives/Switch';
@@ -66,6 +67,9 @@ export interface PersesComponents {
   CardContent: RefComponent<CardContentProps, HTMLElement>;
   Grid: RefComponent<GridProps, HTMLDivElement>;
   GridItem: RefComponent<GridItemProps, HTMLDivElement>;
+  Select: RefComponent<SelectProps, HTMLButtonElement>;
+  SelectItem: RefComponent<SelectItemProps, HTMLDivElement>;
+  SelectGroup: RefComponent<SelectGroupProps, HTMLDivElement>;
   Stack: RefComponent<StackProps, HTMLDivElement>;
   Switch: RefComponent<SwitchProps, HTMLElement>;
   Tooltip: RefComponent<TooltipProps, HTMLDivElement>;

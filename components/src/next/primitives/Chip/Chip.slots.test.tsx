@@ -120,7 +120,7 @@ describe('Chip slots', () => {
     expect(screen.getByRole('button', { name: 'Remove Production' })).toHaveClass('custom-close');
   });
 
-  it.each([undefined, null, false, 0])(
+  it.each([undefined, null, false, ''])(
     'does not render optional parts for startElement=%s without onClose',
     (startElement) => {
       render(

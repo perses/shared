@@ -116,6 +116,14 @@ describe('Chip', () => {
     expect(screen.getByTestId('start-element')).toBeInTheDocument();
   });
 
+  it('renders 0 as a start element and skips an empty string', () => {
+    const { container, rerender } = render(<Chip startElement={0}>Production</Chip>);
+    expect(container.querySelector('.ps-Chip__start')).toHaveTextContent('0');
+
+    rerender(<Chip startElement="">Production</Chip>);
+    expect(container.querySelector('.ps-Chip__start')).toBeNull();
+  });
+
   it('supports interactive elements inside children', async () => {
     const handleClose = vi.fn();
     render(

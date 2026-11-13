@@ -139,11 +139,37 @@ When zero-specificity defaults set the same property on the same element in the 
 
 Popups rendered in a portal (Menu, Tooltip) live outside the `ThemeModeProvider` wrapper and lose its tokens. Read `ThemeModeContext` and set `data-perses-mode` on the portaled element, as [Menu](./primitives/Menu/Menu.tsx) does. Use `data-perses-mode` only for colors and tokens, never for layout: it can land on any portaled element, so a layout rule keyed on it (such as `min-height: 100vh`) will resize popups.
 
+### Self-contained sizing
+
+The document reset in `@perses-dev/design-tokens/css/reset` is opt-in, so component CSS must not rely on it. A
+component that depends on the reset renders one way in a host that loads it and another way in a host that does not.
+Each component therefore sets the browser defaults it needs in its own base rule: `box-sizing: border-box` on elements
+whose size it constrains, and `margin: 0` on elements that can render as a tag with a user-agent margin. For example:
+
+```css
+@layer perses.components {
+  /* :where() keeps specificity at zero, so style props and consumer CSS still win. */
+  :where(.ps-Select__trigger) {
+    /* min-height and padding add up the same way with or without the document reset. */
+    box-sizing: border-box;
+    min-height: var(--ps-select-size);
+  }
+}
+```
+
+[`select.css.test.ts`](./primitives/Select/select.css.test.ts) shows how to assert this for every sized part.
+
 ## Content elements
 
 When a component offers optional content before or after its main content, name the `ReactNode` props `startElement` and
 `endElement`. Use logical start/end rather than physical left/right, and the `Element` suffix rather than `Adornment`.
 These props provide content; `slotProps` only customizes styling.
+
+Guard optional `ReactNode` props (`label`, `helperText`, `startElement`, …) with `hasContent(prop)` from
+`primitives/hasContent.ts`, not a bare `prop && <wrapper>`. A bare check prints a stray `0` when the value is the
+number zero and skips the wrapper, which for `label` leaves the control without an accessible name. `hasContent`
+treats `0` as content and `''`, `true`, `false`, `null` and `undefined` as absent, because React renders those as
+nothing and an empty wrapper would still take up `gap` space.
 
 ## Spacing
 

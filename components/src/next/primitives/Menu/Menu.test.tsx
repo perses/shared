@@ -508,11 +508,19 @@ describe('MenuItem', () => {
       <MenuItem key="a" startElement={false} endElement={null}>
         Copy
       </MenuItem>,
+      <MenuItem key="b" startElement="" endElement="">
+        Paste
+      </MenuItem>,
+      <MenuItem key="c" startElement={true} endElement={true}>
+        Cut
+      </MenuItem>,
     ]);
     await openMenu();
-    const item = screen.getByRole('menuitem', { name: 'Copy' });
-    expect(item.querySelector('.ps-MenuItemBase__start')).toBeNull();
-    expect(item.querySelector('.ps-MenuItemBase__end')).toBeNull();
+    for (const name of ['Copy', 'Paste', 'Cut']) {
+      const item = screen.getByRole('menuitem', { name });
+      expect(item.querySelector('.ps-MenuItemBase__start')).toBeNull();
+      expect(item.querySelector('.ps-MenuItemBase__end')).toBeNull();
+    }
   });
 
   it('renders falsy-but-valid children such as 0', async () => {
