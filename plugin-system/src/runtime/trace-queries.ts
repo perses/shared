@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { QueryDefinition, UnknownSpec, TraceData } from '@perses-dev/spec';
-import type { QueryKey, UseQueryResult } from '@tanstack/react-query';
+import type { QueryKey, QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQueries } from '@tanstack/react-query';
 
 import type { TraceQueryContext, TraceQueryPlugin } from '../model';
@@ -28,8 +28,12 @@ export const TRACE_QUERY_KEY = 'TraceQuery';
  * Run a trace query using a TraceQuery plugin and return the results
  * @param definitions: dashboard defintion for a trace query, written in Trace Query Language (TraceQL)
  * Documentation for TraceQL: https://grafana.com/docs/tempo/latest/traceql/
+ * @param queryOptions: set `enabled` to false to prevent the queries from running
  */
-export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQueryResult<TraceData>> {
+export function useTraceQueries(
+  definitions: TraceQueryDefinition[],
+  queryOptions?: Pick<QueryObserverOptions, 'enabled'>,
+): Array<UseQueryResult<TraceData>> {
   const { getPlugin } = usePluginRegistry();
   const context = useTraceQueryContext();
 
@@ -50,7 +54,7 @@ export function useTraceQueries(definitions: TraceQueryDefinition[]): Array<UseQ
       const { queryEnabled, queryKey } = getQueryOptions({ context, definition, plugin });
       const traceQueryKind = definition?.spec?.plugin?.kind;
       return {
-        enabled: queryEnabled,
+        enabled: (queryOptions?.enabled ?? true) && queryEnabled,
         queryKey: queryKey,
         refetchOnMount: false,
         refetchOnWindowFocus: false,

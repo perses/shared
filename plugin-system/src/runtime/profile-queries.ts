@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { QueryDefinition, UnknownSpec, ProfileData } from '@perses-dev/spec';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQueries } from '@tanstack/react-query';
 
 import { useDatasourceStore } from './datasources';
@@ -24,8 +24,12 @@ export const PROFILE_QUERY_KEY = 'ProfileQuery';
 /**
  * Run a profile query using a ProfileQuery plugin and return the results
  * @param definitions: dashboard defintion for a profile query
+ * @param queryOptions: set `enabled` to false to prevent the queries from running
  */
-export function useProfileQueries(definitions: ProfileQueryDefinition[]): Array<UseQueryResult<ProfileData>> {
+export function useProfileQueries(
+  definitions: ProfileQueryDefinition[],
+  queryOptions?: Pick<QueryObserverOptions, 'enabled'>,
+): Array<UseQueryResult<ProfileData>> {
   const { getPlugin } = usePluginRegistry();
   const datasourceStore = useDatasourceStore();
   const { absoluteTimeRange } = useTimeRange();
@@ -42,6 +46,7 @@ export function useProfileQueries(definitions: ProfileQueryDefinition[]): Array<
       const queryKey = ['query', PROFILE_QUERY_KEY, definition, absoluteTimeRange] as const; // `queryKey` watches and reruns `queryFn` if keys in the array change
       const profileQueryKind = definition?.spec?.plugin?.kind;
       return {
+        enabled: queryOptions?.enabled ?? true,
         queryKey: queryKey,
         refetchOnMount: false,
         refetchOnWindowFocus: false,
