@@ -408,6 +408,19 @@ describe('Select', () => {
       expect(await screen.findByRole('listbox')).toBeInTheDocument();
     });
 
+    it('closes the open list, without reopening it, when the empty part of the control is clicked', async () => {
+      const onOpenChange = vi.fn();
+      renderSelect({ onOpenChange });
+      await open();
+      onOpenChange.mockClear();
+      const control = getRoot().querySelector<HTMLElement>('.ps-Select__control') as HTMLElement;
+      await userEvent.click(control);
+      await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+      expect(onOpenChange).not.toHaveBeenCalledWith(true);
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+    });
+
     it.each([{ disabled: true }, { readOnly: true }])('does not open from the control when %o', async (props) => {
       renderSelect(props);
       const control = getRoot().querySelector<HTMLElement>('.ps-Select__control') as HTMLElement;

@@ -14,7 +14,7 @@
 import { Field } from '@base-ui/react/field';
 import type { SelectPositionerProps } from '@base-ui/react/select';
 import { clsx } from 'clsx';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import type {
   CSSProperties,
   ElementType,
@@ -109,6 +109,7 @@ export function SelectShell({
 }: SelectShellProps): ReactElement {
   const { slotProps, helperText, startElement, endElement, disabled, readOnly, open, setOpen } = engine;
   const helperStatus = engine.status;
+  const wasOpenOnPress = useRef(false);
   const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
     () =>
       (descriptionProps, state): ReactElement => (
@@ -117,12 +118,19 @@ export function SelectShell({
     [helperStatus],
   );
 
+  const handlePointerDownCapture = (): void => {
+    // Base UI's outside press closes the list on pointerdown, before mousedown, so the state seen here is stale.
+    wasOpenOnPress.current = open;
+  };
+
   const handleMouseDown = (event: MouseEvent<HTMLElement>): void => {
     if (disabled || readOnly || event.button !== 0) return;
     // Real controls (trigger, input, clear and chip buttons, links) handle their own presses.
     if ((event.target as Element).closest('button, input, a')) return;
     event.preventDefault();
     controlRef.current?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
+    // The list was open at press time: Base UI's outside press already closed it, so the control toggles like the trigger.
+    if (wasOpenOnPress.current) return;
     setOpen(true);
   };
 
@@ -136,6 +144,7 @@ export function SelectShell({
         data-open={open ? '' : undefined}
         data-disabled={disabled ? '' : undefined}
         data-readonly={readOnly ? '' : undefined}
+        onPointerDownCapture={handlePointerDownCapture}
         onMouseDown={handleMouseDown}
       >
         {hasContent(startElement) && (
