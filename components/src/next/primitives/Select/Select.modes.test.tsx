@@ -141,6 +141,8 @@ describe.each(MODES)('%s mode', (mode) => {
       expect(screen.queryByRole('listbox')).toBeNull();
     });
 
+    // Only a press on the surrounding control area is blocked. A direct press on the trigger or input still opens the
+    // list when read-only: that is by design (like Base UI, read-only locks the value, not the interaction).
     it('marks a read-only control and does not open the list from a press on the control', async () => {
       renderSelect({ ...modeProps(mode), readOnly: true });
 
@@ -149,6 +151,15 @@ describe.each(MODES)('%s mode', (mode) => {
       await nextFrame();
 
       expect(screen.queryByRole('listbox')).toBeNull();
+    });
+
+    it('still opens the list from a direct press on a read-only trigger, by design', async () => {
+      renderSelect({ ...modeProps(mode), readOnly: true });
+
+      await userEvent.click(getTrigger());
+
+      expect(await screen.findByRole('listbox')).toBeInTheDocument();
+      await nextFrame();
     });
   });
 

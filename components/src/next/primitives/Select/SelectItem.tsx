@@ -44,7 +44,12 @@ export interface SelectItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 's
    * arrow onto it, so a screen reader announces why it is unavailable instead of the option silently vanishing.
    */
   disabled?: boolean;
-  /** Plain-text label used for typeahead and search matching when `children` is not plain text. */
+  /**
+   * Plain text used for typeahead, search matching, chip remove labels, and the field text when `children` is not
+   * plain text (for example an icon next to text). Defaults to `children` when they are text, else `String(value)`.
+   * It is read from the `SelectItem` elements in `Select`'s `children`; an item returned by a custom component is not
+   * seen there and falls back to `String(value)` for search and chips.
+   */
   label?: string;
   /** Content before the item text, typically an icon. Mark purely decorative icons `aria-hidden`. */
   startElement?: ReactNode;

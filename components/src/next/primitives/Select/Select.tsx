@@ -87,7 +87,10 @@ export type SelectPlacement = 'top' | 'bottom' | 'left' | 'right';
 export type SelectAlign = 'start' | 'center' | 'end';
 
 export interface SelectStyle extends CSSProperties {
-  /** Per-step trigger height override; falls back to the shared control-size scale. */
+  /**
+   * Per-step minimum height of the control (the bordered field that holds the value, chips and buttons). Falls back to
+   * the shared control-size scale. Set it on the root `style` or on `slotProps.control.style`.
+   */
   '--perses-select-size-xs'?: string;
   '--perses-select-size-sm'?: string;
   '--perses-select-size-md'?: string;
@@ -106,11 +109,21 @@ export interface SelectItemData {
 export interface SelectSlotProps {
   /** Visible label; rendered only when `label` is provided. */
   label?: SlotStyleProps;
-  /** The field that holds the value, chips, input and buttons; accepts the `SelectStyle` size overrides. */
+  /**
+   * The bordered field that holds the start and end elements, the value or chips, the trigger or input, the spinner,
+   * the clear button and the chevron. It carries the radius props and the `--perses-select-size-<step>` overrides, and
+   * is the element the list is anchored to.
+   */
   control?: SlotStyleProps<SelectStyle>;
-  /** The focusable element in either mode: the button, or the search input. */
+  /**
+   * The focusable element: the button in basic mode (it also holds the value and the default icon), or the search
+   * input in searchable mode (the chevron button sits next to it, outside this slot).
+   */
   trigger?: SlotStyleProps;
-  /** The selected-value chips; rendered only with `chips`. */
+  /**
+   * The container of the selected-value chips; rendered only with `chips`. In basic mode it renders only while
+   * something is selected. In searchable mode it also holds the input and is always rendered.
+   */
   chips?: SlotStyleProps;
   /** The button that clears the selection; rendered only with `clearable`. */
   clearButton?: SlotStyleProps;
@@ -153,9 +166,16 @@ interface SelectBaseProps
   /** Trigger height and text size. The popup text and row height follow it; `md` keeps Menu's default density. */
   size?: Size;
   required?: boolean;
+  /**
+   * Locks the value: the selection cannot change, and the clear button and the chips' remove buttons are not rendered.
+   * Like Base UI, read-only locks the value, not the interaction: a direct press on the trigger (or the search input)
+   * still opens the list so the options can be read. Only presses on the surrounding control area (padding,
+   * adornments, chips) do not open it.
+   */
   readOnly?: boolean;
   /**
-   * Shown in the trigger while nothing is selected, even when `renderValue` is set. An empty string `""` counts as
+   * Shown while nothing is selected, even when `renderValue` is set. In searchable mode it is the input's placeholder
+   * and is used only when it is a string. An empty string `""` counts as
    * nothing selected (the same rule as a native `<select>`), so do not combine a placeholder with a `SelectItem`
    * whose value is `""`: selecting that item would show the placeholder instead of its label. `Select` logs a
    * console warning in that case.
@@ -181,13 +201,17 @@ interface SelectBaseProps
   offset?: SelectPositionerProps['sideOffset'];
   /** Shows a button that resets the selection when something is selected. */
   clearable?: boolean;
-  /** Shows a spinner, sets `aria-busy` and shows `loadingText` while there are no items. */
+  /**
+   * Shows a spinner and sets `aria-busy` on the trigger. While there are no items the list shows `loadingText` instead
+   * of `emptyText`, and screen readers hear `loadingText` for as long as the list is open and `loading` is set.
+   * Items stay usable while loading.
+   */
   loading?: boolean;
   /** Non-option content rendered above the options in the popup, outside the listbox. */
   listHeader?: ReactNode;
-  /** Shown when no option matches. Defaults to "No results". */
+  /** Shown when there are no options or none matches the search. Defaults to "No results". */
   emptyText?: ReactNode;
-  /** Shown while `loading` and there are no items. Defaults to "Loading…". */
+  /** Shown in the list while `loading` and there are no items. Defaults to "Loading…". */
   loadingText?: ReactNode;
   /** Accessible name of the clear button. Defaults to "Clear selection". */
   clearAriaLabel?: string;
@@ -251,10 +275,25 @@ type SelectSearchProps =
        * is used only when it is a string.
        */
       searchable: true;
-      /** Custom matching; `null` disables local filtering (server-side search). */
+      /**
+       * Decides whether an option matches the typed text. Defaults to a case- and accent-insensitive match on the
+       * option's label. Pass `null` to disable local filtering, for example when `items` come from a server search.
+       */
       filter?: ((item: SelectItemData, query: string) => boolean) | null;
+      /**
+       * The typed text, when controlled. You then own the text: `Select` no longer resets it to the selected label.
+       */
       inputValue?: string;
+      /**
+       * Initial typed text. In single mode, while the list is closed and `inputValue` is uncontrolled, the text
+       * resyncs to the selected item's label, so `defaultInputValue` only takes effect when the list starts open (for
+       * example with `defaultOpen`). Use controlled `inputValue` to keep other text while the list is closed.
+       */
       defaultInputValue?: string;
+      /**
+       * Called when the typed text changes, including when `Select` resets it, for example to the selected label after a
+       * selection or to an empty string after clearing.
+       */
       onInputValueChange?: (inputValue: string) => void;
     };
 
@@ -318,7 +357,22 @@ export type SelectProps = SelectBaseProps &
  * Dropdown that picks one or more `SelectItem`s, with an optional label and helper text. Spacing (`p`, `m`, …),
  * sizing and `overflow` props style the root wrapper; radius props style the control. Values can be tokens
  * (`"sm"`), pixel numbers (`12`), CSS lengths or responsive objects (`{ default: 'sm', md: 0 }`).
- * Native button attributes, handlers, and `ref` stay on the trigger.
+ * Native attributes, handlers, and `ref` stay on the focusable element: the trigger button, or the input when
+ * `searchable`.
+ *
+ * Two engines share one look. By default the field is a button that opens the list (a Base UI `Select`). With
+ * `searchable` it is an input that filters the list as you type (a Base UI `Combobox`). `searchable` is fixed for the
+ * component's lifetime: changing it remounts the Select and resets its uncontrolled value, open state and typed
+ * text. Native `onChange` is not passed through; use `onValueChange` and `onInputValueChange`.
+ *
+ * `multiple` selects several items. With `chips` the selection shows as removable chips, and `limitChips` collapses
+ * them to "+N" while focus is outside the field and the list is closed. In basic mode the chip `×` is a pointer
+ * shortcut only (it is not a tab stop): keyboard users deselect items in the list. In searchable mode Backspace and
+ * the arrow keys move between the chips and the input. `clearable` adds a button that resets the selection.
+ *
+ * Searchable limits: the input can only show text, so in single mode it shows the selected item's label and
+ * `renderValue` is ignored; in multiple mode without `chips` the joined labels (or `renderValue`) appear before the
+ * input; `placeholder` is used only when it is a string.
  *
  * The list portals to `document.body` and propagates the nearest `ThemeModeProvider` mode so it stays dark on a
  * dark page. Without a provider it inherits the document theme; other ancestor token overrides do not cross the portal.

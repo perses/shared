@@ -179,14 +179,16 @@ export function SelectShell({
   );
 
   const handlePointerDownCapture = (): void => {
-    // Base UI's outside press closes the list on pointerdown, before mousedown, so the state seen here is stale.
+    // Base UI's outside press closes the list on pointerdown, before mousedown fires. Capture the open state here,
+    // before that close, because by mousedown `open` already reads as closed.
     wasOpenOnPress.current = open;
   };
 
   const handleMouseDown = (event: MouseEvent<HTMLElement>): void => {
     const baseEvent = event as MouseEvent<HTMLElement> & { preventBaseUIHandler?: () => void };
     if (disabled || readOnly || event.button !== 0) {
-      // Base UI's search input group opens the list on a press unless it is disabled; a read-only field stays closed.
+      // Base UI's search input group opens the list on a press unless it is disabled; block that for a read-only
+      // field. Direct presses on the trigger or input are not blocked here: they still open the list (by design).
       if (readOnly) baseEvent.preventBaseUIHandler?.();
       return;
     }

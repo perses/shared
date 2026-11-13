@@ -316,7 +316,7 @@
     color: var(--perses-text-secondary);
   }
 
-  /* The search engine keeps the element mounted (it is a live-region-capable Base UI part), empty while results exist. */
+  /* The search engine keeps the element mounted (a live-region-capable Base UI part), empty while results exist. */
   :where(.ps-Select__empty:empty) {
     display: none;
   }
@@ -374,7 +374,10 @@
     flex-shrink: 0;
   }
 
-  /* Always mounted so every row keeps the same width; the check is the only selection signal, so the row stays neutral. */
+  /*
+   * Always mounted so every row keeps the same width; the check is the only selection signal, so the row stays
+   * neutral.
+   */
   :where(.ps-SelectItem__indicator) {
     flex-shrink: 0;
     visibility: hidden;
