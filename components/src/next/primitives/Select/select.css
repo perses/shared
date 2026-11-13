@@ -152,6 +152,12 @@
     overflow-y: auto;
   }
 
+  /* In the search engine the input sits inside the chips container, so the container fills the control and the
+     input grows with it; the clear button and chevron stay at the end. */
+  :where(.ps-Select__chips:has(.ps-Select__input)) {
+    flex: 1 1 4rem;
+  }
+
   :where(.ps-Select[data-size='xs'] .ps-Select__chips),
   :where(.ps-Select[data-size='sm'] .ps-Select__chips) {
     --ps-select-chip-row: var(--perses-chip-size-xs, var(--perses-selection-control-size-xs));
@@ -308,6 +314,11 @@
 
   :where(.ps-Select__empty) {
     color: var(--perses-text-secondary);
+  }
+
+  /* The search engine keeps the element mounted (it is a live-region-capable Base UI part), empty while results exist. */
+  :where(.ps-Select__empty:empty) {
+    display: none;
   }
 
   :where(.ps-Select__popup[data-starting-style]),

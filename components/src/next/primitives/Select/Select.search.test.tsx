@@ -422,6 +422,18 @@ describe('Select searchable', () => {
     expect(getTrigger()).toHaveValue('');
   });
 
+  it('leaves the always-mounted empty message with no child nodes while there are results', async () => {
+    renderSelect({ searchable: true });
+
+    const listbox = await open();
+
+    // The CSS hides `.ps-Select__empty:empty`, so React must render nothing, not an empty text node.
+    const empty = listbox.closest('.ps-Select__popup')?.querySelector('.ps-Select__empty') as HTMLElement;
+    expect(empty).toBeInTheDocument();
+    expect(empty.childNodes).toHaveLength(0);
+    expect(empty).toBeEmptyDOMElement();
+  });
+
   it('announces no results through the status region', async () => {
     renderSelect({ searchable: true });
 

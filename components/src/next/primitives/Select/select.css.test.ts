@@ -42,6 +42,10 @@ function propertyFor(element: Element, property: string): string {
   return matching.reduce((value, rule) => rule.style.getPropertyValue(property) || value, '');
 }
 
+function rulesHiding(element: Element): CSSStyleRule[] {
+  return styleRules().filter((rule) => element.matches(rule.selectorText) && rule.style.display === 'none');
+}
+
 function makeSelect(attributes: Record<string, string> = {}): {
   root: HTMLElement;
   control: HTMLElement;
@@ -362,6 +366,16 @@ describe('select.css', () => {
       );
     });
 
+    it('lets a chips container that holds the search input fill the control, and no other', () => {
+      const { chips } = makeChips();
+      expect(styleRules().some((rule) => chips.matches(rule.selectorText) && rule.style.flex)).toBe(false);
+
+      const input = document.createElement('input');
+      input.className = 'ps-Select__trigger ps-Select__input';
+      chips.append(input);
+      expect(propertyFor(chips, 'flex')).toBe('1 1 4rem');
+    });
+
     it('hides overflow chips and shows +N only while focus is outside and the list is closed', () => {
       const { control, chip, more } = makeChips();
       expect(propertyFor(chip, 'display')).toBe('none');
@@ -402,6 +416,18 @@ describe('select.css', () => {
     document.body.append(empty);
     expect(propertyFor(empty, 'color')).toBe('var(--perses-text-secondary)');
     expect(propertyFor(empty, 'flex')).toBe('none');
+  });
+
+  it('hides an empty message element, which the search engine keeps mounted, but not one with text', () => {
+    const empty = document.createElement('div');
+    empty.className = 'ps-Select__empty';
+    const filled = document.createElement('div');
+    filled.className = 'ps-Select__empty';
+    filled.textContent = 'No results';
+    document.body.append(empty, filled);
+
+    expect(propertyFor(empty, 'display')).toBe('none');
+    expect(rulesHiding(filled)).toEqual([]);
   });
 
   it('only animates when the user has not asked for reduced motion', () => {
