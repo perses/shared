@@ -15,6 +15,7 @@ import type { SxProps, Theme } from '@mui/material';
 import {
   Checkbox,
   Divider,
+  Fade,
   IconButton,
   InputAdornment,
   List,
@@ -230,6 +231,7 @@ export function TableColumnFilterDropdown({
         </IconButton>
       </Tooltip>
       <Popover
+        slots={{ transition: Fade }}
         open={open}
         anchorEl={anchorEl}
         onFocus={handleFocus}
