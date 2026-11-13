@@ -14,7 +14,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { fieldText, getTrigger, MODES, modeProps, renderSelect } from './Select.test.utils';
+import { fieldText, getTrigger, MODES, modeProps, open, renderSelect } from './Select.test.utils';
 
 const queryClear = (name = 'Clear selection'): HTMLElement | null => screen.queryByRole('button', { name });
 const chipElements = (container: HTMLElement): HTMLElement[] =>
@@ -111,6 +111,75 @@ describe.each(MODES)('%s mode', (mode) => {
       renderSelect({ ...modeProps(mode), clearable: true, defaultValue: 'bytes', [flag]: true });
 
       expect(queryClear()).toBeNull();
+    });
+  });
+
+  describe('loading and empty', () => {
+    it('shows a decorative spinner and marks the field busy while loading', () => {
+      const { container, unmount } = renderSelect({ ...modeProps(mode), loading: true });
+
+      expect(container.querySelector('.ps-Select__spinner')).toHaveAttribute('aria-hidden', 'true');
+      expect(getTrigger()).toHaveAttribute('aria-busy', 'true');
+      unmount();
+
+      const idle = renderSelect({ ...modeProps(mode) });
+      expect(idle.container.querySelector('.ps-Select__spinner')).toBeNull();
+      expect(getTrigger()).not.toHaveAttribute('aria-busy');
+    });
+
+    it('shows loadingText in the open popup and status region while loading without items', async () => {
+      renderSelect({ ...modeProps(mode), loading: true }, []);
+
+      await userEvent.click(getTrigger());
+
+      const popup = document.querySelector('.ps-Select__popup') as HTMLElement;
+      expect(popup).toHaveTextContent('Loading…');
+      expect(screen.getByRole('status')).toHaveTextContent('Loading…');
+    });
+
+    it('keeps items usable while loading', async () => {
+      const onValueChange = vi.fn();
+      renderSelect({ ...modeProps(mode), loading: true, onValueChange });
+
+      await open();
+      expect(screen.getAllByRole('option')).toHaveLength(3);
+      await userEvent.click(screen.getByRole('option', { name: 'Seconds' }));
+
+      expect(onValueChange).toHaveBeenCalledWith('seconds');
+    });
+
+    it('shows emptyText when there are no items', async () => {
+      const { unmount } = renderSelect({ ...modeProps(mode) }, []);
+      await userEvent.click(getTrigger());
+      expect(document.querySelector('.ps-Select__empty')).toHaveTextContent('No results');
+      unmount();
+
+      renderSelect({ ...modeProps(mode), emptyText: 'Nothing here' }, []);
+      await userEvent.click(getTrigger());
+      expect(document.querySelector('.ps-Select__empty')).toHaveTextContent('Nothing here');
+    });
+
+    it('renders listHeader in the popup above the listbox and outside it', async () => {
+      renderSelect({ ...modeProps(mode), listHeader: <span>Pick a unit</span> });
+
+      const listbox = await open();
+
+      const header = document.querySelector('.ps-Select__list-header') as HTMLElement;
+      expect(header).toHaveTextContent('Pick a unit');
+      expect(listbox.contains(header)).toBe(false);
+      expect(header.closest('.ps-Select__popup')).toBe(listbox.closest('.ps-Select__popup'));
+      expect(header.compareDocumentPosition(listbox) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    });
+
+    it('keeps the list open when a control in listHeader is clicked', async () => {
+      const spy = vi.fn();
+      renderSelect({ ...modeProps(mode), listHeader: <button onClick={spy}>Select all</button> });
+      await open();
+
+      await userEvent.click(screen.getByRole('button', { name: 'Select all' }));
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('listbox')).toBeInTheDocument();
     });
   });
 

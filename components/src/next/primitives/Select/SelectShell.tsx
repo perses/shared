@@ -29,6 +29,7 @@ import type {
 import { hasContent } from '../hasContent';
 import { CloseIcon } from '../Icon';
 import { IconButton } from '../IconButton';
+import { Spinner } from '../Spinner';
 import { TextHelper } from '../TextHelper';
 import type { Size, Status } from '../types';
 import type { SelectOption } from './collectItems';
@@ -64,6 +65,14 @@ export interface SelectEngineProps {
   /** Shows a button that resets the selection while something is selected. */
   clearable: boolean;
   clearAriaLabel: string;
+  /** Shows a spinner and marks the focusable element busy. Items stay usable. */
+  loading: boolean;
+  /** Shown in the popup while `loading` and there are no items. */
+  loadingText: ReactNode;
+  /** Shown in the popup when there are no items and nothing is loading. */
+  emptyText: ReactNode;
+  /** Non-option content above the list, outside the listbox. */
+  listHeader: ReactNode;
   value: SelectCurrentValue;
   setValue: (next: SelectCurrentValue) => void;
   open: boolean;
@@ -193,6 +202,7 @@ export function SelectShell({
         )}
         {field}
         {hasContent(endElement) && <span className="ps-Select__adornment ps-Select__adornment--end">{endElement}</span>}
+        {engine.loading && <Spinner aria-hidden="true" className="ps-Select__spinner" />}
         {showClear && (
           <IconButton
             aria-label={clearAriaLabel}

@@ -100,6 +100,10 @@
     flex: none;
   }
 
+  :where(.ps-Select__spinner) {
+    flex: none;
+  }
+
   /* ---- Chips (multiple) ---- */
   :where(.ps-Select__control:has(.ps-Select__chips)) {
     flex-wrap: wrap;
@@ -260,6 +264,17 @@
     min-height: 0;
     overflow-y: auto;
     outline: 0;
+  }
+
+  /* Header and message sit outside the scrolling list, so they stay fixed above it. */
+  :where(.ps-Select__list-header),
+  :where(.ps-Select__empty) {
+    flex: none;
+    padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
+  }
+
+  :where(.ps-Select__empty) {
+    color: var(--perses-text-secondary);
   }
 
   :where(.ps-Select__popup[data-starting-style]),

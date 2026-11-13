@@ -43,6 +43,10 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
     form,
     multiple,
     chips,
+    loading,
+    loadingText,
+    emptyText,
+    listHeader,
     value,
     setValue,
     open,
@@ -100,6 +104,7 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
             {chips && values.length > 0 && <SelectChips engine={props} />}
             <BaseSelect.Trigger
               {...focusableProps}
+              aria-busy={loading || undefined}
               ref={forwardedRef as Ref<HTMLButtonElement>}
               className={clsx('ps-Select__trigger', slotProps?.trigger?.className)}
               style={slotProps?.trigger?.style}
@@ -114,6 +119,11 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
               )}
             </BaseSelect.Trigger>
           </>
+        }
+        status={
+          <output className="ps-Select__status ps-Select__visually-hidden">
+            {loading && open ? loadingText : null}
+          </output>
         }
         popup={
           <BaseSelect.Portal>
@@ -131,6 +141,8 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
                 style={slotProps?.popup?.style}
                 data-size={size}
               >
+                {hasContent(listHeader) && <div className="ps-Select__list-header">{listHeader}</div>}
+                {options.length === 0 && <div className="ps-Select__empty">{loading ? loadingText : emptyText}</div>}
                 <BaseSelect.List
                   className={clsx('ps-Select__list', slotProps?.list?.className)}
                   style={slotProps?.list?.style}

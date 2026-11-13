@@ -388,6 +388,14 @@ describe('select.css', () => {
     });
   });
 
+  it('styles the empty and loading message as secondary text', () => {
+    const empty = document.createElement('div');
+    empty.className = 'ps-Select__empty';
+    document.body.append(empty);
+    expect(propertyFor(empty, 'color')).toBe('var(--perses-text-secondary)');
+    expect(propertyFor(empty, 'flex')).toBe('none');
+  });
+
   it('only animates when the user has not asked for reduced motion', () => {
     const mediaRules = Array.from(style.sheet?.cssRules ?? []).filter(
       (rule): rule is CSSMediaRule => rule instanceof CSSMediaRule,
