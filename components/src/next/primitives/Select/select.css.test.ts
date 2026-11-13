@@ -388,6 +388,14 @@ describe('select.css', () => {
     });
   });
 
+  it('resets the search input so it sizes inside the control', () => {
+    const input = document.createElement('input');
+    input.className = 'ps-Select__trigger ps-Select__input';
+    document.body.append(input);
+    expect(propertyFor(input, 'box-sizing')).toBe('border-box');
+    expect(propertyFor(input, 'min-width')).toBe('4rem');
+  });
+
   it('styles the empty and loading message as secondary text', () => {
     const empty = document.createElement('div');
     empty.className = 'ps-Select__empty';

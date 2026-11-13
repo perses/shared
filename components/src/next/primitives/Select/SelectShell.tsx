@@ -33,7 +33,7 @@ import { Spinner } from '../Spinner';
 import { TextHelper } from '../TextHelper';
 import type { Size, Status } from '../types';
 import type { SelectOption } from './collectItems';
-import type { SelectAlign, SelectPlacement, SelectSlotProps } from './Select';
+import type { SelectAlign, SelectItemData, SelectPlacement, SelectSlotProps } from './Select';
 import type { SelectValue } from './SelectItem';
 import { emptySelection, isEmptySelection } from './selectValue';
 import type { SelectCurrentValue } from './selectValue';
@@ -47,6 +47,8 @@ export interface SelectEngineProps {
   focusableProps: Omit<HTMLAttributes<HTMLElement>, 'children'> & { id: string; autoFocus?: boolean };
 
   label: ReactNode;
+  /** Id for the visible label, so a control outside the label's association can reference it. */
+  labelId: string;
   helperText: ReactNode;
   placeholder: ReactNode;
   icon: ReactNode;
@@ -62,6 +64,14 @@ export interface SelectEngineProps {
   form?: string;
 
   multiple: boolean;
+  /** Search settings; only the search engine reads them. */
+  search: {
+    /** `undefined` keeps Base UI's case- and accent-insensitive match; `null` leaves filtering to the consumer. */
+    filter?: ((item: SelectItemData, query: string) => boolean) | null;
+    inputValue?: string;
+    defaultInputValue?: string;
+    onInputValueChange?: (value: string) => void;
+  };
   /** Shows a button that resets the selection while something is selected. */
   clearable: boolean;
   clearAriaLabel: string;
@@ -173,8 +183,14 @@ export function SelectShell({
     if ((event.target as Element).closest('button, input, a')) return;
     event.preventDefault();
     controlRef.current?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
-    // The list was open at press time: Base UI's outside press already closed it, so the control toggles like the trigger.
-    if (wasOpenOnPress.current) return;
+    // The list was open at press time, so the control toggles like the trigger: a press closes it and never reopens it.
+    if (wasOpenOnPress.current) {
+      // Select's outside press has already closed the list by now; the search input group treats the press as inside.
+      if (open) setOpen(false);
+      // `Combobox.InputGroup` opens the list on a press of its own, which would undo the close.
+      (event as MouseEvent<HTMLElement> & { preventBaseUIHandler?: () => void }).preventBaseUIHandler?.();
+      return;
+    }
     setOpen(true);
   };
 

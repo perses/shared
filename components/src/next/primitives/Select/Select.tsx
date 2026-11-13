@@ -14,8 +14,8 @@
 import { Field } from '@base-ui/react/field';
 import type { SelectPositionerProps } from '@base-ui/react/select';
 import { clsx } from 'clsx';
-import { forwardRef, useCallback, useContext, useEffect, useId, useMemo } from 'react';
-import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
+import { forwardRef, useCallback, useContext, useEffect, useId, useMemo, useState } from 'react';
+import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode, Ref } from 'react';
 
 import { ThemeModeContext } from '../../contexts/ThemeModeProvider';
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
@@ -26,10 +26,12 @@ import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingPr
 import type { Size, Status } from '../types';
 import { BasicEngine } from './BasicEngine';
 import { collectItems, optionKey, optionsFromItems } from './collectItems';
+import type { SelectOption } from './collectItems';
+import { SearchEngine } from './SearchEngine';
 import { SelectItem } from './SelectItem';
 import type { SelectValue } from './SelectItem';
 import type { SelectEngineProps } from './SelectShell';
-import { emptySelection, isEmptySelection, toCallbackValue } from './selectValue';
+import { emptySelection, isEmptySelection, isMultipleValue, toCallbackValue } from './selectValue';
 import type { SelectCurrentValue } from './selectValue';
 import { useControllableState } from './useControllableState';
 
@@ -47,6 +49,35 @@ const SIDE_OFFSET = 4;
 const chevronIcon = <ChevronDownIcon className="ps-Select__chevron" />;
 const defaultChipRemoveAriaLabel = (label: string): string => `Remove ${label}`;
 const defaultMoreChipsLabel = (count: number): string => `${count} more selected`;
+
+type OptionCache = ReadonlyMap<SelectValue, SelectOption>;
+const EMPTY_OPTION_CACHE: OptionCache = new Map();
+
+function selectedValuesOf(current: SelectCurrentValue): readonly SelectValue[] {
+  if (isMultipleValue(current)) return current;
+  return isEmptySelection(current) ? [] : [current as SelectValue];
+}
+
+/**
+ * Remembers the option of every selected value, so a selected value that drops out of `items` (async search replaced
+ * them) keeps its label. Values that are no longer selected are pruned. Returns `previous` when nothing changed, so
+ * callers can tell by identity; options are compared by label because `children` produce new option objects on
+ * every parent render.
+ */
+function refreshOptionCache(
+  previous: OptionCache,
+  current: ReadonlyMap<SelectValue, SelectOption>,
+  selected: readonly SelectValue[],
+): OptionCache {
+  const next = new Map<SelectValue, SelectOption>();
+  for (const selectedValue of selected) {
+    const option = current.get(selectedValue) ?? previous.get(selectedValue);
+    if (option) next.set(selectedValue, option);
+  }
+  const unchanged =
+    next.size === previous.size && Array.from(next).every(([key, option]) => previous.get(key)?.label === option.label);
+  return unchanged ? previous : next;
+}
 
 // Only `overflow` from the display category: `display` stays fixed to inline-flex/flex by the stylesheet.
 const SELECT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
@@ -211,7 +242,14 @@ type SelectSearchProps =
       onInputValueChange?: never;
     }
   | {
-      /** Renders an input in the field that filters the options. Fixed for the component's lifetime. */
+      /**
+       * Renders an input in the field that filters the options. Fixed for the component's lifetime: changing it
+       * remounts the Select and resets its uncontrolled state.
+       *
+       * The input can only show text, so in single mode it shows the selected label and `renderValue` is ignored. In
+       * multiple mode without `chips`, the selected labels (or `renderValue`) are shown before the input. `placeholder`
+       * is used only when it is a string.
+       */
       searchable: true;
       /** Custom matching; `null` disables local filtering (server-side search). */
       filter?: ((item: SelectItemData, query: string) => boolean) | null;
@@ -303,66 +341,71 @@ export type SelectProps = SelectBaseProps &
  *   </SelectGroup>
  * </Select>
  */
-export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
-  {
-    label,
-    helperText,
-    status,
-    fullWidth,
-    size = 'md',
-    required,
-    readOnly,
-    disabled,
-    name,
-    form,
-    placeholder,
-    icon = chevronIcon,
-    startElement,
-    endElement,
-    open,
-    defaultOpen,
-    onOpenChange,
-    placement = 'bottom',
-    align = 'start',
-    offset = SIDE_OFFSET,
-    multiple,
-    value,
-    defaultValue,
-    onValueChange,
-    renderValue,
-    items,
-    searchable: _searchable,
-    filter: _filter,
-    inputValue: _inputValue,
-    defaultInputValue: _defaultInputValue,
-    onInputValueChange: _onInputValueChange,
-    chips = false,
-    limitChips,
-    chipRemoveAriaLabel = defaultChipRemoveAriaLabel,
-    moreChipsLabel = defaultMoreChipsLabel,
-    clearable = false,
-    loading = false,
-    listHeader,
-    emptyText = 'No results',
-    loadingText = 'Loading…',
-    clearAriaLabel = 'Clear selection',
-    className,
-    style,
-    slotProps,
-    id,
-    children,
-    ...props
-  },
-  ref,
-) {
+export const Select = forwardRef<HTMLElement, SelectProps>(function Select(props, ref) {
+  // The mode is fixed for a mounted Select: changing `searchable` remounts it and resets the uncontrolled state.
+  return <SelectRoot key={props.searchable ? 'search' : 'basic'} {...props} forwardedRef={ref} />;
+});
+
+type SelectRootProps = SelectProps & { forwardedRef: Ref<HTMLElement> };
+
+function SelectRoot({
+  label,
+  helperText,
+  status,
+  fullWidth,
+  size = 'md',
+  required,
+  readOnly,
+  disabled,
+  name,
+  form,
+  placeholder,
+  icon = chevronIcon,
+  startElement,
+  endElement,
+  open,
+  defaultOpen,
+  onOpenChange,
+  placement = 'bottom',
+  align = 'start',
+  offset = SIDE_OFFSET,
+  multiple,
+  value,
+  defaultValue,
+  onValueChange,
+  renderValue,
+  items,
+  searchable,
+  filter,
+  inputValue,
+  defaultInputValue,
+  onInputValueChange,
+  chips = false,
+  limitChips,
+  chipRemoveAriaLabel = defaultChipRemoveAriaLabel,
+  moreChipsLabel = defaultMoreChipsLabel,
+  clearable = false,
+  loading = false,
+  listHeader,
+  emptyText = 'No results',
+  loadingText = 'Loading…',
+  clearAriaLabel = 'Clear selection',
+  className,
+  style,
+  slotProps,
+  id,
+  children,
+  forwardedRef,
+  ...props
+}: SelectRootProps): ReactElement {
   const generatedId = useId();
+  const labelId = useId();
   const mode = useContext(ThemeModeContext);
   const triggerId = id ?? generatedId;
   const isMultiple = multiple === true;
   // `children` is usually a new value on every parent render; the memo still skips the walk when Select re-renders
   // on its own (for example a theme mode change) or the consumer passes stable children.
   const options = useMemo(() => (items ? optionsFromItems(items) : collectItems(children)), [items, children]);
-  const optionsByValue = useMemo(() => new Map(options.map((option) => [option.value, option])), [options]);
   const optionNodes = useMemo(
     () =>
       items
@@ -399,6 +442,23 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
     (defaultValue as SelectCurrentValue | undefined) ?? emptySelection(isMultiple),
     handleValueChange,
   );
+  const optionsByCurrent = useMemo(() => new Map(options.map((option) => [option.value, option])), [options]);
+  const selectedValues = useMemo(() => selectedValuesOf(currentValue), [currentValue]);
+  const [optionCache, setOptionCache] = useState<OptionCache>(() =>
+    refreshOptionCache(EMPTY_OPTION_CACHE, optionsByCurrent, selectedValues),
+  );
+  const nextOptionCache = refreshOptionCache(optionCache, optionsByCurrent, selectedValues);
+  // Adjusting state while rendering (React's documented alternative to an effect) keeps the cache in step with the
+  // same render that needs it.
+  if (nextOptionCache !== optionCache) setOptionCache(nextOptionCache);
+  const optionsByValue = useMemo(() => {
+    const byValue = new Map(optionsByCurrent);
+    for (const selectedValue of selectedValues) {
+      const cached = nextOptionCache.get(selectedValue);
+      if (!byValue.has(selectedValue) && cached) byValue.set(selectedValue, cached);
+    }
+    return byValue;
+  }, [optionsByCurrent, selectedValues, nextOptionCache]);
   const [isOpen, setIsOpen] = useControllableState<boolean>(open, defaultOpen ?? false, onOpenChange);
   const {
     className: radiusClassName,
@@ -413,9 +473,10 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
   const { display: _display, ...restWithoutDisplay } = rest as typeof rest & { display?: unknown };
 
   const engineProps: SelectEngineProps = {
-    forwardedRef: ref,
+    forwardedRef,
     focusableProps: { ...restWithoutDisplay, id: triggerId },
     label,
+    labelId,
     helperText,
     placeholder,
     icon,
@@ -429,6 +490,7 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
     name,
     form,
     multiple: isMultiple,
+    search: { filter, inputValue, defaultInputValue, onInputValueChange },
     clearable,
     clearAriaLabel,
     loading,
@@ -466,7 +528,7 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
       data-status={status}
       data-full-width={fullWidth || undefined}
     >
-      <BasicEngine {...engineProps} />
+      {searchable ? <SearchEngine {...engineProps} /> : <BasicEngine {...engineProps} />}
     </Field.Root>
   );
-});
+}

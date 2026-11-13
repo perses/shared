@@ -11,9 +11,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Combobox } from '@base-ui/react/combobox';
 import { Select as BaseSelect } from '@base-ui/react/select';
 import { clsx } from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useContext } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
@@ -21,6 +22,7 @@ import { hasContent } from '../hasContent';
 import { CheckIcon, Icon } from '../Icon';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
+import { SelectEngineContext, SelectVisibleValuesContext } from './SelectEngineContext';
 
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared spacing utility styles used by style props.
 import '../system/spacing.css';
@@ -42,7 +44,7 @@ export interface SelectItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 's
    * arrow onto it, so a screen reader announces why it is unavailable instead of the option silently vanishing.
    */
   disabled?: boolean;
-  /** Plain-text label used for typeahead when `children` is not plain text. */
+  /** Plain-text label used for typeahead and search matching when `children` is not plain text. */
   label?: string;
   /** Content before the item text, typically an icon. Mark purely decorative icons `aria-hidden`. */
   startElement?: ReactNode;
@@ -61,6 +63,29 @@ export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(function S
     style: computedStyle,
     rest,
   } = applyStyleProps(props, SELECT_ITEM_STYLE_PROPS, style);
+  const engine = useContext(SelectEngineContext);
+  const visibleValues = useContext(SelectVisibleValuesContext);
+
+  if (engine === 'search') {
+    // The search engine owns filtering, so a value outside the matches renders nothing.
+    if (visibleValues && !visibleValues.has(value)) return null;
+    return (
+      <Combobox.Item
+        {...rest}
+        ref={ref}
+        value={value}
+        disabled={disabled}
+        className={clsx('ps-SelectItem', styleClassName, className)}
+        style={computedStyle}
+      >
+        {hasContent(startElement) && <span className="ps-SelectItem__start">{startElement}</span>}
+        <span className="ps-SelectItem__text">{children}</span>
+        <Combobox.ItemIndicator className="ps-SelectItem__indicator" render={renderIndicator} keepMounted>
+          {checkIcon}
+        </Combobox.ItemIndicator>
+      </Combobox.Item>
+    );
+  }
 
   return (
     <BaseSelect.Item

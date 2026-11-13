@@ -11,14 +11,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Combobox } from '@base-ui/react/combobox';
 import { Select as BaseSelect } from '@base-ui/react/select';
 import { clsx } from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useContext, useMemo } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
+import { collectItems } from './collectItems';
+import { SelectEngineContext, SelectVisibleValuesContext } from './SelectEngineContext';
 
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared spacing utility styles used by style props.
 import '../system/spacing.css';
@@ -46,6 +49,28 @@ export const SelectGroup = forwardRef<HTMLDivElement, SelectGroupProps>(function
     style: computedStyle,
     rest,
   } = applyStyleProps(props, SELECT_GROUP_STYLE_PROPS, style);
+  const engine = useContext(SelectEngineContext);
+  const visibleValues = useContext(SelectVisibleValuesContext);
+  const hasVisibleItem = useMemo(
+    () => engine !== 'search' || !visibleValues || collectItems(children).some((item) => visibleValues.has(item.value)),
+    [engine, visibleValues, children],
+  );
+
+  if (engine === 'search') {
+    // A group whose items are all filtered out would leave an empty heading behind.
+    if (!hasVisibleItem) return null;
+    return (
+      <Combobox.Group
+        {...rest}
+        ref={ref}
+        className={clsx('ps-SelectGroup', styleClassName, className)}
+        style={computedStyle}
+      >
+        <Combobox.GroupLabel className="ps-SelectGroup__label">{label}</Combobox.GroupLabel>
+        {children}
+      </Combobox.Group>
+    );
+  }
 
   return (
     <BaseSelect.Group

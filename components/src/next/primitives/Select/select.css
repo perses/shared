@@ -88,6 +88,38 @@
     color: var(--perses-text-secondary);
   }
 
+  /* The search input: a text field that fills what the value text and buttons leave. */
+  :where(.ps-Select__input) {
+    box-sizing: border-box;
+    flex: 1 1 4rem;
+    min-width: 4rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    outline: 0;
+    cursor: text;
+  }
+
+  /* Selected labels that sit before the search input take only the room they need. */
+  :where(.ps-Select__value:has(+ .ps-Select__input)) {
+    flex: 0 1 auto;
+  }
+
+  :where(.ps-Select__toggle) {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: inherit;
+  }
+
   :where(.ps-Select__adornment),
   :where(.ps-Select__icon) {
     display: inline-flex;
@@ -158,7 +190,8 @@
   }
 
   /* Only the default chevron flips; a consumer icon is left as drawn. */
-  :where(.ps-Select__trigger[data-popup-open] .ps-Select__chevron) {
+  :where(.ps-Select__trigger[data-popup-open] .ps-Select__chevron),
+  :where(.ps-Select__toggle[data-popup-open] .ps-Select__chevron) {
     transform: rotate(180deg);
   }
 

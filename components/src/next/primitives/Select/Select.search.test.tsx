@@ -1,0 +1,300 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { createRef } from 'react';
+
+import { Select } from './Select';
+import { getTrigger, open, renderSelect, units } from './Select.test.utils';
+import { SelectGroup } from './SelectGroup';
+import { SelectItem } from './SelectItem';
+
+const optionLabels = (): string[] => screen.queryAllByRole('option').map((option) => option.textContent ?? '');
+const valueText = (): string => document.querySelector('.ps-Select__value')?.textContent ?? '';
+
+describe('Select searchable', () => {
+  it('renders an input combobox that receives the ref and pass-through props', () => {
+    const ref = createRef<HTMLElement>();
+    render(
+      <Select label="Unit" searchable ref={ref} data-testid="field">
+        {units}
+      </Select>,
+    );
+
+    const input = getTrigger();
+    expect(input.tagName).toBe('INPUT');
+    expect(input).toHaveAttribute('aria-autocomplete', 'list');
+    expect(input).toHaveClass('ps-Select__trigger', 'ps-Select__input');
+    expect(ref.current).toBe(input);
+    expect(screen.getByTestId('field')).toBe(input);
+  });
+
+  it('focuses the input without opening the list when the label is clicked', async () => {
+    renderSelect({ searchable: true });
+
+    await userEvent.click(screen.getByText('Unit'));
+
+    expect(getTrigger()).toHaveFocus();
+    expect(screen.queryByRole('listbox')).toBeNull();
+  });
+
+  it('filters JSX items by their search label while typing', async () => {
+    renderSelect({ searchable: true });
+
+    await userEvent.type(getTrigger(), 'sec');
+
+    expect(optionLabels()).toEqual(['Seconds']);
+  });
+
+  it('matches case- and accent-insensitively anywhere in the label', async () => {
+    renderSelect({ searchable: true }, [
+      <SelectItem key="cafe" value="cafe">
+        Café
+      </SelectItem>,
+      <SelectItem key="tea" value="tea">
+        Tea
+      </SelectItem>,
+    ]);
+
+    await userEvent.type(getTrigger(), 'AFE');
+
+    expect(optionLabels()).toEqual(['Café']);
+  });
+
+  it('searches rich items by their label prop', async () => {
+    renderSelect({ searchable: true }, [
+      <SelectItem key="b" value="b" label="Bytes">
+        <strong>B</strong>
+      </SelectItem>,
+      <SelectItem key="s" value="s" label="Seconds">
+        <strong>S</strong>
+      </SelectItem>,
+    ]);
+
+    await userEvent.type(getTrigger(), 'byt');
+
+    expect(screen.getAllByRole('option')).toHaveLength(1);
+  });
+
+  it('hides groups with no matching items', async () => {
+    renderSelect({ searchable: true }, [
+      <SelectGroup key="data" label="Data">
+        <SelectItem value="bytes">Bytes</SelectItem>
+      </SelectGroup>,
+      <SelectGroup key="time" label="Time">
+        <SelectItem value="seconds">Seconds</SelectItem>
+      </SelectGroup>,
+    ]);
+
+    await userEvent.type(getTrigger(), 'sec');
+
+    const list = screen.getByRole('listbox');
+    expect(within(list).getAllByRole('group')).toHaveLength(1);
+    expect(within(list).getByRole('group', { name: 'Time' })).toBeInTheDocument();
+  });
+
+  it('applies a custom filter to item data', async () => {
+    renderSelect({
+      searchable: true,
+      filter: (item, query) => item.label.endsWith(query),
+    });
+
+    await userEvent.type(getTrigger(), 'tes');
+
+    expect(optionLabels()).toEqual(['Bytes']);
+  });
+
+  it('leaves filtering to the consumer when filter is null', async () => {
+    const onInputValueChange = vi.fn();
+    renderSelect({ searchable: true, filter: null, onInputValueChange });
+
+    await userEvent.type(getTrigger(), 'zzz');
+
+    expect(screen.getAllByRole('option')).toHaveLength(3);
+    expect(onInputValueChange).toHaveBeenLastCalledWith('zzz');
+  });
+
+  it('keeps a selected label after async search replaces items', () => {
+    const alpha = [{ value: 'a1', label: 'Alpha' }];
+    const beta = [{ value: 'b1', label: 'Beta' }];
+    const { rerender } = render(<Select label="Unit" searchable multiple value={['a1']} items={alpha} />);
+    expect(valueText()).toBe('Alpha');
+
+    rerender(<Select label="Unit" searchable multiple value={['a1']} items={beta} />);
+
+    expect(valueText()).toBe('Alpha');
+  });
+
+  it('closes after a single selection and shows the label in the input', async () => {
+    const onValueChange = vi.fn();
+    renderSelect({ searchable: true, onValueChange });
+    await open();
+
+    await userEvent.click(screen.getByRole('option', { name: 'Seconds' }));
+
+    expect(onValueChange).toHaveBeenCalledWith('seconds');
+    expect(screen.queryByRole('listbox')).toBeNull();
+    expect(getTrigger()).toHaveValue('Seconds');
+  });
+
+  it('keeps the typed text and the open list after a multiple selection', async () => {
+    const onValueChange = vi.fn();
+    renderSelect({ searchable: true, multiple: true, onValueChange });
+
+    await userEvent.type(getTrigger(), 'se');
+    await userEvent.click(screen.getByRole('option', { name: 'Seconds' }));
+
+    expect(onValueChange).toHaveBeenCalledWith(['seconds']);
+    expect(getTrigger()).toHaveValue('se');
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+  });
+
+  it('resets typed text when the list closes', async () => {
+    renderSelect({ searchable: true });
+
+    await userEvent.type(getTrigger(), 'se');
+    await userEvent.keyboard('{Escape}');
+
+    expect(getTrigger()).toHaveValue('');
+  });
+
+  it('supports a controlled inputValue', async () => {
+    const onInputValueChange = vi.fn();
+    renderSelect({ searchable: true, inputValue: 'by', onInputValueChange, defaultOpen: true });
+
+    await screen.findByRole('listbox');
+    expect(optionLabels()).toEqual(['Bytes']);
+
+    await userEvent.type(getTrigger(), 'x');
+
+    expect(onInputValueChange).toHaveBeenCalledWith('byx');
+    expect(getTrigger()).toHaveValue('by');
+  });
+
+  it('shows the selected labels before the input in multiple mode without chips', () => {
+    const { rerender } = render(
+      <Select label="Unit" searchable multiple defaultValue={['bytes', 'seconds']}>
+        {units}
+      </Select>,
+    );
+    expect(valueText()).toBe('Bytes, Seconds');
+
+    rerender(
+      <Select
+        label="Unit"
+        searchable
+        multiple
+        defaultValue={['bytes', 'seconds']}
+        renderValue={(selected) => `${selected.length} units`}
+      >
+        {units}
+      </Select>,
+    );
+
+    expect(valueText()).toBe('2 units');
+  });
+
+  it('closes the open list, without reopening it, when the empty part of the control is clicked', async () => {
+    const onOpenChange = vi.fn();
+    renderSelect({ searchable: true, onOpenChange });
+    await open();
+    onOpenChange.mockClear();
+    const control = document.querySelector<HTMLElement>('.ps-Select__control') as HTMLElement;
+
+    await userEvent.click(control);
+
+    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
+    expect(onOpenChange).not.toHaveBeenCalledWith(true);
+  });
+
+  it('opens from the chevron button, which is not a tab stop', async () => {
+    renderSelect({ searchable: true });
+
+    const toggle = screen.getByRole('button', { name: 'Unit' });
+    expect(toggle).toHaveAttribute('tabindex', '-1');
+
+    await userEvent.click(toggle);
+
+    expect(await screen.findByRole('listbox')).toBeInTheDocument();
+  });
+
+  it.each([
+    ['single', 'seconds', [['unit', 'seconds']]],
+    [
+      'multiple',
+      ['bytes', 'seconds'],
+      [
+        ['unit', 'bytes'],
+        ['unit', 'seconds'],
+      ],
+    ],
+    ['numeric', 1, [['unit', '1']]],
+  ])('submits the same FormData as basic mode (%s)', (_label, value, expected) => {
+    const multiple = Array.isArray(value);
+    const items = [
+      { value: 'bytes', label: 'Bytes' },
+      { value: 'seconds', label: 'Seconds' },
+      { value: 1, label: 'One' },
+    ];
+    const entriesFor = (searchable: boolean): Array<[string, FormDataEntryValue]> => {
+      const props = { label: 'Unit', name: 'unit', defaultValue: value, items, multiple, searchable };
+      const { container, unmount } = render(
+        <form>
+          <Select {...(props as Parameters<typeof Select>[0])} />
+        </form>,
+      );
+      const entries = [...new FormData(container.querySelector('form') as HTMLFormElement).entries()];
+      unmount();
+      return entries;
+    };
+
+    const basic = entriesFor(false);
+    const searchable = entriesFor(true);
+
+    expect(searchable).toEqual(basic);
+    expect(searchable).toEqual(expected);
+  });
+
+  it('resets uncontrolled state when searchable changes', async () => {
+    const { rerender } = render(
+      <Select label="Unit" defaultValue="bytes">
+        {units}
+      </Select>,
+    );
+    await open();
+    await userEvent.click(screen.getByRole('option', { name: 'Seconds' }));
+
+    rerender(
+      <Select label="Unit" defaultValue="bytes" searchable>
+        {units}
+      </Select>,
+    );
+
+    expect(getTrigger()).toHaveValue('Bytes');
+  });
+
+  it('keeps disabled items visible but unselectable while filtering', async () => {
+    const onValueChange = vi.fn();
+    renderSelect({ searchable: true, onValueChange });
+
+    await userEvent.type(getTrigger(), 'per');
+
+    const percent = screen.getByRole('option', { name: 'Percent' });
+    expect(percent).toHaveAttribute('aria-disabled', 'true');
+
+    await userEvent.click(percent);
+
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+});
