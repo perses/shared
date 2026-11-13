@@ -44,7 +44,7 @@ export type TimeSeriesQueryMode = 'instant' | 'range';
 export interface TimeSeriesQueryContext {
   suggestedStepMs?: number;
   mode?: TimeSeriesQueryMode;
-  timeRange: AbsoluteTimeRange;
+  absoluteTimeRange: AbsoluteTimeRange;
   variableState: VariableStateMap;
   datasourceStore: DatasourceStore;
 }
