@@ -96,6 +96,10 @@
     color: var(--perses-text-secondary);
   }
 
+  :where(.ps-Select__clear) {
+    flex: none;
+  }
+
   /* Only the default chevron flips; a consumer icon is left as drawn. */
   :where(.ps-Select__trigger[data-popup-open] .ps-Select__chevron) {
     transform: rotate(180deg);

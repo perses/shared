@@ -27,11 +27,16 @@ import type {
 } from 'react';
 
 import { hasContent } from '../hasContent';
+import { CloseIcon } from '../Icon';
+import { IconButton } from '../IconButton';
 import { TextHelper } from '../TextHelper';
 import type { Size, Status } from '../types';
 import type { SelectOption } from './collectItems';
 import type { SelectAlign, SelectPlacement, SelectSlotProps } from './Select';
+import { emptySelection, isEmptySelection } from './selectValue';
 import type { SelectCurrentValue } from './selectValue';
+
+const closeIcon = <CloseIcon aria-hidden="true" />;
 
 /** Everything an engine needs from `Select`: already normalized, and always controlled. */
 export interface SelectEngineProps {
@@ -55,6 +60,9 @@ export interface SelectEngineProps {
   form?: string;
 
   multiple: boolean;
+  /** Shows a button that resets the selection while something is selected. */
+  clearable: boolean;
+  clearAriaLabel: string;
   value: SelectCurrentValue;
   setValue: (next: SelectCurrentValue) => void;
   open: boolean;
@@ -90,6 +98,7 @@ export interface SelectShellProps {
   status?: ReactNode;
   popup: ReactNode;
   Control?: ElementType;
+  /** Called after the clear button has reset the value, before focus returns to the field. */
   onClear?: () => void;
 }
 
@@ -106,8 +115,24 @@ export function SelectShell({
   status,
   popup,
   Control = 'div',
+  onClear,
 }: SelectShellProps): ReactElement {
-  const { slotProps, helperText, startElement, endElement, disabled, readOnly, open, setOpen } = engine;
+  const {
+    slotProps,
+    helperText,
+    startElement,
+    endElement,
+    disabled,
+    readOnly,
+    open,
+    setOpen,
+    clearable,
+    clearAriaLabel,
+    multiple,
+    value,
+    setValue,
+  } = engine;
+  const showClear = clearable && !isEmptySelection(value) && !disabled && !readOnly;
   const helperStatus = engine.status;
   const wasOpenOnPress = useRef(false);
   const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
@@ -134,6 +159,12 @@ export function SelectShell({
     setOpen(true);
   };
 
+  const handleClear = (): void => {
+    setValue(emptySelection(multiple));
+    onClear?.();
+    controlRef.current?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
+  };
+
   return (
     <>
       {label}
@@ -152,6 +183,18 @@ export function SelectShell({
         )}
         {field}
         {hasContent(endElement) && <span className="ps-Select__adornment ps-Select__adornment--end">{endElement}</span>}
+        {showClear && (
+          <IconButton
+            aria-label={clearAriaLabel}
+            size="xs"
+            variant="ghost"
+            className={clsx('ps-Select__clear', slotProps?.clearButton?.className)}
+            style={slotProps?.clearButton?.style}
+            onClick={handleClear}
+          >
+            {closeIcon}
+          </IconButton>
+        )}
         {trailing}
       </Control>
       {hasContent(helperText) && (

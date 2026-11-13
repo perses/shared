@@ -31,6 +31,18 @@ export const units = [
   </SelectItem>,
 ];
 
+export type SelectMode = 'basic' | 'searchable';
+/** The engines every mode-agnostic test runs against. Task 8 adds `'searchable'`. */
+export const MODES: readonly SelectMode[] = ['basic'];
+
+/**
+ * Spread into every mode-agnostic render. The narrow return type (instead of `Partial<SelectProps>`, a union)
+ * keeps the spread assignable to `SelectProps` next to other props.
+ */
+export function modeProps(mode: SelectMode): { searchable?: true } {
+  return mode === 'searchable' ? { searchable: true } : {};
+}
+
 export function renderSelect(
   props: Partial<SelectProps> = {},
   children: ReactElement[] = units,
@@ -40,6 +52,10 @@ export function renderSelect(
 }
 
 export const getTrigger = (name = 'Unit'): HTMLElement => screen.getByRole('combobox', { name });
+/** What the field shows: the typed or selected text of an `<input>`, otherwise the element's text content. */
+export const fieldText = (el: HTMLElement): string =>
+  el instanceof HTMLInputElement ? el.value : (el.textContent ?? '');
+
 export const getRoot = (name = 'Unit'): HTMLElement => getTrigger(name).closest('.ps-Select') as HTMLElement;
 
 export async function open(name = 'Unit'): Promise<HTMLElement> {
