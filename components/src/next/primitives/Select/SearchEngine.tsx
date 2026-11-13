@@ -140,6 +140,7 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
           engine={props}
           controlRef={controlRef}
           Control={Combobox.InputGroup}
+          pressIsInside
           label={
             hasLabel ? (
               <Field.Label

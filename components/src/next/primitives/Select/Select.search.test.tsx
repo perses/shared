@@ -253,7 +253,21 @@ describe('Select searchable', () => {
     await userEvent.click(control);
 
     await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
-    expect(onOpenChange).not.toHaveBeenCalledWith(true);
+    expect(onOpenChange).toHaveBeenCalledTimes(1);
+    expect(onOpenChange).toHaveBeenCalledWith(false);
+  });
+
+  it('opens the closed list once, and focuses the input, when the empty part of the control is clicked', async () => {
+    const onOpenChange = vi.fn();
+    renderSelect({ searchable: true, onOpenChange });
+    const control = document.querySelector<HTMLElement>('.ps-Select__control') as HTMLElement;
+
+    await userEvent.click(control);
+
+    expect(await screen.findByRole('listbox')).toBeInTheDocument();
+    expect(getTrigger()).toHaveFocus();
+    expect(onOpenChange).toHaveBeenCalledTimes(1);
+    expect(onOpenChange).toHaveBeenCalledWith(true);
   });
 
   it('opens from the chevron button, which is not a tab stop', async () => {

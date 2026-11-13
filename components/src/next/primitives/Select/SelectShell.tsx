@@ -127,6 +127,11 @@ export interface SelectShellProps {
   status?: ReactNode;
   popup: ReactNode;
   Control?: ElementType;
+  /**
+   * True when Base UI treats a press on the control as inside its reference (the search input group), so the outside
+   * press leaves the list open and the shell has to close it. False when the outside press already closes the list.
+   */
+  pressIsInside?: boolean;
   /** Called after the clear button has reset the value, before focus returns to the field. */
   onClear?: () => void;
 }
@@ -144,6 +149,7 @@ export function SelectShell({
   status,
   popup,
   Control = 'div',
+  pressIsInside = false,
   onClear,
 }: SelectShellProps): ReactElement {
   const {
@@ -183,12 +189,13 @@ export function SelectShell({
     if ((event.target as Element).closest('button, input, a')) return;
     event.preventDefault();
     controlRef.current?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
+    // The shell owns a control press end to end, so Base UI's own press handler on the control (the search input
+    // group opens the list on press) must not call `setOpen` a second time.
+    (event as MouseEvent<HTMLElement> & { preventBaseUIHandler?: () => void }).preventBaseUIHandler?.();
     // The list was open at press time, so the control toggles like the trigger: a press closes it and never reopens it.
     if (wasOpenOnPress.current) {
-      // Select's outside press has already closed the list by now; the search input group treats the press as inside.
-      if (open) setOpen(false);
-      // `Combobox.InputGroup` opens the list on a press of its own, which would undo the close.
-      (event as MouseEvent<HTMLElement> & { preventBaseUIHandler?: () => void }).preventBaseUIHandler?.();
+      // Base UI's outside press has already closed the list, unless the press counts as inside.
+      if (pressIsInside) setOpen(false);
       return;
     }
     setOpen(true);

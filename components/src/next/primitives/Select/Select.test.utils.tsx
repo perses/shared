@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 
@@ -60,5 +60,9 @@ export const getRoot = (name = 'Unit'): HTMLElement => getTrigger(name).closest(
 
 export async function open(name = 'Unit'): Promise<HTMLElement> {
   await userEvent.click(getTrigger(name));
-  return screen.findByRole('listbox');
+  const listbox = await screen.findByRole('listbox');
+  // Base UI opens a trigger press on the next animation frame as well. Without waiting for it, a quick follow-up
+  // press in a test would be followed by that stale frame reopening the list.
+  await act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+  return listbox;
 }
