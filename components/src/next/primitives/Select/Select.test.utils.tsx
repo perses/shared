@@ -35,8 +35,8 @@ export function renderSelect(
   props: Partial<SelectProps> = {},
   children: ReactElement[] = units,
 ): ReturnType<typeof render> {
-  const merged = { label: 'Unit', ...props } as SelectProps;
-  return render(<Select {...merged}>{children}</Select>);
+  const merged = { label: 'Unit', ...props, children } as SelectProps;
+  return render(<Select {...merged} />);
 }
 
 export const getTrigger = (name = 'Unit'): HTMLElement => screen.getByRole('combobox', { name });

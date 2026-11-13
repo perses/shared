@@ -16,7 +16,7 @@ import { Select as BaseSelect } from '@base-ui/react/select';
 import type { SelectPositionerProps } from '@base-ui/react/select';
 import { clsx } from 'clsx';
 import { forwardRef, useCallback, useContext, useEffect, useId, useMemo } from 'react';
-import type { ButtonHTMLAttributes, CSSProperties, ReactElement, ReactNode } from 'react';
+import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode, Ref } from 'react';
 
 import { ThemeModeContext } from '../../contexts/ThemeModeProvider';
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
@@ -58,14 +58,30 @@ export interface SelectStyle extends CSSProperties {
   '--perses-select-size-lg'?: string;
 }
 
+/** A data-driven option for the `items` prop. */
+export interface SelectItemData {
+  value: SelectValue;
+  /** Text shown in the list, the field and chips; also what search matches against. */
+  label: string;
+  disabled?: boolean;
+}
+
 /** Documented internal styling targets; the root remains styled through top-level `className` and `style`. */
 export interface SelectSlotProps {
   /** Visible label; rendered only when `label` is provided. */
   label?: SlotStyleProps;
-  /** The button that shows the selected value and opens the list; accepts the `SelectStyle` size overrides. */
-  trigger?: SlotStyleProps<SelectStyle>;
+  /** The field that holds the value, chips, input and buttons; accepts the `SelectStyle` size overrides. */
+  control?: SlotStyleProps<SelectStyle>;
+  /** The focusable element in either mode: the button, or the search input. */
+  trigger?: SlotStyleProps;
+  /** The selected-value chips; rendered only with `chips`. */
+  chips?: SlotStyleProps;
+  /** The button that clears the selection; rendered only with `clearable`. */
+  clearButton?: SlotStyleProps;
   /** The floating list; portaled to `document.body`. */
   popup?: SlotStyleProps;
+  /** The listbox that holds the options inside the popup. */
+  list?: SlotStyleProps;
   /** Supporting text; rendered only when `helperText` is provided. */
   helper?: SlotStyleProps;
 }
@@ -78,8 +94,8 @@ export interface SelectSlotProps {
 interface SelectBaseProps
   extends
     Omit<
-      ButtonHTMLAttributes<HTMLButtonElement>,
-      'value' | 'defaultValue' | 'style' | 'type' | 'aria-label' | 'aria-labelledby'
+      HTMLAttributes<HTMLElement>,
+      'defaultValue' | 'onChange' | 'style' | 'children' | 'aria-label' | 'aria-labelledby'
     >,
     SpacingProps,
     SizingProps,
@@ -91,6 +107,10 @@ interface SelectBaseProps
   slotProps?: SelectSlotProps;
   /** Hint or validation message, linked to the trigger through `aria-describedby`. */
   helperText?: ReactNode;
+  name?: string;
+  form?: string;
+  disabled?: boolean;
+  autoFocus?: boolean;
   /** Visual status. `error` also sets `aria-invalid` on the trigger. */
   status?: Status;
   fullWidth?: boolean;
@@ -123,9 +143,31 @@ interface SelectBaseProps
   align?: SelectAlign;
   /** Distance from the trigger in pixels. Defaults to 4. */
   offset?: SelectPositionerProps['sideOffset'];
-  /** `SelectItem` and `SelectGroup` elements. */
-  children?: ReactNode;
+  /** Shows a button that resets the selection when something is selected. */
+  clearable?: boolean;
+  /** Shows a spinner, sets `aria-busy` and shows `loadingText` while there are no items. */
+  loading?: boolean;
+  /** Non-option content rendered above the options in the popup, outside the listbox. */
+  listHeader?: ReactNode;
+  /** Shown when no option matches. Defaults to "No results". */
+  emptyText?: ReactNode;
+  /** Shown while `loading` and there are no items. Defaults to "Loading…". */
+  loadingText?: ReactNode;
+  /** Accessible name of the clear button. Defaults to "Clear selection". */
+  clearAriaLabel?: string;
 }
+
+/** Options come from `items` or from `SelectItem` and `SelectGroup` children, never both. */
+type SelectOptionsSource =
+  | {
+      items: SelectItemData[];
+      children?: never;
+    }
+  | {
+      items?: undefined;
+      /** `SelectItem` and `SelectGroup` elements. */
+      children?: ReactNode;
+    };
 
 /**
  * Every Select needs a name for screen readers, so you must pass one of `label`, `aria-label` or
@@ -155,34 +197,79 @@ type SelectAccessibleName =
       'aria-labelledby': string;
     };
 
-interface SelectSingleProps {
-  multiple?: false;
-  value?: SelectValue | null;
-  defaultValue?: SelectValue | null;
-  onValueChange?: (value: SelectValue | null) => void;
-  /**
-   * Custom trigger content for the current value; defaults to the selected item's `children`. While nothing is
-   * selected and a `placeholder` is set, the placeholder is shown and this is not called; otherwise it receives
-   * `null` (or `""`) for an empty selection.
-   */
-  renderValue?: (value: SelectValue | null) => ReactNode;
-}
+type SelectSearchProps =
+  | {
+      searchable?: false;
+      filter?: never;
+      inputValue?: never;
+      defaultInputValue?: never;
+      onInputValueChange?: never;
+    }
+  | {
+      /** Renders an input in the field that filters the options. Fixed for the component's lifetime. */
+      searchable: true;
+      /** Custom matching; `null` disables local filtering (server-side search). */
+      filter?: ((item: SelectItemData, query: string) => boolean) | null;
+      inputValue?: string;
+      defaultInputValue?: string;
+      onInputValueChange?: (inputValue: string) => void;
+    };
 
-interface SelectMultipleProps {
-  /** Allows several items to be selected; `value` becomes an array and the trigger joins the item labels. */
-  multiple: true;
-  value?: SelectValue[];
-  defaultValue?: SelectValue[];
-  onValueChange?: (value: SelectValue[]) => void;
-  /**
-   * Custom trigger content for the current values; defaults to the selected items' `children` joined by `, `.
-   * While nothing is selected and a `placeholder` is set, the placeholder is shown and this is not called;
-   * otherwise it receives an empty array.
-   */
-  renderValue?: (value: SelectValue[]) => ReactNode;
-}
+type SelectSelectionProps =
+  | {
+      multiple?: false;
+      value?: SelectValue | null;
+      defaultValue?: SelectValue | null;
+      onValueChange?: (value: SelectValue | null) => void;
+      /**
+       * Custom field content for the current value; defaults to the selected item's `children`. While nothing is
+       * selected and a `placeholder` is set, the placeholder is shown and this is not called; otherwise it receives
+       * `null` (or `""`) for an empty selection.
+       */
+      renderValue?: (value: SelectValue | null) => ReactNode;
+      chips?: never;
+      limitChips?: never;
+      chipRemoveAriaLabel?: never;
+      moreChipsLabel?: never;
+    }
+  | {
+      /** Allows several items to be selected; `value` becomes an array and the field joins the item labels. */
+      multiple: true;
+      value?: readonly SelectValue[];
+      defaultValue?: readonly SelectValue[];
+      onValueChange?: (value: SelectValue[]) => void;
+      /**
+       * Custom field content for the current values; defaults to the selected items' `children` joined by `, `.
+       * While nothing is selected and a `placeholder` is set, the placeholder is shown and this is not called;
+       * otherwise it receives an empty array.
+       */
+      renderValue?: (value: SelectValue[]) => ReactNode;
+      chips?: false;
+      limitChips?: never;
+      chipRemoveAriaLabel?: never;
+      moreChipsLabel?: never;
+    }
+  | {
+      multiple: true;
+      value?: readonly SelectValue[];
+      defaultValue?: readonly SelectValue[];
+      onValueChange?: (value: SelectValue[]) => void;
+      /** Shows the selected items as removable chips. */
+      chips: true;
+      /** While focus is outside the field and the list is closed, show this many chips, then "+N". */
+      limitChips?: number;
+      renderValue?: never;
+      /** Accessible name of a chip's remove button. Defaults to `(label) => \`Remove ${label}\``. */
+      chipRemoveAriaLabel?: (label: string) => string;
+      /** Screen-reader text for "+N". Defaults to `(count) => \`${count} more selected\``. */
+      moreChipsLabel?: (count: number) => string;
+    };
 
-export type SelectProps = SelectBaseProps & SelectAccessibleName & (SelectSingleProps | SelectMultipleProps);
+export type SelectProps = SelectBaseProps &
+  SelectAccessibleName &
+  SelectOptionsSource &
+  SelectSearchProps &
+  SelectSelectionProps;
 
 type SelectCurrentValue = SelectValue | SelectValue[] | null;
 
@@ -219,7 +306,7 @@ function isEmptySelection(value: SelectCurrentValue): boolean {
  *   </SelectGroup>
  * </Select>
  */
-export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select(
+export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
   {
     label,
     helperText,
@@ -246,6 +333,22 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
     defaultValue,
     onValueChange,
     renderValue,
+    items: _itemsProp,
+    searchable: _searchable,
+    filter: _filter,
+    inputValue: _inputValue,
+    defaultInputValue: _defaultInputValue,
+    onInputValueChange: _onInputValueChange,
+    chips: _chips,
+    limitChips: _limitChips,
+    chipRemoveAriaLabel: _chipRemoveAriaLabel,
+    moreChipsLabel: _moreChipsLabel,
+    clearable: _clearable,
+    loading: _loading,
+    listHeader: _listHeader,
+    emptyText: _emptyText,
+    loadingText: _loadingText,
+    clearAriaLabel: _clearAriaLabel,
     className,
     style,
     slotProps,
@@ -336,7 +439,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
         )}
         <BaseSelect.Trigger
           {...restWithoutDisplay}
-          ref={ref}
+          ref={ref as Ref<HTMLButtonElement>}
           id={triggerId}
           className={clsx('ps-Select__trigger', radiusClassName, slotProps?.trigger?.className)}
           style={radiusStyle}

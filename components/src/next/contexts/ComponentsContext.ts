@@ -67,7 +67,7 @@ export interface PersesComponents {
   CardContent: RefComponent<CardContentProps, HTMLElement>;
   Grid: RefComponent<GridProps, HTMLDivElement>;
   GridItem: RefComponent<GridItemProps, HTMLDivElement>;
-  Select: RefComponent<SelectProps, HTMLButtonElement>;
+  Select: RefComponent<SelectProps, HTMLElement>;
   SelectItem: RefComponent<SelectItemProps, HTMLDivElement>;
   SelectGroup: RefComponent<SelectGroupProps, HTMLDivElement>;
   Stack: RefComponent<StackProps, HTMLDivElement>;

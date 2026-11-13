@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { render, screen } from '@testing-library/react';
-import type { ComponentProps, CSSProperties } from 'react';
+import type { ComponentProps, ComponentRef, CSSProperties } from 'react';
 import { expectTypeOf } from 'vitest';
 
 import type { PersesComponents, PersesCSSProperties, PersesIcons, SlotStyleProps } from './index';
@@ -36,9 +36,12 @@ import type {
   RadiusValue,
   PersesCSSProperties as PrimitiveCSSProperties,
   SlotStyleProps as PrimitiveSlotStyleProps,
+  Select,
+  SelectItemData,
   SelectProps,
   SelectSlotProps,
   SelectStyle,
+  SelectValue,
   Status,
   SwitchProps,
   SwitchSlotProps,
@@ -112,7 +115,12 @@ type _SlotStylePrimitiveExport = AssertAssignable<SlotStyleProps, PrimitiveSlotS
 type _SlotStyleKeys = AssertNever<Exclude<keyof SlotStyleProps, 'className' | 'style'>>;
 type _TextFieldSlotKeys = AssertNever<Exclude<keyof TextFieldSlotProps, 'label' | 'wrapper' | 'input' | 'helper'>>;
 type _TextFieldSlotProp = AssertAssignable<NonNullable<TextFieldProps['slotProps']>, TextFieldSlotProps>;
-type _SelectSlotKeys = AssertNever<Exclude<keyof SelectSlotProps, 'label' | 'trigger' | 'popup' | 'helper'>>;
+type _SelectSlotKeys = AssertNever<
+  Exclude<
+    keyof SelectSlotProps,
+    'label' | 'control' | 'trigger' | 'chips' | 'clearButton' | 'popup' | 'list' | 'helper'
+  >
+>;
 type _SelectSlotProp = AssertAssignable<NonNullable<SelectProps['slotProps']>, SelectSlotProps>;
 
 expectTypeOf<BoxProps['rounded']>().toEqualTypeOf<RadiusProps['rounded']>();
@@ -255,6 +263,58 @@ expectTypeOf({
 } satisfies SelectProps);
 // @ts-expect-error A Select needs a label, aria-label or aria-labelledby.
 expectTypeOf({ value: 'bytes' } satisfies SelectProps);
+// Search, chips, clear and the items data source.
+expectTypeOf({
+  label: 'Unit',
+  searchable: true,
+  multiple: true,
+  chips: true,
+  limitChips: 3,
+  items: [{ value: 'a', label: 'A' }],
+  filter: null,
+  inputValue: '',
+  onInputValueChange: (v: string): string => v,
+  clearable: true,
+  loading: true,
+  listHeader: 'All',
+  chipRemoveAriaLabel: (l: string): string => `Drop ${l}`,
+  moreChipsLabel: (n: number): string => `${n} more`,
+} satisfies SelectProps);
+expectTypeOf({
+  label: 'Unit',
+  searchable: true,
+  filter: (item: SelectItemData, q: string): boolean => item.label.startsWith(q),
+} satisfies SelectProps);
+// @ts-expect-error chips need multiple.
+expectTypeOf({ label: 'Unit', chips: true } satisfies SelectProps);
+// @ts-expect-error limitChips needs chips.
+expectTypeOf({ label: 'Unit', multiple: true, limitChips: 3 } satisfies SelectProps);
+// @ts-expect-error moreChipsLabel needs chips.
+expectTypeOf({ label: 'Unit', multiple: true, moreChipsLabel: (n: number): string => `${n}` } satisfies SelectProps);
+// @ts-expect-error chips replace renderValue.
+expectTypeOf({ label: 'Unit', multiple: true, chips: true, renderValue: (): null => null } satisfies SelectProps);
+// @ts-expect-error filter needs searchable.
+expectTypeOf({ label: 'Unit', filter: null } satisfies SelectProps);
+// @ts-expect-error inputValue needs searchable.
+expectTypeOf({ label: 'Unit', inputValue: 'a' } satisfies SelectProps);
+// @ts-expect-error items and children are exclusive.
+expectTypeOf({ label: 'Unit', items: [], children: 'x' } satisfies SelectProps);
+// @ts-expect-error native onChange is not forwarded; use onValueChange or onInputValueChange.
+expectTypeOf({ label: 'Unit', onChange: (): undefined => undefined } satisfies SelectProps);
+// Readonly arrays are accepted as input; callbacks still receive SelectValue[].
+const frozenUnits = ['bytes', 1] as const;
+expectTypeOf({
+  label: 'Unit',
+  multiple: true,
+  value: frozenUnits,
+  defaultValue: frozenUnits,
+  onValueChange: (v: SelectValue[]): number => v.push('x'),
+} satisfies SelectProps);
+expectTypeOf<Parameters<NonNullable<Extract<SelectProps, { multiple: true }>['onValueChange']>>[0]>().toEqualTypeOf<
+  SelectValue[]
+>();
+expectTypeOf<ComponentRef<typeof Select>>().toEqualTypeOf<HTMLElement>();
+
 // @ts-expect-error A visible label cannot be overridden by aria-label.
 expectTypeOf({ label: 'Unit', 'aria-label': 'Other' } satisfies SelectProps);
 // @ts-expect-error Single selection does not accept an array value.
@@ -328,7 +388,8 @@ expectTypeOf({ '--perses-checkbox-size-md': 24 } satisfies PersesCSSProperties<C
 expectTypeOf({ '--perses-chip-border-style': 1 } satisfies PersesCSSProperties<ChipStyle>);
 
 expectTypeOf<NonNullable<TextFieldSlotProps['wrapper']>>().toEqualTypeOf<SlotStyleProps<TextFieldStyle>>();
-expectTypeOf<NonNullable<SelectSlotProps['trigger']>>().toEqualTypeOf<SlotStyleProps<SelectStyle>>();
+expectTypeOf<NonNullable<SelectSlotProps['control']>>().toEqualTypeOf<SlotStyleProps<SelectStyle>>();
+expectTypeOf<NonNullable<SelectSlotProps['trigger']>>().toEqualTypeOf<SlotStyleProps>();
 expectTypeOf({
   control: { style: { '--perses-checkbox-size-md': '24px', '--app-accent': 'blue' } },
 } satisfies CheckboxSlotProps);
@@ -339,7 +400,7 @@ expectTypeOf({ control: { style: { '--perses-switch-size-md': 24 } } } satisfies
 // @ts-expect-error Typed slots check documented custom properties the same way as the top-level style.
 expectTypeOf({ wrapper: { style: { '--perses-textfield-size-md': 40 } } } satisfies TextFieldSlotProps);
 // @ts-expect-error Typed slots check documented custom properties the same way as the top-level style.
-expectTypeOf({ trigger: { style: { '--perses-select-size-md': 40 } } } satisfies SelectSlotProps);
+expectTypeOf({ control: { style: { '--perses-select-size-md': 40 } } } satisfies SelectSlotProps);
 
 const MIXED_STYLE = {
   marginTop: 8,

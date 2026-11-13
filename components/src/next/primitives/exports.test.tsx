@@ -40,6 +40,7 @@ import type {
   MenuProps,
   Size,
   SelectGroupProps,
+  SelectItemData,
   SelectItemProps,
   SelectProps,
   SelectStyle,
@@ -184,6 +185,7 @@ describe('primitives barrel exports', () => {
     const iconProps: IconProps = {};
     const selectValue: SelectValue = 'bytes';
     const selectProps: SelectProps = { label: 'Unit', value: selectValue };
+    const selectItemData: SelectItemData = { value: 'b', label: 'Bytes' };
     const selectItemProps: SelectItemProps = { value: 1 };
     const selectGroupProps: SelectGroupProps = { label: 'Units' };
     const selectStyle: SelectStyle = { '--perses-select-size-md': '2.5rem' };
@@ -249,6 +251,7 @@ describe('primitives barrel exports', () => {
     expect(gridItemProps.size).toBe(6);
     expect(iconProps).toBeDefined();
     expect(selectProps).toBeDefined();
+    expect(selectItemData.label).toBe('Bytes');
     expect(selectItemProps.value).toBe(1);
     expect(selectGroupProps).toBeDefined();
     expect(selectStyle).toBeDefined();
