@@ -11,17 +11,147 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { fieldText, getTrigger, MODES, modeProps, open, renderSelect } from './Select.test.utils';
+import { ThemeModeProvider } from '../../contexts/ThemeModeProvider';
+import { Select } from './Select';
+import type { SelectProps, SelectSlotProps } from './Select';
+import {
+  fieldText,
+  getRoot,
+  getTrigger,
+  MODES,
+  modeProps,
+  nextFrame,
+  open,
+  renderSelect,
+  units,
+} from './Select.test.utils';
 
 const queryClear = (name = 'Clear selection'): HTMLElement | null => screen.queryByRole('button', { name });
+const control = (): HTMLElement => document.querySelector('.ps-Select__control') as HTMLElement;
 const chipElements = (container: HTMLElement): HTMLElement[] =>
   Array.from(container.querySelectorAll<HTMLElement>('.ps-Select__chip'));
 const removeButtons = (): HTMLElement[] => screen.queryAllByRole('button', { name: /^Remove / });
 
 describe.each(MODES)('%s mode', (mode) => {
+  describe('parity', () => {
+    it('names the focusable from the visible label, or from aria-label when there is no label', () => {
+      const { unmount } = renderSelect({ ...modeProps(mode) });
+      expect(getTrigger()).toHaveAccessibleName('Unit');
+      unmount();
+
+      render(<Select {...({ ...modeProps(mode), 'aria-label': 'Unit', children: units } as SelectProps)} />);
+      expect(getTrigger()).toHaveAccessibleName('Unit');
+      expect(document.querySelector('.ps-Select__label')).toBeNull();
+    });
+
+    it('references the helper text from aria-describedby', () => {
+      renderSelect({ ...modeProps(mode), helperText: 'Shown to your team' });
+
+      const helper = screen.getByText('Shown to your team');
+      expect(helper.id).not.toBe('');
+      expect(getTrigger().getAttribute('aria-describedby')?.split(' ')).toContain(helper.id);
+    });
+
+    it('sets aria-invalid for the error status', () => {
+      renderSelect({ ...modeProps(mode), status: 'error' });
+
+      expect(getTrigger()).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    it('puts data-size on the root and the popup', async () => {
+      renderSelect({ ...modeProps(mode), size: 'lg' });
+
+      const listbox = await open();
+
+      expect(getRoot()).toHaveAttribute('data-size', 'lg');
+      expect(listbox.closest('.ps-Select__popup')).toHaveAttribute('data-size', 'lg');
+    });
+
+    it('gives the positioner the theme mode of the surrounding provider', async () => {
+      render(
+        <ThemeModeProvider mode="dark">
+          <Select {...({ ...modeProps(mode), label: 'Unit', children: units } as SelectProps)} />
+        </ThemeModeProvider>,
+      );
+
+      const listbox = await open();
+
+      expect(listbox.closest('.ps-Select__positioner')).toHaveAttribute('data-perses-mode', 'dark');
+    });
+
+    it('puts each slot className on its part', async () => {
+      const slotProps: SelectSlotProps = {
+        label: { className: 'custom-label' },
+        control: { className: 'custom-control' },
+        trigger: { className: 'custom-trigger' },
+        chips: { className: 'custom-chips' },
+        clearButton: { className: 'custom-clear' },
+        popup: { className: 'custom-popup' },
+        list: { className: 'custom-list' },
+        helper: { className: 'custom-helper' },
+      };
+      renderSelect({
+        ...modeProps(mode),
+        multiple: true,
+        chips: true,
+        clearable: true,
+        defaultValue: ['bytes'],
+        helperText: 'Pick units',
+        slotProps,
+      });
+
+      // Open lists hide the rest of the page from assistive technology, so check the clear button first.
+      const clearButton = queryClear();
+      const listbox = await open();
+
+      expect(screen.getByText('Unit')).toHaveClass('custom-label');
+      expect(control()).toHaveClass('custom-control');
+      expect(getTrigger()).toHaveClass('custom-trigger');
+      expect(document.querySelector('.ps-Select__chips')).toHaveClass('custom-chips');
+      expect(clearButton).toHaveClass('custom-clear');
+      expect(listbox.closest('.ps-Select__popup')).toHaveClass('custom-popup');
+      expect(listbox).toHaveClass('custom-list');
+      expect(screen.getByText('Pick units')).toHaveClass('custom-helper');
+    });
+
+    it('puts the radius classes on the control', () => {
+      renderSelect({ ...modeProps(mode), rounded: 'lg', roundedTopLeft: 'sm' });
+
+      expect(control()).toHaveClass('ps-rounded', 'ps-rounded-top-left');
+      expect(control()).toHaveStyle({ '--ps-rounded': 'var(--perses-radius-lg)' });
+    });
+
+    it('reflects required', () => {
+      renderSelect({ ...modeProps(mode), required: true });
+
+      expect(getTrigger()).toHaveAttribute('aria-required', 'true');
+    });
+
+    it('marks a disabled control and does not open the list', async () => {
+      renderSelect({ ...modeProps(mode), disabled: true });
+
+      expect(control()).toHaveAttribute('data-disabled');
+      await userEvent.click(getTrigger());
+      await userEvent.click(control());
+      await nextFrame();
+
+      expect(screen.queryByRole('listbox')).toBeNull();
+    });
+
+    it('marks a read-only control and does not open the list from a press on the control', async () => {
+      renderSelect({ ...modeProps(mode), readOnly: true });
+
+      expect(control()).toHaveAttribute('data-readonly');
+      await userEvent.click(control());
+      await nextFrame();
+
+      expect(screen.queryByRole('listbox')).toBeNull();
+    });
+  });
+
   describe('clear', () => {
     it('renders no clear button until something is selected', () => {
       const { unmount } = renderSelect({ ...modeProps(mode), clearable: true });

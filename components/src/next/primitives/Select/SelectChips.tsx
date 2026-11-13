@@ -11,13 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Combobox } from '@base-ui/react/combobox';
 import { clsx } from 'clsx';
+import { useContext } from 'react';
 import type { MouseEvent, ReactElement, ReactNode } from 'react';
 
 import type { ChipSize } from '../Chip/Chip';
 import { CloseIcon } from '../Icon';
 import type { Size } from '../types';
 import { optionKey } from './collectItems';
+import { SelectEngineContext } from './SelectEngineContext';
 import type { SelectEngineProps } from './SelectShell';
 import { isMultipleValue } from './selectValue';
 
@@ -31,6 +34,14 @@ export function chipSize(size: Size): ChipSize {
   return size === 'xs' || size === 'sm' ? 'xs' : 'sm';
 }
 
+/**
+ * The shell owns a press on the control end to end (focus, toggle), so Base UI's own press handler on the chips
+ * container must not open the list a second time.
+ */
+function keepPressWithShell(event: MouseEvent<HTMLElement> & { preventBaseUIHandler?: () => void }): void {
+  event.preventBaseUIHandler?.();
+}
+
 export interface SelectChipsProps {
   engine: SelectEngineProps;
   /** Rendered after the chips; the search input in searchable mode. */
@@ -41,6 +52,10 @@ export interface SelectChipsProps {
  * The selected values as removable chips, followed by a "+N" element for the chips beyond `limitChips`.
  * It reuses the Chip stylesheet and class contract but not the `Chip` component: the remove buttons must stay out of
  * the tab order, which `Chip`'s close button does not allow.
+ *
+ * In the search engine the parts are Base UI's `Combobox.Chips`, `Chip` and `ChipRemove`, so Backspace and the arrow
+ * keys move between the chips and the input, and removal reaches `onValueChange` through Base UI. The container holds
+ * `children` (the input), so it renders even while nothing is selected.
  */
 export function SelectChips({ engine, children }: SelectChipsProps): ReactElement {
   const {
@@ -58,6 +73,7 @@ export function SelectChips({ engine, children }: SelectChipsProps): ReactElemen
   const values = isMultipleValue(value) ? value : [];
   const hiddenCount = limitChips === undefined ? 0 : values.length - limitChips;
   const removable = !disabled && !readOnly;
+  const isSearch = useContext(SelectEngineContext) === 'search';
 
   const handleRemove = (event: MouseEvent<HTMLButtonElement>, index: number): void => {
     const control = event.currentTarget.closest('.ps-Select__control');
@@ -65,13 +81,20 @@ export function SelectChips({ engine, children }: SelectChipsProps): ReactElemen
     control?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
   };
 
+  const Container = isSearch ? Combobox.Chips : 'div';
+  const Chip = isSearch ? Combobox.Chip : 'div';
+
   return (
-    <div className={clsx('ps-Select__chips', slotProps?.chips?.className)} style={slotProps?.chips?.style}>
+    <Container
+      {...(isSearch ? { onMouseDown: keepPressWithShell } : {})}
+      className={clsx('ps-Select__chips', slotProps?.chips?.className)}
+      style={slotProps?.chips?.style}
+    >
       {values.map((chipValue, index) => {
         const option = optionsByValue.get(chipValue);
         const label = option?.label ?? String(chipValue);
         return (
-          <div
+          <Chip
             key={optionKey(chipValue)}
             className="ps-Chip ps-Select__chip"
             data-size={chipSize(size)}
@@ -80,18 +103,23 @@ export function SelectChips({ engine, children }: SelectChipsProps): ReactElemen
             data-overflow={limitChips !== undefined && index >= limitChips ? '' : undefined}
           >
             <span className="ps-Chip__label">{option?.content ?? label}</span>
-            {removable && (
-              <button
-                type="button"
-                tabIndex={-1}
-                className="ps-Chip__close"
-                aria-label={chipRemoveAriaLabel(label)}
-                onClick={(event) => handleRemove(event, index)}
-              >
-                {closeIcon}
-              </button>
-            )}
-          </div>
+            {removable &&
+              (isSearch ? (
+                <Combobox.ChipRemove className="ps-Chip__close" aria-label={chipRemoveAriaLabel(label)}>
+                  {closeIcon}
+                </Combobox.ChipRemove>
+              ) : (
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  className="ps-Chip__close"
+                  aria-label={chipRemoveAriaLabel(label)}
+                  onClick={(event) => handleRemove(event, index)}
+                >
+                  {closeIcon}
+                </button>
+              ))}
+          </Chip>
         );
       })}
       {hiddenCount > 0 && (
@@ -101,6 +129,6 @@ export function SelectChips({ engine, children }: SelectChipsProps): ReactElemen
         </span>
       )}
       {children}
-    </div>
+    </Container>
   );
 }

@@ -11,16 +11,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRef } from 'react';
 
 import { Select } from './Select';
-import { getTrigger, open, renderSelect, units } from './Select.test.utils';
+import { getTrigger, nextFrame, open, renderSelect, units } from './Select.test.utils';
 import { SelectGroup } from './SelectGroup';
 import { SelectItem } from './SelectItem';
 
 const optionLabels = (): string[] => screen.queryAllByRole('option').map((option) => option.textContent ?? '');
+/** Presses the clear button while the list is open: that hides it from the accessibility tree, hence the label query. */
+const pressClear = async (): Promise<void> => {
+  // The press closes the open list; `act` keeps the closing updates inside the test.
+  await act(async () => {
+    await userEvent.click(screen.getByLabelText('Clear selection'));
+  });
+  await nextFrame();
+};
 const valueText = (): string => document.querySelector('.ps-Select__value')?.textContent ?? '';
 
 describe('Select searchable', () => {
@@ -348,5 +356,77 @@ describe('Select searchable', () => {
     await userEvent.click(percent);
 
     expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  describe('chips', () => {
+    const chipProps = { searchable: true, multiple: true, chips: true } as const;
+
+    it('removes the last chip with Backspace in an empty input', async () => {
+      const onValueChange = vi.fn();
+      renderSelect({ ...chipProps, defaultValue: ['bytes', 'seconds'], onValueChange });
+
+      await userEvent.tab();
+      expect(getTrigger()).toHaveFocus();
+      await userEvent.keyboard('{Backspace}');
+
+      expect(onValueChange).toHaveBeenCalledWith(['bytes']);
+      expect(screen.queryByRole('button', { name: 'Remove Seconds' })).toBeNull();
+      expect(screen.getByRole('button', { name: 'Remove Bytes' })).toBeInTheDocument();
+    });
+
+    it('moves from the input start to the chips with ArrowLeft and removes the focused chip with Backspace', async () => {
+      const onValueChange = vi.fn();
+      renderSelect({ ...chipProps, defaultValue: ['bytes'], onValueChange });
+
+      await userEvent.tab();
+      expect(getTrigger()).toHaveFocus();
+      await userEvent.keyboard('{ArrowLeft}');
+      const chip = document.querySelector<HTMLElement>('.ps-Select__chip') as HTMLElement;
+      expect(chip).toHaveFocus();
+
+      await userEvent.keyboard('{Backspace}');
+
+      expect(onValueChange).toHaveBeenCalledWith([]);
+      expect(document.querySelector('.ps-Select__chip')).toBeNull();
+      expect(getTrigger()).toHaveFocus();
+      await userEvent.keyboard('sec');
+      expect(getTrigger()).toHaveValue('sec');
+    });
+
+    it('keeps the chips container, which holds the input, while nothing is selected', () => {
+      renderSelect({ ...chipProps });
+
+      const chips = document.querySelector('.ps-Select__chips') as HTMLElement;
+      expect(chips).toContainElement(getTrigger());
+    });
+  });
+
+  it('clears typed text together with the selection', async () => {
+    const { unmount } = renderSelect({ searchable: true, clearable: true, defaultValue: 'bytes' });
+    await userEvent.type(getTrigger(), 'x');
+    await nextFrame();
+    expect(getTrigger()).toHaveValue('Bytesx');
+
+    await pressClear();
+
+    expect(getTrigger()).toHaveValue('');
+    unmount();
+
+    renderSelect({ searchable: true, multiple: true, chips: true, clearable: true, defaultValue: ['bytes'] });
+    await userEvent.type(getTrigger(), 'sec');
+    await nextFrame();
+    expect(getTrigger()).toHaveValue('sec');
+
+    await pressClear();
+
+    expect(getTrigger()).toHaveValue('');
+  });
+
+  it('announces no results through the status region', async () => {
+    renderSelect({ searchable: true });
+
+    await userEvent.type(getTrigger(), 'zzz');
+
+    expect(screen.getByRole('status')).toHaveTextContent('No results');
   });
 });

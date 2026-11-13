@@ -18,6 +18,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import type { MouseEvent, ReactElement, ReactNode, Ref } from 'react';
 
 import { hasContent } from '../hasContent';
+import { SelectChips } from './SelectChips';
 import { SelectEngineContext, SelectVisibleValuesContext } from './SelectEngineContext';
 import type { SelectValue } from './SelectItem';
 import { SelectShell } from './SelectShell';
@@ -34,6 +35,23 @@ function VisibleValues({ children }: { children: ReactNode }): ReactElement {
   const filtered = Combobox.useFilteredItems<SelectValue>();
   const visible = useMemo(() => new Set(filtered), [filtered]);
   return <SelectVisibleValuesContext.Provider value={visible}>{children}</SelectVisibleValuesContext.Provider>;
+}
+
+/**
+ * The live region: `loadingText` while loading, `emptyText` while the open list has no match. `Combobox.Status` stays
+ * mounted so changes to its text are announced.
+ */
+function SearchStatus({
+  loading,
+  loadingText,
+  emptyText,
+  open,
+}: Pick<SelectEngineProps, 'loading' | 'loadingText' | 'emptyText' | 'open'>): ReactElement {
+  const noMatches = Combobox.useFilteredItems<SelectValue>().length === 0;
+  let message: ReactNode = null;
+  if (open && loading) message = loadingText;
+  else if (open && noMatches) message = emptyText;
+  return <Combobox.Status className="ps-Select__status ps-Select__visually-hidden">{message}</Combobox.Status>;
 }
 
 /** The input-trigger engine: a Base UI `Combobox` whose value, open and typed-text state are owned by `Select`. */
@@ -110,6 +128,17 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
     focusInput();
   };
 
+  const input = (
+    <Combobox.Input
+      {...focusableProps}
+      ref={forwardedRef as Ref<HTMLInputElement>}
+      aria-busy={loading || undefined}
+      placeholder={isEmptySelection(value) && typeof placeholder === 'string' ? placeholder : undefined}
+      className={clsx('ps-Select__trigger ps-Select__input', slotProps?.trigger?.className)}
+      style={slotProps?.trigger?.style}
+    />
+  );
+
   return (
     <SelectEngineContext.Provider value="search">
       <Combobox.Root<SelectValue, boolean>
@@ -141,6 +170,7 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
           controlRef={controlRef}
           Control={Combobox.InputGroup}
           pressIsInside
+          onClear={() => setInputValue('')}
           label={
             hasLabel ? (
               <Field.Label
@@ -160,14 +190,7 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
                   {renderValue ? renderValue(value) : selectedValues.map(labelOf).join(', ')}
                 </span>
               )}
-              <Combobox.Input
-                {...focusableProps}
-                ref={forwardedRef as Ref<HTMLInputElement>}
-                aria-busy={loading || undefined}
-                placeholder={isEmptySelection(value) && typeof placeholder === 'string' ? placeholder : undefined}
-                className={clsx('ps-Select__trigger ps-Select__input', slotProps?.trigger?.className)}
-                style={slotProps?.trigger?.style}
-              />
+              {chips ? <SelectChips engine={props}>{input}</SelectChips> : input}
             </>
           }
           trailing={
@@ -182,6 +205,7 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
               </Combobox.Trigger>
             ) : null
           }
+          status={<SearchStatus loading={loading} loadingText={loadingText} emptyText={emptyText} open={open} />}
           popup={
             <Combobox.Portal>
               <Combobox.Positioner
@@ -198,7 +222,10 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
                   data-size={size}
                 >
                   {hasContent(listHeader) && <div className="ps-Select__list-header">{listHeader}</div>}
-                  {options.length === 0 && <div className="ps-Select__empty">{loading ? loadingText : emptyText}</div>}
+                  {/* `SearchStatus` is the one live region; Empty's own `role="status"` would announce twice. */}
+                  <Combobox.Empty className="ps-Select__empty" role="presentation" aria-live="off">
+                    {loading ? loadingText : emptyText}
+                  </Combobox.Empty>
                   <Combobox.List
                     className={clsx('ps-Select__list', slotProps?.list?.className)}
                     style={slotProps?.list?.style}

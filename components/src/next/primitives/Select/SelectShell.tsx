@@ -184,14 +184,19 @@ export function SelectShell({
   };
 
   const handleMouseDown = (event: MouseEvent<HTMLElement>): void => {
-    if (disabled || readOnly || event.button !== 0) return;
+    const baseEvent = event as MouseEvent<HTMLElement> & { preventBaseUIHandler?: () => void };
+    if (disabled || readOnly || event.button !== 0) {
+      // Base UI's search input group opens the list on a press unless it is disabled; a read-only field stays closed.
+      if (readOnly) baseEvent.preventBaseUIHandler?.();
+      return;
+    }
     // Real controls (trigger, input, clear and chip buttons, links) handle their own presses.
     if ((event.target as Element).closest('button, input, a')) return;
     event.preventDefault();
     controlRef.current?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
     // The shell owns a control press end to end, so Base UI's own press handler on the control (the search input
     // group opens the list on press) must not call `setOpen` a second time.
-    (event as MouseEvent<HTMLElement> & { preventBaseUIHandler?: () => void }).preventBaseUIHandler?.();
+    baseEvent.preventBaseUIHandler?.();
     // The list was open at press time, so the control toggles like the trigger: a press closes it and never reopens it.
     if (wasOpenOnPress.current) {
       // Base UI's outside press has already closed the list, unless the press counts as inside.

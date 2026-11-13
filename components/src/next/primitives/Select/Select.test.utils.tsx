@@ -32,8 +32,8 @@ export const units = [
 ];
 
 export type SelectMode = 'basic' | 'searchable';
-/** The engines every mode-agnostic test runs against. Task 8 adds `'searchable'`. */
-export const MODES: readonly SelectMode[] = ['basic'];
+/** The engines every mode-agnostic test runs against. */
+export const MODES: readonly SelectMode[] = ['basic', 'searchable'];
 
 /**
  * Spread into every mode-agnostic render. The narrow return type (instead of `Partial<SelectProps>`, a union)
@@ -58,11 +58,16 @@ export const fieldText = (el: HTMLElement): string =>
 
 export const getRoot = (name = 'Unit'): HTMLElement => getTrigger(name).closest('.ps-Select') as HTMLElement;
 
+/** Lets Base UI's pending animation-frame work run inside `act`, so it does not update state after the test ends. */
+export async function nextFrame(): Promise<void> {
+  await act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+}
+
 export async function open(name = 'Unit'): Promise<HTMLElement> {
   await userEvent.click(getTrigger(name));
   const listbox = await screen.findByRole('listbox');
   // Base UI opens a trigger press on the next animation frame as well. Without waiting for it, a quick follow-up
   // press in a test would be followed by that stale frame reopening the list.
-  await act(() => new Promise<void>((resolve) => requestAnimationFrame(() => resolve())));
+  await nextFrame();
   return listbox;
 }
