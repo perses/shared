@@ -35,7 +35,7 @@ export function renderSelect(
   props: Partial<SelectProps> = {},
   children: ReactElement[] = units,
 ): ReturnType<typeof render> {
-  const merged = { label: 'Unit', ...props, children } as SelectProps;
+  const merged = (props.items ? { label: 'Unit', ...props } : { label: 'Unit', ...props, children }) as SelectProps;
   return render(<Select {...merged} />);
 }
 

@@ -26,7 +26,8 @@ import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../sy
 import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
 import { TextHelper } from '../TextHelper';
 import type { Size, Status } from '../types';
-import { collectItems } from './collectItems';
+import { collectItems, optionKey, optionsFromItems } from './collectItems';
+import { SelectItem } from './SelectItem';
 import type { SelectValue } from './SelectItem';
 
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared layout utility styles used by style props.
@@ -333,7 +334,7 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
     defaultValue,
     onValueChange,
     renderValue,
-    items: _itemsProp,
+    items,
     searchable: _searchable,
     filter: _filter,
     inputValue: _inputValue,
@@ -363,9 +364,21 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
   const triggerId = id ?? generatedId;
   // `children` is usually a new value on every parent render; the memo still skips the walk when Select re-renders
   // on its own (for example a theme mode change) or the consumer passes stable children.
-  const items = useMemo(() => collectItems(children), [children]);
+  const options = useMemo(() => (items ? optionsFromItems(items) : collectItems(children)), [items, children]);
+  const baseItems = useMemo(() => options.map((option) => ({ value: option.value, label: option.content })), [options]);
+  const optionNodes = useMemo(
+    () =>
+      items
+        ? items.map((item) => (
+            <SelectItem key={optionKey(item.value)} value={item.value} disabled={item.disabled}>
+              {item.label}
+            </SelectItem>
+          ))
+        : children,
+    [items, children],
+  );
   const showsPlaceholder = hasContent(placeholder);
-  const placeholderConflict = showsPlaceholder && items.some((item) => item.value === '');
+  const placeholderConflict = showsPlaceholder && options.some((option) => option.value === '');
   useEffect(() => {
     if (placeholderConflict) {
       console.warn(
@@ -414,7 +427,7 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
       data-full-width={fullWidth || undefined}
     >
       <BaseSelect.Root<SelectValue, boolean>
-        items={items}
+        items={baseItems}
         multiple={multiple}
         value={value}
         defaultValue={defaultValue}
@@ -473,7 +486,7 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
               style={slotProps?.popup?.style}
               data-size={size}
             >
-              {children}
+              {optionNodes}
             </BaseSelect.Popup>
           </BaseSelect.Positioner>
         </BaseSelect.Portal>

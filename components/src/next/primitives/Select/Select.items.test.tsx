@@ -14,7 +14,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { open, renderSelect } from './Select.test.utils';
+import { getTrigger, open, renderSelect } from './Select.test.utils';
 import { SelectGroup } from './SelectGroup';
 import { SelectItem } from './SelectItem';
 
@@ -99,6 +99,36 @@ describe('Select groups and items', () => {
       await userEvent.keyboard('{Enter}');
       expect(onValueChange).not.toHaveBeenCalled();
       expect(screen.getByRole('listbox')).toBeInTheDocument();
+    });
+  });
+
+  describe('items data', () => {
+    it('renders data items as options and shows the selected label', async () => {
+      renderSelect({
+        items: [
+          { value: 'b', label: 'Bytes' },
+          { value: 's', label: 'Seconds', disabled: true },
+        ],
+        defaultValue: 'b',
+      });
+      expect(getTrigger()).toHaveTextContent('Bytes');
+      await open();
+      expect(screen.getByRole('option', { name: 'Bytes' })).toBeInTheDocument();
+      expect(screen.getByRole('option', { name: 'Seconds' })).toHaveAttribute('aria-disabled', 'true');
+    });
+
+    it('keeps 1 and "1" distinct', async () => {
+      const onValueChange = vi.fn();
+      renderSelect({
+        items: [
+          { value: 1, label: 'One (number)' },
+          { value: '1', label: 'One (string)' },
+        ],
+        onValueChange,
+      });
+      await open();
+      await userEvent.click(screen.getByRole('option', { name: 'One (string)' }));
+      expect(onValueChange).toHaveBeenCalledWith('1');
     });
   });
 });
