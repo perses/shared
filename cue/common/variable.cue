@@ -13,4 +13,9 @@
 
 package common
 
-#variableSyntaxRegex: "^\\$(\\w+|\\{\\w+\\})$"
+// A variable reference is a "$" followed by a variable name, optionally wrapped
+// in braces ("${name}"). The accepted character set must stay in sync with the
+// variable name rule (#metadataName, "^[a-zA-Z0-9_.-]+$"), otherwise a
+// validly-named variable such as "my-datasource" cannot be referenced as
+// "$my-datasource". See perses/perses#4327.
+#variableSyntaxRegex: "^\\$([a-zA-Z0-9_.-]+|\\{[a-zA-Z0-9_.-]+\\})$"
