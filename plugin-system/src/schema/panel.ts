@@ -11,11 +11,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { PluginSchema } from '@perses-dev/spec';
+import type { PanelDefinition, PluginSchema } from '@perses-dev/spec';
 import { panelDefinitionSchema, buildPanelDefinitionSchema } from '@perses-dev/spec';
 import { z } from 'zod';
 
 import type { PanelEditorValues } from '../model';
+
+// The spec schema accepts a looser link input than PanelDefinition, so its input type is `unknown`.
+// The editor form always feeds a PanelDefinition, so narrowing the input keeps the form resolver typed.
+type PanelDefinitionEditorSchema = z.ZodType<PanelDefinition, PanelDefinition>;
 
 const layoutDefinitionSchema = z
   .object({
@@ -33,14 +37,14 @@ const layoutDefinitionSchema = z
 
 export const panelEditorSchema: z.ZodType<PanelEditorValues, PanelEditorValues> = z.object({
   groupId: z.number(),
-  panelDefinition: panelDefinitionSchema,
+  panelDefinition: panelDefinitionSchema as PanelDefinitionEditorSchema,
   layoutDefinition: layoutDefinitionSchema,
 });
 
 export function buildPanelEditorSchema(pluginSchema: PluginSchema): z.ZodType<PanelEditorValues, PanelEditorValues> {
   return z.object({
     groupId: z.number(),
-    panelDefinition: buildPanelDefinitionSchema(pluginSchema),
+    panelDefinition: buildPanelDefinitionSchema(pluginSchema) as PanelDefinitionEditorSchema,
     layoutDefinition: layoutDefinitionSchema,
   });
 }
