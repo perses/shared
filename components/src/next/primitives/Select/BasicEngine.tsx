@@ -14,13 +14,15 @@
 import { Select as BaseSelect } from '@base-ui/react/select';
 import { clsx } from 'clsx';
 import { useMemo, useRef } from 'react';
-import type { ReactElement, Ref } from 'react';
+import type { ReactElement, ReactNode, Ref } from 'react';
 
 import { hasContent } from '../hasContent';
 import { Icon } from '../Icon';
+import { SelectChips } from './SelectChips';
 import type { SelectValue } from './SelectItem';
 import { SelectShell } from './SelectShell';
 import type { SelectEngineProps } from './SelectShell';
+import { isEmptySelection, isMultipleValue } from './selectValue';
 import type { SelectCurrentValue } from './selectValue';
 
 const renderIcon = <Icon />;
@@ -40,11 +42,13 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
     name,
     form,
     multiple,
+    chips,
     value,
     setValue,
     open,
     setOpen,
     options,
+    optionsByValue,
     optionNodes,
     renderValue,
     placement,
@@ -55,6 +59,13 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
   } = props;
   const controlRef = useRef<HTMLDivElement | null>(null);
   const baseItems = useMemo(() => options.map((option) => ({ value: option.value, label: option.content })), [options]);
+  const values = isMultipleValue(value) ? value : [];
+  // The chips sit outside the button, so the trigger keeps the labels for screen readers (they are visually hidden).
+  const renderTriggerValue = (current: SelectCurrentValue): ReactNode => {
+    if (isEmptySelection(current)) return placeholder;
+    const labels = values.map((selected) => optionsByValue.get(selected)?.label ?? String(selected));
+    return <span className="ps-Select__visually-hidden">{labels.join(', ')}</span>;
+  };
 
   return (
     <BaseSelect.Root<SelectValue, boolean>
@@ -85,21 +96,24 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
           ) : null
         }
         field={
-          <BaseSelect.Trigger
-            {...focusableProps}
-            ref={forwardedRef as Ref<HTMLButtonElement>}
-            className={clsx('ps-Select__trigger', slotProps?.trigger?.className)}
-            style={slotProps?.trigger?.style}
-          >
-            <BaseSelect.Value className="ps-Select__value" placeholder={placeholder}>
-              {renderValue}
-            </BaseSelect.Value>
-            {hasContent(icon) && (
-              <BaseSelect.Icon className="ps-Select__icon" render={renderIcon}>
-                {icon}
-              </BaseSelect.Icon>
-            )}
-          </BaseSelect.Trigger>
+          <>
+            {chips && values.length > 0 && <SelectChips engine={props} />}
+            <BaseSelect.Trigger
+              {...focusableProps}
+              ref={forwardedRef as Ref<HTMLButtonElement>}
+              className={clsx('ps-Select__trigger', slotProps?.trigger?.className)}
+              style={slotProps?.trigger?.style}
+            >
+              <BaseSelect.Value className="ps-Select__value" placeholder={placeholder}>
+                {chips ? renderTriggerValue : renderValue}
+              </BaseSelect.Value>
+              {hasContent(icon) && (
+                <BaseSelect.Icon className="ps-Select__icon" render={renderIcon}>
+                  {icon}
+                </BaseSelect.Icon>
+              )}
+            </BaseSelect.Trigger>
+          </>
         }
         popup={
           <BaseSelect.Portal>

@@ -45,6 +45,8 @@ import './select.css';
 /** Mirrors --perses-spacing-xs (4px). */
 const SIDE_OFFSET = 4;
 const chevronIcon = <ChevronDownIcon className="ps-Select__chevron" />;
+const defaultChipRemoveAriaLabel = (label: string): string => `Remove ${label}`;
+const defaultMoreChipsLabel = (count: number): string => `${count} more selected`;
 
 // Only `overflow` from the display category: `display` stays fixed to inline-flex/flex by the stylesheet.
 const SELECT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
@@ -334,10 +336,10 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
     inputValue: _inputValue,
     defaultInputValue: _defaultInputValue,
     onInputValueChange: _onInputValueChange,
-    chips: _chips,
-    limitChips: _limitChips,
-    chipRemoveAriaLabel: _chipRemoveAriaLabel,
-    moreChipsLabel: _moreChipsLabel,
+    chips = false,
+    limitChips,
+    chipRemoveAriaLabel = defaultChipRemoveAriaLabel,
+    moreChipsLabel = defaultMoreChipsLabel,
     clearable = false,
     loading: _loading,
     listHeader: _listHeader,
@@ -360,6 +362,7 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
   // `children` is usually a new value on every parent render; the memo still skips the walk when Select re-renders
   // on its own (for example a theme mode change) or the consumer passes stable children.
   const options = useMemo(() => (items ? optionsFromItems(items) : collectItems(children)), [items, children]);
+  const optionsByValue = useMemo(() => new Map(options.map((option) => [option.value, option])), [options]);
   const optionNodes = useMemo(
     () =>
       items
@@ -428,11 +431,16 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
     multiple: isMultiple,
     clearable,
     clearAriaLabel,
+    chips,
+    limitChips,
+    chipRemoveAriaLabel,
+    moreChipsLabel,
     value: currentValue,
     setValue: setCurrentValue,
     open: isOpen,
     setOpen: setIsOpen,
     options,
+    optionsByValue,
     optionNodes,
     renderValue: renderTriggerValue,
     placement,

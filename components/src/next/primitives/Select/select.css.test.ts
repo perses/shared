@@ -60,6 +60,25 @@ function makeSelect(attributes: Record<string, string> = {}): {
   return { root, control, trigger };
 }
 
+function makeChips(attributes: Record<string, string> = {}): {
+  control: HTMLElement;
+  chips: HTMLElement;
+  chip: HTMLElement;
+  more: HTMLElement;
+} {
+  const { control } = makeSelect(attributes);
+  const chips = document.createElement('div');
+  chips.className = 'ps-Select__chips';
+  const chip = document.createElement('div');
+  chip.className = 'ps-Chip ps-Select__chip';
+  chip.setAttribute('data-overflow', '');
+  const more = document.createElement('span');
+  more.className = 'ps-Select__more';
+  chips.append(chip, more);
+  control.prepend(chips);
+  return { control, chips, chip, more };
+}
+
 describe('select.css', () => {
   beforeAll(() => {
     style.textContent = css;
@@ -93,6 +112,7 @@ describe('select.css', () => {
     // State and status rules are intentionally specific; defaults must stay zero-specificity.
     expect(unwrapped).toEqual([
       '.ps-Select__control:has(.ps-Select__trigger:focus-visible)',
+      '.ps-Select__control:not(:focus-within):not([data-open]) .ps-Select__chip[data-overflow]',
       '.ps-Select__control[data-readonly]',
       '.ps-Select[data-disabled]',
       '.ps-Select[data-disabled] .ps-Text[data-disabled]',
@@ -311,6 +331,61 @@ describe('select.css', () => {
     expect(forced).toMatch(
       /\.ps-Select\[data-status='error'\] \.ps-Select__control,\s*\.ps-Select\[data-status='warning'\] \.ps-Select__control \{\s*border-width: var\(--perses-border-width-md\)/,
     );
+  });
+
+  describe('chips', () => {
+    it('caps the chip area at six chip rows and scrolls beyond', () => {
+      const { chips } = makeChips({ 'data-size': 'md' });
+      expect(propertyFor(chips, 'max-height')).toBe(
+        'calc(6 * var(--ps-select-chip-row) + 5 * var(--perses-spacing-xs))',
+      );
+      expect(propertyFor(chips, 'overflow-y')).toBe('auto');
+    });
+
+    it.each([
+      ['xs', 'xs'],
+      ['sm', 'xs'],
+      ['md', 'sm'],
+      ['lg', 'sm'],
+    ])('sizes the chip row of a %s field like a %s chip', (size, chipStep) => {
+      const { chips } = makeChips({ 'data-size': size });
+      expect(propertyFor(chips, '--ps-select-chip-row')).toBe(
+        `var(--perses-chip-size-${chipStep}, var(--perses-selection-control-size-${chipStep}))`,
+      );
+    });
+
+    it('wraps the control only when it holds chips', () => {
+      const { control } = makeChips();
+      expect(propertyFor(control, 'flex-wrap')).toBe('wrap');
+      expect(styleRules().some((rule) => makeSelect().control.matches(rule.selectorText) && rule.style.flexWrap)).toBe(
+        false,
+      );
+    });
+
+    it('hides overflow chips and shows +N only while focus is outside and the list is closed', () => {
+      const { control, chip, more } = makeChips();
+      expect(propertyFor(chip, 'display')).toBe('none');
+      expect(propertyFor(more, 'display')).toBe('inline-flex');
+
+      control.setAttribute('data-open', '');
+      const hidingChip = styleRules().filter(
+        (rule) => chip.matches(rule.selectorText) && rule.style.display === 'none',
+      );
+      expect(hidingChip).toEqual([]);
+      expect(propertyFor(more, 'display')).toBe('none');
+    });
+
+    it('hides visually hidden text without removing it from the accessibility tree', () => {
+      const hidden = document.createElement('span');
+      hidden.className = 'ps-Select__visually-hidden';
+      document.body.append(hidden);
+      expect(propertyFor(hidden, 'position')).toBe('absolute');
+      expect(propertyFor(hidden, 'clip-path')).toBe('inset(50%)');
+      expect(propertyFor(hidden, 'width')).toBe('0.0625rem');
+      expect(propertyFor(hidden, 'height')).toBe('0.0625rem');
+      expect(propertyFor(hidden, 'overflow')).toBe('hidden');
+      expect(propertyFor(hidden, 'white-space')).toBe('nowrap');
+    });
   });
 
   it('only animates when the user has not asked for reduced motion', () => {

@@ -33,6 +33,7 @@ import { TextHelper } from '../TextHelper';
 import type { Size, Status } from '../types';
 import type { SelectOption } from './collectItems';
 import type { SelectAlign, SelectPlacement, SelectSlotProps } from './Select';
+import type { SelectValue } from './SelectItem';
 import { emptySelection, isEmptySelection } from './selectValue';
 import type { SelectCurrentValue } from './selectValue';
 
@@ -68,7 +69,16 @@ export interface SelectEngineProps {
   open: boolean;
   setOpen: (next: boolean) => void;
 
+  /** Shows the selected values as removable chips (multiple only). */
+  chips: boolean;
+  /** While focus is outside the field and the list is closed, show this many chips, then "+N". */
+  limitChips?: number;
+  chipRemoveAriaLabel: (label: string) => string;
+  moreChipsLabel: (count: number) => string;
+
   options: SelectOption[];
+  /** The same options keyed by value, for looking up the label and content of selected values. */
+  optionsByValue: ReadonlyMap<SelectValue, SelectOption>;
   optionNodes: ReactNode;
   /** Already placeholder-aware: it is not called while nothing is selected and a placeholder is set. */
   renderValue?: (value: SelectCurrentValue) => ReactNode;

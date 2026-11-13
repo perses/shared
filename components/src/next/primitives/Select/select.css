@@ -100,6 +100,59 @@
     flex: none;
   }
 
+  /* ---- Chips (multiple) ---- */
+  :where(.ps-Select__control:has(.ps-Select__chips)) {
+    flex-wrap: wrap;
+  }
+
+  /* Six rows of chips, then the area scrolls. --ps-select-chip-row is set per field size below. */
+  :where(.ps-Select__chips) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--perses-spacing-xs);
+    min-width: 0;
+    max-height: calc(6 * var(--ps-select-chip-row) + 5 * var(--perses-spacing-xs));
+    overflow-y: auto;
+  }
+
+  :where(.ps-Select[data-size='xs'] .ps-Select__chips),
+  :where(.ps-Select[data-size='sm'] .ps-Select__chips) {
+    --ps-select-chip-row: var(--perses-chip-size-xs, var(--perses-selection-control-size-xs));
+  }
+
+  :where(.ps-Select[data-size='md'] .ps-Select__chips),
+  :where(.ps-Select[data-size='lg'] .ps-Select__chips) {
+    --ps-select-chip-row: var(--perses-chip-size-sm, var(--perses-selection-control-size-sm));
+  }
+
+  /* "+N" stands in for the overflow chips, so it only shows while they are hidden. */
+  :where(.ps-Select__more) {
+    display: none;
+  }
+
+  :where(.ps-Select__control:not(:focus-within):not([data-open]) .ps-Select__more) {
+    display: inline-flex;
+  }
+
+  /* Specific on purpose: chip.css sets display on .ps-Chip at zero specificity in this same layer, so load order
+     could otherwise let it win over this rule. */
+  .ps-Select__control:not(:focus-within):not([data-open]) .ps-Select__chip[data-overflow] {
+    display: none;
+  }
+
+  :where(.ps-Select__visually-hidden) {
+    position: absolute;
+    width: 0.0625rem;
+    height: 0.0625rem;
+    margin: -0.0625rem;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
   /* Only the default chevron flips; a consumer icon is left as drawn. */
   :where(.ps-Select__trigger[data-popup-open] .ps-Select__chevron) {
     transform: rotate(180deg);

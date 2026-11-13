@@ -478,6 +478,17 @@ describe('Select', () => {
       expect(onValueChange).toHaveBeenCalledWith(['seconds']);
     });
 
+    it('keeps the selected labels in the trigger for screen readers while chips show them', () => {
+      render(
+        <Select label="Unit" multiple chips defaultValue={['bytes', 'seconds']}>
+          {units}
+        </Select>,
+      );
+      const trigger = getTrigger();
+      expect(trigger.textContent).toBe('Bytes, Seconds');
+      expect(trigger.querySelector('span.ps-Select__visually-hidden')).toHaveTextContent('Bytes, Seconds');
+    });
+
     it('types value and onValueChange per mode', () => {
       const single = <Select label="Unit" value="bytes" onValueChange={(v: SelectValue | null) => v} />;
       const many = <Select label="Unit" multiple value={['bytes']} onValueChange={(v: SelectValue[]) => v} />;
