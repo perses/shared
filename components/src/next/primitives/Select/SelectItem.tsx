@@ -42,7 +42,7 @@ export interface SelectItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 's
    * arrow onto it, so a screen reader announces why it is unavailable instead of the option silently vanishing.
    */
   disabled?: boolean;
-  /** Plain-text label used for typeahead and the hidden form input when `children` is not plain text. */
+  /** Plain-text label used for typeahead when `children` is not plain text. */
   label?: string;
   /** Content before the item text, typically an icon. Mark purely decorative icons `aria-hidden`. */
   startElement?: ReactNode;

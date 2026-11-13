@@ -24,14 +24,24 @@ describe('accessibility', () => {
     const trigger = getTrigger();
     const label = screen.getByText('Unit');
     expect(trigger.id).not.toBe('');
-    expect(label).toHaveAttribute('for', trigger.id);
+    expect(label.id).not.toBe('');
+    expect(trigger).toHaveAttribute('aria-labelledby', label.id);
     expect(trigger).toHaveAccessibleName('Unit');
   });
 
-  it('uses a provided id for both the trigger and the label', () => {
+  it('uses a provided id for the trigger and keeps the label linked', () => {
     renderSelect({ id: 'unit-select' });
-    expect(getTrigger()).toHaveAttribute('id', 'unit-select');
-    expect(screen.getByText('Unit')).toHaveAttribute('for', 'unit-select');
+    const trigger = getTrigger();
+    expect(trigger).toHaveAttribute('id', 'unit-select');
+    expect(trigger).toHaveAttribute('aria-labelledby', screen.getByText('Unit').id);
+  });
+
+  it('focuses the trigger without opening the list when the label is clicked', async () => {
+    renderSelect();
+    await userEvent.click(screen.getByText('Unit'));
+    expect(getTrigger()).toHaveFocus();
+    expect(getTrigger()).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
   });
 
   it('generates distinct ids for multiple selects', () => {

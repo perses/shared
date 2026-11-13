@@ -229,7 +229,7 @@ export const Variants: Story = () => (
 Variants.storyName = 'Variants';
 
 const placeholderCode = `// placeholder shows while nothing is selected. "" also means "nothing selected", so never pair a
-// placeholder with <SelectItem value="">; use a value such as "all" or "none" instead (Select throws otherwise).
+// placeholder with <SelectItem value="">; use a value such as "all" or "none" instead (Select warns otherwise).
 ${code('label="Unit" placeholder="Choose a unit"')}`;
 const helperTextCode = `// helperText is linked to the trigger via aria-describedby.
 ${code('label="Unit" helperText="Shown on every axis" defaultValue="bytes"')}`;

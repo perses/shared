@@ -210,14 +210,30 @@ describe('select.css', () => {
     expect(propertyFor(icon, 'transform')).toBe('');
   });
 
-  it('marks the highlighted row with an inset focus ring instead of a fill', () => {
-    const item = document.createElement('div');
-    item.className = 'ps-SelectItem';
-    item.setAttribute('data-highlighted', '');
-    document.body.append(item);
-    expect(propertyFor(item, 'outline')).toBe('var(--perses-focus-ring-width) solid var(--perses-focus-ring-color)');
-    expect(propertyFor(item, 'outline-offset')).toBe('calc(-1 * var(--perses-focus-ring-offset))');
-    expect(propertyFor(item, 'background-color')).toBe('');
+  it('marks the focused row with an inset focus ring only for keyboard focus, like Menu', () => {
+    const rules = styleRules();
+    const ring = rules.find((rule) => rule.selectorText === ':where(.ps-SelectItem:focus-visible)');
+    expect(ring?.style.getPropertyValue('outline')).toBe(
+      'var(--perses-focus-ring-width) solid var(--perses-focus-ring-color)',
+    );
+    expect(ring?.style.getPropertyValue('outline-offset')).toBe('calc(-1 * var(--perses-focus-ring-offset))');
+    expect(ring?.style.getPropertyValue('background-color')).toBe('');
+    // Base UI moves DOM focus to an option on pointer hover too, so the highlight attribute must not draw the ring.
+    const highlightRings = rules.filter(
+      (rule) => rule.selectorText.includes('data-highlighted') && rule.style.getPropertyValue('outline'),
+    );
+    expect(highlightRings).toEqual([]);
+  });
+
+  it('gives a hovered enabled row a neutral fill, like Menu', () => {
+    const hover = styleRules().find(
+      (rule) => rule.selectorText === ':where(.ps-SelectItem:hover:not([data-disabled]))',
+    );
+    expect(hover?.style.getPropertyValue('background-color')).toBe('var(--perses-status-bg-default)');
+  });
+
+  it('gives the root a minimum width that cannot overflow a narrower container', () => {
+    expect(propertyFor(makeSelect().root, 'min-width')).toBe('min(10rem, 100%)');
   });
 
   it('keeps the selected row neutral and lets the check carry the selection colour', () => {
@@ -251,7 +267,7 @@ describe('select.css', () => {
     // The default focus rule is deliberately specific, so its forced-colors restatement must not be in :where().
     expect(forced).toMatch(/\n\s*\.ps-Select__trigger:focus-visible \{[^}]*outline-color: Highlight/);
     expect(forced).not.toContain(':where(.ps-Select__trigger:focus-visible)');
-    expect(forced).toMatch(/\.ps-SelectItem\[data-highlighted\]\)[\s\S]*?outline-color: Highlight/);
+    expect(forced).toMatch(/\.ps-SelectItem:focus-visible\)[\s\S]*?outline-color: Highlight/);
     expect(forced).toMatch(/\.ps-SelectItem__indicator\)[\s\S]*?color: CanvasText/);
   });
 

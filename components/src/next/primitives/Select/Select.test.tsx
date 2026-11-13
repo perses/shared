@@ -146,28 +146,41 @@ describe('Select', () => {
     expect(getTrigger()).toHaveTextContent('None');
   });
 
-  it('throws when a placeholder is combined with an empty-string item', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const message = /cannot be combined with a `SelectItem` whose value is ""/;
+  it('warns, without throwing, when a placeholder is combined with an empty-string item', () => {
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const message = expect.stringMatching(/should not be combined with a `SelectItem` whose value is ""/);
 
-    expect(() =>
-      renderSelect({ placeholder: 'Pick a unit' }, [
-        <SelectItem key="none" value="">
-          None
-        </SelectItem>,
-        ...units,
-      ]),
-    ).toThrow(message);
+    const { unmount } = renderSelect({ placeholder: 'Pick a unit' }, [
+      <SelectItem key="none" value="">
+        None
+      </SelectItem>,
+      ...units,
+    ]);
+    expect(getTrigger()).toHaveTextContent('Pick a unit');
+    expect(spy).toHaveBeenCalledWith(message);
+    unmount();
+    spy.mockClear();
 
-    expect(() =>
-      renderSelect({ placeholder: 'Pick a unit' }, [
-        <SelectGroup key="g" label="Other">
-          <SelectItem value="">None</SelectItem>
-        </SelectGroup>,
-        ...units,
-      ]),
-    ).toThrow(message);
+    renderSelect({ placeholder: 'Pick a unit' }, [
+      <SelectGroup key="g" label="Other">
+        <SelectItem value="">None</SelectItem>
+      </SelectGroup>,
+      ...units,
+    ]);
+    expect(spy).toHaveBeenCalledWith(message);
 
+    spy.mockRestore();
+  });
+
+  it('does not warn about an empty-string item without a placeholder', () => {
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    renderSelect({}, [
+      <SelectItem key="none" value="">
+        None
+      </SelectItem>,
+      ...units,
+    ]);
+    expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
   });
 
@@ -320,6 +333,15 @@ describe('Select', () => {
     expect(getTrigger().querySelector('.ps-Select__chevron')).toBeNull();
   });
 
+  it('renders no icon wrapper when icon is null', () => {
+    render(
+      <Select label="Unit" icon={null}>
+        {units}
+      </Select>,
+    );
+    expect(getTrigger().querySelector('.ps-Select__icon')).toBeNull();
+  });
+
   it('supports controlled open state', async () => {
     const onOpenChange = vi.fn();
     const { rerender } = render(
@@ -409,6 +431,40 @@ describe('Select', () => {
         </Select>,
       );
       expect(getTrigger()).toHaveTextContent('2 selected');
+    });
+
+    it('shows the placeholder instead of calling renderValue while nothing is selected', async () => {
+      const renderValue = vi.fn((value: SelectValue | null) => `Unit: ${String(value)}`);
+      renderSelect({ placeholder: 'Pick a unit', renderValue });
+      const trigger = getTrigger();
+      expect(trigger).toHaveTextContent('Pick a unit');
+      expect(trigger).toHaveAttribute('data-placeholder');
+      expect(renderValue).not.toHaveBeenCalled();
+
+      await open();
+      await userEvent.click(screen.getByRole('option', { name: 'Seconds' }));
+      expect(trigger).toHaveTextContent('Unit: seconds');
+    });
+
+    it('shows the placeholder instead of calling renderValue while no values are selected', async () => {
+      render(
+        <Select label="Unit" multiple placeholder="Pick some units" renderValue={(value) => `${value.length} selected`}>
+          {units}
+        </Select>,
+      );
+      const trigger = getTrigger();
+      expect(trigger).toHaveTextContent('Pick some units');
+
+      await open();
+      await userEvent.click(screen.getByRole('option', { name: 'Bytes' }));
+      expect(trigger).toHaveTextContent('1 selected');
+      await userEvent.click(screen.getByRole('option', { name: 'Bytes' }));
+      expect(trigger).toHaveTextContent('Pick some units');
+    });
+
+    it('calls renderValue for an empty selection when there is no placeholder', () => {
+      renderSelect({ renderValue: (value: SelectValue | null) => (value === null ? 'Any unit' : String(value)) });
+      expect(getTrigger()).toHaveTextContent('Any unit');
     });
   });
 });

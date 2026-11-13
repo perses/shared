@@ -21,6 +21,9 @@
     display: inline-flex;
     flex-direction: column;
     gap: var(--perses-spacing-xs);
+    /* Keeps the trigger from resizing as the selection changes; min() lets it shrink in a narrower container.
+       The minWidth style prop overrides it. */
+    min-width: min(10rem, 100%);
     font-family: var(--perses-font-family);
   }
 
@@ -200,11 +203,16 @@
     min-height: var(--perses-control-size-md);
   }
 
-  /* Items never take DOM focus: Base UI marks the keyboard/pointer cursor with data-highlighted, so it carries
-     the focus ring. The ring sits inside the row so the scrolling popup cannot clip it. */
-  :where(.ps-SelectItem[data-highlighted]) {
+  /* Items take DOM focus as the keyboard or pointer moves through the list. As in Menu, the ring follows
+     :focus-visible and pointer hover gets a neutral fill. The ring sits inside the row so the scrolling popup
+     cannot clip it. */
+  :where(.ps-SelectItem:focus-visible) {
     outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
     outline-offset: calc(-1 * var(--perses-focus-ring-offset));
+  }
+
+  :where(.ps-SelectItem:hover:not([data-disabled])) {
+    background-color: var(--perses-status-bg-default);
   }
 
   :where(.ps-SelectItem[data-disabled]) {
@@ -251,7 +259,7 @@
       outline-color: Highlight;
     }
 
-    :where(.ps-SelectItem[data-highlighted]) {
+    :where(.ps-SelectItem:focus-visible) {
       outline-color: Highlight;
     }
 

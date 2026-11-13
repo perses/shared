@@ -15,7 +15,7 @@ import { Field } from '@base-ui/react/field';
 import { Select as BaseSelect } from '@base-ui/react/select';
 import type { SelectPositionerProps } from '@base-ui/react/select';
 import { clsx } from 'clsx';
-import { forwardRef, useCallback, useContext, useId, useMemo } from 'react';
+import { forwardRef, useCallback, useContext, useEffect, useId, useMemo } from 'react';
 import type { ButtonHTMLAttributes, CSSProperties, ReactElement, ReactNode } from 'react';
 
 import { ThemeModeContext } from '../../contexts/ThemeModeProvider';
@@ -99,12 +99,16 @@ interface SelectBaseProps
   required?: boolean;
   readOnly?: boolean;
   /**
-   * Shown in the trigger while nothing is selected. An empty string `""` counts as nothing selected (the same rule
-   * as a native `<select>`), so a `SelectItem` with `value=""` cannot be combined with a placeholder; `Select`
-   * throws in that case.
+   * Shown in the trigger while nothing is selected, even when `renderValue` is set. An empty string `""` counts as
+   * nothing selected (the same rule as a native `<select>`), so do not combine a placeholder with a `SelectItem`
+   * whose value is `""`: selecting that item would show the placeholder instead of its label. `Select` logs a
+   * console warning in that case.
    */
   placeholder?: ReactNode;
-  /** Replaces the default chevron. Only the default chevron flips while the list is open; a custom icon stays still. */
+  /**
+   * Replaces the default chevron; pass `null` to render no icon. Only the default chevron flips while the list is
+   * open; a custom icon stays still.
+   */
   icon?: ReactNode;
   /** Content before the value. Mark purely decorative icons `aria-hidden`. */
   startElement?: ReactNode;
@@ -130,7 +134,10 @@ interface SelectBaseProps
  */
 type SelectAccessibleName =
   | {
-      /** Visible label, associated with the trigger through `htmlFor`/`id`, and used as the accessible name. */
+      /**
+       * Visible label, associated with the trigger through `aria-labelledby` and used as the accessible name.
+       * Clicking it focuses the trigger without opening the list, like the label of a native `<select>`.
+       */
       label: ReactNode;
       'aria-label'?: never;
       'aria-labelledby'?: never;
@@ -153,7 +160,11 @@ interface SelectSingleProps {
   value?: SelectValue | null;
   defaultValue?: SelectValue | null;
   onValueChange?: (value: SelectValue | null) => void;
-  /** Custom trigger content for the current value; defaults to the selected item's `children`. */
+  /**
+   * Custom trigger content for the current value; defaults to the selected item's `children`. While nothing is
+   * selected and a `placeholder` is set, the placeholder is shown and this is not called; otherwise it receives
+   * `null` (or `""`) for an empty selection.
+   */
   renderValue?: (value: SelectValue | null) => ReactNode;
 }
 
@@ -163,11 +174,23 @@ interface SelectMultipleProps {
   value?: SelectValue[];
   defaultValue?: SelectValue[];
   onValueChange?: (value: SelectValue[]) => void;
-  /** Custom trigger content for the current values; defaults to the selected items' `children` joined by `, `. */
+  /**
+   * Custom trigger content for the current values; defaults to the selected items' `children` joined by `, `.
+   * While nothing is selected and a `placeholder` is set, the placeholder is shown and this is not called;
+   * otherwise it receives an empty array.
+   */
   renderValue?: (value: SelectValue[]) => ReactNode;
 }
 
 export type SelectProps = SelectBaseProps & SelectAccessibleName & (SelectSingleProps | SelectMultipleProps);
+
+type SelectCurrentValue = SelectValue | SelectValue[] | null;
+
+/** Mirrors Base UI's selected-value check, so the placeholder shows exactly when the trigger has `data-placeholder`. */
+function isEmptySelection(value: SelectCurrentValue): boolean {
+  if (Array.isArray(value)) return value.length === 0;
+  return value === null || value === undefined || value === '';
+}
 
 /**
  * Dropdown that picks one or more `SelectItem`s, with an optional label and helper text. Spacing (`p`, `m`, …),
@@ -235,12 +258,24 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
   const generatedId = useId();
   const mode = useContext(ThemeModeContext);
   const triggerId = id ?? generatedId;
+  // `children` is usually a new value on every parent render; the memo still skips the walk when Select re-renders
+  // on its own (for example a theme mode change) or the consumer passes stable children.
   const items = useMemo(() => collectItems(children), [children]);
-  if (hasContent(placeholder) && items.some((item) => item.value === '')) {
-    throw new Error(
-      'Select: `placeholder` cannot be combined with a `SelectItem` whose value is "" because "" means nothing is selected. Give the item a value such as "all" or "none".',
-    );
-  }
+  const showsPlaceholder = hasContent(placeholder);
+  const placeholderConflict = showsPlaceholder && items.some((item) => item.value === '');
+  useEffect(() => {
+    if (placeholderConflict) {
+      console.warn(
+        'Select: `placeholder` should not be combined with a `SelectItem` whose value is "" because "" means nothing is selected, so selecting that item shows the placeholder. Give the item a value such as "all" or "none".',
+      );
+    }
+  }, [placeholderConflict]);
+  const renderTriggerValue = useMemo(() => {
+    if (!renderValue) return undefined;
+    const render = renderValue as (current: SelectCurrentValue) => ReactNode;
+    return (current: SelectCurrentValue): ReactNode =>
+      showsPlaceholder && isEmptySelection(current) ? placeholder : render(current);
+  }, [renderValue, showsPlaceholder, placeholder]);
   const handleValueChange = useCallback(
     (next: SelectValue | SelectValue[] | null) => (onValueChange as ((value: typeof next) => void) | undefined)?.(next),
     [onValueChange],
@@ -292,13 +327,12 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
         modal={false}
       >
         {hasContent(label) && (
-          <Field.Label
+          <BaseSelect.Label
             className={clsx('ps-Select__label', slotProps?.label?.className)}
             style={slotProps?.label?.style}
-            htmlFor={triggerId}
           >
             {label}
-          </Field.Label>
+          </BaseSelect.Label>
         )}
         <BaseSelect.Trigger
           {...restWithoutDisplay}
@@ -311,14 +345,16 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(function Select
             <span className="ps-Select__adornment ps-Select__adornment--start">{startElement}</span>
           )}
           <BaseSelect.Value className="ps-Select__value" placeholder={placeholder}>
-            {renderValue}
+            {renderTriggerValue}
           </BaseSelect.Value>
           {hasContent(endElement) && (
             <span className="ps-Select__adornment ps-Select__adornment--end">{endElement}</span>
           )}
-          <BaseSelect.Icon className="ps-Select__icon" render={renderIcon}>
-            {icon}
-          </BaseSelect.Icon>
+          {hasContent(icon) && (
+            <BaseSelect.Icon className="ps-Select__icon" render={renderIcon}>
+              {icon}
+            </BaseSelect.Icon>
+          )}
         </BaseSelect.Trigger>
         <BaseSelect.Portal>
           <BaseSelect.Positioner
