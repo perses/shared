@@ -183,6 +183,13 @@
     display: none;
   }
 
+  /* Searchable chips take DOM focus for Backspace and arrow navigation. The ring sits inside the chip because the
+     chips container scrolls and would clip an outer ring. */
+  :where(.ps-Select__chip:focus-visible) {
+    outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
+    outline-offset: calc(-1 * var(--perses-focus-ring-offset));
+  }
+
   :where(.ps-Select__visually-hidden) {
     position: absolute;
     width: 0.0625rem;
@@ -406,6 +413,10 @@
     }
 
     :where(.ps-SelectItem:focus-visible) {
+      outline-color: Highlight;
+    }
+
+    :where(.ps-Select__chip:focus-visible) {
       outline-color: Highlight;
     }
 

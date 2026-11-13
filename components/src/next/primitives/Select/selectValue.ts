@@ -16,6 +16,11 @@ import type { SelectValue } from './SelectItem';
 /** The selection `Select` holds: one value or `null`, or several values. A controlled `value` may be readonly. */
 export type SelectCurrentValue = SelectValue | readonly SelectValue[] | null;
 
+/** Key that keeps `1` and `"1"` apart, since a plain `String(value)` would collapse them. */
+export function optionKey(value: SelectValue): string {
+  return `${typeof value}:${value}`;
+}
+
 /** `Array.isArray` that narrows readonly arrays, which the built-in guard does not. */
 export function isMultipleValue(value: SelectCurrentValue): value is readonly SelectValue[] {
   return Array.isArray(value);

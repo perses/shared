@@ -14,7 +14,7 @@
 import { Combobox } from '@base-ui/react/combobox';
 import { Select as BaseSelect } from '@base-ui/react/select';
 import { clsx } from 'clsx';
-import { forwardRef, useContext } from 'react';
+import { forwardRef, useContext, useEffect } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
@@ -22,7 +22,8 @@ import { hasContent } from '../hasContent';
 import { CheckIcon, Icon } from '../Icon';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
-import { SelectEngineContext, SelectVisibleValuesContext } from './SelectEngineContext';
+import { isFilteredOut, SelectEngineContext, SelectVisibleValuesContext } from './SelectEngineContext';
+import { optionKey } from './selectValue';
 
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared spacing utility styles used by style props.
 import '../system/spacing.css';
@@ -48,7 +49,7 @@ export interface SelectItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 's
    * Plain text used for typeahead, search matching, chip remove labels, and the field text when `children` is not
    * plain text (for example an icon next to text). Defaults to `children` when they are text, else `String(value)`.
    * It is read from the `SelectItem` elements in `Select`'s `children`; an item returned by a custom component is not
-   * seen there and falls back to `String(value)` for search and chips.
+   * seen there and falls back to `String(value)` for chips.
    */
   label?: string;
   /** Content before the item text, typically an icon. Mark purely decorative icons `aria-hidden`. */
@@ -58,6 +59,10 @@ export interface SelectItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 's
 /**
  * One option inside a `Select`. Its `children` are also shown in the trigger when selected. Spacing props
  * (`p`, `m`, …) pad or offset the option row; values can be tokens, pixel numbers, CSS lengths or responsive objects.
+ *
+ * With `searchable`, `Select` finds the options by reading `SelectItem` elements in its `children` (or the `items`
+ * prop). An item rendered through a wrapper component (`<MyOption />`) cannot be read: it stays in the list, is not
+ * filtered by the typed text, and `Select` warns once. Render `SelectItem` directly or pass `items` instead.
  */
 export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(function SelectItem(
   { value, disabled, label, startElement, className, style, children, ...props },
@@ -69,11 +74,17 @@ export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(function S
     rest,
   } = applyStyleProps(props, SELECT_ITEM_STYLE_PROPS, style);
   const engine = useContext(SelectEngineContext);
-  const visibleValues = useContext(SelectVisibleValuesContext);
+  const visibility = useContext(SelectVisibleValuesContext);
+  const isUnknown = engine === 'search' && visibility !== null && !visibility.known.has(optionKey(value));
+  const reportUnknown = visibility?.reportUnknown;
+  useEffect(() => {
+    if (isUnknown) reportUnknown?.();
+  }, [isUnknown, reportUnknown]);
 
   if (engine === 'search') {
-    // The search engine owns filtering, so a value outside the matches renders nothing.
-    if (visibleValues && !visibleValues.has(value)) return null;
+    // The search engine owns filtering: a value it knows about and the search excluded renders nothing. A value it
+    // cannot see (an item behind a wrapper component) is never filtered.
+    if (isFilteredOut(visibility, value)) return null;
     return (
       <Combobox.Item
         {...rest}

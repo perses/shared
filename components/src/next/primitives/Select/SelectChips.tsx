@@ -19,10 +19,9 @@ import type { MouseEvent, ReactElement, ReactNode } from 'react';
 import type { ChipSize } from '../Chip/Chip';
 import { CloseIcon } from '../Icon';
 import type { Size } from '../types';
-import { optionKey } from './collectItems';
 import { SelectEngineContext } from './SelectEngineContext';
 import type { SelectEngineProps } from './SelectShell';
-import { isMultipleValue } from './selectValue';
+import { isMultipleValue, optionKey } from './selectValue';
 
 // oxlint-disable-next-line import/no-unassigned-import -- Registers the Chip styles that the selected-value chips reuse.
 import '../Chip/chip.css';
@@ -71,7 +70,8 @@ export function SelectChips({ engine, children }: SelectChipsProps): ReactElemen
     slotProps,
   } = engine;
   const values = isMultipleValue(value) ? value : [];
-  const hiddenCount = limitChips === undefined ? 0 : values.length - limitChips;
+  const limit = limitChips === undefined ? undefined : Math.max(0, limitChips);
+  const hiddenCount = limit === undefined ? 0 : values.length - limit;
   const removable = !disabled && !readOnly;
   const isSearch = useContext(SelectEngineContext) === 'search';
 
@@ -100,7 +100,7 @@ export function SelectChips({ engine, children }: SelectChipsProps): ReactElemen
             data-size={chipSize(size)}
             data-color="default"
             data-variant="solid"
-            data-overflow={limitChips !== undefined && index >= limitChips ? '' : undefined}
+            data-overflow={limit !== undefined && index >= limit ? '' : undefined}
           >
             <span className="ps-Chip__label">{option?.content ?? label}</span>
             {removable &&

@@ -192,8 +192,11 @@ export function SelectShell({
       if (readOnly) baseEvent.preventBaseUIHandler?.();
       return;
     }
-    // Real controls (trigger, input, clear and chip buttons, links) handle their own presses.
-    if ((event.target as Element).closest('button, input, a')) return;
+    // Real controls (trigger, input, clear and chip buttons, links, and `role="button"` content in an end element)
+    // handle their own presses. Only a match inside this control counts: an interactive ancestor of the whole
+    // Select must not stop the control from opening.
+    const interactive = (event.target as Element).closest('button, input, a, [role="button"]');
+    if (interactive && controlRef.current?.contains(interactive)) return;
     event.preventDefault();
     controlRef.current?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
     // The shell owns a control press end to end, so Base UI's own press handler on the control (the search input

@@ -14,11 +14,13 @@
 import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createRef } from 'react';
+import type { ReactElement } from 'react';
 
 import { Select } from './Select';
 import { getTrigger, nextFrame, open, renderSelect, units } from './Select.test.utils';
 import { SelectGroup } from './SelectGroup';
 import { SelectItem } from './SelectItem';
+import type { SelectItemProps } from './SelectItem';
 
 const optionLabels = (): string[] => screen.queryAllByRole('option').map((option) => option.textContent ?? '');
 /** Presses the clear button while the list is open: that hides it from the accessibility tree, hence the label query. */
@@ -29,6 +31,8 @@ const pressClear = async (): Promise<void> => {
   });
   await nextFrame();
 };
+/** A custom component that returns a `SelectItem`, which `Select` cannot read from the element tree. */
+const WrappedOption = (props: SelectItemProps): ReactElement => <SelectItem {...props} />;
 const valueText = (): string => document.querySelector('.ps-Select__value')?.textContent ?? '';
 
 describe('Select searchable', () => {
@@ -440,5 +444,112 @@ describe('Select searchable', () => {
     await userEvent.type(getTrigger(), 'zzz');
 
     expect(screen.getByRole('status')).toHaveTextContent('No results');
+  });
+
+  it('keeps the selected label when async search replaces items in single mode', () => {
+    const alpha = [{ value: 'a1', label: 'Alpha' }];
+    const beta = [{ value: 'b1', label: 'Beta' }];
+    const { rerender } = render(<Select label="Unit" searchable value="a1" items={alpha} />);
+    expect(getTrigger()).toHaveValue('Alpha');
+
+    rerender(<Select label="Unit" searchable value="a1" items={beta} />);
+
+    expect(getTrigger()).toHaveValue('Alpha');
+  });
+
+  it('keeps the selected chip label when async search replaces items in chips mode', () => {
+    const alpha = [{ value: 'a1', label: 'Alpha' }];
+    const beta = [{ value: 'b1', label: 'Beta' }];
+    const props = { label: 'Unit', searchable: true, multiple: true, chips: true, value: ['a1'] } as const;
+    const { rerender } = render(<Select {...props} items={alpha} />);
+    expect(screen.getByRole('button', { name: 'Remove Alpha' })).toBeInTheDocument();
+
+    rerender(<Select {...props} items={beta} />);
+
+    expect(screen.getByRole('button', { name: 'Remove Alpha' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Remove a1' })).toBeNull();
+  });
+
+  describe('items rendered through a wrapper component', () => {
+    it('lists them without filtering by the typed text and warns once', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      renderSelect({ searchable: true }, [
+        <SelectItem key="bytes" value="bytes">
+          Bytes
+        </SelectItem>,
+        <SelectItem key="seconds" value="seconds">
+          Seconds
+        </SelectItem>,
+        <WrappedOption key="wrapped" value="wrapped">
+          Wrapped
+        </WrappedOption>,
+      ]);
+
+      await userEvent.type(getTrigger(), 'by');
+
+      expect(optionLabels()).toEqual(['Bytes', 'Wrapped']);
+      expect(warn).toHaveBeenCalledTimes(1);
+      expect(warn.mock.calls[0]?.[0]).toContain('wrapper components');
+      warn.mockRestore();
+    });
+
+    it('selects a wrapped item', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      const onValueChange = vi.fn();
+      renderSelect({ searchable: true, onValueChange }, [
+        <WrappedOption key="wrapped" value="wrapped">
+          Wrapped
+        </WrappedOption>,
+      ]);
+      await open();
+
+      await userEvent.click(screen.getByRole('option', { name: 'Wrapped' }));
+
+      expect(onValueChange).toHaveBeenCalledWith('wrapped');
+      warn.mockRestore();
+    });
+
+    it('does not warn when every item is a direct SelectItem', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      renderSelect({ searchable: true });
+
+      await userEvent.type(getTrigger(), 'by');
+
+      expect(warn).not.toHaveBeenCalled();
+      warn.mockRestore();
+    });
+
+    it('shows them unchanged in basic mode without a warning', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+      renderSelect({}, [
+        <WrappedOption key="wrapped" value="wrapped">
+          Wrapped
+        </WrappedOption>,
+      ]);
+
+      await open();
+
+      expect(optionLabels()).toEqual(['Wrapped']);
+      expect(warn).not.toHaveBeenCalled();
+      warn.mockRestore();
+    });
+  });
+
+  it('does not call onInputValueChange on mount when defaultInputValue is set and the list starts closed', () => {
+    const onInputValueChange = vi.fn();
+    renderSelect({ searchable: true, defaultInputValue: 'ignored', onInputValueChange });
+
+    expect(onInputValueChange).not.toHaveBeenCalled();
+    expect(getTrigger()).toHaveValue('');
+  });
+
+  it('keeps defaultInputValue when the list starts open', async () => {
+    const onInputValueChange = vi.fn();
+    renderSelect({ searchable: true, defaultInputValue: 'by', onInputValueChange, defaultOpen: true });
+
+    await screen.findByRole('listbox');
+
+    expect(getTrigger()).toHaveValue('by');
+    expect(onInputValueChange).not.toHaveBeenCalled();
   });
 });

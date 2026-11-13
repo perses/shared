@@ -14,9 +14,29 @@
 import { createContext } from 'react';
 
 import type { SelectValue } from './SelectItem';
+import { optionKey } from './selectValue';
 
 /** Which Base UI part family `SelectItem` and `SelectGroup` render: `Select` parts or `Combobox` parts. */
 export const SelectEngineContext = createContext<'basic' | 'search'>('basic');
 
-/** The values that match the current search. `null` means there is no filtering: show everything. */
-export const SelectVisibleValuesContext = createContext<ReadonlySet<SelectValue> | null>(null);
+/**
+ * What the search engine knows about its options. `known` holds the `optionKey` of every option the engine could read
+ * (from `items` or from `SelectItem` elements in `children`); `visible` holds those that match the search. An item
+ * rendered through a wrapper component is not in `known`, so it is never hidden by the search.
+ * `null` means there is no filtering: show everything.
+ */
+export interface SelectVisibility {
+  known: ReadonlySet<string>;
+  visible: ReadonlySet<string>;
+  /** Reports an item the engine cannot see; it warns once per `Select`. */
+  reportUnknown: () => void;
+}
+
+export const SelectVisibleValuesContext = createContext<SelectVisibility | null>(null);
+
+/** True when the search engine knows the option and the current search excludes it. */
+export function isFilteredOut(visibility: SelectVisibility | null, value: SelectValue): boolean {
+  if (!visibility) return false;
+  const key = optionKey(value);
+  return visibility.known.has(key) && !visibility.visible.has(key);
+}

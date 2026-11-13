@@ -14,7 +14,7 @@
 import { Combobox } from '@base-ui/react/combobox';
 import { Field } from '@base-ui/react/field';
 import { clsx } from 'clsx';
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { MouseEvent, ReactElement, ReactNode, Ref } from 'react';
 
 import { hasContent } from '../hasContent';
@@ -23,18 +23,29 @@ import { SelectEngineContext, SelectVisibleValuesContext } from './SelectEngineC
 import type { SelectValue } from './SelectItem';
 import { SelectShell } from './SelectShell';
 import type { SelectEngineProps } from './SelectShell';
-import { isEmptySelection, isMultipleValue } from './selectValue';
+import { isEmptySelection, isMultipleValue, optionKey } from './selectValue';
 import type { SelectCurrentValue } from './selectValue';
 import { useControllableState } from './useControllableState';
 
 /**
- * Tells `SelectItem` and `SelectGroup` which values match the search. `items` is set on the Combobox, so Base UI
- * filters the values and leaves the static children to us.
+ * Tells `SelectItem` and `SelectGroup` which values the engine knows and which of them match the search. `items` is
+ * set on the Combobox, so Base UI filters the values and leaves the static children to us.
  */
-function VisibleValues({ children }: { children: ReactNode }): ReactElement {
+function VisibleValues({ values, children }: { values: readonly SelectValue[]; children: ReactNode }): ReactElement {
   const filtered = Combobox.useFilteredItems<SelectValue>();
-  const visible = useMemo(() => new Set(filtered), [filtered]);
-  return <SelectVisibleValuesContext.Provider value={visible}>{children}</SelectVisibleValuesContext.Provider>;
+  const known = useMemo(() => new Set(values.map(optionKey)), [values]);
+  const visible = useMemo(() => new Set(filtered.map(optionKey)), [filtered]);
+  const warned = useRef(false);
+  const reportUnknown = useCallback((): void => {
+    if (warned.current) return;
+    warned.current = true;
+    console.warn(
+      'Select: searchable mode cannot see `SelectItem`s rendered through wrapper components, so they are never ' +
+        'filtered by the typed text. Render `SelectItem` directly in `children`, or pass `items`.',
+    );
+  }, []);
+  const visibility = useMemo(() => ({ known, visible, reportUnknown }), [known, visible, reportUnknown]);
+  return <SelectVisibleValuesContext.Provider value={visibility}>{children}</SelectVisibleValuesContext.Provider>;
 }
 
 /**
@@ -95,9 +106,12 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
   const selectedValues = isMultipleValue(value) ? value : [];
   const labelOf = (selected: SelectValue): string => optionsByValue.get(selected)?.label ?? String(selected);
   const selectedLabel = !multiple && !isEmptySelection(value) ? labelOf(value as SelectValue) : '';
+  // In single mode a closed list shows the selected label (see the resync below), so `defaultInputValue` only applies
+  // when the list starts open. Starting from the label avoids a resync, and an `onInputValueChange` call, on mount.
+  const keepsDefaultInputValue = multiple || open;
   const [inputValue, setInputValue] = useControllableState<string>(
     search.inputValue,
-    search.defaultInputValue ?? selectedLabel,
+    (keepsDefaultInputValue ? search.defaultInputValue : undefined) ?? selectedLabel,
     search.onInputValueChange,
   );
   const typedTextIsControlled = search.inputValue !== undefined;
@@ -230,7 +244,7 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
                     className={clsx('ps-Select__list', slotProps?.list?.className)}
                     style={slotProps?.list?.style}
                   >
-                    <VisibleValues>{optionNodes}</VisibleValues>
+                    <VisibleValues values={values}>{optionNodes}</VisibleValues>
                   </Combobox.List>
                 </Combobox.Popup>
               </Combobox.Positioner>

@@ -25,13 +25,13 @@ import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../sy
 import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
 import type { Size, Status } from '../types';
 import { BasicEngine } from './BasicEngine';
-import { collectItems, optionKey, optionsFromItems } from './collectItems';
+import { collectItems, optionsFromItems } from './collectItems';
 import type { SelectOption } from './collectItems';
 import { SearchEngine } from './SearchEngine';
 import { SelectItem } from './SelectItem';
 import type { SelectValue } from './SelectItem';
 import type { SelectEngineProps } from './SelectShell';
-import { emptySelection, isEmptySelection, isMultipleValue, toCallbackValue } from './selectValue';
+import { emptySelection, isEmptySelection, isMultipleValue, optionKey, toCallbackValue } from './selectValue';
 import type { SelectCurrentValue } from './selectValue';
 import { useControllableState } from './useControllableState';
 
@@ -163,7 +163,7 @@ interface SelectBaseProps
   /** Visual status. `error` also sets `aria-invalid` on the trigger. */
   status?: Status;
   fullWidth?: boolean;
-  /** Trigger height and text size. The popup text and row height follow it; `md` keeps Menu's default density. */
+  /** Control height and text size. The popup text and row height follow it; `md` keeps Menu's default density. */
   size?: Size;
   required?: boolean;
   /**
@@ -193,11 +193,11 @@ interface SelectBaseProps
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
-  /** Side of the trigger the list opens on. Defaults to `bottom`. */
+  /** Side of the control the list opens on; the list is anchored to the whole control. Defaults to `bottom`. */
   placement?: SelectPlacement;
-  /** Alignment of the list along the trigger. Defaults to `start`. */
+  /** Alignment of the list along the control. Defaults to `start`. */
   align?: SelectAlign;
-  /** Distance from the trigger in pixels. Defaults to 4. */
+  /** Distance from the control in pixels. Defaults to 4. */
   offset?: SelectPositionerProps['sideOffset'];
   /** Shows a button that resets the selection when something is selected. */
   clearable?: boolean;
@@ -207,7 +207,12 @@ interface SelectBaseProps
    * Items stay usable while loading.
    */
   loading?: boolean;
-  /** Non-option content rendered above the options in the popup, outside the listbox. */
+  /**
+   * Non-option content rendered above the options in the popup, outside the listbox. It is not in the list's keyboard
+   * path: Tab from the field closes the list, so interactive content here (buttons, links) can only be used by
+   * pointer while the list is open. Provide a keyboard equivalent, for example a keyboard-reachable "select all" item
+   * or a control elsewhere on the page.
+   */
   listHeader?: ReactNode;
   /** Shown when there are no options or none matches the search. Defaults to "No results". */
   emptyText?: ReactNode;
@@ -220,7 +225,7 @@ interface SelectBaseProps
 /** Options come from `items` or from `SelectItem` and `SelectGroup` children, never both. */
 type SelectOptionsSource =
   | {
-      items: SelectItemData[];
+      items: readonly SelectItemData[];
       children?: never;
     }
   | {
@@ -381,7 +386,9 @@ export type SelectProps = SelectBaseProps &
  * While the list is closed the trigger shows the selected item's `children`, read from the `SelectItem` elements
  * in `children` (through `SelectGroup` and fragments). If you write a custom component that returns a `SelectItem`
  * (for example `<MyOption />`), its label cannot be read this way and the trigger falls back to `String(value)`;
- * supply the text with `renderValue` in that case.
+ * supply the text with `renderValue` in that case. With `searchable` such an item is still listed but is never
+ * filtered by the typed text, its chip and field text fall back to `String(value)`, and `Select` warns once. Render
+ * `SelectItem` directly in `children`, or pass `items`, to make the item searchable.
  *
  * @example
  * <Select label="Unit" value={unit} onValueChange={setUnit}>

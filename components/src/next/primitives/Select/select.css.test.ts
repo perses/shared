@@ -129,7 +129,7 @@ describe('select.css', () => {
   });
 
   it('keeps sizing independent of the optional document reset', () => {
-    const { root, control, trigger } = makeSelect();
+    const { root, control } = makeSelect();
     const popup = document.createElement('div');
     popup.className = 'ps-Select__popup';
     const list = document.createElement('div');
@@ -139,7 +139,6 @@ describe('select.css', () => {
     for (const element of [root, control, popup, list, item]) {
       expect(propertyFor(element, 'box-sizing')).toBe('border-box');
     }
-    expect(trigger).toBeInTheDocument();
   });
 
   it.each(['xs', 'sm', 'md', 'lg'])(
@@ -356,6 +355,19 @@ describe('select.css', () => {
       expect(propertyFor(chips, '--ps-select-chip-row')).toBe(
         `var(--perses-chip-size-${chipStep}, var(--perses-selection-control-size-${chipStep}))`,
       );
+    });
+
+    it('draws an inset focus ring on a focused chip only for keyboard focus', () => {
+      const ring = styleRules().find((rule) => rule.selectorText === ':where(.ps-Select__chip:focus-visible)');
+      expect(ring?.style.getPropertyValue('outline')).toBe(
+        'var(--perses-focus-ring-width) solid var(--perses-focus-ring-color)',
+      );
+      expect(ring?.style.getPropertyValue('outline-offset')).toBe('calc(-1 * var(--perses-focus-ring-offset))');
+    });
+
+    it('restates the chip focus ring in the Highlight system colour when colours are forced', () => {
+      const forced = source.slice(source.indexOf('@media (forced-colors: active)'));
+      expect(forced).toMatch(/:where\(\.ps-Select__chip:focus-visible\) \{[^}]*outline-color: Highlight/);
     });
 
     it('wraps the control only when it holds chips', () => {

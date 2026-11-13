@@ -121,7 +121,8 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
           </>
         }
         status={
-          <output className="ps-Select__status ps-Select__visually-hidden">
+          // `<output>` is an implicit live region; `aria-live` covers screen readers that do not treat it as one.
+          <output aria-live="polite" className="ps-Select__status ps-Select__visually-hidden">
             {loading && open ? loadingText : null}
           </output>
         }

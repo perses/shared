@@ -40,11 +40,6 @@ export function getSearchLabel(value: SelectValue, children: ReactNode, label?: 
   return String(value);
 }
 
-/** Key that keeps `1` and `"1"` apart, since a plain `String(value)` would collapse them. */
-export function optionKey(value: SelectValue): string {
-  return `${typeof value}:${value}`;
-}
-
 /** Normalizes the `items` prop into options. The label is also the rendered content. */
 export function optionsFromItems(items: readonly SelectItemData[]): SelectOption[] {
   return items.map((item) => ({

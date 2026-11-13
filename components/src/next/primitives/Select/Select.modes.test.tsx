@@ -153,6 +153,45 @@ describe.each(MODES)('%s mode', (mode) => {
       expect(screen.queryByRole('listbox')).toBeNull();
     });
 
+    it('does not open the list from a press on a role="button" element in an end element', async () => {
+      const onInnerClick = vi.fn();
+      renderSelect({
+        ...modeProps(mode),
+        endElement: (
+          // A non-native button, as a custom component library renders it; the shell must treat it as interactive.
+          // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role, jsx-a11y/click-events-have-key-events
+          <div role="button" tabIndex={0} onClick={onInnerClick}>
+            Info
+          </div>
+        ),
+      });
+
+      await userEvent.click(screen.getByRole('button', { name: 'Info' }));
+      await nextFrame();
+
+      expect(onInnerClick).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole('listbox')).toBeNull();
+    });
+
+    it('opens the list from a press on the control even inside an interactive ancestor', async () => {
+      render(
+        <a href="#unit">
+          {mode === 'searchable' ? (
+            <Select label="Unit" searchable>
+              {units}
+            </Select>
+          ) : (
+            <Select label="Unit">{units}</Select>
+          )}
+        </a>,
+      );
+
+      await userEvent.click(control());
+
+      expect(await screen.findByRole('listbox')).toBeInTheDocument();
+      await nextFrame();
+    });
+
     it('still opens the list from a direct press on a read-only trigger, by design', async () => {
       renderSelect({ ...modeProps(mode), readOnly: true });
 
@@ -292,12 +331,20 @@ describe.each(MODES)('%s mode', (mode) => {
     it('shows emptyText when there are no items', async () => {
       const { unmount } = renderSelect({ ...modeProps(mode) }, []);
       await userEvent.click(getTrigger());
-      expect(document.querySelector('.ps-Select__empty')).toHaveTextContent('No results');
+      const empty = document.querySelector('.ps-Select__empty') as HTMLElement;
+      expect(empty).toHaveTextContent('No results');
+      // jsdom keeps the unpositioned popup at opacity 0, so `toBeVisible` cannot be used; check it is not hidden.
+      expect(empty).not.toHaveAttribute('hidden');
+      // A listbox may only own options and groups, so the message sits beside it, never inside it.
+      expect(empty.closest('[role="listbox"]')).toBeNull();
       unmount();
 
       renderSelect({ ...modeProps(mode), emptyText: 'Nothing here' }, []);
       await userEvent.click(getTrigger());
-      expect(document.querySelector('.ps-Select__empty')).toHaveTextContent('Nothing here');
+      const customEmpty = document.querySelector('.ps-Select__empty') as HTMLElement;
+      expect(customEmpty).toHaveTextContent('Nothing here');
+      expect(customEmpty).not.toHaveAttribute('hidden');
+      expect(customEmpty.closest('[role="listbox"]')).toBeNull();
     });
 
     it('renders listHeader in the popup above the listbox and outside it', async () => {
@@ -393,6 +440,7 @@ describe.each(MODES)('%s mode', (mode) => {
     it.each([
       [2, 2, null],
       [0, 2, '+2'],
+      [-1, 2, '+2'],
     ])('limitChips=%i with %i values shows %s', (limitChips, count, shown) => {
       const { container } = renderSelect({
         ...modeProps(mode),

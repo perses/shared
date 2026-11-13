@@ -564,4 +564,10 @@ describe('Select', () => {
       expect(getTrigger()).toHaveTextContent('Any unit');
     });
   });
+
+  it('marks the basic status region as a polite live region', () => {
+    renderSelect({ loading: true });
+
+    expect(screen.getByRole('status')).toHaveAttribute('aria-live', 'polite');
+  });
 });

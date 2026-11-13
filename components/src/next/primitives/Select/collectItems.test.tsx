@@ -13,9 +13,10 @@
 
 import { Fragment, isValidElement } from 'react';
 
-import { collectItems, getSearchLabel, optionKey, optionsFromItems } from './collectItems';
+import { collectItems, getSearchLabel, optionsFromItems } from './collectItems';
 import { SelectGroup } from './SelectGroup';
 import { SelectItem } from './SelectItem';
+import { optionKey } from './selectValue';
 
 describe('collectItems', () => {
   it('uses SelectItem label, then plain-text children, then String(value) as the search label', () => {

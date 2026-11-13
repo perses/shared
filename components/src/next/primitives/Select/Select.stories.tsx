@@ -634,14 +634,18 @@ function AsyncSearchSelect(): ReactElement {
   // Loading until the results for the current query arrive. Deriving it (rather than a flag set on input) cannot get
   // stuck when the text is set to the value it already has, which Base UI does when an item is picked.
   const loading = resolvedQuery !== query;
+  // Picking an item puts its label in the field, which also becomes the query. Search with '' then, so reopening the
+  // list shows every result instead of only the match for the selected label.
+  const selectedLabel = metricItems.find((item) => item.value === value)?.label;
+  const searchText = query === selectedLabel ? '' : query;
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setItems(searchMetrics(query));
+      setItems(searchMetrics(searchText));
       setResolvedQuery(query);
     }, SEARCH_DELAY_MS);
     return (): void => clearTimeout(timer);
-  }, [query]);
+  }, [query, searchText]);
 
   return (
     <Select
@@ -668,14 +672,18 @@ function AsyncSearchSelect() {
   const [value, setValue] = useState<SelectValue | null>(null);
   // Loading until the results for the current query arrive; it cannot get stuck on an unchanged query.
   const loading = resolvedQuery !== query;
+  // Picking an item puts its label in the field, which also becomes the query. Search with '' then, so reopening the
+  // list shows every result instead of only the match for the selected label.
+  const selectedLabel = metricItems.find((item) => item.value === value)?.label;
+  const searchText = query === selectedLabel ? '' : query;
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setItems(searchMetrics(query));
+      setItems(searchMetrics(searchText));
       setResolvedQuery(query);
     }, 400);
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, searchText]);
 
   return (
     <Select
@@ -775,7 +783,8 @@ function ListHeaderSelect(): ReactElement {
 }
 
 const listHeaderCode = `// listHeader renders outside the listbox, so the story owns the controls. Here the search text is controlled
-// so "Select all" can act on the filtered items.
+// so "Select all" can act on the filtered items. The header is pointer-only (Tab from the field closes the list), so
+// offer a keyboard equivalent as well.
 function ListHeaderSelect() {
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<SelectValue[]>(['up']);
@@ -815,6 +824,11 @@ export const ListHeader: Story = () => (
     <p>
       <code>listHeader</code> renders non-option content above the options, outside the listbox. <code>Select</code>{' '}
       only places it; the story owns the select-all button and the count.
+    </p>
+    <p>
+      The header is not in the list&apos;s keyboard path: Tab from the field closes the list, so its buttons work by
+      pointer only. Provide a keyboard equivalent, such as a keyboard-reachable &quot;select all&quot; item or a control
+      elsewhere on the page.
     </p>
     <Sample title="Select all and count" code={listHeaderCode}>
       <div style={rowStyle}>
