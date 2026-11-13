@@ -12,23 +12,26 @@
 // limitations under the License.
 
 import { Field } from '@base-ui/react/field';
-import { Select as BaseSelect } from '@base-ui/react/select';
 import type { SelectPositionerProps } from '@base-ui/react/select';
 import { clsx } from 'clsx';
 import { forwardRef, useCallback, useContext, useEffect, useId, useMemo } from 'react';
-import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode, Ref } from 'react';
+import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
 
 import { ThemeModeContext } from '../../contexts/ThemeModeProvider';
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import { hasContent } from '../hasContent';
-import { ChevronDownIcon, Icon } from '../Icon';
+import { ChevronDownIcon } from '../Icon';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
-import { TextHelper } from '../TextHelper';
 import type { Size, Status } from '../types';
+import { BasicEngine } from './BasicEngine';
 import { collectItems, optionKey, optionsFromItems } from './collectItems';
 import { SelectItem } from './SelectItem';
 import type { SelectValue } from './SelectItem';
+import type { SelectEngineProps } from './SelectShell';
+import { emptySelection, isEmptySelection, toCallbackValue } from './selectValue';
+import type { SelectCurrentValue } from './selectValue';
+import { useControllableState } from './useControllableState';
 
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared layout utility styles used by style props.
 import '../system/layout.css';
@@ -42,7 +45,6 @@ import './select.css';
 /** Mirrors --perses-spacing-xs (4px). */
 const SIDE_OFFSET = 4;
 const chevronIcon = <ChevronDownIcon className="ps-Select__chevron" />;
-const renderIcon = <Icon />;
 
 // Only `overflow` from the display category: `display` stays fixed to inline-flex/flex by the stylesheet.
 const SELECT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
@@ -89,7 +91,7 @@ export interface SelectSlotProps {
 
 /**
  * Props shared by single and multiple selection. Spacing and sizing style props apply to the root; radius props
- * apply to the trigger. From the display group only `overflow` is accepted: `display` is fixed by the stylesheet
+ * apply to the control. From the display group only `overflow` is accepted: `display` is fixed by the stylesheet
  * (`inline-flex`, or `flex` with `fullWidth`) and is ignored if passed.
  */
 interface SelectBaseProps
@@ -272,17 +274,9 @@ export type SelectProps = SelectBaseProps &
   SelectSearchProps &
   SelectSelectionProps;
 
-type SelectCurrentValue = SelectValue | SelectValue[] | null;
-
-/** Mirrors Base UI's selected-value check, so the placeholder shows exactly when the trigger has `data-placeholder`. */
-function isEmptySelection(value: SelectCurrentValue): boolean {
-  if (Array.isArray(value)) return value.length === 0;
-  return value === null || value === undefined || value === '';
-}
-
 /**
  * Dropdown that picks one or more `SelectItem`s, with an optional label and helper text. Spacing (`p`, `m`, …),
- * sizing and `overflow` props style the root wrapper; radius props style the trigger. Values can be tokens
+ * sizing and `overflow` props style the root wrapper; radius props style the control. Values can be tokens
  * (`"sm"`), pixel numbers (`12`), CSS lengths or responsive objects (`{ default: 'sm', md: 0 }`).
  * Native button attributes, handlers, and `ref` stay on the trigger.
  *
@@ -362,10 +356,10 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
   const generatedId = useId();
   const mode = useContext(ThemeModeContext);
   const triggerId = id ?? generatedId;
+  const isMultiple = multiple === true;
   // `children` is usually a new value on every parent render; the memo still skips the walk when Select re-renders
   // on its own (for example a theme mode change) or the consumer passes stable children.
   const options = useMemo(() => (items ? optionsFromItems(items) : collectItems(children)), [items, children]);
-  const baseItems = useMemo(() => options.map((option) => ({ value: option.value, label: option.content })), [options]);
   const optionNodes = useMemo(
     () =>
       items
@@ -390,31 +384,63 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
     if (!renderValue) return undefined;
     const render = renderValue as (current: SelectCurrentValue) => ReactNode;
     return (current: SelectCurrentValue): ReactNode =>
-      showsPlaceholder && isEmptySelection(current) ? placeholder : render(current);
+      showsPlaceholder && isEmptySelection(current) ? placeholder : render(toCallbackValue(current));
   }, [renderValue, showsPlaceholder, placeholder]);
   const handleValueChange = useCallback(
-    (next: SelectValue | SelectValue[] | null) => (onValueChange as ((value: typeof next) => void) | undefined)?.(next),
+    (next: SelectCurrentValue) =>
+      (onValueChange as ((value: SelectValue | SelectValue[] | null) => void) | undefined)?.(toCallbackValue(next)),
     [onValueChange],
   );
-  const handleOpenChange = useCallback((next: boolean) => onOpenChange?.(next), [onOpenChange]);
-  const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
-    () =>
-      (descriptionProps, state): ReactElement => (
-        <TextHelper {...descriptionProps} status={status} disabled={state.disabled} />
-      ),
-    [status],
+  const [currentValue, setCurrentValue] = useControllableState<SelectCurrentValue>(
+    value as SelectCurrentValue | undefined,
+    (defaultValue as SelectCurrentValue | undefined) ?? emptySelection(isMultiple),
+    handleValueChange,
   );
+  const [isOpen, setIsOpen] = useControllableState<boolean>(open, defaultOpen ?? false, onOpenChange);
   const {
     className: radiusClassName,
     style: radiusStyle,
     rest: restWithoutRadius,
-  } = applyStyleProps(props, SELECT_RADIUS_PROPS, slotProps?.trigger?.style);
+  } = applyStyleProps(props, SELECT_RADIUS_PROPS, slotProps?.control?.style);
   const {
     className: styleClassName,
     style: computedStyle,
     rest,
   } = applyStyleProps(restWithoutRadius, SELECT_STYLE_PROPS, style);
   const { display: _display, ...restWithoutDisplay } = rest as typeof rest & { display?: unknown };
+
+  const engineProps: SelectEngineProps = {
+    forwardedRef: ref,
+    focusableProps: { ...restWithoutDisplay, id: triggerId },
+    label,
+    helperText,
+    placeholder,
+    icon,
+    startElement,
+    endElement,
+    size,
+    status,
+    required,
+    readOnly,
+    disabled,
+    name,
+    form,
+    multiple: isMultiple,
+    value: currentValue,
+    setValue: setCurrentValue,
+    open: isOpen,
+    setOpen: setIsOpen,
+    options,
+    optionNodes,
+    renderValue: renderTriggerValue,
+    placement,
+    align,
+    offset,
+    themeMode: mode,
+    slotProps,
+    controlClassName: clsx(radiusClassName, slotProps?.control?.className),
+    controlStyle: radiusStyle,
+  };
 
   return (
     <Field.Root
@@ -426,80 +452,7 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(
       data-status={status}
       data-full-width={fullWidth || undefined}
     >
-      <BaseSelect.Root<SelectValue, boolean>
-        items={baseItems}
-        multiple={multiple}
-        value={value}
-        defaultValue={defaultValue}
-        onValueChange={handleValueChange}
-        name={name}
-        form={form}
-        required={required}
-        readOnly={readOnly}
-        disabled={disabled}
-        open={open}
-        defaultOpen={defaultOpen}
-        onOpenChange={handleOpenChange}
-        modal={false}
-      >
-        {hasContent(label) && (
-          <BaseSelect.Label
-            className={clsx('ps-Select__label', slotProps?.label?.className)}
-            style={slotProps?.label?.style}
-          >
-            {label}
-          </BaseSelect.Label>
-        )}
-        <BaseSelect.Trigger
-          {...restWithoutDisplay}
-          ref={ref as Ref<HTMLButtonElement>}
-          id={triggerId}
-          className={clsx('ps-Select__trigger', radiusClassName, slotProps?.trigger?.className)}
-          style={radiusStyle}
-        >
-          {hasContent(startElement) && (
-            <span className="ps-Select__adornment ps-Select__adornment--start">{startElement}</span>
-          )}
-          <BaseSelect.Value className="ps-Select__value" placeholder={placeholder}>
-            {renderTriggerValue}
-          </BaseSelect.Value>
-          {hasContent(endElement) && (
-            <span className="ps-Select__adornment ps-Select__adornment--end">{endElement}</span>
-          )}
-          {hasContent(icon) && (
-            <BaseSelect.Icon className="ps-Select__icon" render={renderIcon}>
-              {icon}
-            </BaseSelect.Icon>
-          )}
-        </BaseSelect.Trigger>
-        <BaseSelect.Portal>
-          <BaseSelect.Positioner
-            className="ps-Select__positioner"
-            data-perses-mode={mode}
-            side={placement}
-            align={align}
-            sideOffset={offset}
-            alignItemWithTrigger={false}
-          >
-            <BaseSelect.Popup
-              className={clsx('ps-Select__popup', slotProps?.popup?.className)}
-              style={slotProps?.popup?.style}
-              data-size={size}
-            >
-              {optionNodes}
-            </BaseSelect.Popup>
-          </BaseSelect.Positioner>
-        </BaseSelect.Portal>
-        {hasContent(helperText) && (
-          <Field.Description
-            className={clsx('ps-Select__helper', slotProps?.helper?.className)}
-            style={slotProps?.helper?.style}
-            render={renderHelper}
-          >
-            {helperText}
-          </Field.Description>
-        )}
-      </BaseSelect.Root>
+      <BasicEngine {...engineProps} />
     </Field.Root>
   );
 });

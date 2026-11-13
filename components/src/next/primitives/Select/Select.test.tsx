@@ -67,8 +67,10 @@ describe('Select', () => {
   it('opens on click with options and classes', async () => {
     renderSelect();
     const listbox = await open();
-    expect(listbox).toHaveClass('ps-Select__popup');
-    expect(listbox.parentElement).toHaveClass('ps-Select__positioner');
+    expect(listbox).toHaveClass('ps-Select__list');
+    expect(listbox.parentElement).toHaveClass('ps-Select__popup');
+    expect(listbox.parentElement).toHaveAttribute('role', 'presentation');
+    expect(listbox.parentElement?.parentElement).toHaveClass('ps-Select__positioner');
     const options = screen.getAllByRole('option');
     expect(options).toHaveLength(3);
     for (const option of options) expect(option).toHaveClass('ps-SelectItem');
@@ -253,7 +255,7 @@ describe('Select', () => {
   it('forwards the size to the portaled popup', async () => {
     renderSelect({ size: 'lg' });
     const listbox = await open();
-    expect(listbox).toHaveAttribute('data-size', 'lg');
+    expect(listbox.parentElement).toHaveAttribute('data-size', 'lg');
   });
 
   it('defaults to the md size', () => {
@@ -297,13 +299,18 @@ describe('Select', () => {
   it('renders startElement and endElement around the value', () => {
     renderSelect({ startElement: START_ICON, endElement: END_ICON, defaultValue: 'bytes' });
     const trigger = getTrigger();
+    const control = getRoot().querySelector('.ps-Select__control');
     const start = screen.getByTestId('start-icon').parentElement;
     const end = screen.getByTestId('end-icon').parentElement;
-    const value = trigger.querySelector('.ps-Select__value');
     expect(start).toHaveClass('ps-Select__adornment', 'ps-Select__adornment--start');
     expect(end).toHaveClass('ps-Select__adornment', 'ps-Select__adornment--end');
-    expect(start?.compareDocumentPosition(value as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(value?.compareDocumentPosition(end as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(start?.parentElement).toBe(control);
+    expect(end?.parentElement).toBe(control);
+    expect(trigger.parentElement).toBe(control);
+    expect(trigger).not.toContainElement(start);
+    expect(trigger).not.toContainElement(end);
+    expect(start?.compareDocumentPosition(trigger)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(trigger.compareDocumentPosition(end as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it('renders a default chevron that icon replaces', () => {
@@ -370,8 +377,64 @@ describe('Select', () => {
   it('passes placement and align to the positioner', async () => {
     renderSelect({ placement: 'top', align: 'end' });
     const listbox = await open();
-    expect(listbox).toHaveAttribute('data-side', 'top');
-    expect(listbox).toHaveAttribute('data-align', 'end');
+    expect(listbox.parentElement).toHaveAttribute('data-side', 'top');
+    expect(listbox.parentElement).toHaveAttribute('data-align', 'end');
+  });
+
+  describe('control', () => {
+    it('mirrors open, disabled and read-only state on the control', async () => {
+      const { unmount } = renderSelect();
+      const control = getRoot().querySelector('.ps-Select__control');
+      expect(control).not.toHaveAttribute('data-open');
+      await open();
+      expect(control).toHaveAttribute('data-open');
+      await userEvent.keyboard('{Escape}');
+      await waitFor(() => expect(control).not.toHaveAttribute('data-open'));
+      unmount();
+
+      const disabled = renderSelect({ disabled: true });
+      expect(getRoot().querySelector('.ps-Select__control')).toHaveAttribute('data-disabled');
+      disabled.unmount();
+
+      renderSelect({ readOnly: true });
+      expect(getRoot().querySelector('.ps-Select__control')).toHaveAttribute('data-readonly');
+    });
+
+    it('opens and focuses the trigger when the empty part of the control is clicked', async () => {
+      renderSelect();
+      const control = getRoot().querySelector<HTMLElement>('.ps-Select__control') as HTMLElement;
+      await userEvent.click(control);
+      expect(getTrigger()).toHaveFocus();
+      expect(await screen.findByRole('listbox')).toBeInTheDocument();
+    });
+
+    it.each([{ disabled: true }, { readOnly: true }])('does not open from the control when %o', async (props) => {
+      renderSelect(props);
+      const control = getRoot().querySelector<HTMLElement>('.ps-Select__control') as HTMLElement;
+      await userEvent.click(control);
+      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('value', () => {
+    it('accepts a readonly controlled value and hands callbacks a fresh array', async () => {
+      const frozen = Object.freeze(['bytes']);
+      const renderValue = vi.fn((value: SelectValue[]) => value.join(', '));
+      const onValueChange = vi.fn();
+      render(
+        <Select label="Unit" multiple value={frozen} renderValue={renderValue} onValueChange={onValueChange}>
+          {units}
+        </Select>,
+      );
+      const argument = renderValue.mock.calls[0]?.[0];
+      expect(argument).toEqual(['bytes']);
+      expect(argument).not.toBe(frozen);
+      expect(Object.isFrozen(argument)).toBe(false);
+
+      await open();
+      await userEvent.click(screen.getByRole('option', { name: 'Seconds' }));
+      expect(onValueChange).toHaveBeenCalledWith(['bytes', 'seconds']);
+    });
   });
 
   describe('multiple', () => {

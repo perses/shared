@@ -35,8 +35,8 @@ const WIDTH = { default: 120, md: 200 };
 const TOP_STYLE: PersesCSSProperties = { borderRadius: '40px', marginTop: '4px', '--app-accent': 'root' };
 const OVERRIDE_STYLE: PersesCSSProperties = { ...TOP_STYLE, '--ps-rounded': '99px' };
 const SLOTS: SelectSlotProps = {
-  trigger: {
-    className: 'custom-trigger',
+  control: {
+    className: 'custom-control',
     style: { borderRadius: '6px', '--ps-rounded': '3px', '--ps-rounded-top-left-md': '4px' },
   },
   popup: { className: 'custom-popup', style: { color: 'red' } },
@@ -55,7 +55,7 @@ const units = [
 ];
 
 describe('Select radius props', () => {
-  it.each([false, true])('rounds only the trigger (labeled=%s)', (labeled) => {
+  it.each([false, true])('rounds only the control (labeled=%s)', (labeled) => {
     const { container } = render(
       <Select
         {...(labeled ? { label: 'Unit' } : { 'aria-label': 'Unit' })}
@@ -76,9 +76,10 @@ describe('Select radius props', () => {
     );
     const trigger = screen.getByRole('combobox', { name: 'Unit' });
     const root = trigger.closest('.ps-Select');
+    const control = root?.querySelector('.ps-Select__control') as HTMLElement;
 
-    expect(trigger).toHaveClass(
-      'ps-Select__trigger',
+    expect(control).toHaveClass(
+      'ps-Select__control',
       'ps-rounded',
       'ps-rounded-lg',
       'ps-rounded-top',
@@ -91,7 +92,7 @@ describe('Select radius props', () => {
       'ps-rounded-bottom-left',
       'ps-rounded-bottom-right',
     );
-    expect(trigger).toHaveStyle({
+    expect(control).toHaveStyle({
       '--ps-rounded': 'var(--perses-radius-md)',
       '--ps-rounded-lg': 'var(--perses-radius-full)',
       '--ps-rounded-top': 'var(--perses-radius-sm)',
@@ -114,9 +115,11 @@ describe('Select radius props', () => {
       '--ps-overflow': 'hidden',
       '--app-accent': 'root',
     });
-    expect(trigger).not.toHaveClass('custom-root', 'ps-p', 'ps-width', 'ps-overflow');
+    expect(control).not.toHaveClass('custom-root', 'ps-p', 'ps-width', 'ps-overflow');
+    expect(trigger).toHaveClass('ps-Select__trigger');
+    expect(Array.from(trigger.classList).some((name) => name.startsWith('ps-rounded'))).toBe(false);
     for (const element of container.querySelectorAll<HTMLElement>('*')) {
-      if (element === trigger) continue;
+      if (element === control) continue;
       expect(Array.from(element.classList).some((name) => name.startsWith('ps-rounded'))).toBe(false);
       expect(element.style.getPropertyValue('--ps-rounded')).toBe('');
     }
@@ -127,7 +130,7 @@ describe('Select radius props', () => {
     expect(trigger).toHaveAccessibleDescription('Shown to your team');
   });
 
-  it('lets trigger slot styles override radius variables without moving top-level styles off the root', () => {
+  it('lets control slot styles override radius variables without moving top-level styles off the root', () => {
     render(
       <Select label="Unit" rounded="md" roundedTopLeft={CORNER_RADIUS} style={OVERRIDE_STYLE} slotProps={SLOTS}>
         {units}
@@ -135,9 +138,10 @@ describe('Select radius props', () => {
     );
     const trigger = screen.getByRole('combobox', { name: 'Unit' });
     const root = trigger.closest('.ps-Select');
+    const control = root?.querySelector('.ps-Select__control');
 
-    expect(trigger).toHaveClass('ps-Select__trigger', 'custom-trigger', 'ps-rounded', 'ps-rounded-top-left-md');
-    expect(trigger).toHaveStyle({ borderRadius: '6px', '--ps-rounded': '3px', '--ps-rounded-top-left-md': '4px' });
+    expect(control).toHaveClass('ps-Select__control', 'custom-control', 'ps-rounded', 'ps-rounded-top-left-md');
+    expect(control).toHaveStyle({ borderRadius: '6px', '--ps-rounded': '3px', '--ps-rounded-top-left-md': '4px' });
     expect(root).toHaveStyle({ borderRadius: '40px', '--ps-rounded': '99px', '--app-accent': 'root' });
     expect(root).not.toHaveClass('ps-rounded');
   });
@@ -150,7 +154,8 @@ describe('Select radius props', () => {
       </Select>,
     );
     const trigger = screen.getByRole('combobox', { name: 'Unit' });
-    expect(trigger).toHaveClass('ps-rounded', 'ps-rounded-top-left-xl');
+    const control = trigger.closest('.ps-Select__control') as HTMLElement;
+    expect(control).toHaveClass('ps-rounded', 'ps-rounded-top-left-xl');
     expect(ref.current).toBe(trigger);
     await userEvent.click(trigger);
     await userEvent.click(await screen.findByRole('option', { name: 'Seconds' }));
@@ -163,8 +168,8 @@ describe('Select radius props', () => {
     );
     expect(screen.getByRole('combobox', { name: 'Unit' })).toBe(trigger);
     expect(trigger).toHaveClass('ps-Select__trigger');
-    expect(trigger.className).not.toContain('ps-rounded');
-    expect(trigger.getAttribute('style') ?? '').not.toContain('--ps-rounded');
+    expect(control.className).not.toContain('ps-rounded');
+    expect(control.getAttribute('style') ?? '').not.toContain('--ps-rounded');
     expect(trigger.closest('.ps-Select')).toHaveStyle({
       borderRadius: '40px',
       marginTop: '4px',

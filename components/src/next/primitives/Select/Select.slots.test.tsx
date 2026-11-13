@@ -23,8 +23,10 @@ import { SelectItem } from './SelectItem';
 const COLOR_STYLE = { color: 'red' };
 const SLOT_PROPS: SelectSlotProps = {
   label: { className: 'custom-label', style: { letterSpacing: '1px' } },
+  control: { className: 'custom-control', style: { gap: '9px' } },
   trigger: { className: 'custom-trigger', style: { fontFamily: 'monospace', '--app-select-accent': 'blue' } },
   popup: { className: 'custom-popup', style: { maxHeight: '200px' } },
+  list: { className: 'custom-list', style: { letterSpacing: '2px' } },
   helper: { className: 'custom-helper', style: { fontStyle: 'italic' } },
 };
 
@@ -44,6 +46,7 @@ function createStructuralSlotProps(ref: Ref<HTMLButtonElement>, onClick: () => v
       render: 'div',
     },
     popup: { className: 'custom-popup', role: 'menu', 'data-open': 'forged' },
+    list: { className: 'custom-list', role: 'menu', 'data-open': 'forged' },
     helper: { className: 'custom-helper', id: 'slot-helper-id', children: 'Wrong helper', render: 'div' },
   };
   return slotProps;
@@ -75,13 +78,23 @@ describe('Select slot styling', () => {
 
     expect(root).toHaveClass('ps-Select', 'custom-root');
     expect(root.style.color).toBe('red');
-    for (const name of ['custom-label', 'custom-trigger', 'custom-popup', 'custom-helper']) {
+    for (const name of [
+      'custom-label',
+      'custom-control',
+      'custom-trigger',
+      'custom-popup',
+      'custom-list',
+      'custom-helper',
+    ]) {
       expect(root).not.toHaveClass(name);
     }
     expect(label).toHaveClass('ps-Select__label', 'custom-label');
     expect(label).toHaveStyle({ letterSpacing: '1px' });
+    const control = root.querySelector('.ps-Select__control');
+    expect(control).toHaveClass('ps-Select__control', 'custom-control');
+    expect(control).toHaveStyle({ gap: '9px' });
     expect(trigger).toHaveClass('ps-Select__trigger', 'custom-trigger');
-    expect(trigger).not.toHaveClass('custom-root');
+    expect(trigger).not.toHaveClass('custom-root', 'custom-control');
     expect(trigger).toHaveStyle({ fontFamily: 'monospace', '--app-select-accent': 'blue' });
     expect(trigger.style.color).toBe('');
     expect(trigger).not.toHaveAttribute('slotprops');
@@ -90,9 +103,13 @@ describe('Select slot styling', () => {
     expect(trigger).toHaveAccessibleDescription('Pick a unit');
 
     await userEvent.click(trigger);
-    const popup = await screen.findByRole('listbox');
+    const listbox = await screen.findByRole('listbox');
+    const popup = listbox.parentElement;
     expect(popup).toHaveClass('ps-Select__popup', 'custom-popup');
     expect(popup).toHaveStyle({ maxHeight: '200px' });
+    expect(popup).not.toHaveClass('custom-list');
+    expect(listbox).toHaveClass('ps-Select__list', 'custom-list');
+    expect(listbox).toHaveStyle({ letterSpacing: '2px' });
   });
 
   it('ignores structural slot keys even on nonliteral objects', async () => {
@@ -133,9 +150,14 @@ describe('Select slot styling', () => {
     expect(slotRef.current).toBeNull();
 
     await userEvent.click(trigger);
-    const popup = await screen.findByRole('listbox');
+    const listbox = await screen.findByRole('listbox');
+    const popup = listbox.parentElement;
     expect(popup).toHaveClass('custom-popup');
-    expect(popup).not.toHaveAttribute('role', 'menu');
+    expect(popup).toHaveAttribute('role', 'presentation');
+    expect(popup).not.toHaveAttribute('data-open', 'forged');
+    expect(listbox).toHaveClass('custom-list');
+    expect(listbox).toHaveAttribute('role', 'listbox');
+    expect(listbox).not.toHaveAttribute('data-open', 'forged');
     await userEvent.click(screen.getByRole('option', { name: 'Seconds' }));
     expect(onValueChange).toHaveBeenCalledWith('seconds');
     expect(slotOnClick).not.toHaveBeenCalled();
@@ -150,6 +172,7 @@ describe('Select slot styling', () => {
     const root = getRoot();
     expect(root.querySelector('.custom-label')).not.toBeInTheDocument();
     expect(root.querySelector('.custom-helper')).not.toBeInTheDocument();
+    expect(root.querySelector('.custom-control')).toBeInTheDocument();
     expect(getTrigger()).toHaveClass('custom-trigger');
   });
 

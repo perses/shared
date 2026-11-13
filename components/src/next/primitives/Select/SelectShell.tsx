@@ -1,0 +1,161 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Field } from '@base-ui/react/field';
+import type { SelectPositionerProps } from '@base-ui/react/select';
+import { clsx } from 'clsx';
+import { useMemo } from 'react';
+import type {
+  CSSProperties,
+  ElementType,
+  HTMLAttributes,
+  MouseEvent,
+  ReactElement,
+  ReactNode,
+  Ref,
+  RefObject,
+} from 'react';
+
+import { hasContent } from '../hasContent';
+import { TextHelper } from '../TextHelper';
+import type { Size, Status } from '../types';
+import type { SelectOption } from './collectItems';
+import type { SelectAlign, SelectPlacement, SelectSlotProps } from './Select';
+import type { SelectCurrentValue } from './selectValue';
+
+/** Everything an engine needs from `Select`: already normalized, and always controlled. */
+export interface SelectEngineProps {
+  forwardedRef: Ref<HTMLElement>;
+  /** Pass-through attributes for the focusable element (the trigger button). */
+  focusableProps: Omit<HTMLAttributes<HTMLElement>, 'children'> & { id: string; autoFocus?: boolean };
+
+  label: ReactNode;
+  helperText: ReactNode;
+  placeholder: ReactNode;
+  icon: ReactNode;
+  startElement: ReactNode;
+  endElement: ReactNode;
+
+  size: Size;
+  status?: Status;
+  required?: boolean;
+  readOnly?: boolean;
+  disabled?: boolean;
+  name?: string;
+  form?: string;
+
+  multiple: boolean;
+  value: SelectCurrentValue;
+  setValue: (next: SelectCurrentValue) => void;
+  open: boolean;
+  setOpen: (next: boolean) => void;
+
+  options: SelectOption[];
+  optionNodes: ReactNode;
+  /** Already placeholder-aware: it is not called while nothing is selected and a placeholder is set. */
+  renderValue?: (value: SelectCurrentValue) => ReactNode;
+
+  placement: SelectPlacement;
+  align: SelectAlign;
+  /** Same type as the public `offset` prop, which Base UI allows to be a function as well as a number. */
+  offset: SelectPositionerProps['sideOffset'];
+  themeMode: string | undefined;
+
+  slotProps?: SelectSlotProps;
+  /** Radius classes merged with `slotProps.control.className`. */
+  controlClassName?: string;
+  /** Radius variables merged with `slotProps.control.style`. */
+  controlStyle?: CSSProperties;
+}
+
+export interface SelectShellProps {
+  engine: SelectEngineProps;
+  controlRef: RefObject<HTMLDivElement | null>;
+  label: ReactNode;
+  /** The focusable part of the control: the trigger button or the search input. */
+  field: ReactNode;
+  /** Content after the end element, such as the clear button and the chevron. */
+  trailing?: ReactNode;
+  /** The live status region. */
+  status?: ReactNode;
+  popup: ReactNode;
+  Control?: ElementType;
+  onClear?: () => void;
+}
+
+/**
+ * Layout shared by every engine: label, the bordered control (start element, field, end element, trailing
+ * content), helper text, status region and popup. The engine supplies the parts that depend on Base UI context.
+ */
+export function SelectShell({
+  engine,
+  controlRef,
+  label,
+  field,
+  trailing,
+  status,
+  popup,
+  Control = 'div',
+}: SelectShellProps): ReactElement {
+  const { slotProps, helperText, startElement, endElement, disabled, readOnly, open, setOpen } = engine;
+  const helperStatus = engine.status;
+  const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
+    () =>
+      (descriptionProps, state): ReactElement => (
+        <TextHelper {...descriptionProps} status={helperStatus} disabled={state.disabled} />
+      ),
+    [helperStatus],
+  );
+
+  const handleMouseDown = (event: MouseEvent<HTMLElement>): void => {
+    if (disabled || readOnly || event.button !== 0) return;
+    // Real controls (trigger, input, clear and chip buttons, links) handle their own presses.
+    if ((event.target as Element).closest('button, input, a')) return;
+    event.preventDefault();
+    controlRef.current?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
+    setOpen(true);
+  };
+
+  return (
+    <>
+      {label}
+      <Control
+        ref={controlRef}
+        className={clsx('ps-Select__control', engine.controlClassName)}
+        style={engine.controlStyle}
+        data-open={open ? '' : undefined}
+        data-disabled={disabled ? '' : undefined}
+        data-readonly={readOnly ? '' : undefined}
+        onMouseDown={handleMouseDown}
+      >
+        {hasContent(startElement) && (
+          <span className="ps-Select__adornment ps-Select__adornment--start">{startElement}</span>
+        )}
+        {field}
+        {hasContent(endElement) && <span className="ps-Select__adornment ps-Select__adornment--end">{endElement}</span>}
+        {trailing}
+      </Control>
+      {hasContent(helperText) && (
+        <Field.Description
+          className={clsx('ps-Select__helper', slotProps?.helper?.className)}
+          style={slotProps?.helper?.style}
+          render={renderHelper}
+        >
+          {helperText}
+        </Field.Description>
+      )}
+      {status}
+      {popup}
+    </>
+  );
+}

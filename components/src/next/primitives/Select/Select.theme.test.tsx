@@ -31,8 +31,8 @@ describe('theme mode across the portal', () => {
     const listbox = await open();
     expect(document.body).toContainElement(listbox);
     expect(container).not.toContainElement(listbox);
-    expect(listbox.parentElement).toHaveAttribute('data-perses-mode', mode);
-    expect(listbox.closest('[data-perses-mode]')).toBe(listbox.parentElement);
+    expect(listbox.closest('.ps-Select__positioner')).toHaveAttribute('data-perses-mode', mode);
+    expect(listbox.closest('[data-perses-mode]')).toBe(listbox.closest('.ps-Select__positioner'));
     expect(document.documentElement.getAttribute('data-perses-mode')).toBe(documentMode);
     expect(document.body.getAttribute('data-perses-mode')).toBe(bodyMode);
   });
@@ -44,7 +44,7 @@ describe('theme mode across the portal', () => {
       </ThemeModeProvider>,
     );
     const listbox = await open();
-    const positioner = listbox.parentElement;
+    const positioner = listbox.closest('.ps-Select__positioner');
     expect(positioner).toHaveAttribute('data-perses-mode', 'dark');
     await userEvent.keyboard('{ArrowDown}');
     const highlighted = screen.getByRole('option', { name: 'Bytes' });
@@ -56,7 +56,7 @@ describe('theme mode across the portal', () => {
       </ThemeModeProvider>,
     );
     expect(screen.getByRole('listbox')).toBe(listbox);
-    expect(listbox.parentElement).toBe(positioner);
+    expect(listbox.closest('.ps-Select__positioner')).toBe(positioner);
     expect(positioner).toHaveAttribute('data-perses-mode', 'light');
     expect(highlighted).toHaveAttribute('data-highlighted');
   });
@@ -79,8 +79,8 @@ describe('theme mode across the portal', () => {
     expect(darkList).not.toBe(lightList);
     expect(container).not.toContainElement(darkList);
     expect(container).not.toContainElement(lightList);
-    expect(darkList.parentElement).toHaveAttribute('data-perses-mode', 'dark');
-    expect(lightList.parentElement).toHaveAttribute('data-perses-mode', 'light');
+    expect(darkList.closest('.ps-Select__positioner')).toHaveAttribute('data-perses-mode', 'dark');
+    expect(lightList.closest('.ps-Select__positioner')).toHaveAttribute('data-perses-mode', 'light');
     expect(document.documentElement).not.toHaveAttribute('data-perses-mode');
     expect(document.body).not.toHaveAttribute('data-perses-mode');
   });
@@ -88,7 +88,7 @@ describe('theme mode across the portal', () => {
   it('does not force a mode boundary when no provider is present', async () => {
     renderSelect();
     const listbox = await open();
-    expect(listbox.parentElement).not.toHaveAttribute('data-perses-mode');
+    expect(listbox.closest('.ps-Select__positioner')).not.toHaveAttribute('data-perses-mode');
     expect(listbox).not.toHaveAttribute('data-perses-mode');
     expect(listbox.closest('[data-perses-mode]')).toBeNull();
   });

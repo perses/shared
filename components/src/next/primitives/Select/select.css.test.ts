@@ -42,15 +42,22 @@ function propertyFor(element: Element, property: string): string {
   return matching.reduce((value, rule) => rule.style.getPropertyValue(property) || value, '');
 }
 
-function makeSelect(attributes: Record<string, string> = {}): { root: HTMLElement; trigger: HTMLElement } {
+function makeSelect(attributes: Record<string, string> = {}): {
+  root: HTMLElement;
+  control: HTMLElement;
+  trigger: HTMLElement;
+} {
   const root = document.createElement('div');
   root.className = 'ps-Select';
   for (const [name, value] of Object.entries(attributes)) root.setAttribute(name, value);
+  const control = document.createElement('div');
+  control.className = 'ps-Select__control';
   const trigger = document.createElement('button');
   trigger.className = 'ps-Select__trigger';
-  root.append(trigger);
+  control.append(trigger);
+  root.append(control);
   document.body.append(root);
-  return { root, trigger };
+  return { root, control, trigger };
 }
 
 describe('select.css', () => {
@@ -85,37 +92,40 @@ describe('select.css', () => {
       .filter((selector) => !selector.startsWith(':where('));
     // State and status rules are intentionally specific; defaults must stay zero-specificity.
     expect(unwrapped).toEqual([
-      '.ps-Select__trigger:focus-visible',
-      '.ps-Select__trigger[data-readonly]',
+      '.ps-Select__control:has(.ps-Select__trigger:focus-visible)',
+      '.ps-Select__control[data-readonly]',
       '.ps-Select[data-disabled]',
       '.ps-Select[data-disabled] .ps-Text[data-disabled]',
-      '.ps-Select__trigger[data-disabled]',
-      ".ps-Select[data-status='error'] .ps-Select__trigger",
-      ".ps-Select[data-status='warning'] .ps-Select__trigger",
-      ".ps-Select[data-status='success'] .ps-Select__trigger",
-      ".ps-Select[data-status='info'] .ps-Select__trigger",
+      '.ps-Select__control[data-disabled]',
+      ".ps-Select[data-status='error'] .ps-Select__control",
+      ".ps-Select[data-status='warning'] .ps-Select__control",
+      ".ps-Select[data-status='success'] .ps-Select__control",
+      ".ps-Select[data-status='info'] .ps-Select__control",
     ]);
   });
 
   it('keeps sizing independent of the optional document reset', () => {
-    const { root, trigger } = makeSelect();
+    const { root, control, trigger } = makeSelect();
     const popup = document.createElement('div');
     popup.className = 'ps-Select__popup';
+    const list = document.createElement('div');
+    list.className = 'ps-Select__list';
     const item = document.createElement('div');
     item.className = 'ps-SelectItem';
-    for (const element of [root, trigger, popup, item]) {
+    for (const element of [root, control, popup, list, item]) {
       expect(propertyFor(element, 'box-sizing')).toBe('border-box');
     }
+    expect(trigger).toBeInTheDocument();
   });
 
   it.each(['xs', 'sm', 'md', 'lg'])(
-    'sizes the %s trigger from a per-component token with a shared fallback',
+    'sizes the %s control from a per-component token with a shared fallback',
     (size) => {
-      const { trigger } = makeSelect({ 'data-size': size });
-      expect(propertyFor(trigger, '--ps-select-size')).toBe(
+      const { control } = makeSelect({ 'data-size': size });
+      expect(propertyFor(control, '--ps-select-size')).toBe(
         `var(--perses-select-size-${size}, var(--perses-control-size-${size}))`,
       );
-      expect(propertyFor(trigger, 'min-height')).toBe('var(--ps-select-size)');
+      expect(propertyFor(control, 'min-height')).toBe('var(--ps-select-size)');
     },
   );
 
@@ -136,10 +146,11 @@ describe('select.css', () => {
     expect(propertyFor(item, 'min-height')).toBe(rowHeight);
   });
 
-  it('stretches the root and trigger when fullWidth is set', () => {
-    const { root } = makeSelect({ 'data-full-width': 'true' });
+  it('stretches the root and control when fullWidth is set', () => {
+    const { root, control } = makeSelect({ 'data-full-width': 'true' });
     expect(propertyFor(root, 'display')).toBe('flex');
     expect(propertyFor(root, 'width')).toBe('100%');
+    expect(propertyFor(control, 'display')).toBe('flex');
     expect(propertyFor(makeSelect().root, 'display')).toBe('inline-flex');
   });
 
@@ -149,9 +160,9 @@ describe('select.css', () => {
     ['success', false],
     ['info', false],
   ])('colours the %s border from the status token (thickened=%s)', (status, thickened) => {
-    const { trigger } = makeSelect({ 'data-status': status });
-    expect(propertyFor(trigger, 'border-color')).toBe(`var(--perses-status-border-${status})`);
-    expect(propertyFor(trigger, 'box-shadow') !== '').toBe(thickened);
+    const { control } = makeSelect({ 'data-status': status });
+    expect(propertyFor(control, 'border-color')).toBe(`var(--perses-status-border-${status})`);
+    expect(propertyFor(control, 'box-shadow') !== '').toBe(thickened);
   });
 
   it('dims the disabled root once and not the disabled helper text again', () => {
@@ -174,10 +185,32 @@ describe('select.css', () => {
     expect(propertyFor(positioner, 'z-index')).toBe('var(--perses-z-index-overlay)');
     expect(propertyFor(popup, 'min-width')).toBe('var(--anchor-width)');
     expect(propertyFor(popup, 'max-height')).toBe('var(--available-height)');
-    expect(propertyFor(popup, 'overflow-y')).toBe('auto');
+    expect(propertyFor(popup, 'overflow')).toBe('hidden');
     expect(propertyFor(popup, 'background-color')).toBe('var(--perses-bg-overlay)');
     expect(propertyFor(popup, 'box-shadow')).toBe('var(--perses-shadow-overlay)');
     expect(propertyFor(popup, 'z-index')).toBe('');
+  });
+
+  it('draws the focus ring on the control while its trigger has keyboard focus', () => {
+    const ring = styleRules().find(
+      (rule) => rule.selectorText === '.ps-Select__control:has(.ps-Select__trigger:focus-visible)',
+    );
+    expect(ring?.style.getPropertyValue('outline')).toBe(
+      'var(--perses-focus-ring-width) solid var(--perses-focus-ring-color)',
+    );
+    expect(ring?.style.getPropertyValue('outline-offset')).toBe('var(--perses-focus-ring-offset)');
+  });
+
+  it('makes the inner list the scroller so a header can sit above it', () => {
+    const popup = document.createElement('div');
+    popup.className = 'ps-Select__popup';
+    const list = document.createElement('div');
+    list.className = 'ps-Select__list';
+    popup.append(list);
+    document.body.append(popup);
+    expect(propertyFor(list, 'overflow-y')).toBe('auto');
+    expect(propertyFor(list, 'min-height')).toBe('0');
+    expect(propertyFor(popup, 'overflow')).toBe('hidden');
   });
 
   it('insets the popup and rounds each row so the ring and rows share the Menu density', () => {
@@ -265,8 +298,10 @@ describe('select.css', () => {
   it('restates the focus ring and check in system colours when colours are forced', () => {
     const forced = source.slice(source.indexOf('@media (forced-colors: active)'));
     // The default focus rule is deliberately specific, so its forced-colors restatement must not be in :where().
-    expect(forced).toMatch(/\n\s*\.ps-Select__trigger:focus-visible \{[^}]*outline-color: Highlight/);
-    expect(forced).not.toContain(':where(.ps-Select__trigger:focus-visible)');
+    expect(forced).toMatch(
+      /\n\s*\.ps-Select__control:has\(\.ps-Select__trigger:focus-visible\) \{[^}]*outline-color: Highlight/,
+    );
+    expect(forced).not.toContain(':where(.ps-Select__control:has(');
     expect(forced).toMatch(/\.ps-SelectItem:focus-visible\)[\s\S]*?outline-color: Highlight/);
     expect(forced).toMatch(/\.ps-SelectItem__indicator\)[\s\S]*?color: CanvasText/);
   });
@@ -274,7 +309,7 @@ describe('select.css', () => {
   it('thickens the error and warning border when colours are forced, since box-shadow is dropped', () => {
     const forced = source.slice(source.indexOf('@media (forced-colors: active)'));
     expect(forced).toMatch(
-      /\.ps-Select\[data-status='error'\] \.ps-Select__trigger,\s*\.ps-Select\[data-status='warning'\] \.ps-Select__trigger \{\s*border-width: var\(--perses-border-width-md\)/,
+      /\.ps-Select\[data-status='error'\] \.ps-Select__control,\s*\.ps-Select\[data-status='warning'\] \.ps-Select__control \{\s*border-width: var\(--perses-border-width-md\)/,
     );
   });
 

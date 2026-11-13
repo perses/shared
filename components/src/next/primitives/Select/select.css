@@ -37,8 +37,8 @@
     color: var(--perses-text-secondary);
   }
 
-  /* ---- Trigger carries the border, like the TextField wrapper ---- */
-  :where(.ps-Select__trigger) {
+  /* ---- Control carries the border, like the TextField wrapper ---- */
+  :where(.ps-Select__control) {
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -53,7 +53,25 @@
     cursor: pointer;
   }
 
-  .ps-Select__trigger:focus-visible {
+  /* The trigger is a borderless button that fills the control, so the control draws the border and focus ring. */
+  :where(.ps-Select__trigger) {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    gap: var(--perses-spacing-xs);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: inherit;
+    cursor: inherit;
+    outline: 0;
+  }
+
+  .ps-Select__control:has(.ps-Select__trigger:focus-visible) {
     outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
     outline-offset: var(--perses-focus-ring-offset);
   }
@@ -83,7 +101,7 @@
     transform: rotate(180deg);
   }
 
-  .ps-Select__trigger[data-readonly] {
+  .ps-Select__control[data-readonly] {
     cursor: default;
   }
 
@@ -95,30 +113,30 @@
     opacity: 1;
   }
 
-  .ps-Select__trigger[data-disabled] {
+  .ps-Select__control[data-disabled] {
     cursor: not-allowed;
   }
 
   /* Sized via --ps-select-size: per-component --perses-select-size-<step>, else the shared control-size token. */
-  :where(.ps-Select[data-size='xs'] .ps-Select__trigger) {
+  :where(.ps-Select[data-size='xs'] .ps-Select__control) {
     --ps-select-size: var(--perses-select-size-xs, var(--perses-control-size-xs));
     padding: var(--perses-spacing-0) var(--perses-spacing-xs);
     font-size: var(--perses-font-size-xs);
   }
 
-  :where(.ps-Select[data-size='sm'] .ps-Select__trigger) {
+  :where(.ps-Select[data-size='sm'] .ps-Select__control) {
     --ps-select-size: var(--perses-select-size-sm, var(--perses-control-size-sm));
     padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
     font-size: var(--perses-font-size-xs);
   }
 
-  :where(.ps-Select[data-size='md'] .ps-Select__trigger) {
+  :where(.ps-Select[data-size='md'] .ps-Select__control) {
     --ps-select-size: var(--perses-select-size-md, var(--perses-control-size-md));
     padding: var(--perses-spacing-sm) var(--perses-spacing-md);
     font-size: var(--perses-font-size-sm);
   }
 
-  :where(.ps-Select[data-size='lg'] .ps-Select__trigger) {
+  :where(.ps-Select[data-size='lg'] .ps-Select__control) {
     --ps-select-size: var(--perses-select-size-lg, var(--perses-control-size-lg));
     padding: var(--perses-spacing-sm) var(--perses-spacing-lg);
     font-size: var(--perses-font-size-md);
@@ -126,18 +144,18 @@
 
   /* ---- Status variants ---- */
   /* error and warning also thicken the border so status is not conveyed by colour alone */
-  .ps-Select[data-status='error'] .ps-Select__trigger {
+  .ps-Select[data-status='error'] .ps-Select__control {
     border-color: var(--perses-status-border-error);
     box-shadow: inset 0 0 0 var(--perses-border-width-sm) var(--perses-status-border-error);
   }
-  .ps-Select[data-status='warning'] .ps-Select__trigger {
+  .ps-Select[data-status='warning'] .ps-Select__control {
     border-color: var(--perses-status-border-warning);
     box-shadow: inset 0 0 0 var(--perses-border-width-sm) var(--perses-status-border-warning);
   }
-  .ps-Select[data-status='success'] .ps-Select__trigger {
+  .ps-Select[data-status='success'] .ps-Select__control {
     border-color: var(--perses-status-border-success);
   }
-  .ps-Select[data-status='info'] .ps-Select__trigger {
+  .ps-Select[data-status='info'] .ps-Select__control {
     border-color: var(--perses-status-border-info);
   }
 
@@ -154,7 +172,7 @@
     min-width: var(--anchor-width);
     max-height: var(--available-height);
     padding: var(--perses-spacing-xs);
-    overflow-y: auto;
+    overflow: hidden;
     background-color: var(--perses-bg-overlay);
     color: var(--perses-text-primary);
     font-family: var(--perses-font-family);
@@ -176,6 +194,15 @@
 
   :where(.ps-Select__popup[data-size='lg']) {
     font-size: var(--perses-font-size-md);
+  }
+
+  /* The list scrolls, not the popup, so a header can stay fixed above it. */
+  :where(.ps-Select__list) {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    outline: 0;
   }
 
   :where(.ps-Select__popup[data-starting-style]),
@@ -255,7 +282,7 @@
 
   @media (forced-colors: active) {
     /* Same specificity as the focus rule above; a :where() restatement would always lose to it. */
-    .ps-Select__trigger:focus-visible {
+    .ps-Select__control:has(.ps-Select__trigger:focus-visible) {
       outline-color: Highlight;
     }
 
@@ -268,8 +295,8 @@
     }
 
     /* Forced colours drop box-shadow and recolour borders, so thicken the border itself instead. */
-    .ps-Select[data-status='error'] .ps-Select__trigger,
-    .ps-Select[data-status='warning'] .ps-Select__trigger {
+    .ps-Select[data-status='error'] .ps-Select__control,
+    .ps-Select[data-status='warning'] .ps-Select__control {
       border-width: var(--perses-border-width-md);
     }
   }
