@@ -36,7 +36,7 @@ export function isPanelGroupVisible(visibility: Visibility | undefined, variable
     return true;
   }
   const state = variableValues[visibility.variable];
-  if (!state || (state.loading && state.value == null)) {
+  if (!state || (state.loading && state.value === null)) {
     return false;
   }
   const selected: string[] = [state.value ?? []].flat();
