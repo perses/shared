@@ -79,7 +79,7 @@ describe('GridTitle collapsed panel count', () => {
         panelGroupId={0}
         title="Workers"
         collapse={{ isOpen: true, onToggleOpen: vi.fn() }}
-        visibilityNotice={{ hidden: true, description: 'Shown when phase notEquals PRD' }}
+        visibilityNotice={{ hidden: true, description: 'Shown when phase is not PRD' }}
       />,
     );
     expect(screen.getByRole('button', { name: 'Group hidden for the current selection' })).toBeInTheDocument();
@@ -89,10 +89,22 @@ describe('GridTitle collapsed panel count', () => {
         panelGroupId={0}
         title="Workers"
         collapse={{ isOpen: true, onToggleOpen: vi.fn() }}
-        visibilityNotice={{ hidden: false, description: 'Shown when phase notEquals PRD' }}
+        visibilityNotice={{ hidden: false, description: 'Shown when phase is not PRD' }}
       />,
     );
     expect(screen.getByRole('button', { name: 'Group shown for the current selection' })).toBeInTheDocument();
+  });
+
+  it('shows the visibility mark without an empty heading when the group has no title', () => {
+    render(
+      <GridTitle
+        panelGroupId={0}
+        title=""
+        visibilityNotice={{ hidden: true, description: 'Shown when phase is not PRD' }}
+      />,
+    );
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Group hidden for the current selection' })).toBeInTheDocument();
   });
 
   it('hides count when collapse is not used', () => {

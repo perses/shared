@@ -43,10 +43,6 @@ export interface GridTitleProps {
   visibilityNotice?: VisibilityNotice;
 }
 
-/**
- * Renders the title for a Grid section, optionally also supporting expanding
- * and collapsing
- */
 function VisibilityMark({ notice }: { notice: VisibilityNotice }): ReactElement {
   const Icon = notice.hidden ? EyeOffIcon : EyeIcon;
   return (
@@ -63,6 +59,10 @@ function VisibilityMark({ notice }: { notice: VisibilityNotice }): ReactElement 
   );
 }
 
+/**
+ * Renders the title for a Grid section, optionally also supporting expanding
+ * and collapsing
+ */
 export function GridTitle(props: GridTitleProps): ReactElement {
   const { panelGroupId, title: rawTitle, panelCount, collapse, visibilityNotice } = props;
 
@@ -76,7 +76,7 @@ export function GridTitle(props: GridTitleProps): ReactElement {
 
   const text = (
     <>
-      <Typography variant="h2">{title}</Typography>
+      {title !== '' && <Typography variant="h2">{title}</Typography>}
       {showCount && (
         <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
           ({panelCount} {panelCount === 1 ? 'panel' : 'panels'})

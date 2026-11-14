@@ -33,7 +33,7 @@ export interface GridLayoutProps {
 /**
  * Layout component that arranges children in a Grid based on the definition.
  */
-export function GridLayout(props: GridLayoutProps): ReactElement | null {
+export function GridLayout(props: GridLayoutProps): ReactElement {
   const { panelGroupId, panelOptions, panelFullHeight } = props;
   const groupDefinition: PanelGroupDefinition = usePanelGroup(panelGroupId);
   const { updatePanelGroupLayouts } = usePanelGroupActions(panelGroupId);
@@ -54,7 +54,7 @@ export function GridLayout(props: GridLayoutProps): ReactElement | null {
 
   // Edit mode keeps hidden groups reachable.
   if (!isEditMode && !isPanelGroupVisible(groupDefinition.visibility, variableValues)) {
-    return null;
+    return <></>;
   }
   const notice =
     isEditMode && groupDefinition.visibility ? visibilityNotice(groupDefinition.visibility, variableValues) : undefined;

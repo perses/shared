@@ -64,7 +64,7 @@ describe('GridLayout visibility', () => {
     vi.mocked(useEditMode).mockReturnValue({ isEditMode: true } as ReturnType<typeof useEditMode>);
     render(<GridLayout panelGroupId={0} />);
     expect(vi.mocked(Row).mock.calls[0]?.[0]).toMatchObject({
-      visibilityNotice: { hidden: true, description: 'Shown when phase equals DEV' },
+      visibilityNotice: { hidden: true, description: 'Shown when phase is DEV' },
     });
   });
 
@@ -73,7 +73,7 @@ describe('GridLayout visibility', () => {
     vi.mocked(useEditMode).mockReturnValue({ isEditMode: true } as ReturnType<typeof useEditMode>);
     render(<GridLayout panelGroupId={0} />);
     expect(vi.mocked(Row).mock.calls[0]?.[0]).toMatchObject({
-      visibilityNotice: { hidden: false, description: 'Shown when phase equals DEV' },
+      visibilityNotice: { hidden: false, description: 'Shown when phase is DEV' },
     });
   });
 

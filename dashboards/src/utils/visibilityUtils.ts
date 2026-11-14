@@ -12,13 +12,15 @@
 // limitations under the License.
 
 import type { VariableStateMap } from '@perses-dev/plugin-system';
+import type { Visibility } from '@perses-dev/spec';
 
-import type { PanelGroupVisibility } from '../model';
-
-// Patterns are anchored like Prometheus label matchers; an invalid pattern never matches.
+// Anchored like a Prometheus matcher. A leading RE2 (?i) becomes the JS i flag.
+// Any other pattern the JS engine rejects never matches.
 function matchesPattern(pattern: string, value: string): boolean {
+  const caseInsensitive = pattern.startsWith('(?i)');
+  const source = caseInsensitive ? pattern.slice(4) : pattern;
   try {
-    return new RegExp(`^(?:${pattern})$`).test(value);
+    return new RegExp(`^(?:${source})$`, caseInsensitive ? 'i' : '').test(value);
   } catch {
     return false;
   }
@@ -26,17 +28,15 @@ function matchesPattern(pattern: string, value: string): boolean {
 
 /**
  * A group without visibility is always visible. Otherwise the selected values of the variable are tested against
- * `visibility.value` with `visibility.operator` (default `equals`); an unknown or loading variable hides the group.
+ * `visibility.value` with `visibility.operator` (default `equals`). An unknown variable, or one still loading
+ * with no value yet, hides the group. A refresh that keeps the previous value leaves the group mounted.
  */
-export function isPanelGroupVisible(
-  visibility: PanelGroupVisibility | undefined,
-  variableValues: VariableStateMap,
-): boolean {
+export function isPanelGroupVisible(visibility: Visibility | undefined, variableValues: VariableStateMap): boolean {
   if (!visibility) {
     return true;
   }
   const state = variableValues[visibility.variable];
-  if (!state || state.loading) {
+  if (!state || (state.loading && state.value == null)) {
     return false;
   }
   const selected: string[] = [state.value ?? []].flat();
@@ -59,10 +59,17 @@ export interface VisibilityNotice {
   description: string;
 }
 
-export function visibilityNotice(visibility: PanelGroupVisibility, variableValues: VariableStateMap): VisibilityNotice {
+const operatorText: Record<NonNullable<Visibility['operator']>, string> = {
+  equals: 'is',
+  notEquals: 'is not',
+  matches: 'matches',
+  notMatches: 'does not match',
+};
+
+export function visibilityNotice(visibility: Visibility, variableValues: VariableStateMap): VisibilityNotice {
   const operator = visibility.operator ?? 'equals';
   return {
     hidden: !isPanelGroupVisible(visibility, variableValues),
-    description: `Shown when ${visibility.variable} ${operator} ${visibility.value.join(', ')}`,
+    description: `Shown when ${visibility.variable} ${operatorText[operator]} ${visibility.value.join(', ')}`,
   };
 }

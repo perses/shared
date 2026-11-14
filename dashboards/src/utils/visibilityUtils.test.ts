@@ -52,9 +52,13 @@ describe('isPanelGroupVisible', () => {
     expect(isPanelGroupVisible(visibility, {})).toBe(false);
   });
 
-  it('is hidden while the variable is loading', () => {
+  it('keeps the previous value while a refresh is loading', () => {
     const variables: VariableStateMap = { phase: { value: 'DEV', loading: true } };
-    expect(isPanelGroupVisible(visibility, variables)).toBe(false);
+    expect(isPanelGroupVisible(visibility, variables)).toBe(true);
+  });
+
+  it('is hidden while loading before a value exists', () => {
+    expect(isPanelGroupVisible(visibility, { phase: { value: null, loading: true } })).toBe(false);
   });
 
   it('matches values exactly', () => {
@@ -75,8 +79,8 @@ describe('isPanelGroupVisible', () => {
       expect(isPanelGroupVisible(notPrd, { phase: { value: ['DEV', 'PRD'], loading: false } })).toBe(false);
     });
 
-    it('is hidden while the variable is loading or unknown', () => {
-      expect(isPanelGroupVisible(notPrd, { phase: { value: 'DEV', loading: true } })).toBe(false);
+    it('keeps a loaded value during a refresh and hides an unknown variable', () => {
+      expect(isPanelGroupVisible(notPrd, { phase: { value: 'DEV', loading: true } })).toBe(true);
       expect(isPanelGroupVisible(notPrd, {})).toBe(false);
     });
   });
@@ -104,6 +108,12 @@ describe('isPanelGroupVisible', () => {
       const invalid: Visibility = { variable: 'phase', operator: 'matches', value: ['('] };
       expect(isPanelGroupVisible(invalid, { phase: { value: 'DEV', loading: false } })).toBe(false);
     });
+
+    it('honors a leading case-insensitive flag', () => {
+      const insensitive: Visibility = { variable: 'phase', operator: 'matches', value: ['(?i)dev'] };
+      expect(isPanelGroupVisible(insensitive, { phase: { value: 'DEV', loading: false } })).toBe(true);
+      expect(isPanelGroupVisible(insensitive, { phase: { value: 'PRD', loading: false } })).toBe(false);
+    });
   });
 
   describe('notMatches', () => {
@@ -125,11 +135,11 @@ describe('visibilityNotice', () => {
   it('describes the rule and whether the current selection hides the group', () => {
     expect(visibilityNotice(rule, { phase: { value: 'DEV', loading: false } })).toEqual({
       hidden: false,
-      description: 'Shown when phase notEquals PRD',
+      description: 'Shown when phase is not PRD',
     });
     expect(visibilityNotice(rule, { phase: { value: 'PRD', loading: false } })).toEqual({
       hidden: true,
-      description: 'Shown when phase notEquals PRD',
+      description: 'Shown when phase is not PRD',
     });
   });
 
@@ -138,7 +148,7 @@ describe('visibilityNotice', () => {
       visibilityNotice({ variable: 'phase', value: ['DEV'] }, { phase: { value: 'DEV', loading: false } }),
     ).toEqual({
       hidden: false,
-      description: 'Shown when phase equals DEV',
+      description: 'Shown when phase is DEV',
     });
   });
 });

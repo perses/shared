@@ -66,11 +66,6 @@ export interface PanelGroupItemLayout extends BaseLayout {
 }
 
 /**
- * The group is only rendered when the selected values of the variable satisfy the operator against the values.
- */
-export type PanelGroupVisibility = Visibility;
-
-/**
  * Definition of a panel group, containing layout and panel information.
  */
 export interface PanelGroupDefinition {
@@ -79,7 +74,7 @@ export interface PanelGroupDefinition {
   title?: string;
   repeatedOriginId?: PanelGroupId; // ID of the original panel group from which this repeated group is derived
   repeatVariable?: string; // Optional, used for repeated panel groups
-  visibility?: PanelGroupVisibility;
+  visibility?: Visibility;
   itemLayouts: PanelGroupItemLayout[];
   itemPanelKeys: Record<PanelGroupItemLayoutId, string>;
 }
