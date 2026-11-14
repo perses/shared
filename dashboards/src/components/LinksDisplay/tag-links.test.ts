@@ -14,85 +14,26 @@
 import { describe, expect, it } from 'vitest';
 
 import { isDashboardLinkValid, isTagLink, normalizeDashboardLink } from './dashboard-link';
-import { appBasePath, appendLinkState, buildTagLinkHref, selectTagLinkTargets } from './tag-links';
-import type { TagLinkDashboard } from './tag-links';
+import { appendLinkState, tagLinkTargets } from './tag-links';
+import type { TagLinkHit } from './tag-links';
 
-const dashboards: TagLinkDashboard[] = [
-  {
-    kind: 'Dashboard',
-    metadata: { name: 'current', project: 'demo', tags: ['traffic'] },
-    spec: { display: { name: 'Current' }, variables: [{ spec: { name: 'env' } }] },
-  },
-  {
-    kind: 'Dashboard',
-    metadata: { name: 'service-detail', project: 'demo', tags: ['traffic', 'api'] },
-    spec: { display: { name: 'Service detail' }, variables: [{ spec: { name: 'env' } }, { spec: { name: 'region' } }] },
-  },
-  {
-    kind: 'Dashboard',
-    metadata: { name: 'other', project: 'demo', tags: ['billing'] },
-    spec: { display: { name: 'Billing' } },
-  },
-  {
-    kind: 'Dashboard',
-    metadata: { name: 'abroad', project: 'other', tags: ['traffic'] },
-    spec: { display: { name: 'Abroad' } },
-  },
-  {
-    kind: 'EphemeralDashboard',
-    metadata: { name: 'scratch', project: 'demo', tags: ['traffic'] },
-    spec: { display: { name: 'Scratch' } },
-  },
+const hits: TagLinkHit[] = [
+  { name: 'current', label: 'Current', variableNames: ['env'] },
+  { name: 'service-detail', label: 'Service detail', variableNames: ['env', 'region'] },
+  { name: 'billing', label: 'Billing' },
 ];
 
-describe('selectTagLinkTargets', () => {
-  it('keeps dashboards that have every tag and drops the current dashboard', () => {
-    expect(
-      selectTagLinkTargets({ dashboards, tags: ['traffic'], project: 'demo', currentName: 'current' }).map(
-        (target) => target.name,
-      ),
-    ).toEqual(['service-detail']);
+describe('tagLinkTargets', () => {
+  it('drops the current dashboard and sorts by label', () => {
+    expect(tagLinkTargets(hits, 'current').map((target) => target.name)).toEqual(['billing', 'service-detail']);
   });
 
-  it('matches tags with AND', () => {
-    expect(
-      selectTagLinkTargets({ dashboards, tags: ['traffic', 'api'], project: 'demo', currentName: 'current' }),
-    ).toEqual([{ name: 'service-detail', label: 'Service detail', variableNames: ['env', 'region'] }]);
-  });
-});
-
-describe('buildTagLinkHref', () => {
-  it('forwards the relative time range and variables that exist on the destination', () => {
-    expect(
-      buildTagLinkHref({
-        basePath: '/perses',
-        project: 'demo',
-        name: 'service-detail',
-        keepTime: true,
-        includeVariables: true,
-        timeRange: { pastDuration: '1h' },
-        variables: {
-          env: { value: 'production' },
-          missing: { value: 'nope' },
-          empty: { value: '' },
-        },
-        destinationVariableNames: ['env', 'region'],
-      }),
-    ).toBe('/perses/projects/demo/dashboards/service-detail?start=1h&var-env=production');
-  });
-
-  it('encodes an absolute time range in unix milliseconds', () => {
-    const href = buildTagLinkHref({
-      basePath: '',
-      project: 'demo',
-      name: 'service detail',
-      keepTime: true,
-      includeVariables: false,
-      timeRange: { start: new Date('2026-01-01T00:00:00Z'), end: new Date('2026-01-01T01:00:00Z') },
-      variables: {},
-      destinationVariableNames: [],
+  it('keeps the variable names returned by the search', () => {
+    expect(tagLinkTargets(hits, 'current').find((target) => target.name === 'service-detail')).toEqual({
+      name: 'service-detail',
+      label: 'Service detail',
+      variableNames: ['env', 'region'],
     });
-    expect(href).toBe('/projects/demo/dashboards/service%20detail?start=1767225600000&end=1767229200000');
   });
 });
 
@@ -112,6 +53,16 @@ describe('appendLinkState', () => {
     ).toBe('https://example.com/runbook?page=1&start=1h&var-env=production&var-region=eu#section');
   });
 
+  it('appends time without rewriting the original query', () => {
+    expect(
+      appendLinkState('https://example.com/runbook?a=b%20c&flag#section', {
+        keepTime: true,
+        includeVariables: false,
+        timeRange: { pastDuration: '1h' },
+      }),
+    ).toBe('https://example.com/runbook?a=b%20c&flag&start=1h#section');
+  });
+
   it('leaves a URL unchanged when both flags are off', () => {
     expect(
       appendLinkState('https://example.com/runbook', {
@@ -124,10 +75,31 @@ describe('appendLinkState', () => {
   });
 });
 
-describe('appBasePath', () => {
-  it('returns the path before /projects/', () => {
-    expect(appBasePath('/perses/projects/demo/dashboards/overview')).toBe('/perses');
-    expect(appBasePath('/projects/demo/dashboards/overview')).toBe('');
+describe('appendLinkState variable filter', () => {
+  it('forwards only the variables named by the caller', () => {
+    expect(
+      appendLinkState('/perses/projects/demo/dashboards/service-detail', {
+        keepTime: true,
+        includeVariables: true,
+        timeRange: { pastDuration: '1h' },
+        variables: {
+          env: { value: 'production' },
+          missing: { value: 'nope' },
+          empty: { value: '' },
+        },
+        variableNames: ['env', 'region'],
+      }),
+    ).toBe('/perses/projects/demo/dashboards/service-detail?start=1h&var-env=production');
+  });
+
+  it('encodes an absolute time range in unix milliseconds', () => {
+    expect(
+      appendLinkState('/projects/demo/dashboards/service%20detail', {
+        keepTime: true,
+        includeVariables: false,
+        timeRange: { start: new Date('2026-01-01T00:00:00Z'), end: new Date('2026-01-01T01:00:00Z') },
+      }),
+    ).toBe('/projects/demo/dashboards/service%20detail?start=1767225600000&end=1767229200000');
   });
 });
 
@@ -153,9 +125,7 @@ describe('dashboard link validity', () => {
     ).toEqual({
       name: 'Docs',
       url: 'https://perses.dev',
-      tooltip: undefined,
       renderVariables: true,
-      targetBlank: undefined,
       keepTime: true,
       includeVariables: true,
     });
@@ -164,10 +134,15 @@ describe('dashboard link validity', () => {
   it('drops the URL when saving a tag link', () => {
     expect(normalizeDashboardLink({ name: ' Menu ', url: '', tags: [' traffic '], keepTime: true })).toEqual({
       name: 'Menu',
-      tooltip: undefined,
       tags: ['traffic'],
       keepTime: true,
-      includeVariables: undefined,
     });
+  });
+
+  it('rejects more than 20 tags and a tag longer than 50 characters', () => {
+    expect(isDashboardLinkValid({ name: 'Menu', tags: Array.from({ length: 21 }, (_, index) => `tag${index}`) })).toBe(
+      false,
+    );
+    expect(isDashboardLinkValid({ name: 'Menu', tags: ['x'.repeat(51)] })).toBe(false);
   });
 });

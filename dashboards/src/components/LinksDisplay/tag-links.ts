@@ -17,17 +17,10 @@ import { isRelativeTimeRange } from '@perses-dev/spec';
 
 import { encodeVariableValue } from '../../context/VariableProvider/query-params';
 
-export interface TagLinkDashboard {
-  kind: string;
-  metadata: {
-    name: string;
-    project?: string;
-    tags?: string[];
-  };
-  spec?: {
-    display?: { name?: string };
-    variables?: Array<{ spec?: { name?: string } }>;
-  };
+export interface TagLinkHit {
+  name: string;
+  label: string;
+  variableNames?: string[];
 }
 
 export interface TagLinkTarget {
@@ -36,64 +29,21 @@ export interface TagLinkTarget {
   variableNames: string[];
 }
 
-export function appBasePath(pathname: string): string {
-  const marker = '/projects/';
-  const index = pathname.indexOf(marker);
-  if (index <= 0) {
-    return '';
-  }
-  return pathname.slice(0, index);
-}
-
-export function selectTagLinkTargets(input: {
-  dashboards: TagLinkDashboard[];
-  tags: string[];
-  project: string;
-  currentName: string;
-}): TagLinkTarget[] {
-  const required = input.tags.map((tag) => tag.trim()).filter((tag) => tag.length > 0);
+export function tagLinkTargets(hits: TagLinkHit[], currentName: string): TagLinkTarget[] {
   const targets: TagLinkTarget[] = [];
-  for (const dashboard of input.dashboards) {
-    if (dashboard.kind !== 'Dashboard') {
+  for (const hit of hits) {
+    if (hit.name === currentName) {
       continue;
     }
-    if (dashboard.metadata.project !== undefined && dashboard.metadata.project !== input.project) {
-      continue;
-    }
-    if (dashboard.metadata.name === input.currentName) {
-      continue;
-    }
-    const have = new Set(dashboard.metadata.tags ?? []);
-    if (!required.every((tag) => have.has(tag))) {
-      continue;
-    }
-    const label = dashboard.spec?.display?.name?.trim() || dashboard.metadata.name;
-    const variableNames = (dashboard.spec?.variables ?? [])
-      .map((variable) => variable.spec?.name)
-      .filter((name): name is string => Boolean(name));
-    targets.push({ name: dashboard.metadata.name, label, variableNames });
+    targets.push({
+      name: hit.name,
+      label: hit.label.trim() || hit.name,
+      variableNames: hit.variableNames ?? [],
+    });
   }
   return targets.toSorted(
     (left, right) => left.label.localeCompare(right.label) || left.name.localeCompare(right.name),
   );
-}
-
-export function buildTagLinkHref(input: {
-  basePath: string;
-  project: string;
-  name: string;
-  keepTime: boolean;
-  includeVariables: boolean;
-  timeRange?: TimeRangeValue;
-  variables?: Record<string, { value: VariableValue }>;
-  destinationVariableNames: string[];
-}): string {
-  const base = input.basePath.endsWith('/') ? input.basePath.slice(0, -1) : input.basePath;
-  const path = `${base}/projects/${encodeURIComponent(input.project)}/dashboards/${encodeURIComponent(input.name)}`;
-  const params = new URLSearchParams();
-  appendLinkParams(params, input, new Set(input.destinationVariableNames));
-  const query = params.toString();
-  return query === '' ? path : `${path}?${query}`;
 }
 
 /** Appends time and variables to an existing URL. A URL copies every current variable. */
@@ -104,6 +54,7 @@ export function appendLinkState(
     includeVariables: boolean;
     timeRange?: TimeRangeValue;
     variables?: Record<string, { value: VariableValue }>;
+    variableNames?: string[];
   },
 ): string {
   if ((!input.keepTime && !input.includeVariables) || url === '') {
@@ -114,51 +65,70 @@ export function appendLinkState(
   const beforeHash = hashAt >= 0 ? url.slice(0, hashAt) : url;
   const queryAt = beforeHash.indexOf('?');
   const path = queryAt >= 0 ? beforeHash.slice(0, queryAt) : beforeHash;
-  const params = new URLSearchParams(queryAt >= 0 ? beforeHash.slice(queryAt + 1) : '');
-  appendLinkParams(params, input);
-  const query = params.toString();
+  const originalQuery = queryAt >= 0 ? beforeHash.slice(queryAt + 1) : '';
+  const { replace, additions } = linkStateParams(input);
+  const kept = originalQuery
+    .split('&')
+    .filter((part) => part !== '' && !replace.has(queryParamName(part)))
+    .join('&');
+  const query = [kept, additions.join('&')].filter((part) => part !== '').join('&');
   return query === '' ? `${path}${hash}` : `${path}?${query}${hash}`;
 }
 
-function appendLinkParams(
-  params: URLSearchParams,
-  input: {
-    keepTime: boolean;
-    includeVariables: boolean;
-    timeRange?: TimeRangeValue;
-    variables?: Record<string, { value: VariableValue }>;
-  },
-  allowed?: Set<string>,
-): void {
+function linkStateParams(input: {
+  keepTime: boolean;
+  includeVariables: boolean;
+  timeRange?: TimeRangeValue;
+  variables?: Record<string, { value: VariableValue }>;
+  variableNames?: string[];
+}): { replace: Set<string>; additions: string[] } {
+  const replace = new Set<string>();
+  const additions: string[] = [];
   if (input.keepTime && input.timeRange) {
-    appendTimeRange(params, input.timeRange);
+    appendTimeRange(replace, additions, input.timeRange);
   }
-  if (!input.includeVariables || !input.variables) {
-    return;
-  }
-  for (const name of Object.keys(input.variables).toSorted()) {
-    if (allowed && !allowed.has(name)) {
-      continue;
+  if (input.includeVariables && input.variables) {
+    const allowed = input.variableNames === undefined ? undefined : new Set(input.variableNames);
+    for (const name of Object.keys(input.variables).toSorted()) {
+      if (allowed && !allowed.has(name)) {
+        continue;
+      }
+      const encoded = encodeVariableValue(input.variables[name]?.value ?? null);
+      if (!encoded) {
+        continue;
+      }
+      const key = `var-${name}`;
+      replace.add(key);
+      additions.push(encodeQueryParam(key, encoded));
     }
-    const encoded = encodeVariableValue(input.variables[name]?.value ?? null);
-    if (!encoded) {
-      continue;
-    }
-    params.set(`var-${name}`, encoded);
   }
+  return { replace, additions };
 }
 
-function appendTimeRange(params: URLSearchParams, timeRange: TimeRangeValue): void {
+function appendTimeRange(replace: Set<string>, additions: string[], timeRange: TimeRangeValue): void {
   if (isRelativeTimeRange(timeRange)) {
-    params.set('start', timeRange.pastDuration);
+    replace.add('start');
+    additions.push(encodeQueryParam('start', timeRange.pastDuration));
     return;
   }
   const start = encodeTimeRangeValue(timeRange.start);
   const end = encodeTimeRangeValue(timeRange.end);
   if (start) {
-    params.set('start', start);
+    replace.add('start');
+    additions.push(encodeQueryParam('start', start));
   }
   if (end) {
-    params.set('end', end);
+    replace.add('end');
+    additions.push(encodeQueryParam('end', end));
   }
+}
+
+function queryParamName(part: string): string {
+  const eq = part.indexOf('=');
+  const raw = eq >= 0 ? part.slice(0, eq) : part;
+  return decodeURIComponent(raw.replaceAll('+', ' '));
+}
+
+function encodeQueryParam(name: string, value: string): string {
+  return new URLSearchParams([[name, value]]).toString();
 }

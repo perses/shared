@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { linkSchema } from '@perses-dev/spec';
 import type { Link } from '@perses-dev/spec';
 
 // Editor draft. A saved link is the spec union, which needs either a URL or tags.
@@ -20,51 +21,20 @@ export interface DashboardLink {
   tooltip?: string;
   renderVariables?: boolean;
   targetBlank?: boolean;
-  tags?: string[];
+  tags?: string[] | null;
   keepTime?: boolean;
   includeVariables?: boolean;
 }
 
-export function linkTags(link: DashboardLink): string[] {
-  return (link.tags ?? []).map((tag) => tag.trim()).filter((tag) => tag.length > 0);
-}
-
 export function isTagLink(link: DashboardLink): boolean {
-  return linkTags(link).length > 0 && (link.url?.trim() ?? '') === '';
+  const tags = link.tags ?? [];
+  return tags.some((tag) => tag.trim() !== '') && (link.url?.trim() ?? '') === '';
 }
 
 export function isDashboardLinkValid(link: DashboardLink): boolean {
-  const url = link.url?.trim() ?? '';
-  const tags = linkTags(link);
-  if (url !== '' && tags.length > 0) {
-    return false;
-  }
-  if (url !== '') {
-    return true;
-  }
-  return tags.length > 0 && (link.name?.trim() ?? '') !== '';
+  return linkSchema.safeParse(link).success;
 }
 
 export function normalizeDashboardLink(link: DashboardLink): Link {
-  const tags = linkTags(link);
-  const url = link.url?.trim() ?? '';
-  if (tags.length > 0 && url === '') {
-    return {
-      name: link.name?.trim() ?? '',
-      tooltip: link.tooltip,
-      tags,
-      ...(link.targetBlank === undefined ? {} : { targetBlank: link.targetBlank }),
-      keepTime: link.keepTime,
-      includeVariables: link.includeVariables,
-    };
-  }
-  return {
-    name: link.name,
-    url,
-    tooltip: link.tooltip,
-    renderVariables: link.renderVariables,
-    targetBlank: link.targetBlank,
-    keepTime: link.keepTime,
-    includeVariables: link.includeVariables,
-  };
+  return linkSchema.parse(link);
 }

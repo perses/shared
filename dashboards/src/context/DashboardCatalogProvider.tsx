@@ -11,35 +11,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { useFetch } from '@perses-dev/client';
+import type { TimeRangeValue, VariableValue } from '@perses-dev/spec';
 import type { ReactElement, ReactNode } from 'react';
-import { createContext, useCallback, useContext } from 'react';
+import { createContext, useContext } from 'react';
 
-import { appBasePath } from '../components/LinksDisplay/tag-links';
-import type { TagLinkDashboard } from '../components/LinksDisplay/tag-links';
+import type { TagLinkHit } from '../components/LinksDisplay/tag-links';
 
-export type ListProjectDashboards = (project: string) => Promise<TagLinkDashboard[]>;
+export interface TagLinkHrefInput {
+  project: string;
+  name: string;
+  keepTime: boolean;
+  includeVariables: boolean;
+  timeRange?: TimeRangeValue;
+  variables?: Record<string, { value: VariableValue }>;
+  variableNames: string[];
+}
 
-const DashboardCatalogContext = createContext<ListProjectDashboards | undefined>(undefined);
+export interface DashboardCatalog {
+  search: (project: string, tags: string[]) => Promise<TagLinkHit[]>;
+  queryKey: (project: string, tags: string[]) => readonly unknown[];
+  href: (input: TagLinkHrefInput) => string;
+}
+
+const DashboardCatalogContext = createContext<DashboardCatalog | undefined>(undefined);
 
 export interface DashboardCatalogProviderProps {
-  listDashboards: ListProjectDashboards;
+  catalog: DashboardCatalog;
   children: ReactNode;
 }
 
-export function DashboardCatalogProvider({ listDashboards, children }: DashboardCatalogProviderProps): ReactElement {
-  return <DashboardCatalogContext.Provider value={listDashboards}>{children}</DashboardCatalogContext.Provider>;
+export function DashboardCatalogProvider({ catalog, children }: DashboardCatalogProviderProps): ReactElement {
+  return <DashboardCatalogContext.Provider value={catalog}>{children}</DashboardCatalogContext.Provider>;
 }
 
-export function useListProjectDashboards(): ListProjectDashboards {
-  const listDashboards = useContext(DashboardCatalogContext);
-  const { fetchJson } = useFetch();
-  const fallback = useCallback(
-    (project: string) => {
-      const prefix = typeof window === 'undefined' ? '' : appBasePath(window.location.pathname);
-      return fetchJson<TagLinkDashboard[]>(`${prefix}/api/v1/projects/${encodeURIComponent(project)}/dashboards`);
-    },
-    [fetchJson],
-  );
-  return listDashboards ?? fallback;
+export function useDashboardCatalog(): DashboardCatalog | undefined {
+  return useContext(DashboardCatalogContext);
 }

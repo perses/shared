@@ -70,4 +70,12 @@ describe('DashboardLinksEditor', () => {
     expect(within(rowByName('Second')).getByText('https://example.com/second')).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Tags' })).toHaveValue('foo,');
   });
+
+  test('disables apply when a tag exceeds the spec limit', () => {
+    render(
+      <DashboardLinksEditor links={[{ name: 'Menu', tags: ['x'.repeat(51)] }]} onChange={vi.fn()} onCancel={vi.fn()} />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Apply' })).toBeDisabled();
+  });
 });

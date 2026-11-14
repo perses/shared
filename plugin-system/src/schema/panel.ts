@@ -31,17 +31,16 @@ const layoutDefinitionSchema = z
   })
   .optional();
 
-// Spec publishes these schemas as ZodType<Output>, whose Zod 4 input defaults to unknown.
-export const panelEditorSchema = z.object({
+export const panelEditorSchema: z.ZodType<PanelEditorValues> = z.object({
   groupId: z.number(),
   panelDefinition: panelDefinitionSchema,
   layoutDefinition: layoutDefinitionSchema,
-}) as z.ZodType<PanelEditorValues, PanelEditorValues>;
+});
 
-export function buildPanelEditorSchema(pluginSchema: PluginSchema): z.ZodType<PanelEditorValues, PanelEditorValues> {
+export function buildPanelEditorSchema(pluginSchema: PluginSchema): z.ZodType<PanelEditorValues> {
   return z.object({
     groupId: z.number(),
     panelDefinition: buildPanelDefinitionSchema(pluginSchema),
     layoutDefinition: layoutDefinitionSchema,
-  }) as z.ZodType<PanelEditorValues, PanelEditorValues>;
+  });
 }

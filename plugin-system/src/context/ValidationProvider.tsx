@@ -29,7 +29,7 @@ import { buildPanelEditorSchema, panelEditorSchema as defaultPanelEditorSchema }
 
 export interface ValidationSchemas {
   datasourceEditorSchema: z.ZodType<DatasourceDefinition, DatasourceDefinition>;
-  panelEditorSchema: z.ZodType<PanelEditorValues, PanelEditorValues>;
+  panelEditorSchema: z.ZodType<PanelEditorValues>;
   variableEditorSchema: z.ZodType<VariableDefinition, VariableDefinition>;
   annotationEditorSchema: z.ZodType<AnnotationSpec, AnnotationSpec>;
   setDatasourceEditorSchemaPlugin: (pluginSchema: PluginSchema) => void;
@@ -58,8 +58,7 @@ interface ValidationProviderProps {
 export function ValidationProvider({ children }: ValidationProviderProps): ReactElement {
   const [datasourceEditorSchema, setDatasourceEditorSchema] =
     useState<z.ZodType<DatasourceDefinition, DatasourceDefinition>>(datasourceDefinitionSchema);
-  const [panelEditorSchema, setPanelEditorSchema] =
-    useState<z.ZodType<PanelEditorValues, PanelEditorValues>>(defaultPanelEditorSchema);
+  const [panelEditorSchema, setPanelEditorSchema] = useState<z.ZodType<PanelEditorValues>>(defaultPanelEditorSchema);
   const [variableEditorSchema, setVariableEditorSchema] =
     useState<z.ZodType<VariableDefinition, VariableDefinition>>(variableDefinitionSchema);
   const [annotationEditorSchema, setAnnotationEditorSchema] =

@@ -14,14 +14,14 @@
 import type { Theme } from '@mui/material';
 import { IconButton, Link as LinkComponent, Menu, MenuItem, Chip, capitalize, Stack } from '@mui/material';
 import { InfoTooltip, sanitizeUrl } from '@perses-dev/components';
-import { useReplaceVariablesInString, useReplaceVariablesInUrl, useTimeRange } from '@perses-dev/plugin-system';
+import { useReplaceVariablesInString, useReplaceVariablesInUrl } from '@perses-dev/plugin-system';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import type { MouseEvent, ReactElement } from 'react';
 import { useId, useState } from 'react';
 
-import { useVariableDefinitionStates } from '../../context';
 import type { DashboardLink } from './dashboard-link';
 import { isTagLink } from './dashboard-link';
+import { WithTimeRange, WithVariables } from './link-state';
 import { appendLinkState } from './tag-links';
 import { TagLinkMenu } from './TagLinkMenu';
 
@@ -208,58 +208,29 @@ function ResolveLink({
   link: DashboardLink;
   children: (resolved: ResolvedLink) => ReactElement;
 }): ReactElement {
-  const keepTime = link.keepTime === true;
-  const includeVariables = link.includeVariables === true;
-  if (keepTime && includeVariables) {
-    return <ResolveLinkTimeAndVariables link={link}>{children}</ResolveLinkTimeAndVariables>;
-  }
-  if (keepTime) {
-    return <ResolveLinkTime link={link}>{children}</ResolveLinkTime>;
-  }
-  if (includeVariables) {
-    return <ResolveLinkVariables link={link}>{children}</ResolveLinkVariables>;
-  }
-  return <ResolveLinkPlain link={link}>{children}</ResolveLinkPlain>;
-}
-
-function ResolveLinkPlain({
-  link,
-  children,
-}: {
-  link: DashboardLink;
-  children: (resolved: ResolvedLink) => ReactElement;
-}): ReactElement {
-  return children(usePlainLink(link));
-}
-
-function ResolveLinkTime({
-  link,
-  children,
-}: {
-  link: DashboardLink;
-  children: (resolved: ResolvedLink) => ReactElement;
-}): ReactElement {
-  return children(useLinkWithTime(link));
-}
-
-function ResolveLinkVariables({
-  link,
-  children,
-}: {
-  link: DashboardLink;
-  children: (resolved: ResolvedLink) => ReactElement;
-}): ReactElement {
-  return children(useLinkWithVariables(link));
-}
-
-function ResolveLinkTimeAndVariables({
-  link,
-  children,
-}: {
-  link: DashboardLink;
-  children: (resolved: ResolvedLink) => ReactElement;
-}): ReactElement {
-  return children(useLinkWithTimeAndVariables(link));
+  const interpolated = useInterpolatedLink(link);
+  return (
+    <WithTimeRange enabled={link.keepTime === true}>
+      {(timeRange) => (
+        <WithVariables enabled={link.includeVariables === true}>
+          {(variables) =>
+            children(
+              finishResolvedLink(
+                link,
+                interpolated,
+                appendLinkState(interpolated.baseUrl, {
+                  keepTime: timeRange !== undefined,
+                  includeVariables: variables !== undefined,
+                  timeRange,
+                  variables,
+                }),
+              ),
+            )
+          }
+        </WithVariables>
+      )}
+    </WithTimeRange>
+  );
 }
 
 interface ResolvedLink extends DashboardLink {
@@ -293,46 +264,6 @@ function useInterpolatedLink(link: DashboardLink): InterpolatedLink {
   const interpolatedUrl = useReplaceVariablesInUrl(link.renderVariables === false ? undefined : link.url);
   const baseUrl = link.renderVariables === false ? (link.url ?? '') : (interpolatedUrl ?? link.url ?? '');
   return { name, tooltip, baseUrl };
-}
-
-function usePlainLink(link: DashboardLink): ResolvedLink {
-  const interpolated = useInterpolatedLink(link);
-  return finishResolvedLink(link, interpolated, interpolated.baseUrl);
-}
-
-function useLinkWithTime(link: DashboardLink): ResolvedLink {
-  const interpolated = useInterpolatedLink(link);
-  const { timeRange } = useTimeRange();
-  const url = appendLinkState(interpolated.baseUrl, {
-    keepTime: true,
-    includeVariables: false,
-    timeRange,
-  });
-  return finishResolvedLink(link, interpolated, url);
-}
-
-function useLinkWithVariables(link: DashboardLink): ResolvedLink {
-  const interpolated = useInterpolatedLink(link);
-  const variables = useVariableDefinitionStates();
-  const url = appendLinkState(interpolated.baseUrl, {
-    keepTime: false,
-    includeVariables: true,
-    variables,
-  });
-  return finishResolvedLink(link, interpolated, url);
-}
-
-function useLinkWithTimeAndVariables(link: DashboardLink): ResolvedLink {
-  const interpolated = useInterpolatedLink(link);
-  const { timeRange } = useTimeRange();
-  const variables = useVariableDefinitionStates();
-  const url = appendLinkState(interpolated.baseUrl, {
-    keepTime: true,
-    includeVariables: true,
-    timeRange,
-    variables,
-  });
-  return finishResolvedLink(link, interpolated, url);
 }
 
 function finishResolvedLink(link: DashboardLink, interpolated: InterpolatedLink, url: string): ResolvedLink {

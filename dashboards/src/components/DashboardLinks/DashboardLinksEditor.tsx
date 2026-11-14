@@ -42,7 +42,7 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import AddIcon from 'mdi-material-ui/Plus';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import type { ForwardedRef, ReactElement } from 'react';
-import { forwardRef, useImperativeHandle, useState } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { useImmer } from 'use-immer';
 
 import { useDiscardChangesConfirmationDialog } from '../../context';
@@ -55,16 +55,9 @@ export interface DashboardLinksEditorProps {
   onCancel: () => void;
 }
 
-function swapIds(ids: string[], from: number, to: number): string[] {
-  const next = ids.slice();
-  const moved = next[from];
-  const target = next[to];
-  if (moved === undefined || target === undefined) {
-    return ids;
-  }
-  next[from] = target;
-  next[to] = moved;
-  return next;
+interface LinkRow {
+  id: string;
+  link: DashboardLink;
 }
 
 const DEFAULT_LINK: Link = {
@@ -79,19 +72,17 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
   { links: initialLinks, onChange, onCancel }: DashboardLinksEditorProps,
   ref: ForwardedRef<FormEditorHandle>,
 ): ReactElement {
-  const [links, setLinks] = useImmer<DashboardLink[]>(initialLinks);
+  const nextRowId = useRef(initialLinks.length);
+  const [rows, setRows] = useImmer<LinkRow[]>(() =>
+    initialLinks.map((link, index) => ({ id: `link-row-${index}`, link })),
+  );
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  // Stable per row, and moved with the row. key={index} would reuse kind and tagsText after a reorder.
-  const [rowIds, setRowIds] = useState<{ next: number; ids: string[] }>(() => ({
-    next: initialLinks.length,
-    ids: initialLinks.map((_, index) => `link-row-${index}`),
-  }));
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
 
   const handleCancel = (): void => {
-    if (JSON.stringify(initialLinks) !== JSON.stringify(links)) {
+    if (JSON.stringify(initialLinks) !== JSON.stringify(rows.map((row) => row.link))) {
       openDiscardChangesConfirmationDialog({
         onDiscardChanges: () => {
           closeDiscardChangesConfirmationDialog();
@@ -107,21 +98,18 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
   useImperativeHandle(ref, () => ({ requestClose: handleCancel }));
 
   const handleAdd = (): void => {
-    setLinks((draft) => {
-      draft.push({ ...DEFAULT_LINK });
+    const id = `link-row-${nextRowId.current}`;
+    nextRowId.current += 1;
+    setRows((draft) => {
+      draft.push({ id, link: { ...DEFAULT_LINK } });
     });
-    setRowIds((state) => ({
-      next: state.next + 1,
-      ids: [...state.ids, `link-row-${state.next}`],
-    }));
-    setExpandedIndex(links.length);
+    setExpandedIndex(rows.length);
   };
 
   const handleRemove = (index: number): void => {
-    setLinks((draft) => {
+    setRows((draft) => {
       draft.splice(index, 1);
     });
-    setRowIds((state) => ({ ...state, ids: state.ids.filter((_, i) => i !== index) }));
     if (expandedIndex === index) {
       setExpandedIndex(null);
     } else if (expandedIndex !== null && expandedIndex > index) {
@@ -131,14 +119,13 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
 
   const handleMoveUp = (index: number): void => {
     if (index === 0) return;
-    setLinks((draft) => {
+    setRows((draft) => {
       const temp = draft[index - 1];
       if (temp && draft[index]) {
         draft[index - 1] = draft[index]!;
         draft[index] = temp;
       }
     });
-    setRowIds((state) => ({ ...state, ids: swapIds(state.ids, index, index - 1) }));
     if (expandedIndex === index) {
       setExpandedIndex(index - 1);
     } else if (expandedIndex === index - 1) {
@@ -147,15 +134,14 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
   };
 
   const handleMoveDown = (index: number): void => {
-    if (index >= links.length - 1) return;
-    setLinks((draft) => {
+    if (index >= rows.length - 1) return;
+    setRows((draft) => {
       const temp = draft[index + 1];
       if (temp && draft[index]) {
         draft[index + 1] = draft[index]!;
         draft[index] = temp;
       }
     });
-    setRowIds((state) => ({ ...state, ids: swapIds(state.ids, index, index + 1) }));
     if (expandedIndex === index) {
       setExpandedIndex(index + 1);
     } else if (expandedIndex === index + 1) {
@@ -164,12 +150,15 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
   };
 
   const handleUpdateLink = (index: number, link: DashboardLink): void => {
-    setLinks((draft) => {
-      draft[index] = link;
+    setRows((draft) => {
+      const row = draft[index];
+      if (row) {
+        row.link = link;
+      }
     });
   };
 
-  const isValid = links.every((link) => isDashboardLinkValid(link));
+  const isValid = rows.every((row) => isDashboardLinkValid(row.link));
 
   return (
     <>
@@ -186,7 +175,7 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
           <Button
             disabled={!isValid}
             variant="contained"
-            onClick={() => onChange(links.map((link) => normalizeDashboardLink(link)))}
+            onClick={() => onChange(rows.map((row) => normalizeDashboardLink(row.link)))}
           >
             Apply
           </Button>
@@ -210,13 +199,13 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
                 </TableRow>
               </TableHead>
               <TableBody>
-                {links.map((link, index) => (
+                {rows.map((row, index) => (
                   <LinkTableRow
-                    key={rowIds.ids[index] ?? index}
-                    link={link}
+                    key={row.id}
+                    link={row.link}
                     index={index}
                     isFirst={index === 0}
-                    isLast={index === links.length - 1}
+                    isLast={index === rows.length - 1}
                     isExpanded={expandedIndex === index}
                     onToggleExpand={() => setExpandedIndex(expandedIndex === index ? null : index)}
                     onUpdate={(updatedLink) => handleUpdateLink(index, updatedLink)}
@@ -228,7 +217,7 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
               </TableBody>
             </Table>
           </TableContainer>
-          {links.length === 0 && (
+          {rows.length === 0 && (
             <Typography variant="body1" color="text.secondary" fontStyle="italic" textAlign="center" py={4}>
               No links defined. Click &apos;Add Link&apos; to create one.
             </Typography>
@@ -292,7 +281,7 @@ function LinkTableRow({
             {targetLabel}
           </InfoTooltip>
         </TableCell>
-        <TableCell>{tagMode ? '—' : newTabLabel}</TableCell>
+        <TableCell>{newTabLabel}</TableCell>
         <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
           <IconButton onClick={onMoveUp} disabled={isFirst} aria-label="Move link up">
             <ArrowUp />
@@ -326,8 +315,9 @@ function LinkTableRow({
                         name: link.name,
                         tooltip: link.tooltip,
                         tags: link.tags ?? [],
-                        keepTime: link.keepTime ?? true,
-                        includeVariables: link.includeVariables ?? true,
+                        targetBlank: link.targetBlank,
+                        keepTime: link.keepTime,
+                        includeVariables: link.includeVariables,
                       });
                       return;
                     }
@@ -437,6 +427,15 @@ function TagLinkFields({
         fullWidth
         value={link.tooltip ?? ''}
         onChange={(event) => onUpdate({ ...link, tooltip: event.target.value })}
+      />
+      <FormControlLabel
+        label="Open in new tab"
+        control={
+          <Checkbox
+            checked={link.targetBlank === true}
+            onChange={(event) => onUpdate({ ...link, targetBlank: event.target.checked })}
+          />
+        }
       />
       <LinkStateFields link={link} onUpdate={onUpdate} variableLabel="Include matching variables" />
     </Stack>

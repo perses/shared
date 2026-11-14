@@ -11,51 +11,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { FetchFn } from '@perses-dev/client';
-import { FetchProvider } from '@perses-dev/client';
 import { renderHook } from '@testing-library/react';
 import type { PropsWithChildren, ReactElement } from 'react';
 
-import type { TagLinkDashboard } from '../components/LinksDisplay/tag-links';
-import { DashboardCatalogProvider, useListProjectDashboards } from './DashboardCatalogProvider';
+import type { TagLinkHit } from '../components/LinksDisplay/tag-links';
+import type { DashboardCatalog } from './DashboardCatalogProvider';
+import { DashboardCatalogProvider, useDashboardCatalog } from './DashboardCatalogProvider';
 
-const dashboards: TagLinkDashboard[] = [
-  { kind: 'Dashboard', metadata: { name: 'overview', project: 'my project', tags: ['ops'] } },
-];
+const hits: TagLinkHit[] = [{ name: 'overview', label: 'Overview', variableNames: ['env'] }];
 
-function jsonResponse(body: unknown): Response {
-  return {
-    ok: true,
-    json: () => Promise.resolve(body),
-  } as Response;
-}
+describe('useDashboardCatalog', () => {
+  test('is unset until the host provides a catalog', () => {
+    const { result } = renderHook(() => useDashboardCatalog());
 
-describe('useListProjectDashboards', () => {
-  test('loads the project catalog with the fetch from FetchProvider', async () => {
-    const customFetch = vi.fn<FetchFn>().mockResolvedValue(jsonResponse(dashboards));
-    const wrapper = ({ children }: PropsWithChildren): ReactElement => (
-      <FetchProvider fetchFn={customFetch}>{children}</FetchProvider>
-    );
-
-    const { result } = renderHook(() => useListProjectDashboards(), { wrapper });
-
-    await expect(result.current('my project')).resolves.toEqual(dashboards);
-    expect(customFetch).toHaveBeenCalledWith('/api/v1/projects/my%20project/dashboards');
+    expect(result.current).toBeUndefined();
   });
 
-  test('uses the catalog provider instead of fetching', async () => {
-    const customFetch = vi.fn<FetchFn>();
-    const listDashboards = vi.fn().mockResolvedValue(dashboards);
+  test('returns the catalog provided by the host', async () => {
+    const search = vi.fn().mockResolvedValue(hits);
+    const catalog: DashboardCatalog = {
+      search,
+      queryKey: (project, tags) => ['dashboards', project, tags],
+      href: (input) => `/go/${input.project}/${input.name}`,
+    };
     const wrapper = ({ children }: PropsWithChildren): ReactElement => (
-      <FetchProvider fetchFn={customFetch}>
-        <DashboardCatalogProvider listDashboards={listDashboards}>{children}</DashboardCatalogProvider>
-      </FetchProvider>
+      <DashboardCatalogProvider catalog={catalog}>{children}</DashboardCatalogProvider>
     );
 
-    const { result } = renderHook(() => useListProjectDashboards(), { wrapper });
+    const { result } = renderHook(() => useDashboardCatalog(), { wrapper });
 
-    await expect(result.current('my project')).resolves.toEqual(dashboards);
-    expect(listDashboards).toHaveBeenCalledWith('my project');
-    expect(customFetch).not.toHaveBeenCalled();
+    await expect(result.current?.search('demo', ['ops'])).resolves.toEqual(hits);
+    expect(search).toHaveBeenCalledWith('demo', ['ops']);
+    expect(result.current?.queryKey('demo', ['ops'])).toEqual(['dashboards', 'demo', ['ops']]);
   });
 });
