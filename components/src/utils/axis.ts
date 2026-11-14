@@ -33,7 +33,7 @@ const AXIS_LABEL_PADDING = 16;
 const MIN_AXIS_LABEL_WIDTH = CHAR_WIDTH_BASE * 4;
 /** Placeholder max when series data has not produced a max yet (keeps first layout stable). */
 const DEFAULT_AXIS_MAX_VALUE = 1000;
-/** grid.right when there are no additional right axes (single Y-axis chart). */
+/** grid.right. containLabel already fits every vertical axis label. */
 const DEFAULT_RIGHT_GRID_PADDING = 20;
 
 function estimateLabelWidth(format: FormatOptions | undefined, maxValue: number): number {
@@ -73,7 +73,7 @@ export function getFormattedAxis(axis?: YAXisComponentOption | XAXisComponentOpt
 
 export interface MultipleYAxesLayout {
   axes: YAXisComponentOption[];
-  /** Extra grid.right for right axes after the first. containLabel covers the first. */
+  /** grid.right. Offset right axes stay inside the room containLabel already reserved. */
   rightGridPadding: number;
 }
 
@@ -105,7 +105,6 @@ export function getFormattedMultipleYAxesLayout(
   const logBase = isLogScale && 'logBase' in baseAxis ? baseAxis.logBase : undefined;
 
   let cumulativeOffset = 0;
-  let outerAxesWidth = 0;
   additionalFormats.forEach((format, index) => {
     const labelWidth = estimateLabelWidth(format, maxValues?.[index] ?? DEFAULT_AXIS_MAX_VALUE) + AXIS_LABEL_PADDING;
     const commonOptions = {
@@ -128,14 +127,11 @@ export function getFormattedMultipleYAxesLayout(
       : { ...commonOptions, type: 'value' };
     axes.push(rightAxisConfig);
     cumulativeOffset += labelWidth;
-    if (index > 0) {
-      outerAxesWidth += labelWidth;
-    }
   });
 
   return {
     axes,
-    rightGridPadding: additionalFormats.length > 1 ? outerAxesWidth : DEFAULT_RIGHT_GRID_PADDING,
+    rightGridPadding: DEFAULT_RIGHT_GRID_PADDING,
   };
 }
 

@@ -37,22 +37,14 @@ describe('getFormattedMultipleYAxesLayout', () => {
     expect(rightGridPadding).toBe(20);
   });
 
-  it('reserves grid.right only for right axes after the first', () => {
-    const opsPerSec = { unit: 'ops/sec' as const };
-    const decimal = { unit: 'decimal' as const };
-    const formats = [opsPerSec, decimal];
-    const firstMax = 100;
-    const secondMax = 1000;
-    const { axes, rightGridPadding } = getFormattedMultipleYAxesLayout({ show: true }, { unit: 'percent' }, formats, [
-      firstMax,
-      secondMax,
-    ]);
-    const secondAxisWidth = getFormattedMultipleYAxesLayout(
+  it('keeps grid.right at the default padding when several right axes are offset', () => {
+    const formats = [{ unit: 'ops/sec' as const }, { unit: 'decimal' as const }];
+    const { axes, rightGridPadding } = getFormattedMultipleYAxesLayout(
       { show: true },
       { unit: 'percent' },
-      [decimal, opsPerSec],
-      [secondMax, firstMax],
-    ).axes[2]?.offset;
+      formats,
+      [100, 1000],
+    );
 
     expect(axes).toHaveLength(3);
     expect(axes[0]?.position).toBe('left');
@@ -60,20 +52,17 @@ describe('getFormattedMultipleYAxesLayout', () => {
     expect(axes[1]?.offset).toBe(0);
     expect(axes[2]?.position).toBe('right');
     expect((axes[2]?.offset as number) ?? 0).toBeGreaterThan(0);
-    expect(rightGridPadding).toBe(secondAxisWidth);
-    expect(rightGridPadding).toBeLessThan(((axes[2]?.offset as number) ?? 0) + (secondAxisWidth as number));
+    expect(rightGridPadding).toBe(20);
   });
 
-  it('still reserves only the outer axis when maxValues is omitted', () => {
-    const opsPerSec = { unit: 'ops/sec' as const };
-    const eventsPerSec = { unit: 'events/sec' as const };
-    const formats = [opsPerSec, eventsPerSec];
-    const { axes, rightGridPadding } = getFormattedMultipleYAxesLayout(undefined, { unit: 'decimal' }, formats);
-    const secondAxisWidth = getFormattedMultipleYAxesLayout(undefined, { unit: 'decimal' }, [eventsPerSec, opsPerSec])
-      .axes[2]?.offset;
+  it('keeps the default padding when maxValues is omitted', () => {
+    const { axes, rightGridPadding } = getFormattedMultipleYAxesLayout(undefined, { unit: 'decimal' }, [
+      { unit: 'ops/sec' },
+      { unit: 'events/sec' },
+    ]);
     expect(axes).toHaveLength(3);
-    expect(rightGridPadding).toBe(secondAxisWidth);
-    expect(rightGridPadding).toBeGreaterThan(20);
+    expect((axes[2]?.offset as number) ?? 0).toBeGreaterThan(0);
+    expect(rightGridPadding).toBe(20);
   });
 });
 
