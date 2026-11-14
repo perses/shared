@@ -12,15 +12,21 @@
 // limitations under the License.
 
 import type { TimeSeries } from '@perses-dev/spec';
+import { LineChart } from 'echarts/charts';
+import { GridComponent } from 'echarts/components';
+import type * as EChartsCore from 'echarts/core';
 import type { ECharts as EChartsInstance } from 'echarts/core';
+import { SVGRenderer } from 'echarts/renderers';
 
 import type { EChartsDataFormat, FormatOptions, TimeChartSeriesMapping } from '../model';
 import {
   checkforNearbyTimeSeries,
+  getNearbySeriesData,
   legacyCheckforNearbySeries,
   getYBuffer,
   isWithinPercentageRange,
 } from './nearby-series';
+import type { CursorCoordinates } from './tooltip-model';
 import { calculateVisualYForSeries } from './utils';
 
 describe('legacyCheckforNearbySeries', () => {
@@ -277,5 +283,81 @@ describe('checkforNearbyTimeSeries — stacked lines', () => {
     expect(downplayed.has(0)).toBe(true);
     expect(downplayed.has(1)).toBe(true);
     expect(downplayed.has(2)).toBe(true);
+  });
+});
+
+describe('getNearbySeriesData — y axis scale of a rendered chart', () => {
+  const TIMESTAMPS = [1_700_000_000_000, 1_700_000_015_000, 1_700_000_030_000];
+  const HOVERED_TIMESTAMP = 1_700_000_015_000;
+
+  let echarts: typeof EChartsCore;
+  const charts: EChartsInstance[] = [];
+
+  beforeAll(async () => {
+    // The test setup mocks 'echarts/core'; these tests need its real scales.
+    echarts = await vi.importActual<typeof EChartsCore>('echarts/core');
+    echarts.use([LineChart, GridComponent, SVGRenderer]);
+  });
+
+  afterEach(() => {
+    for (const chart of charts.splice(0)) chart.dispose();
+  });
+
+  function renderChart(
+    yAxisType: 'value' | 'log',
+    seriesValues: number[],
+  ): {
+    chart: EChartsInstance;
+    data: TimeSeries[];
+    seriesMapping: TimeChartSeriesMapping;
+  } {
+    const data: TimeSeries[] = seriesValues.map((value, idx) => ({
+      name: `series-${idx}`,
+      values: TIMESTAMPS.map((ts) => [ts, value]),
+    }));
+    const seriesMapping = data.map((series) => ({
+      type: 'line',
+      id: series.name,
+      name: series.name,
+      color: '#000',
+      data: series.values,
+    })) as unknown as TimeChartSeriesMapping;
+
+    const chart = echarts.init(null, null, { renderer: 'svg', ssr: true, width: 600, height: 400 });
+    charts.push(chart);
+    chart.setOption({
+      animation: false,
+      // jsdom cannot measure text, so the axes have no labels.
+      xAxis: { type: 'time', axisLabel: { show: false } },
+      yAxis: { type: yAxisType, axisLabel: { show: false } },
+      series: seriesMapping,
+    });
+    return { chart, data, seriesMapping };
+  }
+
+  function cursorAt(chart: EChartsInstance, value: number): CursorCoordinates {
+    const [x, y] = chart.convertToPixel('grid', [HOVERED_TIMESTAMP, value]) as number[];
+    return { page: { x: 0, y: 0 }, client: { x: 0, y: 0 }, plotCanvas: { x, y }, target: null };
+  }
+
+  it('finds the series under the cursor on a linear y axis', () => {
+    const { chart, data, seriesMapping } = renderChart('value', [20, 80]);
+    const cursor = cursorAt(chart, 80);
+
+    const result = getNearbySeriesData({ mousePos: cursor, pinnedPos: cursor, data, seriesMapping, chart });
+
+    expect(result.find((series) => series.isClosestToCursor)?.seriesName).toBe('series-1');
+  });
+
+  it('finds the series under the cursor on a log y axis, with a buffer in data space', () => {
+    // The y axis spans 1..1000, so the buffer is a few percent of that range: series-1 (5) is
+    // within it, series-2 (1000) is not.
+    const { chart, data, seriesMapping } = renderChart('log', [1, 5, 1000]);
+    const cursor = cursorAt(chart, 1);
+
+    const result = getNearbySeriesData({ mousePos: cursor, pinnedPos: cursor, data, seriesMapping, chart });
+
+    expect(result.map((series) => series.seriesName)).toEqual(['series-0', 'series-1']);
+    expect(result.find((series) => series.isClosestToCursor)?.seriesName).toBe('series-0');
   });
 });
