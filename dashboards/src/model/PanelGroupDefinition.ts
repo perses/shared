@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { PanelEditorValues, PanelGroupId } from '@perses-dev/plugin-system';
+import type { Visibility } from '@perses-dev/spec';
 
 export type RepeatVariable = NonNullable<NonNullable<PanelEditorValues['layoutDefinition']>['repeatVariable']>;
 
@@ -73,6 +74,7 @@ export interface PanelGroupDefinition {
   title?: string;
   repeatedOriginId?: PanelGroupId; // ID of the original panel group from which this repeated group is derived
   repeatVariable?: string; // Optional, used for repeated panel groups
+  visibility?: Visibility;
   itemLayouts: PanelGroupItemLayout[];
   itemPanelKeys: Record<PanelGroupItemLayoutId, string>;
 }

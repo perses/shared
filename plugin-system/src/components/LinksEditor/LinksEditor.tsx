@@ -13,6 +13,7 @@
 
 import { Divider, IconButton, Stack, Typography } from '@mui/material';
 import { LinkEditorForm } from '@perses-dev/components';
+import type { URLLink } from '@perses-dev/spec';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import type { HTMLAttributes, ReactElement } from 'react';
@@ -61,6 +62,19 @@ export function LinksEditor({ control, ...props }: LinksEditorProps): ReactEleme
   );
 }
 
+function panelUrlLink(
+  link: { url?: string; name?: string; tooltip?: string; renderVariables?: boolean; targetBlank?: boolean } | undefined,
+  patch: Partial<URLLink>,
+): URLLink {
+  return {
+    url: patch.url ?? link?.url ?? '',
+    name: patch.name ?? link?.name,
+    tooltip: patch.tooltip ?? link?.tooltip,
+    renderVariables: patch.renderVariables ?? link?.renderVariables,
+    targetBlank: patch.targetBlank ?? link?.targetBlank,
+  };
+}
+
 function LinkControl({ control, index }: { control: Control<PanelEditorValues>; index: number }): ReactElement {
   const defaultLink = { url: '', name: '', tooltip: '', renderVariables: false, targetBlank: false };
   return (
@@ -74,18 +88,18 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
             mode="inline"
             url={{
               onBlur: field.onBlur,
-              value: safeLink.url,
+              value: safeLink.url ?? '',
               label: 'URL',
               error: { hasError: !!fieldState.error, helperText: fieldState.error?.message },
               onChange: (url) => {
-                field.onChange({ ...link, url });
+                field.onChange(panelUrlLink(link, { url }));
               },
             }}
             newTabOpen={{
               onBlur: field.onBlur,
               value: !!safeLink.targetBlank,
               onChange: (targetBlank) => {
-                field.onChange({ ...link, targetBlank });
+                field.onChange(panelUrlLink(link, { targetBlank }));
               },
               label: 'Open in new tab',
             }}
@@ -94,7 +108,7 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
               value: safeLink.name ?? '',
               label: 'Name',
               onChange: (name) => {
-                field.onChange({ ...link, name });
+                field.onChange(panelUrlLink(link, { name }));
               },
             }}
             renderVariables={{
@@ -102,7 +116,7 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
               value: !!safeLink.renderVariables,
               label: 'Render variables',
               onChange: (renderVariables) => {
-                field.onChange({ ...link, renderVariables });
+                field.onChange(panelUrlLink(link, { renderVariables }));
               },
             }}
             tooltip={{
@@ -110,7 +124,7 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
               value: safeLink.tooltip ?? '',
               label: 'Tooltip',
               onChange: (tooltip) => {
-                field.onChange({ ...link, tooltip });
+                field.onChange(panelUrlLink(link, { tooltip }));
               },
             }}
           />

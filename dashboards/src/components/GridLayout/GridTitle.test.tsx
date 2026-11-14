@@ -73,6 +73,40 @@ describe('GridTitle collapsed panel count', () => {
     expect(screen.queryByText(/panels/)).not.toBeInTheDocument();
   });
 
+  it('shows whether the current selection hides a conditional group', () => {
+    const { rerender } = render(
+      <GridTitle
+        panelGroupId={0}
+        title="Workers"
+        collapse={{ isOpen: true, onToggleOpen: vi.fn() }}
+        visibilityNotice={{ hidden: true, description: 'Shown when phase is not PRD' }}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Group hidden for the current selection' })).toBeInTheDocument();
+
+    rerender(
+      <GridTitle
+        panelGroupId={0}
+        title="Workers"
+        collapse={{ isOpen: true, onToggleOpen: vi.fn() }}
+        visibilityNotice={{ hidden: false, description: 'Shown when phase is not PRD' }}
+      />,
+    );
+    expect(screen.getByRole('button', { name: 'Group shown for the current selection' })).toBeInTheDocument();
+  });
+
+  it('shows the visibility mark without an empty heading when the group has no title', () => {
+    render(
+      <GridTitle
+        panelGroupId={0}
+        title=""
+        visibilityNotice={{ hidden: true, description: 'Shown when phase is not PRD' }}
+      />,
+    );
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Group hidden for the current selection' })).toBeInTheDocument();
+  });
+
   it('hides count when collapse is not used', () => {
     render(<GridTitle panelGroupId={0} title="Always open" panelCount={3} />);
     expect(screen.getByRole('heading', { name: 'Always open' })).toBeInTheDocument();

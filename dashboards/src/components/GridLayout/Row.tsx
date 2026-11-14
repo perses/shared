@@ -22,6 +22,7 @@ import { useMemo, useState } from 'react';
 import { DEFAULT_MARGIN, GRID_LAYOUT_COLS, ROW_HEIGHT } from '../../constants';
 import { useRepeatVariableMaxValues, useViewPanelGroup } from '../../context';
 import type { PanelGroupDefinition, PanelGroupItemLayout } from '../../model';
+import type { VisibilityNotice } from '../../utils';
 import {
   buildRepeatMeta,
   compactLayout,
@@ -48,6 +49,7 @@ export interface RowProps {
   isEditMode?: boolean;
   onLayoutChange?: (layout: PanelGroupItemLayout[]) => void;
   repeatVariable?: [string, string];
+  visibilityNotice?: VisibilityNotice;
 }
 
 export function Row({
@@ -58,6 +60,7 @@ export function Row({
   isEditMode = false,
   onLayoutChange,
   repeatVariable,
+  visibilityNotice,
 }: RowProps): ReactElement {
   const { width, containerRef } = useContainerWidth();
   const theme = useTheme();
@@ -183,12 +186,13 @@ export function Row({
 
   return (
     <GridContainer sx={containerSx}>
-      {groupDefinition.title && (
+      {(groupDefinition.title || visibilityNotice) && (
         <GridTitle
           panelGroupId={panelGroupId}
-          title={groupDefinition.title}
+          title={groupDefinition.title ?? ''}
           panelCount={expandedItemLayouts.length}
           collapse={collapse}
+          visibilityNotice={visibilityNotice}
         />
       )}
       <Collapse in={isOpen || hasViewPanel} unmountOnExit appear={false} data-testid="panel-group-content">

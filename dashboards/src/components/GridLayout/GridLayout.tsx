@@ -18,6 +18,7 @@ import { useCallback } from 'react';
 
 import { useEditMode, usePanelGroup, usePanelGroupActions, useViewPanelGroup } from '../../context';
 import type { PanelGroupDefinition, PanelGroupItemLayout } from '../../model';
+import { isPanelGroupVisible, visibilityNotice } from '../../utils';
 import type { PanelOptions } from '../Panel';
 import { FixedValueVariableProvider } from '../Variables';
 import type { RowProps } from './Row';
@@ -38,6 +39,7 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
   const { updatePanelGroupLayouts } = usePanelGroupActions(panelGroupId);
   const viewPanelItemId = useViewPanelGroup();
   const { isEditMode } = useEditMode();
+  const variableValues = useVariableValues();
 
   const hasViewPanel = viewPanelItemId?.panelGroupId === panelGroupId; // current panelGroup contains the panel extended?
 
@@ -50,6 +52,13 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
     [hasViewPanel, isEditMode, updatePanelGroupLayouts],
   );
 
+  // Edit mode keeps hidden groups reachable.
+  if (!isEditMode && !isPanelGroupVisible(groupDefinition.visibility, variableValues)) {
+    return <></>;
+  }
+  const notice =
+    isEditMode && groupDefinition.visibility ? visibilityNotice(groupDefinition.visibility, variableValues) : undefined;
+
   return (
     <>
       {!groupDefinition.repeatVariable ? (
@@ -60,6 +69,7 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
           panelOptions={panelOptions}
           isEditMode={isEditMode}
           onLayoutChange={handleLayoutChange}
+          visibilityNotice={notice}
         />
       ) : (
         <RepeatGridLayout
@@ -70,6 +80,7 @@ export function GridLayout(props: GridLayoutProps): ReactElement {
           panelOptions={panelOptions}
           isEditMode={isEditMode}
           onLayoutChange={handleLayoutChange}
+          visibilityNotice={notice}
         />
       )}
     </>
