@@ -100,13 +100,16 @@ export function getFormattedMultipleYAxesLayout(
   );
   axes.push(baseAxisConfig);
 
+  // Right-side axes inherit the log scale of the base axis so all axes share the same scale type.
+  const isLogScale = baseAxis?.type === 'log';
+  const logBase = isLogScale && 'logBase' in baseAxis ? baseAxis.logBase : undefined;
+
   let cumulativeOffset = 0;
   let outerAxesWidth = 0;
   additionalFormats.forEach((format, index) => {
     const labelWidth = estimateLabelWidth(format, maxValues?.[index] ?? DEFAULT_AXIS_MAX_VALUE) + AXIS_LABEL_PADDING;
-    axes.push({
-      type: 'value',
-      position: 'right',
+    const commonOptions = {
+      position: 'right' as const,
       offset: cumulativeOffset,
       boundaryGap: [0, '10%'],
       axisLabel: {
@@ -119,7 +122,11 @@ export function getFormattedMultipleYAxesLayout(
         show: false,
       },
       show: baseAxis?.show,
-    });
+    } satisfies Readonly<YAXisComponentOption>;
+    const rightAxisConfig: YAXisComponentOption = isLogScale
+      ? { ...commonOptions, type: 'log', logBase }
+      : { ...commonOptions, type: 'value' };
+    axes.push(rightAxisConfig);
     cumulativeOffset += labelWidth;
     if (index > 0) {
       outerAxesWidth += labelWidth;

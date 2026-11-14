@@ -83,4 +83,23 @@ describe('getFormattedMultipleYAxes', () => {
     expect(axes).toHaveLength(2);
     expect(axes[1]?.position).toBe('right');
   });
+
+  it('applies the base axis log scale to the right-side axes', () => {
+    const axes = getFormattedMultipleYAxes({ type: 'log', logBase: 2 }, { unit: 'bytes' }, [
+      { unit: 'seconds' },
+      { unit: 'percent' },
+    ]);
+
+    expect(axes).toHaveLength(3);
+    axes.forEach((axis) => {
+      expect(axis).toMatchObject({ type: 'log', logBase: 2 });
+    });
+  });
+
+  it('keeps the right-side axes linear when the base axis is linear', () => {
+    const axes = getFormattedMultipleYAxes({ show: true }, { unit: 'bytes' }, [{ unit: 'seconds' }]);
+
+    expect(axes[1]).toMatchObject({ type: 'value', position: 'right' });
+    expect(axes[1]).not.toHaveProperty('logBase');
+  });
 });
