@@ -282,7 +282,7 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
       },
     },
     {
-      title: 'overridden datasources cannot be set as default',
+      title: 'overridden global datasource remains the default when the overriding datasource is not default',
       input: {
         datasources: {
           local: {},
@@ -295,7 +295,72 @@ describe('DatasourceStoreProvider::useListDatasourceSelectItems', () => {
           {
             editLink: undefined,
             group: `Default Datasource Plugin for ${FAKE_PLUGIN_NAME}`,
-            items: [],
+            items: [
+              {
+                name: 'Default (datasourceA from global)',
+                selector: {
+                  kind: FAKE_PLUGIN_NAME,
+                },
+              },
+            ],
+          },
+          {
+            editLink: '/projects/perses/datasources',
+            group: 'project',
+            items: [
+              {
+                name: 'datasourceA',
+                overridden: false,
+                overriding: true,
+                selector: {
+                  group: 'project',
+                  kind: FAKE_PLUGIN_NAME,
+                  name: 'datasourceA',
+                },
+              },
+            ],
+          },
+          {
+            editLink: '/admin/datasources',
+            group: 'global',
+            items: [
+              {
+                name: 'datasourceA',
+                overridden: true,
+                overriding: true, // Oddity coming from the algorithm. Not harmful as overriding is not checked if overridden is true
+                selector: {
+                  group: 'global',
+                  kind: FAKE_PLUGIN_NAME,
+                  name: 'datasourceA',
+                },
+              },
+            ],
+          },
+        ],
+      },
+    },
+    {
+      title: 'project default takes precedence over a global default with the same name',
+      input: {
+        datasources: {
+          local: {},
+          project: [definedInProject({ name: 'datasourceA', default: true })],
+          global: [definedGlobally({ name: 'datasourceA', default: true })],
+        },
+      },
+      expected: {
+        result: [
+          {
+            editLink: undefined,
+            group: `Default Datasource Plugin for ${FAKE_PLUGIN_NAME}`,
+            items: [
+              {
+                name: 'Default (datasourceA from project)',
+                selector: {
+                  kind: FAKE_PLUGIN_NAME,
+                },
+              },
+            ],
           },
           {
             editLink: '/projects/perses/datasources',
