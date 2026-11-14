@@ -13,6 +13,7 @@
 
 export * from './components';
 export * from './context';
+export { appendLinkState } from './components/LinksDisplay/tag-links';
 export * from './keyboard-shortcuts';
 export * from './views';
 export * from './model';
