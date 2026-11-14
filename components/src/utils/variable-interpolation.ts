@@ -152,8 +152,10 @@ export function replaceVariable(
   if (typeof variableValue === 'string') {
     replaceString = interpolate([variableValue], varName, varFormat || InterpolationFormat.RAW);
   }
-  text = text.replaceAll(variableSyntax, replaceString);
-  return text.replaceAll(alternativeVariableSyntax, replaceString);
+  // The replacement is given as a function to insert the value as is: in a replacement string,
+  // the sequences "$$", "$&", "$`" and "$'" are not copied but replaced by something else.
+  text = text.replaceAll(variableSyntax, () => replaceString);
+  return text.replaceAll(alternativeVariableSyntax, () => replaceString);
 }
 
 // This regular expression is designed to identify variable references in a string.

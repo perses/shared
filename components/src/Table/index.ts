@@ -12,4 +12,5 @@
 // limitations under the License.
 
 export * from './Table';
+export * from './TableColumnFilterDropdown';
 export * from './model/table-model';
