@@ -112,13 +112,15 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
               <BaseSelect.Value className="ps-Select__value" placeholder={placeholder}>
                 {chips ? renderTriggerValue : renderValue}
               </BaseSelect.Value>
-              {hasContent(icon) && (
-                <BaseSelect.Icon className="ps-Select__icon" render={renderIcon}>
-                  {icon}
-                </BaseSelect.Icon>
-              )}
             </BaseSelect.Trigger>
           </>
+        }
+        trailing={
+          hasContent(icon) ? (
+            <BaseSelect.Icon className="ps-Select__icon" render={renderIcon}>
+              {icon}
+            </BaseSelect.Icon>
+          ) : null
         }
         status={
           // `<output>` is an implicit live region; `aria-live` covers screen readers that do not treat it as one.

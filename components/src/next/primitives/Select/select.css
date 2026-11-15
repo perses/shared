@@ -136,13 +136,32 @@
     flex: none;
   }
 
-  /* ---- Chips (multiple) ---- */
-  :where(.ps-Select__control:has(.ps-Select__chips)) {
-    flex-wrap: wrap;
+  /* The end element, spinner, clear button and chevron form one group, so they never wrap apart. */
+  :where(.ps-Select__end) {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    gap: var(--perses-spacing-xs);
   }
 
-  /* Six rows of chips, then the area scrolls. --ps-select-chip-row is set per field size below. */
+  /* ---- Chips (multiple) ---- */
+  /* align-content keeps a single row centred in a field taller than one chip row. */
+  :where(.ps-Select__control:has(.ps-Select__chips)) {
+    flex-wrap: wrap;
+    align-content: center;
+  }
+
+  /* The chips can span several rows or collapse to one row with "+N". Bottom-aligning a group one chip row tall keeps
+     the chevron on the last chip row in every case, instead of centred on the chip block. */
+  :where(.ps-Select__control:has(.ps-Select__chips) > .ps-Select__end) {
+    align-self: flex-end;
+    min-height: var(--ps-select-chip-row);
+  }
+
+  /* Six rows of chips, then the area scrolls. --ps-select-chip-row is set per field size below. The basis is 0 so the
+     chips wrap inside the area rather than pushing the end group onto a row of its own. */
   :where(.ps-Select__chips) {
+    flex: 1 1 0;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -152,34 +171,40 @@
     overflow-y: auto;
   }
 
-  /* In the search engine the input sits inside the chips container, so the container fills the control and the
-     input grows with it; the clear button and chevron stay at the end. */
+  /* In the search engine the input sits inside the chips container, so the container keeps room for the input. */
   :where(.ps-Select__chips:has(.ps-Select__input)) {
     flex: 1 1 4rem;
   }
 
-  :where(.ps-Select[data-size='xs'] .ps-Select__chips),
-  :where(.ps-Select[data-size='sm'] .ps-Select__chips) {
+  /* In the basic engine the chips sit before the trigger, which then only holds visually hidden labels. */
+  :where(.ps-Select__chips ~ .ps-Select__trigger) {
+    flex: none;
+  }
+
+  :where(.ps-Select[data-size='xs'] .ps-Select__control),
+  :where(.ps-Select[data-size='sm'] .ps-Select__control) {
     --ps-select-chip-row: var(--perses-chip-size-xs, var(--perses-selection-control-size-xs));
   }
 
-  :where(.ps-Select[data-size='md'] .ps-Select__chips),
-  :where(.ps-Select[data-size='lg'] .ps-Select__chips) {
+  :where(.ps-Select[data-size='md'] .ps-Select__control),
+  :where(.ps-Select[data-size='lg'] .ps-Select__control) {
     --ps-select-chip-row: var(--perses-chip-size-sm, var(--perses-selection-control-size-sm));
   }
 
-  /* "+N" stands in for the overflow chips, so it only shows while they are hidden. */
+  /* "+N" stands in for the overflow chips, so it only shows while they are hidden: the list is closed and focus is
+     outside the chips. Focus on the basic trigger, which sits beside the chips, does not count; Base UI returns focus
+     there after an outside press, and counting it would flicker the field between "+N" and every chip. */
   :where(.ps-Select__more) {
     display: none;
   }
 
-  :where(.ps-Select__control:not(:focus-within):not([data-open]) .ps-Select__more) {
+  :where(.ps-Select__control:not([data-open]) .ps-Select__chips:not(:focus-within) .ps-Select__more) {
     display: inline-flex;
   }
 
   /* Specific on purpose: chip.css sets display on .ps-Chip at zero specificity in this same layer, so load order
      could otherwise let it win over this rule. */
-  .ps-Select__control:not(:focus-within):not([data-open]) .ps-Select__chip[data-overflow] {
+  .ps-Select__control:not([data-open]) .ps-Select__chips:not(:focus-within) .ps-Select__chip[data-overflow] {
     display: none;
   }
 
@@ -203,7 +228,7 @@
   }
 
   /* Only the default chevron flips; a consumer icon is left as drawn. */
-  :where(.ps-Select__trigger[data-popup-open] .ps-Select__chevron),
+  :where(.ps-Select__icon[data-popup-open] .ps-Select__chevron),
   :where(.ps-Select__toggle[data-popup-open] .ps-Select__chevron) {
     transform: rotate(180deg);
   }

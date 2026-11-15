@@ -463,8 +463,8 @@ export const Searchable: Story = () => (
 );
 Searchable.storyName = 'Searchable';
 
-const chipsCode = `// chips shows the selection as removable chips. limitChips collapses them to "+N" while focus is outside the field
-// and the list is closed.
+const chipsCode = `// chips shows the selection as removable chips. limitChips collapses them to "+N" while the list is closed and
+// focus is not in the chips or the search input.
 <Select label="Metrics" multiple chips limitChips={3} defaultValue={[...]} items={metricItems} />`;
 const searchableChipsCode = `// With searchable, the chips and the input share the field; Backspace and the arrow keys move between them.
 <Select label="Metrics" searchable multiple chips defaultValue={['up', 'go_goroutines']} items={metricItems} />`;

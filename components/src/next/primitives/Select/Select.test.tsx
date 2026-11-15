@@ -305,7 +305,8 @@ describe('Select', () => {
     expect(start).toHaveClass('ps-Select__adornment', 'ps-Select__adornment--start');
     expect(end).toHaveClass('ps-Select__adornment', 'ps-Select__adornment--end');
     expect(start?.parentElement).toBe(control);
-    expect(end?.parentElement).toBe(control);
+    expect(end?.parentElement).toHaveClass('ps-Select__end');
+    expect(end?.parentElement?.parentElement).toBe(control);
     expect(trigger.parentElement).toBe(control);
     expect(trigger).not.toContainElement(start);
     expect(trigger).not.toContainElement(end);
@@ -315,29 +316,31 @@ describe('Select', () => {
 
   it('renders a default chevron that icon replaces', () => {
     const { rerender } = render(<Select label="Unit">{units}</Select>);
-    const icon = getTrigger().querySelector('.ps-Select__icon');
+    const icon = getRoot().querySelector('.ps-Select__icon');
     expect(icon).toHaveClass('ps-Icon');
     expect(icon).toHaveAttribute('aria-hidden', 'true');
     expect(icon?.querySelector('svg')).toBeInTheDocument();
+    expect(getTrigger()).not.toContainElement(icon as HTMLElement);
 
     rerender(
       <Select label="Unit" icon={CUSTOM_ICON}>
         {units}
       </Select>,
     );
-    expect(getTrigger().querySelector('.ps-Select__icon')).toContainElement(screen.getByTestId('custom-icon'));
+    expect(getRoot().querySelector('.ps-Select__icon')).toContainElement(screen.getByTestId('custom-icon'));
   });
 
   it('marks only the default chevron for rotation', () => {
     const { rerender } = render(<Select label="Unit">{units}</Select>);
-    expect(getTrigger().querySelector('.ps-Select__icon .ps-Select__chevron')).toBeInTheDocument();
+    expect(getRoot().querySelector('.ps-Select__icon .ps-Select__chevron')).toBeInTheDocument();
 
     rerender(
       <Select label="Unit" icon={CUSTOM_ICON}>
         {units}
       </Select>,
     );
-    expect(getTrigger().querySelector('.ps-Select__chevron')).toBeNull();
+    expect(getRoot().querySelector('.ps-Select__icon')).toBeInTheDocument();
+    expect(getRoot().querySelector('.ps-Select__chevron')).toBeNull();
   });
 
   it('renders no icon wrapper when icon is null', () => {
@@ -346,7 +349,7 @@ describe('Select', () => {
         {units}
       </Select>,
     );
-    expect(getTrigger().querySelector('.ps-Select__icon')).toBeNull();
+    expect(getRoot().querySelector('.ps-Select__icon')).toBeNull();
   });
 
   it('supports controlled open state', async () => {

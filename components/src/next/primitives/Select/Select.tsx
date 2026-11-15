@@ -116,8 +116,8 @@ export interface SelectSlotProps {
    */
   control?: SlotStyleProps<SelectStyle>;
   /**
-   * The focusable element: the button in basic mode (it also holds the value and the default icon), or the search
-   * input in searchable mode (the chevron button sits next to it, outside this slot).
+   * The focusable element: the button in basic mode (it also holds the value), or the search input in searchable
+   * mode. In both modes the chevron sits outside this slot, as the last item in the control.
    */
   trigger?: SlotStyleProps;
   /**
@@ -344,7 +344,10 @@ type SelectSelectionProps =
       onValueChange?: (value: SelectValue[]) => void;
       /** Shows the selected items as removable chips. */
       chips: true;
-      /** While focus is outside the field and the list is closed, show this many chips, then "+N". */
+      /**
+       * While the list is closed and focus is not in the chips or the search input, show this many chips, then "+N".
+       * Focus on the basic trigger keeps them collapsed.
+       */
       limitChips?: number;
       renderValue?: never;
       /** Accessible name of a chip's remove button. Defaults to `(label) => \`Remove ${label}\``. */
@@ -372,9 +375,10 @@ export type SelectProps = SelectBaseProps &
  * text. Native `onChange` is not passed through; use `onValueChange` and `onInputValueChange`.
  *
  * `multiple` selects several items. With `chips` the selection shows as removable chips, and `limitChips` collapses
- * them to "+N" while focus is outside the field and the list is closed. In basic mode the chip `×` is a pointer
- * shortcut only (it is not a tab stop): keyboard users deselect items in the list. In searchable mode Backspace and
- * the arrow keys move between the chips and the input. `clearable` adds a button that resets the selection.
+ * them to "+N" while the list is closed and focus is not in the chips or the search input (focus on the basic trigger
+ * keeps them collapsed). In basic mode the chip `×` is a pointer shortcut only (it is not a tab stop): keyboard users
+ * deselect items in the list. In searchable mode Backspace and the arrow keys move between the chips and the input.
+ * `clearable` adds a button that resets the selection.
  *
  * Searchable limits: the input can only show text, so in single mode it shows the selected item's label and
  * `renderValue` is ignored; in multiple mode without `chips` the joined labels (or `renderValue`) appear before the

@@ -116,7 +116,7 @@ describe('select.css', () => {
     // State and status rules are intentionally specific; defaults must stay zero-specificity.
     expect(unwrapped).toEqual([
       '.ps-Select__control:has(.ps-Select__trigger:focus-visible)',
-      '.ps-Select__control:not(:focus-within):not([data-open]) .ps-Select__chip[data-overflow]',
+      '.ps-Select__control:not([data-open]) .ps-Select__chips:not(:focus-within) .ps-Select__chip[data-overflow]',
       '.ps-Select__control[data-readonly]',
       '.ps-Select[data-disabled]',
       '.ps-Select[data-disabled] .ps-Text[data-disabled]',
@@ -252,16 +252,13 @@ describe('select.css', () => {
   });
 
   it('flips only the default chevron while the list is open', () => {
-    const trigger = document.createElement('button');
-    trigger.className = 'ps-Select__trigger';
-    trigger.setAttribute('data-popup-open', '');
     const icon = document.createElement('span');
     icon.className = 'ps-Select__icon';
+    icon.setAttribute('data-popup-open', '');
     const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     chevron.setAttribute('class', 'ps-Select__chevron');
     icon.append(chevron);
-    trigger.append(icon);
-    document.body.append(trigger);
+    document.body.append(icon);
     expect(propertyFor(chevron, 'transform')).toBe('rotate(180deg)');
     expect(propertyFor(icon, 'transform')).toBe('');
   });
@@ -351,10 +348,35 @@ describe('select.css', () => {
       ['md', 'sm'],
       ['lg', 'sm'],
     ])('sizes the chip row of a %s field like a %s chip', (size, chipStep) => {
-      const { chips } = makeChips({ 'data-size': size });
-      expect(propertyFor(chips, '--ps-select-chip-row')).toBe(
+      const { control } = makeChips({ 'data-size': size });
+      expect(propertyFor(control, '--ps-select-chip-row')).toBe(
         `var(--perses-chip-size-${chipStep}, var(--perses-selection-control-size-${chipStep}))`,
       );
+    });
+
+    // The chips can span several rows, or collapse to one row with "+N". A bottom-aligned end group one chip row tall
+    // keeps the chevron on the last chip row in every case, instead of centred on the chip block.
+    it('keeps the end group on the last chip row', () => {
+      const { control } = makeChips({ 'data-size': 'md' });
+      const end = document.createElement('span');
+      end.className = 'ps-Select__end';
+      control.append(end);
+
+      expect(propertyFor(control, 'align-content')).toBe('center');
+      expect(propertyFor(end, 'align-self')).toBe('flex-end');
+      expect(propertyFor(end, 'min-height')).toBe('var(--ps-select-chip-row)');
+    });
+
+    it('centres the end group in a field without chips', () => {
+      const { control } = makeSelect({ 'data-size': 'md' });
+      const end = document.createElement('span');
+      end.className = 'ps-Select__end';
+      control.append(end);
+
+      expect(propertyFor(end, 'display')).toBe('inline-flex');
+      expect(propertyFor(end, 'align-items')).toBe('center');
+      expect(propertyFor(end, 'align-self')).toBe('');
+      expect(propertyFor(end, 'min-height')).toBe('');
     });
 
     it('draws an inset focus ring on a focused chip only for keyboard focus', () => {
@@ -378,9 +400,14 @@ describe('select.css', () => {
       );
     });
 
-    it('lets a chips container that holds the search input fill the control, and no other', () => {
-      const { chips } = makeChips();
-      expect(styleRules().some((rule) => chips.matches(rule.selectorText) && rule.style.flex)).toBe(false);
+    // A zero basis lets the chips wrap inside their area, so the end group stays beside the last chip row instead of
+    // wrapping onto a row of its own. The search area keeps room for the input.
+    it('lets the chips area fill the row beside the end group, keeping room for the search input', () => {
+      const { control, chips } = makeChips();
+      const trigger = control.querySelector('.ps-Select__trigger') as HTMLElement;
+      control.append(trigger);
+      expect(propertyFor(chips, 'flex')).toBe('1 1 0');
+      expect(propertyFor(trigger, 'flex')).toBe('none');
 
       const input = document.createElement('input');
       input.className = 'ps-Select__trigger ps-Select__input';
@@ -388,7 +415,7 @@ describe('select.css', () => {
       expect(propertyFor(chips, 'flex')).toBe('1 1 4rem');
     });
 
-    it('hides overflow chips and shows +N only while focus is outside and the list is closed', () => {
+    it('hides overflow chips and shows +N only while the list is closed and focus is outside the chips', () => {
       const { control, chip, more } = makeChips();
       expect(propertyFor(chip, 'display')).toBe('none');
       expect(propertyFor(more, 'display')).toBe('inline-flex');
@@ -398,6 +425,23 @@ describe('select.css', () => {
         (rule) => chip.matches(rule.selectorText) && rule.style.display === 'none',
       );
       expect(hidingChip).toEqual([]);
+      expect(propertyFor(more, 'display')).toBe('none');
+    });
+
+    // Base UI returns focus to the basic trigger after an outside press closes the list. The trigger sits beside the
+    // chips, so focusing it must not expand them, or the field flickers between "+N" and every chip.
+    it('keeps +N while focus is on a trigger outside the chips, and expands for focus inside them', () => {
+      const { control, chips, chip, more } = makeChips();
+      const trigger = control.querySelector('.ps-Select__trigger') as HTMLElement;
+      trigger.focus();
+      expect(rulesHiding(chip)).not.toEqual([]);
+      expect(propertyFor(more, 'display')).toBe('inline-flex');
+
+      const input = document.createElement('input');
+      input.className = 'ps-Select__trigger ps-Select__input';
+      chips.append(input);
+      input.focus();
+      expect(rulesHiding(chip)).toEqual([]);
       expect(propertyFor(more, 'display')).toBe('none');
     });
 

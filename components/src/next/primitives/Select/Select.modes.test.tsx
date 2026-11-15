@@ -276,6 +276,34 @@ describe.each(MODES)('%s mode', (mode) => {
       expect(queryClear()).toBeNull();
     });
 
+    it('keeps the open indicator last, after the end element, spinner and clear button', () => {
+      renderSelect({
+        ...modeProps(mode),
+        clearable: true,
+        loading: true,
+        defaultValue: 'bytes',
+        endElement: <span data-testid="end" />,
+      });
+
+      const end = control().querySelector('.ps-Select__end') as HTMLElement;
+      const parts = [
+        screen.getByTestId('end').parentElement,
+        end.querySelector('.ps-Select__spinner'),
+        queryClear(),
+        end.querySelector(mode === 'searchable' ? '.ps-Select__toggle' : '.ps-Select__icon'),
+      ];
+
+      // One group, so the items never wrap apart and align together (bottom-aligned when the field holds chips).
+      expect(control().lastElementChild).toBe(end);
+      expect(Array.from(end.children)).toEqual(parts);
+    });
+
+    it('renders no end group when there is nothing to show at the end', () => {
+      renderSelect({ ...modeProps(mode), icon: null });
+
+      expect(control().querySelector('.ps-Select__end')).toBeNull();
+    });
+
     it('keeps a controlled value the parent does not update', async () => {
       const onValueChange = vi.fn();
       renderSelect({ ...modeProps(mode), clearable: true, value: 'bytes', onValueChange });

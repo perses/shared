@@ -90,7 +90,7 @@ export interface SelectEngineProps {
 
   /** Shows the selected values as removable chips (multiple only). */
   chips: boolean;
-  /** While focus is outside the field and the list is closed, show this many chips, then "+N". */
+  /** While the list is closed and focus is not in the chips or the search input, show this many chips, then "+N". */
   limitChips?: number;
   chipRemoveAriaLabel: (label: string) => string;
   moreChipsLabel: (count: number) => string;
@@ -121,7 +121,7 @@ export interface SelectShellProps {
   label: ReactNode;
   /** The focusable part of the control: the trigger button or the search input. */
   field: ReactNode;
-  /** Content after the end element, such as the clear button and the chevron. */
+  /** The open indicator (chevron). It always renders last, after the end element, spinner and clear button. */
   trailing?: ReactNode;
   /** The live status region. */
   status?: ReactNode;
@@ -234,21 +234,28 @@ export function SelectShell({
           <span className="ps-Select__adornment ps-Select__adornment--start">{startElement}</span>
         )}
         {field}
-        {hasContent(endElement) && <span className="ps-Select__adornment ps-Select__adornment--end">{endElement}</span>}
-        {engine.loading && <Spinner aria-hidden="true" className="ps-Select__spinner" />}
-        {showClear && (
-          <IconButton
-            aria-label={clearAriaLabel}
-            size="xs"
-            variant="ghost"
-            className={clsx('ps-Select__clear', slotProps?.clearButton?.className)}
-            style={slotProps?.clearButton?.style}
-            onClick={handleClear}
-          >
-            {closeIcon}
-          </IconButton>
+        {(hasContent(endElement) || engine.loading || showClear || hasContent(trailing)) && (
+          // One group, so these never wrap apart and align together: bottom-aligned on the last chip row.
+          <span className="ps-Select__end">
+            {hasContent(endElement) && (
+              <span className="ps-Select__adornment ps-Select__adornment--end">{endElement}</span>
+            )}
+            {engine.loading && <Spinner aria-hidden="true" className="ps-Select__spinner" />}
+            {showClear && (
+              <IconButton
+                aria-label={clearAriaLabel}
+                size="xs"
+                variant="ghost"
+                className={clsx('ps-Select__clear', slotProps?.clearButton?.className)}
+                style={slotProps?.clearButton?.style}
+                onClick={handleClear}
+              >
+                {closeIcon}
+              </IconButton>
+            )}
+            {trailing}
+          </span>
         )}
-        {trailing}
       </Control>
       {hasContent(helperText) && (
         <Field.Description
