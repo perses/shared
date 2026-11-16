@@ -42,6 +42,18 @@ describe('Checkbox', () => {
     expect(checkbox).toHaveAttribute('data-variant', 'subtle');
   });
 
+  it('renders 0 as a label and treats null, false or an empty label as unlabeled', () => {
+    const { container, rerender } = render(<Checkbox label={0} />);
+    expect(screen.getByRole('checkbox', { name: '0' })).toBeInTheDocument();
+    expect(container.querySelector('.ps-Checkbox__field')).toBeInTheDocument();
+
+    for (const label of [null, false, '']) {
+      rerender(<Checkbox label={label} aria-label="Select item" />);
+      expect(container.querySelector('.ps-Checkbox__field')).toBeNull();
+      expect(container.querySelector('.ps-Checkbox__labelText')).toBeNull();
+    }
+  });
+
   it.each(VARIANTS)('preserves selection and interaction states with variant=%s', async (variant) => {
     const handleCheckedChange = vi.fn();
     const { rerender } = render(

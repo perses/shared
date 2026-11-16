@@ -408,11 +408,19 @@ describe('Tabs', () => {
             <Tab value="a" startElement={false} endElement={null}>
               Label
             </Tab>
+            <Tab value="b" startElement="" endElement="">
+              Other
+            </Tab>
+            <Tab value="c" startElement={true} endElement={true}>
+              Third
+            </Tab>
           </TabList>
         </Tabs>,
       );
-      expect(tab('Label').querySelector('.ps-Tab__start')).toBeNull();
-      expect(tab('Label').querySelector('.ps-Tab__end')).toBeNull();
+      for (const name of ['Label', 'Other', 'Third']) {
+        expect(tab(name).querySelector('.ps-Tab__start')).toBeNull();
+        expect(tab(name).querySelector('.ps-Tab__end')).toBeNull();
+      }
     });
 
     it('omits the content wrapper for an icon-only tab so the flex gap does not add space', () => {

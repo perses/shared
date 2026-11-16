@@ -17,6 +17,7 @@ import { forwardRef, useContext } from 'react';
 import type { HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
+import { hasContent } from '../hasContent';
 import { applyStyleProps, compileStyleProps, radiusProps, sizingProps, spacingProps } from '../system';
 import type { RadiusProps, SizingProps, SpacingProps } from '../system';
 import type { ColorVariant, Status } from '../types';
@@ -57,10 +58,6 @@ export interface TabProps
    * Enable for custom buttons to retain `type="button"` and native keyboard behavior; leave off for links.
    */
   nativeButton?: boolean;
-}
-
-function hasContent(node: ReactNode): boolean {
-  return node !== undefined && node !== null && typeof node !== 'boolean';
 }
 
 /**

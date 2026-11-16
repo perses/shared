@@ -17,6 +17,7 @@ import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { hasContent } from '../hasContent';
 import {
   applyStyleProps,
   compileStyleProps,
@@ -151,7 +152,7 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
   const controlId = id ?? generatedId;
   const labelId = `${controlId}-label`;
   const hiddenInputId = `${controlId}-input`;
-  const hasLabel = Boolean(label);
+  const hasLabel = hasContent(label);
   const callerClassName = clsx(styleClassName, className);
   const controlStyle = hasLabel
     ? mergeControlStyle(radiusStyle, slotProps?.control?.style ?? {})

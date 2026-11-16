@@ -152,6 +152,15 @@ describe('Switch', () => {
     expect(container.querySelector('.ps-Switch__wrapper')).not.toBeInTheDocument();
   });
 
+  it('renders 0 as a label and skips an empty label', () => {
+    const { container, rerender } = render(<Switch checked={false} onCheckedChange={noop} label={0} />);
+    expect(screen.getByRole('switch', { name: '0' })).toBeInTheDocument();
+    expect(container.querySelector('.ps-Switch__wrapper')).toBeInTheDocument();
+
+    rerender(<Switch checked={false} onCheckedChange={noop} label="" aria-label="Enable" />);
+    expect(container.querySelector('.ps-Switch__wrapper')).not.toBeInTheDocument();
+  });
+
   it('merges additional className with ps-Switch', () => {
     render(<Switch checked={false} onCheckedChange={noop} className="custom" />);
     const control = screen.getByRole('switch');
