@@ -16,6 +16,7 @@ import type { HTMLAttributes, ReactNode } from 'react';
 import { createElement, forwardRef } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { hasContent } from '../hasContent';
 import { applyStyleProps, compileStyleProps, radiusProps, sizingProps, spacingProps } from '../system';
 import type { RadiusProps, SizingProps, SpacingProps } from '../system';
 
@@ -110,7 +111,7 @@ export const CardHeader = forwardRef<HTMLElement, CardHeaderProps>(function Card
     style: computedStyle,
     rest,
   } = applyStyleProps(props, CARD_HEADER_STYLE_PROPS, style);
-  const hasEndElement = endElement !== undefined && endElement !== null && typeof endElement !== 'boolean';
+  const hasEndElement = hasContent(endElement);
 
   return createElement(
     as,

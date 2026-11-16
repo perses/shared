@@ -14,6 +14,7 @@
 import type { ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
+import { hasContent } from '../hasContent';
 import { CheckIcon } from '../Icon/icons/CheckIcon';
 import { compileStyleProps, radiusProps, spacingProps } from '../system';
 import type { RadiusProps, SpacingProps } from '../system';
@@ -46,10 +47,6 @@ export interface MenuItemBaseProps extends SpacingProps, RadiusProps {
 }
 
 export const MENU_ITEM_STYLE_PROPS = compileStyleProps([spacingProps, radiusProps]);
-
-function hasContent(node: ReactNode): boolean {
-  return node !== undefined && node !== null && typeof node !== 'boolean';
-}
 
 /** Renders the shared start / content / end layout and optional selection check. */
 export function MenuItemContent({

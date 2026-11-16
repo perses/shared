@@ -17,6 +17,7 @@ import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, InputHTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { hasContent } from '../hasContent';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
 import { TextHelper } from '../TextHelper';
@@ -169,7 +170,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
       data-full-width={fullWidth || undefined}
       data-multiline={multiline || undefined}
     >
-      {label && (
+      {hasContent(label) && (
         <Field.Label
           className={clsx('ps-TextField__label', slotProps?.label?.className)}
           style={slotProps?.label?.style}
@@ -182,7 +183,9 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
         className={clsx('ps-TextField__wrapper', radiusClassName, slotProps?.wrapper?.className)}
         style={radiusStyle}
       >
-        {startElement && <span className="ps-TextField__adornment ps-TextField__adornment--start">{startElement}</span>}
+        {hasContent(startElement) && (
+          <span className="ps-TextField__adornment ps-TextField__adornment--start">{startElement}</span>
+        )}
         <Field.Control
           {...restWithoutDisplay}
           ref={ref}
@@ -192,9 +195,11 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
           render={multiline ? renderTextarea : undefined}
           {...(multiline && { rows })}
         />
-        {endElement && <span className="ps-TextField__adornment ps-TextField__adornment--end">{endElement}</span>}
+        {hasContent(endElement) && (
+          <span className="ps-TextField__adornment ps-TextField__adornment--end">{endElement}</span>
+        )}
       </div>
-      {helperText && (
+      {hasContent(helperText) && (
         <Field.Description
           className={clsx('ps-TextField__helper', slotProps?.helper?.className)}
           style={slotProps?.helper?.style}

@@ -17,6 +17,7 @@ import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 import { forwardRef, useCallback } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { hasContent } from '../hasContent';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import {
   applyStyleProps,
@@ -139,7 +140,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
   },
   ref,
 ) {
-  const hasLabel = label !== undefined;
+  const hasLabel = hasContent(label);
   const {
     className: radiusClassName,
     style: radiusStyle,

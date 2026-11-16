@@ -179,13 +179,22 @@ describe('CardHeader', () => {
     expect(screen.getByTestId('header').querySelector('.ps-CardHeader__end')).toBeNull();
   });
 
-  it.each([false, true])('omits the end slot for the empty React node %s', (endElement) => {
+  it.each([false, true, ''])('omits the end slot for the empty React node %j', (endElement) => {
     render(
       <CardHeader data-testid="header" endElement={endElement}>
         Title
       </CardHeader>,
     );
     expect(screen.getByTestId('header').querySelector('.ps-CardHeader__end')).toBeNull();
+  });
+
+  it('renders 0 as an end element', () => {
+    render(
+      <CardHeader data-testid="header" endElement={0}>
+        Title
+      </CardHeader>,
+    );
+    expect(screen.getByTestId('header').querySelector('.ps-CardHeader__end')).toHaveTextContent('0');
   });
 
   it('merges className, forwards ref, id and aria attributes', () => {
