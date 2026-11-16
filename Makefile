@@ -24,6 +24,11 @@ cue-test:
 	@echo ">> Run the unit tests for CUE schemas"
 	$(GO) run ./scripts/test-cue/test-cue.go
 
+.PHONY: go-test
+go-test:
+	@echo ">> Run the unit tests of the Go scripts"
+	$(GO) test -count=1 -race -shuffle=on ./...
+
 .PHONY: checklicense
 checklicense:
 	@echo ">> checking license"

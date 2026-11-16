@@ -28,3 +28,4 @@ export * from './time-series-data';
 export * from './trace-data';
 export * from './types';
 export * from './text';
+export * from './url';

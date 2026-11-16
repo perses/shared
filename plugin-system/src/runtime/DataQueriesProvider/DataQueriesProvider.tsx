@@ -60,7 +60,7 @@ export function useDataQueries<T extends keyof QueryType>(queryType: T): UseData
       queryDefinitions: filteredQueryDefinitions,
       queryResults: filteredQueryResults,
       isFetching: filteredQueryResults.some((result) => result.isFetching),
-      isLoading: filteredQueryResults.some((result) => result.isLoading),
+      isPending: filteredQueryResults.some((result) => result.isPending),
       refetchAll: ctx.refetchAll,
       errors: filteredErrors,
     };
@@ -127,7 +127,7 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
       queryDefinitions: definitions,
       queryResults: mergedQueryResults,
       isFetching: mergedQueryResults.some((result) => result.isFetching),
-      isLoading: mergedQueryResults.some((result) => result.isLoading),
+      isPending: mergedQueryResults.some((result) => result.isPending),
       refetchAll,
       errors: mergedQueryResults.map((result) => result.error),
     };
@@ -159,7 +159,7 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
       for (const result of ctx.queryResults) {
         if (result.error) {
           usageMetrics.markQuery(result.definition, 'error');
-        } else if (!result.isLoading && !result.isFetching) {
+        } else if (!result.isPending && !result.isFetching) {
           usageMetrics.markQuery(result.definition, 'success');
         }
       }

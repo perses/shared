@@ -15,7 +15,7 @@ import { Box, TablePagination, TableRow as MuiTableRow } from '@mui/material';
 import type { ReactTable, Row, RowData } from '@tanstack/react-table';
 import { flexRender } from '@tanstack/react-table';
 import type { ReactElement } from 'react';
-import { useMemo, useRef } from 'react';
+import { forwardRef, useMemo, useRef } from 'react';
 import type { TableComponents, TableVirtuosoHandle, TableVirtuosoProps } from 'react-virtuoso';
 import { TableVirtuoso } from 'react-virtuoso';
 
@@ -27,6 +27,7 @@ import type { TableCellProps } from './TableCell';
 import { TableCell } from './TableCell';
 import { TableFoot } from './TableFoot';
 import { TableHead } from './TableHead';
+import type { FilterConfig } from './TableHeaderCell';
 import { TableHeaderCell } from './TableHeaderCell';
 import { TableRow } from './TableRow';
 import type { TableToolbarProps } from './TableToolbar';
@@ -36,6 +37,56 @@ import { VirtualizedTableContainer } from './VirtualizedTableContainer';
 type TableCellPosition = {
   row: number;
   column: number;
+};
+
+type TableContext<TableData extends RowData> = {
+  width: number | string;
+  density: VirtualizedTableProps<TableData>['density'];
+  onTableKeyDown: React.KeyboardEventHandler<HTMLTableElement>;
+  onTableBlur: React.FocusEventHandler<HTMLTableElement>;
+  onRowClick: VirtualizedTableProps<TableData>['onRowClick'];
+  onRowMouseOver: VirtualizedTableProps<TableData>['onRowMouseOver'];
+  onRowMouseOut: VirtualizedTableProps<TableData>['onRowMouseOut'];
+};
+
+// Defined outside VirtualizedTable so the object reference is stable and
+// TableVirtuoso never remounts its internal components due to a changed prop.
+// Props that vary per-render are passed via the `context` prop instead.
+const VirtuosoTableComponents: TableComponents<Row<TableFeatures, RowData>, TableContext<RowData>> = {
+  Scroller: forwardRef(({ context: _, ...props }, ref) => <VirtualizedTableContainer {...props} ref={ref} />),
+  Table: ({ context, ...props }): ReactElement => (
+    <InnerTable
+      {...props}
+      width={context.width}
+      density={context.density}
+      onKeyDown={context.onTableKeyDown}
+      onBlur={context.onTableBlur}
+    />
+  ),
+  TableHead: forwardRef(({ context: _, ...props }, ref) => <TableHead {...props} ref={ref} />),
+  TableFoot: forwardRef(({ context: _, ...props }, ref) => <TableFoot {...props} ref={ref} />),
+  TableRow: ({ item, context, ...props }): ReactElement | null => {
+    if (!item) {
+      return null;
+    }
+
+    const rowEventOpts: TableRowEventOpts = { id: item.id, index: item.index };
+
+    return (
+      <TableRow
+        {...props}
+        onClick={(e) => context.onRowClick(e, item)}
+        density={context.density}
+        onMouseOver={(e) => {
+          context.onRowMouseOver?.(e, rowEventOpts);
+        }}
+        onMouseOut={(e) => {
+          context.onRowMouseOut?.(e, rowEventOpts);
+        }}
+      />
+    );
+  },
+  TableBody: forwardRef(({ context: _, ...props }, ref) => <TableBody {...props} ref={ref} />),
 };
 
 export type VirtualizedTableProps<TableData extends RowData> = Required<
@@ -119,57 +170,18 @@ export function VirtualizedTable<TableData extends RowData>({
     return 'none';
   };
 
-  const VirtuosoTableComponents: TableComponents<Row<TableFeatures, TableData>> = useMemo(() => {
-    return {
-      Scroller: VirtualizedTableContainer,
-      Table: (props): ReactElement => {
-        return (
-          <InnerTable
-            {...props}
-            width={width}
-            density={density}
-            onKeyDown={keyboardNav.onTableKeyDown}
-            onBlur={keyboardNav.onTableBlur}
-          />
-        );
-      },
-      TableHead,
-      TableFoot,
-      TableRow: ({ item: _item, ...props }): ReactElement | null => {
-        const index = props['data-index'];
-        const row = rows[index];
-        if (!row) {
-          return null;
-        }
-
-        const rowEventOpts: TableRowEventOpts = { id: row.id, index: row.index };
-
-        return (
-          <TableRow
-            {...props}
-            onClick={(e) => onRowClick(e, row)}
-            density={density}
-            onMouseOver={(e) => {
-              onRowMouseOver?.(e, rowEventOpts);
-            }}
-            onMouseOut={(e) => {
-              onRowMouseOut?.(e, rowEventOpts);
-            }}
-          />
-        );
-      },
-      TableBody,
-    };
-  }, [
-    density,
-    keyboardNav.onTableKeyDown,
-    keyboardNav.onTableBlur,
-    onRowClick,
-    onRowMouseOut,
-    onRowMouseOver,
-    rows,
-    width,
-  ]);
+  const tableContext: TableContext<TableData> = useMemo(
+    () => ({
+      width,
+      density,
+      onTableKeyDown: keyboardNav.onTableKeyDown,
+      onTableBlur: keyboardNav.onTableBlur,
+      onRowClick,
+      onRowMouseOver,
+      onRowMouseOut,
+    }),
+    [width, density, keyboardNav.onTableKeyDown, keyboardNav.onTableBlur, onRowClick, onRowMouseOver, onRowMouseOut],
+  );
 
   const handleChangePage = (_event: React.MouseEvent<HTMLButtonElement> | null, newPage: number): void => {
     if (!pagination || !onPaginationChange) return;
@@ -202,8 +214,9 @@ export function VirtualizedTable<TableData extends RowData>({
       <TableToolbar {...toolbarConfig} width={width} />
       <TableVirtuoso
         ref={virtuosoRef}
-        totalCount={rows.length}
-        components={VirtuosoTableComponents}
+        data={rows}
+        components={VirtuosoTableComponents as TableComponents<Row<TableFeatures, TableData>, TableContext<TableData>>}
+        context={tableContext}
         // Note: this value is impacted by overscan. See this issue if overscan
         // is added.
         // https://github.com/petyosi/react-virtuoso/issues/118#issuecomment-642156138
@@ -223,6 +236,17 @@ export function VirtualizedTable<TableData extends RowData>({
 
                       const isSorted = column.getIsSorted();
                       const nextSorting = column.getNextSortingOrder();
+                      const isFilterEnabled = !!column.columnDef.enableColumnFilter;
+
+                      const filterConfig: FilterConfig | undefined = isFilterEnabled
+                        ? {
+                            uniqueValues: column.getFacetedUniqueValues(),
+                            filterValues: (column.getFilterValue() as unknown[] | undefined) ?? [],
+                            onFilterChange: (values: unknown[]): void => {
+                              column.setFilterValue(values.length > 0 ? values : undefined);
+                            },
+                          }
+                        : undefined;
 
                       return (
                         <TableHeaderCell
@@ -253,6 +277,7 @@ export function VirtualizedTable<TableData extends RowData>({
                                 }
                               : undefined
                           }
+                          filterConfig={filterConfig}
                         >
                           {flexRender(column.columnDef.header, header.getContext())}
                         </TableHeaderCell>
