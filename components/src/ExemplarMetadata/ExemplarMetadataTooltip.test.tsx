@@ -85,6 +85,46 @@ describe('ExemplarMetadataTooltip', () => {
     expect(screen.getByText('Exemplar labels')).toBeVisible();
   });
 
+  it('does not render a links section when the exemplar has no links', () => {
+    renderComponent();
+    expect(screen.queryByText('Links')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('renders the exemplar links, opening in a new tab', () => {
+    renderComponent({
+      exemplar: {
+        ...exemplar,
+        links: [
+          { name: 'View trace', url: 'http://localhost:16686/trace/abc-123' },
+          { url: '/explore?explorer=Tempo-TempoExplorer' },
+        ],
+      },
+    });
+    expect(screen.getByText('Links')).toBeVisible();
+
+    const named = screen.getByRole('link', { name: 'View trace' });
+    expect(named).toHaveAttribute('href', 'http://localhost:16686/trace/abc-123');
+    expect(named).toHaveAttribute('target', '_blank');
+    expect(named).toHaveAttribute('rel', 'noopener noreferrer');
+
+    // Without a name, the URL itself is the link text.
+    const unnamed = screen.getByRole('link', { name: '/explore?explorer=Tempo-TempoExplorer' });
+    expect(unnamed).toHaveAttribute('href', '/explore?explorer=Tempo-TempoExplorer');
+  });
+
+  it('does not render links with an unsafe URL', () => {
+    renderComponent({
+      exemplar: {
+        ...exemplar,
+        links: [{ name: 'Unsafe', url: 'javascript:alert(1)' }],
+      },
+    });
+    expect(screen.queryByText('Links')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByText('Unsafe')).not.toBeInTheDocument();
+  });
+
   it('does not render a divider for empty label sets', () => {
     render(<ExemplarMetadataTooltip exemplar={{ ...exemplar, labels: {} }} seriesLabels={{}} pinnedPos={pinnedPos} />);
     expect(screen.queryByText('Series labels')).not.toBeInTheDocument();
