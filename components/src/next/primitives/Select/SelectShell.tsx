@@ -141,55 +141,26 @@ export interface SelectShellProps {
   onClear?: () => void;
 }
 
-/**
- * Layout shared by every engine: label, the bordered wrapper (start element, field, end element, trailing
- * content), helper text, live region and popup. The engine supplies the parts that depend on Base UI context.
- */
-export function SelectShell({
-  engine,
-  wrapperRef,
-  label,
-  field,
-  trailing,
-  liveRegion,
-  popup,
-  Wrapper = 'div',
-  pressIsInside = false,
-  onClear,
-}: SelectShellProps): ReactElement {
-  const {
-    slotProps,
-    helperText,
-    startElement,
-    endElement,
-    status,
-    disabled,
-    readOnly,
-    open,
-    setOpen,
-    clearable,
-    clearAriaLabel,
-    multiple,
-    value,
-    setValue,
-  } = engine;
-  const showClear = clearable && !isEmptySelection(value) && !disabled && !readOnly;
-  const wasOpenOnPress = useRef(false);
-  const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
-    () =>
-      (descriptionProps, state): ReactElement => (
-        <TextHelper {...descriptionProps} status={status} disabled={state.disabled} />
-      ),
-    [status],
-  );
+type WrapperPressOptions = Pick<SelectEngineProps, 'open' | 'setOpen' | 'disabled' | 'readOnly'> &
+  Pick<SelectShellProps, 'wrapperRef'> & { pressIsInside: boolean };
 
-  const handlePointerDownCapture = (): void => {
+/**
+ * A press on the wrapper's empty space focuses the field and toggles the list, like a press on the trigger. Presses
+ * on real controls inside the wrapper are left to those controls.
+ */
+function useWrapperPress({ wrapperRef, open, setOpen, disabled, readOnly, pressIsInside }: WrapperPressOptions): {
+  onPointerDownCapture: () => void;
+  onMouseDown: (event: MouseEvent<HTMLElement>) => void;
+} {
+  const wasOpenOnPress = useRef(false);
+
+  const onPointerDownCapture = (): void => {
     // Base UI's outside press closes the list on pointerdown, before mousedown fires. Capture the open state here,
     // before that close, because by mousedown `open` already reads as closed.
     wasOpenOnPress.current = open;
   };
 
-  const handleMouseDown = (event: MouseEvent<HTMLElement>): void => {
+  const onMouseDown = (event: MouseEvent<HTMLElement>): void => {
     const baseEvent = event as MouseEvent<HTMLElement> & { preventBaseUIHandler?: () => void };
     if (disabled || readOnly || event.button !== 0) {
       // Base UI's search input group opens the list on a press unless it is disabled; block that for a read-only
@@ -216,11 +187,103 @@ export function SelectShell({
     setOpen(true);
   };
 
+  return { onPointerDownCapture, onMouseDown };
+}
+
+function SelectAdornment({ side, children }: { side: 'start' | 'end'; children: ReactNode }): ReactElement | null {
+  if (!hasContent(children)) return null;
+  return <span className={`ps-Select__adornment ps-Select__adornment--${side}`}>{children}</span>;
+}
+
+function canClear({ clearable, value, disabled, readOnly }: SelectEngineProps): boolean {
+  return clearable && !isEmptySelection(value) && !disabled && !readOnly;
+}
+
+type SelectActionsProps = Pick<SelectShellProps, 'engine' | 'wrapperRef' | 'trailing' | 'onClear'>;
+
+/** Resets the selection, then returns focus to the field. */
+function SelectClearButton({ engine, wrapperRef, onClear }: SelectActionsProps): ReactElement | null {
+  if (!canClear(engine)) return null;
+  const { clearAriaLabel, multiple, setValue, slotProps } = engine;
   const handleClear = (): void => {
     setValue(emptySelection(multiple));
     onClear?.();
     focusField(wrapperRef.current);
   };
+  return (
+    <IconButton
+      aria-label={clearAriaLabel}
+      size="xs"
+      variant="ghost"
+      className={clsx('ps-Select__clear', slotProps?.clearButton?.className)}
+      style={slotProps?.clearButton?.style}
+      onClick={handleClear}
+    >
+      {closeIcon}
+    </IconButton>
+  );
+}
+
+/**
+ * The end element, spinner, clear button and trailing content as one group, so they never wrap apart and align
+ * together: bottom-aligned on the last chip row. Renders nothing when none of them is shown.
+ */
+function SelectActions(props: SelectActionsProps): ReactElement | null {
+  const { engine, trailing } = props;
+  const { endElement, loading } = engine;
+  if (!hasContent(endElement) && !loading && !canClear(engine) && !hasContent(trailing)) return null;
+  return (
+    <span className="ps-Select__actions">
+      <SelectAdornment side="end">{endElement}</SelectAdornment>
+      {loading && <Spinner aria-hidden="true" className="ps-Select__spinner" />}
+      <SelectClearButton {...props} />
+      {trailing}
+    </span>
+  );
+}
+
+function SelectHelper({
+  helperText,
+  status,
+  slotProps,
+}: Pick<SelectEngineProps, 'helperText' | 'status' | 'slotProps'>): ReactElement | null {
+  const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
+    () =>
+      (descriptionProps, state): ReactElement => (
+        <TextHelper {...descriptionProps} status={status} disabled={state.disabled} />
+      ),
+    [status],
+  );
+  if (!hasContent(helperText)) return null;
+  return (
+    <Field.Description
+      className={clsx('ps-Select__helper', slotProps?.helper?.className)}
+      style={slotProps?.helper?.style}
+      render={renderHelper}
+    >
+      {helperText}
+    </Field.Description>
+  );
+}
+
+/**
+ * Layout shared by every engine: label, the bordered wrapper (start element, field, end element, trailing
+ * content), helper text, live region and popup. The engine supplies the parts that depend on Base UI context.
+ */
+export function SelectShell({
+  engine,
+  wrapperRef,
+  label,
+  field,
+  trailing,
+  liveRegion,
+  popup,
+  Wrapper = 'div',
+  pressIsInside = false,
+  onClear,
+}: SelectShellProps): ReactElement {
+  const { open, setOpen, disabled, readOnly } = engine;
+  const pressHandlers = useWrapperPress({ wrapperRef, open, setOpen, disabled, readOnly, pressIsInside });
 
   return (
     <>
@@ -232,45 +295,13 @@ export function SelectShell({
         data-open={open ? '' : undefined}
         data-disabled={disabled ? '' : undefined}
         data-readonly={readOnly ? '' : undefined}
-        onPointerDownCapture={handlePointerDownCapture}
-        onMouseDown={handleMouseDown}
+        {...pressHandlers}
       >
-        {hasContent(startElement) && (
-          <span className="ps-Select__adornment ps-Select__adornment--start">{startElement}</span>
-        )}
+        <SelectAdornment side="start">{engine.startElement}</SelectAdornment>
         {field}
-        {(hasContent(endElement) || engine.loading || showClear || hasContent(trailing)) && (
-          // One group, so these never wrap apart and align together: bottom-aligned on the last chip row.
-          <span className="ps-Select__actions">
-            {hasContent(endElement) && (
-              <span className="ps-Select__adornment ps-Select__adornment--end">{endElement}</span>
-            )}
-            {engine.loading && <Spinner aria-hidden="true" className="ps-Select__spinner" />}
-            {showClear && (
-              <IconButton
-                aria-label={clearAriaLabel}
-                size="xs"
-                variant="ghost"
-                className={clsx('ps-Select__clear', slotProps?.clearButton?.className)}
-                style={slotProps?.clearButton?.style}
-                onClick={handleClear}
-              >
-                {closeIcon}
-              </IconButton>
-            )}
-            {trailing}
-          </span>
-        )}
+        <SelectActions engine={engine} wrapperRef={wrapperRef} trailing={trailing} onClear={onClear} />
       </Wrapper>
-      {hasContent(helperText) && (
-        <Field.Description
-          className={clsx('ps-Select__helper', slotProps?.helper?.className)}
-          style={slotProps?.helper?.style}
-          render={renderHelper}
-        >
-          {helperText}
-        </Field.Description>
-      )}
+      <SelectHelper helperText={engine.helperText} status={engine.status} slotProps={engine.slotProps} />
       {liveRegion}
       {popup}
     </>

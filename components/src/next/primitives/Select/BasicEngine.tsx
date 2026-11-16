@@ -21,11 +21,57 @@ import { Icon } from '../Icon';
 import { SelectChips } from './SelectChips';
 import type { SelectValue } from './SelectItem';
 import { SelectShell } from './SelectShell';
-import type { SelectEngineProps } from './SelectShell';
+import type { SelectEngineProps, SelectShellProps } from './SelectShell';
 import { isEmptySelection, isMultipleValue } from './selectValue';
 import type { SelectCurrentValue } from './selectValue';
 
 const renderIcon = <Icon />;
+
+function BasicPopup({ engine, wrapperRef }: Pick<SelectShellProps, 'engine' | 'wrapperRef'>): ReactElement {
+  const {
+    slotProps,
+    themeMode,
+    placement,
+    align,
+    offset,
+    size,
+    listHeader,
+    options,
+    loading,
+    loadingText,
+    emptyText,
+    optionNodes,
+  } = engine;
+  return (
+    <BaseSelect.Portal>
+      <BaseSelect.Positioner
+        className={clsx('ps-Select__positioner', slotProps?.positioner?.className)}
+        style={slotProps?.positioner?.style}
+        data-perses-mode={themeMode}
+        anchor={wrapperRef}
+        side={placement}
+        align={align}
+        sideOffset={offset}
+        alignItemWithTrigger={false}
+      >
+        <BaseSelect.Popup
+          className={clsx('ps-Select__popup', slotProps?.popup?.className)}
+          style={slotProps?.popup?.style}
+          data-size={size}
+        >
+          {hasContent(listHeader) && <div className="ps-Select__list-header">{listHeader}</div>}
+          {options.length === 0 && <div className="ps-Select__empty">{loading ? loadingText : emptyText}</div>}
+          <BaseSelect.List
+            className={clsx('ps-Select__list', slotProps?.list?.className)}
+            style={slotProps?.list?.style}
+          >
+            {optionNodes}
+          </BaseSelect.List>
+        </BaseSelect.Popup>
+      </BaseSelect.Positioner>
+    </BaseSelect.Portal>
+  );
+}
 
 /** The button-trigger engine: a Base UI `Select` whose value and open state are owned by `Select`. */
 export function BasicEngine(props: SelectEngineProps): ReactElement {
@@ -35,7 +81,6 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
     label,
     placeholder,
     icon,
-    size,
     required,
     readOnly,
     disabled,
@@ -45,20 +90,12 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
     chips,
     loading,
     loadingText,
-    emptyText,
-    listHeader,
     value,
     setValue,
     open,
     setOpen,
-    options,
     optionsByValue,
-    optionNodes,
     renderValue,
-    placement,
-    align,
-    offset,
-    themeMode,
     slotProps,
   } = props;
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -132,35 +169,7 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
             {loading && open ? loadingText : null}
           </output>
         }
-        popup={
-          <BaseSelect.Portal>
-            <BaseSelect.Positioner
-              className={clsx('ps-Select__positioner', slotProps?.positioner?.className)}
-              style={slotProps?.positioner?.style}
-              data-perses-mode={themeMode}
-              anchor={wrapperRef}
-              side={placement}
-              align={align}
-              sideOffset={offset}
-              alignItemWithTrigger={false}
-            >
-              <BaseSelect.Popup
-                className={clsx('ps-Select__popup', slotProps?.popup?.className)}
-                style={slotProps?.popup?.style}
-                data-size={size}
-              >
-                {hasContent(listHeader) && <div className="ps-Select__list-header">{listHeader}</div>}
-                {options.length === 0 && <div className="ps-Select__empty">{loading ? loadingText : emptyText}</div>}
-                <BaseSelect.List
-                  className={clsx('ps-Select__list', slotProps?.list?.className)}
-                  style={slotProps?.list?.style}
-                >
-                  {optionNodes}
-                </BaseSelect.List>
-              </BaseSelect.Popup>
-            </BaseSelect.Positioner>
-          </BaseSelect.Portal>
-        }
+        popup={<BasicPopup engine={props} wrapperRef={wrapperRef} />}
       />
     </BaseSelect.Root>
   );

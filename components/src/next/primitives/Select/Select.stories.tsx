@@ -49,6 +49,29 @@ const units = (
   </>
 );
 
+const timeZones = (
+  <>
+    <SelectItem value="utc">UTC</SelectItem>
+    <SelectItem value="new-york">New York</SelectItem>
+    <SelectItem value="paris">Paris</SelectItem>
+  </>
+);
+
+const metricItems: SelectItemData[] = [
+  { value: 'up', label: 'up' },
+  { value: 'node_cpu_seconds_total', label: 'node_cpu_seconds_total' },
+  { value: 'node_memory_MemFree_bytes', label: 'node_memory_MemFree_bytes' },
+  { value: 'http_requests_total', label: 'http_requests_total' },
+  { value: 'http_request_duration_seconds', label: 'http_request_duration_seconds' },
+  { value: 'process_resident_memory_bytes', label: 'process_resident_memory_bytes' },
+  { value: 'go_goroutines', label: 'go_goroutines' },
+  { value: 'go_gc_duration_seconds', label: 'go_gc_duration_seconds', disabled: true },
+];
+
+function code(attrs: string, children = '…'): string {
+  return `<Select ${attrs}>${children}</Select>`;
+}
+
 function ControlledSelect(): ReactElement {
   const [unit, setUnit] = useState<SelectValue | null>('bytes');
 
@@ -85,53 +108,16 @@ export const Basic: Story = () => (
 );
 Basic.storyName = 'Basic';
 
-function code(attrs: string, children = '…'): string {
-  return `<Select ${attrs}>${children}</Select>`;
-}
-
 const sizeCode = `// size: 'xs' | 'sm' | 'md' | 'lg'. The popup text and row height follow the trigger.
 ${code('label="Unit" size="lg" defaultValue="bytes"')}`;
 const statusCode = `// status: 'error' | 'warning' | 'success' | 'info'. status="error" also sets aria-invalid.
 ${code('label="Unit" status="error" defaultValue="bytes"')}`;
 const fullWidthCode = `// fullWidth stretches the root and trigger to the container.
 ${code('label="Dashboard" fullWidth defaultValue="overview"')}`;
-const multipleCode = `// multiple: value is an array; the trigger joins the selected labels.
-<Select label="Columns" multiple defaultValue={['alertname', 'severity']}>
-  <SelectItem value="alertname">alertname</SelectItem>
-  <SelectItem value="severity">severity</SelectItem>
-  <SelectItem value="instance">instance</SelectItem>
-</Select>`;
-const renderValueCode = `// renderValue replaces the trigger content; numeric values stay numbers.
-<Select label="Refresh" defaultValue={30} renderValue={(value) => \`Every \${value}s\`}>
-  <SelectItem value={5}>5 seconds</SelectItem>
-  <SelectItem value={30}>30 seconds</SelectItem>
-  <SelectItem value={60}>60 seconds</SelectItem>
-</Select>`;
 const iconCode = `// icon replaces the chevron. Only the default chevron flips while the list is open; a custom icon stays still.
 ${code('label="Unit" icon={<UnfoldMoreIcon />} defaultValue="bytes"')}`;
 const adornmentsCode = `// startElement and endElement sit inside the trigger, around the value.
 ${code('label="Time zone" startElement={<EarthIcon aria-hidden="true" />} endElement={<Chip size="xs">+00:00</Chip>} defaultValue="utc"')}`;
-const groupsCode = `<Select label="Time zone" defaultValue="utc">
-  <SelectGroup label="Universal">
-    <SelectItem value="utc">UTC</SelectItem>
-  </SelectGroup>
-  <SelectGroup label="Americas">
-    <SelectItem value="new-york">New York</SelectItem>
-    <SelectItem value="los-angeles">Los Angeles</SelectItem>
-  </SelectGroup>
-</Select>`;
-const itemStartCode = `<Select label="Region" defaultValue="eu">
-  <SelectItem value="eu" startElement={<EarthIcon aria-hidden="true" />}>Europe</SelectItem>
-  <SelectItem value="us" startElement={<EarthIcon aria-hidden="true" />}>Americas</SelectItem>
-</Select>`;
-
-const timeZones = (
-  <>
-    <SelectItem value="utc">UTC</SelectItem>
-    <SelectItem value="new-york">New York</SelectItem>
-    <SelectItem value="paris">Paris</SelectItem>
-  </>
-);
 
 export const Variants: Story = () => (
   <Stack>
@@ -164,26 +150,6 @@ export const Variants: Story = () => (
       </div>
     </Sample>
 
-    <Sample title="multiple" code={multipleCode}>
-      <div style={rowStyle}>
-        <Select label="Columns" multiple defaultValue={['alertname', 'severity']}>
-          <SelectItem value="alertname">alertname</SelectItem>
-          <SelectItem value="severity">severity</SelectItem>
-          <SelectItem value="instance">instance</SelectItem>
-        </Select>
-      </div>
-    </Sample>
-
-    <Sample title="renderValue" code={renderValueCode}>
-      <div style={rowStyle}>
-        <Select label="Refresh" defaultValue={30} renderValue={(value) => `Every ${String(value)}s`}>
-          <SelectItem value={5}>5 seconds</SelectItem>
-          <SelectItem value={30}>30 seconds</SelectItem>
-          <SelectItem value={60}>60 seconds</SelectItem>
-        </Select>
-      </div>
-    </Sample>
-
     <Sample title="icon" code={iconCode}>
       <div style={rowStyle}>
         <Select label="Unit" icon={unfoldIcon} defaultValue="bytes">
@@ -196,33 +162,6 @@ export const Variants: Story = () => (
       <div style={rowStyle}>
         <Select label="Time zone" startElement={earthIcon} endElement={offsetChip} defaultValue="utc">
           {timeZones}
-        </Select>
-      </div>
-    </Sample>
-
-    <Sample title="SelectGroup" code={groupsCode}>
-      <div style={rowStyle}>
-        <Select label="Time zone" defaultValue="utc">
-          <SelectGroup label="Universal">
-            <SelectItem value="utc">UTC</SelectItem>
-          </SelectGroup>
-          <SelectGroup label="Americas">
-            <SelectItem value="new-york">New York</SelectItem>
-            <SelectItem value="los-angeles">Los Angeles</SelectItem>
-          </SelectGroup>
-        </Select>
-      </div>
-    </Sample>
-
-    <Sample title="SelectItem startElement" code={itemStartCode}>
-      <div style={rowStyle}>
-        <Select label="Region" defaultValue="eu">
-          <SelectItem value="eu" startElement={earthIcon}>
-            Europe
-          </SelectItem>
-          <SelectItem value="us" startElement={earthIcon}>
-            Americas
-          </SelectItem>
         </Select>
       </div>
     </Sample>
@@ -239,14 +178,14 @@ const readOnlyCode = `// readOnly locks the value, not the interaction: the list
 ${code('label="Unit" readOnly defaultValue="bytes"')}`;
 const disabledCode = `// The whole control fades once; adornments inherit the fade instead of stacking their own.
 ${code('label="Time zone" disabled startElement={<EarthIcon aria-hidden="true" />} endElement={<Chip size="xs">+00:00</Chip>} defaultValue="utc"')}`;
-const disabledItemCode = `// A disabled item cannot be selected, but arrow keys still reach it so screen readers announce it.
-<Select label="Unit" placeholder="Seconds cannot be picked">
-  <SelectItem value="bytes">Bytes</SelectItem>
-  <SelectItem value="seconds" disabled startElement={<EarthIcon aria-hidden="true" />}>Seconds</SelectItem>
-  <SelectItem value="percent">Percent</SelectItem>
-</Select>`;
 const ariaLabelCode = `// Without a visible label, aria-label provides the accessible name.
 ${code('aria-label="Unit" placeholder="Unit"')}`;
+const loadingCode = `// loading shows a spinner and sets aria-busy. Items stay usable; the spinner only signals that more may arrive.
+// While there are no items the list shows loadingText. Open the lists to see the messages.
+<Select label="Metric (no items)" loading items={[]} placeholder="Loading metrics" />
+<Select label="Metric (with items)" loading defaultValue="up" items={metricItems} />`;
+const emptyTextCode = `// emptyText replaces "No results" when there are no items and nothing is loading.
+<Select label="Metric" items={[]} emptyText="No metrics found" placeholder="Nothing to pick" />`;
 
 export const States: Story = () => (
   <Stack>
@@ -282,6 +221,104 @@ export const States: Story = () => (
       </div>
     </Sample>
 
+    <Sample title="aria-label" code={ariaLabelCode}>
+      <div style={rowStyle}>
+        <Select aria-label="Unit" placeholder="Unit">
+          {units}
+        </Select>
+      </div>
+    </Sample>
+
+    <Sample title="loading" code={loadingCode}>
+      <div style={rowStyle}>
+        <Select label="Metric (no items)" loading items={[]} placeholder="Loading metrics" />
+        <Select label="Metric (with items)" loading defaultValue="up" items={metricItems} />
+      </div>
+    </Sample>
+
+    <Sample title="emptyText" code={emptyTextCode}>
+      <div style={rowStyle}>
+        <Select label="Metric" items={[]} emptyText="No metrics found" placeholder="Nothing to pick" />
+      </div>
+    </Sample>
+  </Stack>
+);
+States.storyName = 'States';
+
+const unitItems: SelectItemData[] = [
+  { value: 'bytes', label: 'Bytes' },
+  { value: 'seconds', label: 'Seconds' },
+  { value: 'percent', label: 'Percent', disabled: true },
+];
+
+const itemsCode = `// \`items\` replaces SelectItem children. label is the text shown in the list, the field and chips, and what search
+// matches. Use either \`items\` or children, never both.
+const items: SelectItemData[] = [
+  { value: 'bytes', label: 'Bytes' },
+  { value: 'seconds', label: 'Seconds' },
+  { value: 'percent', label: 'Percent', disabled: true },
+];
+
+<Select label="Unit" items={items} defaultValue="bytes" />`;
+const groupsCode = `<Select label="Time zone" defaultValue="utc">
+  <SelectGroup label="Universal">
+    <SelectItem value="utc">UTC</SelectItem>
+  </SelectGroup>
+  <SelectGroup label="Americas">
+    <SelectItem value="new-york">New York</SelectItem>
+    <SelectItem value="los-angeles">Los Angeles</SelectItem>
+  </SelectGroup>
+</Select>`;
+const itemStartCode = `<Select label="Region" defaultValue="eu">
+  <SelectItem value="eu" startElement={<EarthIcon aria-hidden="true" />}>Europe</SelectItem>
+  <SelectItem value="us" startElement={<EarthIcon aria-hidden="true" />}>Americas</SelectItem>
+</Select>`;
+const disabledItemCode = `// A disabled item cannot be selected, but arrow keys still reach it so screen readers announce it.
+<Select label="Unit" placeholder="Seconds cannot be picked">
+  <SelectItem value="bytes">Bytes</SelectItem>
+  <SelectItem value="seconds" disabled startElement={<EarthIcon aria-hidden="true" />}>Seconds</SelectItem>
+  <SelectItem value="percent">Percent</SelectItem>
+</Select>`;
+
+export const Options: Story = () => (
+  <Stack>
+    <p>
+      Options come from <code>SelectItem</code> children, or from <code>items</code> when they come from data. Each item
+      has a <code>value</code>, a plain-text <code>label</code> and an optional <code>disabled</code>.
+    </p>
+    <Sample title="items" code={itemsCode}>
+      <div style={rowStyle}>
+        <Select label="Unit" items={unitItems} defaultValue="bytes" />
+      </div>
+    </Sample>
+
+    <Sample title="SelectGroup" code={groupsCode}>
+      <div style={rowStyle}>
+        <Select label="Time zone" defaultValue="utc">
+          <SelectGroup label="Universal">
+            <SelectItem value="utc">UTC</SelectItem>
+          </SelectGroup>
+          <SelectGroup label="Americas">
+            <SelectItem value="new-york">New York</SelectItem>
+            <SelectItem value="los-angeles">Los Angeles</SelectItem>
+          </SelectGroup>
+        </Select>
+      </div>
+    </Sample>
+
+    <Sample title="SelectItem startElement" code={itemStartCode}>
+      <div style={rowStyle}>
+        <Select label="Region" defaultValue="eu">
+          <SelectItem value="eu" startElement={earthIcon}>
+            Europe
+          </SelectItem>
+          <SelectItem value="us" startElement={earthIcon}>
+            Americas
+          </SelectItem>
+        </Select>
+      </div>
+    </Sample>
+
     <Sample title="SelectItem disabled" code={disabledItemCode}>
       <div style={rowStyle}>
         <Select label="Unit" placeholder="Seconds cannot be picked">
@@ -293,17 +330,387 @@ export const States: Story = () => (
         </Select>
       </div>
     </Sample>
+  </Stack>
+);
+Options.storyName = 'Options';
 
-    <Sample title="aria-label" code={ariaLabelCode}>
+const manyMetrics = [
+  'up',
+  'node_cpu_seconds_total',
+  'http_requests_total',
+  'go_goroutines',
+  'process_resident_memory_bytes',
+];
+
+const multipleCode = `// multiple: value is an array; the trigger joins the selected labels.
+<Select label="Columns" multiple defaultValue={['alertname', 'severity']}>
+  <SelectItem value="alertname">alertname</SelectItem>
+  <SelectItem value="severity">severity</SelectItem>
+  <SelectItem value="instance">instance</SelectItem>
+</Select>`;
+const renderValueCode = `// renderValue replaces the trigger content; numeric values stay numbers.
+<Select label="Refresh" defaultValue={30} renderValue={(value) => \`Every \${value}s\`}>
+  <SelectItem value={5}>5 seconds</SelectItem>
+  <SelectItem value={30}>30 seconds</SelectItem>
+  <SelectItem value={60}>60 seconds</SelectItem>
+</Select>`;
+const chipsCode = `// chips shows the selection as removable chips. limitChips collapses them to "+N" while the list is closed and
+// focus is not in the chips or the search input.
+<Select label="Metrics" multiple chips limitChips={3} defaultValue={[...]} items={metricItems} />`;
+const chipLabelsCode = `// Customize the screen-reader text of the remove buttons and of "+N".
+<Select
+  label="Metrics"
+  multiple
+  chips
+  limitChips={1}
+  defaultValue={['up', 'go_goroutines', 'http_requests_total']}
+  items={metricItems}
+  chipRemoveAriaLabel={(label) => \`Deselect \${label}\`}
+  moreChipsLabel={(count) => \`\${count} more metrics\`}
+/>`;
+const clearableCode = `// clearable shows a button while something is selected. Single mode reports null, multiple mode reports [].
+<Select label="Unit" clearable defaultValue="bytes" placeholder="Choose a unit">…</Select>
+<Select label="Metrics" clearable multiple defaultValue={['up', 'go_goroutines']} items={metricItems} />`;
+
+export const Selection: Story = () => (
+  <Stack>
+    <p>
+      How the selection shows in the field and how it is cleared. With <code>multiple chips</code> the selection shows
+      as removable chips; in the basic (button) mode the chip <code>×</code> is a pointer shortcut only and is not a tab
+      stop, so keyboard users deselect items in the list. <code>clearable</code> is hidden while <code>disabled</code>{' '}
+      or <code>readOnly</code>, and focus returns to the field after clearing.
+    </p>
+    <Sample title="multiple" code={multipleCode}>
       <div style={rowStyle}>
-        <Select aria-label="Unit" placeholder="Unit">
+        <Select label="Columns" multiple defaultValue={['alertname', 'severity']}>
+          <SelectItem value="alertname">alertname</SelectItem>
+          <SelectItem value="severity">severity</SelectItem>
+          <SelectItem value="instance">instance</SelectItem>
+        </Select>
+      </div>
+    </Sample>
+
+    <Sample title="renderValue" code={renderValueCode}>
+      <div style={rowStyle}>
+        <Select label="Refresh" defaultValue={30} renderValue={(value) => `Every ${String(value)}s`}>
+          <SelectItem value={5}>5 seconds</SelectItem>
+          <SelectItem value={30}>30 seconds</SelectItem>
+          <SelectItem value={60}>60 seconds</SelectItem>
+        </Select>
+      </div>
+    </Sample>
+
+    <Sample title="chips and limitChips" code={chipsCode}>
+      <div style={wideStyle}>
+        <Select
+          label="Metrics"
+          multiple
+          chips
+          limitChips={3}
+          defaultValue={manyMetrics}
+          items={metricItems}
+          fullWidth
+        />
+      </div>
+    </Sample>
+
+    <Sample title="chipRemoveAriaLabel and moreChipsLabel" code={chipLabelsCode}>
+      <div style={wideStyle}>
+        <Select
+          label="Metrics"
+          multiple
+          chips
+          limitChips={1}
+          defaultValue={['up', 'go_goroutines', 'http_requests_total']}
+          items={metricItems}
+          chipRemoveAriaLabel={(label) => `Deselect ${label}`}
+          moreChipsLabel={(count) => `${String(count)} more metrics`}
+          fullWidth
+        />
+      </div>
+    </Sample>
+
+    <Sample title="clearable" code={clearableCode}>
+      <div style={rowStyle}>
+        <Select label="Unit" clearable defaultValue="bytes" placeholder="Choose a unit">
           {units}
         </Select>
+        <Select label="Metrics" clearable multiple defaultValue={['up', 'go_goroutines']} items={metricItems} />
       </div>
     </Sample>
   </Stack>
 );
-States.storyName = 'States';
+Selection.storyName = 'Selection';
+
+const SEARCH_DELAY_MS = 400;
+
+function searchMetrics(query: string): SelectItemData[] {
+  const needle = query.toLowerCase();
+  return metricItems.filter((item) => item.label.toLowerCase().includes(needle));
+}
+
+function AsyncSearchSelect(): ReactElement {
+  const [query, setQuery] = useState('');
+  const [resolvedQuery, setResolvedQuery] = useState('');
+  const [items, setItems] = useState<SelectItemData[]>(() => searchMetrics(''));
+  const [value, setValue] = useState<SelectValue | null>(null);
+  // Loading until the results for the current query arrive. Deriving it (rather than a flag set on input) cannot get
+  // stuck when the text is set to the value it already has, which Base UI does when an item is picked.
+  const loading = resolvedQuery !== query;
+  // Picking an item puts its label in the field, which also becomes the query. Search with '' then, so reopening the
+  // list shows every result instead of only the match for the selected label.
+  const selectedLabel = metricItems.find((item) => item.value === value)?.label;
+  const searchText = query === selectedLabel ? '' : query;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setItems(searchMetrics(searchText));
+      setResolvedQuery(query);
+    }, SEARCH_DELAY_MS);
+    return (): void => clearTimeout(timer);
+  }, [query, searchText]);
+
+  return (
+    <Select
+      label="Metric"
+      searchable
+      filter={null}
+      items={items}
+      loading={loading}
+      value={value}
+      onValueChange={setValue}
+      onInputValueChange={setQuery}
+      placeholder="Search metrics"
+      helperText="Results come from a simulated server after each keystroke"
+    />
+  );
+}
+
+const headerStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between' };
+
+function ListHeaderSelect(): ReactElement {
+  const [query, setQuery] = useState('');
+  const [selected, setSelected] = useState<SelectValue[]>(['up']);
+  const matching = metricItems.filter(
+    (item) => !item.disabled && item.label.toLowerCase().includes(query.toLowerCase()),
+  );
+
+  return (
+    <Select
+      label="Metrics"
+      searchable
+      multiple
+      items={metricItems}
+      value={selected}
+      onValueChange={setSelected}
+      inputValue={query}
+      onInputValueChange={setQuery}
+      listHeader={
+        <div style={headerStyle}>
+          <Button
+            size="xs"
+            variant="ghost"
+            disabled={matching.length === 0}
+            onClick={() => setSelected([...new Set([...selected, ...matching.map((item) => item.value)])])}
+          >
+            Select all ({matching.length})
+          </Button>
+          <span>{selected.length} selected</span>
+        </div>
+      }
+    />
+  );
+}
+
+const searchableCode = `// searchable renders an input that filters the options. Single mode shows the selected label in the input.
+<Select label="Metric" searchable defaultValue="up">
+  <SelectItem value="up">up</SelectItem>
+  <SelectItem value="node_cpu_seconds_total">node_cpu_seconds_total</SelectItem>
+  <SelectItem value="http_requests_total">http_requests_total</SelectItem>
+</Select>`;
+const searchableMultipleCode = `// Without chips, the joined labels appear before the input. With chips, the chips and the input share the field;
+// Backspace and the arrow keys move between them. The typed filter survives each pick.
+<Select label="Metrics" searchable multiple defaultValue={['up', 'go_goroutines']} items={metricItems} />
+<Select label="Metrics (chips)" searchable multiple chips defaultValue={['up', 'go_goroutines']} items={metricItems} />`;
+const searchableFilterCode = `// filter replaces the default case- and accent-insensitive match on the label.
+<Select
+  label="Metric (starts with)"
+  searchable
+  items={metricItems}
+  filter={(item, query) => item.label.toLowerCase().startsWith(query.toLowerCase())}
+/>`;
+const searchableGroupsCode = `// Groups with no matching option are hidden while searching.
+<Select label="Time zone" searchable placeholder="Search time zones">
+  <SelectGroup label="Universal">…</SelectGroup>
+  <SelectGroup label="Americas">…</SelectGroup>
+</Select>`;
+const searchableClearableCode = `// With searchable, clearing also empties the typed text. clearAriaLabel names the button.
+<Select label="Metric" clearable searchable clearAriaLabel="Reset metric" defaultValue="up" items={metricItems} />`;
+const asyncSearchCode = `// filter={null} turns off local filtering: listen to onInputValueChange and replace \`items\` for each query.
+// A selected value that drops out of \`items\` keeps its label.
+function AsyncSearchSelect() {
+  const [query, setQuery] = useState('');
+  const [resolvedQuery, setResolvedQuery] = useState('');
+  const [items, setItems] = useState(() => searchMetrics(''));
+  const [value, setValue] = useState<SelectValue | null>(null);
+  // Loading until the results for the current query arrive; it cannot get stuck on an unchanged query.
+  const loading = resolvedQuery !== query;
+  // Picking an item puts its label in the field, which also becomes the query. Search with '' then, so reopening the
+  // list shows every result instead of only the match for the selected label.
+  const selectedLabel = metricItems.find((item) => item.value === value)?.label;
+  const searchText = query === selectedLabel ? '' : query;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setItems(searchMetrics(searchText));
+      setResolvedQuery(query);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [query, searchText]);
+
+  return (
+    <Select
+      label="Metric"
+      searchable
+      filter={null}
+      items={items}
+      loading={loading}
+      value={value}
+      onValueChange={setValue}
+      onInputValueChange={setQuery}
+    />
+  );
+}`;
+const listHeaderCode = `// listHeader renders non-option content above the options, outside the listbox, in either mode. Select only places
+// it, so the story owns the controls. Here the search text is controlled so "Select all" can act on the filtered
+// items. The header is pointer-only (Tab from the field closes the list), so offer a keyboard equivalent as well,
+// such as a keyboard-reachable "select all" item or a control elsewhere on the page.
+function ListHeaderSelect() {
+  const [query, setQuery] = useState('');
+  const [selected, setSelected] = useState<SelectValue[]>(['up']);
+  const matching = metricItems.filter(
+    (item) => !item.disabled && item.label.toLowerCase().includes(query.toLowerCase()),
+  );
+
+  return (
+    <Select
+      label="Metrics"
+      searchable
+      multiple
+      items={metricItems}
+      value={selected}
+      onValueChange={setSelected}
+      inputValue={query}
+      onInputValueChange={setQuery}
+      listHeader={
+        <div style={headerStyle}>
+          <Button
+            size="xs"
+            variant="ghost"
+            disabled={matching.length === 0}
+            onClick={() => setSelected([...new Set([...selected, ...matching.map((item) => item.value)])])}
+          >
+            Select all ({matching.length})
+          </Button>
+          <span>{selected.length} selected</span>
+        </div>
+      }
+    />
+  );
+}`;
+
+export const Searchable: Story = () => (
+  <Stack>
+    <p>
+      <code>searchable</code> replaces the button with an input that filters the list as you type. It is fixed for the
+      component&apos;s lifetime: changing it remounts the <code>Select</code> and resets its uncontrolled state. In
+      single mode the input shows the selected label, so <code>renderValue</code> is ignored; <code>placeholder</code>{' '}
+      is used only when it is a string.
+    </p>
+    <Sample title="searchable" code={searchableCode}>
+      <div style={rowStyle}>
+        <Select label="Metric" searchable defaultValue="up">
+          <SelectItem value="up">up</SelectItem>
+          <SelectItem value="node_cpu_seconds_total">node_cpu_seconds_total</SelectItem>
+          <SelectItem value="http_requests_total">http_requests_total</SelectItem>
+          <SelectItem value="go_goroutines">go_goroutines</SelectItem>
+        </Select>
+      </div>
+    </Sample>
+
+    <Sample title="multiple and chips" code={searchableMultipleCode}>
+      <div style={rowStyle}>
+        <Select label="Metrics" searchable multiple defaultValue={['up', 'go_goroutines']} items={metricItems} />
+        <div style={wideStyle}>
+          <Select
+            label="Metrics (chips)"
+            searchable
+            multiple
+            chips
+            defaultValue={['up', 'go_goroutines']}
+            items={metricItems}
+            fullWidth
+          />
+        </div>
+      </div>
+    </Sample>
+
+    <Sample title="filter" code={searchableFilterCode}>
+      <div style={rowStyle}>
+        <Select
+          label="Metric (starts with)"
+          searchable
+          items={metricItems}
+          filter={(item, query) => item.label.toLowerCase().startsWith(query.toLowerCase())}
+        />
+      </div>
+    </Sample>
+
+    <Sample title="SelectGroup" code={searchableGroupsCode}>
+      <div style={rowStyle}>
+        <Select label="Time zone" searchable placeholder="Search time zones">
+          <SelectGroup label="Universal">
+            <SelectItem value="utc">UTC</SelectItem>
+          </SelectGroup>
+          <SelectGroup label="Americas">
+            <SelectItem value="new-york">New York</SelectItem>
+            <SelectItem value="los-angeles">Los Angeles</SelectItem>
+          </SelectGroup>
+          <SelectGroup label="Europe">
+            <SelectItem value="paris">Paris</SelectItem>
+            <SelectItem value="berlin">Berlin</SelectItem>
+          </SelectGroup>
+        </Select>
+      </div>
+    </Sample>
+
+    <Sample title="clearable" code={searchableClearableCode}>
+      <div style={rowStyle}>
+        <Select
+          label="Metric"
+          clearable
+          searchable
+          clearAriaLabel="Reset metric"
+          defaultValue="up"
+          items={metricItems}
+        />
+      </div>
+    </Sample>
+
+    <Sample title="filter={null}" code={asyncSearchCode}>
+      <div style={rowStyle}>
+        <AsyncSearchSelect />
+      </div>
+    </Sample>
+
+    <Sample title="listHeader" code={listHeaderCode}>
+      <div style={rowStyle}>
+        <ListHeaderSelect />
+      </div>
+    </Sample>
+  </Stack>
+);
+Searchable.storyName = 'Searchable';
 
 const querySlots: SelectSlotProps = {
   label: { style: { fontWeight: 'var(--perses-font-weight-bold)' } },
@@ -376,468 +783,3 @@ export const Slots: Story = () => (
   </Stack>
 );
 Slots.storyName = 'Slots';
-
-const metricItems: SelectItemData[] = [
-  { value: 'up', label: 'up' },
-  { value: 'node_cpu_seconds_total', label: 'node_cpu_seconds_total' },
-  { value: 'node_memory_MemFree_bytes', label: 'node_memory_MemFree_bytes' },
-  { value: 'http_requests_total', label: 'http_requests_total' },
-  { value: 'http_request_duration_seconds', label: 'http_request_duration_seconds' },
-  { value: 'process_resident_memory_bytes', label: 'process_resident_memory_bytes' },
-  { value: 'go_goroutines', label: 'go_goroutines' },
-  { value: 'go_gc_duration_seconds', label: 'go_gc_duration_seconds', disabled: true },
-];
-
-const searchableCode = `// searchable renders an input that filters the options. Single mode shows the selected label in the input.
-<Select label="Metric" searchable defaultValue="up">
-  <SelectItem value="up">up</SelectItem>
-  <SelectItem value="node_cpu_seconds_total">node_cpu_seconds_total</SelectItem>
-  <SelectItem value="http_requests_total">http_requests_total</SelectItem>
-</Select>`;
-const searchableMultipleCode = `// With multiple and no chips, the joined labels appear before the input; the typed filter survives each pick.
-<Select label="Metrics" searchable multiple defaultValue={['up', 'go_goroutines']} items={metricItems} />`;
-const searchableFilterCode = `// filter replaces the default case- and accent-insensitive match on the label.
-<Select
-  label="Metric (starts with)"
-  searchable
-  items={metricItems}
-  filter={(item, query) => item.label.toLowerCase().startsWith(query.toLowerCase())}
-/>`;
-const searchableGroupsCode = `// Groups with no matching option are hidden while searching.
-<Select label="Time zone" searchable placeholder="Search time zones">
-  <SelectGroup label="Universal">…</SelectGroup>
-  <SelectGroup label="Americas">…</SelectGroup>
-</Select>`;
-
-export const Searchable: Story = () => (
-  <Stack>
-    <p>
-      <code>searchable</code> replaces the button with an input that filters the list as you type. It is fixed for the
-      component&apos;s lifetime: changing it remounts the <code>Select</code> and resets its uncontrolled state. In
-      single mode the input shows the selected label, so <code>renderValue</code> is ignored; <code>placeholder</code>{' '}
-      is used only when it is a string.
-    </p>
-    <Sample title="Single" code={searchableCode}>
-      <div style={rowStyle}>
-        <Select label="Metric" searchable defaultValue="up">
-          <SelectItem value="up">up</SelectItem>
-          <SelectItem value="node_cpu_seconds_total">node_cpu_seconds_total</SelectItem>
-          <SelectItem value="http_requests_total">http_requests_total</SelectItem>
-          <SelectItem value="go_goroutines">go_goroutines</SelectItem>
-        </Select>
-      </div>
-    </Sample>
-
-    <Sample title="Multiple" code={searchableMultipleCode}>
-      <div style={rowStyle}>
-        <Select label="Metrics" searchable multiple defaultValue={['up', 'go_goroutines']} items={metricItems} />
-      </div>
-    </Sample>
-
-    <Sample title="Custom filter" code={searchableFilterCode}>
-      <div style={rowStyle}>
-        <Select
-          label="Metric (starts with)"
-          searchable
-          items={metricItems}
-          filter={(item, query) => item.label.toLowerCase().startsWith(query.toLowerCase())}
-        />
-      </div>
-    </Sample>
-
-    <Sample title="Groups" code={searchableGroupsCode}>
-      <div style={rowStyle}>
-        <Select label="Time zone" searchable placeholder="Search time zones">
-          <SelectGroup label="Universal">
-            <SelectItem value="utc">UTC</SelectItem>
-          </SelectGroup>
-          <SelectGroup label="Americas">
-            <SelectItem value="new-york">New York</SelectItem>
-            <SelectItem value="los-angeles">Los Angeles</SelectItem>
-          </SelectGroup>
-          <SelectGroup label="Europe">
-            <SelectItem value="paris">Paris</SelectItem>
-            <SelectItem value="berlin">Berlin</SelectItem>
-          </SelectGroup>
-        </Select>
-      </div>
-    </Sample>
-  </Stack>
-);
-Searchable.storyName = 'Searchable';
-
-const chipsCode = `// chips shows the selection as removable chips. limitChips collapses them to "+N" while the list is closed and
-// focus is not in the chips or the search input.
-<Select label="Metrics" multiple chips limitChips={3} defaultValue={[...]} items={metricItems} />`;
-const searchableChipsCode = `// With searchable, the chips and the input share the field; Backspace and the arrow keys move between them.
-<Select label="Metrics" searchable multiple chips defaultValue={['up', 'go_goroutines']} items={metricItems} />`;
-const chipLabelsCode = `// Customize the screen-reader text of the remove buttons and of "+N".
-<Select
-  label="Metrics"
-  multiple
-  chips
-  limitChips={1}
-  defaultValue={['up', 'go_goroutines', 'http_requests_total']}
-  items={metricItems}
-  chipRemoveAriaLabel={(label) => \`Deselect \${label}\`}
-  moreChipsLabel={(count) => \`\${count} more metrics\`}
-/>`;
-
-const manyMetrics = [
-  'up',
-  'node_cpu_seconds_total',
-  'http_requests_total',
-  'go_goroutines',
-  'process_resident_memory_bytes',
-];
-
-export const Chips: Story = () => (
-  <Stack>
-    <p>
-      With <code>multiple chips</code> the selection shows as removable chips. In the basic (button) mode the chip{' '}
-      <code>×</code> is a pointer shortcut only and is not a tab stop: keyboard users deselect items in the list. In{' '}
-      <code>searchable</code> mode Backspace and the arrow keys move between the chips and the input.
-    </p>
-    <Sample title="limitChips" code={chipsCode}>
-      <div style={wideStyle}>
-        <Select
-          label="Metrics"
-          multiple
-          chips
-          limitChips={3}
-          defaultValue={manyMetrics}
-          items={metricItems}
-          fullWidth
-        />
-      </div>
-    </Sample>
-
-    <Sample title="Searchable chips" code={searchableChipsCode}>
-      <div style={wideStyle}>
-        <Select
-          label="Metrics"
-          searchable
-          multiple
-          chips
-          defaultValue={['up', 'go_goroutines']}
-          items={metricItems}
-          fullWidth
-        />
-      </div>
-    </Sample>
-
-    <Sample title="chipRemoveAriaLabel and moreChipsLabel" code={chipLabelsCode}>
-      <div style={wideStyle}>
-        <Select
-          label="Metrics"
-          multiple
-          chips
-          limitChips={1}
-          defaultValue={['up', 'go_goroutines', 'http_requests_total']}
-          items={metricItems}
-          chipRemoveAriaLabel={(label) => `Deselect ${label}`}
-          moreChipsLabel={(count) => `${String(count)} more metrics`}
-          fullWidth
-        />
-      </div>
-    </Sample>
-  </Stack>
-);
-Chips.storyName = 'Chips';
-
-const clearableSingleCode = `// clearable shows a button while something is selected. Single mode reports null.
-<Select label="Unit" clearable defaultValue="bytes" placeholder="Choose a unit">…</Select>`;
-const clearableMultipleCode = `// Multiple mode reports [].
-<Select label="Metrics" clearable multiple defaultValue={['up', 'go_goroutines']} items={metricItems} />`;
-const clearableSearchCode = `// With searchable, clearing also empties the typed text. clearAriaLabel names the button.
-<Select label="Metric" clearable searchable clearAriaLabel="Reset metric" defaultValue="up" items={metricItems} />`;
-
-export const Clearable: Story = () => (
-  <Stack>
-    <p>
-      <code>clearable</code> shows a button while something is selected. It is hidden while <code>disabled</code> or{' '}
-      <code>readOnly</code>, and focus returns to the field after clearing.
-    </p>
-    <Sample title="Single" code={clearableSingleCode}>
-      <div style={rowStyle}>
-        <Select label="Unit" clearable defaultValue="bytes" placeholder="Choose a unit">
-          {units}
-        </Select>
-      </div>
-    </Sample>
-
-    <Sample title="Multiple" code={clearableMultipleCode}>
-      <div style={rowStyle}>
-        <Select label="Metrics" clearable multiple defaultValue={['up', 'go_goroutines']} items={metricItems} />
-      </div>
-    </Sample>
-
-    <Sample title="Searchable" code={clearableSearchCode}>
-      <div style={rowStyle}>
-        <Select
-          label="Metric"
-          clearable
-          searchable
-          clearAriaLabel="Reset metric"
-          defaultValue="up"
-          items={metricItems}
-        />
-      </div>
-    </Sample>
-  </Stack>
-);
-Clearable.storyName = 'Clearable';
-
-const loadingCode = `// loading shows a spinner and sets aria-busy. While there are no items the list shows loadingText.
-<Select label="Metric" loading items={[]} placeholder="Loading metrics" />`;
-const loadingItemsCode = `// Items stay usable while loading; the spinner only signals that more may arrive.
-<Select label="Metric" loading defaultValue="up" items={metricItems} />`;
-const emptyCode = `// emptyText replaces "No results".
-<Select label="Metric" items={[]} emptyText="No metrics found" placeholder="Nothing to pick" />`;
-
-export const Loading: Story = () => (
-  <Stack>
-    <p>
-      <code>loading</code> shows a spinner and sets <code>aria-busy</code>. With no items the list shows{' '}
-      <code>loadingText</code> (<code>emptyText</code> when not loading). Open the lists to see the messages.
-    </p>
-    <Sample title="Loading without items" code={loadingCode}>
-      <div style={rowStyle}>
-        <Select label="Metric" loading items={[]} placeholder="Loading metrics" />
-      </div>
-    </Sample>
-
-    <Sample title="Loading with items" code={loadingItemsCode}>
-      <div style={rowStyle}>
-        <Select label="Metric" loading defaultValue="up" items={metricItems} />
-      </div>
-    </Sample>
-
-    <Sample title="Empty" code={emptyCode}>
-      <div style={rowStyle}>
-        <Select label="Metric" items={[]} emptyText="No metrics found" placeholder="Nothing to pick" />
-      </div>
-    </Sample>
-  </Stack>
-);
-Loading.storyName = 'Loading';
-
-const SEARCH_DELAY_MS = 400;
-
-function searchMetrics(query: string): SelectItemData[] {
-  const needle = query.toLowerCase();
-  return metricItems.filter((item) => item.label.toLowerCase().includes(needle));
-}
-
-function AsyncSearchSelect(): ReactElement {
-  const [query, setQuery] = useState('');
-  const [resolvedQuery, setResolvedQuery] = useState('');
-  const [items, setItems] = useState<SelectItemData[]>(() => searchMetrics(''));
-  const [value, setValue] = useState<SelectValue | null>(null);
-  // Loading until the results for the current query arrive. Deriving it (rather than a flag set on input) cannot get
-  // stuck when the text is set to the value it already has, which Base UI does when an item is picked.
-  const loading = resolvedQuery !== query;
-  // Picking an item puts its label in the field, which also becomes the query. Search with '' then, so reopening the
-  // list shows every result instead of only the match for the selected label.
-  const selectedLabel = metricItems.find((item) => item.value === value)?.label;
-  const searchText = query === selectedLabel ? '' : query;
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setItems(searchMetrics(searchText));
-      setResolvedQuery(query);
-    }, SEARCH_DELAY_MS);
-    return (): void => clearTimeout(timer);
-  }, [query, searchText]);
-
-  return (
-    <Select
-      label="Metric"
-      searchable
-      filter={null}
-      items={items}
-      loading={loading}
-      value={value}
-      onValueChange={setValue}
-      onInputValueChange={setQuery}
-      placeholder="Search metrics"
-      helperText="Results come from a simulated server after each keystroke"
-    />
-  );
-}
-
-const asyncSearchCode = `// filter={null} turns off local filtering: the consumer replaces \`items\` for each query.
-// A selected value that drops out of \`items\` keeps its label.
-function AsyncSearchSelect() {
-  const [query, setQuery] = useState('');
-  const [resolvedQuery, setResolvedQuery] = useState('');
-  const [items, setItems] = useState(() => searchMetrics(''));
-  const [value, setValue] = useState<SelectValue | null>(null);
-  // Loading until the results for the current query arrive; it cannot get stuck on an unchanged query.
-  const loading = resolvedQuery !== query;
-  // Picking an item puts its label in the field, which also becomes the query. Search with '' then, so reopening the
-  // list shows every result instead of only the match for the selected label.
-  const selectedLabel = metricItems.find((item) => item.value === value)?.label;
-  const searchText = query === selectedLabel ? '' : query;
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setItems(searchMetrics(searchText));
-      setResolvedQuery(query);
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [query, searchText]);
-
-  return (
-    <Select
-      label="Metric"
-      searchable
-      filter={null}
-      items={items}
-      loading={loading}
-      value={value}
-      onValueChange={setValue}
-      onInputValueChange={setQuery}
-    />
-  );
-}`;
-
-export const AsyncSearch: Story = () => (
-  <Stack>
-    <p>
-      For server-side search, pass <code>filter={'{null}'}</code>, listen to <code>onInputValueChange</code> and replace{' '}
-      <code>items</code> when results arrive. Selected values that drop out of <code>items</code> keep their labels.
-    </p>
-    <Sample title="Simulated server search" code={asyncSearchCode}>
-      <div style={rowStyle}>
-        <AsyncSearchSelect />
-      </div>
-    </Sample>
-  </Stack>
-);
-AsyncSearch.storyName = 'AsyncSearch';
-
-const itemsDataCode = `// \`items\` replaces SelectItem children. label is the text shown in the list, the field and chips, and what search
-// matches. Use either \`items\` or children, never both.
-const items: SelectItemData[] = [
-  { value: 'bytes', label: 'Bytes' },
-  { value: 'seconds', label: 'Seconds' },
-  { value: 'percent', label: 'Percent', disabled: true },
-];
-
-<Select label="Unit" items={items} defaultValue="bytes" />`;
-
-const unitItems: SelectItemData[] = [
-  { value: 'bytes', label: 'Bytes' },
-  { value: 'seconds', label: 'Seconds' },
-  { value: 'percent', label: 'Percent', disabled: true },
-];
-
-export const ItemsData: Story = () => (
-  <Stack>
-    <p>
-      Pass <code>items</code> instead of <code>SelectItem</code> children when options come from data. Each item has a{' '}
-      <code>value</code>, a plain-text <code>label</code> and an optional <code>disabled</code>.
-    </p>
-    <Sample title="items" code={itemsDataCode}>
-      <div style={rowStyle}>
-        <Select label="Unit" items={unitItems} defaultValue="bytes" />
-        <Select label="Unit (searchable)" searchable items={unitItems} defaultValue="seconds" />
-      </div>
-    </Sample>
-  </Stack>
-);
-ItemsData.storyName = 'ItemsData';
-
-const headerStyle: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'space-between' };
-
-function ListHeaderSelect(): ReactElement {
-  const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState<SelectValue[]>(['up']);
-  const matching = metricItems.filter(
-    (item) => !item.disabled && item.label.toLowerCase().includes(query.toLowerCase()),
-  );
-
-  return (
-    <Select
-      label="Metrics"
-      searchable
-      multiple
-      items={metricItems}
-      value={selected}
-      onValueChange={setSelected}
-      inputValue={query}
-      onInputValueChange={setQuery}
-      listHeader={
-        <div style={headerStyle}>
-          <Button
-            size="xs"
-            variant="ghost"
-            disabled={matching.length === 0}
-            onClick={() => setSelected([...new Set([...selected, ...matching.map((item) => item.value)])])}
-          >
-            Select all ({matching.length})
-          </Button>
-          <span>{selected.length} selected</span>
-        </div>
-      }
-    />
-  );
-}
-
-const listHeaderCode = `// listHeader renders outside the listbox, so the story owns the controls. Here the search text is controlled
-// so "Select all" can act on the filtered items. The header is pointer-only (Tab from the field closes the list), so
-// offer a keyboard equivalent as well.
-function ListHeaderSelect() {
-  const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState<SelectValue[]>(['up']);
-  const matching = metricItems.filter(
-    (item) => !item.disabled && item.label.toLowerCase().includes(query.toLowerCase()),
-  );
-
-  return (
-    <Select
-      label="Metrics"
-      searchable
-      multiple
-      items={metricItems}
-      value={selected}
-      onValueChange={setSelected}
-      inputValue={query}
-      onInputValueChange={setQuery}
-      listHeader={
-        <div style={headerStyle}>
-          <Button
-            size="xs"
-            variant="ghost"
-            disabled={matching.length === 0}
-            onClick={() => setSelected([...new Set([...selected, ...matching.map((item) => item.value)])])}
-          >
-            Select all ({matching.length})
-          </Button>
-          <span>{selected.length} selected</span>
-        </div>
-      }
-    />
-  );
-}`;
-
-export const ListHeader: Story = () => (
-  <Stack>
-    <p>
-      <code>listHeader</code> renders non-option content above the options, outside the listbox. <code>Select</code>{' '}
-      only places it; the story owns the select-all button and the count.
-    </p>
-    <p>
-      The header is not in the list&apos;s keyboard path: Tab from the field closes the list, so its buttons work by
-      pointer only. Provide a keyboard equivalent, such as a keyboard-reachable &quot;select all&quot; item or a control
-      elsewhere on the page.
-    </p>
-    <Sample title="Select all and count" code={listHeaderCode}>
-      <div style={rowStyle}>
-        <ListHeaderSelect />
-      </div>
-    </Sample>
-  </Stack>
-);
-ListHeader.storyName = 'ListHeader';
