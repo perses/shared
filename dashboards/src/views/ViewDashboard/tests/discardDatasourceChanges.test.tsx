@@ -14,7 +14,7 @@
 import type { DashboardResource } from '@perses-dev/client';
 import { TimeRangeProviderBasic, useDatasourceStore } from '@perses-dev/plugin-system';
 import type { DatasourceSpec } from '@perses-dev/spec';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 
@@ -42,10 +42,10 @@ const newDatasource: DatasourceSpec = {
   },
 };
 
-// Applies a datasource change the same way the datasource editor does when its "Apply" button is clicked,
-// and exposes the datasources that the editor would be opened with.
-function DatasourceEditorProbe(): ReactElement {
-  const { getLocalDatasources, setLocalDatasources, getSavedDatasources, setSavedDatasources } = useDatasourceStore();
+// Applies a datasource change the same way the datasource editor does when its "Apply" button is clicked.
+// The test plugin registry has no datasource plugin, so the editor itself cannot add one.
+function ApplyNewDatasourceButton(): ReactElement {
+  const { getLocalDatasources, setLocalDatasources, setSavedDatasources } = useDatasourceStore();
   const { dashboard, setDashboard } = useDashboard();
 
   const applyNewDatasource = (): void => {
@@ -56,13 +56,9 @@ function DatasourceEditorProbe(): ReactElement {
   };
 
   return (
-    <>
-      <button type="button" onClick={applyNewDatasource}>
-        Apply new datasource
-      </button>
-      <div data-testid="editor-datasources">{Object.keys(getLocalDatasources()).join(',')}</div>
-      <div data-testid="saved-datasources">{Object.keys(getSavedDatasources()).join(',')}</div>
-    </>
+    <button type="button" onClick={applyNewDatasource}>
+      Apply new datasource
+    </button>
   );
 }
 
@@ -81,7 +77,7 @@ function DashboardViewUnderTest(): ReactElement {
                 isAnnotationEnabled={true}
                 isDatasourceEnabled={true}
               />
-              <DatasourceEditorProbe />
+              <ApplyNewDatasourceButton />
             </DashboardProvider>
           </AnnotationProvider>
         </VariableProvider>
@@ -91,8 +87,9 @@ function DashboardViewUnderTest(): ReactElement {
 }
 
 describe('Discarding dashboard changes', () => {
-  beforeEach(() => {
-    // The toolbar only shows the "Edit" button on screens wider than the `sm` breakpoint
+  beforeAll(() => {
+    // The toolbar only shows the "Edit" button on screens wider than the `sm` breakpoint.
+    // Each test file runs in its own environment, so no teardown is needed.
     vi.stubGlobal(
       'matchMedia',
       vi.fn((query: string) => ({
@@ -108,25 +105,17 @@ describe('Discarding dashboard changes', () => {
     );
   });
 
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   it('rolls back datasources added in edit mode', async () => {
     renderWithContext(<DashboardViewUnderTest />);
 
-    expect(screen.getByTestId('editor-datasources')).not.toHaveTextContent('NewDatasource');
-
     await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
     await userEvent.click(screen.getByRole('button', { name: 'Apply new datasource' }));
-    expect(screen.getByTestId('editor-datasources')).toHaveTextContent('NewDatasource');
-
     await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     await userEvent.click(await screen.findByRole('button', { name: 'Discard Changes' }));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('editor-datasources')).not.toHaveTextContent('NewDatasource');
-    });
-    expect(screen.getByTestId('saved-datasources')).not.toHaveTextContent('NewDatasource');
+    await userEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Edit datasources' }));
+    const editor = await screen.findByTestId('datasource-editor');
+    expect(within(editor).queryByRole('rowheader', { name: 'NewDatasource' })).not.toBeInTheDocument();
   });
 });
