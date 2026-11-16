@@ -24,6 +24,13 @@ import {
   TableHead,
   TableRow,
   Collapse,
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
 } from '@mui/material';
 import { InfoTooltip, LinkEditorForm } from '@perses-dev/components';
 import type { FormEditorHandle } from '@perses-dev/components';
@@ -35,15 +42,22 @@ import PencilIcon from 'mdi-material-ui/Pencil';
 import AddIcon from 'mdi-material-ui/Plus';
 import TrashIcon from 'mdi-material-ui/TrashCan';
 import type { ForwardedRef, ReactElement } from 'react';
-import { forwardRef, useImperativeHandle, useState } from 'react';
+import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import { useImmer } from 'use-immer';
 
 import { useDiscardChangesConfirmationDialog } from '../../context';
+import type { DashboardLink } from '../LinksDisplay/dashboard-link';
+import { isDashboardLinkValid, isTagLink, normalizeDashboardLink } from '../LinksDisplay/dashboard-link';
 
 export interface DashboardLinksEditorProps {
-  links: Link[];
+  links: DashboardLink[];
   onChange: (links: Link[]) => void;
   onCancel: () => void;
+}
+
+interface LinkRow {
+  id: string;
+  link: DashboardLink;
 }
 
 const DEFAULT_LINK: Link = {
@@ -58,14 +72,17 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
   { links: initialLinks, onChange, onCancel }: DashboardLinksEditorProps,
   ref: ForwardedRef<FormEditorHandle>,
 ): ReactElement {
-  const [links, setLinks] = useImmer(initialLinks);
+  const nextRowId = useRef(initialLinks.length);
+  const [rows, setRows] = useImmer<LinkRow[]>(() =>
+    initialLinks.map((link, index) => ({ id: `link-row-${index}`, link })),
+  );
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
 
   const handleCancel = (): void => {
-    if (JSON.stringify(initialLinks) !== JSON.stringify(links)) {
+    if (JSON.stringify(initialLinks) !== JSON.stringify(rows.map((row) => row.link))) {
       openDiscardChangesConfirmationDialog({
         onDiscardChanges: () => {
           closeDiscardChangesConfirmationDialog();
@@ -81,14 +98,16 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
   useImperativeHandle(ref, () => ({ requestClose: handleCancel }));
 
   const handleAdd = (): void => {
-    setLinks((draft) => {
-      draft.push({ ...DEFAULT_LINK });
+    const id = `link-row-${nextRowId.current}`;
+    nextRowId.current += 1;
+    setRows((draft) => {
+      draft.push({ id, link: { ...DEFAULT_LINK } });
     });
-    setExpandedIndex(links.length);
+    setExpandedIndex(rows.length);
   };
 
   const handleRemove = (index: number): void => {
-    setLinks((draft) => {
+    setRows((draft) => {
       draft.splice(index, 1);
     });
     if (expandedIndex === index) {
@@ -100,7 +119,7 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
 
   const handleMoveUp = (index: number): void => {
     if (index === 0) return;
-    setLinks((draft) => {
+    setRows((draft) => {
       const temp = draft[index - 1];
       if (temp && draft[index]) {
         draft[index - 1] = draft[index]!;
@@ -115,8 +134,8 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
   };
 
   const handleMoveDown = (index: number): void => {
-    if (index >= links.length - 1) return;
-    setLinks((draft) => {
+    if (index >= rows.length - 1) return;
+    setRows((draft) => {
       const temp = draft[index + 1];
       if (temp && draft[index]) {
         draft[index + 1] = draft[index]!;
@@ -130,13 +149,16 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
     }
   };
 
-  const handleUpdateLink = (index: number, link: Link): void => {
-    setLinks((draft) => {
-      draft[index] = link;
+  const handleUpdateLink = (index: number, link: DashboardLink): void => {
+    setRows((draft) => {
+      const row = draft[index];
+      if (row) {
+        row.link = link;
+      }
     });
   };
 
-  const isValid = links.every((link) => link.url.trim().length > 0);
+  const isValid = rows.every((row) => isDashboardLinkValid(row.link));
 
   return (
     <>
@@ -150,7 +172,11 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
       >
         <Typography variant="h2">Edit Dashboard Links</Typography>
         <Stack direction="row" spacing={1} marginLeft="auto">
-          <Button disabled={!isValid} variant="contained" onClick={() => onChange(links)}>
+          <Button
+            disabled={!isValid}
+            variant="contained"
+            onClick={() => onChange(rows.map((row) => normalizeDashboardLink(row.link)))}
+          >
             Apply
           </Button>
           <Button color="secondary" variant="outlined" onClick={handleCancel}>
@@ -165,7 +191,7 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
               <TableHead>
                 <TableRow>
                   <TableCell>Name</TableCell>
-                  <TableCell>URL</TableCell>
+                  <TableCell>Target</TableCell>
                   <TableCell width={80}>New Tab</TableCell>
                   <TableCell align="right" width={180}>
                     Actions
@@ -173,13 +199,13 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
                 </TableRow>
               </TableHead>
               <TableBody>
-                {links.map((link, index) => (
+                {rows.map((row, index) => (
                   <LinkTableRow
-                    key={index}
-                    link={link}
+                    key={row.id}
+                    link={row.link}
                     index={index}
                     isFirst={index === 0}
-                    isLast={index === links.length - 1}
+                    isLast={index === rows.length - 1}
                     isExpanded={expandedIndex === index}
                     onToggleExpand={() => setExpandedIndex(expandedIndex === index ? null : index)}
                     onUpdate={(updatedLink) => handleUpdateLink(index, updatedLink)}
@@ -191,7 +217,7 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
               </TableBody>
             </Table>
           </TableContainer>
-          {links.length === 0 && (
+          {rows.length === 0 && (
             <Typography variant="body1" color="text.secondary" fontStyle="italic" textAlign="center" py={4}>
               No links defined. Click &apos;Add Link&apos; to create one.
             </Typography>
@@ -206,13 +232,13 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
 });
 
 interface LinkTableRowProps {
-  link: Link;
+  link: DashboardLink;
   index: number;
   isFirst: boolean;
   isLast: boolean;
   isExpanded: boolean;
   onToggleExpand: () => void;
-  onUpdate: (link: Link) => void;
+  onUpdate: (link: DashboardLink) => void;
   onRemove: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
@@ -231,7 +257,11 @@ function LinkTableRow({
   onMoveDown,
 }: LinkTableRowProps): ReactElement {
   const displayName = link.name?.trim() || `Link ${index + 1}`;
-  const hasError = link.url.trim().length === 0;
+  const [kind, setKind] = useState<'url' | 'tags'>(isTagLink(link) ? 'tags' : 'url');
+  const tagMode = kind === 'tags';
+  const hasError = !isDashboardLinkValid(link);
+  const targetLabel = tagMode ? (link.tags ?? []).join(', ') : link.url || '(no URL)';
+  const newTabLabel = link.targetBlank ? 'Yes' : 'No';
 
   return (
     <>
@@ -247,11 +277,11 @@ function LinkTableRow({
             color: hasError ? 'error.main' : undefined,
           }}
         >
-          <InfoTooltip description={link.url} enterDelay={100}>
-            {link.url || '(no URL)'}
+          <InfoTooltip description={targetLabel} enterDelay={100}>
+            {targetLabel}
           </InfoTooltip>
         </TableCell>
-        <TableCell>{link.targetBlank ? 'Yes' : 'No'}</TableCell>
+        <TableCell>{newTabLabel}</TableCell>
         <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
           <IconButton onClick={onMoveUp} disabled={isFirst} aria-label="Move link up">
             <ArrowUp />
@@ -271,40 +301,176 @@ function LinkTableRow({
         <TableCell colSpan={4} sx={{ paddingBottom: 0, paddingTop: 0, border: isExpanded ? undefined : 'none' }}>
           <Collapse in={isExpanded} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 2 }}>
-              <LinkEditorForm
-                mode="modalEmbedded"
-                url={{
-                  value: link.url,
-                  label: 'URL',
-                  error: { hasError: hasError, helperText: hasError ? 'URL is required' : undefined },
-                  placeholder: 'https://example.com/dashboard?var=$variable',
-                  onChange: (url) => onUpdate({ ...link, url }),
-                }}
-                name={{
-                  value: link.name ?? '',
-                  label: 'Display Name',
-                  onChange: (name) => onUpdate({ ...link, name }),
-                }}
-                tooltip={{
-                  value: link.tooltip ?? '',
-                  label: 'Tooltip',
-                  onChange: (tooltip) => onUpdate({ ...link, tooltip }),
-                }}
-                renderVariables={{
-                  value: link.renderVariables ?? true,
-                  label: 'Replace variables in URL',
-                  onChange: (renderVariables) => onUpdate({ ...link, renderVariables }),
-                }}
-                newTabOpen={{
-                  value: link.targetBlank ?? true,
-                  label: 'Open in new tab',
-                  onChange: (targetBlank) => onUpdate({ ...link, targetBlank }),
-                }}
-              />
+              <FormControl fullWidth sx={{ marginBottom: 2 }}>
+                <InputLabel id={`link-kind-${index}`}>Kind</InputLabel>
+                <Select
+                  labelId={`link-kind-${index}`}
+                  label="Kind"
+                  value={kind}
+                  onChange={(event) => {
+                    const next = event.target.value === 'tags' ? 'tags' : 'url';
+                    setKind(next);
+                    if (next === 'tags') {
+                      onUpdate({
+                        name: link.name,
+                        tooltip: link.tooltip,
+                        tags: link.tags ?? [],
+                        targetBlank: link.targetBlank,
+                        keepTime: link.keepTime,
+                        includeVariables: link.includeVariables,
+                      });
+                      return;
+                    }
+                    onUpdate({
+                      name: link.name,
+                      tooltip: link.tooltip,
+                      url: link.url ?? '',
+                      renderVariables: link.renderVariables ?? true,
+                      targetBlank: link.targetBlank ?? true,
+                      keepTime: link.keepTime,
+                      includeVariables: link.includeVariables,
+                    });
+                  }}
+                >
+                  <MenuItem value="url">URL</MenuItem>
+                  <MenuItem value="tags">Dashboards by tag</MenuItem>
+                </Select>
+              </FormControl>
+              {tagMode ? (
+                <TagLinkFields link={link} onUpdate={onUpdate} />
+              ) : (
+                <>
+                  <LinkEditorForm
+                    mode="modalEmbedded"
+                    url={{
+                      value: link.url ?? '',
+                      label: 'URL',
+                      error: { hasError: hasError, helperText: hasError ? 'URL is required' : undefined },
+                      placeholder: 'https://example.com/dashboard?var=$variable',
+                      onChange: (url) => onUpdate({ ...link, url, tags: undefined }),
+                    }}
+                    name={{
+                      value: link.name ?? '',
+                      label: 'Display Name',
+                      onChange: (name) => onUpdate({ ...link, name }),
+                    }}
+                    tooltip={{
+                      value: link.tooltip ?? '',
+                      label: 'Tooltip',
+                      onChange: (tooltip) => onUpdate({ ...link, tooltip }),
+                    }}
+                    renderVariables={{
+                      value: link.renderVariables ?? true,
+                      label: 'Replace variables in URL',
+                      onChange: (renderVariables) => onUpdate({ ...link, renderVariables }),
+                    }}
+                    newTabOpen={{
+                      value: link.targetBlank ?? true,
+                      label: 'Open in new tab',
+                      onChange: (targetBlank) => onUpdate({ ...link, targetBlank }),
+                    }}
+                  />
+                  <LinkStateFields link={link} onUpdate={onUpdate} variableLabel="Include current variables" />
+                </>
+              )}
             </Box>
           </Collapse>
         </TableCell>
       </TableRow>
     </>
+  );
+}
+
+function TagLinkFields({
+  link,
+  onUpdate,
+}: {
+  link: DashboardLink;
+  onUpdate: (link: DashboardLink) => void;
+}): ReactElement {
+  const [tagsText, setTagsText] = useState((link.tags ?? []).join(', '));
+  const nameMissing = (link.name?.trim() ?? '') === '';
+  const tagsMissing = (link.tags ?? []).length === 0;
+
+  return (
+    <Stack gap={2}>
+      <TextField
+        label="Display Name"
+        required
+        fullWidth
+        value={link.name ?? ''}
+        error={nameMissing}
+        helperText={nameMissing ? 'Name is required' : undefined}
+        onChange={(event) => onUpdate({ ...link, name: event.target.value })}
+      />
+      <TextField
+        label="Tags"
+        required
+        fullWidth
+        value={tagsText}
+        error={tagsMissing}
+        helperText={tagsMissing ? 'At least one tag is required' : 'Comma-separated. A dashboard must have every tag.'}
+        onChange={(event) => {
+          const text = event.target.value;
+          setTagsText(text);
+          onUpdate({
+            ...link,
+            tags: text
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter((tag) => tag.length > 0),
+          });
+        }}
+      />
+      <TextField
+        label="Tooltip"
+        fullWidth
+        value={link.tooltip ?? ''}
+        onChange={(event) => onUpdate({ ...link, tooltip: event.target.value })}
+      />
+      <FormControlLabel
+        label="Open in new tab"
+        control={
+          <Checkbox
+            checked={link.targetBlank === true}
+            onChange={(event) => onUpdate({ ...link, targetBlank: event.target.checked })}
+          />
+        }
+      />
+      <LinkStateFields link={link} onUpdate={onUpdate} variableLabel="Include matching variables" />
+    </Stack>
+  );
+}
+
+function LinkStateFields({
+  link,
+  onUpdate,
+  variableLabel,
+}: {
+  link: DashboardLink;
+  onUpdate: (link: DashboardLink) => void;
+  variableLabel: string;
+}): ReactElement {
+  return (
+    <Stack direction="row" gap={1}>
+      <FormControlLabel
+        label="Keep current time range"
+        control={
+          <Checkbox
+            checked={link.keepTime === true}
+            onChange={(event) => onUpdate({ ...link, keepTime: event.target.checked })}
+          />
+        }
+      />
+      <FormControlLabel
+        label={variableLabel}
+        control={
+          <Checkbox
+            checked={link.includeVariables === true}
+            onChange={(event) => onUpdate({ ...link, includeVariables: event.target.checked })}
+          />
+        }
+      />
+    </Stack>
   );
 }

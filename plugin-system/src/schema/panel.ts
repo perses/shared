@@ -31,16 +31,22 @@ const layoutDefinitionSchema = z
   })
   .optional();
 
+// Spec publishes panelDefinitionSchema as ZodType<PanelDefinition>, so the input defaults to unknown.
+// The editor stores the parsed panel and validates that value. preprocess runs the spec parser unchanged.
+function editorValue<T>(schema: z.ZodType<T>): z.ZodType<T, T> {
+  return z.preprocess<unknown, z.ZodType<T>, T>((value) => value, schema);
+}
+
 export const panelEditorSchema: z.ZodType<PanelEditorValues, PanelEditorValues> = z.object({
   groupId: z.number(),
-  panelDefinition: panelDefinitionSchema,
+  panelDefinition: editorValue(panelDefinitionSchema),
   layoutDefinition: layoutDefinitionSchema,
 });
 
 export function buildPanelEditorSchema(pluginSchema: PluginSchema): z.ZodType<PanelEditorValues, PanelEditorValues> {
   return z.object({
     groupId: z.number(),
-    panelDefinition: buildPanelDefinitionSchema(pluginSchema),
+    panelDefinition: editorValue(buildPanelDefinitionSchema(pluginSchema)),
     layoutDefinition: layoutDefinitionSchema,
   });
 }
