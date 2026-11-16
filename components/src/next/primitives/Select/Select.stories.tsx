@@ -75,7 +75,7 @@ export const Basic: Story = () => (
       <code>{'<TextField select>'}</code> migrates by renaming. The trigger shows the selected item&apos;s content, and
       values can be strings or numbers. Native button attributes and <code>ref</code> go to the trigger. Responsive
       spacing, sizing and <code>overflow</code> style props apply to the root element and behave as documented on{' '}
-      <code>Box</code>; radius props apply to the control. Add <code>searchable</code>, <code>multiple</code>,{' '}
+      <code>Box</code>; radius props apply to the wrapper. Add <code>searchable</code>, <code>multiple</code>,{' '}
       <code>chips</code> and <code>clearable</code> for the patterns in the stories below.
     </p>
     <Sample title="Minimal usage" code={basicCode}>
@@ -307,14 +307,14 @@ States.storyName = 'States';
 
 const querySlots: SelectSlotProps = {
   label: { style: { fontWeight: 'var(--perses-font-weight-bold)' } },
-  control: { style: { borderStyle: 'dashed' } },
+  wrapper: { style: { borderStyle: 'dashed' } },
   trigger: { className: 'query-trigger', style: { fontFamily: 'monospace' } },
   popup: { style: { maxHeight: '8rem', fontFamily: 'monospace' } },
   helper: { style: { fontStyle: 'italic' } },
 };
 const slotStylingCode = `const querySlots: SelectSlotProps = {
   label: { style: { fontWeight: 'var(--perses-font-weight-bold)' } },
-  control: { style: { borderStyle: 'dashed' } },
+  wrapper: { style: { borderStyle: 'dashed' } },
   trigger: { className: 'query-trigger', style: { fontFamily: 'monospace' } },
   popup: { style: { maxHeight: '8rem', fontFamily: 'monospace' } },
   helper: { style: { fontStyle: 'italic' } },
@@ -336,7 +336,7 @@ export const Slots: Story = () => (
           <code>label</code> — Visible label, when provided.
         </li>
         <li>
-          <code>control</code> — Bordered field that holds the value, chips, input and buttons; also takes the{' '}
+          <code>wrapper</code> — Bordered field that holds the value, chips, input and buttons; also takes the{' '}
           <code>--perses-select-size-&lt;step&gt;</code> overrides.
         </li>
         <li>
@@ -347,6 +347,9 @@ export const Slots: Story = () => (
         </li>
         <li>
           <code>clearButton</code> — Button that clears the selection, with <code>clearable</code>.
+        </li>
+        <li>
+          <code>positioner</code> — Positions the popup and owns its <code>z-index</code>.
         </li>
         <li>
           <code>popup</code> — Floating list that holds the items.

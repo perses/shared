@@ -21,7 +21,7 @@ import type { PersesCSSProperties } from '../../types';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
 import { collectItems } from './collectItems';
-import { isFilteredOut, SelectEngineContext, SelectVisibleValuesContext } from './SelectEngineContext';
+import { isFilteredOut, SelectVisibleValuesContext } from './SelectVisibleValuesContext';
 
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared spacing utility styles used by style props.
 import '../system/spacing.css';
@@ -49,16 +49,16 @@ export const SelectGroup = forwardRef<HTMLDivElement, SelectGroupProps>(function
     style: computedStyle,
     rest,
   } = applyStyleProps(props, SELECT_GROUP_STYLE_PROPS, style);
-  const engine = useContext(SelectEngineContext);
+  // Set only inside the search engine's list.
   const visibility = useContext(SelectVisibleValuesContext);
   // Only items the group's own JSX shows can be counted; a group of wrapper components has none and stays visible.
   const hasVisibleItem = useMemo(() => {
-    if (engine !== 'search' || !visibility) return true;
+    if (!visibility) return true;
     const items = collectItems(children);
     return items.length === 0 || items.some((item) => !isFilteredOut(visibility, item.value));
-  }, [engine, visibility, children]);
+  }, [visibility, children]);
 
-  if (engine === 'search') {
+  if (visibility) {
     // A group whose items are all filtered out would leave an empty heading behind.
     if (!hasVisibleItem) return null;
     return (

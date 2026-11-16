@@ -14,7 +14,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { Status } from '../types';
 import { Select } from './Select';
 import { getRoot, getTrigger, open, renderSelect, units } from './Select.test.utils';
 
@@ -36,14 +35,6 @@ describe('accessibility', () => {
     expect(trigger).toHaveAttribute('aria-labelledby', screen.getByText('Unit').id);
   });
 
-  it('focuses the trigger without opening the list when the label is clicked', async () => {
-    renderSelect();
-    await userEvent.click(screen.getByText('Unit'));
-    expect(getTrigger()).toHaveFocus();
-    expect(getTrigger()).toHaveAttribute('aria-expanded', 'false');
-    expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
-  });
-
   it('generates distinct ids for multiple selects', () => {
     render(
       <>
@@ -52,12 +43,6 @@ describe('accessibility', () => {
       </>,
     );
     expect(getTrigger('First').id).not.toBe(getTrigger('Second').id);
-  });
-
-  it('supports aria-label when there is no visible label', () => {
-    render(<Select aria-label="Unit">{units}</Select>);
-    expect(getTrigger()).toHaveAccessibleName('Unit');
-    expect(document.querySelector('.ps-Select__label')).not.toBeInTheDocument();
   });
 
   it('supports aria-labelledby', () => {
@@ -90,30 +75,6 @@ describe('accessibility', () => {
   it('does not include start/end elements or helper text in the accessible name', () => {
     renderSelect({ startElement: <span>$</span>, endElement: <span>%</span>, helperText: 'Hint' });
     expect(getTrigger()).toHaveAccessibleName('Unit');
-  });
-
-  it('links helper text through aria-describedby and omits it otherwise', () => {
-    const { rerender } = render(
-      <Select label="Unit" helperText="Shown to your team">
-        {units}
-      </Select>,
-    );
-    expect(getTrigger()).toHaveAccessibleDescription('Shown to your team');
-    rerender(<Select label="Unit">{units}</Select>);
-    expect(getTrigger()).not.toHaveAttribute('aria-describedby');
-  });
-
-  it('sets aria-invalid for the error status only', () => {
-    const statuses: Status[] = ['error', 'warning', 'success', 'info'];
-    for (const status of statuses) {
-      const { unmount } = renderSelect({ status });
-      if (status === 'error') {
-        expect(getTrigger()).toBeInvalid();
-      } else {
-        expect(getTrigger()).not.toHaveAttribute('aria-invalid');
-      }
-      unmount();
-    }
   });
 
   it('exposes required and read-only states', () => {

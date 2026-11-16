@@ -18,12 +18,12 @@ import type { Ref } from 'react';
 
 import { Select } from './Select';
 import type { SelectSlotProps } from './Select';
-import { SelectItem } from './SelectItem';
+import { getRoot, getTrigger, getWrapper, open, units } from './Select.test.utils';
 
 const COLOR_STYLE = { color: 'red' };
 const SLOT_PROPS: SelectSlotProps = {
   label: { className: 'custom-label', style: { letterSpacing: '1px' } },
-  control: { className: 'custom-control', style: { gap: '9px' } },
+  wrapper: { className: 'custom-wrapper', style: { gap: '9px' } },
   trigger: { className: 'custom-trigger', style: { fontFamily: 'monospace', '--app-select-accent': 'blue' } },
   popup: { className: 'custom-popup', style: { maxHeight: '200px' } },
   list: { className: 'custom-list', style: { letterSpacing: '2px' } },
@@ -52,18 +52,6 @@ function createStructuralSlotProps(ref: Ref<HTMLButtonElement>, onClick: () => v
   return slotProps;
 }
 
-const units = [
-  <SelectItem key="bytes" value="bytes">
-    Bytes
-  </SelectItem>,
-  <SelectItem key="seconds" value="seconds">
-    Seconds
-  </SelectItem>,
-];
-
-const getTrigger = (name = 'Unit'): HTMLElement => screen.getByRole('combobox', { name });
-const getRoot = (): HTMLElement => getTrigger().closest('.ps-Select') as HTMLElement;
-
 describe('Select slot styling', () => {
   it('styles each documented part without changing root styling', async () => {
     render(
@@ -80,7 +68,7 @@ describe('Select slot styling', () => {
     expect(root.style.color).toBe('red');
     for (const name of [
       'custom-label',
-      'custom-control',
+      'custom-wrapper',
       'custom-trigger',
       'custom-popup',
       'custom-list',
@@ -90,11 +78,11 @@ describe('Select slot styling', () => {
     }
     expect(label).toHaveClass('ps-Select__label', 'custom-label');
     expect(label).toHaveStyle({ letterSpacing: '1px' });
-    const control = root.querySelector('.ps-Select__control');
-    expect(control).toHaveClass('ps-Select__control', 'custom-control');
-    expect(control).toHaveStyle({ gap: '9px' });
+    const wrapper = getWrapper();
+    expect(wrapper).toHaveClass('ps-Select__wrapper', 'custom-wrapper');
+    expect(wrapper).toHaveStyle({ gap: '9px' });
     expect(trigger).toHaveClass('ps-Select__trigger', 'custom-trigger');
-    expect(trigger).not.toHaveClass('custom-root', 'custom-control');
+    expect(trigger).not.toHaveClass('custom-root', 'custom-wrapper');
     expect(trigger).toHaveStyle({ fontFamily: 'monospace', '--app-select-accent': 'blue' });
     expect(trigger.style.color).toBe('');
     expect(trigger).not.toHaveAttribute('slotprops');
@@ -102,8 +90,7 @@ describe('Select slot styling', () => {
     expect(helper).toHaveStyle({ fontStyle: 'italic' });
     expect(trigger).toHaveAccessibleDescription('Pick a unit');
 
-    await userEvent.click(trigger);
-    const listbox = await screen.findByRole('listbox');
+    const listbox = await open();
     const popup = listbox.parentElement;
     expect(popup).toHaveClass('ps-Select__popup', 'custom-popup');
     expect(popup).toHaveStyle({ maxHeight: '200px' });
@@ -149,8 +136,7 @@ describe('Select slot styling', () => {
     expect(ref.current).toBe(trigger);
     expect(slotRef.current).toBeNull();
 
-    await userEvent.click(trigger);
-    const listbox = await screen.findByRole('listbox');
+    const listbox = await open();
     const popup = listbox.parentElement;
     expect(popup).toHaveClass('custom-popup');
     expect(popup).toHaveAttribute('role', 'presentation');
@@ -172,7 +158,7 @@ describe('Select slot styling', () => {
     const root = getRoot();
     expect(root.querySelector('.custom-label')).not.toBeInTheDocument();
     expect(root.querySelector('.custom-helper')).not.toBeInTheDocument();
-    expect(root.querySelector('.custom-control')).toBeInTheDocument();
+    expect(root.querySelector('.custom-wrapper')).toBeInTheDocument();
     expect(getTrigger()).toHaveClass('custom-trigger');
   });
 

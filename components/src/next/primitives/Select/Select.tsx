@@ -89,7 +89,7 @@ export type SelectAlign = 'start' | 'center' | 'end';
 export interface SelectStyle extends CSSProperties {
   /**
    * Per-step minimum height of the control (the bordered field that holds the value, chips and buttons). Falls back to
-   * the shared control-size scale. Set it on the root `style` or on `slotProps.control.style`.
+   * the shared control-size scale. Set it on the root `style` or on `slotProps.wrapper.style`.
    */
   '--perses-select-size-xs'?: string;
   '--perses-select-size-sm'?: string;
@@ -114,7 +114,7 @@ export interface SelectSlotProps {
    * the clear button and the chevron. It carries the radius props and the `--perses-select-size-<step>` overrides, and
    * is the element the list is anchored to.
    */
-  control?: SlotStyleProps<SelectStyle>;
+  wrapper?: SlotStyleProps<SelectStyle>;
   /**
    * The focusable element: the button in basic mode (it also holds the value), or the search input in searchable
    * mode. In both modes the chevron sits outside this slot, as the last item in the control.
@@ -127,7 +127,9 @@ export interface SelectSlotProps {
   chips?: SlotStyleProps;
   /** The button that clears the selection; rendered only with `clearable`. */
   clearButton?: SlotStyleProps;
-  /** The floating list; portaled to `document.body`. */
+  /** Positions the popup and owns its stacking (`z-index`); portaled to `document.body`. */
+  positioner?: SlotStyleProps;
+  /** The floating list inside the positioner. */
   popup?: SlotStyleProps;
   /** The listbox that holds the options inside the popup. */
   list?: SlotStyleProps;
@@ -137,7 +139,7 @@ export interface SelectSlotProps {
 
 /**
  * Props shared by single and multiple selection. Spacing and sizing style props apply to the root; radius props
- * apply to the control. From the display group only `overflow` is accepted: `display` is fixed by the stylesheet
+ * apply to the wrapper. From the display group only `overflow` is accepted: `display` is fixed by the stylesheet
  * (`inline-flex`, or `flex` with `fullWidth`) and is ignored if passed.
  */
 interface SelectBaseProps
@@ -364,7 +366,7 @@ export type SelectProps = SelectBaseProps &
 
 /**
  * Dropdown that picks one or more `SelectItem`s, with an optional label and helper text. Spacing (`p`, `m`, …),
- * sizing and `overflow` props style the root wrapper; radius props style the control. Values can be tokens
+ * sizing and `overflow` props style the root; radius props style the bordered wrapper. Values can be tokens
  * (`"sm"`), pixel numbers (`12`), CSS lengths or responsive objects (`{ default: 'sm', md: 0 }`).
  * Native attributes, handlers, and `ref` stay on the focusable element: the trigger button, or the input when
  * `searchable`.
@@ -517,20 +519,17 @@ function SelectRoot({
   // Adjusting state while rendering (React's documented alternative to an effect) keeps the cache in step with the
   // same render that needs it.
   if (nextOptionCache !== optionCache) setOptionCache(nextOptionCache);
-  const optionsByValue = useMemo(() => {
-    const byValue = new Map(optionsByCurrent);
-    for (const selectedValue of selectedValues) {
-      const cached = nextOptionCache.get(selectedValue);
-      if (!byValue.has(selectedValue) && cached) byValue.set(selectedValue, cached);
-    }
-    return byValue;
-  }, [optionsByCurrent, selectedValues, nextOptionCache]);
+  // The cache holds only selected values; current options take precedence over cached ones.
+  const optionsByValue = useMemo(
+    () => new Map([...nextOptionCache, ...optionsByCurrent]),
+    [optionsByCurrent, nextOptionCache],
+  );
   const [isOpen, setIsOpen] = useControllableState<boolean>(open, defaultOpen ?? false, onOpenChange);
   const {
     className: radiusClassName,
     style: radiusStyle,
     rest: restWithoutRadius,
-  } = applyStyleProps(props, SELECT_RADIUS_PROPS, slotProps?.control?.style);
+  } = applyStyleProps(props, SELECT_RADIUS_PROPS, slotProps?.wrapper?.style);
   const {
     className: styleClassName,
     style: computedStyle,
@@ -580,8 +579,8 @@ function SelectRoot({
     offset,
     themeMode: mode,
     slotProps,
-    controlClassName: clsx(radiusClassName, slotProps?.control?.className),
-    controlStyle: radiusStyle,
+    wrapperClassName: clsx(radiusClassName, slotProps?.wrapper?.className),
+    wrapperStyle: radiusStyle,
   };
 
   return (

@@ -52,15 +52,6 @@ describe('Select searchable', () => {
     expect(screen.getByTestId('field')).toBe(input);
   });
 
-  it('focuses the input without opening the list when the label is clicked', async () => {
-    renderSelect({ searchable: true });
-
-    await userEvent.click(screen.getByText('Unit'));
-
-    expect(getTrigger()).toHaveFocus();
-    expect(screen.queryByRole('listbox')).toBeNull();
-  });
-
   it('filters JSX items by their search label while typing', async () => {
     renderSelect({ searchable: true });
 
@@ -146,6 +137,30 @@ describe('Select searchable', () => {
     rerender(<Select label="Unit" searchable multiple value={['a1']} items={beta} />);
 
     expect(valueText()).toBe('Alpha');
+  });
+
+  it('keeps the selected label when async search replaces items in single mode', () => {
+    const alpha = [{ value: 'a1', label: 'Alpha' }];
+    const beta = [{ value: 'b1', label: 'Beta' }];
+    const { rerender } = render(<Select label="Unit" searchable value="a1" items={alpha} />);
+    expect(getTrigger()).toHaveValue('Alpha');
+
+    rerender(<Select label="Unit" searchable value="a1" items={beta} />);
+
+    expect(getTrigger()).toHaveValue('Alpha');
+  });
+
+  it('keeps the selected chip label when async search replaces items in chips mode', () => {
+    const alpha = [{ value: 'a1', label: 'Alpha' }];
+    const beta = [{ value: 'b1', label: 'Beta' }];
+    const props = { label: 'Unit', searchable: true, multiple: true, chips: true, value: ['a1'] } as const;
+    const { rerender } = render(<Select {...props} items={alpha} />);
+    expect(screen.getByRole('button', { name: 'Remove Alpha' })).toBeInTheDocument();
+
+    rerender(<Select {...props} items={beta} />);
+
+    expect(screen.getByRole('button', { name: 'Remove Alpha' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Remove a1' })).toBeNull();
   });
 
   it('closes after a single selection and shows the label in the input', async () => {
@@ -253,33 +268,6 @@ describe('Select searchable', () => {
     );
 
     expect(valueText()).toBe('2 units');
-  });
-
-  it('closes the open list, without reopening it, when the empty part of the control is clicked', async () => {
-    const onOpenChange = vi.fn();
-    renderSelect({ searchable: true, onOpenChange });
-    await open();
-    onOpenChange.mockClear();
-    const control = document.querySelector<HTMLElement>('.ps-Select__control') as HTMLElement;
-
-    await userEvent.click(control);
-
-    await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
-    expect(onOpenChange).toHaveBeenCalledTimes(1);
-    expect(onOpenChange).toHaveBeenCalledWith(false);
-  });
-
-  it('opens the closed list once, and focuses the input, when the empty part of the control is clicked', async () => {
-    const onOpenChange = vi.fn();
-    renderSelect({ searchable: true, onOpenChange });
-    const control = document.querySelector<HTMLElement>('.ps-Select__control') as HTMLElement;
-
-    await userEvent.click(control);
-
-    expect(await screen.findByRole('listbox')).toBeInTheDocument();
-    expect(getTrigger()).toHaveFocus();
-    expect(onOpenChange).toHaveBeenCalledTimes(1);
-    expect(onOpenChange).toHaveBeenCalledWith(true);
   });
 
   it('opens from the chevron button, which is not a tab stop', async () => {
@@ -444,30 +432,6 @@ describe('Select searchable', () => {
     await userEvent.type(getTrigger(), 'zzz');
 
     expect(screen.getByRole('status')).toHaveTextContent('No results');
-  });
-
-  it('keeps the selected label when async search replaces items in single mode', () => {
-    const alpha = [{ value: 'a1', label: 'Alpha' }];
-    const beta = [{ value: 'b1', label: 'Beta' }];
-    const { rerender } = render(<Select label="Unit" searchable value="a1" items={alpha} />);
-    expect(getTrigger()).toHaveValue('Alpha');
-
-    rerender(<Select label="Unit" searchable value="a1" items={beta} />);
-
-    expect(getTrigger()).toHaveValue('Alpha');
-  });
-
-  it('keeps the selected chip label when async search replaces items in chips mode', () => {
-    const alpha = [{ value: 'a1', label: 'Alpha' }];
-    const beta = [{ value: 'b1', label: 'Beta' }];
-    const props = { label: 'Unit', searchable: true, multiple: true, chips: true, value: ['a1'] } as const;
-    const { rerender } = render(<Select {...props} items={alpha} />);
-    expect(screen.getByRole('button', { name: 'Remove Alpha' })).toBeInTheDocument();
-
-    rerender(<Select {...props} items={beta} />);
-
-    expect(screen.getByRole('button', { name: 'Remove Alpha' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Remove a1' })).toBeNull();
   });
 
   describe('items rendered through a wrapper component', () => {

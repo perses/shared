@@ -37,8 +37,8 @@
     color: var(--perses-text-secondary);
   }
 
-  /* ---- Control carries the border, like the TextField wrapper ---- */
-  :where(.ps-Select__control) {
+  /* ---- Wrapper carries the border, like the TextField wrapper ---- */
+  :where(.ps-Select__wrapper) {
     box-sizing: border-box;
     display: flex;
     align-items: center;
@@ -53,7 +53,7 @@
     cursor: pointer;
   }
 
-  /* The trigger is a borderless button that fills the control, so the control draws the border and focus ring. */
+  /* The trigger is a borderless button that fills the wrapper, so the wrapper draws the border and focus ring. */
   :where(.ps-Select__trigger) {
     flex: 1 1 auto;
     display: flex;
@@ -71,7 +71,7 @@
     outline: 0;
   }
 
-  .ps-Select__control:has(.ps-Select__trigger:focus-visible) {
+  .ps-Select__wrapper:has(.ps-Select__trigger:focus-visible) {
     outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
     outline-offset: var(--perses-focus-ring-offset);
   }
@@ -116,7 +116,8 @@
     padding: 0;
     border: 0;
     background: transparent;
-    color: inherit;
+    /* Same colour as the basic engine's .ps-Select__icon, so both modes draw the chevron alike. */
+    color: var(--perses-text-secondary);
     cursor: inherit;
   }
 
@@ -137,7 +138,7 @@
   }
 
   /* The end element, spinner, clear button and chevron form one group, so they never wrap apart. */
-  :where(.ps-Select__end) {
+  :where(.ps-Select__actions) {
     display: inline-flex;
     align-items: center;
     flex: none;
@@ -146,14 +147,14 @@
 
   /* ---- Chips (multiple) ---- */
   /* align-content keeps a single row centred in a field taller than one chip row. */
-  :where(.ps-Select__control:has(.ps-Select__chips)) {
+  :where(.ps-Select__wrapper:has(.ps-Select__chips)) {
     flex-wrap: wrap;
     align-content: center;
   }
 
   /* The chips can span several rows or collapse to one row with "+N". Bottom-aligning a group one chip row tall keeps
      the chevron on the last chip row in every case, instead of centred on the chip block. */
-  :where(.ps-Select__control:has(.ps-Select__chips) > .ps-Select__end) {
+  :where(.ps-Select__wrapper:has(.ps-Select__chips) > .ps-Select__actions) {
     align-self: flex-end;
     min-height: var(--ps-select-chip-row);
   }
@@ -181,13 +182,13 @@
     flex: none;
   }
 
-  :where(.ps-Select[data-size='xs'] .ps-Select__control),
-  :where(.ps-Select[data-size='sm'] .ps-Select__control) {
+  :where(.ps-Select[data-size='xs'] .ps-Select__wrapper),
+  :where(.ps-Select[data-size='sm'] .ps-Select__wrapper) {
     --ps-select-chip-row: var(--perses-chip-size-xs, var(--perses-selection-control-size-xs));
   }
 
-  :where(.ps-Select[data-size='md'] .ps-Select__control),
-  :where(.ps-Select[data-size='lg'] .ps-Select__control) {
+  :where(.ps-Select[data-size='md'] .ps-Select__wrapper),
+  :where(.ps-Select[data-size='lg'] .ps-Select__wrapper) {
     --ps-select-chip-row: var(--perses-chip-size-sm, var(--perses-selection-control-size-sm));
   }
 
@@ -198,13 +199,13 @@
     display: none;
   }
 
-  :where(.ps-Select__control:not([data-open]) .ps-Select__chips:not(:focus-within) .ps-Select__more) {
+  :where(.ps-Select__wrapper:not([data-open]) .ps-Select__chips:not(:focus-within) .ps-Select__more) {
     display: inline-flex;
   }
 
   /* Specific on purpose: chip.css sets display on .ps-Chip at zero specificity in this same layer, so load order
      could otherwise let it win over this rule. */
-  .ps-Select__control:not([data-open]) .ps-Select__chips:not(:focus-within) .ps-Select__chip[data-overflow] {
+  .ps-Select__wrapper:not([data-open]) .ps-Select__chips:not(:focus-within) .ps-Select__chip[data-overflow] {
     display: none;
   }
 
@@ -233,7 +234,7 @@
     transform: rotate(180deg);
   }
 
-  .ps-Select__control[data-readonly] {
+  .ps-Select__wrapper[data-readonly] {
     cursor: default;
   }
 
@@ -245,30 +246,30 @@
     opacity: 1;
   }
 
-  .ps-Select__control[data-disabled] {
+  .ps-Select__wrapper[data-disabled] {
     cursor: not-allowed;
   }
 
   /* Sized via --ps-select-size: per-component --perses-select-size-<step>, else the shared control-size token. */
-  :where(.ps-Select[data-size='xs'] .ps-Select__control) {
+  :where(.ps-Select[data-size='xs'] .ps-Select__wrapper) {
     --ps-select-size: var(--perses-select-size-xs, var(--perses-control-size-xs));
     padding: var(--perses-spacing-0) var(--perses-spacing-xs);
     font-size: var(--perses-font-size-xs);
   }
 
-  :where(.ps-Select[data-size='sm'] .ps-Select__control) {
+  :where(.ps-Select[data-size='sm'] .ps-Select__wrapper) {
     --ps-select-size: var(--perses-select-size-sm, var(--perses-control-size-sm));
     padding: var(--perses-spacing-xs) var(--perses-spacing-sm);
     font-size: var(--perses-font-size-xs);
   }
 
-  :where(.ps-Select[data-size='md'] .ps-Select__control) {
+  :where(.ps-Select[data-size='md'] .ps-Select__wrapper) {
     --ps-select-size: var(--perses-select-size-md, var(--perses-control-size-md));
     padding: var(--perses-spacing-sm) var(--perses-spacing-md);
     font-size: var(--perses-font-size-sm);
   }
 
-  :where(.ps-Select[data-size='lg'] .ps-Select__control) {
+  :where(.ps-Select[data-size='lg'] .ps-Select__wrapper) {
     --ps-select-size: var(--perses-select-size-lg, var(--perses-control-size-lg));
     padding: var(--perses-spacing-sm) var(--perses-spacing-lg);
     font-size: var(--perses-font-size-md);
@@ -276,18 +277,18 @@
 
   /* ---- Status variants ---- */
   /* error and warning also thicken the border so status is not conveyed by colour alone */
-  .ps-Select[data-status='error'] .ps-Select__control {
+  .ps-Select[data-status='error'] .ps-Select__wrapper {
     border-color: var(--perses-status-border-error);
     box-shadow: inset 0 0 0 var(--perses-border-width-sm) var(--perses-status-border-error);
   }
-  .ps-Select[data-status='warning'] .ps-Select__control {
+  .ps-Select[data-status='warning'] .ps-Select__wrapper {
     border-color: var(--perses-status-border-warning);
     box-shadow: inset 0 0 0 var(--perses-border-width-sm) var(--perses-status-border-warning);
   }
-  .ps-Select[data-status='success'] .ps-Select__control {
+  .ps-Select[data-status='success'] .ps-Select__wrapper {
     border-color: var(--perses-status-border-success);
   }
-  .ps-Select[data-status='info'] .ps-Select__control {
+  .ps-Select[data-status='info'] .ps-Select__wrapper {
     border-color: var(--perses-status-border-info);
   }
 
@@ -433,7 +434,7 @@
 
   @media (forced-colors: active) {
     /* Same specificity as the focus rule above; a :where() restatement would always lose to it. */
-    .ps-Select__control:has(.ps-Select__trigger:focus-visible) {
+    .ps-Select__wrapper:has(.ps-Select__trigger:focus-visible) {
       outline-color: Highlight;
     }
 
@@ -450,8 +451,8 @@
     }
 
     /* Forced colours drop box-shadow and recolour borders, so thicken the border itself instead. */
-    .ps-Select[data-status='error'] .ps-Select__control,
-    .ps-Select[data-status='warning'] .ps-Select__control {
+    .ps-Select[data-status='error'] .ps-Select__wrapper,
+    .ps-Select[data-status='warning'] .ps-Select__wrapper {
       border-width: var(--perses-border-width-md);
     }
   }

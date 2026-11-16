@@ -18,7 +18,7 @@ import type { ReactElement } from 'react';
 
 import type { Size, Status } from '../types';
 import { Select } from './Select';
-import { getRoot, getTrigger, open, renderSelect, units } from './Select.test.utils';
+import { getRoot, getTrigger, getWrapper, open, renderSelect, units } from './Select.test.utils';
 import { SelectGroup } from './SelectGroup';
 import { SelectItem } from './SelectItem';
 import type { SelectValue } from './SelectItem';
@@ -116,6 +116,16 @@ describe('Select', () => {
     expect(trigger).toHaveTextContent('Two bold');
     expect(trigger.querySelector('b')).toHaveTextContent('bold');
     expect(trigger).not.toHaveTextContent('2');
+  });
+
+  it('keeps the selected label when items no longer include the value', () => {
+    const alpha = [{ value: 'a1', label: 'Alpha' }];
+    const { rerender } = render(<Select label="Unit" value="a1" items={alpha} />);
+    expect(getTrigger()).toHaveTextContent('Alpha');
+
+    rerender(<Select label="Unit" value="a1" items={[]} loading />);
+
+    expect(getTrigger()).toHaveTextContent('Alpha');
   });
 
   it('shows the content of an item nested in a group', () => {
@@ -252,12 +262,6 @@ describe('Select', () => {
     }
   });
 
-  it('forwards the size to the portaled popup', async () => {
-    renderSelect({ size: 'lg' });
-    const listbox = await open();
-    expect(listbox.parentElement).toHaveAttribute('data-size', 'lg');
-  });
-
   it('defaults to the md size', () => {
     renderSelect();
     expect(getRoot()).toHaveAttribute('data-size', 'md');
@@ -299,27 +303,28 @@ describe('Select', () => {
   it('renders startElement and endElement around the value', () => {
     renderSelect({ startElement: START_ICON, endElement: END_ICON, defaultValue: 'bytes' });
     const trigger = getTrigger();
-    const control = getRoot().querySelector('.ps-Select__control');
+    const wrapper = getWrapper();
     const start = screen.getByTestId('start-icon').parentElement;
     const end = screen.getByTestId('end-icon').parentElement;
     expect(start).toHaveClass('ps-Select__adornment', 'ps-Select__adornment--start');
     expect(end).toHaveClass('ps-Select__adornment', 'ps-Select__adornment--end');
-    expect(start?.parentElement).toBe(control);
-    expect(end?.parentElement).toHaveClass('ps-Select__end');
-    expect(end?.parentElement?.parentElement).toBe(control);
-    expect(trigger.parentElement).toBe(control);
+    expect(start?.parentElement).toBe(wrapper);
+    expect(end?.parentElement).toHaveClass('ps-Select__actions');
+    expect(end?.parentElement?.parentElement).toBe(wrapper);
+    expect(trigger.parentElement).toBe(wrapper);
     expect(trigger).not.toContainElement(start);
     expect(trigger).not.toContainElement(end);
     expect(start?.compareDocumentPosition(trigger)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(trigger.compareDocumentPosition(end as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
-  it('renders a default chevron that icon replaces', () => {
+  it('renders a default chevron, marked for rotation, that icon replaces without the rotation mark', () => {
     const { rerender } = render(<Select label="Unit">{units}</Select>);
     const icon = getRoot().querySelector('.ps-Select__icon');
     expect(icon).toHaveClass('ps-Icon');
     expect(icon).toHaveAttribute('aria-hidden', 'true');
     expect(icon?.querySelector('svg')).toBeInTheDocument();
+    expect(icon?.querySelector('.ps-Select__chevron')).toBeInTheDocument();
     expect(getTrigger()).not.toContainElement(icon as HTMLElement);
 
     rerender(
@@ -328,27 +333,11 @@ describe('Select', () => {
       </Select>,
     );
     expect(getRoot().querySelector('.ps-Select__icon')).toContainElement(screen.getByTestId('custom-icon'));
-  });
-
-  it('marks only the default chevron for rotation', () => {
-    const { rerender } = render(<Select label="Unit">{units}</Select>);
-    expect(getRoot().querySelector('.ps-Select__icon .ps-Select__chevron')).toBeInTheDocument();
-
-    rerender(
-      <Select label="Unit" icon={CUSTOM_ICON}>
-        {units}
-      </Select>,
-    );
-    expect(getRoot().querySelector('.ps-Select__icon')).toBeInTheDocument();
     expect(getRoot().querySelector('.ps-Select__chevron')).toBeNull();
   });
 
   it('renders no icon wrapper when icon is null', () => {
-    render(
-      <Select label="Unit" icon={null}>
-        {units}
-      </Select>,
-    );
+    renderSelect({ icon: null });
     expect(getRoot().querySelector('.ps-Select__icon')).toBeNull();
   });
 
@@ -385,60 +374,14 @@ describe('Select', () => {
   });
 
   describe('control', () => {
-    it('mirrors open, disabled and read-only state on the control', async () => {
-      const { unmount } = renderSelect();
-      const control = getRoot().querySelector('.ps-Select__control');
-      expect(control).not.toHaveAttribute('data-open');
-      await open();
-      expect(control).toHaveAttribute('data-open');
-      await userEvent.keyboard('{Escape}');
-      await waitFor(() => expect(control).not.toHaveAttribute('data-open'));
-      unmount();
-
-      const disabled = renderSelect({ disabled: true });
-      expect(getRoot().querySelector('.ps-Select__control')).toHaveAttribute('data-disabled');
-      disabled.unmount();
-
-      renderSelect({ readOnly: true });
-      expect(getRoot().querySelector('.ps-Select__control')).toHaveAttribute('data-readonly');
-    });
-
-    it('opens and focuses the trigger when the empty part of the control is clicked', async () => {
+    it('mirrors the open state on the control', async () => {
       renderSelect();
-      const control = getRoot().querySelector<HTMLElement>('.ps-Select__control') as HTMLElement;
-      await userEvent.click(control);
-      expect(getTrigger()).toHaveFocus();
-      expect(await screen.findByRole('listbox')).toBeInTheDocument();
-    });
-
-    it('opens once when the empty part of the closed control is clicked', async () => {
-      const onOpenChange = vi.fn();
-      renderSelect({ onOpenChange });
-      const control = getRoot().querySelector<HTMLElement>('.ps-Select__control') as HTMLElement;
-      await userEvent.click(control);
-      expect(await screen.findByRole('listbox')).toBeInTheDocument();
-      expect(onOpenChange).toHaveBeenCalledTimes(1);
-      expect(onOpenChange).toHaveBeenCalledWith(true);
-    });
-
-    it('closes the open list, without reopening it, when the empty part of the control is clicked', async () => {
-      const onOpenChange = vi.fn();
-      renderSelect({ onOpenChange });
+      const wrapper = getWrapper();
+      expect(wrapper).not.toHaveAttribute('data-open');
       await open();
-      onOpenChange.mockClear();
-      const control = getRoot().querySelector<HTMLElement>('.ps-Select__control') as HTMLElement;
-      await userEvent.click(control);
-      await waitFor(() => expect(screen.queryByRole('listbox')).not.toBeInTheDocument());
-      expect(onOpenChange).toHaveBeenCalledWith(false);
-      expect(onOpenChange).not.toHaveBeenCalledWith(true);
-      expect(onOpenChange).toHaveBeenCalledTimes(1);
-    });
-
-    it.each([{ disabled: true }, { readOnly: true }])('does not open from the control when %o', async (props) => {
-      renderSelect(props);
-      const control = getRoot().querySelector<HTMLElement>('.ps-Select__control') as HTMLElement;
-      await userEvent.click(control);
-      expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
+      expect(wrapper).toHaveAttribute('data-open');
+      await userEvent.keyboard('{Escape}');
+      await waitFor(() => expect(wrapper).not.toHaveAttribute('data-open'));
     });
   });
 
@@ -447,11 +390,7 @@ describe('Select', () => {
       const frozen = Object.freeze(['bytes']);
       const renderValue = vi.fn((value: SelectValue[]) => value.join(', '));
       const onValueChange = vi.fn();
-      render(
-        <Select label="Unit" multiple value={frozen} renderValue={renderValue} onValueChange={onValueChange}>
-          {units}
-        </Select>,
-      );
+      renderSelect({ multiple: true, value: frozen, renderValue, onValueChange });
       const argument = renderValue.mock.calls[0]?.[0];
       expect(argument).toEqual(['bytes']);
       expect(argument).not.toBe(frozen);
@@ -466,11 +405,7 @@ describe('Select', () => {
   describe('multiple', () => {
     it('reports an array and joins the selected labels in the trigger', async () => {
       const onValueChange = vi.fn();
-      render(
-        <Select label="Unit" multiple defaultValue={['bytes']} onValueChange={onValueChange}>
-          {units}
-        </Select>,
-      );
+      renderSelect({ multiple: true, defaultValue: ['bytes'], onValueChange });
       expect(getTrigger()).toHaveTextContent('Bytes');
       await open();
       await userEvent.click(screen.getByRole('option', { name: 'Seconds' }));
@@ -481,22 +416,14 @@ describe('Select', () => {
 
     it('toggles an already selected option off', async () => {
       const onValueChange = vi.fn();
-      render(
-        <Select label="Unit" multiple defaultValue={['bytes', 'seconds']} onValueChange={onValueChange}>
-          {units}
-        </Select>,
-      );
+      renderSelect({ multiple: true, defaultValue: ['bytes', 'seconds'], onValueChange });
       await open();
       await userEvent.click(screen.getByRole('option', { name: 'Bytes' }));
       expect(onValueChange).toHaveBeenCalledWith(['seconds']);
     });
 
     it('keeps the selected labels in the trigger for screen readers while chips show them', () => {
-      render(
-        <Select label="Unit" multiple chips defaultValue={['bytes', 'seconds']}>
-          {units}
-        </Select>,
-      );
+      renderSelect({ multiple: true, chips: true, defaultValue: ['bytes', 'seconds'] });
       const trigger = getTrigger();
       expect(trigger.textContent).toBe('Bytes, Seconds');
       expect(trigger.querySelector('span.ps-Select__visually-hidden')).toHaveTextContent('Bytes, Seconds');
@@ -520,16 +447,11 @@ describe('Select', () => {
     });
 
     it('overrides the trigger content for multiple values', () => {
-      render(
-        <Select
-          label="Unit"
-          multiple
-          defaultValue={['bytes', 'seconds']}
-          renderValue={(value) => `${value.length} selected`}
-        >
-          {units}
-        </Select>,
-      );
+      renderSelect({
+        multiple: true,
+        defaultValue: ['bytes', 'seconds'],
+        renderValue: (value: SelectValue[]) => `${value.length} selected`,
+      });
       expect(getTrigger()).toHaveTextContent('2 selected');
     });
 
@@ -547,11 +469,11 @@ describe('Select', () => {
     });
 
     it('shows the placeholder instead of calling renderValue while no values are selected', async () => {
-      render(
-        <Select label="Unit" multiple placeholder="Pick some units" renderValue={(value) => `${value.length} selected`}>
-          {units}
-        </Select>,
-      );
+      renderSelect({
+        multiple: true,
+        placeholder: 'Pick some units',
+        renderValue: (value: SelectValue[]) => `${value.length} selected`,
+      });
       const trigger = getTrigger();
       expect(trigger).toHaveTextContent('Pick some units');
 

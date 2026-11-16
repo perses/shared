@@ -149,7 +149,7 @@ whose size it constrains, and `margin: 0` on elements that can render as a tag w
 ```css
 @layer perses.components {
   /* :where() keeps specificity at zero, so style props and consumer CSS still win. */
-  :where(.ps-Select__trigger) {
+  :where(.ps-Select__wrapper) {
     /* min-height and padding add up the same way with or without the document reset. */
     box-sizing: border-box;
     min-height: var(--ps-select-size);

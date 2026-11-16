@@ -19,12 +19,12 @@ import type { MouseEvent, ReactElement, ReactNode, Ref } from 'react';
 
 import { hasContent } from '../hasContent';
 import { SelectChips } from './SelectChips';
-import { SelectEngineContext, SelectVisibleValuesContext } from './SelectEngineContext';
 import type { SelectValue } from './SelectItem';
-import { SelectShell } from './SelectShell';
+import { focusField, SelectShell } from './SelectShell';
 import type { SelectEngineProps } from './SelectShell';
 import { isEmptySelection, isMultipleValue, optionKey } from './selectValue';
 import type { SelectCurrentValue } from './selectValue';
+import { SelectVisibleValuesContext } from './SelectVisibleValuesContext';
 import { useControllableState } from './useControllableState';
 
 /**
@@ -101,7 +101,7 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
     slotProps,
     search,
   } = props;
-  const controlRef = useRef<HTMLDivElement | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const values = useMemo(() => options.map((option) => option.value), [options]);
   const selectedValues = isMultipleValue(value) ? value : [];
   const labelOf = (selected: SelectValue): string => optionsByValue.get(selected)?.label ?? String(selected);
@@ -133,13 +133,10 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
 
   const hasLabel = hasContent(label);
   const showsValueText = multiple && !chips && !isEmptySelection(value);
-  const focusInput = (): void => {
-    controlRef.current?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
-  };
   const handleLabelClick = (event: MouseEvent<HTMLLabelElement>): void => {
     // A native label click would click the input, and the input opens the list on click.
     event.preventDefault();
-    focusInput();
+    focusField(wrapperRef.current);
   };
 
   const input = (
@@ -154,104 +151,109 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
   );
 
   return (
-    <SelectEngineContext.Provider value="search">
-      <Combobox.Root<SelectValue, boolean>
-        items={values}
-        itemToStringLabel={labelOf}
-        filter={baseFilter}
-        multiple={multiple}
-        value={value as SelectValue | SelectValue[] | null}
-        onValueChange={(next) => setValue(next as SelectCurrentValue)}
-        inputValue={inputValue}
-        onInputValueChange={(next) => setInputValue(next)}
-        open={open}
-        onOpenChange={(next, details) => {
-          // The list stays open while several items are picked, so the typed filter survives each selection.
-          if (!next && multiple && details.reason === 'item-press') {
-            details.cancel();
-            return;
-          }
-          setOpen(next);
-        }}
-        name={name}
-        form={form}
-        required={required}
-        readOnly={readOnly}
-        disabled={disabled}
-      >
-        <SelectShell
-          engine={props}
-          controlRef={controlRef}
-          Control={Combobox.InputGroup}
-          pressIsInside
-          onClear={() => setInputValue('')}
-          label={
-            hasLabel ? (
-              <Field.Label
-                id={labelId}
-                className={clsx('ps-Select__label', slotProps?.label?.className)}
-                style={slotProps?.label?.style}
-                onClick={handleLabelClick}
+    <Combobox.Root<SelectValue, boolean>
+      items={values}
+      itemToStringLabel={labelOf}
+      filter={baseFilter}
+      multiple={multiple}
+      value={value as SelectValue | SelectValue[] | null}
+      onValueChange={(next) => setValue(next as SelectCurrentValue)}
+      inputValue={inputValue}
+      onInputValueChange={setInputValue}
+      open={open}
+      onOpenChange={(next, details) => {
+        // The list stays open while several items are picked, so the typed filter survives each selection.
+        if (!next && multiple && details.reason === 'item-press') {
+          details.cancel();
+          return;
+        }
+        setOpen(next);
+      }}
+      name={name}
+      form={form}
+      required={required}
+      readOnly={readOnly}
+      disabled={disabled}
+    >
+      <SelectShell
+        engine={props}
+        wrapperRef={wrapperRef}
+        Wrapper={Combobox.InputGroup}
+        pressIsInside
+        onClear={() => setInputValue('')}
+        label={
+          hasLabel ? (
+            <Field.Label
+              id={labelId}
+              className={clsx('ps-Select__label', slotProps?.label?.className)}
+              style={slotProps?.label?.style}
+              onClick={handleLabelClick}
+            >
+              {label}
+            </Field.Label>
+          ) : null
+        }
+        field={
+          <>
+            {showsValueText && (
+              <span className="ps-Select__value">
+                {renderValue ? renderValue(value) : selectedValues.map(labelOf).join(', ')}
+              </span>
+            )}
+            {chips ? (
+              <SelectChips engine={props} isSearch>
+                {input}
+              </SelectChips>
+            ) : (
+              input
+            )}
+          </>
+        }
+        trailing={
+          hasContent(icon) ? (
+            <Combobox.Trigger
+              className="ps-Select__toggle"
+              tabIndex={-1}
+              aria-labelledby={hasLabel ? labelId : focusableProps['aria-labelledby']}
+              aria-label={hasLabel ? undefined : focusableProps['aria-label']}
+            >
+              {icon}
+            </Combobox.Trigger>
+          ) : null
+        }
+        liveRegion={<SearchStatus loading={loading} loadingText={loadingText} emptyText={emptyText} open={open} />}
+        popup={
+          <Combobox.Portal>
+            <Combobox.Positioner
+              className={clsx('ps-Select__positioner', slotProps?.positioner?.className)}
+              style={slotProps?.positioner?.style}
+              data-perses-mode={themeMode}
+              anchor={wrapperRef}
+              side={placement}
+              align={align}
+              sideOffset={offset}
+            >
+              <Combobox.Popup
+                className={clsx('ps-Select__popup', slotProps?.popup?.className)}
+                style={slotProps?.popup?.style}
+                data-size={size}
               >
-                {label}
-              </Field.Label>
-            ) : null
-          }
-          field={
-            <>
-              {showsValueText && (
-                <span className="ps-Select__value">
-                  {renderValue ? renderValue(value) : selectedValues.map(labelOf).join(', ')}
-                </span>
-              )}
-              {chips ? <SelectChips engine={props}>{input}</SelectChips> : input}
-            </>
-          }
-          trailing={
-            hasContent(icon) ? (
-              <Combobox.Trigger
-                className="ps-Select__toggle"
-                tabIndex={-1}
-                aria-labelledby={hasLabel ? labelId : focusableProps['aria-labelledby']}
-                aria-label={hasLabel ? undefined : focusableProps['aria-label']}
-              >
-                {icon}
-              </Combobox.Trigger>
-            ) : null
-          }
-          status={<SearchStatus loading={loading} loadingText={loadingText} emptyText={emptyText} open={open} />}
-          popup={
-            <Combobox.Portal>
-              <Combobox.Positioner
-                className="ps-Select__positioner"
-                data-perses-mode={themeMode}
-                anchor={controlRef}
-                side={placement}
-                align={align}
-                sideOffset={offset}
-              >
-                <Combobox.Popup
-                  className={clsx('ps-Select__popup', slotProps?.popup?.className)}
-                  style={slotProps?.popup?.style}
-                  data-size={size}
+                {hasContent(listHeader) && <div className="ps-Select__list-header">{listHeader}</div>}
+                {/* `SearchStatus` is the one live region; Empty's own `role="status"` would announce twice. */}
+                <Combobox.Empty className="ps-Select__empty" role="presentation" aria-live="off">
+                  {loading ? loadingText : emptyText}
+                </Combobox.Empty>
+                <Combobox.List
+                  className={clsx('ps-Select__list', slotProps?.list?.className)}
+                  style={slotProps?.list?.style}
                 >
-                  {hasContent(listHeader) && <div className="ps-Select__list-header">{listHeader}</div>}
-                  {/* `SearchStatus` is the one live region; Empty's own `role="status"` would announce twice. */}
-                  <Combobox.Empty className="ps-Select__empty" role="presentation" aria-live="off">
-                    {loading ? loadingText : emptyText}
-                  </Combobox.Empty>
-                  <Combobox.List
-                    className={clsx('ps-Select__list', slotProps?.list?.className)}
-                    style={slotProps?.list?.style}
-                  >
-                    <VisibleValues values={values}>{optionNodes}</VisibleValues>
-                  </Combobox.List>
-                </Combobox.Popup>
-              </Combobox.Positioner>
-            </Combobox.Portal>
-          }
-        />
-      </Combobox.Root>
-    </SelectEngineContext.Provider>
+                  <VisibleValues values={values}>{optionNodes}</VisibleValues>
+                </Combobox.List>
+              </Combobox.Popup>
+            </Combobox.Positioner>
+          </Combobox.Portal>
+        }
+      />
+    </Combobox.Root>
   );
 }

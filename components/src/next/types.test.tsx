@@ -118,7 +118,7 @@ type _TextFieldSlotProp = AssertAssignable<NonNullable<TextFieldProps['slotProps
 type _SelectSlotKeys = AssertNever<
   Exclude<
     keyof SelectSlotProps,
-    'label' | 'control' | 'trigger' | 'chips' | 'clearButton' | 'popup' | 'list' | 'helper'
+    'label' | 'wrapper' | 'trigger' | 'chips' | 'clearButton' | 'positioner' | 'popup' | 'list' | 'helper'
   >
 >;
 type _SelectSlotProp = AssertAssignable<NonNullable<SelectProps['slotProps']>, SelectSlotProps>;
@@ -388,7 +388,7 @@ expectTypeOf({ '--perses-checkbox-size-md': 24 } satisfies PersesCSSProperties<C
 expectTypeOf({ '--perses-chip-border-style': 1 } satisfies PersesCSSProperties<ChipStyle>);
 
 expectTypeOf<NonNullable<TextFieldSlotProps['wrapper']>>().toEqualTypeOf<SlotStyleProps<TextFieldStyle>>();
-expectTypeOf<NonNullable<SelectSlotProps['control']>>().toEqualTypeOf<SlotStyleProps<SelectStyle>>();
+expectTypeOf<NonNullable<SelectSlotProps['wrapper']>>().toEqualTypeOf<SlotStyleProps<SelectStyle>>();
 expectTypeOf<NonNullable<SelectSlotProps['trigger']>>().toEqualTypeOf<SlotStyleProps>();
 expectTypeOf({
   control: { style: { '--perses-checkbox-size-md': '24px', '--app-accent': 'blue' } },
@@ -400,7 +400,7 @@ expectTypeOf({ control: { style: { '--perses-switch-size-md': 24 } } } satisfies
 // @ts-expect-error Typed slots check documented custom properties the same way as the top-level style.
 expectTypeOf({ wrapper: { style: { '--perses-textfield-size-md': 40 } } } satisfies TextFieldSlotProps);
 // @ts-expect-error Typed slots check documented custom properties the same way as the top-level style.
-expectTypeOf({ control: { style: { '--perses-select-size-md': 40 } } } satisfies SelectSlotProps);
+expectTypeOf({ wrapper: { style: { '--perses-select-size-md': 40 } } } satisfies SelectSlotProps);
 
 const MIXED_STYLE = {
   marginTop: 8,

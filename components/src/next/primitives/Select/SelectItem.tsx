@@ -22,8 +22,8 @@ import { hasContent } from '../hasContent';
 import { CheckIcon, Icon } from '../Icon';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
-import { isFilteredOut, SelectEngineContext, SelectVisibleValuesContext } from './SelectEngineContext';
 import { optionKey } from './selectValue';
+import { isFilteredOut, SelectVisibleValuesContext } from './SelectVisibleValuesContext';
 
 // oxlint-disable-next-line import/no-unassigned-import -- Registers shared spacing utility styles used by style props.
 import '../system/spacing.css';
@@ -73,15 +73,15 @@ export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(function S
     style: computedStyle,
     rest,
   } = applyStyleProps(props, SELECT_ITEM_STYLE_PROPS, style);
-  const engine = useContext(SelectEngineContext);
+  // Set only inside the search engine's list.
   const visibility = useContext(SelectVisibleValuesContext);
-  const isUnknown = engine === 'search' && visibility !== null && !visibility.known.has(optionKey(value));
+  const isUnknown = visibility !== null && !visibility.known.has(optionKey(value));
   const reportUnknown = visibility?.reportUnknown;
   useEffect(() => {
     if (isUnknown) reportUnknown?.();
   }, [isUnknown, reportUnknown]);
 
-  if (engine === 'search') {
+  if (visibility) {
     // The search engine owns filtering: a value it knows about and the search excluded renders nothing. A value it
     // cannot see (an item behind a wrapper component) is never filtered.
     if (isFilteredOut(visibility, value)) return null;

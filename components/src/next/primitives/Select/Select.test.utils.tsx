@@ -57,6 +57,9 @@ export const fieldText = (el: HTMLElement): string =>
   el instanceof HTMLInputElement ? el.value : (el.textContent ?? '');
 
 export const getRoot = (name = 'Unit'): HTMLElement => getTrigger(name).closest('.ps-Select') as HTMLElement;
+/** The bordered field around the trigger, end group and adornments. */
+export const getWrapper = (name = 'Unit'): HTMLElement =>
+  getRoot(name).querySelector('.ps-Select__wrapper') as HTMLElement;
 
 /** Lets Base UI's pending animation-frame work run inside `act`, so it does not update state after the test ends. */
 export async function nextFrame(): Promise<void> {

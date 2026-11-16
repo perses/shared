@@ -109,26 +109,31 @@ export interface SelectEngineProps {
   themeMode: string | undefined;
 
   slotProps?: SelectSlotProps;
-  /** Radius classes merged with `slotProps.control.className`. */
-  controlClassName?: string;
-  /** Radius variables merged with `slotProps.control.style`. */
-  controlStyle?: CSSProperties;
+  /** Radius classes merged with `slotProps.wrapper.className`. */
+  wrapperClassName?: string;
+  /** Radius variables merged with `slotProps.wrapper.style`. */
+  wrapperStyle?: CSSProperties;
+}
+
+/** Focuses the field (trigger button or search input) inside a Select wrapper. */
+export function focusField(wrapper: Element | null | undefined): void {
+  wrapper?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
 }
 
 export interface SelectShellProps {
   engine: SelectEngineProps;
-  controlRef: RefObject<HTMLDivElement | null>;
+  wrapperRef: RefObject<HTMLDivElement | null>;
   label: ReactNode;
-  /** The focusable part of the control: the trigger button or the search input. */
+  /** The focusable part of the wrapper: the trigger button or the search input. */
   field: ReactNode;
   /** The open indicator (chevron). It always renders last, after the end element, spinner and clear button. */
   trailing?: ReactNode;
   /** The live status region. */
-  status?: ReactNode;
+  liveRegion?: ReactNode;
   popup: ReactNode;
-  Control?: ElementType;
+  Wrapper?: ElementType;
   /**
-   * True when Base UI treats a press on the control as inside its reference (the search input group), so the outside
+   * True when Base UI treats a press on the wrapper as inside its reference (the search input group), so the outside
    * press leaves the list open and the shell has to close it. False when the outside press already closes the list.
    */
   pressIsInside?: boolean;
@@ -137,18 +142,18 @@ export interface SelectShellProps {
 }
 
 /**
- * Layout shared by every engine: label, the bordered control (start element, field, end element, trailing
- * content), helper text, status region and popup. The engine supplies the parts that depend on Base UI context.
+ * Layout shared by every engine: label, the bordered wrapper (start element, field, end element, trailing
+ * content), helper text, live region and popup. The engine supplies the parts that depend on Base UI context.
  */
 export function SelectShell({
   engine,
-  controlRef,
+  wrapperRef,
   label,
   field,
   trailing,
-  status,
+  liveRegion,
   popup,
-  Control = 'div',
+  Wrapper = 'div',
   pressIsInside = false,
   onClear,
 }: SelectShellProps): ReactElement {
@@ -157,6 +162,7 @@ export function SelectShell({
     helperText,
     startElement,
     endElement,
+    status,
     disabled,
     readOnly,
     open,
@@ -168,14 +174,13 @@ export function SelectShell({
     setValue,
   } = engine;
   const showClear = clearable && !isEmptySelection(value) && !disabled && !readOnly;
-  const helperStatus = engine.status;
   const wasOpenOnPress = useRef(false);
   const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
     () =>
       (descriptionProps, state): ReactElement => (
-        <TextHelper {...descriptionProps} status={helperStatus} disabled={state.disabled} />
+        <TextHelper {...descriptionProps} status={status} disabled={state.disabled} />
       ),
-    [helperStatus],
+    [status],
   );
 
   const handlePointerDownCapture = (): void => {
@@ -193,16 +198,16 @@ export function SelectShell({
       return;
     }
     // Real controls (trigger, input, clear and chip buttons, links, and `role="button"` content in an end element)
-    // handle their own presses. Only a match inside this control counts: an interactive ancestor of the whole
-    // Select must not stop the control from opening.
+    // handle their own presses. Only a match inside this wrapper counts: an interactive ancestor of the whole
+    // Select must not stop the wrapper from opening.
     const interactive = (event.target as Element).closest('button, input, a, [role="button"]');
-    if (interactive && controlRef.current?.contains(interactive)) return;
+    if (interactive && wrapperRef.current?.contains(interactive)) return;
     event.preventDefault();
-    controlRef.current?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
-    // The shell owns a control press end to end, so Base UI's own press handler on the control (the search input
+    focusField(wrapperRef.current);
+    // The shell owns a wrapper press end to end, so Base UI's own press handler on the wrapper (the search input
     // group opens the list on press) must not call `setOpen` a second time.
     baseEvent.preventBaseUIHandler?.();
-    // The list was open at press time, so the control toggles like the trigger: a press closes it and never reopens it.
+    // The list was open at press time, so the wrapper toggles like the trigger: a press closes it and never reopens it.
     if (wasOpenOnPress.current) {
       // Base UI's outside press has already closed the list, unless the press counts as inside.
       if (pressIsInside) setOpen(false);
@@ -214,16 +219,16 @@ export function SelectShell({
   const handleClear = (): void => {
     setValue(emptySelection(multiple));
     onClear?.();
-    controlRef.current?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
+    focusField(wrapperRef.current);
   };
 
   return (
     <>
       {label}
-      <Control
-        ref={controlRef}
-        className={clsx('ps-Select__control', engine.controlClassName)}
-        style={engine.controlStyle}
+      <Wrapper
+        ref={wrapperRef}
+        className={clsx('ps-Select__wrapper', engine.wrapperClassName)}
+        style={engine.wrapperStyle}
         data-open={open ? '' : undefined}
         data-disabled={disabled ? '' : undefined}
         data-readonly={readOnly ? '' : undefined}
@@ -236,7 +241,7 @@ export function SelectShell({
         {field}
         {(hasContent(endElement) || engine.loading || showClear || hasContent(trailing)) && (
           // One group, so these never wrap apart and align together: bottom-aligned on the last chip row.
-          <span className="ps-Select__end">
+          <span className="ps-Select__actions">
             {hasContent(endElement) && (
               <span className="ps-Select__adornment ps-Select__adornment--end">{endElement}</span>
             )}
@@ -256,7 +261,7 @@ export function SelectShell({
             {trailing}
           </span>
         )}
-      </Control>
+      </Wrapper>
       {hasContent(helperText) && (
         <Field.Description
           className={clsx('ps-Select__helper', slotProps?.helper?.className)}
@@ -266,7 +271,7 @@ export function SelectShell({
           {helperText}
         </Field.Description>
       )}
-      {status}
+      {liveRegion}
       {popup}
     </>
   );

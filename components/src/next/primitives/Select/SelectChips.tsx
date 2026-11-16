@@ -13,13 +13,12 @@
 
 import { Combobox } from '@base-ui/react/combobox';
 import { clsx } from 'clsx';
-import { useContext } from 'react';
 import type { MouseEvent, ReactElement, ReactNode } from 'react';
 
 import type { ChipSize } from '../Chip/Chip';
 import { CloseIcon } from '../Icon';
 import type { Size } from '../types';
-import { SelectEngineContext } from './SelectEngineContext';
+import { focusField } from './SelectShell';
 import type { SelectEngineProps } from './SelectShell';
 import { isMultipleValue, optionKey } from './selectValue';
 
@@ -29,7 +28,7 @@ import '../Chip/chip.css';
 const closeIcon = <CloseIcon aria-hidden="true" />;
 
 /** Field `xs`/`sm` use `xs` chips and field `md`/`lg` use `sm` chips, so chips stay smaller than the field. */
-export function chipSize(size: Size): ChipSize {
+function chipSize(size: Size): ChipSize {
   return size === 'xs' || size === 'sm' ? 'xs' : 'sm';
 }
 
@@ -43,6 +42,8 @@ function keepPressWithShell(event: MouseEvent<HTMLElement> & { preventBaseUIHand
 
 export interface SelectChipsProps {
   engine: SelectEngineProps;
+  /** Renders Base UI's `Combobox` chip parts (search engine) instead of plain elements (basic engine). */
+  isSearch?: boolean;
   /** Rendered after the chips; the search input in searchable mode. */
   children?: ReactNode;
 }
@@ -56,7 +57,7 @@ export interface SelectChipsProps {
  * keys move between the chips and the input, and removal reaches `onValueChange` through Base UI. The container holds
  * `children` (the input), so it renders even while nothing is selected.
  */
-export function SelectChips({ engine, children }: SelectChipsProps): ReactElement {
+export function SelectChips({ engine, isSearch = false, children }: SelectChipsProps): ReactElement {
   const {
     value,
     setValue,
@@ -73,12 +74,11 @@ export function SelectChips({ engine, children }: SelectChipsProps): ReactElemen
   const limit = limitChips === undefined ? undefined : Math.max(0, limitChips);
   const hiddenCount = limit === undefined ? 0 : values.length - limit;
   const removable = !disabled && !readOnly;
-  const isSearch = useContext(SelectEngineContext) === 'search';
 
   const handleRemove = (event: MouseEvent<HTMLButtonElement>, index: number): void => {
-    const control = event.currentTarget.closest('.ps-Select__control');
+    const wrapper = event.currentTarget.closest('.ps-Select__wrapper');
     setValue(values.filter((_, position) => position !== index));
-    control?.querySelector<HTMLElement>('[role="combobox"]')?.focus();
+    focusField(wrapper);
   };
 
   const Container = isSearch ? Combobox.Chips : 'div';

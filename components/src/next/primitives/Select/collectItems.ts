@@ -19,10 +19,7 @@ import { SelectItem } from './SelectItem';
 import type { SelectItemProps, SelectValue } from './SelectItem';
 
 /** One normalized option, whether it came from `SelectItem` children or from the `items` prop. */
-export interface SelectOption {
-  value: SelectValue;
-  /** Plain text used for search matching and for chips. */
-  label: string;
+export interface SelectOption extends SelectItemData {
   /** What the list and the field render for this option. */
   content: ReactNode;
   disabled: boolean;

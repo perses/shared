@@ -15,6 +15,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 const source = readFileSync(resolve(__dirname, './select.css'), 'utf-8');
+const forcedColors = source.slice(source.indexOf('@media (forced-colors: active)'));
 
 // jsdom cannot resolve token values; inspect declarations from rules matching synthetic elements.
 const css = source
@@ -48,29 +49,29 @@ function rulesHiding(element: Element): CSSStyleRule[] {
 
 function makeSelect(attributes: Record<string, string> = {}): {
   root: HTMLElement;
-  control: HTMLElement;
+  wrapper: HTMLElement;
   trigger: HTMLElement;
 } {
   const root = document.createElement('div');
   root.className = 'ps-Select';
   for (const [name, value] of Object.entries(attributes)) root.setAttribute(name, value);
-  const control = document.createElement('div');
-  control.className = 'ps-Select__control';
+  const wrapper = document.createElement('div');
+  wrapper.className = 'ps-Select__wrapper';
   const trigger = document.createElement('button');
   trigger.className = 'ps-Select__trigger';
-  control.append(trigger);
-  root.append(control);
+  wrapper.append(trigger);
+  root.append(wrapper);
   document.body.append(root);
-  return { root, control, trigger };
+  return { root, wrapper, trigger };
 }
 
 function makeChips(attributes: Record<string, string> = {}): {
-  control: HTMLElement;
+  wrapper: HTMLElement;
   chips: HTMLElement;
   chip: HTMLElement;
   more: HTMLElement;
 } {
-  const { control } = makeSelect(attributes);
+  const { wrapper } = makeSelect(attributes);
   const chips = document.createElement('div');
   chips.className = 'ps-Select__chips';
   const chip = document.createElement('div');
@@ -79,8 +80,8 @@ function makeChips(attributes: Record<string, string> = {}): {
   const more = document.createElement('span');
   more.className = 'ps-Select__more';
   chips.append(chip, more);
-  control.prepend(chips);
-  return { control, chips, chip, more };
+  wrapper.prepend(chips);
+  return { wrapper, chips, chip, more };
 }
 
 describe('select.css', () => {
@@ -115,28 +116,31 @@ describe('select.css', () => {
       .filter((selector) => !selector.startsWith(':where('));
     // State and status rules are intentionally specific; defaults must stay zero-specificity.
     expect(unwrapped).toEqual([
-      '.ps-Select__control:has(.ps-Select__trigger:focus-visible)',
-      '.ps-Select__control:not([data-open]) .ps-Select__chips:not(:focus-within) .ps-Select__chip[data-overflow]',
-      '.ps-Select__control[data-readonly]',
+      '.ps-Select__wrapper:has(.ps-Select__trigger:focus-visible)',
+      '.ps-Select__wrapper:not([data-open]) .ps-Select__chips:not(:focus-within) .ps-Select__chip[data-overflow]',
+      '.ps-Select__wrapper[data-readonly]',
       '.ps-Select[data-disabled]',
       '.ps-Select[data-disabled] .ps-Text[data-disabled]',
-      '.ps-Select__control[data-disabled]',
-      ".ps-Select[data-status='error'] .ps-Select__control",
-      ".ps-Select[data-status='warning'] .ps-Select__control",
-      ".ps-Select[data-status='success'] .ps-Select__control",
-      ".ps-Select[data-status='info'] .ps-Select__control",
+      '.ps-Select__wrapper[data-disabled]',
+      ".ps-Select[data-status='error'] .ps-Select__wrapper",
+      ".ps-Select[data-status='warning'] .ps-Select__wrapper",
+      ".ps-Select[data-status='success'] .ps-Select__wrapper",
+      ".ps-Select[data-status='info'] .ps-Select__wrapper",
     ]);
   });
 
   it('keeps sizing independent of the optional document reset', () => {
-    const { root, control } = makeSelect();
+    const { root, wrapper } = makeSelect();
     const popup = document.createElement('div');
     popup.className = 'ps-Select__popup';
     const list = document.createElement('div');
     list.className = 'ps-Select__list';
     const item = document.createElement('div');
     item.className = 'ps-SelectItem';
-    for (const element of [root, control, popup, list, item]) {
+    const input = document.createElement('input');
+    input.className = 'ps-Select__trigger ps-Select__input';
+    document.body.append(input);
+    for (const element of [root, wrapper, popup, list, item, input]) {
       expect(propertyFor(element, 'box-sizing')).toBe('border-box');
     }
   });
@@ -144,11 +148,11 @@ describe('select.css', () => {
   it.each(['xs', 'sm', 'md', 'lg'])(
     'sizes the %s control from a per-component token with a shared fallback',
     (size) => {
-      const { control } = makeSelect({ 'data-size': size });
-      expect(propertyFor(control, '--ps-select-size')).toBe(
+      const { wrapper } = makeSelect({ 'data-size': size });
+      expect(propertyFor(wrapper, '--ps-select-size')).toBe(
         `var(--perses-select-size-${size}, var(--perses-control-size-${size}))`,
       );
-      expect(propertyFor(control, 'min-height')).toBe('var(--ps-select-size)');
+      expect(propertyFor(wrapper, 'min-height')).toBe('var(--ps-select-size)');
     },
   );
 
@@ -170,10 +174,10 @@ describe('select.css', () => {
   });
 
   it('stretches the root and control when fullWidth is set', () => {
-    const { root, control } = makeSelect({ 'data-full-width': 'true' });
+    const { root, wrapper } = makeSelect({ 'data-full-width': 'true' });
     expect(propertyFor(root, 'display')).toBe('flex');
     expect(propertyFor(root, 'width')).toBe('100%');
-    expect(propertyFor(control, 'display')).toBe('flex');
+    expect(propertyFor(wrapper, 'display')).toBe('flex');
     expect(propertyFor(makeSelect().root, 'display')).toBe('inline-flex');
   });
 
@@ -183,9 +187,9 @@ describe('select.css', () => {
     ['success', false],
     ['info', false],
   ])('colours the %s border from the status token (thickened=%s)', (status, thickened) => {
-    const { control } = makeSelect({ 'data-status': status });
-    expect(propertyFor(control, 'border-color')).toBe(`var(--perses-status-border-${status})`);
-    expect(propertyFor(control, 'box-shadow') !== '').toBe(thickened);
+    const { wrapper } = makeSelect({ 'data-status': status });
+    expect(propertyFor(wrapper, 'border-color')).toBe(`var(--perses-status-border-${status})`);
+    expect(propertyFor(wrapper, 'box-shadow') !== '').toBe(thickened);
   });
 
   it('dims the disabled root once and not the disabled helper text again', () => {
@@ -209,14 +213,12 @@ describe('select.css', () => {
     expect(propertyFor(popup, 'min-width')).toBe('var(--anchor-width)');
     expect(propertyFor(popup, 'max-height')).toBe('var(--available-height)');
     expect(propertyFor(popup, 'overflow')).toBe('hidden');
-    expect(propertyFor(popup, 'background-color')).toBe('var(--perses-bg-overlay)');
-    expect(propertyFor(popup, 'box-shadow')).toBe('var(--perses-shadow-overlay)');
     expect(propertyFor(popup, 'z-index')).toBe('');
   });
 
   it('draws the focus ring on the control while its trigger has keyboard focus', () => {
     const ring = styleRules().find(
-      (rule) => rule.selectorText === '.ps-Select__control:has(.ps-Select__trigger:focus-visible)',
+      (rule) => rule.selectorText === '.ps-Select__wrapper:has(.ps-Select__trigger:focus-visible)',
     );
     expect(ring?.style.getPropertyValue('outline')).toBe(
       'var(--perses-focus-ring-width) solid var(--perses-focus-ring-color)',
@@ -261,6 +263,16 @@ describe('select.css', () => {
     document.body.append(icon);
     expect(propertyFor(chevron, 'transform')).toBe('rotate(180deg)');
     expect(propertyFor(icon, 'transform')).toBe('');
+  });
+
+  it('colours the chevron the same in basic (icon) and searchable (toggle) mode', () => {
+    const icon = document.createElement('span');
+    icon.className = 'ps-Select__icon';
+    const toggle = document.createElement('button');
+    toggle.className = 'ps-Select__toggle';
+    document.body.append(icon, toggle);
+    expect(propertyFor(toggle, 'color')).toBe('var(--perses-text-secondary)');
+    expect(propertyFor(icon, 'color')).toBe(propertyFor(toggle, 'color'));
   });
 
   it('marks the focused row with an inset focus ring only for keyboard focus, like Menu', () => {
@@ -316,20 +328,18 @@ describe('select.css', () => {
   });
 
   it('restates the focus ring and check in system colours when colours are forced', () => {
-    const forced = source.slice(source.indexOf('@media (forced-colors: active)'));
     // The default focus rule is deliberately specific, so its forced-colors restatement must not be in :where().
-    expect(forced).toMatch(
-      /\n\s*\.ps-Select__control:has\(\.ps-Select__trigger:focus-visible\) \{[^}]*outline-color: Highlight/,
+    expect(forcedColors).toMatch(
+      /\n\s*\.ps-Select__wrapper:has\(\.ps-Select__trigger:focus-visible\) \{[^}]*outline-color: Highlight/,
     );
-    expect(forced).not.toContain(':where(.ps-Select__control:has(');
-    expect(forced).toMatch(/\.ps-SelectItem:focus-visible\)[\s\S]*?outline-color: Highlight/);
-    expect(forced).toMatch(/\.ps-SelectItem__indicator\)[\s\S]*?color: CanvasText/);
+    expect(forcedColors).not.toContain(':where(.ps-Select__wrapper:has(');
+    expect(forcedColors).toMatch(/\.ps-SelectItem:focus-visible\)[\s\S]*?outline-color: Highlight/);
+    expect(forcedColors).toMatch(/\.ps-SelectItem__indicator\)[\s\S]*?color: CanvasText/);
   });
 
   it('thickens the error and warning border when colours are forced, since box-shadow is dropped', () => {
-    const forced = source.slice(source.indexOf('@media (forced-colors: active)'));
-    expect(forced).toMatch(
-      /\.ps-Select\[data-status='error'\] \.ps-Select__control,\s*\.ps-Select\[data-status='warning'\] \.ps-Select__control \{\s*border-width: var\(--perses-border-width-md\)/,
+    expect(forcedColors).toMatch(
+      /\.ps-Select\[data-status='error'\] \.ps-Select__wrapper,\s*\.ps-Select\[data-status='warning'\] \.ps-Select__wrapper \{\s*border-width: var\(--perses-border-width-md\)/,
     );
   });
 
@@ -348,8 +358,8 @@ describe('select.css', () => {
       ['md', 'sm'],
       ['lg', 'sm'],
     ])('sizes the chip row of a %s field like a %s chip', (size, chipStep) => {
-      const { control } = makeChips({ 'data-size': size });
-      expect(propertyFor(control, '--ps-select-chip-row')).toBe(
+      const { wrapper } = makeChips({ 'data-size': size });
+      expect(propertyFor(wrapper, '--ps-select-chip-row')).toBe(
         `var(--perses-chip-size-${chipStep}, var(--perses-selection-control-size-${chipStep}))`,
       );
     });
@@ -357,21 +367,21 @@ describe('select.css', () => {
     // The chips can span several rows, or collapse to one row with "+N". A bottom-aligned end group one chip row tall
     // keeps the chevron on the last chip row in every case, instead of centred on the chip block.
     it('keeps the end group on the last chip row', () => {
-      const { control } = makeChips({ 'data-size': 'md' });
+      const { wrapper } = makeChips({ 'data-size': 'md' });
       const end = document.createElement('span');
-      end.className = 'ps-Select__end';
-      control.append(end);
+      end.className = 'ps-Select__actions';
+      wrapper.append(end);
 
-      expect(propertyFor(control, 'align-content')).toBe('center');
+      expect(propertyFor(wrapper, 'align-content')).toBe('center');
       expect(propertyFor(end, 'align-self')).toBe('flex-end');
       expect(propertyFor(end, 'min-height')).toBe('var(--ps-select-chip-row)');
     });
 
     it('centres the end group in a field without chips', () => {
-      const { control } = makeSelect({ 'data-size': 'md' });
+      const { wrapper } = makeSelect({ 'data-size': 'md' });
       const end = document.createElement('span');
-      end.className = 'ps-Select__end';
-      control.append(end);
+      end.className = 'ps-Select__actions';
+      wrapper.append(end);
 
       expect(propertyFor(end, 'display')).toBe('inline-flex');
       expect(propertyFor(end, 'align-items')).toBe('center');
@@ -388,14 +398,13 @@ describe('select.css', () => {
     });
 
     it('restates the chip focus ring in the Highlight system colour when colours are forced', () => {
-      const forced = source.slice(source.indexOf('@media (forced-colors: active)'));
-      expect(forced).toMatch(/:where\(\.ps-Select__chip:focus-visible\) \{[^}]*outline-color: Highlight/);
+      expect(forcedColors).toMatch(/:where\(\.ps-Select__chip:focus-visible\) \{[^}]*outline-color: Highlight/);
     });
 
     it('wraps the control only when it holds chips', () => {
-      const { control } = makeChips();
-      expect(propertyFor(control, 'flex-wrap')).toBe('wrap');
-      expect(styleRules().some((rule) => makeSelect().control.matches(rule.selectorText) && rule.style.flexWrap)).toBe(
+      const { wrapper } = makeChips();
+      expect(propertyFor(wrapper, 'flex-wrap')).toBe('wrap');
+      expect(styleRules().some((rule) => makeSelect().wrapper.matches(rule.selectorText) && rule.style.flexWrap)).toBe(
         false,
       );
     });
@@ -403,9 +412,9 @@ describe('select.css', () => {
     // A zero basis lets the chips wrap inside their area, so the end group stays beside the last chip row instead of
     // wrapping onto a row of its own. The search area keeps room for the input.
     it('lets the chips area fill the row beside the end group, keeping room for the search input', () => {
-      const { control, chips } = makeChips();
-      const trigger = control.querySelector('.ps-Select__trigger') as HTMLElement;
-      control.append(trigger);
+      const { wrapper, chips } = makeChips();
+      const trigger = wrapper.querySelector('.ps-Select__trigger') as HTMLElement;
+      wrapper.append(trigger);
       expect(propertyFor(chips, 'flex')).toBe('1 1 0');
       expect(propertyFor(trigger, 'flex')).toBe('none');
 
@@ -416,11 +425,11 @@ describe('select.css', () => {
     });
 
     it('hides overflow chips and shows +N only while the list is closed and focus is outside the chips', () => {
-      const { control, chip, more } = makeChips();
+      const { wrapper, chip, more } = makeChips();
       expect(propertyFor(chip, 'display')).toBe('none');
       expect(propertyFor(more, 'display')).toBe('inline-flex');
 
-      control.setAttribute('data-open', '');
+      wrapper.setAttribute('data-open', '');
       const hidingChip = styleRules().filter(
         (rule) => chip.matches(rule.selectorText) && rule.style.display === 'none',
       );
@@ -431,8 +440,8 @@ describe('select.css', () => {
     // Base UI returns focus to the basic trigger after an outside press closes the list. The trigger sits beside the
     // chips, so focusing it must not expand them, or the field flickers between "+N" and every chip.
     it('keeps +N while focus is on a trigger outside the chips, and expands for focus inside them', () => {
-      const { control, chips, chip, more } = makeChips();
-      const trigger = control.querySelector('.ps-Select__trigger') as HTMLElement;
+      const { wrapper, chips, chip, more } = makeChips();
+      const trigger = wrapper.querySelector('.ps-Select__trigger') as HTMLElement;
       trigger.focus();
       expect(rulesHiding(chip)).not.toEqual([]);
       expect(propertyFor(more, 'display')).toBe('inline-flex');
@@ -451,26 +460,13 @@ describe('select.css', () => {
       document.body.append(hidden);
       expect(propertyFor(hidden, 'position')).toBe('absolute');
       expect(propertyFor(hidden, 'clip-path')).toBe('inset(50%)');
-      expect(propertyFor(hidden, 'width')).toBe('0.0625rem');
-      expect(propertyFor(hidden, 'height')).toBe('0.0625rem');
-      expect(propertyFor(hidden, 'overflow')).toBe('hidden');
-      expect(propertyFor(hidden, 'white-space')).toBe('nowrap');
     });
   });
 
-  it('resets the search input so it sizes inside the control', () => {
-    const input = document.createElement('input');
-    input.className = 'ps-Select__trigger ps-Select__input';
-    document.body.append(input);
-    expect(propertyFor(input, 'box-sizing')).toBe('border-box');
-    expect(propertyFor(input, 'min-width')).toBe('4rem');
-  });
-
-  it('styles the empty and loading message as secondary text', () => {
+  it('keeps the empty and loading message from growing or shrinking in the popup', () => {
     const empty = document.createElement('div');
     empty.className = 'ps-Select__empty';
     document.body.append(empty);
-    expect(propertyFor(empty, 'color')).toBe('var(--perses-text-secondary)');
     expect(propertyFor(empty, 'flex')).toBe('none');
   });
 

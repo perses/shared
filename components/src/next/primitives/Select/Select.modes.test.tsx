@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { ThemeModeProvider } from '../../contexts/ThemeModeProvider';
@@ -21,6 +21,7 @@ import {
   fieldText,
   getRoot,
   getTrigger,
+  getWrapper,
   MODES,
   modeProps,
   nextFrame,
@@ -30,7 +31,7 @@ import {
 } from './Select.test.utils';
 
 const queryClear = (name = 'Clear selection'): HTMLElement | null => screen.queryByRole('button', { name });
-const control = (): HTMLElement => document.querySelector('.ps-Select__control') as HTMLElement;
+
 const chipElements = (container: HTMLElement): HTMLElement[] =>
   Array.from(container.querySelectorAll<HTMLElement>('.ps-Select__chip'));
 const removeButtons = (): HTMLElement[] => screen.queryAllByRole('button', { name: /^Remove / });
@@ -47,18 +48,39 @@ describe.each(MODES)('%s mode', (mode) => {
       expect(document.querySelector('.ps-Select__label')).toBeNull();
     });
 
-    it('references the helper text from aria-describedby', () => {
-      renderSelect({ ...modeProps(mode), helperText: 'Shown to your team' });
+    it('references the helper text from aria-describedby, and omits it without helper text', () => {
+      const { unmount } = renderSelect({ ...modeProps(mode), helperText: 'Shown to your team' });
 
       const helper = screen.getByText('Shown to your team');
       expect(helper.id).not.toBe('');
       expect(getTrigger().getAttribute('aria-describedby')?.split(' ')).toContain(helper.id);
+      expect(getTrigger()).toHaveAccessibleDescription('Shown to your team');
+      unmount();
+
+      renderSelect({ ...modeProps(mode) });
+      expect(getTrigger()).not.toHaveAttribute('aria-describedby');
     });
 
-    it('sets aria-invalid for the error status', () => {
-      renderSelect({ ...modeProps(mode), status: 'error' });
-
+    it('sets aria-invalid for the error status only', () => {
+      const { unmount } = renderSelect({ ...modeProps(mode), status: 'error' });
       expect(getTrigger()).toHaveAttribute('aria-invalid', 'true');
+      unmount();
+
+      for (const status of ['warning', 'success', 'info'] as const) {
+        const other = renderSelect({ ...modeProps(mode), status });
+        expect(getTrigger()).not.toHaveAttribute('aria-invalid');
+        other.unmount();
+      }
+    });
+
+    it('focuses the field without opening the list when the label is clicked', async () => {
+      renderSelect({ ...modeProps(mode) });
+
+      await userEvent.click(screen.getByText('Unit'));
+
+      expect(getTrigger()).toHaveFocus();
+      expect(getTrigger()).toHaveAttribute('aria-expanded', 'false');
+      expect(screen.queryByRole('listbox')).toBeNull();
     });
 
     it('puts data-size on the root and the popup', async () => {
@@ -85,10 +107,11 @@ describe.each(MODES)('%s mode', (mode) => {
     it('puts each slot className on its part', async () => {
       const slotProps: SelectSlotProps = {
         label: { className: 'custom-label' },
-        control: { className: 'custom-control' },
+        wrapper: { className: 'custom-wrapper' },
         trigger: { className: 'custom-trigger' },
         chips: { className: 'custom-chips' },
         clearButton: { className: 'custom-clear' },
+        positioner: { className: 'custom-positioner', style: { zIndex: 42 } },
         popup: { className: 'custom-popup' },
         list: { className: 'custom-list' },
         helper: { className: 'custom-helper' },
@@ -108,10 +131,12 @@ describe.each(MODES)('%s mode', (mode) => {
       const listbox = await open();
 
       expect(screen.getByText('Unit')).toHaveClass('custom-label');
-      expect(control()).toHaveClass('custom-control');
+      expect(getWrapper()).toHaveClass('custom-wrapper');
       expect(getTrigger()).toHaveClass('custom-trigger');
       expect(document.querySelector('.ps-Select__chips')).toHaveClass('custom-chips');
       expect(clearButton).toHaveClass('custom-clear');
+      expect(listbox.closest('.ps-Select__positioner')).toHaveClass('custom-positioner');
+      expect(listbox.closest('.ps-Select__positioner')).toHaveStyle({ zIndex: '42' });
       expect(listbox.closest('.ps-Select__popup')).toHaveClass('custom-popup');
       expect(listbox).toHaveClass('custom-list');
       expect(screen.getByText('Pick units')).toHaveClass('custom-helper');
@@ -120,8 +145,8 @@ describe.each(MODES)('%s mode', (mode) => {
     it('puts the radius classes on the control', () => {
       renderSelect({ ...modeProps(mode), rounded: 'lg', roundedTopLeft: 'sm' });
 
-      expect(control()).toHaveClass('ps-rounded', 'ps-rounded-top-left');
-      expect(control()).toHaveStyle({ '--ps-rounded': 'var(--perses-radius-lg)' });
+      expect(getWrapper()).toHaveClass('ps-rounded', 'ps-rounded-top-left');
+      expect(getWrapper()).toHaveStyle({ '--ps-rounded': 'var(--perses-radius-lg)' });
     });
 
     it('reflects required', () => {
@@ -133,9 +158,9 @@ describe.each(MODES)('%s mode', (mode) => {
     it('marks a disabled control and does not open the list', async () => {
       renderSelect({ ...modeProps(mode), disabled: true });
 
-      expect(control()).toHaveAttribute('data-disabled');
+      expect(getWrapper()).toHaveAttribute('data-disabled');
       await userEvent.click(getTrigger());
-      await userEvent.click(control());
+      await userEvent.click(getWrapper());
       await nextFrame();
 
       expect(screen.queryByRole('listbox')).toBeNull();
@@ -146,8 +171,8 @@ describe.each(MODES)('%s mode', (mode) => {
     it('marks a read-only control and does not open the list from a press on the control', async () => {
       renderSelect({ ...modeProps(mode), readOnly: true });
 
-      expect(control()).toHaveAttribute('data-readonly');
-      await userEvent.click(control());
+      expect(getWrapper()).toHaveAttribute('data-readonly');
+      await userEvent.click(getWrapper());
       await nextFrame();
 
       expect(screen.queryByRole('listbox')).toBeNull();
@@ -186,10 +211,37 @@ describe.each(MODES)('%s mode', (mode) => {
         </a>,
       );
 
-      await userEvent.click(control());
+      await userEvent.click(getWrapper());
 
       expect(await screen.findByRole('listbox')).toBeInTheDocument();
       await nextFrame();
+    });
+
+    it('opens the closed list once, and focuses the field, when the empty part of the control is clicked', async () => {
+      const onOpenChange = vi.fn();
+      renderSelect({ ...modeProps(mode), onOpenChange });
+
+      await userEvent.click(getWrapper());
+
+      expect(await screen.findByRole('listbox')).toBeInTheDocument();
+      expect(getTrigger()).toHaveFocus();
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+      expect(onOpenChange).toHaveBeenCalledWith(true);
+      await nextFrame();
+    });
+
+    it('closes the open list, without reopening it, when the empty part of the control is clicked', async () => {
+      const onOpenChange = vi.fn();
+      renderSelect({ ...modeProps(mode), onOpenChange });
+      await open();
+      onOpenChange.mockClear();
+
+      await userEvent.click(getWrapper());
+
+      await waitFor(() => expect(screen.queryByRole('listbox')).toBeNull());
+      expect(onOpenChange).toHaveBeenCalledTimes(1);
+      expect(onOpenChange).toHaveBeenCalledWith(false);
+      expect(onOpenChange).not.toHaveBeenCalledWith(true);
     });
 
     it('still opens the list from a direct press on a read-only trigger, by design', async () => {
@@ -285,7 +337,7 @@ describe.each(MODES)('%s mode', (mode) => {
         endElement: <span data-testid="end" />,
       });
 
-      const end = control().querySelector('.ps-Select__end') as HTMLElement;
+      const end = getWrapper().querySelector('.ps-Select__actions') as HTMLElement;
       const parts = [
         screen.getByTestId('end').parentElement,
         end.querySelector('.ps-Select__spinner'),
@@ -294,14 +346,14 @@ describe.each(MODES)('%s mode', (mode) => {
       ];
 
       // One group, so the items never wrap apart and align together (bottom-aligned when the field holds chips).
-      expect(control().lastElementChild).toBe(end);
+      expect(getWrapper().lastElementChild).toBe(end);
       expect(Array.from(end.children)).toEqual(parts);
     });
 
     it('renders no end group when there is nothing to show at the end', () => {
       renderSelect({ ...modeProps(mode), icon: null });
 
-      expect(control().querySelector('.ps-Select__end')).toBeNull();
+      expect(getWrapper().querySelector('.ps-Select__actions')).toBeNull();
     });
 
     it('keeps a controlled value the parent does not update', async () => {
@@ -338,7 +390,7 @@ describe.each(MODES)('%s mode', (mode) => {
     it('shows loadingText in the open popup and status region while loading without items', async () => {
       renderSelect({ ...modeProps(mode), loading: true }, []);
 
-      await userEvent.click(getTrigger());
+      await open();
 
       const popup = document.querySelector('.ps-Select__popup') as HTMLElement;
       expect(popup).toHaveTextContent('Loading…');
@@ -358,7 +410,7 @@ describe.each(MODES)('%s mode', (mode) => {
 
     it('shows emptyText when there are no items', async () => {
       const { unmount } = renderSelect({ ...modeProps(mode) }, []);
-      await userEvent.click(getTrigger());
+      await open();
       const empty = document.querySelector('.ps-Select__empty') as HTMLElement;
       expect(empty).toHaveTextContent('No results');
       // jsdom keeps the unpositioned popup at opacity 0, so `toBeVisible` cannot be used; check it is not hidden.
@@ -368,7 +420,7 @@ describe.each(MODES)('%s mode', (mode) => {
       unmount();
 
       renderSelect({ ...modeProps(mode), emptyText: 'Nothing here' }, []);
-      await userEvent.click(getTrigger());
+      await open();
       const customEmpty = document.querySelector('.ps-Select__empty') as HTMLElement;
       expect(customEmpty).toHaveTextContent('Nothing here');
       expect(customEmpty).not.toHaveAttribute('hidden');

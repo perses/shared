@@ -61,8 +61,12 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
     themeMode,
     slotProps,
   } = props;
-  const controlRef = useRef<HTMLDivElement | null>(null);
-  const baseItems = useMemo(() => options.map((option) => ({ value: option.value, label: option.content })), [options]);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  // From `optionsByValue`, not `options`, so a selected value that dropped out of the current items keeps its label.
+  const baseItems = useMemo(
+    () => Array.from(optionsByValue.values(), (option) => ({ value: option.value, label: option.content })),
+    [optionsByValue],
+  );
   const values = isMultipleValue(value) ? value : [];
   // The chips sit outside the button, so the trigger keeps the labels for screen readers (they are visually hidden).
   const renderTriggerValue = (current: SelectCurrentValue): ReactNode => {
@@ -83,12 +87,12 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
       readOnly={readOnly}
       disabled={disabled}
       open={open}
-      onOpenChange={(next) => setOpen(next)}
+      onOpenChange={setOpen}
       modal={false}
     >
       <SelectShell
         engine={props}
-        controlRef={controlRef}
+        wrapperRef={wrapperRef}
         label={
           hasContent(label) ? (
             <BaseSelect.Label
@@ -122,7 +126,7 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
             </BaseSelect.Icon>
           ) : null
         }
-        status={
+        liveRegion={
           // `<output>` is an implicit live region; `aria-live` covers screen readers that do not treat it as one.
           <output aria-live="polite" className="ps-Select__status ps-Select__visually-hidden">
             {loading && open ? loadingText : null}
@@ -131,9 +135,10 @@ export function BasicEngine(props: SelectEngineProps): ReactElement {
         popup={
           <BaseSelect.Portal>
             <BaseSelect.Positioner
-              className="ps-Select__positioner"
+              className={clsx('ps-Select__positioner', slotProps?.positioner?.className)}
+              style={slotProps?.positioner?.style}
               data-perses-mode={themeMode}
-              anchor={controlRef}
+              anchor={wrapperRef}
               side={placement}
               align={align}
               sideOffset={offset}

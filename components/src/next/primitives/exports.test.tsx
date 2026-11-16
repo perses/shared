@@ -39,9 +39,11 @@ import type {
   MenuPlacement,
   MenuProps,
   Size,
+  SelectAlign,
   SelectGroupProps,
   SelectItemData,
   SelectItemProps,
+  SelectPlacement,
   SelectProps,
   SelectStyle,
   SelectValue,
@@ -184,7 +186,14 @@ describe('primitives barrel exports', () => {
     const gridItemProps: GridItemProps = { size: 6 };
     const iconProps: IconProps = {};
     const selectValue: SelectValue = 'bytes';
-    const selectProps: SelectProps = { label: 'Unit', value: selectValue };
+    const selectPlacement: SelectPlacement = 'top';
+    const selectAlign: SelectAlign = 'end';
+    const selectProps: SelectProps = {
+      label: 'Unit',
+      value: selectValue,
+      placement: selectPlacement,
+      align: selectAlign,
+    };
     const selectItemData: SelectItemData = { value: 'b', label: 'Bytes' };
     const selectItemProps: SelectItemProps = { value: 1 };
     const selectGroupProps: SelectGroupProps = { label: 'Units' };
