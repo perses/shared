@@ -84,6 +84,18 @@ function makeChips(attributes: Record<string, string> = {}): {
   return { wrapper, chips, chip, more };
 }
 
+/** A highlighted option row inside a popup carrying the given boolean attributes. */
+function highlightedItem(...popupAttributes: string[]): HTMLElement {
+  const popup = document.createElement('div');
+  popup.className = 'ps-Select__popup';
+  for (const attribute of popupAttributes) popup.setAttribute(attribute, '');
+  const item = document.createElement('div');
+  item.className = 'ps-SelectItem';
+  item.setAttribute('data-highlighted', '');
+  popup.append(item);
+  return item;
+}
+
 describe('select.css', () => {
   beforeAll(() => {
     style.textContent = css;
@@ -277,17 +289,24 @@ describe('select.css', () => {
 
   it('marks the focused row with an inset focus ring only for keyboard focus, like Menu', () => {
     const rules = styleRules();
-    const ring = rules.find((rule) => rule.selectorText === ':where(.ps-SelectItem:focus-visible)');
-    expect(ring?.style.getPropertyValue('outline')).toBe(
-      'var(--perses-focus-ring-width) solid var(--perses-focus-ring-color)',
-    );
+    const ringOutline = 'var(--perses-focus-ring-width) solid var(--perses-focus-ring-color)';
+    const ring = rules.find((rule) => rule.selectorText.includes(':where(.ps-SelectItem:focus-visible)'));
+    expect(ring?.style.getPropertyValue('outline')).toBe(ringOutline);
     expect(ring?.style.getPropertyValue('outline-offset')).toBe('calc(-1 * var(--perses-focus-ring-offset))');
     expect(ring?.style.getPropertyValue('background-color')).toBe('');
-    // Base UI moves DOM focus to an option on pointer hover too, so the highlight attribute must not draw the ring.
-    const highlightRings = rules.filter(
-      (rule) => rule.selectorText.includes('data-highlighted') && rule.style.getPropertyValue('outline'),
+    const hasRing = (item: HTMLElement): boolean =>
+      rules.some((rule) => rule.style.getPropertyValue('outline') === ringOutline && item.matches(rule.selectorText));
+    // Basic mode moves DOM focus to a hovered option too, so its highlight must not draw the ring. Searchable mode
+    // keeps DOM focus in the input, so its highlight carries the ring unless the pointer put it there.
+    expect(hasRing(highlightedItem())).toBe(false);
+    expect(hasRing(highlightedItem('data-searchable', 'data-pointer-highlight'))).toBe(false);
+    expect(hasRing(highlightedItem('data-searchable'))).toBe(true);
+  });
+
+  it('restates the option focus ring in the Highlight system colour when colours are forced', () => {
+    expect(forcedColors).toMatch(
+      /:where\(\.ps-Select__popup\[data-searchable\]:not\(\[data-pointer-highlight\]\) \.ps-SelectItem\[data-highlighted\]\) \{[^}]*outline-color: Highlight/,
     );
-    expect(highlightRings).toEqual([]);
   });
 
   it('gives a hovered enabled row a neutral fill, like Menu', () => {

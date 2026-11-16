@@ -14,10 +14,13 @@
 import { Combobox } from '@base-ui/react/combobox';
 import { Field } from '@base-ui/react/field';
 import { clsx } from 'clsx';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { MouseEvent, ReactElement, ReactNode, Ref } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { MouseEvent, ReactElement, ReactNode, Ref, RefObject } from 'react';
+import { Virtuoso } from 'react-virtuoso';
+import type { VirtuosoHandle } from 'react-virtuoso';
 
 import { hasContent } from '../hasContent';
+import { SearchOption } from './SearchOption';
 import { SelectChips } from './SelectChips';
 import type { SelectValue } from './SelectItem';
 import { focusField, SelectShell } from './SelectShell';
@@ -174,11 +177,58 @@ function SearchToggle({ engine }: { engine: SelectEngineProps }): ReactElement {
   );
 }
 
+/**
+ * The options for `virtualized`: Virtuoso mounts only the filtered options in view and scrolls the listbox itself. The
+ * DOM holds a window of the options, so each one states its position in the filtered list.
+ */
+function VirtualOptions({
+  engine,
+  scroller,
+  virtuosoRef,
+}: {
+  engine: SelectEngineProps;
+  scroller: HTMLDivElement;
+  virtuosoRef: RefObject<VirtuosoHandle>;
+}): ReactElement {
+  const { optionsByValue } = engine;
+  const filtered = Combobox.useFilteredItems<SelectValue>();
+  const renderOption = (index: number, value: SelectValue): ReactNode => {
+    const option = optionsByValue.get(value);
+    return (
+      <SearchOption
+        index={index}
+        value={value}
+        disabled={option?.disabled}
+        aria-setsize={filtered.length}
+        aria-posinset={index + 1}
+      >
+        {option?.content}
+      </SearchOption>
+    );
+  };
+  return (
+    <Virtuoso
+      ref={virtuosoRef}
+      customScrollParent={scroller}
+      data={filtered}
+      computeItemKey={(_, value) => optionKey(value)}
+      itemContent={renderOption}
+    />
+  );
+}
+
 function SearchPopup({
   engine,
   wrapperRef,
   values,
-}: Pick<SelectShellProps, 'engine' | 'wrapperRef'> & { values: readonly SelectValue[] }): ReactElement {
+  virtuosoRef,
+  pointerHighlight,
+}: Pick<SelectShellProps, 'engine' | 'wrapperRef'> & {
+  values: readonly SelectValue[];
+  virtuosoRef: RefObject<VirtuosoHandle>;
+  /** The highlight came from the pointer, so it gets the hover fill without the keyboard ring. */
+  pointerHighlight: boolean;
+}): ReactElement {
   const {
     slotProps,
     themeMode,
@@ -191,7 +241,10 @@ function SearchPopup({
     loadingText,
     emptyText,
     optionNodes,
+    search,
   } = engine;
+  // Virtuoso scrolls the listbox, so it can only mount once the listbox exists.
+  const [scroller, setScroller] = useState<HTMLDivElement | null>(null);
   return (
     <Combobox.Portal>
       <Combobox.Positioner
@@ -207,14 +260,24 @@ function SearchPopup({
           className={clsx('ps-Select__popup', slotProps?.popup?.className)}
           style={slotProps?.popup?.style}
           data-size={size}
+          data-searchable
+          data-pointer-highlight={pointerHighlight || undefined}
         >
           {hasContent(listHeader) && <div className="ps-Select__list-header">{listHeader}</div>}
           {/* `SearchStatus` is the one live region; Empty's own `role="status"` would announce twice. */}
           <Combobox.Empty className="ps-Select__empty" role="presentation" aria-live="off">
             {loading ? loadingText : emptyText}
           </Combobox.Empty>
-          <Combobox.List className={clsx('ps-Select__list', slotProps?.list?.className)} style={slotProps?.list?.style}>
-            <VisibleValues values={values}>{optionNodes}</VisibleValues>
+          <Combobox.List
+            ref={setScroller}
+            className={clsx('ps-Select__list', slotProps?.list?.className)}
+            style={slotProps?.list?.style}
+          >
+            {search.virtualized ? (
+              scroller && <VirtualOptions engine={engine} scroller={scroller} virtuosoRef={virtuosoRef} />
+            ) : (
+              <VisibleValues values={values}>{optionNodes}</VisibleValues>
+            )}
           </Combobox.List>
         </Combobox.Popup>
       </Combobox.Positioner>
@@ -250,6 +313,8 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
   const selectedLabel = !multiple && !isEmptySelection(value) ? labelOf(value as SelectValue) : '';
   const [inputValue, setInputValue] = useSearchInputValue(props, selectedLabel);
   const filter = useValueFilter(search.filter, optionsByValue);
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const [pointerHighlight, setPointerHighlight] = useState(false);
 
   const handleOpenChange = (next: boolean, details: Combobox.Root.ChangeEventDetails): void => {
     // The list stays open while several items are picked, so the typed filter survives each selection.
@@ -258,6 +323,19 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
       return;
     }
     setOpen(next);
+  };
+  // Base UI scrolls only mounted options into view, and a keyboard or programmatic highlight can land outside the
+  // virtualized window; a pointer highlight is already under the pointer. Without virtualization the ref stays null.
+  // The pointer source also drops the keyboard ring, as hovering does in basic mode.
+  const handleItemHighlighted = (_: SelectValue | undefined, details: Combobox.Root.HighlightEventDetails): void => {
+    const fromPointer = details.reason === 'pointer';
+    setPointerHighlight(fromPointer);
+    if (!fromPointer && details.index >= 0) virtuosoRef.current?.scrollIntoView({ index: details.index });
+  };
+  // Base UI resets the scroll of a regular list on typed input, but leaves a virtualized list to its scroller.
+  const handleInputValueChange = (next: string, details: Combobox.Root.ChangeEventDetails): void => {
+    if (details.reason === 'input-change') virtuosoRef.current?.scrollToIndex(0);
+    setInputValue(next);
   };
 
   return (
@@ -269,9 +347,11 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
       value={value as SelectValue | SelectValue[] | null}
       onValueChange={(next) => setValue(next as SelectCurrentValue)}
       inputValue={inputValue}
-      onInputValueChange={setInputValue}
+      onInputValueChange={handleInputValueChange}
       open={open}
       onOpenChange={handleOpenChange}
+      virtualized={search.virtualized}
+      onItemHighlighted={handleItemHighlighted}
       name={name}
       form={form}
       required={required}
@@ -288,7 +368,15 @@ export function SearchEngine(props: SelectEngineProps): ReactElement {
         field={<SearchField engine={props} labelOf={labelOf} />}
         trailing={hasContent(icon) ? <SearchToggle engine={props} /> : null}
         liveRegion={<SearchStatus loading={loading} loadingText={loadingText} emptyText={emptyText} open={open} />}
-        popup={<SearchPopup engine={props} wrapperRef={wrapperRef} values={values} />}
+        popup={
+          <SearchPopup
+            engine={props}
+            wrapperRef={wrapperRef}
+            values={values}
+            virtuosoRef={virtuosoRef}
+            pointerHighlight={pointerHighlight}
+          />
+        }
       />
     </Combobox.Root>
   );

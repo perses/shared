@@ -11,7 +11,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Combobox } from '@base-ui/react/combobox';
 import { Select as BaseSelect } from '@base-ui/react/select';
 import { clsx } from 'clsx';
 import { forwardRef, useContext, useEffect } from 'react';
@@ -19,9 +18,9 @@ import type { HTMLAttributes, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
 import { hasContent } from '../hasContent';
-import { CheckIcon, Icon } from '../Icon';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
+import { checkIcon, renderIndicator, SearchOption } from './SearchOption';
 import { optionKey } from './selectValue';
 import { isFilteredOut, SelectVisibleValuesContext } from './SelectVisibleValuesContext';
 
@@ -34,8 +33,6 @@ import './select.css';
 export type SelectValue = string | number;
 
 const SELECT_ITEM_STYLE_PROPS = compileStyleProps([spacingProps]);
-const checkIcon = <CheckIcon />;
-const renderIndicator = <Icon />;
 
 export interface SelectItemProps extends Omit<HTMLAttributes<HTMLDivElement>, 'style'>, SpacingProps {
   style?: PersesCSSProperties;
@@ -86,20 +83,17 @@ export const SelectItem = forwardRef<HTMLDivElement, SelectItemProps>(function S
     // cannot see (an item behind a wrapper component) is never filtered.
     if (isFilteredOut(visibility, value)) return null;
     return (
-      <Combobox.Item
+      <SearchOption
         {...rest}
         ref={ref}
         value={value}
         disabled={disabled}
-        className={clsx('ps-SelectItem', styleClassName, className)}
+        startElement={startElement}
+        className={clsx(styleClassName, className)}
         style={computedStyle}
       >
-        {hasContent(startElement) && <span className="ps-SelectItem__start">{startElement}</span>}
-        <span className="ps-SelectItem__text">{children}</span>
-        <Combobox.ItemIndicator className="ps-SelectItem__indicator" render={renderIndicator} keepMounted>
-          {checkIcon}
-        </Combobox.ItemIndicator>
-      </Combobox.Item>
+        {children}
+      </SearchOption>
     );
   }
 

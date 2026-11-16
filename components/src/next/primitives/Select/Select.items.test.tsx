@@ -13,13 +13,22 @@
 
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactElement } from 'react';
 
-import { getTrigger, open, renderSelect } from './Select.test.utils';
+import type { SelectItemData } from './Select';
+import { fieldText, getTrigger, MODES, modeProps, open, renderSelect } from './Select.test.utils';
 import { SelectGroup } from './SelectGroup';
 import { SelectItem } from './SelectItem';
 
 const START_ICON = <span data-testid="start-icon" />;
 const COLOR_STYLE = { color: 'red' };
+const UNIT_ITEMS: SelectItemData[] = [
+  { value: 'b', label: 'Bytes' },
+  { value: 's', label: 'Seconds' },
+];
+const renderUnitItem = (item: SelectItemData): ReactElement => (
+  <span data-testid={`row-${String(item.value)}`}>{item.label} unit</span>
+);
 
 describe('Select groups and items', () => {
   describe('groups', () => {
@@ -129,6 +138,39 @@ describe('Select groups and items', () => {
       await open();
       await userEvent.click(screen.getByRole('option', { name: 'One (string)' }));
       expect(onValueChange).toHaveBeenCalledWith('1');
+    });
+  });
+
+  describe.each(MODES)('renderItem (%s mode)', (mode) => {
+    it('renders custom content inside the option row', async () => {
+      renderSelect({ ...modeProps(mode), items: UNIT_ITEMS, renderItem: renderUnitItem });
+      await open();
+      const option = screen.getByRole('option', { name: 'Seconds unit' });
+      expect(option).toContainElement(screen.getByTestId('row-s'));
+      expect(option.querySelector('.ps-SelectItem__indicator')).not.toBeNull();
+    });
+
+    it('selects the item and reports its value', async () => {
+      const onValueChange = vi.fn();
+      renderSelect({ ...modeProps(mode), items: UNIT_ITEMS, renderItem: renderUnitItem, onValueChange });
+      await open();
+      await userEvent.click(screen.getByRole('option', { name: 'Seconds unit' }));
+      expect(onValueChange).toHaveBeenCalledWith('s');
+    });
+  });
+
+  describe('renderItem field text', () => {
+    it('shows the rendered content in the basic trigger, like SelectItem children', () => {
+      renderSelect({ items: UNIT_ITEMS, renderItem: renderUnitItem, defaultValue: 's' });
+      expect(getTrigger()).toContainElement(screen.getByTestId('row-s'));
+    });
+
+    it('searches and fills the input with the plain label', async () => {
+      renderSelect({ searchable: true, items: UNIT_ITEMS, renderItem: renderUnitItem });
+      await userEvent.type(getTrigger(), 'sec');
+      expect(screen.getAllByRole('option')).toHaveLength(1);
+      await userEvent.click(screen.getByRole('option', { name: 'Seconds unit' }));
+      expect(fieldText(getTrigger())).toBe('Seconds');
     });
   });
 });

@@ -381,8 +381,10 @@
 
   /* Items take DOM focus as the keyboard or pointer moves through the list. As in Menu, the ring follows
      :focus-visible and pointer hover gets a neutral fill. The ring sits inside the row so the scrolling popup
-     cannot clip it. */
-  :where(.ps-SelectItem:focus-visible) {
+     cannot clip it. In searchable mode DOM focus stays in the input, so a highlight from the keyboard (not the
+     pointer) carries the ring. */
+  :where(.ps-SelectItem:focus-visible),
+  :where(.ps-Select__popup[data-searchable]:not([data-pointer-highlight]) .ps-SelectItem[data-highlighted]) {
     outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
     outline-offset: calc(-1 * var(--perses-focus-ring-offset));
   }
@@ -438,7 +440,8 @@
       outline-color: Highlight;
     }
 
-    :where(.ps-SelectItem:focus-visible) {
+    :where(.ps-SelectItem:focus-visible),
+    :where(.ps-Select__popup[data-searchable]:not([data-pointer-highlight]) .ps-SelectItem[data-highlighted]) {
       outline-color: Highlight;
     }
 

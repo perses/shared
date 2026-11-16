@@ -71,6 +71,8 @@ export interface SelectEngineProps {
     inputValue?: string;
     defaultInputValue?: string;
     onInputValueChange?: (value: string) => void;
+    /** Mounts only the options in view; set only together with `items`. */
+    virtualized: boolean;
   };
   /** Shows a button that resets the selection while something is selected. */
   clearable: boolean;

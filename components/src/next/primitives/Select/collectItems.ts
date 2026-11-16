@@ -37,12 +37,18 @@ export function getSearchLabel(value: SelectValue, children: ReactNode, label?: 
   return String(value);
 }
 
-/** Normalizes the `items` prop into options. The label is also the rendered content. */
-export function optionsFromItems(items: readonly SelectItemData[]): SelectOption[] {
+/**
+ * Normalizes the `items` prop into options. The content is `renderItem`'s output, else the label; the label stays the
+ * plain text used for search, typeahead and the search input.
+ */
+export function optionsFromItems(
+  items: readonly SelectItemData[],
+  renderItem?: (item: SelectItemData) => ReactNode,
+): SelectOption[] {
   return items.map((item) => ({
     value: item.value,
     label: item.label,
-    content: item.label,
+    content: renderItem ? renderItem(item) : item.label,
     disabled: item.disabled ?? false,
   }));
 }

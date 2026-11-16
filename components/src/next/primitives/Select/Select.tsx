@@ -100,7 +100,10 @@ export interface SelectStyle extends CSSProperties {
 /** A data-driven option for the `items` prop. */
 export interface SelectItemData {
   value: SelectValue;
-  /** Text shown in the list, the field and chips; also what search matches against. */
+  /**
+   * Plain text for search, typeahead, the search input and chip remove labels. It is also the displayed content (list,
+   * trigger, chips) unless `renderItem` is set.
+   */
   label: string;
   disabled?: boolean;
 }
@@ -228,12 +231,38 @@ interface SelectBaseProps
 type SelectOptionsSource =
   | {
       items: readonly SelectItemData[];
+      /**
+       * Custom content for each option row; defaults to `item.label`. Like `SelectItem` children, it is also shown
+       * for a selected item in the basic trigger and in chips (`renderValue` replaces the field content). The row,
+       * check indicator and keyboard behavior stay with `Select`, and `label` remains the text used for search,
+       * typeahead, the search input and chip remove labels. Every item is rendered again when the function changes,
+       * so define it outside the component or memoize it.
+       */
+      renderItem?: (item: SelectItemData) => ReactNode;
       children?: never;
     }
   | {
       items?: undefined;
+      renderItem?: never;
       /** `SelectItem` and `SelectGroup` elements. */
       children?: ReactNode;
+    };
+
+/** Virtualization needs the search engine and data items; see `virtualized`. */
+type SelectVirtualizationProps =
+  | {
+      virtualized?: false;
+    }
+  | {
+      /**
+       * Mounts only the options in view, for lists of thousands of items. Requires `searchable` and `items`:
+       * `SelectItem` children and `SelectGroup` are not supported, and the basic (button) mode cannot be
+       * virtualized. Rows should share one height: rows not yet rendered are sized like the first one. Each option
+       * carries `aria-setsize` and `aria-posinset`, so screen readers announce its position in the filtered list.
+       */
+      virtualized: true;
+      searchable: true;
+      items: readonly SelectItemData[];
     };
 
 /**
@@ -362,6 +391,7 @@ export type SelectProps = SelectBaseProps &
   SelectAccessibleName &
   SelectOptionsSource &
   SelectSearchProps &
+  SelectVirtualizationProps &
   SelectSelectionProps;
 
 /**
@@ -395,6 +425,9 @@ export type SelectProps = SelectBaseProps &
  * supply the text with `renderValue` in that case. With `searchable` such an item is still listed but is never
  * filtered by the typed text, its chip and field text fall back to `String(value)`, and `Select` warns once. Render
  * `SelectItem` directly in `children`, or pass `items`, to make the item searchable.
+ *
+ * For long lists, `searchable virtualized` with `items` mounts only the options in view. `renderItem` customizes how
+ * each data item is rendered in the list, in either mode.
  *
  * @example
  * <Select label="Unit" value={unit} onValueChange={setUnit}>
@@ -443,7 +476,9 @@ function SelectRoot({
   onValueChange,
   renderValue,
   items,
+  renderItem,
   searchable,
+  virtualized = false,
   filter,
   inputValue,
   defaultInputValue,
@@ -471,20 +506,30 @@ function SelectRoot({
   const mode = useContext(ThemeModeContext);
   const triggerId = id ?? generatedId;
   const isMultiple = multiple === true;
+  // Only the search engine virtualizes; a basic-mode caller that bypasses the types still gets its full list.
+  const isVirtualized = virtualized && searchable === true;
   // `children` is usually a new value on every parent render; the memo still skips the walk when Select re-renders
   // on its own (for example a theme mode change) or the consumer passes stable children.
-  const options = useMemo(() => (items ? optionsFromItems(items) : collectItems(children)), [items, children]);
-  const optionNodes = useMemo(
-    () =>
-      items
-        ? items.map((item) => (
-            <SelectItem key={optionKey(item.value)} value={item.value} disabled={item.disabled}>
-              {item.label}
-            </SelectItem>
-          ))
-        : children,
-    [items, children],
+  const options = useMemo(
+    () => (items ? optionsFromItems(items, renderItem) : collectItems(children)),
+    [items, renderItem, children],
   );
+  const optionNodes = useMemo(() => {
+    // The virtualized list renders its own options from the filtered values.
+    if (isVirtualized) return null;
+    return items
+      ? options.map((option) => (
+          <SelectItem
+            key={optionKey(option.value)}
+            value={option.value}
+            disabled={option.disabled}
+            label={option.label}
+          >
+            {option.content}
+          </SelectItem>
+        ))
+      : children;
+  }, [isVirtualized, items, options, children]);
   const showsPlaceholder = hasContent(placeholder);
   const placeholderConflict = showsPlaceholder && options.some((option) => option.value === '');
   useEffect(() => {
@@ -555,7 +600,7 @@ function SelectRoot({
     name,
     form,
     multiple: isMultiple,
-    search: { filter, inputValue, defaultInputValue, onInputValueChange },
+    search: { filter, inputValue, defaultInputValue, onInputValueChange, virtualized: isVirtualized },
     clearable,
     clearAriaLabel,
     loading,

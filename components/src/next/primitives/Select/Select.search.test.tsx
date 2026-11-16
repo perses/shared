@@ -60,6 +60,22 @@ describe('Select searchable', () => {
     expect(optionLabels()).toEqual(['Seconds']);
   });
 
+  it('lets the pointer move the highlight, and draws the keyboard ring only for keyboard highlights', async () => {
+    renderSelect({ searchable: true });
+    await open();
+    const popup = document.querySelector('.ps-Select__popup');
+    expect(popup).toHaveAttribute('data-searchable');
+
+    await userEvent.hover(screen.getByRole('option', { name: 'Bytes' }));
+    expect(screen.getByRole('option', { name: 'Bytes' })).toHaveAttribute('data-highlighted');
+    expect(popup).toHaveAttribute('data-pointer-highlight');
+
+    // The keyboard continues from the hovered option.
+    await userEvent.keyboard('{ArrowDown}');
+    expect(screen.getByRole('option', { name: 'Seconds' })).toHaveAttribute('data-highlighted');
+    expect(popup).not.toHaveAttribute('data-pointer-highlight');
+  });
+
   it('matches case- and accent-insensitively anywhere in the label', async () => {
     renderSelect({ searchable: true }, [
       <SelectItem key="cafe" value="cafe">

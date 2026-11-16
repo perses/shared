@@ -77,6 +77,12 @@ describe('optionsFromItems', () => {
     ]);
     expect(optionsFromItems([{ value: 2, label: 'Two' }])[0]?.disabled).toBe(false);
   });
+
+  it('uses renderItem for the content and keeps the label as plain text', () => {
+    const [option] = optionsFromItems([{ value: 1, label: 'One' }], (item) => <b>{item.label}!</b>);
+    expect(option?.label).toBe('One');
+    expect(isValidElement(option?.content)).toBe(true);
+  });
 });
 
 describe('getSearchLabel', () => {

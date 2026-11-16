@@ -280,6 +280,45 @@ const disabledItemCode = `// A disabled item cannot be selected, but arrow keys 
   <SelectItem value="percent">Percent</SelectItem>
 </Select>`;
 
+const metricTypes: Record<string, string> = {
+  up: 'gauge',
+  node_cpu_seconds_total: 'counter',
+  node_memory_MemFree_bytes: 'gauge',
+  http_requests_total: 'counter',
+  http_request_duration_seconds: 'histogram',
+  process_resident_memory_bytes: 'gauge',
+  go_goroutines: 'gauge',
+  go_gc_duration_seconds: 'summary',
+};
+const metricRowStyle: CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: 'var(--perses-spacing-sm)',
+};
+
+function renderMetric(item: SelectItemData): ReactElement {
+  return (
+    <span style={metricRowStyle}>
+      {item.label}
+      <Chip size="xs">{metricTypes[String(item.value)]}</Chip>
+    </span>
+  );
+}
+
+const renderItemCode = `// renderItem customizes each data item's row; look up extra data by item.value. label stays the text for search,
+// typeahead and the search input. Like SelectItem children, the content also shows in the trigger and chips.
+// Define the function outside the component (or memoize it): a new function renders every item again.
+function renderMetric(item: SelectItemData) {
+  return (
+    <span style={{ display: 'flex', justifyContent: 'space-between', gap: 'var(--perses-spacing-sm)' }}>
+      {item.label}
+      <Chip size="xs">{metricTypes[item.value]}</Chip>
+    </span>
+  );
+}
+
+<Select label="Metric" items={metricItems} renderItem={renderMetric} defaultValue="up" />`;
+
 export const Options: Story = () => (
   <Stack>
     <p>
@@ -289,6 +328,12 @@ export const Options: Story = () => (
     <Sample title="items" code={itemsCode}>
       <div style={rowStyle}>
         <Select label="Unit" items={unitItems} defaultValue="bytes" />
+      </div>
+    </Sample>
+
+    <Sample title="renderItem" code={renderItemCode}>
+      <div style={wideStyle}>
+        <Select label="Metric" items={metricItems} renderItem={renderMetric} defaultValue="up" fullWidth />
       </div>
     </Sample>
 
@@ -546,6 +591,15 @@ const searchableGroupsCode = `// Groups with no matching option are hidden while
 </Select>`;
 const searchableClearableCode = `// With searchable, clearing also empties the typed text. clearAriaLabel names the button.
 <Select label="Metric" clearable searchable clearAriaLabel="Reset metric" defaultValue="up" items={metricItems} />`;
+const seriesItems: SelectItemData[] = Array.from({ length: 10_000 }, (_, index) => ({
+  value: index,
+  label: `series_${String(index)}`,
+}));
+const virtualizedCode = `// virtualized mounts only the options in view, for lists of thousands of items. It needs searchable and items
+// (no SelectItem children or SelectGroup). Rows should share one height: rows not yet rendered are sized like the first.
+const seriesItems = Array.from({ length: 10_000 }, (_, index) => ({ value: index, label: \`series_\${index}\` }));
+
+<Select label="Series" searchable virtualized items={seriesItems} placeholder="Search 10,000 series" />`;
 const asyncSearchCode = `// filter={null} turns off local filtering: listen to onInputValueChange and replace \`items\` for each query.
 // A selected value that drops out of \`items\` keeps its label.
 function AsyncSearchSelect() {
@@ -706,6 +760,12 @@ export const Searchable: Story = () => (
     <Sample title="listHeader" code={listHeaderCode}>
       <div style={rowStyle}>
         <ListHeaderSelect />
+      </div>
+    </Sample>
+
+    <Sample title="virtualized" code={virtualizedCode}>
+      <div style={rowStyle}>
+        <Select label="Series" searchable virtualized items={seriesItems} placeholder="Search 10,000 series" />
       </div>
     </Sample>
   </Stack>
