@@ -15,7 +15,7 @@ import { Combobox } from '@base-ui/react/combobox';
 import { Field } from '@base-ui/react/field';
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { MouseEvent, ReactElement, ReactNode, Ref, RefObject } from 'react';
+import type { MouseEvent, ReactElement, ReactNode, Ref } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import type { VirtuosoHandle } from 'react-virtuoso';
 
@@ -188,7 +188,7 @@ function VirtualOptions({
 }: {
   engine: SelectEngineProps;
   scroller: HTMLDivElement;
-  virtuosoRef: RefObject<VirtuosoHandle>;
+  virtuosoRef: Ref<VirtuosoHandle>;
 }): ReactElement {
   const { optionsByValue } = engine;
   const filtered = Combobox.useFilteredItems<SelectValue>();
@@ -225,7 +225,7 @@ function SearchPopup({
   pointerHighlight,
 }: Pick<SelectShellProps, 'engine' | 'wrapperRef'> & {
   values: readonly SelectValue[];
-  virtuosoRef: RefObject<VirtuosoHandle>;
+  virtuosoRef: Ref<VirtuosoHandle>;
   /** The highlight came from the pointer, so it gets the hover fill without the keyboard ring. */
   pointerHighlight: boolean;
 }): ReactElement {
