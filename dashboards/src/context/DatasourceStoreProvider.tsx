@@ -218,20 +218,9 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
     [createCacheKey],
   );
 
-  const setLocalDatasources = useCallback(
-    (datasources: Record<string, DatasourceSpec>) => {
-      if (dashboardResource) {
-        setDashboardResource({
-          ...dashboardResource,
-          spec: {
-            ...dashboardResource.spec,
-            datasources: datasources,
-          },
-        });
-      }
-    },
-    [dashboardResource],
-  );
+  const setLocalDatasources = useCallback((datasources: Record<string, DatasourceSpec>) => {
+    setDashboardResource((prev) => prev && { ...prev, spec: { ...prev.spec, datasources } });
+  }, []);
 
   const ctxValue: DatasourceStore = useMemo(
     () =>
