@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { SilencesData, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
-import type { QueryKey, UseQueryResult } from '@tanstack/react-query';
+import type { QueryKey, QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQueries } from '@tanstack/react-query';
 
 import type { SilencesQueryContext, SilencesQueryPlugin } from '../model';
@@ -28,8 +28,12 @@ export const SILENCES_QUERY_KEY = 'SilencesQuery';
  * Run a silences query using a SilencesQuery plugin and return the results.
  * Silences represent current state and are NOT time-range dependent.
  * @param definitions: dashboard definition for a silences query
+ * @param queryOptions: set `enabled` to false to prevent the queries from running
  */
-export function useSilencesQueries(definitions: SilencesQueryDefinition[]): Array<UseQueryResult<SilencesData>> {
+export function useSilencesQueries(
+  definitions: SilencesQueryDefinition[],
+  queryOptions?: Pick<QueryObserverOptions, 'enabled'>,
+): Array<UseQueryResult<SilencesData>> {
   const { getPlugin } = usePluginRegistry();
   const context = useSilencesQueryContext();
 
@@ -48,7 +52,7 @@ export function useSilencesQueries(definitions: SilencesQueryDefinition[]): Arra
       const { queryEnabled, queryKey } = getQueryOptions({ context, definition, plugin });
       const silencesQueryKind = definition?.spec?.plugin?.kind;
       return {
-        enabled: queryEnabled,
+        enabled: (queryOptions?.enabled ?? true) && queryEnabled,
         queryKey: queryKey,
         refetchOnMount: false,
         refetchOnWindowFocus: false,
