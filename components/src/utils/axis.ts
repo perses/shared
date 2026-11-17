@@ -34,10 +34,10 @@ const MIN_AXIS_LABEL_WIDTH = CHAR_WIDTH_BASE * 4;
 /** Placeholder max when series data has not produced a max yet (keeps first layout stable). */
 const DEFAULT_AXIS_MAX_VALUE = 1000;
 /** grid.right. containLabel already fits every vertical axis label. */
-const DEFAULT_RIGHT_GRID_PADDING = 20;
+export const DEFAULT_RIGHT_GRID_PADDING = 20;
 
-function estimateLabelWidth(format: FormatOptions | undefined, maxValue: number): number {
-  const formattedLabel = formatValue(maxValue, format);
+function measureFormattedLabel(format: FormatOptions | undefined, value: number): number {
+  const formattedLabel = formatValue(value, format);
   const fallbackLabelWidth = Math.max(formattedLabel.length * CHAR_WIDTH_BASE, MIN_AXIS_LABEL_WIDTH);
   if (typeof document === 'undefined') {
     return fallbackLabelWidth;
@@ -53,6 +53,11 @@ function estimateLabelWidth(format: FormatOptions | undefined, maxValue: number)
   } catch {
     return fallbackLabelWidth;
   }
+}
+
+// Zero often keeps a long unit ("0 bytes/sec") while the series max is scaled ("120 MB/s").
+function estimateLabelWidth(format: FormatOptions | undefined, maxValue: number): number {
+  return Math.max(measureFormattedLabel(format, 0), measureFormattedLabel(format, maxValue));
 }
 
 /*
@@ -106,7 +111,7 @@ export function getFormattedMultipleYAxesLayout(
 
   let cumulativeOffset = 0;
   additionalFormats.forEach((format, index) => {
-    const labelWidth = estimateLabelWidth(format, maxValues?.[index] ?? DEFAULT_AXIS_MAX_VALUE) + AXIS_LABEL_PADDING;
+    const labelWidth = estimateLabelWidth(format, maxValues?.[index] ?? DEFAULT_AXIS_MAX_VALUE);
     const commonOptions = {
       position: 'right' as const,
       offset: cumulativeOffset,
@@ -116,6 +121,9 @@ export function getFormattedMultipleYAxesLayout(
           return formatValue(value, format);
         },
         hideOverlap: true,
+        // Share one right edge per column. A short tick then does not open a hole before the next axis.
+        align: 'right' as const,
+        margin: labelWidth,
       },
       splitLine: {
         show: false,
@@ -126,7 +134,7 @@ export function getFormattedMultipleYAxesLayout(
       ? { ...commonOptions, type: 'log', logBase }
       : { ...commonOptions, type: 'value' };
     axes.push(rightAxisConfig);
-    cumulativeOffset += labelWidth;
+    cumulativeOffset += labelWidth + AXIS_LABEL_PADDING;
   });
 
   return {

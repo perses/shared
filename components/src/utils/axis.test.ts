@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getFormattedMultipleYAxes, getFormattedMultipleYAxesLayout } from './axis';
+import { DEFAULT_RIGHT_GRID_PADDING, getFormattedMultipleYAxes, getFormattedMultipleYAxesLayout } from './axis';
 
 beforeAll(() => {
   Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
@@ -25,7 +25,7 @@ describe('getFormattedMultipleYAxesLayout', () => {
     const { axes, rightGridPadding } = getFormattedMultipleYAxesLayout({ show: true, min: 0 }, { unit: 'decimal' }, []);
     expect(axes).toHaveLength(1);
     expect(axes[0]?.position).toBe('left');
-    expect(rightGridPadding).toBe(20);
+    expect(rightGridPadding).toBe(DEFAULT_RIGHT_GRID_PADDING);
   });
 
   it('leaves a single right axis to containLabel', () => {
@@ -34,7 +34,7 @@ describe('getFormattedMultipleYAxesLayout', () => {
     ]);
     expect(axes).toHaveLength(2);
     expect(axes[1]?.offset).toBe(0);
-    expect(rightGridPadding).toBe(20);
+    expect(rightGridPadding).toBe(DEFAULT_RIGHT_GRID_PADDING);
   });
 
   it('keeps grid.right at the default padding when several right axes are offset', () => {
@@ -51,8 +51,10 @@ describe('getFormattedMultipleYAxesLayout', () => {
     expect(axes[1]?.position).toBe('right');
     expect(axes[1]?.offset).toBe(0);
     expect(axes[2]?.position).toBe('right');
-    expect((axes[2]?.offset as number) ?? 0).toBeGreaterThan(0);
-    expect(rightGridPadding).toBe(20);
+    // Canvas is mocked, so the slot is max(formatted.length * 7, 28). "100 ops/sec" is 77px, plus 16px padding.
+    expect(axes[2]?.offset).toBe(93);
+    expect(axes[1]?.axisLabel).toMatchObject({ align: 'right', margin: 77 });
+    expect(rightGridPadding).toBe(DEFAULT_RIGHT_GRID_PADDING);
   });
 
   it('keeps the default padding when maxValues is omitted', () => {
@@ -61,8 +63,9 @@ describe('getFormattedMultipleYAxesLayout', () => {
       { unit: 'events/sec' },
     ]);
     expect(axes).toHaveLength(3);
-    expect((axes[2]?.offset as number) ?? 0).toBeGreaterThan(0);
-    expect(rightGridPadding).toBe(20);
+    // Default max 1000 formats as "1K ops/sec" (70px) plus 16px padding.
+    expect(axes[2]?.offset).toBe(86);
+    expect(rightGridPadding).toBe(DEFAULT_RIGHT_GRID_PADDING);
   });
 });
 
