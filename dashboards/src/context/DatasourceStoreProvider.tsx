@@ -218,20 +218,9 @@ export function DatasourceStoreProvider(props: DatasourceStoreProviderProps): Re
     [createCacheKey],
   );
 
-  const setLocalDatasources = useCallback(
-    (datasources: Record<string, DatasourceSpec>) => {
-      if (dashboardResource) {
-        setDashboardResource({
-          ...dashboardResource,
-          spec: {
-            ...dashboardResource.spec,
-            datasources: datasources,
-          },
-        });
-      }
-    },
-    [dashboardResource],
-  );
+  const setLocalDatasources = useCallback((datasources: Record<string, DatasourceSpec>) => {
+    setDashboardResource((prev) => prev && { ...prev, spec: { ...prev.spec, datasources } });
+  }, []);
 
   const ctxValue: DatasourceStore = useMemo(
     () =>
@@ -355,7 +344,8 @@ function buildDatasourceSelectItemGroups(pluginDisplayName: string): {
     });
     usedNames.add(selectorName);
 
-    const isExplicitDefault = !isOverridden && spec.default && !explicitDefaultAdded;
+    // The default datasource is resolved by kind only, so a datasource overridden by name can still be the default.
+    const isExplicitDefault = spec.default && !explicitDefaultAdded;
     if (results[0] && isExplicitDefault) {
       // If we haven't added a default yet and this is a default, add default option to the beginning of the results
       results[0].items = [
