@@ -26,7 +26,7 @@ import { useFormControlContext } from './FormControlContext';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared spacing styles.
 import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the Field styles.
-import './field.css';
+import './formControl.css';
 
 const FORM_HELPER_TEXT_STYLE_PROPS = compileStyleProps([spacingProps]);
 
@@ -42,7 +42,7 @@ export interface FormHelperTextProps extends Omit<HTMLAttributes<HTMLParagraphEl
  * @example
  * <FormControl status="error">
  *   <FormLabel>Name</FormLabel>
- *   <Field.Control />
+ *   <TextField labelledByFormControl />
  *   <FormHelperText>Name is required</FormHelperText>
  * </FormControl>
  */

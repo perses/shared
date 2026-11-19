@@ -23,7 +23,7 @@ import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared spacing styles.
 import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the Field styles.
-import './field.css';
+import './formControl.css';
 
 const FORM_LABEL_STYLE_PROPS = compileStyleProps([spacingProps]);
 
@@ -38,7 +38,7 @@ export interface FormLabelProps extends Omit<LabelHTMLAttributes<HTMLLabelElemen
  * @example
  * <FormControl>
  *   <FormLabel>Name</FormLabel>
- *   <Field.Control />
+ *   <TextField labelledByFormControl />
  * </FormControl>
  */
 export const FormLabel = forwardRef<HTMLLabelElement, FormLabelProps>(function FormLabel(

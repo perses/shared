@@ -13,18 +13,19 @@
 
 import { Field } from '@base-ui/react/field';
 import { clsx } from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useMemo } from 'react';
 import type { LabelHTMLAttributes, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
 import { hasContent } from '../hasContent';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
+import { FormControlContext } from './FormControlContext';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared spacing styles.
 import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the Field styles.
-import './field.css';
+import './formControl.css';
 
 const FORM_CONTROL_LABEL_STYLE_PROPS = compileStyleProps([spacingProps]);
 
@@ -44,11 +45,11 @@ export interface FormControlLabelProps extends Omit<LabelHTMLAttributes<HTMLLabe
 
 /**
  * Clickable text next to a selection control, wrapping both in one `<label>` so clicking the text toggles the
- * control. Prefer the control's own `label` prop when it has one; use this for controls that do not.
+ * control. Perses controls that require an accessible name opt in with `labelledByFormControl`.
  *
  * @example
  * <FormControlLabel label="Allow header sorting">
- *   <Switch />
+ *   <Switch labelledByFormControl />
  * </FormControlLabel>
  */
 export const FormControlLabel = forwardRef<HTMLLabelElement, FormControlLabelProps>(function FormControlLabel(
@@ -60,23 +61,26 @@ export const FormControlLabel = forwardRef<HTMLLabelElement, FormControlLabelPro
     style: computedStyle,
     rest: domProps,
   } = applyStyleProps(rest, FORM_CONTROL_LABEL_STYLE_PROPS, style);
+  const contextValue = useMemo(() => ({ inFormControl: true, disabled }), [disabled]);
 
   return (
-    <Field.Root
-      render={
-        // oxlint-disable-next-line jsx-a11y/label-has-associated-control -- Base UI renders the control and text inside this label.
-        <label
-          {...domProps}
-          ref={ref}
-          className={clsx('ps-FormControlLabel', styleClassName, className)}
-          style={computedStyle}
-          data-label-placement={labelPlacement}
-        />
-      }
-      disabled={disabled}
-    >
-      {children}
-      {hasContent(label) && <span className="ps-FormControlLabel__text">{label}</span>}
-    </Field.Root>
+    <FormControlContext.Provider value={contextValue}>
+      <Field.Root
+        render={
+          // oxlint-disable-next-line jsx-a11y/label-has-associated-control -- Base UI renders the control and text inside this label.
+          <label
+            {...domProps}
+            ref={ref}
+            className={clsx('ps-FormControlLabel', styleClassName, className)}
+            style={computedStyle}
+            data-label-placement={labelPlacement}
+          />
+        }
+        disabled={disabled}
+      >
+        {children}
+        {hasContent(label) && <span className="ps-FormControlLabel__text">{label}</span>}
+      </Field.Root>
+    </FormControlContext.Provider>
   );
 });

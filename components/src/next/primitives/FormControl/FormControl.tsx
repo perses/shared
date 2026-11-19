@@ -27,7 +27,7 @@ import '../system/layout.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared spacing styles.
 import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the Field styles.
-import './field.css';
+import './formControl.css';
 
 const FORM_CONTROL_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, flexboxProps, displayProps]);
 
@@ -46,13 +46,13 @@ export interface FormControlProps
 
 /**
  * Groups one control with its `FormLabel` and `FormHelperText` and wires the accessible name and description
- * between them. Use it around controls that do not render their own label (plain inputs, `Checkbox` without
- * `label`, plugin-provided editors). `TextField` and `Select` already own a label, so wrap them only without one.
+ * between them. Controls opt in with `labelledByFormControl` and then inherit `size`, `disabled`, `required` and
+ * `status` from the wrapper.
  *
  * @example
  * <FormControl required status="error">
  *   <FormLabel>Name</FormLabel>
- *   <Field.Control />
+ *   <TextField labelledByFormControl />
  *   <FormHelperText>Name is required</FormHelperText>
  * </FormControl>
  */
@@ -65,7 +65,10 @@ export const FormControl = forwardRef<HTMLDivElement, FormControlProps>(function
     style: computedStyle,
     rest: domProps,
   } = applyStyleProps(rest, FORM_CONTROL_STYLE_PROPS, style);
-  const contextValue = useMemo(() => ({ status }), [status]);
+  const contextValue = useMemo(
+    () => ({ inFormControl: true, size, disabled, required, status }),
+    [size, disabled, required, status],
+  );
 
   return (
     <FormControlContext.Provider value={contextValue}>
