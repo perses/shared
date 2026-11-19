@@ -88,6 +88,14 @@ describe('fetch', () => {
     expect(error.headers.get('Retry-After')).toBe('5');
   });
 
+  test('rethrows errors other than invalid JSON from reading the body', async () => {
+    mockResponse('{}', { status: 429, headers: { 'Content-Type': 'application/json' } });
+    const readError = new TypeError('body stream already read');
+    vi.spyOn(Response.prototype, 'json').mockRejectedValue(readError);
+
+    await expect(fetch('/api')).rejects.toBe(readError);
+  });
+
   test('returns OK responses as-is', async () => {
     const response = new Response('ok', { status: 200 });
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(response);

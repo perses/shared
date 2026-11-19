@@ -24,7 +24,10 @@ export async function fetch(...args: Parameters<typeof globalThis.fetch>): Promi
       const json = await response
         .clone()
         .json()
-        .catch(() => undefined);
+        .catch((error: unknown) => {
+          if (error instanceof SyntaxError) return undefined;
+          throw error;
+        });
       if (json?.error) {
         throw new UserFriendlyError(json.error, response.status, response.headers);
       }
@@ -57,7 +60,6 @@ export async function fetchJson<T>(...args: Parameters<typeof globalThis.fetch>)
 
 export interface StatusError extends Error {
   status: number;
-  /** Response headers, when the error comes from a response. */
   headers?: Headers;
 }
 
@@ -66,7 +68,6 @@ export interface StatusError extends Error {
  */
 export class FetchError extends Error implements StatusError {
   status: number;
-  /** Response headers, e.g. `Retry-After`; cross-origin it needs `Access-Control-Expose-Headers`. */
   headers: Headers;
   constructor(response: Readonly<Response>) {
     super(`${response.status} ${response.statusText}`);
@@ -81,10 +82,6 @@ export class FetchError extends Error implements StatusError {
  */
 export class UserFriendlyError extends Error implements StatusError {
   status: number;
-  /**
-   * Response headers when the error comes from a response, e.g. `Retry-After`;
-   * cross-origin it needs `Access-Control-Expose-Headers`.
-   */
   headers?: Headers;
   constructor(message: string, status: number, headers?: Headers) {
     super(message);
