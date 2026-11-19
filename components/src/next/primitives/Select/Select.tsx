@@ -19,6 +19,7 @@ import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode, Ref } from
 
 import { ThemeModeContext } from '../../contexts/ThemeModeProvider';
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { useFormControlContext } from '../FormControl/FormControlContext';
 import { hasContent } from '../hasContent';
 import { ChevronDownIcon } from '../Icon';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
@@ -279,18 +280,32 @@ type SelectAccessibleName =
       label: ReactNode;
       'aria-label'?: never;
       'aria-labelledby'?: never;
+      labelledByFormControl?: never;
     }
   | {
       label?: undefined;
       /** Accessible name when there is no visible label. */
       'aria-label': string;
       'aria-labelledby'?: string;
+      labelledByFormControl?: never;
     }
   | {
       label?: undefined;
       'aria-label'?: string;
       /** Id of an external element that labels the trigger when there is no visible label. */
       'aria-labelledby': string;
+      labelledByFormControl?: never;
+    }
+  | {
+      label?: undefined;
+      'aria-label'?: never;
+      'aria-labelledby'?: never;
+      /**
+       * The enclosing `FormControl` provides the label and helper text. The select skips its own `Field.Root`, label
+       * and helper, inherits `size`, `disabled`, `required` and `status` from the wrapper, and `FormLabel` names the
+       * trigger Local `size`/`status`/`required` win; a disabled wrapper always disables the control.
+       */
+      labelledByFormControl: true;
     };
 
 type SelectSearchProps =
@@ -441,6 +456,13 @@ export type SelectProps = SelectBaseProps &
  *     <SelectItem value="alertname">alertname</SelectItem>
  *   </SelectGroup>
  * </Select>
+ *
+ * @example
+ * // Inside a FormControl the wrapper owns the label and helper text.
+ * <FormControl>
+ *   <FormLabel>Unit</FormLabel>
+ *   <Select labelledByFormControl value={unit} onValueChange={setUnit}>…</Select>
+ * </FormControl>
  */
 export const Select = forwardRef<HTMLElement, SelectProps>(function Select(props, ref) {
   // The mode is fixed for a mounted Select: changing `searchable` remounts it and resets the uncontrolled state.
@@ -451,13 +473,14 @@ type SelectRootProps = SelectProps & { forwardedRef: Ref<HTMLElement> };
 
 function SelectRoot({
   label,
-  helperText,
-  status,
+  helperText: helperTextProp,
+  status: statusProp,
   fullWidth,
-  size = 'md',
-  required,
+  size: sizeProp,
+  required: requiredProp,
   readOnly,
-  disabled,
+  disabled: disabledProp,
+  labelledByFormControl: _labelledByFormControl,
   name,
   form,
   placeholder,
@@ -504,6 +527,12 @@ function SelectRoot({
   const generatedId = useId();
   const labelId = useId();
   const mode = useContext(ThemeModeContext);
+  const formControl = useFormControlContext();
+  const size = sizeProp ?? formControl.size ?? 'md';
+  const status = statusProp ?? formControl.status;
+  const disabled = disabledProp ?? formControl.disabled;
+  const required = requiredProp ?? formControl.required;
+  const helperText = formControl.inFormControl ? undefined : helperTextProp;
   const triggerId = id ?? generatedId;
   const isMultiple = multiple === true;
   // Only the search engine virtualizes; a basic-mode caller that bypasses the types still gets its full list.
@@ -628,9 +657,27 @@ function SelectRoot({
     wrapperStyle: radiusStyle,
   };
 
+  const engine = searchable ? <SearchEngine {...engineProps} /> : <BasicEngine {...engineProps} />;
+  const rootClassName = clsx('ps-Select', styleClassName, className);
+
+  if (formControl.inFormControl) {
+    return (
+      <div
+        className={rootClassName}
+        style={computedStyle}
+        data-disabled={disabled || undefined}
+        data-size={size}
+        data-status={status}
+        data-full-width={fullWidth || undefined}
+      >
+        {engine}
+      </div>
+    );
+  }
+
   return (
     <Field.Root
-      className={clsx('ps-Select', styleClassName, className)}
+      className={rootClassName}
       style={computedStyle}
       disabled={disabled}
       invalid={status === 'error' ? true : undefined}
@@ -638,7 +685,7 @@ function SelectRoot({
       data-status={status}
       data-full-width={fullWidth || undefined}
     >
-      {searchable ? <SearchEngine {...engineProps} /> : <BasicEngine {...engineProps} />}
+      {engine}
     </Field.Root>
   );
 }

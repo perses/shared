@@ -17,6 +17,7 @@ import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { useFormControlContext } from '../FormControl/FormControlContext';
 import { hasContent } from '../hasContent';
 import {
   applyStyleProps,
@@ -118,14 +119,14 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
     checked,
     defaultChecked,
     onCheckedChange,
-    disabled,
-    required,
+    disabled: disabledProp,
+    required: requiredProp,
     readOnly,
     name,
     form,
     value,
     uncheckedValue,
-    size = 'md',
+    size: sizeProp,
     color = 'default',
     label,
     className,
@@ -148,6 +149,10 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
     style: computedStyle,
     rest,
   } = applyStyleProps(restWithoutRadius, SWITCH_STYLE_PROPS, style);
+  const formControl = useFormControlContext();
+  const size = sizeProp ?? formControl.size ?? 'md';
+  const disabled = disabledProp ?? formControl.disabled;
+  const required = requiredProp ?? formControl.required;
   const generatedId = useId();
   const controlId = id ?? generatedId;
   const labelId = `${controlId}-label`;
