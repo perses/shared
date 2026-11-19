@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader } from './Card';
 import { Checkbox } from './Checkbox';
 import { Chip } from './Chip';
 import { Divider } from './Divider';
-import { FormControl, FormControlLabel, FormGroup, FormHelperText, FormLabel } from './Field';
+import { FormControl, FormControlLabel, FormGroup, FormHelperText, FormLabel } from './FormControl';
 import { Grid, GridItem } from './Grid';
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons';
 import { IconButton } from './IconButton';

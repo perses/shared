@@ -20,6 +20,7 @@ import type { ReactElement, ReactNode } from 'react';
 import { ComponentsProvider, useComponents } from '../../contexts/ComponentsProvider';
 import { Checkbox } from '../Checkbox';
 import { defaultComponents, defaultIcons } from '../defaults';
+import { Select, SelectItem } from '../Select';
 import { Switch } from '../Switch';
 import { TextField } from '../TextField';
 import { FormControl, FormControlLabel, FormGroup, FormHelperText, FormLabel } from './index';
@@ -115,16 +116,20 @@ describe('FormControl + FormLabel + FormHelperText', () => {
     expect(getLabel().textContent).toBe('Name');
   });
 
-  it('T18 renders a single linked label when wrapping a TextField that owns its label', () => {
+  it('T18 ignores the inner label and helper of a nested TextField; the FormControl owns both', () => {
     render(
       <FormControl>
-        <TextField label="Inner" />
+        <FormLabel>Outer</FormLabel>
+        <TextField label="Inner" helperText="Inner help" />
+        <FormHelperText>Outer help</FormHelperText>
       </FormControl>,
     );
-    const input = screen.getByLabelText('Inner');
-    const labels = document.querySelectorAll('label');
-    expect(labels).toHaveLength(1);
-    expect(labels[0]?.htmlFor).toBe(input.id);
+    const input = screen.getByLabelText('Outer');
+    expect(document.querySelectorAll('label')).toHaveLength(1);
+    expect(screen.queryByText('Inner')).toBeNull();
+    expect(screen.queryByText('Inner help')).toBeNull();
+    expect(input).toHaveAccessibleDescription('Outer help');
+    expect(document.querySelector('.ps-TextField')).not.toHaveClass('ps-FormControl');
   });
 
   it('T19 exposes size through data-size and defaults to md', () => {
@@ -143,6 +148,113 @@ describe('FormControl + FormLabel + FormHelperText', () => {
       </FormControl>,
     );
     expect(screen.getByRole('checkbox')).toHaveAccessibleName('Enabled');
+  });
+});
+
+describe('controls nested in a FormControl', () => {
+  it('links FormLabel and FormHelperText to a TextField with labelledByFormControl', () => {
+    render(
+      <FormControl status="error">
+        <FormLabel>Name</FormLabel>
+        <TextField labelledByFormControl placeholder="Type here" />
+        <FormHelperText>Name is required</FormHelperText>
+      </FormControl>,
+    );
+    const input = screen.getByRole('textbox', { name: 'Name' });
+    expect(input).toHaveAccessibleDescription('Name is required');
+    expect(input).toHaveAttribute('aria-invalid', 'true');
+    expect(input.closest('.ps-TextField')).toHaveAttribute('data-status', 'error');
+  });
+
+  it('TextField inherits size, disabled and required from the FormControl unless set locally', () => {
+    render(
+      <FormControl size="sm" disabled required>
+        <FormLabel>Name</FormLabel>
+        <TextField labelledByFormControl />
+      </FormControl>,
+    );
+    const input = screen.getByLabelText(/Name/);
+    expect(input).toBeDisabled();
+    expect(input).toBeRequired();
+    expect(input.closest('.ps-TextField')).toHaveAttribute('data-size', 'sm');
+    expect(input.closest('.ps-TextField')).toHaveAttribute('data-disabled');
+  });
+
+  it('local size and status win over inherited ones; a disabled FormControl always disables its control', () => {
+    render(
+      <FormControl size="sm" status="warning" disabled>
+        <FormLabel>Name</FormLabel>
+        <TextField labelledByFormControl size="lg" status="error" disabled={false} />
+      </FormControl>,
+    );
+    const input = screen.getByLabelText('Name');
+    expect(input).toBeDisabled();
+    expect(input.closest('.ps-TextField')).toHaveAttribute('data-size', 'lg');
+    expect(input.closest('.ps-TextField')).toHaveAttribute('data-status', 'error');
+  });
+
+  it.each([false, true])(
+    'names a Select (searchable=%s) with labelledByFormControl from the FormLabel',
+    (searchable) => {
+      render(
+        <FormControl disabled>
+          <FormLabel>Unit</FormLabel>
+          {searchable ? (
+            <Select labelledByFormControl searchable defaultValue="bytes" helperText="ignored">
+              <SelectItem value="bytes">Bytes</SelectItem>
+            </Select>
+          ) : (
+            <Select labelledByFormControl defaultValue="bytes" helperText="ignored">
+              <SelectItem value="bytes">Bytes</SelectItem>
+            </Select>
+          )}
+          <FormHelperText>Pick one</FormHelperText>
+        </FormControl>,
+      );
+      const trigger = screen.getByRole('combobox', { name: 'Unit' });
+      expect(trigger).toHaveAccessibleDescription('Pick one');
+      expect(screen.queryByText('ignored')).toBeNull();
+      expect(document.querySelector('.ps-Select')).toHaveAttribute('data-disabled');
+    },
+  );
+
+  it('names a Checkbox with labelledByFormControl from FormControlLabel and inherits size', () => {
+    render(
+      <FormControlLabel label="Allow header sorting">
+        <Checkbox labelledByFormControl size="lg" />
+      </FormControlLabel>,
+    );
+    const checkbox = screen.getByRole('checkbox', { name: 'Allow header sorting' });
+    expect(checkbox).toHaveAttribute('data-size', 'lg');
+  });
+
+  it('Switch and Checkbox inherit disabled from FormControlLabel and FormControl', () => {
+    render(
+      <>
+        <FormControlLabel label="Toggle" disabled>
+          <Switch />
+        </FormControlLabel>
+        <FormControl size="sm" disabled>
+          <FormLabel>Agree</FormLabel>
+          <Checkbox labelledByFormControl />
+        </FormControl>
+      </>,
+    );
+    expect(screen.getByRole('switch', { name: 'Toggle' })).toHaveAttribute('aria-disabled', 'true');
+    const checkbox = screen.getByRole('checkbox', { name: 'Agree' });
+    expect(checkbox).toHaveAttribute('aria-disabled', 'true');
+    expect(checkbox).toHaveAttribute('data-size', 'sm');
+  });
+
+  it('labelledByFormControl is exclusive with label and aria-label at the type level', () => {
+    render(
+      <FormControl>
+        <FormLabel>Name</FormLabel>
+        {/* @ts-expect-error label and labelledByFormControl cannot be combined */}
+        <TextField labelledByFormControl label="Dup" />
+      </FormControl>,
+    );
+    expect(document.querySelectorAll('label')).toHaveLength(1);
   });
 });
 

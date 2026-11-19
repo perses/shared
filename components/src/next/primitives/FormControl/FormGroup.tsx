@@ -26,7 +26,7 @@ import '../system/layout.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared spacing styles.
 import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the Field styles.
-import './field.css';
+import './formControl.css';
 
 const FORM_GROUP_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, flexboxProps, displayProps]);
 

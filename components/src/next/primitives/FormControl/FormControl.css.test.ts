@@ -14,7 +14,7 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-const source = readFileSync(resolve(__dirname, './field.css'), 'utf-8');
+const source = readFileSync(resolve(__dirname, './formControl.css'), 'utf-8');
 
 // jsdom cannot resolve token values; inspect declarations from rules matching synthetic elements.
 const css = source
@@ -40,7 +40,7 @@ function make(className: string, tag = 'div', attributes: Record<string, string>
   return element;
 }
 
-describe('field.css contracts', () => {
+describe('formControl.css contracts', () => {
   beforeAll(() => {
     style.textContent = css;
     document.head.append(style);

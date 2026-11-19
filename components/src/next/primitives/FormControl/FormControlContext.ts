@@ -13,14 +13,19 @@
 
 import { createContext, useContext } from 'react';
 
-import type { Status } from '../types';
+import type { Size, Status } from '../types';
 
 export interface FormControlContextValue {
+  /** `true` inside a `FormControl` or `FormControlLabel`; controls then defer label and helper to the wrapper. */
+  inFormControl: boolean;
+  size?: Size;
+  disabled?: boolean;
+  required?: boolean;
   status?: Status;
 }
 
-/** Visual state a `FormControl` shares with its `FormHelperText`; Base UI's field context only carries validity. */
-export const FormControlContext = createContext<FormControlContextValue>({});
+/** State a `FormControl` shares with the controls and `FormHelperText` inside it. */
+export const FormControlContext = createContext<FormControlContextValue>({ inFormControl: false });
 
 export function useFormControlContext(): FormControlContextValue {
   return useContext(FormControlContext);

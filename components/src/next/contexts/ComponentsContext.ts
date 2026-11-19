@@ -27,7 +27,7 @@ import type {
   FormGroupProps,
   FormHelperTextProps,
   FormLabelProps,
-} from '../primitives/Field';
+} from '../primitives/FormControl';
 import type { GridItemProps, GridProps } from '../primitives/Grid';
 import type { IconButtonProps } from '../primitives/IconButton';
 import type { MenuCheckboxItemProps, MenuItemProps, MenuLinkItemProps, MenuProps } from '../primitives/Menu';
