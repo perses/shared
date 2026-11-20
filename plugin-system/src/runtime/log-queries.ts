@@ -12,54 +12,101 @@
 // limitations under the License.
 
 import type { QueryDefinition, UnknownSpec } from '@perses-dev/spec';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { QueryKey, UseQueryResult } from '@tanstack/react-query';
 import { useQueries } from '@tanstack/react-query';
 
-import type { LogQueryResult } from '../model/log-queries';
+import type { LogQueryContext, LogQueryPlugin, LogQueryResult } from '../model';
 import { useDatasourceStore } from './datasources';
-import { usePluginRegistry } from './plugin-registry';
+import { usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
-import { useVariableValues } from './variables';
+import { filterVariableStateMap, getVariableValuesKey } from './utils';
+import { useAllVariableValues } from './variables';
 
 export type LogQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'LogQuery', PluginSpec>;
 export const LOG_QUERY_KEY = 'LogQuery';
 
+/**
+ * Run log queries using LogQuery plugins and return the results.
+ */
 export function useLogQueries(definitions: LogQueryDefinition[]): Array<UseQueryResult<LogQueryResult>> {
   const { getPlugin } = usePluginRegistry();
-  const datasourceStore = useDatasourceStore();
-  const { absoluteTimeRange } = useTimeRange();
-  const variableValues = useVariableValues();
+  const context = useLogQueryContext();
 
-  const context = {
-    timeRange: absoluteTimeRange,
-    variableState: variableValues,
-    datasourceStore,
-    refreshKey: '',
-  };
+  const pluginLoaderResponse = usePlugins(
+    LOG_QUERY_KEY,
+    definitions.map(({ spec }) => ({
+      kind: spec.plugin.kind,
+      version: spec.plugin.metadata?.version,
+      registry: spec.plugin.metadata?.registry,
+    })),
+  );
 
   return useQueries({
-    queries: definitions.map((definition) => {
-      const queryKey = ['query', LOG_QUERY_KEY, definition, absoluteTimeRange, variableValues] as const;
-      const logQueryKind = definition?.spec?.plugin?.kind;
+    queries: definitions.map((definition, index) => {
+      const plugin = pluginLoaderResponse[index]?.data;
+      const pluginLoadFailed = pluginLoaderResponse[index]?.isError ?? false;
+      const { queryEnabled, queryKey } = getQueryOptions({ plugin, pluginLoadFailed, definition, context });
       return {
-        queryKey: queryKey,
+        enabled: queryEnabled,
+        queryKey,
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
         staleTime: Infinity,
+        structuralSharing: false,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<LogQueryResult> => {
-          const plugin = await getPlugin({
+          const queryPlugin = await getPlugin({
             kind: LOG_QUERY_KEY,
-            name: logQueryKind,
+            name: definition.spec.plugin.kind,
             version: definition.spec.plugin.metadata?.version,
             registry: definition.spec.plugin.metadata?.registry,
           });
-          const data = await plugin.getLogData(definition.spec.plugin.spec, context, signal);
-          return data;
+          return queryPlugin.getLogData(definition.spec.plugin.spec, context, signal);
         },
-
-        structuralSharing: false,
       };
     }),
   });
+}
+
+function getQueryOptions({
+  plugin,
+  pluginLoadFailed,
+  definition,
+  context,
+}: {
+  plugin?: LogQueryPlugin;
+  pluginLoadFailed: boolean;
+  definition: LogQueryDefinition;
+  context: LogQueryContext;
+}): {
+  queryKey: QueryKey;
+  queryEnabled: boolean;
+} {
+  const { variableState, absoluteTimeRange } = context;
+  const dependencies = plugin?.dependsOn?.(definition.spec.plugin.spec, context);
+  const variableDependencies = dependencies?.variables;
+  const filteredVariableState = filterVariableStateMap(variableState, variableDependencies);
+  const variablesValueKey = getVariableValuesKey(filteredVariableState);
+  const queryKey = ['query', LOG_QUERY_KEY, definition, absoluteTimeRange, variablesValueKey] as const;
+  // Only declared dependencies delay the query; undeclared ones still rerun it through the cache key.
+  const waitToLoad = variableDependencies?.some((name) => variableState[name]?.loading) ?? false;
+  // Let the query function surface plugin loading errors once variable dependencies are ready.
+  const queryEnabled = (plugin !== undefined || pluginLoadFailed) && !waitToLoad;
+
+  return {
+    queryKey,
+    queryEnabled,
+  };
+}
+
+function useLogQueryContext(): LogQueryContext {
+  const { absoluteTimeRange } = useTimeRange();
+  const variableState = useAllVariableValues();
+  const datasourceStore = useDatasourceStore();
+
+  return {
+    variableState,
+    datasourceStore,
+    absoluteTimeRange,
+  };
 }

@@ -17,7 +17,8 @@ import { useQueries, useQuery } from '@tanstack/react-query';
 
 import type { AnnotationContext, AnnotationPlugin } from '../model';
 import { useDatasourceStore } from './datasources';
-import { usePlugin, usePlugins } from './plugin-registry';
+import type { PluginRegistryContextType } from './plugin-registry';
+import { usePlugin, usePluginRegistry, usePlugins } from './plugin-registry';
 import { useTimeRange } from './TimeRangeProvider';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
 import { useAllVariableValues } from './variables';
@@ -38,34 +39,45 @@ function useAnnotationContext(): AnnotationContext {
 
 function getQueryOptions({
   plugin,
+  pluginLoadFailed,
+  getPlugin,
   definition,
   context,
 }: {
   plugin?: AnnotationPlugin;
+  pluginLoadFailed: boolean;
+  getPlugin: PluginRegistryContextType['getPlugin'];
   definition: AnnotationSpec;
   context: AnnotationContext;
 }): UseQueryOptions<AnnotationData[]> {
   const { variableState, absoluteTimeRange } = context;
   const dependencies = plugin?.dependsOn?.(definition.plugin.spec, context);
-  const filteredVariableState = filterVariableStateMap(variableState, dependencies?.variables);
+  const variableDependencies = dependencies?.variables;
+  const filteredVariableState = filterVariableStateMap(variableState, variableDependencies);
   const variablesValueKey = getVariableValuesKey(filteredVariableState);
-  // Only declared variable dependencies delay the query, like other query plugins.
-  const waitToLoad = dependencies?.variables?.some((name) => variableState[name]?.loading) ?? false;
+  // ['annotation', spec] prefix: refreshed by TimeRangeProvider and invalidated by the annotation editor preview.
+  const queryKey = ['annotation', definition, absoluteTimeRange, variablesValueKey] as const;
+  // Only declared dependencies delay the query; undeclared ones still rerun it through the cache key.
+  const waitToLoad = variableDependencies?.some((name) => variableState[name]?.loading) ?? false;
+  // Let the query function surface plugin loading errors once variable dependencies are ready.
+  const queryEnabled = (plugin !== undefined || pluginLoadFailed) && !waitToLoad;
 
   return {
-    // ['annotation', spec] prefix: refreshed by TimeRangeProvider and invalidated by the annotation editor preview.
-    queryKey: ['annotation', definition, absoluteTimeRange, variablesValueKey],
-    enabled: plugin !== undefined && !waitToLoad,
+    queryKey,
+    enabled: queryEnabled,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
     staleTime: Infinity,
+    structuralSharing: false,
     queryFn: async ({ signal }): Promise<AnnotationData[]> => {
-      if (plugin === undefined) {
-        throw new Error('Expected annotation plugin to be loaded');
-      }
-      const data = await plugin.getAnnotationData(definition.plugin.spec, context, signal);
-      return data;
+      const queryPlugin = await getPlugin({
+        kind: ANNOTATION_KEY,
+        name: definition.plugin.kind,
+        version: definition.plugin.metadata?.version,
+        registry: definition.plugin.metadata?.registry,
+      });
+      return queryPlugin.getAnnotationData(definition.plugin.spec, context, signal);
     },
   };
 }
@@ -75,21 +87,24 @@ function getQueryOptions({
  * absolute time range, and variable values share both in-flight requests and cached data with previews.
  */
 export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryResult<AnnotationData[]>> {
+  const { getPlugin } = usePluginRegistry();
   const context = useAnnotationContext();
 
   const pluginLoaderResponse = usePlugins(
-    'Annotation',
-    definitions.map((d) => ({
-      kind: d.plugin.kind,
-      version: d.plugin.metadata?.version,
-      registry: d.plugin.metadata?.registry,
+    ANNOTATION_KEY,
+    definitions.map(({ plugin }) => ({
+      kind: plugin.kind,
+      version: plugin.metadata?.version,
+      registry: plugin.metadata?.registry,
     })),
   );
 
   return useQueries({
-    queries: definitions.map((definition, index) =>
-      getQueryOptions({ context, definition, plugin: pluginLoaderResponse[index]?.data }),
-    ),
+    queries: definitions.map((definition, index) => {
+      const plugin = pluginLoaderResponse[index]?.data;
+      const pluginLoadFailed = pluginLoaderResponse[index]?.isError ?? false;
+      return getQueryOptions({ plugin, pluginLoadFailed, getPlugin, definition, context });
+    }),
   });
 }
 
@@ -98,11 +113,12 @@ export function useAnnotations(definitions: AnnotationSpec[]): Array<UseQueryRes
  * Used by annotation previews; also exposes loading, error, and refetch state to individual consumers.
  */
 export function useAnnotationData(spec: AnnotationSpec): UseQueryResult<AnnotationData[]> {
-  const { data: plugin } = usePlugin(ANNOTATION_KEY, spec.plugin.kind, {
+  const { getPlugin } = usePluginRegistry();
+  const { data: plugin, isError: pluginLoadFailed } = usePlugin(ANNOTATION_KEY, spec.plugin.kind, {
     version: spec.plugin.metadata?.version,
     registry: spec.plugin.metadata?.registry,
   });
   const context = useAnnotationContext();
 
-  return useQuery(getQueryOptions({ plugin, definition: spec, context }));
+  return useQuery(getQueryOptions({ plugin, pluginLoadFailed, getPlugin, definition: spec, context }));
 }

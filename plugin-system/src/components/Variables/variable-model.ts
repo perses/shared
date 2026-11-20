@@ -46,9 +46,9 @@ export function filterVariableList(data: VariableOption[], capturedRegexp: RegEx
 function useVariablePluginContext(): GetVariableOptionsContext {
   const datasourceStore = useDatasourceStore();
   const allVariables = useAllVariableValues();
-  const { absoluteTimeRange: timeRange } = useTimeRange();
+  const { absoluteTimeRange } = useTimeRange();
 
-  return { timeRange, datasourceStore, variables: allVariables };
+  return { absoluteTimeRange, datasourceStore, variables: allVariables };
 }
 
 const getVariableQueryConfig = (
@@ -62,7 +62,7 @@ const getVariableQueryConfig = (
     definition.spec.capturingRegexp !== undefined ? new RegExp(definition.spec.capturingRegexp, 'g') : undefined;
   const variablesValueKey = getVariableValuesKey(variablePluginCtx.variables);
   return {
-    queryKey: ['variable', definition, variablePluginCtx.timeRange, variablesValueKey],
+    queryKey: ['variable', definition, variablePluginCtx.absoluteTimeRange, variablesValueKey],
     queryFn: async ({ signal }): Promise<VariableOption[]> => {
       const resp = await variablePlugin?.getVariableOptions(definition.spec.plugin.spec, variablePluginCtx, signal);
       if (!resp?.data?.length) {
@@ -74,6 +74,7 @@ const getVariableQueryConfig = (
       return options;
     },
     enabled,
+    structuralSharing: false,
   };
 };
 
@@ -127,7 +128,7 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
   initialVariableValues: Record<string, VariableValue>;
   isLoading: boolean;
 } {
-  const { timeRange, datasourceStore, variables: outerVariableValues } = useVariablePluginContext();
+  const { absoluteTimeRange, datasourceStore, variables: outerVariableValues } = useVariablePluginContext();
 
   const listVariables = useMemo(
     () => variableDefinitions.filter((v): v is ListVariableDefinition => v.kind === 'ListVariable'),
@@ -165,7 +166,7 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
 
       const dependsOn = resolveDependsOnVariables(
         plugin,
-        { timeRange, datasourceStore, variables: allVariables },
+        { absoluteTimeRange, datasourceStore, variables: allVariables },
         definition,
       );
 
@@ -183,7 +184,7 @@ export function useResolveListVariableValues(variableDefinitions: VariableDefini
         }
       }
 
-      const ctx = { timeRange, datasourceStore, variables: dependentVariables };
+      const ctx = { absoluteTimeRange, datasourceStore, variables: dependentVariables };
       return getVariableQueryConfig(definition, ctx, plugin, !hasPendingDeps && !isPluginLoading, onFetched);
     }),
   });
