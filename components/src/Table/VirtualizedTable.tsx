@@ -27,6 +27,7 @@ import type { TableCellProps } from './TableCell';
 import { TableCell } from './TableCell';
 import { TableFoot } from './TableFoot';
 import { TableHead } from './TableHead';
+import type { FilterConfig } from './TableHeaderCell';
 import { TableHeaderCell } from './TableHeaderCell';
 import { TableRow } from './TableRow';
 import type { TableToolbarProps } from './TableToolbar';
@@ -235,6 +236,17 @@ export function VirtualizedTable<TableData extends RowData>({
 
                       const isSorted = column.getIsSorted();
                       const nextSorting = column.getNextSortingOrder();
+                      const isFilterEnabled = !!column.columnDef.enableColumnFilter;
+
+                      const filterConfig: FilterConfig | undefined = isFilterEnabled
+                        ? {
+                            uniqueValues: column.getFacetedUniqueValues(),
+                            filterValues: (column.getFilterValue() as unknown[] | undefined) ?? [],
+                            onFilterChange: (values: unknown[]): void => {
+                              column.setFilterValue(values.length > 0 ? values : undefined);
+                            },
+                          }
+                        : undefined;
 
                       return (
                         <TableHeaderCell
@@ -265,6 +277,7 @@ export function VirtualizedTable<TableData extends RowData>({
                                 }
                               : undefined
                           }
+                          filterConfig={filterConfig}
                         >
                           {flexRender(column.columnDef.header, header.getContext())}
                         </TableHeaderCell>

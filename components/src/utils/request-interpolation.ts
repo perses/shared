@@ -65,8 +65,9 @@ function expandQueryParamValue(value: string | string[], variableState: Variable
         // Replace the variable reference with the raw value directly.
         // We cannot use replaceVariables here because it would apply QUERYPARAM format
         // to the single value, producing "varName=val" instead of just "val".
-        text = text.replaceAll(bracketSyntax, singleValue);
-        text = text.replaceAll(simpleSyntax, singleValue);
+        // The replacement is given as a function to insert the value as is (see replaceVariable).
+        text = text.replaceAll(bracketSyntax, () => singleValue);
+        text = text.replaceAll(simpleSyntax, () => singleValue);
         // Replace any remaining variables (other than the expanded one) using standard interpolation
         return replaceVariables(text, variableState);
       });

@@ -35,7 +35,7 @@
     "@perses-dev/spec": "0.3.0",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
-    "fast-uri": "3.1.8",
+    "fast-uri": "3.1.9",
     "immer": "^11.2.9",
     "react-compiler-runtime": "^1.0.0",
     "react-hook-form": "^7.87.0",

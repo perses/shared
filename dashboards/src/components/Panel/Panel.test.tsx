@@ -381,18 +381,27 @@ describe('Panel', () => {
     expect(screen.getByRole('banner')).toHaveTextContent('Stacks - All');
   });
 
-  it('shows panel description', async () => {
+  it('shows panel description when clicked', async () => {
     await renderPanel();
 
-    const descriptionButton = screen.getByRole('button', { name: /description/i });
-    expect(descriptionButton).toBeInTheDocument();
+    const descriptionButton = screen.getByRole('button', {
+      name: /description/i,
+    });
 
-    // Can hover to see panel description in tooltip
-    userEvent.hover(descriptionButton);
+    expect(descriptionButton).toHaveAttribute('aria-expanded', 'false');
 
-    const tooltip = await screen.findByTestId('panel-description-content');
-    expect(tooltip).toHaveTextContent('This is a fake panel - bar');
-    expect(descriptionButton.querySelector('svg')).toHaveAttribute('aria-describedby', 'info-tooltip');
+    await userEvent.click(descriptionButton);
+
+    const content = await screen.findByTestId('panel-description-content');
+
+    expect(content).toHaveTextContent('This is a fake panel - bar');
+    expect(descriptionButton).toHaveAttribute('aria-expanded', 'true');
+
+    const popover = screen.getByRole('dialog', {
+      name: 'Panel description',
+    });
+
+    expect(descriptionButton).toHaveAttribute('aria-controls', popover.id);
   });
 
   it('renders panel description as markdown', async () => {
@@ -404,7 +413,7 @@ describe('Panel', () => {
     };
     await renderPanel(panel);
 
-    userEvent.hover(screen.getByRole('button', { name: /description/i }));
+    userEvent.click(screen.getByRole('button', { name: /description/i }));
 
     const content = await screen.findByTestId('panel-description-content');
     expect(within(content).getByRole('heading', { name: 'Heading' })).toBeInTheDocument();
@@ -416,6 +425,32 @@ describe('Panel', () => {
         .map((item) => item.textContent),
     ).toEqual(['first item', 'second item']);
     expect(within(content).getByRole('link', { name: 'docs' })).toHaveAttribute('target', '_blank');
+  });
+
+  it('allows keyboard navigation to links in panel description', async () => {
+    const panel = createTestPanel();
+    panel.spec.display = {
+      name: 'Test Panel',
+      description: '[Docs](https://example.com)',
+    };
+
+    await renderPanel(panel);
+
+    const button = screen.getByRole('button', { name: /description/i });
+    button.focus();
+    await userEvent.keyboard('{Enter}');
+    const dialog = await screen.findByRole('dialog', { name: 'Panel description' });
+
+    const link = within(dialog).getByRole('link', { name: 'Docs' });
+    await userEvent.tab();
+
+    expect(link).toHaveFocus();
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Panel description' })).not.toBeInTheDocument();
+      expect(button).toHaveFocus();
+    });
   });
 
   it('shows panel link', async () => {

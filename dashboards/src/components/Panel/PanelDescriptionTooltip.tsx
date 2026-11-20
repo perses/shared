@@ -11,13 +11,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { TooltipProps } from '@mui/material';
-import { Box, styled, Tooltip, tooltipClasses } from '@mui/material';
+import { Box, Popover, styled } from '@mui/material';
 import type { DOMPurify as DOMPurifyInstance } from 'dompurify';
 import DOMPurify from 'dompurify';
 import { Marked } from 'marked';
-import type { ReactElement, ReactNode } from 'react';
-import { useMemo } from 'react';
+import type { MouseEventHandler, ReactElement } from 'react';
+import { cloneElement, useId, useMemo, useState } from 'react';
 
 // Dedicated Marked instance, so that global `marked.use()` / `marked.setOptions()` calls elsewhere in the host
 // application do not change how descriptions are rendered.
@@ -92,32 +91,89 @@ export function panelDescriptionToHTML(description: string): string {
   });
 }
 
+type TriggerProps = {
+  onClick?: MouseEventHandler<HTMLElement>;
+  'aria-expanded'?: boolean;
+  'aria-controls'?: string;
+  'aria-haspopup'?: 'dialog';
+};
+
 export interface PanelDescriptionTooltipProps {
   id?: string;
-  /**
-   * Panel description, written in Markdown.
-   */
+  /** Panel description, written in Markdown. */
   description: string;
-  children: ReactNode;
+  children: ReactElement<TriggerProps>;
+  /** Kept for compatibility; no delay in click-to-open mode. */
   enterDelay?: number;
 }
 
 /**
- * Tooltip displaying a panel description rendered as Markdown.
- * The tooltip is interactive, so that links can be clicked and long descriptions can be scrolled.
+ * Displays a Markdown panel description in an accessible popover.
+ * Links are keyboard-accessible.
  */
-export function PanelDescriptionTooltip({
-  id,
-  description,
-  children,
-  enterDelay,
-}: PanelDescriptionTooltipProps): ReactElement {
-  const title = useMemo(() => <PanelDescriptionContent description={description} />, [description]);
+export function PanelDescriptionTooltip({ id, description, children }: PanelDescriptionTooltipProps): ReactElement {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+  const generatedId = useId();
+  const popoverId = id ?? generatedId;
+  const open = Boolean(anchorEl);
+
+  const handleClose = (): void => {
+    setAnchorEl(null);
+  };
+
+  const trigger = cloneElement(children, {
+    onClick: (event) => {
+      children.props.onClick?.(event);
+
+      if (event.defaultPrevented) {
+        return;
+      }
+
+      event.stopPropagation();
+
+      setAnchorEl(event.currentTarget);
+    },
+    'aria-expanded': open,
+    'aria-controls': open ? popoverId : undefined,
+    'aria-haspopup': 'dialog',
+  });
+
   return (
-    <StyledTooltip arrow id={id} placement="top" title={title} enterDelay={enterDelay ?? 500} enterNextDelay={500}>
-      {/* Wrap in a span so that the tooltip always has a child that can hold a ref. */}
-      <span>{children}</span>
-    </StyledTooltip>
+    <>
+      {trigger}
+
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        onClick={(event) => event.stopPropagation()}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        slotProps={{
+          paper: {
+            id: popoverId,
+            role: 'dialog',
+            'aria-label': 'Panel description',
+            sx: (theme) => ({
+              backgroundColor: theme.palette.background.tooltip,
+              color: theme.palette.text.primary,
+              maxWidth: '500px',
+              padding: theme.spacing(1),
+              boxShadow: theme.shadows[1],
+            }),
+          },
+        }}
+      >
+        <PanelDescriptionContent description={description} />
+      </Popover>
+    </>
   );
 }
 
@@ -170,22 +226,4 @@ const MarkdownContent = styled(Box)(({ theme }) => ({
     borderCollapse: 'collapse',
   },
   '& img': { maxWidth: '100%' },
-}));
-
-function PopperClassTooltip({ className, ...props }: TooltipProps): ReactElement {
-  const classes = useMemo(() => ({ popper: className }), [className]);
-  return <Tooltip {...props} classes={classes} />;
-}
-
-const StyledTooltip = styled(PopperClassTooltip)(({ theme }) => ({
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.background.tooltip,
-    color: theme.palette.text.primary,
-    maxWidth: '500px',
-    padding: theme.spacing(1),
-    boxShadow: theme.shadows[1],
-  },
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.background.tooltip,
-  },
 }));
