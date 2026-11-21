@@ -69,6 +69,7 @@ export const FormControl = forwardRef<HTMLDivElement, FormControlProps>(function
     () => ({ inFormControl: true, size, disabled, required, status }),
     [size, disabled, required, status],
   );
+  const invalid = status === 'error';
 
   return (
     <FormControlContext.Provider value={contextValue}>
@@ -78,7 +79,7 @@ export const FormControl = forwardRef<HTMLDivElement, FormControlProps>(function
         className={clsx('ps-FormControl', styleClassName, className)}
         style={computedStyle}
         disabled={disabled}
-        invalid={status === 'error' ? true : undefined}
+        invalid={invalid}
         data-size={size}
         data-status={status}
         data-required={required || undefined}

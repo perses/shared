@@ -246,6 +246,35 @@ describe('controls nested in a FormControl', () => {
     expect(checkbox).toHaveAttribute('data-size', 'sm');
   });
 
+  it('FormControlLabel inside a FormControl keeps the outer disabled, required, size and status', () => {
+    render(
+      <FormControl disabled required size="sm" status="error">
+        <FormControlLabel label="Agree">
+          <Checkbox labelledByFormControl />
+        </FormControlLabel>
+        <FormHelperText>Required</FormHelperText>
+      </FormControl>,
+    );
+    const checkbox = screen.getByRole('checkbox', { name: 'Agree' });
+    userEvent.click(screen.getByText('Agree'));
+    expect(checkbox).toHaveAttribute('aria-checked', 'false');
+    expect(checkbox).toHaveAttribute('aria-disabled', 'true');
+    expect(checkbox).toHaveAttribute('aria-required', 'true');
+    expect(checkbox).toHaveAttribute('data-size', 'sm');
+    expect(checkbox).toHaveAccessibleDescription('Required');
+  });
+
+  it('FormControlLabel disabled wins over an enabled FormControl', () => {
+    render(
+      <FormControl>
+        <FormControlLabel label="Agree" disabled>
+          <Checkbox labelledByFormControl />
+        </FormControlLabel>
+      </FormControl>,
+    );
+    expect(screen.getByRole('checkbox', { name: 'Agree' })).toHaveAttribute('aria-disabled', 'true');
+  });
+
   it('labelledByFormControl is exclusive with label and aria-label at the type level', () => {
     render(
       <FormControl>

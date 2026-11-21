@@ -20,7 +20,7 @@ import type { PersesCSSProperties } from '../../types';
 import { hasContent } from '../hasContent';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
-import { FormControlContext } from './FormControlContext';
+import { FormControlContext, useFormControlContext } from './FormControlContext';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared spacing styles.
 import '../system/spacing.css';
@@ -49,11 +49,11 @@ export interface FormControlLabelProps extends Omit<LabelHTMLAttributes<HTMLLabe
  *
  * @example
  * <FormControlLabel label="Allow header sorting">
- *   <Switch labelledByFormControl />
+ *   <Checkbox labelledByFormControl />
  * </FormControlLabel>
  */
 export const FormControlLabel = forwardRef<HTMLLabelElement, FormControlLabelProps>(function FormControlLabel(
-  { label, labelPlacement = 'end', disabled, className, style, children, ...rest },
+  { label, labelPlacement = 'end', disabled: disabledProp, className, style, children, ...rest },
   ref,
 ) {
   const {
@@ -61,7 +61,10 @@ export const FormControlLabel = forwardRef<HTMLLabelElement, FormControlLabelPro
     style: computedStyle,
     rest: domProps,
   } = applyStyleProps(rest, FORM_CONTROL_LABEL_STYLE_PROPS, style);
-  const contextValue = useMemo(() => ({ inFormControl: true, disabled }), [disabled]);
+  const parent = useFormControlContext();
+  const disabled = disabledProp || parent.disabled;
+  const invalid = parent.status === 'error';
+  const contextValue = useMemo(() => ({ ...parent, inFormControl: true, disabled }), [parent, disabled]);
 
   return (
     <FormControlContext.Provider value={contextValue}>
@@ -77,6 +80,7 @@ export const FormControlLabel = forwardRef<HTMLLabelElement, FormControlLabelPro
           />
         }
         disabled={disabled}
+        invalid={invalid}
       >
         {children}
         {hasContent(label) && <span className="ps-FormControlLabel__text">{label}</span>}
