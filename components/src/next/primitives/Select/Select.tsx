@@ -530,6 +530,7 @@ function SelectRoot({
   const formControl = useFormControlContext();
   const size = sizeProp ?? formControl.size ?? 'md';
   const status = statusProp ?? formControl.status;
+  const invalid = status === 'error';
   const disabled = disabledProp ?? formControl.disabled;
   const required = requiredProp ?? formControl.required;
   const helperText = formControl.inFormControl ? undefined : helperTextProp;
@@ -613,7 +614,7 @@ function SelectRoot({
 
   const engineProps: SelectEngineProps = {
     forwardedRef,
-    focusableProps: { ...restWithoutDisplay, id: triggerId },
+    focusableProps: { ...(invalid && { 'aria-invalid': true }), ...restWithoutDisplay, id: triggerId },
     label,
     labelId,
     helperText,
@@ -680,7 +681,7 @@ function SelectRoot({
       className={rootClassName}
       style={computedStyle}
       disabled={disabled}
-      invalid={status === 'error' ? true : undefined}
+      invalid={invalid}
       data-size={size}
       data-status={status}
       data-full-width={fullWidth || undefined}

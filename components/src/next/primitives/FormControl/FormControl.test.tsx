@@ -189,9 +189,31 @@ describe('controls nested in a FormControl', () => {
     );
     const input = screen.getByLabelText('Name');
     expect(input).toBeDisabled();
+    expect(input).toHaveAttribute('aria-invalid', 'true');
     expect(input.closest('.ps-TextField')).toHaveAttribute('data-size', 'lg');
     expect(input.closest('.ps-TextField')).toHaveAttribute('data-status', 'error');
   });
+
+  it.each([false, true])(
+    'a local status="error" on a nested Select (searchable=%s) sets aria-invalid on the trigger',
+    (searchable) => {
+      render(
+        <FormControl>
+          <FormLabel>Unit</FormLabel>
+          {searchable ? (
+            <Select labelledByFormControl searchable status="error" defaultValue="bytes">
+              <SelectItem value="bytes">Bytes</SelectItem>
+            </Select>
+          ) : (
+            <Select labelledByFormControl status="error" defaultValue="bytes">
+              <SelectItem value="bytes">Bytes</SelectItem>
+            </Select>
+          )}
+        </FormControl>,
+      );
+      expect(screen.getByRole('combobox', { name: 'Unit' })).toHaveAttribute('aria-invalid', 'true');
+    },
+  );
 
   it.each([false, true])(
     'a local disabled on a nested TextField (multiline=%s) disables the input inside an enabled FormControl',

@@ -171,6 +171,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
   const formControl = useFormControlContext();
   const size = sizeProp ?? formControl.size ?? 'md';
   const status = statusProp ?? formControl.status;
+  const invalid = status === 'error';
   const disabled = disabledProp ?? formControl.disabled;
   const required = requiredProp ?? formControl.required;
   const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
@@ -198,6 +199,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
         <span className="ps-TextField__adornment ps-TextField__adornment--start">{startElement}</span>
       )}
       <Field.Control
+        {...(invalid && { 'aria-invalid': true })}
         {...restWithoutDisplay}
         ref={ref}
         id={inputId}
@@ -235,7 +237,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
       className={rootClassName}
       style={computedStyle}
       disabled={disabled}
-      invalid={status === 'error' ? true : undefined}
+      invalid={invalid}
       data-size={size}
       data-status={status}
       data-full-width={fullWidth || undefined}
