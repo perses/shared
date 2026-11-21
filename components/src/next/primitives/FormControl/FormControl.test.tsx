@@ -194,6 +194,21 @@ describe('controls nested in a FormControl', () => {
   });
 
   it.each([false, true])(
+    'a local disabled on a nested TextField (multiline=%s) disables the input inside an enabled FormControl',
+    (multiline) => {
+      render(
+        <FormControl>
+          <FormLabel>Name</FormLabel>
+          <TextField labelledByFormControl disabled multiline={multiline} />
+        </FormControl>,
+      );
+      const input = screen.getByLabelText('Name');
+      expect(input).toBeDisabled();
+      expect(input.closest('.ps-TextField')).toHaveAttribute('data-disabled');
+    },
+  );
+
+  it.each([false, true])(
     'names a Select (searchable=%s) with labelledByFormControl from the FormLabel',
     (searchable) => {
       render(

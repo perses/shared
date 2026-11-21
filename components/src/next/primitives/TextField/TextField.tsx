@@ -201,6 +201,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
         {...restWithoutDisplay}
         ref={ref}
         id={inputId}
+        disabled={disabled}
         required={required}
         className={clsx('ps-TextField__input', slotProps?.input?.className)}
         style={slotProps?.input?.style}
