@@ -11,9 +11,71 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { getFormattedMultipleYAxes } from './axis';
+import { DEFAULT_RIGHT_GRID_PADDING, getFormattedMultipleYAxes, getFormattedMultipleYAxesLayout } from './axis';
+
+beforeAll(() => {
+  Object.defineProperty(HTMLCanvasElement.prototype, 'getContext', {
+    configurable: true,
+    value: () => null,
+  });
+});
+
+describe('getFormattedMultipleYAxesLayout', () => {
+  it('returns only the left axis when there are no additional formats', () => {
+    const { axes, rightGridPadding } = getFormattedMultipleYAxesLayout({ show: true, min: 0 }, { unit: 'decimal' }, []);
+    expect(axes).toHaveLength(1);
+    expect(axes[0]?.position).toBe('left');
+    expect(rightGridPadding).toBe(DEFAULT_RIGHT_GRID_PADDING);
+  });
+
+  it('leaves a single right axis to containLabel', () => {
+    const { axes, rightGridPadding } = getFormattedMultipleYAxesLayout({ show: true }, { unit: 'percent' }, [
+      { unit: 'bytes' },
+    ]);
+    expect(axes).toHaveLength(2);
+    expect(axes[1]?.offset).toBe(0);
+    expect(rightGridPadding).toBe(DEFAULT_RIGHT_GRID_PADDING);
+  });
+
+  it('keeps grid.right at the default padding when several right axes are offset', () => {
+    const formats = [{ unit: 'ops/sec' as const }, { unit: 'decimal' as const }];
+    const { axes, rightGridPadding } = getFormattedMultipleYAxesLayout(
+      { show: true },
+      { unit: 'percent' },
+      formats,
+      [100, 1000],
+    );
+
+    expect(axes).toHaveLength(3);
+    expect(axes[0]?.position).toBe('left');
+    expect(axes[1]?.position).toBe('right');
+    expect(axes[1]?.offset).toBe(0);
+    expect(axes[2]?.position).toBe('right');
+    // Canvas is mocked, so the slot is max(formatted.length * 7, 28). "100 ops/sec" is 77px, plus 16px padding.
+    expect(axes[2]?.offset).toBe(93);
+    expect(axes[1]?.axisLabel).toMatchObject({ align: 'right', margin: 77 });
+    expect(rightGridPadding).toBe(DEFAULT_RIGHT_GRID_PADDING);
+  });
+
+  it('keeps the default padding when maxValues is omitted', () => {
+    const { axes, rightGridPadding } = getFormattedMultipleYAxesLayout(undefined, { unit: 'decimal' }, [
+      { unit: 'ops/sec' },
+      { unit: 'events/sec' },
+    ]);
+    expect(axes).toHaveLength(3);
+    // Default max 1000 formats as "1K ops/sec" (70px) plus 16px padding.
+    expect(axes[2]?.offset).toBe(86);
+    expect(rightGridPadding).toBe(DEFAULT_RIGHT_GRID_PADDING);
+  });
+});
 
 describe('getFormattedMultipleYAxes', () => {
+  it('returns the axes array from the layout helper', () => {
+    const axes = getFormattedMultipleYAxes({ show: true }, { unit: 'decimal' }, [{ unit: 'ops/sec' }], [50]);
+    expect(axes).toHaveLength(2);
+    expect(axes[1]?.position).toBe('right');
+  });
+
   it('applies the base axis log scale to the right-side axes', () => {
     const axes = getFormattedMultipleYAxes({ type: 'log', logBase: 2 }, { unit: 'bytes' }, [
       { unit: 'seconds' },

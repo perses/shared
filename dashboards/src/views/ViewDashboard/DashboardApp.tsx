@@ -95,7 +95,7 @@ const DashboardAppContent = (props: DashboardAppProps): ReactElement => {
   const { dashboard, setDashboard } = useDashboard();
   const [originalDashboard, setOriginalDashboard] = useState<DashboardResource | undefined>(undefined);
 
-  const { setSavedDatasources } = useDatasourceStore();
+  const { setLocalDatasources, setSavedDatasources } = useDatasourceStore();
 
   const { openDiscardChangesConfirmationDialog, closeDiscardChangesConfirmationDialog } =
     useDiscardChangesConfirmationDialog();
@@ -103,7 +103,11 @@ const DashboardAppContent = (props: DashboardAppProps): ReactElement => {
   const handleDiscardChanges = (): void => {
     // Reset to the original spec and exit edit mode
     if (originalDashboard) {
+      const originalDatasources = originalDashboard.spec.datasources ?? {};
       setDashboard(originalDashboard);
+      // The datasource store keeps its own copy of the dashboard datasources, so it must be rolled back as well
+      setLocalDatasources(originalDatasources);
+      setSavedDatasources(originalDatasources);
     }
     setEditMode(false);
     closeDiscardChangesConfirmationDialog();
