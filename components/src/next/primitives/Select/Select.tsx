@@ -19,7 +19,7 @@ import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode, Ref } from
 
 import { ThemeModeContext } from '../../contexts/ThemeModeProvider';
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
-import { useFormControlContext } from '../FormControl/FormControlContext';
+import { useFormControlState } from '../FormControl/FormControlContext';
 import { hasContent } from '../hasContent';
 import { ChevronDownIcon } from '../Icon';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
@@ -527,13 +527,13 @@ function SelectRoot({
   const generatedId = useId();
   const labelId = useId();
   const mode = useContext(ThemeModeContext);
-  const formControl = useFormControlContext();
-  const size = sizeProp ?? formControl.size ?? 'md';
-  const status = statusProp ?? formControl.status;
-  const invalid = status === 'error';
-  const disabled = disabledProp ?? formControl.disabled;
-  const required = requiredProp ?? formControl.required;
-  const helperText = formControl.inFormControl ? undefined : helperTextProp;
+  const { inFormControl, size, status, invalid, disabled, required } = useFormControlState({
+    size: sizeProp,
+    status: statusProp,
+    disabled: disabledProp,
+    required: requiredProp,
+  });
+  const helperText = inFormControl ? undefined : helperTextProp;
   const triggerId = id ?? generatedId;
   const isMultiple = multiple === true;
   // Only the search engine virtualizes; a basic-mode caller that bypasses the types still gets its full list.
@@ -661,7 +661,7 @@ function SelectRoot({
   const engine = searchable ? <SearchEngine {...engineProps} /> : <BasicEngine {...engineProps} />;
   const rootClassName = clsx('ps-Select', styleClassName, className);
 
-  if (formControl.inFormControl) {
+  if (inFormControl) {
     return (
       <div
         className={rootClassName}

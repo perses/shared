@@ -32,8 +32,7 @@ const rowStyle: CSSProperties = {
   alignItems: 'flex-start',
 };
 
-const basicCode = 
-`<FormControl>
+const basicCode = `<FormControl>
   <FormLabel>Name</FormLabel>
   <TextField labelledByFormControl placeholder="Type here" />
   <FormHelperText>Shown to other members of your team</FormHelperText>
@@ -85,7 +84,6 @@ export const Basic: Story = () => (
   </Stack>
 );
 Basic.storyName = 'Basic';
-
 
 const groupCode = `// Elements are stacked vertically by default, to change orientation add 'direction="row"'
  <FormGroup legend="Columns" direction="row">

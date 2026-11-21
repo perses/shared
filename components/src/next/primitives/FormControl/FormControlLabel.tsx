@@ -20,7 +20,7 @@ import type { PersesCSSProperties } from '../../types';
 import { hasContent } from '../hasContent';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
-import { FormControlContext, useFormControlContext } from './FormControlContext';
+import { FormControlContext, useFormControlState } from './FormControlContext';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared spacing styles.
 import '../system/spacing.css';
@@ -61,10 +61,11 @@ export const FormControlLabel = forwardRef<HTMLLabelElement, FormControlLabelPro
     style: computedStyle,
     rest: domProps,
   } = applyStyleProps(rest, FORM_CONTROL_LABEL_STYLE_PROPS, style);
-  const parent = useFormControlContext();
-  const disabled = disabledProp || parent.disabled;
-  const invalid = parent.status === 'error';
-  const contextValue = useMemo(() => ({ ...parent, inFormControl: true, disabled }), [parent, disabled]);
+  const { size, status, invalid, disabled, required } = useFormControlState({ disabled: disabledProp });
+  const contextValue = useMemo(
+    () => ({ inFormControl: true, size, status, disabled, required }),
+    [size, status, disabled, required],
+  );
 
   return (
     <FormControlContext.Provider value={contextValue}>

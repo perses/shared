@@ -301,6 +301,30 @@ describe('controls nested in a FormControl', () => {
     expect(checkbox).toHaveAccessibleDescription('Required');
   });
 
+  it.each([
+    ['TextField', <TextField key="t" labelledByFormControl disabled={false} />, 'textbox', '.ps-TextField'],
+    ['Checkbox', <Checkbox key="c" labelledByFormControl disabled={false} />, 'checkbox', '.ps-Checkbox'],
+    ['Switch', <Switch key="s" disabled={false} />, 'switch', '.ps-Switch'],
+    [
+      'Select',
+      <Select key="l" labelledByFormControl disabled={false} defaultValue="a">
+        <SelectItem value="a">A</SelectItem>
+      </Select>,
+      'combobox',
+      '.ps-Select',
+    ],
+  ])('disabled={false} on a nested %s cannot re-enable a disabled FormControl', (_name, control, role, root) => {
+    render(
+      <FormControl disabled>
+        <FormLabel>Name</FormLabel>
+        {control}
+      </FormControl>,
+    );
+    const element = screen.getByRole(role, { name: 'Name' });
+    expect(element.closest(root)).toHaveAttribute('data-disabled');
+    expect(element.matches(':disabled, [aria-disabled="true"]')).toBe(true);
+  });
+
   it('FormControlLabel disabled wins over an enabled FormControl', () => {
     render(
       <FormControl>

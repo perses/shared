@@ -17,7 +17,7 @@ import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, InputHTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
-import { useFormControlContext } from '../FormControl/FormControlContext';
+import { useFormControlState } from '../FormControl/FormControlContext';
 import { hasContent } from '../hasContent';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
@@ -168,12 +168,12 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
 ) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
-  const formControl = useFormControlContext();
-  const size = sizeProp ?? formControl.size ?? 'md';
-  const status = statusProp ?? formControl.status;
-  const invalid = status === 'error';
-  const disabled = disabledProp ?? formControl.disabled;
-  const required = requiredProp ?? formControl.required;
+  const { inFormControl, size, status, invalid, disabled, required } = useFormControlState({
+    size: sizeProp,
+    status: statusProp,
+    disabled: disabledProp,
+    required: requiredProp,
+  });
   const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
     () =>
       (descriptionProps, state): ReactElement => (
@@ -216,7 +216,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     </div>
   );
 
-  if (formControl.inFormControl) {
+  if (inFormControl) {
     return (
       <div
         className={rootClassName}

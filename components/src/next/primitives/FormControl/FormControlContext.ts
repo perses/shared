@@ -30,3 +30,37 @@ export const FormControlContext = createContext<FormControlContextValue>({ inFor
 export function useFormControlContext(): FormControlContextValue {
   return useContext(FormControlContext);
 }
+
+export interface FormControlStateProps {
+  size?: Size;
+  status?: Status;
+  disabled?: boolean;
+  required?: boolean;
+}
+
+export interface FormControlState {
+  inFormControl: boolean;
+  size: Size;
+  status?: Status;
+  /** `true` when the resolved status is `error`; mirrors `aria-invalid` on the control. */
+  invalid: boolean;
+  disabled: boolean;
+  required: boolean;
+}
+
+/**
+ * Resolves a control's own props against the enclosing `FormControl`. Local `size`, `status` and `required` win;
+ * a disabled wrapper always disables the control.
+ */
+export function useFormControlState({ size, status, disabled, required }: FormControlStateProps): FormControlState {
+  const formControl = useFormControlContext();
+  const resolvedStatus = status ?? formControl.status;
+  return {
+    inFormControl: formControl.inFormControl,
+    size: size ?? formControl.size ?? 'md',
+    status: resolvedStatus,
+    invalid: resolvedStatus === 'error',
+    disabled: Boolean(disabled || formControl.disabled),
+    required: Boolean(required ?? formControl.required),
+  };
+}

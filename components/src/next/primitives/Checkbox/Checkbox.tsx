@@ -17,7 +17,7 @@ import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 import { forwardRef, useCallback } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
-import { useFormControlContext } from '../FormControl/FormControlContext';
+import { useFormControlState } from '../FormControl/FormControlContext';
 import { hasContent } from '../hasContent';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import {
@@ -155,10 +155,11 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
   },
   ref,
 ) {
-  const formControl = useFormControlContext();
-  const size = sizeProp ?? formControl.size ?? 'md';
-  const disabled = disabledProp ?? formControl.disabled ?? false;
-  const required = requiredProp ?? formControl.required ?? false;
+  const { size, disabled, required } = useFormControlState({
+    size: sizeProp,
+    disabled: disabledProp,
+    required: requiredProp,
+  });
   const hasLabel = hasContent(label);
   const {
     className: radiusClassName,
