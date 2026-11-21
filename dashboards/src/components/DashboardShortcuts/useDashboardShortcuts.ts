@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { useSnackbar } from '@perses-dev/components';
-import { useTimeRange } from '@perses-dev/plugin-system';
+import { getNeighbourRelativeTimeRange, useTimeRange, useTimeRangeOptionsSetting } from '@perses-dev/plugin-system';
 import type { AbsoluteTimeRange, TimeRangeValue } from '@perses-dev/spec';
 import { isRelativeTimeRange, toAbsoluteTimeRange } from '@perses-dev/spec';
 import { useHotkeys, useHotkeySequences } from '@tanstack/react-hotkeys';
@@ -112,6 +112,7 @@ export function useDashboardShortcuts({
   const focusedPanelKey = useFocusedPanel();
   const { isEditMode, setEditMode } = useEditMode();
   const { timeRange, setTimeRange, refresh } = useTimeRange();
+  const timePresets = useTimeRangeOptionsSetting();
   const { infoSnackbar, warningSnackbar } = useSnackbar();
   const viewPanel = useViewPanelGroup();
   const { openEditPanel, duplicatePanel, openDeletePanelDialog, setViewPanel, panelEditor } =
@@ -170,6 +171,12 @@ export function useDashboardShortcuts({
   // Time range handlers
 
   const handleTimeZoomOut = useCallback(() => {
+    // A "last X" range moves to the next larger preset so it keeps following "now"
+    const relativeRange = getNeighbourRelativeTimeRange(timeRange, timePresets, 'out');
+    if (relativeRange) {
+      setTimeRange(relativeRange);
+      return;
+    }
     const { durationMs, midpointMs } = resolveAbsoluteRange(timeRange);
     const newDuration = Math.min(durationMs * 2, MAX_ZOOM_DURATION_MS);
     const halfNew = Math.round(newDuration / 2);
@@ -177,9 +184,14 @@ export function useDashboardShortcuts({
       start: new Date(midpointMs - halfNew),
       end: new Date(midpointMs + halfNew),
     });
-  }, [timeRange, setTimeRange]);
+  }, [timeRange, timePresets, setTimeRange]);
 
   const handleTimeZoomIn = useCallback(() => {
+    const relativeRange = getNeighbourRelativeTimeRange(timeRange, timePresets, 'in');
+    if (relativeRange) {
+      setTimeRange(relativeRange);
+      return;
+    }
     const { durationMs, midpointMs } = resolveAbsoluteRange(timeRange);
     const newDuration = Math.max(Math.round(durationMs / 2), MIN_ZOOM_DURATION_MS);
     const halfNew = Math.round(newDuration / 2);
@@ -187,7 +199,7 @@ export function useDashboardShortcuts({
       start: new Date(midpointMs - halfNew),
       end: new Date(midpointMs + halfNew),
     });
-  }, [timeRange, setTimeRange]);
+  }, [timeRange, timePresets, setTimeRange]);
 
   const handleTimeShiftBack = useCallback(() => {
     const { absoluteRange, durationMs } = resolveAbsoluteRange(timeRange);
