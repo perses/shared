@@ -236,7 +236,7 @@ describe('primitives barrel exports', () => {
     const selectStyle: SelectStyle = { '--perses-select-size-md': '2.5rem' };
     const spinnerProps: SpinnerProps = {};
     const stackProps: StackProps = {};
-    const switchProps: SwitchProps = {};
+    const switchProps: SwitchProps = { 'aria-label': 'Toggle' };
     const tooltipProps: TooltipProps = {
       title: 'tip',
       children: <button type="button">trigger</button>,

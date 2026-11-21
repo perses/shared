@@ -45,7 +45,7 @@ const basicCode = `<FormControl>
 
 // Toggles: FormControlLabel puts the text beside the control and makes it clickable.
 <FormControlLabel label="Show legend"><Checkbox labelledByFormControl /></FormControlLabel>
-<FormControlLabel label="Allow header sorting"><Switch /></FormControlLabel>
+<FormControlLabel label="Allow header sorting"><Switch labelledByFormControl /></FormControlLabel>
 `;
 
 export const Basic: Story = () => (
@@ -77,7 +77,7 @@ export const Basic: Story = () => (
           <Checkbox labelledByFormControl defaultChecked />
         </FormControlLabel>
         <FormControlLabel label="Allow header sorting">
-          <Switch />
+          <Switch labelledByFormControl />
         </FormControlLabel>
       </div>
     </Sample>
@@ -92,9 +92,9 @@ const groupCode = `// Elements are stacked vertically by default, to change orie
   <Checkbox label="Timestamp" />
 </FormGroup>`;
 const formControlLabel = `// Clicking the text toggles the wrapped control. Typically, used with switch and checkbox
-<FormControlLabel label="Allow header sorting"><Switch /></FormControlLabel>
+<FormControlLabel label="Allow header sorting"><Switch labelledByFormControl /></FormControlLabel>
 <FormControlLabel label="Show legend"><Checkbox labelledByFormControl /></FormControlLabel>
-<FormControlLabel label="Text first" labelPlacement="start"><Switch /></FormControlLabel>`;
+<FormControlLabel label="Text first" labelPlacement="start"><Switch labelledByFormControl /></FormControlLabel>`;
 const formLabelCode = `// Plain text label use typically above a TextField or Select
 <FormControl display="flex" alignItems="center" gap="md">
   <FormLabel mb={0} style={{ minWidth: 120 }}>Unit</FormLabel>
@@ -115,13 +115,13 @@ export const Variants: Story = () => (
     <Sample title="FormControlLabel (clickable label beside the control)" code={formControlLabel}>
       <div style={columnStyle}>
         <FormControlLabel label="Allow header sorting">
-          <Switch />
+          <Switch labelledByFormControl />
         </FormControlLabel>
         <FormControlLabel label="Show legend">
           <Checkbox labelledByFormControl />
         </FormControlLabel>
         <FormControlLabel label="Text first" labelPlacement="start">
-          <Switch />
+          <Switch labelledByFormControl />
         </FormControlLabel>
       </div>
     </Sample>
@@ -161,7 +161,7 @@ const disabledCode = `<FormControl disabled>
 
 const disabledGroupCode = `<FormGroup legend="Disabled group" disabled>
   <FormControlLabel label="Email">
-    <Switch defaultChecked />
+    <Switch labelledByFormControl defaultChecked />
   </FormControlLabel>
   <FormControl>
     <FormLabel>Address</FormLabel>
@@ -215,7 +215,7 @@ export const States: Story = () => (
       <div style={columnStyle}>
         <FormGroup legend="Disabled group" disabled>
           <FormControlLabel label="Email">
-            <Switch defaultChecked />
+            <Switch labelledByFormControl defaultChecked />
           </FormControlLabel>
           <FormControl>
             <FormLabel>Address</FormLabel>
@@ -243,10 +243,10 @@ const spacingCode = `// Spacing tokens and responsive objects
     </FormControl>
     <FormGroup legend="Gap medium" gap="md">
       <FormControlLabel label="One">
-        <Switch />
+        <Switch labelledByFormControl />
       </FormControlLabel>
       <FormControlLabel label="Two">
-        <Switch />
+        <Switch labelledByFormControl />
       </FormControlLabel>
     </FormGroup>
   </Stack>`;
@@ -265,10 +265,10 @@ export const Spacing: Story = () => (
         </FormControl>
         <FormGroup legend="Gap medium" gap="md">
           <FormControlLabel label="One">
-            <Switch />
+            <Switch labelledByFormControl />
           </FormControlLabel>
           <FormControlLabel label="Two">
-            <Switch />
+            <Switch labelledByFormControl />
           </FormControlLabel>
         </FormGroup>
       </div>

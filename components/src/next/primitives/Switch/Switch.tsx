@@ -55,7 +55,25 @@ export interface SwitchSlotProps {
   label?: SlotStyleProps;
 }
 
-export interface SwitchProps
+/**
+ * A switch must have an accessible name: a visible `label`, `aria-label`, `aria-labelledby`, or the label of an
+ * enclosing `FormControlLabel`/`FormControl` (`labelledByFormControl`).
+ */
+export type SwitchAccessibleName =
+  | { label: ReactNode; labelledByFormControl?: never }
+  | { 'aria-label': string; labelledByFormControl?: never }
+  | { 'aria-labelledby': string; labelledByFormControl?: never }
+  | {
+      label?: undefined;
+      'aria-label'?: never;
+      'aria-labelledby'?: never;
+      /** The enclosing `FormControlLabel` or `FormControl` names the switch and supplies `size`, `disabled` and `required`. */
+      labelledByFormControl: true;
+    };
+
+export type SwitchProps = SwitchBaseProps & SwitchAccessibleName;
+
+interface SwitchBaseProps
   extends
     Omit<HTMLAttributes<HTMLElement>, 'onChange' | 'children' | 'defaultChecked' | 'style'>,
     SpacingProps,
@@ -107,12 +125,14 @@ export interface SwitchProps
  * `data-required`) so a host application can restyle or replace this primitive.
  *
  * @example
- * // Controlled, no label
- * <Switch checked={enabled} onCheckedChange={setEnabled} />
- *
- * @example
  * // With a label, matching the MUI `FormControlLabel` pattern it replaces
  * <Switch checked={enabled} onCheckedChange={setEnabled} label="Enable feature" />
+ *
+ * @example
+ * // Named by an enclosing FormControlLabel
+ * <FormControlLabel label="Enable feature">
+ *   <Switch labelledByFormControl checked={enabled} onCheckedChange={setEnabled} />
+ * </FormControlLabel>
  */
 export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
   {
@@ -135,6 +155,7 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
     id,
     'aria-labelledby': ariaLabelledBy,
     'aria-label': ariaLabel,
+    labelledByFormControl: _labelledByFormControl,
     ...props
   },
   ref,

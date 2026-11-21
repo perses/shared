@@ -269,7 +269,7 @@ describe('controls nested in a FormControl', () => {
     render(
       <>
         <FormControlLabel label="Toggle" disabled>
-          <Switch />
+          <Switch labelledByFormControl />
         </FormControlLabel>
         <FormControl size="sm" disabled>
           <FormLabel>Agree</FormLabel>
@@ -304,7 +304,7 @@ describe('controls nested in a FormControl', () => {
   it.each([
     ['TextField', <TextField key="t" labelledByFormControl disabled={false} />, 'textbox', '.ps-TextField'],
     ['Checkbox', <Checkbox key="c" labelledByFormControl disabled={false} />, 'checkbox', '.ps-Checkbox'],
-    ['Switch', <Switch key="s" disabled={false} />, 'switch', '.ps-Switch'],
+    ['Switch', <Switch labelledByFormControl key="s" disabled={false} />, 'switch', '.ps-Switch'],
     [
       'Select',
       <Select key="l" labelledByFormControl disabled={false} defaultValue="a">
@@ -396,7 +396,7 @@ describe('FormGroup', () => {
     render(
       <FormGroup legend="Options" disabled>
         <FormControlLabel label="One">
-          <Switch />
+          <Switch labelledByFormControl />
         </FormControlLabel>
         <FormControl>
           <FormLabel>Two</FormLabel>
@@ -418,7 +418,7 @@ describe('FormGroup', () => {
 
 function renderControlLabel(
   props: Partial<FormControlLabelProps> = {},
-  control: ReactElement = <Switch />,
+  control: ReactElement = <Switch labelledByFormControl />,
 ): ReturnType<typeof render> {
   return render(
     <FormControlLabel label="Allow header sorting" {...props}>
@@ -438,7 +438,7 @@ describe('FormControlLabel', () => {
   });
 
   it('T10 toggles a wrapped Switch when the label text is clicked', async () => {
-    renderControlLabel({}, <Switch />);
+    renderControlLabel({}, <Switch labelledByFormControl />);
     const toggle = screen.getByRole('switch', { name: 'Allow header sorting' });
     await userEvent.click(screen.getByText('Allow header sorting'));
     expect(toggle).toBeChecked();
@@ -447,7 +447,7 @@ describe('FormControlLabel', () => {
   it.todo('T11 selects a wrapped Radio inside a RadioGroup (Task 24)');
 
   it('T12 does not change a readOnly control', async () => {
-    renderControlLabel({}, <Switch readOnly />);
+    renderControlLabel({}, <Switch labelledByFormControl readOnly />);
     await userEvent.click(screen.getByText('Allow header sorting'));
     expect(screen.getByRole('switch')).not.toBeChecked();
   });
@@ -584,7 +584,7 @@ describe('prop combinations', () => {
   it('FormControlLabel merges className and spacing props on the label element', () => {
     render(
       <FormControlLabel label="A" className="custom" mt="md">
-        <Switch />
+        <Switch labelledByFormControl />
       </FormControlLabel>,
     );
     const label = screen.getByText('A').closest('label');
@@ -611,7 +611,7 @@ function FieldOverrideConsumer(): ReactElement {
         <HelperText>Hint</HelperText>
       </Control>
       <ControlLabel label="Toggle">
-        <Switch />
+        <Switch labelledByFormControl />
       </ControlLabel>
     </Group>
   );
@@ -653,7 +653,7 @@ describe('ComponentsProvider', () => {
           <FormHelperText ref={helper}>Hint</FormHelperText>
         </FormControl>
         <FormControlLabel ref={controlLabel} label="Toggle">
-          <Switch />
+          <Switch labelledByFormControl />
         </FormControlLabel>
       </FormGroup>,
     );

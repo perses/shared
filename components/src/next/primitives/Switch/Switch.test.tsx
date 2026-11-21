@@ -30,23 +30,23 @@ if (typeof window.PointerEvent === 'undefined') {
 
 describe('Switch', () => {
   it('renders a role="switch" element with the ps-Switch class', () => {
-    render(<Switch checked={false} onCheckedChange={noop} />);
+    render(<Switch aria-label="Toggle" checked={false} onCheckedChange={noop} />);
     const control = screen.getByRole('switch');
     expect(control).toBeInTheDocument();
     expect(control).toHaveClass('ps-Switch');
   });
 
   it('reflects the checked state via aria-checked', () => {
-    const { rerender } = render(<Switch checked={false} onCheckedChange={noop} />);
+    const { rerender } = render(<Switch aria-label="Toggle" checked={false} onCheckedChange={noop} />);
     expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false');
 
-    rerender(<Switch checked onCheckedChange={noop} />);
+    rerender(<Switch aria-label="Toggle" checked onCheckedChange={noop} />);
     expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('calls onCheckedChange with the new boolean value and event details when toggled', async () => {
     const handleChange = vi.fn();
-    render(<Switch checked={false} onCheckedChange={handleChange} />);
+    render(<Switch aria-label="Toggle" checked={false} onCheckedChange={handleChange} />);
 
     await userEvent.click(screen.getByRole('switch'));
 
@@ -56,7 +56,7 @@ describe('Switch', () => {
 
   it('does not call onCheckedChange when disabled and prevents interaction', async () => {
     const handleChange = vi.fn();
-    render(<Switch checked={false} onCheckedChange={handleChange} disabled />);
+    render(<Switch aria-label="Toggle" checked={false} onCheckedChange={handleChange} disabled />);
 
     const control = screen.getByRole('switch');
     await userEvent.click(control);
@@ -65,7 +65,7 @@ describe('Switch', () => {
   });
 
   it('exposes the disabled state via data-disabled and aria-disabled (not toBeDisabled, since the root renders a span)', () => {
-    render(<Switch checked={false} onCheckedChange={noop} disabled />);
+    render(<Switch aria-label="Toggle" checked={false} onCheckedChange={noop} disabled />);
     const control = screen.getByRole('switch');
     expect(control.tagName).toBe('SPAN');
     expect(control).toHaveAttribute('data-disabled');
@@ -73,7 +73,7 @@ describe('Switch', () => {
   });
 
   it('does not set data-disabled or aria-disabled when not disabled', () => {
-    render(<Switch checked={false} onCheckedChange={noop} />);
+    render(<Switch aria-label="Toggle" checked={false} onCheckedChange={noop} />);
     const control = screen.getByRole('switch');
     expect(control).not.toHaveAttribute('data-disabled');
     expect(control).not.toHaveAttribute('aria-disabled');
@@ -81,7 +81,7 @@ describe('Switch', () => {
 
   it('supports readOnly, blocking toggling while keeping the control interactive for focus', async () => {
     const handleChange = vi.fn();
-    render(<Switch checked={false} onCheckedChange={handleChange} readOnly />);
+    render(<Switch aria-label="Toggle" checked={false} onCheckedChange={handleChange} readOnly />);
 
     const control = screen.getByRole('switch');
     expect(control).toHaveAttribute('aria-readonly', 'true');
@@ -92,12 +92,12 @@ describe('Switch', () => {
   });
 
   it.each<Size>(['xs', 'sm', 'md', 'lg'])('sets data-size to %s', (size) => {
-    render(<Switch checked={false} onCheckedChange={noop} size={size} />);
+    render(<Switch aria-label="Toggle" checked={false} onCheckedChange={noop} size={size} />);
     expect(screen.getByRole('switch')).toHaveAttribute('data-size', size);
   });
 
   it('defaults size to md when not provided', () => {
-    render(<Switch checked={false} onCheckedChange={noop} />);
+    render(<Switch aria-label="Toggle" checked={false} onCheckedChange={noop} />);
     expect(screen.getByRole('switch')).toHaveAttribute('data-size', 'md');
   });
 
@@ -123,7 +123,7 @@ describe('Switch', () => {
   );
 
   it('defaults color to default when not provided', () => {
-    render(<Switch checked={false} onCheckedChange={noop} />);
+    render(<Switch aria-label="Toggle" checked={false} onCheckedChange={noop} />);
     expect(screen.getByRole('switch')).toHaveAttribute('data-color', 'default');
   });
 
@@ -148,7 +148,7 @@ describe('Switch', () => {
   });
 
   it('does not render a wrapper when no label is provided', () => {
-    const { container } = render(<Switch checked={false} onCheckedChange={noop} />);
+    const { container } = render(<Switch aria-label="Toggle" checked={false} onCheckedChange={noop} />);
     expect(container.querySelector('.ps-Switch__wrapper')).not.toBeInTheDocument();
   });
 
@@ -162,7 +162,7 @@ describe('Switch', () => {
   });
 
   it('merges additional className with ps-Switch', () => {
-    render(<Switch checked={false} onCheckedChange={noop} className="custom" />);
+    render(<Switch aria-label="Toggle" checked={false} onCheckedChange={noop} className="custom" />);
     const control = screen.getByRole('switch');
     expect(control).toHaveClass('ps-Switch');
     expect(control).toHaveClass('custom');
@@ -172,7 +172,7 @@ describe('Switch', () => {
     const handleBlur = vi.fn();
     render(
       <>
-        <Switch checked={false} onCheckedChange={noop} onBlur={handleBlur} />
+        <Switch aria-label="Toggle" checked={false} onCheckedChange={noop} onBlur={handleBlur} />
         <button type="button">Next</button>
       </>,
     );
@@ -185,12 +185,12 @@ describe('Switch', () => {
 
   it('forwards a ref to the root element', () => {
     const ref = createRef<HTMLElement>();
-    render(<Switch checked={false} onCheckedChange={noop} ref={ref} />);
+    render(<Switch aria-label="Toggle" checked={false} onCheckedChange={noop} ref={ref} />);
     expect(ref.current).toBe(screen.getByRole('switch'));
   });
 
   it('applies a caller-provided id to the visible switch element', () => {
-    render(<Switch checked={false} onCheckedChange={noop} id="my-switch" />);
+    render(<Switch aria-label="Toggle" checked={false} onCheckedChange={noop} id="my-switch" />);
     expect(screen.getByRole('switch')).toHaveAttribute('id', 'my-switch');
   });
 
@@ -358,5 +358,15 @@ describe('Switch', () => {
       render(<Switch aria-label="Feature" m="sm" />);
       expect(screen.getByRole('switch')).not.toHaveAttribute('m');
     });
+  });
+
+  it('requires an accessible name at the type level', () => {
+    // @ts-expect-error -- one of label, aria-label, aria-labelledby or labelledByFormControl is required
+    const missingName = <Switch />;
+    const withLabel = <Switch label="Feature" />;
+    const withAriaLabel = <Switch aria-label="Feature" />;
+    const withAriaLabelledBy = <Switch aria-labelledby="feature-id" />;
+    const withFormControl = <Switch labelledByFormControl />;
+    expect([missingName, withLabel, withAriaLabel, withAriaLabelledBy, withFormControl]).toHaveLength(5);
   });
 });
