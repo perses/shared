@@ -168,10 +168,20 @@ describe('FormControl + FormLabel + FormHelperText', () => {
     render(
       <FormControl>
         <FormLabel>Enabled</FormLabel>
-        <Checkbox aria-label="ignored by label" />
+        <Checkbox labelledByFormControl />
       </FormControl>,
     );
     expect(screen.getByRole('checkbox')).toHaveAccessibleName('Enabled');
+  });
+
+  it('keeps an explicit aria-label on a Checkbox placed inside a FormControl', () => {
+    render(
+      <FormControl>
+        <FormLabel>Enabled</FormLabel>
+        <Checkbox aria-label="Enable plugin" />
+      </FormControl>,
+    );
+    expect(screen.getByRole('checkbox')).toHaveAccessibleName('Enable plugin');
   });
 });
 
@@ -474,6 +484,17 @@ describe('FormControlLabel', () => {
     renderControlLabel({}, <Switch labelledByFormControl readOnly />);
     await userEvent.click(screen.getByText('Allow header sorting'));
     expect(screen.getByRole('switch')).not.toBeChecked();
+  });
+
+  it.each([
+    ['Checkbox', <Checkbox key="c" aria-label="Select all plugins" />, 'checkbox'],
+    ['Switch', <Switch key="s" aria-label="Select all plugins" />, 'switch'],
+  ])('an explicit aria-label on a wrapped %s wins over the visible label text', async (_name, control, role) => {
+    renderControlLabel({ label: 'Update all' }, control);
+    const toggle = screen.getByRole(role, { name: 'Select all plugins' });
+    expect(toggle).toHaveAccessibleName('Select all plugins');
+    await userEvent.click(screen.getByText('Update all'));
+    expect(toggle).toBeChecked();
   });
 
   it('T13 exposes labelPlacement and defaults to end', () => {

@@ -19,6 +19,7 @@ import { forwardRef, useCallback } from 'react';
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import { useFormControlState } from '../FormControl/FormControlContext';
 import { hasContent } from '../hasContent';
+import { resolveAriaLabelledBy } from '../resolveAriaLabelledBy';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import {
   applyStyleProps,
@@ -151,6 +152,8 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
     slotProps,
     id,
     'aria-invalid': ariaInvalidProp,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
     ...props
   },
   ref,
@@ -197,6 +200,8 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
       readOnly={readOnly}
       required={required}
       aria-invalid={invalid || ariaInvalidProp}
+      aria-label={ariaLabel}
+      aria-labelledby={resolveAriaLabelledBy(ariaLabelledBy, ariaLabel)}
       name={name}
       value={value}
       uncheckedValue={uncheckedValue}

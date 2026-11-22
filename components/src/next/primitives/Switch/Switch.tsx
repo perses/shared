@@ -19,6 +19,7 @@ import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'rea
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
 import { useFormControlState } from '../FormControl/FormControlContext';
 import { hasContent } from '../hasContent';
+import { resolveAriaLabelledBy } from '../resolveAriaLabelledBy';
 import {
   applyStyleProps,
   compileStyleProps,
@@ -203,7 +204,7 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
       value={value}
       uncheckedValue={uncheckedValue}
       aria-label={ariaLabel}
-      aria-labelledby={ariaLabelledBy ?? (hasLabel && ariaLabel === undefined ? labelId : undefined)}
+      aria-labelledby={resolveAriaLabelledBy(ariaLabelledBy, ariaLabel, hasLabel ? labelId : undefined)}
       data-size={size}
       data-color={color}
       className={clsx('ps-Switch', radiusClassName, !hasLabel && callerClassName, slotProps?.control?.className)}
