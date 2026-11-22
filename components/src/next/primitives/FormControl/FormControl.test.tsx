@@ -116,20 +116,44 @@ describe('FormControl + FormLabel + FormHelperText', () => {
     expect(getLabel().textContent).toBe('Name');
   });
 
-  it('T18 ignores the inner label and helper of a nested TextField; the FormControl owns both', () => {
+  it('T18 lets the FormControl own the label and helper of a nested TextField that opts in', () => {
     render(
       <FormControl>
         <FormLabel>Outer</FormLabel>
-        <TextField label="Inner" helperText="Inner help" />
+        <TextField labelledByFormControl />
         <FormHelperText>Outer help</FormHelperText>
       </FormControl>,
     );
     const input = screen.getByLabelText('Outer');
     expect(document.querySelectorAll('label')).toHaveLength(1);
-    expect(screen.queryByText('Inner')).toBeNull();
-    expect(screen.queryByText('Inner help')).toBeNull();
     expect(input).toHaveAccessibleDescription('Outer help');
     expect(document.querySelector('.ps-TextField')).not.toHaveClass('ps-FormControl');
+  });
+
+  it.each([
+    ['TextField', <TextField key="t" label="Inner" helperText="Inner help" />, 'textbox'],
+    ['Select', <Select key="s" label="Inner" helperText="Inner help" />, 'combobox'],
+  ])('T18b a nested %s without the opt-in keeps its own label and helper', (_name, control, role) => {
+    render(
+      <FormControl disabled>
+        <FormLabel>Outer</FormLabel>
+        {control}
+        <FormHelperText>Outer help</FormHelperText>
+      </FormControl>,
+    );
+    const element = screen.getByRole(role, { name: 'Inner' });
+    expect(screen.getByText('Outer')).toBeInTheDocument();
+    expect(element).toHaveAccessibleDescription('Outer help Inner help');
+    expect(element.closest('.ps-TextField, .ps-Select')).toHaveAttribute('data-disabled');
+  });
+
+  it('T18c a TextField that opts in without a FormLabel has no accessible name', () => {
+    render(
+      <FormControl>
+        <TextField labelledByFormControl />
+      </FormControl>,
+    );
+    expect(screen.getByRole('textbox')).not.toHaveAccessibleName();
   });
 
   it('T19 exposes size through data-size and defaults to md', () => {

@@ -119,9 +119,9 @@ type TextFieldAccessibleName =
       'aria-label'?: never;
       'aria-labelledby'?: never;
       /**
-       * The enclosing `FormControl` provides the label and helper text. The field skips its own `Field.Root`, label
-       * and helper, inherits `size`, `disabled`, `required` and `status` from the wrapper, and `FormLabel` links to
-       * the input Local `size`/`status`/`required` win; a disabled wrapper always disables the control.
+       * Let the enclosing `FormControl` label the field: it renders no label or helper of its own and the outer
+       * `FormLabel` links to the input. Without this flag the field keeps its own label and helper even inside a
+       * `FormControl`.
        */
       labelledByFormControl: true;
     };
@@ -161,7 +161,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     id,
     disabled: disabledProp,
     required: requiredProp,
-    labelledByFormControl: _labelledByFormControl,
+    labelledByFormControl,
     ...props
   },
   ref,
@@ -174,6 +174,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     disabled: disabledProp,
     required: requiredProp,
   });
+  const nested = labelledByFormControl === true && inFormControl;
   const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
     () =>
       (descriptionProps, state): ReactElement => (
@@ -216,7 +217,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     </div>
   );
 
-  if (inFormControl) {
+  if (nested) {
     return (
       <div
         className={rootClassName}

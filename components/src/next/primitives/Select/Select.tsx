@@ -301,9 +301,9 @@ type SelectAccessibleName =
       'aria-label'?: never;
       'aria-labelledby'?: never;
       /**
-       * The enclosing `FormControl` provides the label and helper text. The select skips its own `Field.Root`, label
-       * and helper, inherits `size`, `disabled`, `required` and `status` from the wrapper, and `FormLabel` names the
-       * trigger Local `size`/`status`/`required` win; a disabled wrapper always disables the control.
+       * Let the enclosing `FormControl` label the select: it renders no label or helper of its own and the outer
+       * `FormLabel` names the trigger. Without this flag the select keeps its own label and helper even inside a
+       * `FormControl`. Either way it inherits `size`, `disabled`, `required` and `status` from the wrapper.
        */
       labelledByFormControl: true;
     };
@@ -480,7 +480,7 @@ function SelectRoot({
   required: requiredProp,
   readOnly,
   disabled: disabledProp,
-  labelledByFormControl: _labelledByFormControl,
+  labelledByFormControl,
   name,
   form,
   placeholder,
@@ -533,7 +533,8 @@ function SelectRoot({
     disabled: disabledProp,
     required: requiredProp,
   });
-  const helperText = inFormControl ? undefined : helperTextProp;
+  const nested = labelledByFormControl === true && inFormControl;
+  const helperText = nested ? undefined : helperTextProp;
   const triggerId = id ?? generatedId;
   const isMultiple = multiple === true;
   // Only the search engine virtualizes; a basic-mode caller that bypasses the types still gets its full list.
@@ -661,7 +662,7 @@ function SelectRoot({
   const engine = searchable ? <SearchEngine {...engineProps} /> : <BasicEngine {...engineProps} />;
   const rootClassName = clsx('ps-Select', styleClassName, className);
 
-  if (inFormControl) {
+  if (nested) {
     return (
       <div
         className={rootClassName}
