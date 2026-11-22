@@ -65,6 +65,11 @@ describe('formControl.css contracts', () => {
     expect(source).toMatch(/:where\(\.ps-FormControlLabel\)\s*\{[^}]*display:\s*inline-flex/);
   });
 
+  it('sizes FormControl and FormGroup roots with border-box so width includes padding', () => {
+    expect(propertyFor(make('ps-FormControl'), 'box-sizing')).toBe('border-box');
+    expect(propertyFor(make('ps-FormGroup', 'fieldset'), 'box-sizing')).toBe('border-box');
+  });
+
   it('T25 styles the state selectors each part emits', () => {
     expect(propertyFor(make('ps-FormControl'), 'display')).toBe('flex');
     expect(propertyFor(make('ps-FormGroup', 'fieldset'), 'min-inline-size')).toBe('0');

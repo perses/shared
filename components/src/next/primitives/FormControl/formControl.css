@@ -18,6 +18,7 @@
 @layer perses.components {
   /* ---- FormControl: label, control and helper in a column ---- */
   :where(.ps-FormControl) {
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     gap: var(--perses-spacing-xs);
@@ -58,6 +59,7 @@
 
   /* ---- FormGroup: a fieldset without the browser chrome ---- */
   :where(.ps-FormGroup) {
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
     gap: var(--perses-spacing-xs);
