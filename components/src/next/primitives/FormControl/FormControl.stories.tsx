@@ -125,7 +125,7 @@ export const Variants: Story = () => (
         </FormControlLabel>
       </div>
     </Sample>
-    <Sample title="FormLabel (label above the control)" code={formLabelCode}>
+    <Sample title="FormLabel (plain-text label above the control)" code={formLabelCode}>
       <FormControl display="flex" gap="md">
         <FormLabel>Unit</FormLabel>
         <TextField labelledByFormControl placeholder="Bytes" />

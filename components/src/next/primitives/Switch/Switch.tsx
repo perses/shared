@@ -17,7 +17,7 @@ import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
-import { useFormControlState } from '../FormControl/FormControlContext';
+import { useFormControlState } from '../formControlContext';
 import { hasContent } from '../hasContent';
 import { resolveAriaLabelledBy } from '../resolveAriaLabelledBy';
 import {

@@ -17,10 +17,10 @@ import { forwardRef, useMemo } from 'react';
 import type { LabelHTMLAttributes, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
+import { FormControlContext, useFormControlState } from '../formControlContext';
 import { hasContent } from '../hasContent';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
-import { FormControlContext, useFormControlState } from './FormControlContext';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared spacing styles.
 import '../system/spacing.css';

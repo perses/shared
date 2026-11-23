@@ -17,11 +17,11 @@ import { forwardRef, useCallback } from 'react';
 import type { HTMLAttributes, ReactElement } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
+import { useFormControlContext } from '../formControlContext';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
 import { TextHelper } from '../TextHelper';
 import type { Status } from '../types';
-import { useFormControlContext } from './FormControlContext';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared spacing styles.
 import '../system/spacing.css';

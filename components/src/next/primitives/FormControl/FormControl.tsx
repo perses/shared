@@ -17,10 +17,10 @@ import { forwardRef, useMemo } from 'react';
 import type { HTMLAttributes } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
+import { FormControlContext } from '../formControlContext';
 import type { DisplayProps, FlexboxProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, flexboxProps, sizingProps, spacingProps } from '../system';
 import type { Size, Status } from '../types';
-import { FormControlContext } from './FormControlContext';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared layout styles.
 import '../system/layout.css';

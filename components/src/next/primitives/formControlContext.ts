@@ -13,7 +13,7 @@
 
 import { createContext, useContext } from 'react';
 
-import type { Size, Status } from '../types';
+import type { Size, Status } from './types';
 
 export interface FormControlContextValue {
   /** `true` inside a `FormControl` or `FormControlLabel`; controls then defer label and helper to the wrapper. */

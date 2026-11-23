@@ -17,7 +17,7 @@ import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 import { forwardRef, useCallback } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
-import { useFormControlState } from '../FormControl/FormControlContext';
+import { useFormControlState } from '../formControlContext';
 import { hasContent } from '../hasContent';
 import { resolveAriaLabelledBy } from '../resolveAriaLabelledBy';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';

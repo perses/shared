@@ -19,7 +19,7 @@ import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode, Ref } from
 
 import { ThemeModeContext } from '../../contexts/ThemeModeProvider';
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
-import { useFormControlState } from '../FormControl/FormControlContext';
+import { useFormControlState } from '../formControlContext';
 import { hasContent } from '../hasContent';
 import { ChevronDownIcon } from '../Icon';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
