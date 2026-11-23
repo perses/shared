@@ -13,6 +13,7 @@
 
 import type { Story } from '@ladle/react';
 import type { SpacingScale } from '@perses-dev/design-tokens';
+import type { CSSProperties } from 'react';
 
 import { Sample, Stack as Page } from '../../stories/Sample';
 import { Checkbox } from '../Checkbox';
@@ -284,6 +285,9 @@ const gapCode = `// gap controls the space between the children of a FormGroup
   </FormControlLabel>
 </FormGroup>`;
 
+const marginOutline: CSSProperties = {
+  outline: 'var(--perses-border-width-sm) dashed var(--perses-border-default)',
+};
 const spacingTokens: SpacingScale[] = ['0', 'xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'];
 
 export const Spacing: Story = () => (
@@ -303,7 +307,7 @@ export const Spacing: Story = () => (
       </Stack>
     </Sample>
     <Sample title="Responsive margin" code={responsiveCode}>
-      <div style={{ outline: '1px dashed var(--perses-color-border-default)' }}>
+      <div style={marginOutline}>
         <FormControl mb={{ default: '0', lg: '4xl' }} mt={{ default: '0', lg: '4xl' }}>
           <FormLabel>Responsive margin top and bottom</FormLabel>
           <TextField labelledByFormControl />
@@ -311,7 +315,7 @@ export const Spacing: Story = () => (
       </div>
     </Sample>
     <Sample title="Margin size" code={spacingCode}>
-      <div style={{ outline: '1px dashed var(--perses-color-border-default)' }}>
+      <div style={marginOutline}>
         {spacingTokens.map((mb) => (
           <FormControl key={mb} mb={mb}>
             <FormLabel>Margin bottom {mb}</FormLabel>
