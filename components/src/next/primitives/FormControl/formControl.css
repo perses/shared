@@ -41,6 +41,10 @@
     color: var(--perses-status-text-error);
   }
 
+  .ps-FormControl[data-status='warning'] .ps-FormLabel {
+    color: var(--perses-status-text-warning);
+  }
+
   /* Alt-text form hides the star from assistive tech; aria-required on the control conveys the requirement. */
   .ps-FormControl[data-required] .ps-FormLabel::after {
     content: '*' / '';
@@ -114,6 +118,7 @@
     }
 
     .ps-FormLabel[data-invalid],
+    .ps-FormControl[data-status='warning'] .ps-FormLabel,
     .ps-FormControl[data-required] .ps-FormLabel::after {
       color: CanvasText;
     }

@@ -87,6 +87,14 @@ describe('formControl.css contracts', () => {
     expect(propertyFor(make('ps-FormControlLabel', 'label', { 'data-disabled': '' }), 'cursor')).toBe('not-allowed');
   });
 
+  it('colours the label for a warning status', () => {
+    const root = make('ps-FormControl', 'div', { 'data-status': 'warning' });
+    const label = document.createElement('label');
+    label.className = 'ps-FormLabel';
+    root.append(label);
+    expect(propertyFor(label, 'color')).toContain('warning');
+  });
+
   it('T25 draws the required indicator with aria-ignorable generated content', () => {
     expect(source).toMatch(/\.ps-FormControl\[data-required\] \.ps-FormLabel::after\s*\{[^}]*content:\s*'\*' \/ ''/);
   });
