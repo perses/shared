@@ -105,4 +105,10 @@ describe('formControl.css contracts', () => {
     root.append(label);
     expect(propertyFor(label, 'font-size')).toContain('--perses-font-size-md');
   });
+
+  it('renders the FormGroup legend as a medium-weight heading', () => {
+    const legend = make('ps-FormGroup__legend', 'legend');
+    expect(propertyFor(legend, 'font-size')).toContain('--perses-font-size-md');
+    expect(propertyFor(legend, 'font-weight')).toContain('--perses-font-weight-medium');
+  });
 });

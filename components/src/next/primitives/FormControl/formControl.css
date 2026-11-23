@@ -74,7 +74,8 @@
     padding: 0;
     margin-block-end: var(--perses-spacing-xs);
     color: var(--perses-text-secondary);
-    font-size: var(--perses-font-size-sm);
+    font-size: var(--perses-font-size-md);
+    font-weight: var(--perses-font-weight-medium);
     line-height: var(--perses-line-height-normal);
   }
 
