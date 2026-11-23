@@ -181,9 +181,7 @@ describe('primitives barrel exports', () => {
     const severity: AlertSeverity = 'info';
     const spacingToken: SpacingValue = 'md';
     const spacingValue: SpacingValue = 100;
-    const boxProps: BoxProps = {
-      p: { default: spacingToken, md: spacingValue, xl: '50%' },
-    };
+    const boxProps: BoxProps = { p: { default: spacingToken, md: spacingValue, xl: '50%' } };
     const buttonProps: ButtonProps = {};
     const variant: ButtonVariant = 'solid';
     const cardProps: CardProps = {};
@@ -200,24 +198,12 @@ describe('primitives barrel exports', () => {
     const chipVariant: ChipVariant = 'outline';
     const chipStyle: ChipStyle = { '--perses-chip-size-sm': '2.5rem' };
     const dividerProps: DividerProps = {};
-    const formControlProps: FormControlProps = {
-      size: 'sm',
-      status: 'error',
-      required: true,
-      flex: 1,
-    };
+    const formControlProps: FormControlProps = { size: 'sm', status: 'error', required: true, flex: 1 };
     const formLabelProps: FormLabelProps = { htmlFor: 'name', mb: 'xs' };
     const formHelperTextProps: FormHelperTextProps = { status: 'warning' };
-    const formGroupProps: FormGroupProps = {
-      legend: 'Columns',
-      direction: { default: 'column', md: 'row' },
-    };
+    const formGroupProps: FormGroupProps = { legend: 'Columns', direction: { default: 'column', md: 'row' } };
     const labelPlacement: FormControlLabelPlacement = 'start';
-    const formControlLabelProps: FormControlLabelProps = {
-      label: 'Enabled',
-      labelPlacement,
-      children: null,
-    };
+    const formControlLabelProps: FormControlLabelProps = { label: 'Enabled', labelPlacement, children: null };
     const gridProps: GridProps = { columns: 24 };
     const gridItemProps: GridItemProps = { size: 6 };
     const iconProps: IconProps = {};
@@ -237,10 +223,7 @@ describe('primitives barrel exports', () => {
     const spinnerProps: SpinnerProps = {};
     const stackProps: StackProps = {};
     const switchProps: SwitchProps = { 'aria-label': 'Toggle' };
-    const tooltipProps: TooltipProps = {
-      title: 'tip',
-      children: <button type="button">trigger</button>,
-    };
+    const tooltipProps: TooltipProps = { title: 'tip', children: <button type="button">trigger</button> };
     const menuPlacement: MenuPlacement = 'bottom';
     const menuAlign: MenuAlign = 'start';
     const menuProps: MenuProps = {
@@ -251,15 +234,8 @@ describe('primitives barrel exports', () => {
     };
     const menuItemSize: MenuItemSize = 'sm';
     const menuItemProps: MenuItemProps = { size: menuItemSize, selected: true };
-    const menuLinkItemProps: MenuLinkItemProps = {
-      href: '/docs',
-      target: '_blank',
-      size: menuItemSize,
-    };
-    const menuCheckboxItemProps: MenuCheckboxItemProps = {
-      checked: true,
-      size: menuItemSize,
-    };
+    const menuLinkItemProps: MenuLinkItemProps = { href: '/docs', target: '_blank', size: menuItemSize };
+    const menuCheckboxItemProps: MenuCheckboxItemProps = { checked: true, size: menuItemSize };
     const tableProps: TableProps = {};
     const tableRowProps: TableRowProps = {};
     const tableCellProps: TableCellProps = {};
@@ -277,15 +253,8 @@ describe('primitives barrel exports', () => {
     const tabStyle: TabStyle = { '--perses-tab-min-height': '3rem' };
     const tabPanelProps: TabPanelProps = { value: 'one' };
     const textFieldProps: TextFieldProps = { label: 'Name' };
-    const textFieldStyle: TextFieldStyle = {
-      '--perses-textfield-size-md': '2.5rem',
-    };
-    const textProps: TextProps = {
-      as: 'p',
-      size: 'sm',
-      weight: 'medium',
-      color: 'secondary',
-    };
+    const textFieldStyle: TextFieldStyle = { '--perses-textfield-size-md': '2.5rem' };
+    const textProps: TextProps = { as: 'p', size: 'sm', weight: 'medium', color: 'secondary' };
     const textHelperProps: TextHelperProps = { status: 'error' };
 
     expect(alertProps).toBeDefined();
