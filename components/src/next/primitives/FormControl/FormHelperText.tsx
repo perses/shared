@@ -13,7 +13,7 @@
 
 import { Field } from '@base-ui/react/field';
 import { clsx } from 'clsx';
-import { forwardRef, useCallback } from 'react';
+import { forwardRef, useMemo } from 'react';
 import type { HTMLAttributes, ReactElement } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
@@ -57,10 +57,11 @@ export const FormHelperText = forwardRef<HTMLParagraphElement, FormHelperTextPro
     style: computedStyle,
     rest: domProps,
   } = applyStyleProps(rest, FORM_HELPER_TEXT_STYLE_PROPS, style);
-  const renderHelper = useCallback<Extract<Field.Description.Props['render'], (...args: never[]) => ReactElement>>(
-    (descriptionProps, state): ReactElement => (
-      <TextHelper {...descriptionProps} status={status} disabled={state.disabled} />
-    ),
+  const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
+    () =>
+      (descriptionProps, state): ReactElement => (
+        <TextHelper {...descriptionProps} status={status} disabled={state.disabled} />
+      ),
     [status],
   );
 
