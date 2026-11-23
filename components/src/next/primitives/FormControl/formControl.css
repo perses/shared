@@ -68,14 +68,14 @@
     flex-direction: column;
     gap: var(--perses-spacing-xs);
     border: 0;
-    margin: 0;
-    padding: 0;
+    margin: var(--perses-spacing-0);
+    padding: var(--perses-spacing-0);
     min-inline-size: 0;
     font-family: var(--perses-font-family);
   }
 
   :where(.ps-FormGroup__legend) {
-    padding: 0;
+    padding: var(--perses-spacing-0);
     margin-block-end: var(--perses-spacing-xs);
     color: var(--perses-text-secondary);
     font-size: var(--perses-font-size-md);
