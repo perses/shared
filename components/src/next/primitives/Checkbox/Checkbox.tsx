@@ -74,7 +74,7 @@ export type CheckboxAccessibleName =
       label?: undefined;
       'aria-label'?: never;
       'aria-labelledby'?: never;
-      /** The enclosing `FormControlLabel` or `FormControl` names the checkbox and supplies `size` and `disabled`. */
+      /** The enclosing `FormControlLabel` or `FormControl` names the checkbox and supplies `size`, `disabled` and `required`. */
       labelledByFormControl: true;
     };
 

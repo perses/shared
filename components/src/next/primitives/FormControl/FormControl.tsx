@@ -34,11 +34,11 @@ const FORM_CONTROL_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, f
 export interface FormControlProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'style'>, SpacingProps, SizingProps, FlexboxProps, DisplayProps {
   style?: PersesCSSProperties;
-  /** Scales the nested `FormLabel`/`FormHelperText`; nested controls keep their own `size`. Defaults to `md`. */
+  /** Scales the nested `FormLabel` and is inherited by opted-in controls. Defaults to `md`. */
   size?: Size;
   /** Disables every nested Base UI control and dims the label. */
   disabled?: boolean;
-  /** Shows the required indicator on the nested `FormLabel`. Set `required` on the control itself for validation. */
+  /** Shows the required indicator on the nested `FormLabel` and marks opted-in controls `required`. */
   required?: boolean;
   /** Visual status. `error` also marks the nested control `aria-invalid`. */
   status?: Status;
