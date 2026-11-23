@@ -32,6 +32,11 @@ import './textField.css';
 // Render function rather than a bare element so the label/aria props Base UI merges in are visible to lint.
 const renderTextarea: NonNullable<Field.Control.Props['render']> = (props) => <textarea {...props} />;
 
+function Adornment({ position, children }: { position: 'start' | 'end'; children: ReactNode }): ReactElement | null {
+  if (!hasContent(children)) return null;
+  return <span className={`ps-TextField__adornment ps-TextField__adornment--${position}`}>{children}</span>;
+}
+
 export interface TextFieldStyle extends CSSProperties {
   /** Per-step height override; falls back to the shared control-size scale. */
   '--perses-textfield-size-xs'?: string;
@@ -193,12 +198,17 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     rest,
   } = applyStyleProps(restWithoutRadius, TEXT_FIELD_STYLE_PROPS, style);
   const { display: _display, ...restWithoutDisplay } = rest as typeof rest & { display?: unknown };
-  const rootClassName = clsx('ps-TextField', styleClassName, className);
+  const rootProps = {
+    className: clsx('ps-TextField', styleClassName, className),
+    style: computedStyle,
+    'data-size': size,
+    'data-status': status,
+    'data-full-width': fullWidth || undefined,
+    'data-multiline': multiline || undefined,
+  };
   const control = (
     <div className={clsx('ps-TextField__wrapper', radiusClassName, slotProps?.wrapper?.className)} style={radiusStyle}>
-      {hasContent(startElement) && (
-        <span className="ps-TextField__adornment ps-TextField__adornment--start">{startElement}</span>
-      )}
+      <Adornment position="start">{startElement}</Adornment>
       <Field.Control
         {...(invalid && { 'aria-invalid': true })}
         {...restWithoutDisplay}
@@ -211,39 +221,20 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
         render={multiline ? renderTextarea : undefined}
         {...(multiline && { rows })}
       />
-      {hasContent(endElement) && (
-        <span className="ps-TextField__adornment ps-TextField__adornment--end">{endElement}</span>
-      )}
+      <Adornment position="end">{endElement}</Adornment>
     </div>
   );
 
   if (nested) {
     return (
-      <div
-        className={rootClassName}
-        style={computedStyle}
-        data-disabled={disabled || undefined}
-        data-size={size}
-        data-status={status}
-        data-full-width={fullWidth || undefined}
-        data-multiline={multiline || undefined}
-      >
+      <div {...rootProps} data-disabled={disabled || undefined}>
         {control}
       </div>
     );
   }
 
   return (
-    <Field.Root
-      className={rootClassName}
-      style={computedStyle}
-      disabled={disabled}
-      invalid={invalid}
-      data-size={size}
-      data-status={status}
-      data-full-width={fullWidth || undefined}
-      data-multiline={multiline || undefined}
-    >
+    <Field.Root {...rootProps} disabled={disabled} invalid={invalid}>
       {hasContent(label) && (
         <Field.Label
           className={clsx('ps-TextField__label', slotProps?.label?.className)}
