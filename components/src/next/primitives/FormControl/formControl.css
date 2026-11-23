@@ -103,4 +103,18 @@
     color: var(--perses-text-disabled);
     cursor: not-allowed;
   }
+
+  /* ---- Forced colors: the disabled and error cues above rely on colours that high-contrast mode drops ---- */
+  @media (forced-colors: active) {
+    .ps-FormLabel[data-disabled],
+    .ps-FormGroup[data-disabled] .ps-FormGroup__legend,
+    .ps-FormControlLabel[data-disabled] {
+      color: GrayText;
+    }
+
+    .ps-FormLabel[data-invalid],
+    .ps-FormControl[data-required] .ps-FormLabel::after {
+      color: CanvasText;
+    }
+  }
 }

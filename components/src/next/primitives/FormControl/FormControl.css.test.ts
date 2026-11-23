@@ -15,6 +15,7 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 const source = readFileSync(resolve(__dirname, './formControl.css'), 'utf-8');
+const forcedColors = source.slice(source.indexOf('@media (forced-colors: active)'));
 
 // jsdom cannot resolve token values; inspect declarations from rules matching synthetic elements.
 const css = source
@@ -88,6 +89,13 @@ describe('formControl.css contracts', () => {
 
   it('T25 draws the required indicator with aria-ignorable generated content', () => {
     expect(source).toMatch(/\.ps-FormControl\[data-required\] \.ps-FormLabel::after\s*\{[^}]*content:\s*'\*' \/ ''/);
+  });
+
+  it('restates disabled and error cues in system colours when colours are forced', () => {
+    expect(forcedColors).toMatch(
+      /\.ps-FormLabel\[data-disabled\],[^{]*\.ps-FormControlLabel\[data-disabled\] \{[^}]*color: GrayText/,
+    );
+    expect(forcedColors).toMatch(/\.ps-FormLabel\[data-invalid\],[^{]*::after \{[^}]*color: CanvasText/);
   });
 
   it('T25 scales label and helper text from the FormControl size', () => {
