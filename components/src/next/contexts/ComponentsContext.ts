@@ -1,0 +1,193 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { ComponentType, ForwardRefExoticComponent, PropsWithoutRef, ReactNode, RefAttributes } from 'react';
+import { createContext } from 'react';
+
+import type { AlertProps } from '../primitives/Alert';
+import type { BoxProps } from '../primitives/Box';
+import type { ButtonProps } from '../primitives/Button';
+import type { CardContentProps, CardHeaderProps, CardProps } from '../primitives/Card';
+import type { CheckboxProps } from '../primitives/Checkbox';
+import type { ChipProps } from '../primitives/Chip';
+import type { DividerProps } from '../primitives/Divider';
+import type { GridItemProps, GridProps } from '../primitives/Grid';
+import type { IconButtonProps } from '../primitives/IconButton';
+import type { MenuCheckboxItemProps, MenuItemProps, MenuLinkItemProps, MenuProps } from '../primitives/Menu';
+import type { SelectGroupProps, SelectItemProps, SelectProps } from '../primitives/Select';
+import type { SpinnerProps } from '../primitives/Spinner';
+import type { StackProps } from '../primitives/Stack';
+import type { SwitchProps } from '../primitives/Switch';
+import type {
+  TableBodyProps,
+  TableCellProps,
+  TableContainerProps,
+  TableFooterProps,
+  TableHeadProps,
+  TablePaginationProps,
+  TableProps,
+  TableRowExpandButtonProps,
+  TableRowProps,
+  TableSortLabelProps,
+} from '../primitives/Table';
+import type { TabListProps, TabPanelProps, TabProps, TabsProps } from '../primitives/Tabs';
+import type { TextProps } from '../primitives/Text';
+import type { TextFieldProps } from '../primitives/TextField';
+import type { TextHelperProps } from '../primitives/TextHelper';
+import type { TooltipProps } from '../primitives/Tooltip';
+import type { StyledSVGProps } from '../types';
+
+type RefComponent<Props, Element> = ForwardRefExoticComponent<PropsWithoutRef<Props> & RefAttributes<Element>>;
+
+/**
+ * Complete set of replaceable Perses primitives. Every entry is required so consumers can rely on a component being
+ * available. Applications that only override some primitives should spread `defaultComponents` into their map.
+ */
+export interface PersesComponents {
+  Button: RefComponent<ButtonProps, HTMLButtonElement>;
+  IconButton: RefComponent<IconButtonProps, HTMLButtonElement>;
+  Alert: RefComponent<AlertProps, HTMLDivElement>;
+  Checkbox: RefComponent<CheckboxProps, HTMLElement>;
+  Chip: RefComponent<ChipProps, HTMLDivElement>;
+  Divider: ComponentType<DividerProps>;
+  Spinner: ComponentType<SpinnerProps>;
+  Box: RefComponent<BoxProps, HTMLDivElement>;
+  Card: RefComponent<CardProps, HTMLElement>;
+  CardHeader: RefComponent<CardHeaderProps, HTMLElement>;
+  CardContent: RefComponent<CardContentProps, HTMLElement>;
+  Grid: RefComponent<GridProps, HTMLDivElement>;
+  GridItem: RefComponent<GridItemProps, HTMLDivElement>;
+  Select: RefComponent<SelectProps, HTMLElement>;
+  SelectItem: RefComponent<SelectItemProps, HTMLDivElement>;
+  SelectGroup: RefComponent<SelectGroupProps, HTMLDivElement>;
+  Stack: RefComponent<StackProps, HTMLDivElement>;
+  Switch: RefComponent<SwitchProps, HTMLElement>;
+  Tooltip: RefComponent<TooltipProps, HTMLDivElement>;
+  Menu: RefComponent<MenuProps, HTMLDivElement>;
+  MenuItem: RefComponent<MenuItemProps, HTMLDivElement>;
+  MenuLinkItem: RefComponent<MenuLinkItemProps, HTMLAnchorElement>;
+  MenuCheckboxItem: RefComponent<MenuCheckboxItemProps, HTMLDivElement>;
+  Table: RefComponent<TableProps, HTMLTableElement>;
+  TableHead: RefComponent<TableHeadProps, HTMLTableSectionElement>;
+  TableBody: RefComponent<TableBodyProps, HTMLTableSectionElement>;
+  TableFooter: RefComponent<TableFooterProps, HTMLTableSectionElement>;
+  TableRow: RefComponent<TableRowProps, HTMLTableRowElement>;
+  TableCell: RefComponent<TableCellProps, HTMLTableCellElement>;
+  TableContainer: RefComponent<TableContainerProps, HTMLDivElement>;
+  TableRowExpandButton: RefComponent<TableRowExpandButtonProps, HTMLButtonElement>;
+  TableSortLabel: RefComponent<TableSortLabelProps, HTMLButtonElement>;
+  TablePagination: RefComponent<TablePaginationProps, HTMLDivElement>;
+  Tabs: RefComponent<TabsProps, HTMLDivElement>;
+  TabList: RefComponent<TabListProps, HTMLDivElement>;
+  Tab: RefComponent<TabProps, HTMLElement>;
+  TabPanel: RefComponent<TabPanelProps, HTMLDivElement>;
+  TextField: RefComponent<TextFieldProps, HTMLInputElement | HTMLTextAreaElement>;
+  Text: RefComponent<TextProps, HTMLElement>;
+  TextHelper: RefComponent<TextHelperProps, HTMLParagraphElement>;
+}
+
+export interface PersesIcons {
+  Error: ComponentType<StyledSVGProps>;
+  Info: ComponentType<StyledSVGProps>;
+  Success: ComponentType<StyledSVGProps>;
+  Warning: ComponentType<StyledSVGProps>;
+}
+
+export interface ComponentsContextValue {
+  components: PersesComponents;
+  icons: PersesIcons;
+}
+
+export interface ComponentsProviderProps {
+  /**
+   * Map of components that will be loaded when using the `useComponents` hook.
+   *
+   * @example
+   * // Use the default components
+   * import { defaultComponents } from '@perses-dev/components/next/primitives/defaults';
+   *
+   * const components: PersesComponents = defaultComponents;
+   *
+   * @example
+   * // Override one component, spreading over the defaults
+   * import { defaultComponents } from '@perses-dev/components/next/primitives/defaults';
+   *
+   * const components: PersesComponents = { ...defaultComponents, Button: MyButton };
+   *
+   * @example
+   * // Provide only custom components
+   * const components: PersesComponents = {
+   *   Alert: MyAlert,
+   *   Box: MyBox,
+   *   Button: MyButton,
+   *   Card: MyCard,
+   *   CardHeader: MyCardHeader,
+   *   CardContent: MyCardContent,
+   *   Chip: MyChip,
+   *   IconButton: MyIconButton,
+   *   Checkbox: MyCheckbox,
+   *   Switch: MySwitch,
+   *   Divider: MyDivider,
+   *   Grid: MyGrid,
+   *   GridItem: MyGridItem,
+   *   Spinner: MySpinner,
+   *   Stack: MyStack,
+   *   Tooltip: MyTooltip,
+   *   Menu: MyMenu,
+   *   MenuItem: MyMenuItem,
+   *   MenuLinkItem: MyMenuLinkItem,
+   *   MenuCheckboxItem: MyMenuCheckboxItem,
+   *   Table: MyTable,
+   *   TableHead: MyTableHead,
+   *   TableBody: MyTableBody,
+   *   TableFooter: MyTableFooter,
+   *   TableRow: MyTableRow,
+   *   TableCell: MyTableCell,
+   *   TableContainer: MyTableContainer,
+   *   TableRowExpandButton: MyTableRowExpandButton,
+   *   TableSortLabel: MyTableSortLabel,
+   *   TablePagination: MyTablePagination,
+   *   Tabs: MyTabs,
+   *   TabList: MyTabList,
+   *   Tab: MyTab,
+   *   TabPanel: MyTabPanel,
+   *   TextField: MyTextField,
+   *   Text: MyText,
+   *   TextHelper: MyTextHelper,
+   * };
+   */
+  components: PersesComponents;
+  /**
+   * Map of icons that will be loaded when using the `useComponents` hook.
+   *
+   * @example
+   * // Use the default icons
+   * import { defaultIcons } from '@perses-dev/components/next/primitives/defaults';
+   *
+   * const icons: PersesIcons = defaultIcons;
+   *
+   * @example
+   * // Override one icon, spreading over the defaults
+   * import { defaultIcons } from '@perses-dev/components/next/primitives/defaults';
+   *
+   * const icons: PersesIcons = { ...defaultIcons, Error: MyErrorIcon };
+   *
+   * @example
+   * // Provide all custom icons
+   * const icons: PersesIcons = { Error: MyErrorIcon, Info: MyInfoIcon, Success: MySuccessIcon, Warning: MyWarningIcon };
+   */
+  icons: PersesIcons;
+  children?: ReactNode;
+}
+
+export const ComponentsContext = createContext<ComponentsContextValue | undefined>(undefined);
