@@ -79,7 +79,7 @@ export type RadiusVar = `--perses-radius-${RadiusScale}`;
 
 export type ShadowVar = '--perses-shadow-overlay';
 
-export type ZIndexVar = '--perses-z-index-overlay';
+export type ZIndexVar = '--perses-z-index-drawer' | '--perses-z-index-overlay';
 
 export type FontSizeScale = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 

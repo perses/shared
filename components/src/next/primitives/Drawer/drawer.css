@@ -19,7 +19,7 @@
   :where(.ps-Drawer__backdrop) {
     position: fixed;
     inset: 0;
-    z-index: var(--perses-z-index-overlay);
+    z-index: var(--perses-z-index-drawer);
     background-color: var(--perses-bg-backdrop);
     transition: opacity 0.15s ease;
   }
@@ -32,7 +32,7 @@
   :where(.ps-Drawer__viewport) {
     position: fixed;
     inset: 0;
-    z-index: var(--perses-z-index-overlay);
+    z-index: var(--perses-z-index-drawer);
     display: flex;
     justify-content: flex-end;
   }

@@ -153,6 +153,7 @@ describe('tokens object', () => {
 
   it('mirrors the CSS variable path for overlay shadow and z-index tokens', () => {
     expect(tokens.shadow.overlay).toBe('var(--perses-shadow-overlay)');
+    expect(tokens.zIndex.drawer).toBe('var(--perses-z-index-drawer)');
     expect(tokens.zIndex.overlay).toBe('var(--perses-z-index-overlay)');
     expect(tokens).not.toHaveProperty('elevation');
   });
