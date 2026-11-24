@@ -25,48 +25,49 @@ import { FormControl, FormControlLabel, FormGroup, FormHelperText, FormLabel } f
 
 const basicCode = `<FormControl>
   <FormLabel>Name</FormLabel>
-  <TextField labelledByFormControl placeholder="Type here" />
+  <TextField placeholder="Type here" />
   <FormHelperText>Displayed dashboard name</FormHelperText>
 </FormControl>
 
 <FormControl>
   <FormLabel>Unit</FormLabel>
-  <Select labelledByFormControl defaultValue="bytes">…</Select>
+  <Select defaultValue="bytes">…</Select>
 </FormControl>
 
 // Toggles: FormControlLabel puts the text beside the control and makes it clickable.
-<FormControlLabel label="Allow header sorting"><Switch labelledByFormControl /></FormControlLabel>
+<FormControlLabel label="Allow header sorting"><Switch /></FormControlLabel>
 `;
 
 export const Basic: Story = () => (
   <Page>
     <p>
       The <code>FormControl</code> family provides the label, helper text and shared state for a control.{' '}
-      <code>TextField</code>, <code>Select</code>, <code>Checkbox</code> and <code>Switch</code> opt in with{' '}
-      <code>labelledByFormControl</code> and then inherit <code>size</code>, <code>disabled</code>,{' '}
-      <code>required</code> and <code>status</code>. Responsive spacing, sizing, flexbox and <code>display</code> style
-      props apply to <code>FormControl</code> and <code>FormGroup</code>; spacing props apply to the other parts.
+      <code>TextField</code>, <code>Select</code>, <code>Checkbox</code> and <code>Switch</code> placed inside use its
+      label automatically and inherit <code>size</code>, <code>disabled</code>, <code>required</code> and{' '}
+      <code>status</code>. Give a <code>TextField</code> or <code>Select</code> its own <code>label</code> to keep its
+      own label and helper text. Responsive spacing, sizing, flexbox and <code>display</code> style props apply to{' '}
+      <code>FormControl</code> and <code>FormGroup</code>; spacing props apply to the other parts.
     </p>
     <Sample title="One wrapper for every control" code={basicCode}>
       <Stack spacing="lg">
         <FormControl>
           <FormLabel>Name</FormLabel>
-          <TextField labelledByFormControl placeholder="Type here" />
+          <TextField placeholder="Type here" />
           <FormHelperText>Displayed name of dashboard</FormHelperText>
         </FormControl>
         <FormControl>
           <FormLabel>Unit</FormLabel>
-          <Select labelledByFormControl defaultValue="bytes">
+          <Select defaultValue="bytes">
             <SelectItem value="bytes">Bytes</SelectItem>
             <SelectItem value="seconds">Seconds</SelectItem>
           </Select>
           <FormHelperText>Applied to every series in the panel</FormHelperText>
         </FormControl>
         <FormControlLabel label="Show legend">
-          <Checkbox labelledByFormControl defaultChecked />
+          <Checkbox defaultChecked />
         </FormControlLabel>
         <FormControlLabel label="Allow header sorting">
-          <Switch labelledByFormControl />
+          <Switch />
         </FormControlLabel>
       </Stack>
     </Sample>
@@ -81,8 +82,8 @@ const groupCode = `// Elements are stacked vertically by default, to change orie
   <Checkbox label="Timestamp" />
 </FormGroup>`;
 const formControlLabel = `// Clicking the text toggles the wrapped control. Typically, used with switch and checkbox
-<FormControlLabel label="Text second"><Switch labelledByFormControl /></FormControlLabel>
-<FormControlLabel label="Text first" labelPlacement="start"><Switch labelledByFormControl /></FormControlLabel>`;
+<FormControlLabel label="Text second"><Switch /></FormControlLabel>
+<FormControlLabel label="Text first" labelPlacement="start"><Switch /></FormControlLabel>`;
 
 const settingsRowsCode = `// To create columns use the 'Stack' component
 <Stack direction="row" spacing="3xl" alignItems="flex-start">
@@ -90,11 +91,11 @@ const settingsRowsCode = `// To create columns use the 'Stack' component
     <FormGroup key={legend} legend={legend} width={360}>
       <FormControl display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
         <FormLabel>Show</FormLabel>
-        <Switch labelledByFormControl defaultChecked />
+        <Switch defaultChecked />
       </FormControl>
       <FormControl display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
         <FormLabel>Position</FormLabel>
-        <Select labelledByFormControl defaultValue="bottom">…</Select>
+        <Select defaultValue="bottom">…</Select>
       </FormControl>
     </FormGroup>
   ))}
@@ -104,11 +105,11 @@ const sizingCode = `// Constrain row using width, minWidth, and flex
 <FormGroup legend="Row" direction="row">
   <FormControl width={180}>
     <FormLabel>Fixed 180px</FormLabel>
-    <TextField labelledByFormControl />
+    <TextField />
   </FormControl>
   <FormControl minWidth={120} flex={1}>
     <FormLabel>Min 120px, grows</FormLabel>
-    <Select labelledByFormControl defaultValue="a">
+    <Select defaultValue="a">
       <SelectItem value="a">Option A</SelectItem>
     </Select>
   </FormControl>
@@ -129,11 +130,11 @@ export const Variants: Story = () => (
       <FormGroup legend="Row" direction="row">
         <FormControl width={180}>
           <FormLabel>Fixed 180px</FormLabel>
-          <TextField labelledByFormControl />
+          <TextField />
         </FormControl>
         <FormControl minWidth={120} flex={1}>
           <FormLabel>Min 120px, grows</FormLabel>
-          <Select labelledByFormControl defaultValue="a">
+          <Select defaultValue="a">
             <SelectItem value="a">Option A</SelectItem>
           </Select>
         </FormControl>
@@ -145,11 +146,11 @@ export const Variants: Story = () => (
           <FormGroup key={legend} legend={legend} width={360}>
             <FormControl display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
               <FormLabel>Show</FormLabel>
-              <Switch labelledByFormControl defaultChecked />
+              <Switch defaultChecked />
             </FormControl>
             <FormControl display="flex" flexDirection="row" alignItems="center" justifyContent="space-between">
               <FormLabel>Position</FormLabel>
-              <Select labelledByFormControl defaultValue="bottom">
+              <Select defaultValue="bottom">
                 <SelectItem value="bottom">Bottom</SelectItem>
                 <SelectItem value="right">Right</SelectItem>
               </Select>
@@ -161,10 +162,10 @@ export const Variants: Story = () => (
     <Sample title="Label Placement" code={formControlLabel}>
       <Stack spacing="lg">
         <FormControlLabel label="Text second">
-          <Switch labelledByFormControl />
+          <Switch />
         </FormControlLabel>
         <FormControlLabel label="Text first" labelPlacement="start">
-          <Switch labelledByFormControl />
+          <Switch />
         </FormControlLabel>
       </Stack>
     </Sample>
@@ -174,35 +175,35 @@ Variants.storyName = 'Variants';
 
 const errorCode = `<FormControl status="error">
   <FormLabel>Email</FormLabel>
-  <TextField labelledByFormControl defaultValue="not-an-email" />
+  <TextField defaultValue="not-an-email" />
   <FormHelperText>Enter a valid email address</FormHelperText>
 </FormControl>`;
 
 const warningCode = `<FormControl status="warning">
   <FormLabel>Threshold</FormLabel>
-  <TextField labelledByFormControl defaultValue="95" />
+  <TextField defaultValue="95" />
   <FormHelperText>Values above 90 may hide short spikes</FormHelperText>
 </FormControl>`;
 
 const requiredCode = `<FormControl required>
   <FormLabel>Name</FormLabel>
-  <TextField labelledByFormControl />
+  <TextField />
   <FormHelperText>The indicator and the required flag on the input both come from FormControl</FormHelperText>
 </FormControl>`;
 
 const disabledCode = `<FormControl disabled>
   <FormLabel>Disabled</FormLabel>
-  <TextField labelledByFormControl defaultValue="Cannot be edited" />
+  <TextField defaultValue="Cannot be edited" />
   <FormHelperText>This field is disabled</FormHelperText>
 </FormControl>`;
 
 const disabledGroupCode = `<FormGroup legend="Disabled group" disabled>
   <FormControlLabel label="Email">
-    <Switch labelledByFormControl defaultChecked />
+    <Switch defaultChecked />
   </FormControlLabel>
   <FormControl>
     <FormLabel>Address</FormLabel>
-    <TextField labelledByFormControl defaultValue="Inherited from the group" />
+    <TextField defaultValue="Inherited from the group" />
   </FormControl>
 </FormGroup>`;
 
@@ -216,7 +217,7 @@ export const States: Story = () => (
       <Stack spacing="lg">
         <FormControl status="error">
           <FormLabel>Email</FormLabel>
-          <TextField labelledByFormControl defaultValue="not-an-email" />
+          <TextField defaultValue="not-an-email" />
           <FormHelperText>Enter a valid email address</FormHelperText>
         </FormControl>
       </Stack>
@@ -225,7 +226,7 @@ export const States: Story = () => (
       <Stack spacing="lg">
         <FormControl status="warning">
           <FormLabel>Threshold</FormLabel>
-          <TextField labelledByFormControl defaultValue="95" />
+          <TextField defaultValue="95" />
           <FormHelperText>Values above 90 may hide short spikes</FormHelperText>
         </FormControl>
       </Stack>
@@ -234,7 +235,7 @@ export const States: Story = () => (
       <Stack spacing="lg">
         <FormControl required>
           <FormLabel>Name</FormLabel>
-          <TextField labelledByFormControl />
+          <TextField />
           <FormHelperText>The indicator and the required flag on the input both come from FormControl</FormHelperText>
         </FormControl>
       </Stack>
@@ -243,7 +244,7 @@ export const States: Story = () => (
       <Stack spacing="lg">
         <FormControl disabled>
           <FormLabel>Disabled</FormLabel>
-          <TextField labelledByFormControl defaultValue="Cannot be edited" />
+          <TextField defaultValue="Cannot be edited" />
           <FormHelperText>This field is disabled</FormHelperText>
         </FormControl>
       </Stack>
@@ -252,11 +253,11 @@ export const States: Story = () => (
       <Stack spacing="lg">
         <FormGroup legend="Disabled group" disabled>
           <FormControlLabel label="Email">
-            <Switch labelledByFormControl defaultChecked />
+            <Switch defaultChecked />
           </FormControlLabel>
           <FormControl>
             <FormLabel>Address</FormLabel>
-            <TextField labelledByFormControl defaultValue="Inherited from the group" />
+            <TextField defaultValue="Inherited from the group" />
           </FormControl>
         </FormGroup>
       </Stack>
@@ -268,20 +269,20 @@ States.storyName = 'States';
 const spacingCode = `// Spacing tokens and responsive objects
 <FormControl mb="lg">
   <FormLabel>Margin bottom lg</FormLabel>
-  <TextField labelledByFormControl />
+  <TextField />
 </FormControl>`;
 const responsiveCode = `// Responsive objects pick a token per breakpoint
 <FormControl mb={{ default: "0", lg: "4xl" }} mt={{ default: "0", lg: "4xl" }}>
   <FormLabel>Responsive margin top and bottom</FormLabel>
-  <TextField labelledByFormControl />
+  <TextField />
 </FormControl>`;
 const gapCode = `// gap controls the space between the children of a FormGroup
 <FormGroup legend="Gap medium" gap="md">
   <FormControlLabel label="One">
-    <Switch labelledByFormControl />
+    <Switch />
   </FormControlLabel>
   <FormControlLabel label="Two">
-    <Switch labelledByFormControl />
+    <Switch />
   </FormControlLabel>
 </FormGroup>`;
 
@@ -297,10 +298,10 @@ export const Spacing: Story = () => (
         {spacingTokens.map((gap) => (
           <FormGroup key={gap} legend={`Gap ${gap}`} gap={gap}>
             <FormControlLabel label="One">
-              <Switch labelledByFormControl />
+              <Switch />
             </FormControlLabel>
             <FormControlLabel label="Two">
-              <Switch labelledByFormControl />
+              <Switch />
             </FormControlLabel>
           </FormGroup>
         ))}
@@ -310,7 +311,7 @@ export const Spacing: Story = () => (
       <div style={marginOutline}>
         <FormControl mb={{ default: '0', lg: '4xl' }} mt={{ default: '0', lg: '4xl' }}>
           <FormLabel>Responsive margin top and bottom</FormLabel>
-          <TextField labelledByFormControl />
+          <TextField />
         </FormControl>
       </div>
     </Sample>
@@ -319,7 +320,7 @@ export const Spacing: Story = () => (
         {spacingTokens.map((mb) => (
           <FormControl key={mb} mb={mb}>
             <FormLabel>Margin bottom {mb}</FormLabel>
-            <TextField labelledByFormControl />
+            <TextField />
           </FormControl>
         ))}
       </div>

@@ -45,7 +45,7 @@
     height: var(--ps-switch-size);
     border: none;
     border-radius: var(--perses-radius-full);
-    background-color: var(--perses-color-gray-300);
+    background-color: var(--perses-bg-sunken);
     cursor: pointer;
     transition: background-color 0.15s ease;
     padding: var(--ps-switch-padding);

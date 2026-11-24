@@ -261,8 +261,10 @@ expectTypeOf({
   value: ['a', 1],
   onValueChange: (value: Array<string | number>): Array<string | number> => value,
 } satisfies SelectProps);
-// @ts-expect-error A Select needs a label, aria-label or aria-labelledby.
+// A Select without its own name is allowed: an enclosing FormControl or the consumer supplies it.
 expectTypeOf({ value: 'bytes' } satisfies SelectProps);
+// @ts-expect-error A visible label cannot be overridden by aria-label (WCAG 2.5.3).
+expectTypeOf({ label: 'Unit', 'aria-label': 'Other', value: 'bytes' } satisfies SelectProps);
 // Search, chips, clear and the items data source.
 expectTypeOf({
   label: 'Unit',

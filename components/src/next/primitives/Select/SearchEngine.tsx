@@ -165,12 +165,16 @@ function SearchField({
 function SearchToggle({ engine }: { engine: SelectEngineProps }): ReactElement {
   const { icon, label, labelId, focusableProps } = engine;
   const hasLabel = hasContent(label);
+  const ariaLabelledBy = hasLabel ? labelId : focusableProps['aria-labelledby'];
+  const ariaLabel = hasLabel ? undefined : focusableProps['aria-label'];
+  // Only pass the props that have a value: an explicit `undefined` would replace the label id Base UI wires up from
+  // an enclosing FormControl's FormLabel and leave the button unnamed.
   return (
     <Combobox.Trigger
       className="ps-Select__toggle"
       tabIndex={-1}
-      aria-labelledby={hasLabel ? labelId : focusableProps['aria-labelledby']}
-      aria-label={hasLabel ? undefined : focusableProps['aria-label']}
+      {...(ariaLabelledBy !== undefined && { 'aria-labelledby': ariaLabelledBy })}
+      {...(ariaLabel !== undefined && { 'aria-label': ariaLabel })}
     >
       {icon}
     </Combobox.Trigger>

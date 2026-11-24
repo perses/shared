@@ -359,14 +359,4 @@ describe('Switch', () => {
       expect(screen.getByRole('switch')).not.toHaveAttribute('m');
     });
   });
-
-  it('requires an accessible name at the type level', () => {
-    // @ts-expect-error -- one of label, aria-label, aria-labelledby or labelledByFormControl is required
-    const missingName = <Switch />;
-    const withLabel = <Switch label="Feature" />;
-    const withAriaLabel = <Switch aria-label="Feature" />;
-    const withAriaLabelledBy = <Switch aria-labelledby="feature-id" />;
-    const withFormControl = <Switch labelledByFormControl />;
-    expect([missingName, withLabel, withAriaLabel, withAriaLabelledBy, withFormControl]).toHaveLength(5);
-  });
 });

@@ -267,45 +267,28 @@ type SelectVirtualizationProps =
     };
 
 /**
- * Every Select needs a name for screen readers, so you must pass one of `label`, `aria-label` or
- * `aria-labelledby`. If you pass a visible `label`, that text is the name and the two aria props are blocked:
- * they would replace the visible text with something the user cannot see (WCAG 2.5.3 Label in Name).
+ * Every Select needs a name for screen readers: a visible `label`, `aria-label`, `aria-labelledby`, or the
+ * `FormLabel` of an enclosing `FormControl`. If you pass a visible `label`, that text is the name and the two aria
+ * props are blocked: they would replace the visible text with something the user cannot see (WCAG 2.5.3 Label in
+ * Name).
  */
 type SelectAccessibleName =
   | {
       /**
        * Visible label, associated with the trigger through `aria-labelledby` and used as the accessible name.
-       * Clicking it focuses the trigger without opening the list, like the label of a native `<select>`.
+       * Clicking it focuses the trigger without opening the list, like the label of a native `<select>`. Inside a
+       * `FormControl` it keeps the select's own label and helper text instead of using the wrapper's.
        */
       label: ReactNode;
       'aria-label'?: never;
       'aria-labelledby'?: never;
-      labelledByFormControl?: never;
     }
   | {
       label?: undefined;
       /** Accessible name when there is no visible label. */
-      'aria-label': string;
-      'aria-labelledby'?: string;
-      labelledByFormControl?: never;
-    }
-  | {
-      label?: undefined;
       'aria-label'?: string;
       /** Id of an external element that labels the trigger when there is no visible label. */
-      'aria-labelledby': string;
-      labelledByFormControl?: never;
-    }
-  | {
-      label?: undefined;
-      'aria-label'?: never;
-      'aria-labelledby'?: never;
-      /**
-       * Let the enclosing `FormControl` label the select: it renders no label or helper of its own and the outer
-       * `FormLabel` names the trigger. Without this flag the select keeps its own label and helper even inside a
-       * `FormControl`. Either way it inherits `size`, `disabled`, `required` and `status` from the wrapper.
-       */
-      labelledByFormControl: true;
+      'aria-labelledby'?: string;
     };
 
 type SelectSearchProps =
@@ -461,7 +444,7 @@ export type SelectProps = SelectBaseProps &
  * // Inside a FormControl the wrapper owns the label and helper text.
  * <FormControl>
  *   <FormLabel>Unit</FormLabel>
- *   <Select labelledByFormControl value={unit} onValueChange={setUnit}>…</Select>
+ *   <Select value={unit} onValueChange={setUnit}>…</Select>
  * </FormControl>
  */
 export const Select = forwardRef<HTMLElement, SelectProps>(function Select(props, ref) {
@@ -480,7 +463,6 @@ function SelectRoot({
   required: requiredProp,
   readOnly,
   disabled: disabledProp,
-  labelledByFormControl,
   name,
   form,
   placeholder,
@@ -533,7 +515,8 @@ function SelectRoot({
     disabled: disabledProp,
     required: requiredProp,
   });
-  const nested = labelledByFormControl === true && inFormControl;
+  // Without its own label the select defers its label and helper text to the enclosing FormControl.
+  const nested = inFormControl && !hasContent(label);
   const helperText = nested ? undefined : helperTextProp;
   const triggerId = id ?? generatedId;
   const isMultiple = multiple === true;
@@ -615,7 +598,7 @@ function SelectRoot({
 
   const engineProps: SelectEngineProps = {
     forwardedRef,
-    focusableProps: { ...(invalid && { 'aria-invalid': true }), ...restWithoutDisplay, id: triggerId },
+    focusableProps: { ...(invalid && !disabled && { 'aria-invalid': true }), ...restWithoutDisplay, id: triggerId },
     label,
     labelId,
     helperText,

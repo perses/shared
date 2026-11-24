@@ -45,11 +45,11 @@ export interface FormControlLabelProps extends Omit<LabelHTMLAttributes<HTMLLabe
 
 /**
  * Clickable text next to a selection control, wrapping both in one `<label>` so clicking the text toggles the
- * control. Perses controls that require an accessible name opt in with `labelledByFormControl`.
+ * control. The text names the wrapped control.
  *
  * @example
  * <FormControlLabel label="Allow header sorting">
- *   <Checkbox labelledByFormControl />
+ *   <Checkbox />
  * </FormControlLabel>
  */
 export const FormControlLabel = forwardRef<HTMLLabelElement, FormControlLabelProps>(function FormControlLabel(

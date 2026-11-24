@@ -92,43 +92,26 @@ interface TextFieldBaseProps
 }
 
 /**
- * Accessible-name contract: at least one of `label`, `aria-label` or `aria-labelledby` is required so the control
- * always has an accessible name. When a visible `label` is provided it is the accessible name; `aria-label` and
- * `aria-labelledby` are disallowed there because either would silently override the visible text and produce a
- * Label-in-Name mismatch (WCAG 2.5.3).
+ * Accessible-name contract. A visible `label` is the accessible name, so `aria-label` and `aria-labelledby` are
+ * disallowed with it: either would silently override the visible text (WCAG 2.5.3 Label in Name). Without a `label`,
+ * the field is named by `aria-label`, `aria-labelledby`, or the `FormLabel` of an enclosing `FormControl`.
  */
 type TextFieldAccessibleName =
   | {
-      /** Visible label, associated with the control through `htmlFor`/`id`, and used as the accessible name. */
+      /**
+       * Visible label, associated with the control through `htmlFor`/`id`, and used as the accessible name. Inside a
+       * `FormControl` it keeps the field's own label and helper text instead of using the wrapper's.
+       */
       label: ReactNode;
       'aria-label'?: never;
       'aria-labelledby'?: never;
-      labelledByFormControl?: never;
     }
   | {
       label?: undefined;
       /** Accessible name when there is no visible label. */
-      'aria-label': string;
-      'aria-labelledby'?: string;
-      labelledByFormControl?: never;
-    }
-  | {
-      label?: undefined;
       'aria-label'?: string;
       /** Id of an external element that labels the control when there is no visible label. */
-      'aria-labelledby': string;
-      labelledByFormControl?: never;
-    }
-  | {
-      label?: undefined;
-      'aria-label'?: never;
-      'aria-labelledby'?: never;
-      /**
-       * Let the enclosing `FormControl` label the field: it renders no label or helper of its own and the outer
-       * `FormLabel` links to the input. Without this flag the field keeps its own label and helper even inside a
-       * `FormControl`.
-       */
-      labelledByFormControl: true;
+      'aria-labelledby'?: string;
     };
 
 export type TextFieldProps = TextFieldBaseProps & TextFieldAccessibleName;
@@ -145,7 +128,7 @@ export type TextFieldProps = TextFieldBaseProps & TextFieldAccessibleName;
  * // Inside a FormControl the wrapper owns the label and helper text.
  * <FormControl required>
  *   <FormLabel>Name</FormLabel>
- *   <TextField labelledByFormControl />
+ *   <TextField />
  *   <FormHelperText>Shown to your team</FormHelperText>
  * </FormControl>
  */
@@ -166,7 +149,6 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     id,
     disabled: disabledProp,
     required: requiredProp,
-    labelledByFormControl,
     ...props
   },
   ref,
@@ -179,7 +161,8 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     disabled: disabledProp,
     required: requiredProp,
   });
-  const nested = labelledByFormControl === true && inFormControl;
+  // Without its own label the field defers its label and helper text to the enclosing FormControl.
+  const nested = inFormControl && !hasContent(label);
   const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
     () =>
       (descriptionProps, state): ReactElement => (
@@ -210,7 +193,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     <div className={clsx('ps-TextField__wrapper', radiusClassName, slotProps?.wrapper?.className)} style={radiusStyle}>
       <Adornment position="start">{startElement}</Adornment>
       <Field.Control
-        {...(invalid && { 'aria-invalid': true })}
+        {...(invalid && !disabled && { 'aria-invalid': true })}
         {...restWithoutDisplay}
         ref={ref}
         id={inputId}

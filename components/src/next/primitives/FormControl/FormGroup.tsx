@@ -13,10 +13,11 @@
 
 import { Fieldset } from '@base-ui/react/fieldset';
 import { clsx } from 'clsx';
-import { forwardRef } from 'react';
+import { forwardRef, useContext } from 'react';
 import type { FieldsetHTMLAttributes, ReactNode } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
+import { FormGroupDisabledContext } from '../formControlContext';
 import { hasContent } from '../hasContent';
 import type { DisplayProps, FlexboxProps, Responsive, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, flexboxProps, sizingProps, spacingProps } from '../system';
@@ -55,7 +56,7 @@ export interface FormGroupProps
  * </FormGroup>
  */
 export const FormGroup = forwardRef<HTMLFieldSetElement, FormGroupProps>(function FormGroup(
-  { legend, direction, className, style, children, ...rest },
+  { legend, direction, disabled, className, style, children, ...rest },
   ref,
 ) {
   const {
@@ -63,6 +64,7 @@ export const FormGroup = forwardRef<HTMLFieldSetElement, FormGroupProps>(functio
     style: computedStyle,
     rest: domProps,
   } = applyStyleProps({ ...rest, flexDirection: direction }, FORM_GROUP_STYLE_PROPS, style);
+  const groupDisabled = useContext(FormGroupDisabledContext) || Boolean(disabled);
 
   return (
     <Fieldset.Root
@@ -70,13 +72,14 @@ export const FormGroup = forwardRef<HTMLFieldSetElement, FormGroupProps>(functio
       ref={ref}
       className={clsx('ps-FormGroup', styleClassName, className)}
       style={computedStyle}
+      disabled={disabled}
     >
       {hasContent(legend) && (
         <Fieldset.Legend className="ps-FormGroup__legend" render={<legend />}>
           {legend}
         </Fieldset.Legend>
       )}
-      {children}
+      <FormGroupDisabledContext.Provider value={groupDisabled}>{children}</FormGroupDisabledContext.Provider>
     </Fieldset.Root>
   );
 });

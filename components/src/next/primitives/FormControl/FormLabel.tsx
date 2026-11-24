@@ -17,6 +17,7 @@ import { forwardRef } from 'react';
 import type { LabelHTMLAttributes } from 'react';
 
 import type { PersesCSSProperties } from '../../types';
+import { useFormControlContext } from '../formControlContext';
 import type { SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, spacingProps } from '../system';
 
@@ -38,7 +39,7 @@ export interface FormLabelProps extends Omit<LabelHTMLAttributes<HTMLLabelElemen
  * @example
  * <FormControl>
  *   <FormLabel>Name</FormLabel>
- *   <TextField labelledByFormControl />
+ *   <TextField />
  * </FormControl>
  */
 export const FormLabel = forwardRef<HTMLLabelElement, FormLabelProps>(function FormLabel(
@@ -50,6 +51,8 @@ export const FormLabel = forwardRef<HTMLLabelElement, FormLabelProps>(function F
     style: computedStyle,
     rest: domProps,
   } = applyStyleProps(rest, FORM_LABEL_STYLE_PROPS, style);
+  // Read from the nearest FormControl so its size, status and required styles never reach labels nested deeper.
+  const { inFormControl, size, status, required } = useFormControlContext();
 
   return (
     <Field.Label
@@ -57,6 +60,9 @@ export const FormLabel = forwardRef<HTMLLabelElement, FormLabelProps>(function F
       ref={ref}
       className={clsx('ps-FormLabel', styleClassName, className)}
       style={computedStyle}
+      data-size={inFormControl ? size : undefined}
+      data-status={inFormControl ? status : undefined}
+      data-required={inFormControl && required ? '' : undefined}
     >
       {children}
     </Field.Label>

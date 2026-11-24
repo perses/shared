@@ -12,10 +12,10 @@
 // limitations under the License.
 
 /**
- * Resolves `aria-labelledby` for toggles (Checkbox, Switch) whose Base UI root is a `<span>`. Base UI names such a
- * control after the wrapping `<label>`, which beats `aria-label` and concatenates both texts. An explicit
- * `aria-label` must win, so an empty `aria-labelledby` is returned in that case: the accessible-name algorithm
- * ignores an empty reference list and falls through to `aria-label`.
+ * Resolves `aria-labelledby` for toggles (Checkbox, Switch) whose Base UI root is a `<span>`. An explicit, non-blank
+ * `aria-label` must win over the wrapping `<label>`, so an empty `aria-labelledby` is returned in that case: the
+ * accessible-name algorithm ignores an empty reference list and falls through to `aria-label`. A blank `aria-label`
+ * names nothing, so it falls back like an absent one and the enclosing label still names the control.
  */
 export function resolveAriaLabelledBy(
   ariaLabelledBy: string | undefined,
@@ -23,6 +23,6 @@ export function resolveAriaLabelledBy(
   fallback?: string,
 ): string | undefined {
   if (ariaLabelledBy !== undefined) return ariaLabelledBy;
-  if (ariaLabel !== undefined) return '';
+  if (ariaLabel?.trim()) return '';
   return fallback;
 }

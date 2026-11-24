@@ -62,22 +62,6 @@ export interface CheckboxStyle extends CSSProperties {
 const CHECKBOX_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
 const CHECKBOX_RADIUS_PROPS = compileStyleProps([radiusProps]);
 
-/**
- * A checkbox must have an accessible name: a visible `label`, `aria-label`, `aria-labelledby`, or the label of an
- * enclosing `FormControlLabel`/`FormControl` (`labelledByFormControl`).
- */
-export type CheckboxAccessibleName =
-  | { label: ReactNode; labelledByFormControl?: never }
-  | { 'aria-label': string; labelledByFormControl?: never }
-  | { 'aria-labelledby': string; labelledByFormControl?: never }
-  | {
-      label?: undefined;
-      'aria-label'?: never;
-      'aria-labelledby'?: never;
-      /** The enclosing `FormControlLabel` or `FormControl` names the checkbox and supplies `size`, `disabled` and `required`. */
-      labelledByFormControl: true;
-    };
-
 /** Styling-only overrides for the checkbox's documented internal parts. */
 export interface CheckboxSlotProps {
   /** The sized control element; accepts the `CheckboxStyle` custom properties. */
@@ -86,9 +70,11 @@ export interface CheckboxSlotProps {
   label?: SlotStyleProps;
 }
 
-export type CheckboxProps = CheckboxBaseProps & CheckboxAccessibleName;
-
-interface CheckboxBaseProps
+/**
+ * Name the checkbox with `label`, `aria-label` or `aria-labelledby`, or place it inside a `FormControl` or
+ * `FormControlLabel`, whose label names it automatically.
+ */
+export interface CheckboxProps
   extends
     Omit<HTMLAttributes<HTMLElement>, 'children' | 'color' | 'onChange' | 'style'>,
     SpacingProps,
@@ -144,7 +130,6 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
     label,
     labelPosition = 'end',
     size: sizeProp,
-    labelledByFormControl: _labelledByFormControl,
     color = 'default',
     variant = 'subtle',
     className,

@@ -42,7 +42,7 @@ export interface FormHelperTextProps extends Omit<HTMLAttributes<HTMLParagraphEl
  * @example
  * <FormControl status="error">
  *   <FormLabel>Name</FormLabel>
- *   <TextField labelledByFormControl />
+ *   <TextField />
  *   <FormHelperText>Name is required</FormHelperText>
  * </FormControl>
  */

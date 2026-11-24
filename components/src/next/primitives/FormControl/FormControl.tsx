@@ -46,13 +46,14 @@ export interface FormControlProps
 
 /**
  * Groups one control with its `FormLabel` and `FormHelperText` and wires the accessible name and description
- * between them. Controls opt in with `labelledByFormControl` and then inherit `size`, `disabled`, `required` and
- * `status` from the wrapper.
+ * between them. Nested controls inherit `size`, `disabled`, `required` and `status` from the wrapper. A `TextField` or
+ * `Select` without its own `label` uses the wrapper's `FormLabel` and `FormHelperText`; give it a `label` to keep its
+ * own.
  *
  * @example
  * <FormControl required status="error">
  *   <FormLabel>Name</FormLabel>
- *   <TextField labelledByFormControl />
+ *   <TextField />
  *   <FormHelperText>Name is required</FormHelperText>
  * </FormControl>
  */

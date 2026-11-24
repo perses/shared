@@ -88,30 +88,42 @@ describe('formControl.css contracts', () => {
   });
 
   it('colours the label for a warning status', () => {
-    const root = make('ps-FormControl', 'div', { 'data-status': 'warning' });
+    expect(propertyFor(make('ps-FormLabel', 'label', { 'data-status': 'warning' }), 'color')).toContain('warning');
+  });
+
+  it.each([
+    ['data-invalid', ''],
+    ['data-status', 'warning'],
+  ])('keeps the disabled label colour when %s is also set', (name, value) => {
+    const label = make('ps-FormLabel', 'label', { 'data-disabled': '', [name]: value });
+    expect(propertyFor(label, 'color')).toContain('disabled');
+  });
+
+  it('styles labels from their own state, not from an ancestor FormControl', () => {
+    const root = make('ps-FormControl', 'div', { 'data-status': 'warning', 'data-size': 'lg', 'data-required': '' });
     const label = document.createElement('label');
     label.className = 'ps-FormLabel';
     root.append(label);
-    expect(propertyFor(label, 'color')).toContain('warning');
+    expect(propertyFor(label, 'color')).not.toContain('warning');
+    expect(propertyFor(label, 'font-size')).not.toContain('--perses-font-size-md');
+    expect(source).not.toMatch(/\.ps-FormControl\[[^\]]+\][^{,]*\.ps-FormLabel/);
   });
 
   it('T25 draws the required indicator with aria-ignorable generated content', () => {
-    expect(source).toMatch(/\.ps-FormControl\[data-required\] \.ps-FormLabel::after\s*\{[^}]*content:\s*'\*' \/ ''/);
+    expect(source).toMatch(/\.ps-FormLabel\[data-required\]::after\s*\{[^}]*content:\s*'\*' \/ ''/);
   });
 
   it('restates disabled and error cues in system colours when colours are forced', () => {
     expect(forcedColors).toMatch(
       /\.ps-FormLabel\[data-disabled\],[^{]*\.ps-FormControlLabel\[data-disabled\] \{[^}]*color: GrayText/,
     );
-    expect(forcedColors).toMatch(/\.ps-FormLabel\[data-invalid\],[^{]*::after \{[^}]*color: CanvasText/);
+    expect(forcedColors).toMatch(/\.ps-FormLabel\[data-invalid\][^,]*,[^{]*::after \{[^}]*color: CanvasText/);
   });
 
   it('T25 scales label and helper text from the FormControl size', () => {
-    const root = make('ps-FormControl', 'div', { 'data-size': 'lg' });
-    const label = document.createElement('label');
-    label.className = 'ps-FormLabel';
-    root.append(label);
-    expect(propertyFor(label, 'font-size')).toContain('--perses-font-size-md');
+    expect(propertyFor(make('ps-FormLabel', 'label', { 'data-size': 'lg' }), 'font-size')).toContain(
+      '--perses-font-size-md',
+    );
   });
 
   it('renders the FormGroup legend as a medium-weight heading', () => {

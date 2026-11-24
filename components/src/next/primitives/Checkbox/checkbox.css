@@ -111,7 +111,8 @@
     --perses-checkbox-focus-color: var(--perses-status-border-info);
   }
 
-  :where(.ps-Checkbox[data-variant='outline']) {
+  /* Only solid fills the unchecked box; subtle and outline stay transparent until checked. */
+  :where(.ps-Checkbox:is([data-variant='subtle'], [data-variant='outline'])) {
     background-color: transparent;
   }
 

@@ -116,11 +116,11 @@ describe('FormControl + FormLabel + FormHelperText', () => {
     expect(getLabel().textContent).toBe('Name');
   });
 
-  it('T18 lets the FormControl own the label and helper of a nested TextField that opts in', () => {
+  it('T18 lets the FormControl own the label and helper of a nested TextField without its own label', () => {
     render(
       <FormControl>
         <FormLabel>Outer</FormLabel>
-        <TextField labelledByFormControl />
+        <TextField />
         <FormHelperText>Outer help</FormHelperText>
       </FormControl>,
     );
@@ -133,7 +133,7 @@ describe('FormControl + FormLabel + FormHelperText', () => {
   it.each([
     ['TextField', <TextField key="t" label="Inner" helperText="Inner help" />, 'textbox'],
     ['Select', <Select key="s" label="Inner" helperText="Inner help" />, 'combobox'],
-  ])('T18b a nested %s without the opt-in keeps its own label and helper', (_name, control, role) => {
+  ])('T18b a nested %s with its own label keeps its own label and helper', (_name, control, role) => {
     render(
       <FormControl disabled>
         <FormLabel>Outer</FormLabel>
@@ -147,10 +147,10 @@ describe('FormControl + FormLabel + FormHelperText', () => {
     expect(element.closest('.ps-TextField, .ps-Select')).toHaveAttribute('data-disabled');
   });
 
-  it('T18c a TextField that opts in without a FormLabel has no accessible name', () => {
+  it('T18c a nested TextField without a FormLabel has no accessible name', () => {
     render(
       <FormControl>
-        <TextField labelledByFormControl />
+        <TextField />
       </FormControl>,
     );
     expect(screen.getByRole('textbox')).not.toHaveAccessibleName();
@@ -168,7 +168,7 @@ describe('FormControl + FormLabel + FormHelperText', () => {
     render(
       <FormControl>
         <FormLabel>Enabled</FormLabel>
-        <Checkbox labelledByFormControl />
+        <Checkbox />
       </FormControl>,
     );
     expect(screen.getByRole('checkbox')).toHaveAccessibleName('Enabled');
@@ -186,11 +186,11 @@ describe('FormControl + FormLabel + FormHelperText', () => {
 });
 
 describe('controls nested in a FormControl', () => {
-  it('links FormLabel and FormHelperText to a TextField with labelledByFormControl', () => {
+  it('links FormLabel and FormHelperText to a nested TextField without its own label', () => {
     render(
       <FormControl status="error">
         <FormLabel>Name</FormLabel>
-        <TextField labelledByFormControl placeholder="Type here" />
+        <TextField placeholder="Type here" />
         <FormHelperText>Name is required</FormHelperText>
       </FormControl>,
     );
@@ -204,7 +204,7 @@ describe('controls nested in a FormControl', () => {
     render(
       <FormControl size="sm" disabled required>
         <FormLabel>Name</FormLabel>
-        <TextField labelledByFormControl />
+        <TextField />
       </FormControl>,
     );
     const input = screen.getByLabelText(/Name/);
@@ -218,12 +218,13 @@ describe('controls nested in a FormControl', () => {
     render(
       <FormControl size="sm" status="warning" disabled>
         <FormLabel>Name</FormLabel>
-        <TextField labelledByFormControl size="lg" status="error" disabled={false} />
+        <TextField size="lg" status="error" disabled={false} />
       </FormControl>,
     );
     const input = screen.getByLabelText('Name');
     expect(input).toBeDisabled();
-    expect(input).toHaveAttribute('aria-invalid', 'true');
+    // Disabled controls are not announced as invalid, matching Base UI; the status still drives the styling.
+    expect(input).not.toHaveAttribute('aria-invalid');
     expect(input.closest('.ps-TextField')).toHaveAttribute('data-size', 'lg');
     expect(input.closest('.ps-TextField')).toHaveAttribute('data-status', 'error');
   });
@@ -235,11 +236,11 @@ describe('controls nested in a FormControl', () => {
         <FormControl>
           <FormLabel>Unit</FormLabel>
           {searchable ? (
-            <Select labelledByFormControl searchable status="error" defaultValue="bytes">
+            <Select searchable status="error" defaultValue="bytes">
               <SelectItem value="bytes">Bytes</SelectItem>
             </Select>
           ) : (
-            <Select labelledByFormControl status="error" defaultValue="bytes">
+            <Select status="error" defaultValue="bytes">
               <SelectItem value="bytes">Bytes</SelectItem>
             </Select>
           )}
@@ -255,7 +256,7 @@ describe('controls nested in a FormControl', () => {
       render(
         <FormControl>
           <FormLabel>Name</FormLabel>
-          <TextField labelledByFormControl disabled multiline={multiline} />
+          <TextField disabled multiline={multiline} />
         </FormControl>,
       );
       const input = screen.getByLabelText('Name');
@@ -265,17 +266,17 @@ describe('controls nested in a FormControl', () => {
   );
 
   it.each([false, true])(
-    'names a Select (searchable=%s) with labelledByFormControl from the FormLabel',
+    'names a nested Select (searchable=%s) without its own label from the FormLabel',
     (searchable) => {
       render(
         <FormControl disabled>
           <FormLabel>Unit</FormLabel>
           {searchable ? (
-            <Select labelledByFormControl searchable defaultValue="bytes" helperText="ignored">
+            <Select searchable defaultValue="bytes" helperText="ignored">
               <SelectItem value="bytes">Bytes</SelectItem>
             </Select>
           ) : (
-            <Select labelledByFormControl defaultValue="bytes" helperText="ignored">
+            <Select defaultValue="bytes" helperText="ignored">
               <SelectItem value="bytes">Bytes</SelectItem>
             </Select>
           )}
@@ -289,10 +290,10 @@ describe('controls nested in a FormControl', () => {
     },
   );
 
-  it('names a Checkbox with labelledByFormControl from FormControlLabel and inherits size', () => {
+  it('names a Checkbox from FormControlLabel and inherits size', () => {
     render(
       <FormControlLabel label="Allow header sorting">
-        <Checkbox labelledByFormControl size="lg" />
+        <Checkbox size="lg" />
       </FormControlLabel>,
     );
     const checkbox = screen.getByRole('checkbox', { name: 'Allow header sorting' });
@@ -303,11 +304,11 @@ describe('controls nested in a FormControl', () => {
     render(
       <>
         <FormControlLabel label="Toggle" disabled>
-          <Switch labelledByFormControl />
+          <Switch />
         </FormControlLabel>
         <FormControl size="sm" disabled>
           <FormLabel>Agree</FormLabel>
-          <Checkbox labelledByFormControl />
+          <Checkbox />
         </FormControl>
       </>,
     );
@@ -321,7 +322,7 @@ describe('controls nested in a FormControl', () => {
     render(
       <FormControl disabled required size="sm" status="error">
         <FormControlLabel label="Agree">
-          <Checkbox labelledByFormControl />
+          <Checkbox />
         </FormControlLabel>
         <FormHelperText>Required</FormHelperText>
       </FormControl>,
@@ -336,12 +337,12 @@ describe('controls nested in a FormControl', () => {
   });
 
   it.each([
-    ['TextField', <TextField key="t" labelledByFormControl disabled={false} />, 'textbox', '.ps-TextField'],
-    ['Checkbox', <Checkbox key="c" labelledByFormControl disabled={false} />, 'checkbox', '.ps-Checkbox'],
-    ['Switch', <Switch labelledByFormControl key="s" disabled={false} />, 'switch', '.ps-Switch'],
+    ['TextField', <TextField key="t" disabled={false} />, 'textbox', '.ps-TextField'],
+    ['Checkbox', <Checkbox key="c" disabled={false} />, 'checkbox', '.ps-Checkbox'],
+    ['Switch', <Switch key="s" disabled={false} />, 'switch', '.ps-Switch'],
     [
       'Select',
-      <Select key="l" labelledByFormControl disabled={false} defaultValue="a">
+      <Select key="l" disabled={false} defaultValue="a">
         <SelectItem value="a">A</SelectItem>
       </Select>,
       'combobox',
@@ -363,22 +364,22 @@ describe('controls nested in a FormControl', () => {
     render(
       <FormControl>
         <FormControlLabel label="Agree" disabled>
-          <Checkbox labelledByFormControl />
+          <Checkbox />
         </FormControlLabel>
       </FormControl>,
     );
     expect(screen.getByRole('checkbox', { name: 'Agree' })).toHaveAttribute('aria-disabled', 'true');
   });
 
-  it('labelledByFormControl is exclusive with label and aria-label at the type level', () => {
+  it('a visible label is exclusive with aria-label at the type level', () => {
     render(
       <FormControl>
         <FormLabel>Name</FormLabel>
-        {/* @ts-expect-error label and labelledByFormControl cannot be combined */}
-        <TextField labelledByFormControl label="Dup" />
+        {/* @ts-expect-error aria-label would override the visible label (WCAG 2.5.3) */}
+        <TextField label="Own" aria-label="Other" />
       </FormControl>,
     );
-    expect(document.querySelectorAll('label')).toHaveLength(1);
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
 });
 
@@ -430,7 +431,7 @@ describe('FormGroup', () => {
     render(
       <FormGroup legend="Options" disabled>
         <FormControlLabel label="One">
-          <Switch labelledByFormControl />
+          <Switch />
         </FormControlLabel>
         <FormControl>
           <FormLabel>Two</FormLabel>
@@ -452,7 +453,7 @@ describe('FormGroup', () => {
 
 function renderControlLabel(
   props: Partial<FormControlLabelProps> = {},
-  control: ReactElement = <Switch labelledByFormControl />,
+  control: ReactElement = <Switch />,
 ): ReturnType<typeof render> {
   return render(
     <FormControlLabel label="Allow header sorting" {...props}>
@@ -472,7 +473,7 @@ describe('FormControlLabel', () => {
   });
 
   it('T10 toggles a wrapped Switch when the label text is clicked', async () => {
-    renderControlLabel({}, <Switch labelledByFormControl />);
+    renderControlLabel({}, <Switch />);
     const toggle = screen.getByRole('switch', { name: 'Allow header sorting' });
     await userEvent.click(screen.getByText('Allow header sorting'));
     expect(toggle).toBeChecked();
@@ -481,7 +482,7 @@ describe('FormControlLabel', () => {
   it.todo('T11 selects a wrapped Radio inside a RadioGroup (Task 24)');
 
   it('T12 does not change a readOnly control', async () => {
-    renderControlLabel({}, <Switch labelledByFormControl readOnly />);
+    renderControlLabel({}, <Switch readOnly />);
     await userEvent.click(screen.getByText('Allow header sorting'));
     expect(screen.getByRole('switch')).not.toBeChecked();
   });
@@ -629,7 +630,7 @@ describe('prop combinations', () => {
   it('FormControlLabel merges className and spacing props on the label element', () => {
     render(
       <FormControlLabel label="A" className="custom" mt="md">
-        <Switch labelledByFormControl />
+        <Switch />
       </FormControlLabel>,
     );
     const label = screen.getByText('A').closest('label');
@@ -656,7 +657,7 @@ function FieldOverrideConsumer(): ReactElement {
         <HelperText>Hint</HelperText>
       </Control>
       <ControlLabel label="Toggle">
-        <Switch labelledByFormControl />
+        <Switch />
       </ControlLabel>
     </Group>
   );
@@ -698,7 +699,7 @@ describe('ComponentsProvider', () => {
           <FormHelperText ref={helper}>Hint</FormHelperText>
         </FormControl>
         <FormControlLabel ref={controlLabel} label="Toggle">
-          <Switch labelledByFormControl />
+          <Switch />
         </FormControlLabel>
       </FormGroup>,
     );
@@ -707,5 +708,116 @@ describe('ComponentsProvider', () => {
     expect(helper.current?.tagName).toBe('P');
     expect(group.current?.tagName).toBe('FIELDSET');
     expect(controlLabel.current?.tagName).toBe('LABEL');
+  });
+});
+
+describe('review fixes', () => {
+  it('names the toggle button of a nested searchable Select from the FormLabel', () => {
+    render(
+      <FormControl>
+        <FormLabel>Unit</FormLabel>
+        <Select searchable defaultValue="bytes">
+          <SelectItem value="bytes">Bytes</SelectItem>
+        </Select>
+      </FormControl>,
+    );
+    const toggle = document.querySelector('.ps-Select__toggle') as HTMLElement;
+    expect(toggle).toHaveAttribute('aria-labelledby', getLabel().id);
+    expect(toggle).toHaveAccessibleName('Unit');
+  });
+
+  it.each([
+    ['TextField', <TextField key="t" />, 'textbox', '.ps-TextField'],
+    ['Checkbox', <Checkbox key="c" />, 'checkbox', '.ps-Checkbox'],
+    ['Switch', <Switch key="s" />, 'switch', '.ps-Switch'],
+    [
+      'Select',
+      <Select key="l" defaultValue="a">
+        <SelectItem value="a">A</SelectItem>
+      </Select>,
+      'combobox',
+      '.ps-Select',
+    ],
+  ])('a disabled FormGroup marks a nested %s data-disabled', (_name, control, role, root) => {
+    render(
+      <FormGroup disabled legend="Group">
+        <FormControl>
+          <FormLabel>Name</FormLabel>
+          {control}
+        </FormControl>
+      </FormGroup>,
+    );
+    const element = screen.getByRole(role, { name: 'Name' });
+    expect(element.closest(root)).toHaveAttribute('data-disabled');
+    expect(element.matches(':disabled, [aria-disabled="true"]')).toBe(true);
+  });
+
+  it('a disabled FormGroup marks a labelled Checkbox wrapper data-disabled', () => {
+    render(
+      <FormGroup disabled>
+        <Checkbox label="Agree" />
+      </FormGroup>,
+    );
+    expect(document.querySelector('.ps-Checkbox__field')).toHaveAttribute('data-disabled');
+  });
+
+  it.each([
+    ['TextField', <TextField key="t" label="Name" status="error" disabled />, 'textbox'],
+    [
+      'Select',
+      <Select key="l" label="Name" status="error" disabled defaultValue="a">
+        <SelectItem value="a">A</SelectItem>
+      </Select>,
+      'combobox',
+    ],
+  ])('a disabled %s with status="error" is not announced as invalid', (_name, control, role) => {
+    render(control);
+    expect(screen.getByRole(role, { name: 'Name' })).not.toHaveAttribute('aria-invalid');
+  });
+
+  it.each([
+    ['Checkbox', <Checkbox key="c" aria-label="  " />, 'checkbox'],
+    ['Switch', <Switch key="s" aria-label="  " />, 'switch'],
+  ])('a blank aria-label on a %s falls back to the FormControl label', (_name, control, role) => {
+    render(
+      <FormControl>
+        <FormLabel>Name</FormLabel>
+        {control}
+      </FormControl>,
+    );
+    const element = screen.getByRole(role, { name: 'Name' });
+    expect(element).not.toHaveAttribute('aria-labelledby', '');
+  });
+
+  it('a non-blank aria-label still wins over the FormControl label', () => {
+    render(
+      <FormControl>
+        <FormLabel>Name</FormLabel>
+        <Checkbox aria-label="Explicit" />
+      </FormControl>,
+    );
+    expect(screen.getByRole('checkbox', { name: 'Explicit' })).toBeInTheDocument();
+  });
+
+  it('a FormLabel takes required, size and status from its own FormControl only', () => {
+    render(
+      <FormControl required size="lg" status="warning">
+        <FormLabel>Outer</FormLabel>
+        <FormGroup legend="Nested">
+          <FormControl>
+            <FormLabel>Inner</FormLabel>
+            <Field.Control />
+          </FormControl>
+        </FormGroup>
+      </FormControl>,
+    );
+    const outer = screen.getByText('Outer');
+    const inner = screen.getByText('Inner');
+    expect(outer).toHaveAttribute('data-required');
+    expect(outer).toHaveAttribute('data-size', 'lg');
+    expect(outer).toHaveAttribute('data-status', 'warning');
+    expect(inner).not.toHaveAttribute('data-required');
+    expect(inner).toHaveAttribute('data-size', 'md');
+    expect(inner).not.toHaveAttribute('data-status');
   });
 });

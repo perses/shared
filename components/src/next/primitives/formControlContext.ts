@@ -16,7 +16,7 @@ import { createContext, useContext } from 'react';
 import type { Size, Status } from './types';
 
 export interface FormControlContextValue {
-  /** `true` inside a `FormControl` or `FormControlLabel`; controls then defer label and helper to the wrapper. */
+  /** `true` inside a `FormControl` or `FormControlLabel`; unlabelled controls then defer label and helper to it. */
   inFormControl: boolean;
   size?: Size;
   disabled?: boolean;
@@ -30,6 +30,12 @@ export const FormControlContext = createContext<FormControlContextValue>({ inFor
 export function useFormControlContext(): FormControlContextValue {
   return useContext(FormControlContext);
 }
+
+/**
+ * `true` inside a disabled `FormGroup`. Base UI disables the nested inputs through its fieldset context, but that
+ * context is not public, so the group shares its state here for the controls' own `data-disabled` styling.
+ */
+export const FormGroupDisabledContext = createContext(false);
 
 export interface FormControlStateProps {
   size?: Size;
@@ -50,17 +56,18 @@ export interface FormControlState {
 
 /**
  * Resolves a control's own props against the enclosing `FormControl`. Local `size`, `status` and `required` win;
- * a disabled wrapper always disables the control.
+ * a disabled wrapper or `FormGroup` always disables the control.
  */
 export function useFormControlState({ size, status, disabled, required }: FormControlStateProps): FormControlState {
   const formControl = useFormControlContext();
+  const groupDisabled = useContext(FormGroupDisabledContext);
   const resolvedStatus = status ?? formControl.status;
   return {
     inFormControl: formControl.inFormControl,
     size: size ?? formControl.size ?? 'md',
     status: resolvedStatus,
     invalid: resolvedStatus === 'error',
-    disabled: Boolean(disabled || formControl.disabled),
+    disabled: Boolean(disabled || formControl.disabled || groupDisabled),
     required: Boolean(required ?? formControl.required),
   };
 }

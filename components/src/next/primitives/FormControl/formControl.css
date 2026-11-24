@@ -33,31 +33,33 @@
     line-height: var(--perses-line-height-normal);
   }
 
+  /* State attributes come from the label's own FormControl, so they never leak into nested FormControls. */
   .ps-FormLabel[data-disabled] {
     color: var(--perses-text-disabled);
   }
 
-  .ps-FormLabel[data-invalid] {
+  /* Disabled wins over status colours. */
+  .ps-FormLabel[data-invalid]:not([data-disabled]) {
     color: var(--perses-status-text-error);
   }
 
-  .ps-FormControl[data-status='warning'] .ps-FormLabel {
+  .ps-FormLabel[data-status='warning']:not([data-disabled]) {
     color: var(--perses-status-text-warning);
   }
 
   /* Alt-text form hides the star from assistive tech; aria-required on the control conveys the requirement. */
-  .ps-FormControl[data-required] .ps-FormLabel::after {
+  .ps-FormLabel[data-required]::after {
     content: '*' / '';
     margin-inline-start: var(--perses-spacing-xs);
     color: var(--perses-status-text-error);
   }
 
   /* The label follows the FormControl size; helper text stays xs. Opted-in controls inherit the size themselves. */
-  :where(.ps-FormControl[data-size='xs'], .ps-FormControl[data-size='sm']) .ps-FormLabel {
+  :where(.ps-FormLabel[data-size='xs'], .ps-FormLabel[data-size='sm']) {
     font-size: var(--perses-font-size-xs);
   }
 
-  :where(.ps-FormControl[data-size='lg']) .ps-FormLabel {
+  :where(.ps-FormLabel[data-size='lg']) {
     font-size: var(--perses-font-size-md);
   }
 
@@ -117,9 +119,9 @@
       color: GrayText;
     }
 
-    .ps-FormLabel[data-invalid],
-    .ps-FormControl[data-status='warning'] .ps-FormLabel,
-    .ps-FormControl[data-required] .ps-FormLabel::after {
+    .ps-FormLabel[data-invalid]:not([data-disabled]),
+    .ps-FormLabel[data-status='warning']:not([data-disabled]),
+    .ps-FormLabel[data-required]::after {
       color: CanvasText;
     }
   }

@@ -130,7 +130,7 @@ describe('Switch CSS contracts', () => {
     expect(getOpacity(control)).toBe('var(--perses-opacity-disabled, 0.5)');
     expectFullOpacity(thumb);
     expect(getComputedStyle(control).backgroundColor).toBe(
-      checked ? 'var(--ps-switch-checked-bg)' : 'var(--perses-color-gray-300)',
+      checked ? 'var(--ps-switch-checked-bg)' : 'var(--perses-bg-sunken)',
     );
     expect(getComputedStyle(thumb).backgroundColor).toBe('var(--perses-color-white)');
     expect(getComputedStyle(thumb).transform).toBe(checked ? 'translateX(var(--ps-switch-thumb-size))' : '');
@@ -140,7 +140,7 @@ describe('Switch CSS contracts', () => {
     expectFullOpacity(control);
     expectFullOpacity(thumb);
     expect(getComputedStyle(control).backgroundColor).toBe(
-      checked ? 'var(--ps-switch-checked-bg)' : 'var(--perses-color-gray-300)',
+      checked ? 'var(--ps-switch-checked-bg)' : 'var(--perses-bg-sunken)',
     );
     expect(getComputedStyle(thumb).backgroundColor).toBe('var(--perses-color-white)');
     expect(getComputedStyle(thumb).transform).toBe(checked ? 'translateX(var(--ps-switch-thumb-size))' : '');

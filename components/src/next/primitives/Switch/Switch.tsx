@@ -57,24 +57,10 @@ export interface SwitchSlotProps {
 }
 
 /**
- * A switch must have an accessible name: a visible `label`, `aria-label`, `aria-labelledby`, or the label of an
- * enclosing `FormControlLabel`/`FormControl` (`labelledByFormControl`).
+ * Name the switch with `label`, `aria-label` or `aria-labelledby`, or place it inside a `FormControl` or
+ * `FormControlLabel`, whose label names it automatically.
  */
-export type SwitchAccessibleName =
-  | { label: ReactNode; labelledByFormControl?: never }
-  | { 'aria-label': string; labelledByFormControl?: never }
-  | { 'aria-labelledby': string; labelledByFormControl?: never }
-  | {
-      label?: undefined;
-      'aria-label'?: never;
-      'aria-labelledby'?: never;
-      /** The enclosing `FormControlLabel` or `FormControl` names the switch and supplies `size`, `disabled` and `required`. */
-      labelledByFormControl: true;
-    };
-
-export type SwitchProps = SwitchBaseProps & SwitchAccessibleName;
-
-interface SwitchBaseProps
+export interface SwitchProps
   extends
     Omit<HTMLAttributes<HTMLElement>, 'onChange' | 'children' | 'defaultChecked' | 'style'>,
     SpacingProps,
@@ -132,7 +118,7 @@ interface SwitchBaseProps
  * @example
  * // Named by an enclosing FormControlLabel
  * <FormControlLabel label="Enable feature">
- *   <Switch labelledByFormControl checked={enabled} onCheckedChange={setEnabled} />
+ *   <Switch checked={enabled} onCheckedChange={setEnabled} />
  * </FormControlLabel>
  */
 export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
@@ -156,7 +142,6 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
     id,
     'aria-labelledby': ariaLabelledBy,
     'aria-label': ariaLabel,
-    labelledByFormControl: _labelledByFormControl,
     ...props
   },
   ref,
