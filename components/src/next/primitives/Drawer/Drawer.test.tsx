@@ -24,7 +24,7 @@ import type { DrawerProps } from './Drawer';
 
 function renderDrawer(props: Partial<DrawerProps> = {}, children: ReactNode = 'Body'): RenderResult {
   return render(
-    <Drawer open onOpenChange={() => {}} {...props}>
+    <Drawer open onOpenChange={() => {}} aria-label="Drawer" {...props}>
       {children}
     </Drawer>,
   );
@@ -45,10 +45,11 @@ function ControlledDrawer({
       </button>
       <Drawer
         open={open}
-        onOpenChange={(next, details) => {
-          onRequestClose?.(next, details);
+        onOpenChange={(next) => {
+          onRequestClose?.(next);
           setOpen(next);
         }}
+        aria-label="Drawer"
       >
         {children ?? (
           <button type="button" onClick={() => setOpen(false)}>
@@ -62,10 +63,10 @@ function ControlledDrawer({
 
 describe('Drawer', () => {
   it('renders nothing when closed and a dialog popup when open', () => {
-    const { rerender } = render(<Drawer open={false} onOpenChange={() => {}} />);
+    const { rerender } = render(<Drawer open={false} onOpenChange={() => {}} aria-label="Drawer" />);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     rerender(
-      <Drawer open onOpenChange={() => {}}>
+      <Drawer open onOpenChange={() => {}} aria-label="Drawer">
         Body
       </Drawer>,
     );
@@ -76,7 +77,11 @@ describe('Drawer', () => {
 
   it('forwards data-testid, className and ref to the popup', () => {
     const ref = createRef<HTMLDivElement>();
-    renderDrawer({ 'data-testid': 'panel-editor', className: 'custom', ref } as Partial<DrawerProps>);
+    render(
+      <Drawer open onOpenChange={() => {}} aria-label="Drawer" data-testid="panel-editor" className="custom" ref={ref}>
+        Body
+      </Drawer>,
+    );
     const popup = screen.getByTestId('panel-editor');
     expect(popup).toBe(screen.getByRole('dialog'));
     expect(popup).toHaveClass('ps-Drawer', 'custom');
@@ -87,7 +92,7 @@ describe('Drawer', () => {
     const { rerender } = renderDrawer();
     expect(screen.getByRole('dialog')).toHaveAttribute('data-anchor', 'right');
     rerender(
-      <Drawer open onOpenChange={() => {}} anchor="left">
+      <Drawer open onOpenChange={() => {}} aria-label="Drawer" anchor="left">
         Body
       </Drawer>,
     );
@@ -106,7 +111,7 @@ describe('Drawer', () => {
       renderDrawer({ onOpenChange });
       await userEvent.keyboard('{Escape}');
       expect(onOpenChange).toHaveBeenCalledTimes(1);
-      expect(onOpenChange).toHaveBeenCalledWith(false, expect.objectContaining({ reason: 'escape-key' }));
+      expect(onOpenChange).toHaveBeenCalledWith(false);
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
@@ -116,7 +121,7 @@ describe('Drawer', () => {
       const backdrop = document.querySelector<HTMLElement>('.ps-Drawer__backdrop');
       await userEvent.click(backdrop as HTMLElement);
       expect(onOpenChange).toHaveBeenCalledTimes(1);
-      expect(onOpenChange).toHaveBeenCalledWith(false, expect.objectContaining({ reason: 'outside-press' }));
+      expect(onOpenChange).toHaveBeenCalledWith(false);
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
@@ -151,7 +156,7 @@ describe('Drawer', () => {
     function Harness(): ReactElement {
       const [open, setOpen] = useState(true);
       return (
-        <Drawer open={open} onOpenChange={setOpen} onExited={onExited}>
+        <Drawer open={open} onOpenChange={setOpen} onExited={onExited} aria-label="Drawer">
           <button type="button" onClick={() => setOpen(false)}>
             Close
           </button>
@@ -181,7 +186,7 @@ describe('Drawer', () => {
     it('propagates the nearest ThemeModeProvider mode onto the portal container', () => {
       render(
         <ThemeModeProvider mode="dark">
-          <Drawer open onOpenChange={() => {}}>
+          <Drawer open onOpenChange={() => {}} aria-label="Drawer">
             Body
           </Drawer>
         </ThemeModeProvider>,
@@ -203,16 +208,16 @@ describe('Drawer', () => {
       renderDrawer({
         width: '50%',
         p: 'md',
-        display: 'grid',
+        overflow: 'auto',
         className: 'custom',
         style: { color: 'red' },
       });
       const popup = screen.getByRole('dialog');
-      expect(popup).toHaveClass('ps-Drawer', 'ps-width', 'ps-p', 'ps-display', 'custom');
+      expect(popup).toHaveClass('ps-Drawer', 'ps-width', 'ps-p', 'ps-overflow', 'custom');
       expect(popup).toHaveStyle({
         '--ps-width': '50%',
         '--ps-p': 'var(--perses-spacing-md)',
-        '--ps-display': 'grid',
+        '--ps-overflow': 'auto',
         color: 'rgb(255, 0, 0)',
       });
       expect(popup).not.toHaveAttribute('width');
@@ -224,7 +229,7 @@ describe('Drawer', () => {
       expect(screen.getByRole('dialog')).toHaveStyle({ '--ps-width': '100%', '--ps-width-lg': '1080px' });
     });
 
-    it('forwards aria-label and aria-labelledby', () => {
+    it('names the dialog from aria-label or aria-labelledby', () => {
       const { rerender } = renderDrawer({ 'aria-label': 'Edit panel' });
       expect(screen.getByRole('dialog', { name: 'Edit panel' })).toBeInTheDocument();
       rerender(

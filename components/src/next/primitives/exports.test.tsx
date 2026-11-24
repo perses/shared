@@ -203,7 +203,12 @@ describe('primitives barrel exports', () => {
     const chipStyle: ChipStyle = { '--perses-chip-size-sm': '2.5rem' };
     const dividerProps: DividerProps = {};
     const drawerAnchor: DrawerAnchor = 'left';
-    const drawerProps: DrawerProps = { open: false, onOpenChange: () => {}, anchor: drawerAnchor };
+    const drawerProps: DrawerProps = {
+      open: false,
+      onOpenChange: () => {},
+      anchor: drawerAnchor,
+      'aria-label': 'Drawer',
+    };
     const formControlProps: FormControlProps = { size: 'sm', status: 'error', required: true, flex: 1 };
     const formLabelProps: FormLabelProps = { htmlFor: 'name', mb: 'xs' };
     const formHelperTextProps: FormHelperTextProps = { status: 'warning' };

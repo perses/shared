@@ -12,7 +12,6 @@
 // limitations under the License.
 
 import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
-import type { DrawerRootProps } from '@base-ui/react/drawer';
 import { clsx } from 'clsx';
 import { forwardRef, useContext } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
@@ -29,16 +28,26 @@ import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the drawer styles.
 import './drawer.css';
 
-const DRAWER_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
+// Only `overflow` from the display category: `display` stays fixed to flex by the stylesheet.
+const DRAWER_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
 
 export type DrawerAnchor = 'left' | 'right';
+
+/** A drawer is a dialog and must have an accessible name: `aria-label` or `aria-labelledby`. */
+export type DrawerAccessibleName = { 'aria-label': string } | { 'aria-labelledby': string };
+
+export type DrawerProps = DrawerBaseProps & DrawerAccessibleName;
 
 /**
  * Style props, `className`, `style`, extra props and `ref` apply to the popup (`role="dialog"`).
  * The popup portals to document.body and propagates the nearest ThemeModeProvider mode.
  */
-export interface DrawerProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'children'>, SpacingProps, SizingProps, DisplayProps {
+interface DrawerBaseProps
+  extends
+    Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'aria-label' | 'aria-labelledby'>,
+    SpacingProps,
+    SizingProps,
+    Pick<DisplayProps, 'overflow'> {
   style?: PersesCSSProperties;
   children?: ReactNode;
   /** Whether the drawer is shown. The drawer is always controlled. */
@@ -47,7 +56,7 @@ export interface DrawerProps
    * Called when the user asks to close (Escape, backdrop click, swipe). The drawer stays open until the
    * consumer sets `open` to false, so a form can show a "discard changes?" confirmation first.
    */
-  onOpenChange: DrawerRootProps['onOpenChange'];
+  onOpenChange: (open: boolean) => void;
   /** Called once the close transition has finished and the popup has unmounted. */
   onExited?: () => void;
   /** Screen edge the drawer slides in from. Defaults to `right`. */
@@ -59,8 +68,8 @@ export interface DrawerProps
  * full-height flex column so children can use `flex: 1; overflow-y: auto` for scrollable bodies.
  *
  * @example
- * <Drawer open={open} onOpenChange={() => formRef.current?.requestClose()} data-testid="panel-editor">
- *   <PanelEditorForm ref={formRef} onClose={() => setOpen(false)} />
+ * <Drawer open={open} onOpenChange={() => formRef.current?.requestClose()} aria-labelledby="panel-editor-title">
+ *   <PanelEditorForm ref={formRef} titleId="panel-editor-title" onClose={() => setOpen(false)} />
  * </Drawer>
  */
 export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
@@ -73,7 +82,7 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
   return (
     <BaseDrawer.Root
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={(next) => onOpenChange(next)}
       onOpenChangeComplete={(next) => {
         if (!next) onExited?.();
       }}

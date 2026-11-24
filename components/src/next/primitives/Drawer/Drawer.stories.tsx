@@ -116,7 +116,7 @@ export const Variants: Story = () => (
   </Stack>
 );
 
-const scrollCode = `<Drawer open={open} onOpenChange={setOpen}>
+const scrollCode = `<Drawer open={open} onOpenChange={setOpen} aria-label="Edit panel">
   <EditorHeader … />
   <Box p="md" style={{ flex: 1, overflowY: 'auto' }}>
     {/* long content scrolls here; the header stays put */}
@@ -126,7 +126,7 @@ const scrollCode = `<Drawer open={open} onOpenChange={setOpen}>
 const confirmCode = `const [open, setOpen] = useState(false);
 const [confirming, setConfirming] = useState(false);
 
-<Drawer open={open} onOpenChange={() => setConfirming(true)}>
+<Drawer open={open} onOpenChange={() => setConfirming(true)} aria-label="Edit datasource">
   …
   {confirming && <ConfirmDialog onDiscard={() => setOpen(false)} onKeep={() => setConfirming(false)} />}
 </Drawer>`;
