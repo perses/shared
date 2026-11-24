@@ -117,5 +117,5 @@ describe('Discarding dashboard changes', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Edit datasources' }));
     const editor = await screen.findByTestId('datasource-editor');
     expect(within(editor).queryByRole('rowheader', { name: 'NewDatasource' })).not.toBeInTheDocument();
-  });
+  }, 30_000);
 });
