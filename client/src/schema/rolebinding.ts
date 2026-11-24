@@ -14,11 +14,12 @@
 import { z } from 'zod';
 
 import type { RoleBinding, RoleBindingSpec, Subject } from '../model';
+import { WILDCARD_USER } from '../model';
 import { nameSchema, metadataSchema, projectMetadataSchema } from './metadata';
 
 export const subjectSchema: z.ZodType<Subject, Subject> = z.object({
   kind: z.enum(['User']),
-  name: nameSchema,
+  name: z.union([z.literal(WILDCARD_USER), nameSchema]),
 });
 
 export const roleBindingSpecSchema: z.ZodType<RoleBindingSpec, RoleBindingSpec> = z.object({

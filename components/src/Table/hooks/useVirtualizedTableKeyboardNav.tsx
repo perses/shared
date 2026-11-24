@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { FocusEventHandler, KeyboardEventHandler, MutableRefObject, RefObject } from 'react';
+import React, { useCallback } from 'react';
 import type { TableVirtuosoHandle } from 'react-virtuoso';
 
 import type { UseTableKeyboardNavProps } from './useTableKeyboardNav';
@@ -47,10 +48,12 @@ export function useVirtualizedTableKeyboardNav({
   onCellFocus: (cellPosition: TableCellPosition) => void;
   onTableBlur: FocusEventHandler<HTMLTableElement>;
 } {
-  const baseKeyboard = useTableKeyboardNav({
-    maxRows,
-    maxColumns,
-    onActiveCellChange: (e, currentPosition, defaultNewPosition) => {
+  const onActiveCellChange = useCallback(
+    (
+      e: React.KeyboardEvent<HTMLTableElement>,
+      currentPosition: TableCellPosition,
+      defaultNewPosition: TableCellPosition | undefined,
+    ) => {
       const key = e.key;
 
       const defaultValueChanged =
@@ -119,7 +122,12 @@ export function useVirtualizedTableKeyboardNav({
 
       return defaultNewPosition;
     },
-  });
+    [maxRows, visibleRange, virtualTable],
+  );
 
-  return baseKeyboard;
+  return useTableKeyboardNav({
+    maxRows,
+    maxColumns,
+    onActiveCellChange,
+  });
 }

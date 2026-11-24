@@ -68,7 +68,7 @@ export function useAnnotationStates(annotationNames?: string[]): AnnotationState
     if (query) {
       result[definition.display.name] = {
         data: query.data ?? null,
-        isPending: query.isLoading,
+        isPending: query.isPending,
         error: query.error instanceof Error ? query.error : undefined,
       };
     }

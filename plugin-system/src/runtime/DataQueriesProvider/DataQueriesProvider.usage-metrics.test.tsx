@@ -38,8 +38,8 @@ const slowQuery: QueryDefinition = { kind: 'TimeSeriesQuery', spec: { plugin: { 
 const definitions = [cachedQuery, slowQuery];
 const queryOptions = { enabled: true };
 
-const done = { data: {}, isFetching: false, isLoading: false, error: null };
-const loading = { data: undefined, isFetching: true, isLoading: true, error: null };
+const done = { data: {}, isFetching: false, isPending: false, error: null };
+const loading = { data: undefined, isFetching: true, isPending: true, error: null };
 
 const markQuery = vi.fn();
 const usageMetrics = { project: 'project', dashboard: 'dashboard', markQuery };

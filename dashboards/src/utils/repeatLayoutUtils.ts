@@ -94,6 +94,8 @@ export function restoreRepeatItemLayout(layout: PanelGroupItemLayout, meta: Repe
   };
 }
 
+const NO_REPEAT_META: ReadonlyMap<string, RepeatItemMeta> = new Map();
+
 /**
  * Builds a map from layout item id to repeat metadata and a list of layouts with
  * expanded heights for repeat-variable items. Non-repeat items are returned unchanged.
@@ -103,7 +105,13 @@ export function buildRepeatMeta(
   variableValues: VariableStateMap,
   groupRepeatVariable?: [string, string],
   maxValues?: number,
-): { expandedItemLayouts: PanelGroupItemLayout[]; repeatMeta: Map<string, RepeatItemMeta> } {
+): { expandedItemLayouts: PanelGroupItemLayout[]; repeatMeta: ReadonlyMap<string, RepeatItemMeta> } {
+  // Without repeated panels, return the same references on every call: variable updates must not change the layout
+  // given to the grid, which would re-render every panel of the group.
+  if (!itemLayouts.some((itemLayout) => itemLayout.repeatVariable)) {
+    return { expandedItemLayouts: itemLayouts, repeatMeta: NO_REPEAT_META };
+  }
+
   const repeatMeta = new Map<string, RepeatItemMeta>();
   const expandedItemLayouts = itemLayouts.map((itemLayout) => {
     const itemRepeatVariable = itemLayout.repeatVariable;

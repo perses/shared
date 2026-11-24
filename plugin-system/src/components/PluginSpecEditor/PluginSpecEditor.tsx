@@ -44,7 +44,7 @@ export function PluginSpecEditor(props: PluginSpecEditorProps): ReactElement | n
   // Edit the exact implementation the definition is pinned to, so the options editor matches the saved spec schema.
   const {
     data: plugin,
-    isLoading,
+    isPending: isLoading,
     error,
   } = usePlugin(pluginType, pluginKind, {
     version: pluginMetadata?.version,

@@ -13,13 +13,19 @@
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import type * as ComponentsModule from '@perses-dev/components';
-import { DataQueriesProvider, TimeRangeProviderBasic, useDataQueriesContext } from '@perses-dev/plugin-system';
+import {
+  DataQueriesProvider,
+  TimeRangeProviderBasic,
+  useDataQueriesContext,
+  usePlugin,
+} from '@perses-dev/plugin-system';
 import type * as PluginSystemModule from '@perses-dev/plugin-system';
 import type { PanelDefinition, QueryDefinition, VariableDefinition, VariableValue } from '@perses-dev/spec';
 import { DEFAULT_ALL_VALUE } from '@perses-dev/spec';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
+import { useSyncExternalStore } from 'react';
 import type * as ResizeObserverModule from 'use-resize-observer';
 import { useResizeObserver } from 'use-resize-observer';
 
@@ -92,6 +98,10 @@ const allVariableDefinitions: VariableDefinition[] = [
 ];
 const allVariableValues: Record<string, VariableValue> = { stack: DEFAULT_ALL_VALUE };
 
+function TestAction(): ReactElement {
+  return <button aria-label="Test action">Test</button>;
+}
+
 function makeQueryResult(
   overrides: Partial<ReturnType<typeof useDataQueriesContext>['queryResults'][number]> = {},
 ): ReturnType<typeof useDataQueriesContext>['queryResults'][number] {
@@ -99,7 +109,7 @@ function makeQueryResult(
     definition: testQueryDefinition,
     error: new Error(''),
     isFetching: false,
-    isLoading: false,
+    isPending: false,
     ...overrides,
   };
 }
@@ -112,7 +122,7 @@ function makeDataQueriesContext(
     queryResults,
     refetchAll: vi.fn(),
     isFetching: queryResults.some((result) => result.isFetching),
-    isLoading: queryResults.some((result) => result.isLoading),
+    isPending: queryResults.some((result) => result.isPending),
     errors: queryResults.flatMap((result) => (result.error.message ? [result.error] : [])),
   };
 }
@@ -141,8 +151,9 @@ vi.mock('@perses-dev/plugin-system', async () => {
   return {
     ...actual,
     useDataQueriesContext: vi.fn(() => makeDataQueriesContext()),
-    usePluginRegistry: vi.fn(() => ({
-      getPlugin: vi.fn().mockResolvedValue({
+    usePlugin: vi.fn(() => ({
+      isLoading: false,
+      data: {
         PanelComponent: (): ReactElement => <div>TimeSeriesChart panel</div>,
         actions: [
           {
@@ -162,7 +173,7 @@ vi.mock('@perses-dev/plugin-system', async () => {
             location: 'header',
           },
         ],
-      }),
+      },
     })),
   };
 });
@@ -224,7 +235,6 @@ describe('Panel', () => {
       </ThemeProvider>,
     );
 
-    // Wait for async effects (plugin actions loading) to complete
     await waitFor(() => {
       expect(screen.getByTestId('panel')).toBeInTheDocument();
     });
@@ -247,7 +257,7 @@ describe('Panel', () => {
   it('passes pending, successful, and errored queries to plugin actions in order', async () => {
     vi.mocked(useDataQueriesContext).mockReturnValue(
       makeDataQueriesContext([
-        makeQueryResult({ isLoading: true }),
+        makeQueryResult({ isPending: true }),
         makeQueryResult({ data: { series: [{ name: 'test', values: [[1, 2]] }] } }),
         makeQueryResult({ error: new Error('query failed') }),
       ]),
@@ -263,6 +273,66 @@ describe('Panel', () => {
       );
     });
     vi.mocked(useDataQueriesContext).mockReturnValue(makeDataQueriesContext());
+  });
+
+  it('renders the panel once per query update', async () => {
+    let queriesContext = makeDataQueriesContext([makeQueryResult()]);
+    let panelRenderCount = 0;
+    const listeners = new Set<() => void>();
+    const subscribe = (listener: () => void): (() => void) => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    };
+    // Only Panel reads this context, so each call is one Panel render.
+    vi.mocked(useDataQueriesContext).mockImplementation(() => {
+      panelRenderCount += 1;
+      return useSyncExternalStore(subscribe, () => queriesContext);
+    });
+
+    try {
+      await renderPanel();
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Export CSV' })).toHaveAttribute('data-query-count', '1');
+      });
+      panelRenderCount = 0;
+
+      act(() => {
+        queriesContext = makeDataQueriesContext([makeQueryResult(), makeQueryResult()]);
+        listeners.forEach((listener) => listener());
+      });
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: 'Export CSV' })).toHaveAttribute('data-query-count', '2');
+      });
+      expect(panelRenderCount).toBe(1);
+    } finally {
+      vi.mocked(useDataQueriesContext).mockReset();
+    }
+  });
+
+  it.each([
+    { label: 'no actions', actions: undefined, rendered: false },
+    { label: 'an action without location', actions: [{ component: TestAction }], rendered: true },
+    { label: 'a header action', actions: [{ component: TestAction, location: 'header' }], rendered: true },
+    { label: 'a non-header action', actions: [{ component: TestAction, location: 'other' }], rendered: false },
+  ])('renders header plugin actions for a plugin with $label', async ({ actions, rendered }) => {
+    vi.mocked(usePlugin).mockReturnValue({
+      isLoading: false,
+      data: { PanelComponent: (): ReactElement => <div>TimeSeriesChart panel</div>, actions },
+    } as unknown as ReturnType<typeof usePlugin>);
+
+    try {
+      await renderPanel();
+
+      expect(screen.getByText('TimeSeriesChart panel')).toBeInTheDocument();
+      if (rendered) {
+        expect(screen.getByRole('button', { name: 'Test action' })).toBeInTheDocument();
+      } else {
+        expect(screen.queryByRole('button', { name: 'Test action' })).not.toBeInTheDocument();
+      }
+    } finally {
+      vi.mocked(usePlugin).mockReset();
+    }
   });
 
   it.each([
@@ -311,19 +381,76 @@ describe('Panel', () => {
     expect(screen.getByRole('banner')).toHaveTextContent('Stacks - All');
   });
 
-  it('shows panel description', async () => {
+  it('shows panel description when clicked', async () => {
     await renderPanel();
 
-    const descriptionButton = screen.getByRole('button', { name: /description/i });
-    expect(descriptionButton).toBeInTheDocument();
+    const descriptionButton = screen.getByRole('button', {
+      name: /description/i,
+    });
 
-    // Can hover to see panel description in tooltip
-    userEvent.hover(descriptionButton);
+    expect(descriptionButton).toHaveAttribute('aria-expanded', 'false');
 
-    const tooltip = await screen.findByRole('tooltip', { name: 'This is a fake panel - bar' });
-    expect(tooltip).toBeDefined();
-    expect(tooltip).toHaveTextContent('This is a fake panel - bar');
-    expect(descriptionButton.querySelector('svg')).toHaveAttribute('aria-describedby', 'info-tooltip');
+    await userEvent.click(descriptionButton);
+
+    const content = await screen.findByTestId('panel-description-content');
+
+    expect(content).toHaveTextContent('This is a fake panel - bar');
+    expect(descriptionButton).toHaveAttribute('aria-expanded', 'true');
+
+    const popover = screen.getByRole('dialog', {
+      name: 'Panel description',
+    });
+
+    expect(descriptionButton).toHaveAttribute('aria-controls', popover.id);
+  });
+
+  it('renders panel description as markdown', async () => {
+    const panel = createTestPanel();
+    panel.spec.display = {
+      name: 'Fake Panel Title',
+      description:
+        '# Heading\n\nSome **bold** text for $foo\n\n- first item\n- second item\n\n[docs](https://example.com)',
+    };
+    await renderPanel(panel);
+
+    userEvent.click(screen.getByRole('button', { name: /description/i }));
+
+    const content = await screen.findByTestId('panel-description-content');
+    expect(within(content).getByRole('heading', { name: 'Heading' })).toBeInTheDocument();
+    expect(content.querySelector('strong')).toHaveTextContent('bold');
+    expect(content).toHaveTextContent('Some bold text for bar');
+    expect(
+      within(content)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual(['first item', 'second item']);
+    expect(within(content).getByRole('link', { name: 'docs' })).toHaveAttribute('target', '_blank');
+  });
+
+  it('allows keyboard navigation to links in panel description', async () => {
+    const panel = createTestPanel();
+    panel.spec.display = {
+      name: 'Test Panel',
+      description: '[Docs](https://example.com)',
+    };
+
+    await renderPanel(panel);
+
+    const button = screen.getByRole('button', { name: /description/i });
+    button.focus();
+    await userEvent.keyboard('{Enter}');
+    const dialog = await screen.findByRole('dialog', { name: 'Panel description' });
+
+    const link = within(dialog).getByRole('link', { name: 'Docs' });
+    await userEvent.tab();
+
+    expect(link).toHaveFocus();
+
+    await userEvent.keyboard('{Escape}');
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog', { name: 'Panel description' })).not.toBeInTheDocument();
+      expect(button).toHaveFocus();
+    });
   });
 
   it('shows panel link', async () => {

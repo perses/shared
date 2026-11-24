@@ -13,6 +13,7 @@
 
 import { Grid, Typography } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
+import type { FormEditorHandle } from '@perses-dev/components';
 import { PanelEditorContext, PanelPreview } from '@perses-dev/dashboards';
 import type { PanelEditorValues } from '@perses-dev/plugin-system';
 import {
@@ -23,7 +24,7 @@ import {
   useVariableValues,
 } from '@perses-dev/plugin-system';
 import type { AnnotationSpec, Definition, PanelDefinition, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
-import type { ReactElement } from 'react';
+import type { ReactElement, Ref } from 'react';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import type { Control } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
@@ -40,6 +41,7 @@ export interface PanelQueriesSharedControlsProps {
   onPluginSpecChange: (spec: UnknownSpec) => void;
   onAnnotationsChange: (annotations: AnnotationSpec[]) => void;
   onJSONChange: (panelDefinitionStr: string) => void;
+  annotationEditorFormRef?: Ref<FormEditorHandle>;
 }
 
 // Component of PanelEditor, it will share queries results to its children with DataQueriesProvider.
@@ -52,6 +54,7 @@ export function PanelQueriesSharedControls({
   onPluginSpecChange,
   onAnnotationsChange,
   onJSONChange,
+  annotationEditorFormRef,
 }: PanelQueriesSharedControlsProps): ReactElement {
   const { data: pluginPreview } = usePlugin('Panel', plugin.kind);
   const panelEditorContext = useContext(PanelEditorContext);
@@ -131,6 +134,7 @@ export function PanelQueriesSharedControls({
             onQueryRun={handleRunQuery}
             onPluginSpecChange={onPluginSpecChange}
             onAnnotationsChange={onAnnotationsChange}
+            annotationEditorFormRef={annotationEditorFormRef}
           />
         </ErrorBoundary>
       </Grid>
