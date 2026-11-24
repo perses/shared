@@ -1,0 +1,242 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Field } from '@base-ui/react/field';
+import clsx from 'clsx';
+import { forwardRef, useId, useMemo } from 'react';
+import type { CSSProperties, InputHTMLAttributes, ReactElement, ReactNode } from 'react';
+
+import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { useFormControlState } from '../formControlContext';
+import { hasContent } from '../hasContent';
+import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
+import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
+import { TextHelper } from '../TextHelper';
+import type { Size, Status } from '../types';
+
+import '../system/layout.css';
+import '../system/radius.css';
+import '../system/spacing.css';
+import './textField.css';
+
+// Render function rather than a bare element so the label/aria props Base UI merges in are visible to lint.
+const renderTextarea: NonNullable<Field.Control.Props['render']> = (props) => <textarea {...props} />;
+
+function Adornment({ position, children }: { position: 'start' | 'end'; children: ReactNode }): ReactElement | null {
+  if (!hasContent(children)) return null;
+  return <span className={`ps-TextField__adornment ps-TextField__adornment--${position}`}>{children}</span>;
+}
+
+export interface TextFieldStyle extends CSSProperties {
+  /** Per-step height override; falls back to the shared control-size scale. */
+  '--perses-textfield-size-xs'?: string;
+  '--perses-textfield-size-sm'?: string;
+  '--perses-textfield-size-md'?: string;
+  '--perses-textfield-size-lg'?: string;
+}
+
+/** Documented internal styling targets; the root remains styled through top-level `className` and `style`. */
+export interface TextFieldSlotProps {
+  /** Visible label; rendered only when `label` is provided. */
+  label?: SlotStyleProps;
+  /** Bordered wrapper around the control and start/end elements; accepts the `TextFieldStyle` size custom properties. */
+  wrapper?: SlotStyleProps<TextFieldStyle>;
+  /** Native input, or textarea when `multiline` is true. */
+  input?: SlotStyleProps;
+  /** Supporting text; rendered only when `helperText` is provided. */
+  helper?: SlotStyleProps;
+}
+
+// Only `overflow` from the display category: `display` stays fixed to inline-flex/flex by the stylesheet, so
+// compiling it would strip a `display` value from the DOM and let `.ps-display` override the default.
+const TEXT_FIELD_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
+const TEXT_FIELD_RADIUS_PROPS = compileStyleProps([radiusProps]);
+
+interface TextFieldBaseProps
+  extends
+    Omit<
+      InputHTMLAttributes<HTMLInputElement>,
+      'size' | 'width' | 'height' | 'style' | 'aria-label' | 'aria-labelledby'
+    >,
+    SpacingProps,
+    SizingProps,
+    RadiusProps,
+    Pick<DisplayProps, 'overflow'> {
+  /** Inline styles for the root; accepts the `--perses-textfield-size-<step>` override custom properties. */
+  style?: PersesCSSProperties<TextFieldStyle>;
+  /** Styling-only overrides for internal parts; does not replace content, behavior, or accessibility attributes. */
+  slotProps?: TextFieldSlotProps;
+  /** Hint or validation message, linked to the control through `aria-describedby`. */
+  helperText?: ReactNode;
+  /** Visual status. `error` also sets `aria-invalid` on the control. */
+  status?: Status;
+  fullWidth?: boolean;
+  size?: Size;
+  /** Renders a `textarea` instead of an `input`. */
+  multiline?: boolean;
+  rows?: number;
+  /** Content before the control. Mark purely decorative icons `aria-hidden`. */
+  startElement?: ReactNode;
+  /** Content after the control. Mark purely decorative icons `aria-hidden`. */
+  endElement?: ReactNode;
+}
+
+/**
+ * Accessible-name contract. A visible `label` is the accessible name, so `aria-label` and `aria-labelledby` are
+ * disallowed with it: either would silently override the visible text (WCAG 2.5.3 Label in Name). Without a `label`,
+ * the field is named by `aria-label`, `aria-labelledby`, or the `FormLabel` of an enclosing `FormControl`.
+ */
+type TextFieldAccessibleName =
+  | {
+      /**
+       * Visible label, associated with the control through `htmlFor`/`id`, and used as the accessible name. Inside a
+       * `FormControl` it keeps the field's own label and helper text instead of using the wrapper's.
+       */
+      label: ReactNode;
+      'aria-label'?: never;
+      'aria-labelledby'?: never;
+    }
+  | {
+      label?: undefined;
+      /** Accessible name when there is no visible label. */
+      'aria-label'?: string;
+      /** Id of an external element that labels the control when there is no visible label. */
+      'aria-labelledby'?: string;
+    };
+
+export type TextFieldProps = TextFieldBaseProps & TextFieldAccessibleName;
+
+/**
+ * Text input with label, helper text and optional start/end elements. Spacing, sizing and `overflow` style props apply to the root
+ * element and behave as documented on `Box`; `display` is fixed by the stylesheet. Native attributes, handlers, and
+ * `ref` stay on the control.
+ *
+ * @example
+ * <TextField label="Name" helperText="Shown to your team" />
+ *
+ * @example
+ * // Inside a FormControl the wrapper owns the label and helper text.
+ * <FormControl required>
+ *   <FormLabel>Name</FormLabel>
+ *   <TextField />
+ *   <FormHelperText>Shown to your team</FormHelperText>
+ * </FormControl>
+ */
+export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldProps>(function TextField(
+  {
+    label,
+    helperText,
+    status: statusProp,
+    fullWidth,
+    size: sizeProp,
+    multiline = false,
+    rows,
+    startElement,
+    endElement,
+    className,
+    style,
+    slotProps,
+    id,
+    disabled: disabledProp,
+    required: requiredProp,
+    ...props
+  },
+  ref,
+) {
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+  const { inFormControl, size, status, invalid, disabled, required } = useFormControlState({
+    size: sizeProp,
+    status: statusProp,
+    disabled: disabledProp,
+    required: requiredProp,
+  });
+  // Without its own label the field defers its label and helper text to the enclosing FormControl.
+  const nested = inFormControl && !hasContent(label);
+  const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
+    () =>
+      (descriptionProps, state): ReactElement => (
+        <TextHelper {...descriptionProps} status={status} disabled={state.disabled} />
+      ),
+    [status],
+  );
+  const {
+    className: radiusClassName,
+    style: radiusStyle,
+    rest: restWithoutRadius,
+  } = applyStyleProps(props, TEXT_FIELD_RADIUS_PROPS, slotProps?.wrapper?.style);
+  const {
+    className: styleClassName,
+    style: computedStyle,
+    rest,
+  } = applyStyleProps(restWithoutRadius, TEXT_FIELD_STYLE_PROPS, style);
+  const { display: _display, ...restWithoutDisplay } = rest as typeof rest & { display?: unknown };
+  const rootProps = {
+    className: clsx('ps-TextField', styleClassName, className),
+    style: computedStyle,
+    'data-size': size,
+    'data-status': status,
+    'data-full-width': fullWidth || undefined,
+    'data-multiline': multiline || undefined,
+  };
+  const control = (
+    <div className={clsx('ps-TextField__wrapper', radiusClassName, slotProps?.wrapper?.className)} style={radiusStyle}>
+      <Adornment position="start">{startElement}</Adornment>
+      <Field.Control
+        {...(invalid && !disabled && { 'aria-invalid': true })}
+        {...restWithoutDisplay}
+        ref={ref}
+        id={inputId}
+        disabled={disabled}
+        required={required}
+        className={clsx('ps-TextField__input', slotProps?.input?.className)}
+        style={slotProps?.input?.style}
+        render={multiline ? renderTextarea : undefined}
+        {...(multiline && { rows })}
+      />
+      <Adornment position="end">{endElement}</Adornment>
+    </div>
+  );
+
+  if (nested) {
+    return (
+      <div {...rootProps} data-disabled={disabled || undefined}>
+        {control}
+      </div>
+    );
+  }
+
+  return (
+    <Field.Root {...rootProps} disabled={disabled} invalid={invalid}>
+      {hasContent(label) && (
+        <Field.Label
+          className={clsx('ps-TextField__label', slotProps?.label?.className)}
+          style={slotProps?.label?.style}
+          htmlFor={inputId}
+        >
+          {label}
+        </Field.Label>
+      )}
+      {control}
+      {hasContent(helperText) && (
+        <Field.Description
+          className={clsx('ps-TextField__helper', slotProps?.helper?.className)}
+          style={slotProps?.helper?.style}
+          render={renderHelper}
+        >
+          {helperText}
+        </Field.Description>
+      )}
+    </Field.Root>
+  );
+});

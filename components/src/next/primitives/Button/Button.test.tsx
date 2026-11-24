@@ -1,0 +1,214 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { ReactElement, ReactNode } from 'react';
+
+import { ComponentsProvider } from '../../contexts/ComponentsProvider';
+import { defaultComponents, defaultIcons } from '../defaults';
+import { Button } from './Button';
+
+function Wrapper({ children }: { children: ReactNode }): ReactElement {
+  return (
+    <ComponentsProvider components={defaultComponents} icons={defaultIcons}>
+      {children}
+    </ComponentsProvider>
+  );
+}
+
+const RESPONSIVE_PADDING = { default: 'sm', md: 'xl' } as const;
+const RESPONSIVE_DISPLAY = { default: 'flex', md: 'none' };
+const STYLE_OVERRIDE = { padding: '99px' };
+
+describe('Button', () => {
+  it('renders children', () => {
+    render(<Button>Click me</Button>, { wrapper: Wrapper });
+    expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument();
+  });
+
+  it('applies the button classes', () => {
+    render(<Button>Test</Button>, { wrapper: Wrapper });
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('ps-ButtonBase');
+    expect(button).toHaveClass('ps-Button');
+  });
+
+  it('sets data-variant, data-color, and data-size attributes', () => {
+    render(
+      <Button variant="outline" color="error" size="lg">
+        Test
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('data-variant', 'outline');
+    expect(button).toHaveAttribute('data-color', 'error');
+    expect(button).toHaveAttribute('data-size', 'lg');
+  });
+
+  it('uses default props when none are provided', () => {
+    render(<Button>Test</Button>, { wrapper: Wrapper });
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('data-variant', 'solid');
+    expect(button).toHaveAttribute('data-color', 'default');
+    expect(button).toHaveAttribute('data-size', 'md');
+  });
+
+  it('merges additional className', () => {
+    render(<Button className="custom-class">Test</Button>, { wrapper: Wrapper });
+    const button = screen.getByRole('button');
+    expect(button).toHaveClass('ps-Button');
+    expect(button).toHaveClass('custom-class');
+  });
+
+  it('handles click events', async () => {
+    const handleClick = vi.fn();
+    render(<Button onClick={handleClick}>Click</Button>, { wrapper: Wrapper });
+    await userEvent.click(screen.getByRole('button'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
+  });
+
+  it('supports disabled state', () => {
+    render(<Button disabled>Disabled</Button>, { wrapper: Wrapper });
+    expect(screen.getByRole('button')).toBeDisabled();
+  });
+
+  it('renders spinner when loading is true', () => {
+    const { container } = render(<Button loading>Save</Button>, { wrapper: Wrapper });
+    expect(container.querySelector('.ps-Button__spinner')).toBeInTheDocument();
+    expect(container.querySelector('.ps-Spinner')).toBeInTheDocument();
+  });
+
+  it('composes the shared Icon primitive for its spinner wrapper', () => {
+    const { container } = render(<Button loading>Save</Button>, { wrapper: Wrapper });
+    const spinnerContainer = container.querySelector('.ps-Button__spinner');
+    expect(spinnerContainer).toHaveClass('ps-Icon');
+  });
+
+  it('keeps a loading button focusable via aria-disabled instead of native disabled', () => {
+    render(<Button loading>Save</Button>, { wrapper: Wrapper });
+    const button = screen.getByRole('button');
+    expect(button).not.toBeDisabled();
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    button.focus();
+    expect(button).toHaveFocus();
+  });
+
+  it('does not fire onClick while loading', async () => {
+    const handleClick = vi.fn();
+    render(
+      <Button loading onClick={handleClick}>
+        Save
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    await userEvent.click(screen.getByRole('button'));
+    expect(handleClick).not.toHaveBeenCalled();
+  });
+
+  it('uses native disabled when explicitly disabled while loading', () => {
+    render(
+      <Button loading disabled>
+        Save
+      </Button>,
+      { wrapper: Wrapper },
+    );
+    expect(screen.getByRole('button')).toBeDisabled();
+  });
+
+  it('sets aria-busy and data-loading when loading', () => {
+    render(<Button loading>Save</Button>, { wrapper: Wrapper });
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(button).toHaveAttribute('data-loading', '');
+  });
+
+  it.each([false, undefined])('removes the loading marker when loading becomes %s', (loading) => {
+    const { rerender } = render(<Button loading>Save</Button>, { wrapper: Wrapper });
+    const button = screen.getByRole('button');
+    expect(button).toHaveAttribute('data-loading', '');
+
+    rerender(<Button loading={loading}>Save</Button>);
+    expect(button).not.toHaveAttribute('data-loading');
+
+    rerender(<Button loading>Save</Button>);
+    expect(button).toHaveAttribute('data-loading', '');
+  });
+
+  it('does not render spinner when loading is false', () => {
+    const { container } = render(<Button>Save</Button>, { wrapper: Wrapper });
+    expect(container.querySelector('.ps-Button__spinner')).not.toBeInTheDocument();
+  });
+
+  describe('style props', () => {
+    it('applies a spacing token through its design-token custom property', () => {
+      render(<Button p="md">Content</Button>, { wrapper: Wrapper });
+      const el = screen.getByRole('button');
+      expect(el).toHaveClass('ps-p');
+      expect(el).toHaveStyle({ '--ps-p': 'var(--perses-spacing-md)' });
+    });
+
+    it('creates responsive spacing variables', () => {
+      render(<Button p={RESPONSIVE_PADDING}>Content</Button>, { wrapper: Wrapper });
+      const el = screen.getByRole('button');
+      expect(el).toHaveClass('ps-p');
+      expect(el).toHaveStyle({ '--ps-p': 'var(--perses-spacing-sm)' });
+      expect(el).toHaveStyle({ '--ps-p-md': 'var(--perses-spacing-xl)' });
+    });
+
+    it('treats numeric sizing as pixels and passes strings through', () => {
+      render(
+        <Button width={130} maxWidth="50%">
+          Content
+        </Button>,
+        { wrapper: Wrapper },
+      );
+      const el = screen.getByRole('button');
+      expect(el).toHaveClass('ps-width', 'ps-max-width');
+      expect(el).toHaveStyle({ '--ps-width': '130px', '--ps-max-width': '50%' });
+    });
+
+    it('applies a responsive display prop', () => {
+      render(<Button display={RESPONSIVE_DISPLAY}>Content</Button>, { wrapper: Wrapper });
+      const el = screen.getByRole('button');
+      expect(el).toHaveClass('ps-display');
+      expect(el).toHaveStyle({ '--ps-display': 'flex', '--ps-display-md': 'none' });
+    });
+
+    it('lets the style prop override a style prop and keeps the component class', () => {
+      render(
+        <Button p="md" style={STYLE_OVERRIDE}>
+          Content
+        </Button>,
+        { wrapper: Wrapper },
+      );
+      const el = screen.getByRole('button');
+      expect(el).toHaveClass('ps-Button', 'ps-p');
+      expect(el).toHaveStyle({ padding: '99px' });
+    });
+
+    it('does not forward style props to the DOM element', () => {
+      render(
+        <Button p="md" width={100} id="x">
+          Content
+        </Button>,
+        { wrapper: Wrapper },
+      );
+      const el = screen.getByRole('button');
+      expect(el).toHaveAttribute('id', 'x');
+      expect(el).not.toHaveAttribute('p');
+      expect(el).not.toHaveAttribute('width');
+    });
+  });
+});
