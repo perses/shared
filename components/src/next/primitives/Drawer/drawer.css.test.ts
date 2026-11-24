@@ -27,15 +27,21 @@ function getRule(selector: string, media?: string): string {
 }
 
 describe('drawer.css', () => {
-  it('layers the backdrop and viewport below MUI modals via the drawer z-index token', () => {
-    expect(getRule(':where(.ps-Drawer__backdrop)')).toContain('z-index: var(--perses-z-index-drawer)');
-    expect(getRule(':where(.ps-Drawer__viewport)')).toContain('z-index: var(--perses-z-index-drawer)');
+  it('layers the backdrop and viewport below dialogs via the drawer z-index token', () => {
+    const shared = getRule(':where(.ps-Drawer__backdrop),\n  :where(.ps-Drawer__viewport)');
+    expect(shared).toContain('position: fixed');
+    expect(shared).toContain('z-index: var(--perses-z-index-drawer)');
     expect(css).not.toContain('--perses-z-index-overlay');
   });
 
   it('anchors with physical edges so anchor matches translateX and swipeDirection in RTL', () => {
     expect(getRule(":where(.ps-Drawer[data-anchor='right'])")).toContain('right: 0');
     expect(getRule(":where(.ps-Drawer[data-anchor='left'])")).toContain('left: 0');
+    expect(getRule(":where(.ps-Drawer[data-anchor='right'])")).toContain('--ps-drawer-offset: 100%');
+    expect(getRule(":where(.ps-Drawer[data-anchor='left'])")).toContain('--ps-drawer-offset: -100%');
+    expect(getRule(':where(.ps-Drawer[data-starting-style]),\n  :where(.ps-Drawer[data-ending-style])')).toContain(
+      'translateX(var(--ps-drawer-offset))',
+    );
     expect(css).not.toMatch(/justify-content|border-(start|end)-(start|end)-radius|inset-inline|margin-inline/);
   });
 
@@ -53,6 +59,17 @@ describe('drawer.css', () => {
     expect(getRule(":where(.ps-Drawer[data-anchor='right'])", media)).toContain('CanvasText');
     expect(getRule(":where(.ps-Drawer[data-anchor='left'])", media)).toContain('border-right:');
     expect(getRule(':where(.ps-Drawer:focus-visible)', media)).toContain('outline-color: Highlight');
+  });
+
+  it('lays out the header as a fixed row and the content as the scrolling column', () => {
+    const header = getRule(':where(.ps-DrawerHeader)');
+    expect(header).toContain('flex-shrink: 0');
+    expect(header).toContain('border-bottom: var(--perses-border-width-sm) solid var(--perses-border-default)');
+    expect(getRule(':where(.ps-DrawerHeader__title)')).toContain('margin: 0');
+    const content = getRule(':where(.ps-DrawerContent)');
+    expect(content).toContain('flex: 1');
+    expect(content).toContain('min-height: 0');
+    expect(content).toContain('overflow: auto');
   });
 
   it('disables motion when the user prefers reduced motion', () => {

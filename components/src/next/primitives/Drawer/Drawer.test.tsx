@@ -21,10 +21,12 @@ import type { ReactElement, ReactNode } from 'react';
 import { ThemeModeProvider } from '../../contexts/ThemeModeProvider';
 import { Drawer } from './Drawer';
 import type { DrawerProps } from './Drawer';
+import { DrawerContent } from './DrawerContent';
+import { DrawerHeader } from './DrawerHeader';
 
 function renderDrawer(props: Partial<DrawerProps> = {}, children: ReactNode = 'Body'): RenderResult {
   return render(
-    <Drawer open onOpenChange={() => {}} aria-label="Drawer" {...props}>
+    <Drawer open onClose={() => {}} aria-label="Drawer" {...props}>
       {children}
     </Drawer>,
   );
@@ -34,7 +36,7 @@ function ControlledDrawer({
   onRequestClose,
   children,
 }: {
-  onRequestClose?: DrawerProps['onOpenChange'];
+  onRequestClose?: () => void;
   children?: ReactNode;
 }): ReactElement {
   const [open, setOpen] = useState(false);
@@ -45,9 +47,9 @@ function ControlledDrawer({
       </button>
       <Drawer
         open={open}
-        onOpenChange={(next) => {
-          onRequestClose?.(next);
-          setOpen(next);
+        onClose={() => {
+          onRequestClose?.();
+          setOpen(false);
         }}
         aria-label="Drawer"
       >
@@ -63,10 +65,10 @@ function ControlledDrawer({
 
 describe('Drawer', () => {
   it('renders nothing when closed and a dialog popup when open', () => {
-    const { rerender } = render(<Drawer open={false} onOpenChange={() => {}} aria-label="Drawer" />);
+    const { rerender } = render(<Drawer open={false} onClose={() => {}} aria-label="Drawer" />);
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     rerender(
-      <Drawer open onOpenChange={() => {}} aria-label="Drawer">
+      <Drawer open onClose={() => {}} aria-label="Drawer">
         Body
       </Drawer>,
     );
@@ -78,7 +80,7 @@ describe('Drawer', () => {
   it('forwards data-testid, className and ref to the popup', () => {
     const ref = createRef<HTMLDivElement>();
     render(
-      <Drawer open onOpenChange={() => {}} aria-label="Drawer" data-testid="panel-editor" className="custom" ref={ref}>
+      <Drawer open onClose={() => {}} aria-label="Drawer" data-testid="panel-editor" className="custom" ref={ref}>
         Body
       </Drawer>,
     );
@@ -92,7 +94,7 @@ describe('Drawer', () => {
     const { rerender } = renderDrawer();
     expect(screen.getByRole('dialog')).toHaveAttribute('data-anchor', 'right');
     rerender(
-      <Drawer open onOpenChange={() => {}} aria-label="Drawer" anchor="left">
+      <Drawer open onClose={() => {}} aria-label="Drawer" anchor="left">
         Body
       </Drawer>,
     );
@@ -106,22 +108,22 @@ describe('Drawer', () => {
   });
 
   describe('closing is a request', () => {
-    it('calls onOpenChange(false) on Escape but stays open while open stays true', async () => {
-      const onOpenChange = vi.fn();
-      renderDrawer({ onOpenChange });
+    it('calls onClose on Escape but stays open while open stays true', async () => {
+      const onClose = vi.fn();
+      renderDrawer({ onClose });
       await userEvent.keyboard('{Escape}');
-      expect(onOpenChange).toHaveBeenCalledTimes(1);
-      expect(onOpenChange).toHaveBeenCalledWith(false);
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onClose).toHaveBeenCalledWith();
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
-    it('calls onOpenChange(false) on backdrop click but stays open while open stays true', async () => {
-      const onOpenChange = vi.fn();
-      renderDrawer({ onOpenChange });
+    it('calls onClose on backdrop click but stays open while open stays true', async () => {
+      const onClose = vi.fn();
+      renderDrawer({ onClose });
       const backdrop = document.querySelector<HTMLElement>('.ps-Drawer__backdrop');
       await userEvent.click(backdrop as HTMLElement);
-      expect(onOpenChange).toHaveBeenCalledTimes(1);
-      expect(onOpenChange).toHaveBeenCalledWith(false);
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(onClose).toHaveBeenCalledWith();
       expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
@@ -134,9 +136,9 @@ describe('Drawer', () => {
     });
 
     it('does not request close when clicking inside a nested portaled dialog', async () => {
-      const onOpenChange = vi.fn();
+      const onClose = vi.fn();
       renderDrawer(
-        { onOpenChange },
+        { onClose },
         <Dialog.Root open>
           <Dialog.Portal>
             <Dialog.Popup>
@@ -147,7 +149,7 @@ describe('Drawer', () => {
         </Dialog.Root>,
       );
       await userEvent.click(screen.getByRole('button', { name: 'Discard' }));
-      expect(onOpenChange).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
     });
   });
 
@@ -156,7 +158,7 @@ describe('Drawer', () => {
     function Harness(): ReactElement {
       const [open, setOpen] = useState(true);
       return (
-        <Drawer open={open} onOpenChange={setOpen} onExited={onExited} anchor={anchor} aria-label="Drawer">
+        <Drawer open={open} onClose={() => setOpen(false)} onExited={onExited} anchor={anchor} aria-label="Drawer">
           <button type="button" onClick={() => setOpen(false)}>
             Close
           </button>
@@ -186,7 +188,7 @@ describe('Drawer', () => {
     it('propagates the nearest ThemeModeProvider mode onto the portal container', () => {
       render(
         <ThemeModeProvider mode="dark">
-          <Drawer open onOpenChange={() => {}} aria-label="Drawer">
+          <Drawer open onClose={() => {}} aria-label="Drawer">
             Body
           </Drawer>
         </ThemeModeProvider>,
@@ -203,25 +205,65 @@ describe('Drawer', () => {
     });
   });
 
+  describe('parts', () => {
+    it('DrawerHeader names the dialog from its visible title and renders endElement', () => {
+      render(
+        <Drawer open onClose={() => {}} aria-label="fallback">
+          <DrawerHeader endElement={<button type="button">Apply</button>}>Edit variables</DrawerHeader>
+        </Drawer>,
+      );
+      const dialog = screen.getByRole('dialog', { name: 'Edit variables' });
+      const title = screen.getByRole('heading', { level: 2, name: 'Edit variables' });
+      expect(title).toHaveClass('ps-DrawerHeader__title');
+      expect(dialog).toHaveAttribute('aria-labelledby', title.id);
+      expect(screen.getByRole('button', { name: 'Apply' }).parentElement).toHaveClass('ps-DrawerHeader__end');
+    });
+
+    it.each([
+      ['undefined', undefined],
+      ['false', false],
+      ['null', null],
+    ])('DrawerHeader omits the end slot for falsy endElement (%s)', (_, endElement) => {
+      renderDrawer({}, <DrawerHeader endElement={endElement}>Title</DrawerHeader>);
+      expect(document.querySelector('.ps-DrawerHeader__end')).toBeNull();
+    });
+
+    it('DrawerHeader and DrawerContent forward ref, className, style props and slotProps', () => {
+      const headerRef = createRef<HTMLDivElement>();
+      const contentRef = createRef<HTMLDivElement>();
+      renderDrawer(
+        {},
+        <>
+          <DrawerHeader
+            ref={headerRef}
+            className="h"
+            p="sm"
+            slotProps={{ title: { className: 't' }, end: { className: 'e' } }}
+            endElement="x"
+          >
+            Title
+          </DrawerHeader>
+          <DrawerContent ref={contentRef} className="c" p="0" data-testid="body">
+            Body
+          </DrawerContent>
+        </>,
+      );
+      expect(headerRef.current).toHaveClass('ps-DrawerHeader', 'ps-p', 'h');
+      expect(document.querySelector('.ps-DrawerHeader__title')).toHaveClass('t');
+      expect(document.querySelector('.ps-DrawerHeader__end')).toHaveClass('e');
+      expect(contentRef.current).toBe(screen.getByTestId('body'));
+      expect(contentRef.current).toHaveClass('ps-DrawerContent', 'ps-p', 'c');
+      expect(contentRef.current).toHaveStyle({ '--ps-p': 'var(--perses-spacing-0)' });
+    });
+  });
+
   describe('prop combinations', () => {
-    it('maps style props onto the popup and keeps caller style and className', () => {
-      renderDrawer({
-        width: '50%',
-        p: 'md',
-        overflow: 'auto',
-        className: 'custom',
-        style: { color: 'red' },
-      });
+    it('maps sizing props onto the popup and keeps caller style and className', () => {
+      renderDrawer({ width: '50%', className: 'custom', style: { color: 'red' } });
       const popup = screen.getByRole('dialog');
-      expect(popup).toHaveClass('ps-Drawer', 'ps-width', 'ps-p', 'ps-overflow', 'custom');
-      expect(popup).toHaveStyle({
-        '--ps-width': '50%',
-        '--ps-p': 'var(--perses-spacing-md)',
-        '--ps-overflow': 'auto',
-        color: 'rgb(255, 0, 0)',
-      });
+      expect(popup).toHaveClass('ps-Drawer', 'ps-width', 'custom');
+      expect(popup).toHaveStyle({ '--ps-width': '50%', color: 'rgb(255, 0, 0)' });
       expect(popup).not.toHaveAttribute('width');
-      expect(popup).not.toHaveAttribute('p');
     });
 
     it('supports responsive width', () => {
@@ -233,7 +275,7 @@ describe('Drawer', () => {
       const { rerender } = renderDrawer({ 'aria-label': 'Edit panel' });
       expect(screen.getByRole('dialog', { name: 'Edit panel' })).toBeInTheDocument();
       rerender(
-        <Drawer open onOpenChange={() => {}} aria-labelledby="title">
+        <Drawer open onClose={() => {}} aria-labelledby="title">
           <h2 id="title">Edit datasource</h2>
         </Drawer>,
       );

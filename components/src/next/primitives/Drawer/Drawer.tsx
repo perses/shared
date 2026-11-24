@@ -18,18 +18,16 @@ import type { HTMLAttributes, ReactNode } from 'react';
 
 import { ThemeModeContext } from '../../contexts/ThemeModeProvider';
 import type { PersesCSSProperties } from '../../types';
-import { applyStyleProps, compileStyleProps, displayProps, sizingProps, spacingProps } from '../system';
-import type { DisplayProps, SizingProps, SpacingProps } from '../system';
+import { applyStyleProps, compileStyleProps, sizingProps } from '../system';
+import type { SizingProps } from '../system';
 
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared layout styles.
 import '../system/layout.css';
-// oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers shared spacing styles.
-import '../system/spacing.css';
 // oxlint-disable-next-line import/no-unassigned-import -- This import intentionally registers the drawer styles.
 import './drawer.css';
 
-// Only `overflow` from the display category: `display` stays fixed to flex by the stylesheet.
-const DRAWER_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, { overflow: displayProps.overflow }]);
+// Only sizing: the popup fixes its own padding-free flex column and `overflow: hidden` for the rounded edge.
+const DRAWER_STYLE_PROPS = compileStyleProps([sizingProps]);
 
 export type DrawerAnchor = 'left' | 'right';
 
@@ -43,11 +41,7 @@ export type DrawerProps = DrawerBaseProps & DrawerAccessibleName;
  * The popup portals to document.body and propagates the nearest ThemeModeProvider mode.
  */
 interface DrawerBaseProps
-  extends
-    Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'aria-label' | 'aria-labelledby'>,
-    SpacingProps,
-    SizingProps,
-    Pick<DisplayProps, 'overflow'> {
+  extends Omit<HTMLAttributes<HTMLDivElement>, 'children' | 'aria-label' | 'aria-labelledby'>, SizingProps {
   style?: PersesCSSProperties;
   children?: ReactNode;
   /** Whether the drawer is shown. The drawer is always controlled. */
@@ -56,24 +50,25 @@ interface DrawerBaseProps
    * Called when the user asks to close (Escape, backdrop click, swipe). The drawer stays open until the
    * consumer sets `open` to false, so a form can show a "discard changes?" confirmation first.
    */
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
   /** Called once the close transition has finished and the popup has unmounted. */
   onExited?: () => void;
-  /** Screen edge the drawer slides in from. Defaults to `right`. */
+  /** Screen edge the drawer slides in from; a physical edge that does not flip in RTL. Defaults to `right`. */
   anchor?: DrawerAnchor;
 }
 
 /**
- * A modal side panel for editing flows. Content owns its own header and close controls; the popup is a
- * full-height flex column so children can use `flex: 1; overflow-y: auto` for scrollable bodies.
+ * A modal side panel for editing flows. Compose `DrawerHeader` and `DrawerContent` inside it, or supply your
+ * own header; the popup is a full-height flex column.
  *
  * @example
- * <Drawer open={open} onOpenChange={() => formRef.current?.requestClose()} aria-labelledby="panel-editor-title">
- *   <PanelEditorForm ref={formRef} titleId="panel-editor-title" onClose={() => setOpen(false)} />
+ * <Drawer open={open} onClose={() => setConfirming(true)} aria-label="Edit panel">
+ *   <DrawerHeader endElement={<Button onClick={save}>Apply</Button>}>Edit panel</DrawerHeader>
+ *   <DrawerContent>{form}</DrawerContent>
  * </Drawer>
  */
 export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
-  { children, open, onOpenChange, onExited, anchor = 'right', className, style, ...props },
+  { children, open, onClose, onExited, anchor = 'right', className, style, ...props },
   ref,
 ) {
   const mode = useContext(ThemeModeContext);
@@ -82,15 +77,15 @@ export const Drawer = forwardRef<HTMLDivElement, DrawerProps>(function Drawer(
   return (
     <BaseDrawer.Root
       open={open}
-      onOpenChange={(next) => onOpenChange(next)}
+      onOpenChange={() => onClose()}
       onOpenChangeComplete={(next) => {
         if (!next) onExited?.();
       }}
       swipeDirection={anchor}
     >
-      <BaseDrawer.Portal className="ps-Drawer__portal" data-perses-mode={mode}>
+      <BaseDrawer.Portal data-perses-mode={mode}>
         <BaseDrawer.Backdrop className="ps-Drawer__backdrop" />
-        <BaseDrawer.Viewport className="ps-Drawer__viewport" data-anchor={anchor}>
+        <BaseDrawer.Viewport className="ps-Drawer__viewport">
           <BaseDrawer.Popup
             {...rest}
             ref={ref}

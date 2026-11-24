@@ -29,6 +29,8 @@ import type {
   ColorVariant,
   DividerProps,
   DrawerAnchor,
+  DrawerContentProps,
+  DrawerHeaderProps,
   DrawerProps,
   FormControlLabelPlacement,
   FormControlLabelProps,
@@ -90,6 +92,8 @@ import {
   Chip,
   Divider,
   Drawer,
+  DrawerContent,
+  DrawerHeader,
   FormControl,
   FormControlLabel,
   FormGroup,
@@ -141,6 +145,8 @@ describe('primitives barrel exports', () => {
     expect(Chip).toBeDefined();
     expect(Divider).toBeDefined();
     expect(Drawer).toBeDefined();
+    expect(DrawerHeader).toBeDefined();
+    expect(DrawerContent).toBeDefined();
     expect(FormControl).toBeDefined();
     expect(FormLabel).toBeDefined();
     expect(FormHelperText).toBeDefined();
@@ -205,10 +211,12 @@ describe('primitives barrel exports', () => {
     const drawerAnchor: DrawerAnchor = 'left';
     const drawerProps: DrawerProps = {
       open: false,
-      onOpenChange: () => {},
+      onClose: () => {},
       anchor: drawerAnchor,
       'aria-label': 'Drawer',
     };
+    const drawerHeaderProps: DrawerHeaderProps = {};
+    const drawerContentProps: DrawerContentProps = {};
     const formControlProps: FormControlProps = { size: 'sm', status: 'error', required: true, flex: 1 };
     const formLabelProps: FormLabelProps = { htmlFor: 'name', mb: 'xs' };
     const formHelperTextProps: FormHelperTextProps = { status: 'warning' };
@@ -290,6 +298,8 @@ describe('primitives barrel exports', () => {
     expect(chipStyle).toBeDefined();
     expect(dividerProps).toBeDefined();
     expect(drawerProps).toBeDefined();
+    expect(drawerHeaderProps).toBeDefined();
+    expect(drawerContentProps).toBeDefined();
     expect(formControlProps.size).toBe('sm');
     expect(formLabelProps.htmlFor).toBe('name');
     expect(formHelperTextProps.status).toBe('warning');

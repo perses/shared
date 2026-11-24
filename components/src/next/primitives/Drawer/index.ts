@@ -12,3 +12,5 @@
 // limitations under the License.
 
 export * from './Drawer';
+export * from './DrawerContent';
+export * from './DrawerHeader';
