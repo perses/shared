@@ -28,6 +28,8 @@ import type {
   ChipVariant,
   ColorVariant,
   DividerProps,
+  DrawerAnchor,
+  DrawerProps,
   FormControlLabelPlacement,
   FormControlLabelProps,
   FormControlProps,
@@ -87,6 +89,7 @@ import {
   Checkbox,
   Chip,
   Divider,
+  Drawer,
   FormControl,
   FormControlLabel,
   FormGroup,
@@ -137,6 +140,7 @@ describe('primitives barrel exports', () => {
     expect(Checkbox).toBeDefined();
     expect(Chip).toBeDefined();
     expect(Divider).toBeDefined();
+    expect(Drawer).toBeDefined();
     expect(FormControl).toBeDefined();
     expect(FormLabel).toBeDefined();
     expect(FormHelperText).toBeDefined();
@@ -198,6 +202,8 @@ describe('primitives barrel exports', () => {
     const chipVariant: ChipVariant = 'outline';
     const chipStyle: ChipStyle = { '--perses-chip-size-sm': '2.5rem' };
     const dividerProps: DividerProps = {};
+    const drawerAnchor: DrawerAnchor = 'left';
+    const drawerProps: DrawerProps = { open: false, onOpenChange: () => {}, anchor: drawerAnchor };
     const formControlProps: FormControlProps = { size: 'sm', status: 'error', required: true, flex: 1 };
     const formLabelProps: FormLabelProps = { htmlFor: 'name', mb: 'xs' };
     const formHelperTextProps: FormHelperTextProps = { status: 'warning' };
@@ -278,6 +284,7 @@ describe('primitives barrel exports', () => {
     expect(chipVariant).toBe('outline');
     expect(chipStyle).toBeDefined();
     expect(dividerProps).toBeDefined();
+    expect(drawerProps).toBeDefined();
     expect(formControlProps.size).toBe('sm');
     expect(formLabelProps.htmlFor).toBe('name');
     expect(formHelperTextProps.status).toBe('warning');
