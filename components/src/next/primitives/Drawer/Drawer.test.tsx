@@ -151,12 +151,12 @@ describe('Drawer', () => {
     });
   });
 
-  it('fires onExited once after the close transition completes', async () => {
+  it.each<DrawerProps['anchor']>(['right', 'left'])('fires onExited once after closing from %s', async (anchor) => {
     const onExited = vi.fn();
     function Harness(): ReactElement {
       const [open, setOpen] = useState(true);
       return (
-        <Drawer open={open} onOpenChange={setOpen} onExited={onExited} aria-label="Drawer">
+        <Drawer open={open} onOpenChange={setOpen} onExited={onExited} anchor={anchor} aria-label="Drawer">
           <button type="button" onClick={() => setOpen(false)}>
             Close
           </button>

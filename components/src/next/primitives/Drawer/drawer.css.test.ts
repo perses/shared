@@ -17,8 +17,9 @@ import { resolve } from 'path';
 // jsdom does not compute stacking or layered styles, so assert the CSS source contracts directly.
 const css = readFileSync(resolve(__dirname, './drawer.css'), 'utf-8').replace(/\/\*[\s\S]*?\*\//g, '');
 
-function getRule(selector: string): string {
-  const rule = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].find(
+function getRule(selector: string, media?: string): string {
+  const source = media ? (css.match(new RegExp(`@media \\(${media}\\)\\s*\\{([\\s\\S]*?)\\n  \\}`))?.[1] ?? '') : css;
+  const rule = [...source.matchAll(/([^{}]+)\{([^{}]*)\}/g)].find(
     ([, ruleSelector]) => ruleSelector?.trim() === selector,
   )?.[2];
   expect(rule).toBeDefined();
@@ -30,5 +31,33 @@ describe('drawer.css', () => {
     expect(getRule(':where(.ps-Drawer__backdrop)')).toContain('z-index: var(--perses-z-index-drawer)');
     expect(getRule(':where(.ps-Drawer__viewport)')).toContain('z-index: var(--perses-z-index-drawer)');
     expect(css).not.toContain('--perses-z-index-overlay');
+  });
+
+  it('anchors with physical edges so anchor matches translateX and swipeDirection in RTL', () => {
+    expect(getRule(":where(.ps-Drawer[data-anchor='right'])")).toContain('right: 0');
+    expect(getRule(":where(.ps-Drawer[data-anchor='left'])")).toContain('left: 0');
+    expect(css).not.toMatch(/justify-content|border-(start|end)-(start|end)-radius|inset-inline|margin-inline/);
+  });
+
+  it('replaces the removed default outline with a token focus ring', () => {
+    const popup = getRule(':where(.ps-Drawer)');
+    expect(popup).toContain('outline: 0');
+    const focus = getRule(':where(.ps-Drawer:focus-visible)');
+    expect(focus).toContain('outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color)');
+    expect(focus).toContain('outline-offset: calc(-1 * var(--perses-focus-ring-width))');
+  });
+
+  it('restates the panel edge and focus ring in forced-colors mode', () => {
+    const media = 'forced-colors: active';
+    expect(getRule(":where(.ps-Drawer[data-anchor='right'])", media)).toContain('border-left:');
+    expect(getRule(":where(.ps-Drawer[data-anchor='right'])", media)).toContain('CanvasText');
+    expect(getRule(":where(.ps-Drawer[data-anchor='left'])", media)).toContain('border-right:');
+    expect(getRule(':where(.ps-Drawer:focus-visible)', media)).toContain('outline-color: Highlight');
+  });
+
+  it('disables motion when the user prefers reduced motion', () => {
+    expect(
+      getRule(':where(.ps-Drawer),\n    :where(.ps-Drawer__backdrop)', 'prefers-reduced-motion: reduce'),
+    ).toContain('transition: none');
   });
 });

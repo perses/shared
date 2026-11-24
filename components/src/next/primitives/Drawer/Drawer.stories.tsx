@@ -110,7 +110,7 @@ export const Variants: Story = () => (
         <DemoDrawer label="Left" title="Left drawer" anchor="left" />
       </div>
     </Sample>
-    <Sample title="Width" code={widthCode}>
+    <Sample title='width="50%"' code={widthCode}>
       <DemoDrawer label="Half width" title="Half-width drawer" width="50%" />
     </Sample>
   </Stack>
