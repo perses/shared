@@ -18,7 +18,7 @@ import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import { Sample, Stack } from '../../stories/Sample';
 import { Box } from '../Box';
 import { Button } from '../Button';
-import { CloseIcon } from '../Icon/icons';
+import { CloseIcon } from '../Icon';
 import { IconButton } from '../IconButton';
 import { Drawer } from './Drawer';
 import type { DrawerProps } from './Drawer';
@@ -128,7 +128,13 @@ const [confirming, setConfirming] = useState(false);
 
 <Drawer open={open} onOpenChange={() => setConfirming(true)} aria-label="Edit datasource">
   …
-  {confirming && <ConfirmDialog onDiscard={() => setOpen(false)} onKeep={() => setConfirming(false)} />}
+  {confirming && (
+    <Box>
+      <p>Discard changes?</p>
+      <Button onClick={() => setOpen(false)}>Discard</Button>
+      <Button onClick={() => setConfirming(false)}>Keep editing</Button>
+    </Box>
+  )}
 </Drawer>`;
 
 function ConfirmingDrawer(): ReactElement {
@@ -150,8 +156,6 @@ function ConfirmingDrawer(): ReactElement {
           {confirming && (
             <Box
               p="md"
-              role="alertdialog"
-              aria-label="Discard changes?"
               style={{
                 border: 'var(--perses-border-width-sm) solid var(--perses-border-default)',
                 borderRadius: 'var(--perses-radius-md)',
@@ -187,7 +191,7 @@ export const States: Story = () => (
         ))}
       </DemoDrawer>
     </Sample>
-    <Sample title="Close is a request" code={confirmCode}>
+    <Sample title="Close is a request (inline prompt)" code={confirmCode}>
       <ConfirmingDrawer />
     </Sample>
   </Stack>
