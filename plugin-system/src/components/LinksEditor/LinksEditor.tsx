@@ -68,6 +68,18 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
       control={control}
       name={`panelDefinition.spec.links.${index}`}
       render={({ field, field: { value: link }, fieldState }) => {
+        // A link has either a URL or tags. Tag links are not edited here, as setting a URL on one makes it invalid.
+        if (link?.tags?.length) {
+          return (
+            <Stack flexGrow={1}>
+              <Typography>{link.name}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Tags: {link.tags.join(', ')}
+              </Typography>
+            </Stack>
+          );
+        }
+
         const safeLink = link ?? defaultLink;
         return (
           <LinkEditorForm
