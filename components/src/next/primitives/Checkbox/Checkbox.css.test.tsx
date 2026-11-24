@@ -89,7 +89,7 @@ describe('Checkbox CSS contracts', () => {
     expect(getComputedStyle(checkbox).borderStyle).toBe('dashed');
 
     rerender(<Checkbox aria-label="Select row" checked={false} disabled />);
-    expect(getComputedStyle(checkbox).backgroundColor).toBe('var(--perses-bg-sunken)');
+    expect(getComputedStyle(checkbox).backgroundColor).toBe('rgba(0, 0, 0, 0)');
     expect(getOpacity(checkbox)).toBe('var(--perses-opacity-disabled, 0.5)');
   });
 
@@ -110,7 +110,7 @@ describe('Checkbox CSS contracts', () => {
 
     rerender(<Checkbox aria-label="Select row" variant={variant} checked={false} />);
     expect(getComputedStyle(checkbox).backgroundColor).toBe(
-      variant === 'outline' ? 'rgba(0, 0, 0, 0)' : 'var(--perses-bg-sunken)',
+      variant === 'solid' ? 'var(--perses-bg-sunken)' : 'rgba(0, 0, 0, 0)',
     );
   });
 

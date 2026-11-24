@@ -17,7 +17,9 @@ import type { CSSProperties, HTMLAttributes, ReactNode, Ref } from 'react';
 import { forwardRef, useCallback } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { useFormControlState } from '../formControlContext';
 import { hasContent } from '../hasContent';
+import { resolveAriaLabelledBy } from '../resolveAriaLabelledBy';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import {
   applyStyleProps,
@@ -60,9 +62,6 @@ export interface CheckboxStyle extends CSSProperties {
 const CHECKBOX_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps]);
 const CHECKBOX_RADIUS_PROPS = compileStyleProps([radiusProps]);
 
-/** A checkbox must have an accessible name: a visible `label`, `aria-label` or `aria-labelledby`. */
-export type CheckboxAccessibleName = { label: ReactNode } | { 'aria-label': string } | { 'aria-labelledby': string };
-
 /** Styling-only overrides for the checkbox's documented internal parts. */
 export interface CheckboxSlotProps {
   /** The sized control element; accepts the `CheckboxStyle` custom properties. */
@@ -71,9 +70,11 @@ export interface CheckboxSlotProps {
   label?: SlotStyleProps;
 }
 
-export type CheckboxProps = CheckboxBaseProps & CheckboxAccessibleName;
-
-interface CheckboxBaseProps
+/**
+ * Name the checkbox with `label`, `aria-label` or `aria-labelledby`, or place it inside a `FormControl` or
+ * `FormControlLabel`, whose label names it automatically.
+ */
+export interface CheckboxProps
   extends
     Omit<HTMLAttributes<HTMLElement>, 'children' | 'color' | 'onChange' | 'style'>,
     SpacingProps,
@@ -117,9 +118,9 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
     defaultChecked,
     onCheckedChange,
     indeterminate = false,
-    disabled = false,
+    disabled: disabledProp,
     readOnly = false,
-    required = false,
+    required: requiredProp,
     invalid = false,
     name,
     value,
@@ -128,7 +129,7 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
     inputRef,
     label,
     labelPosition = 'end',
-    size = 'md',
+    size: sizeProp,
     color = 'default',
     variant = 'subtle',
     className,
@@ -136,10 +137,17 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
     slotProps,
     id,
     'aria-invalid': ariaInvalidProp,
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
     ...props
   },
   ref,
 ) {
+  const { size, disabled, required } = useFormControlState({
+    size: sizeProp,
+    disabled: disabledProp,
+    required: requiredProp,
+  });
   const hasLabel = hasContent(label);
   const {
     className: radiusClassName,
@@ -177,6 +185,8 @@ export const Checkbox = forwardRef<HTMLElement, CheckboxProps>(function Checkbox
       readOnly={readOnly}
       required={required}
       aria-invalid={invalid || ariaInvalidProp}
+      aria-label={ariaLabel}
+      aria-labelledby={resolveAriaLabelledBy(ariaLabelledBy, ariaLabel)}
       name={name}
       value={value}
       uncheckedValue={uncheckedValue}

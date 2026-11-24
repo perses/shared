@@ -116,15 +116,6 @@ describe('TextField', () => {
     expect(screen.getByPlaceholderText('Search')).toBeInTheDocument();
   });
 
-  it('requires an accessible name at the type level', () => {
-    // @ts-expect-error -- one of label, aria-label or aria-labelledby is required
-    const missingName = <TextField placeholder="Search" />;
-    const withLabel = <TextField label="Name" />;
-    const withAriaLabel = <TextField aria-label="Name" />;
-    const withAriaLabelledBy = <TextField aria-labelledby="name-id" />;
-    expect([missingName, withLabel, withAriaLabel, withAriaLabelledBy]).toHaveLength(4);
-  });
-
   it('rejects overriding a visible label with aria-label or aria-labelledby at the type level', () => {
     // @ts-expect-error -- aria-label would override the visible label as the accessible name (WCAG 2.5.3)
     const withAriaLabel = <TextField label="Name" aria-label="Different" />;

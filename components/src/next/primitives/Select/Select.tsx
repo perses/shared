@@ -19,6 +19,7 @@ import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode, Ref } from
 
 import { ThemeModeContext } from '../../contexts/ThemeModeProvider';
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { useFormControlState } from '../formControlContext';
 import { hasContent } from '../hasContent';
 import { ChevronDownIcon } from '../Icon';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
@@ -266,15 +267,17 @@ type SelectVirtualizationProps =
     };
 
 /**
- * Every Select needs a name for screen readers, so you must pass one of `label`, `aria-label` or
- * `aria-labelledby`. If you pass a visible `label`, that text is the name and the two aria props are blocked:
- * they would replace the visible text with something the user cannot see (WCAG 2.5.3 Label in Name).
+ * Every Select needs a name for screen readers: a visible `label`, `aria-label`, `aria-labelledby`, or the
+ * `FormLabel` of an enclosing `FormControl`. If you pass a visible `label`, that text is the name and the two aria
+ * props are blocked: they would replace the visible text with something the user cannot see (WCAG 2.5.3 Label in
+ * Name).
  */
 type SelectAccessibleName =
   | {
       /**
        * Visible label, associated with the trigger through `aria-labelledby` and used as the accessible name.
-       * Clicking it focuses the trigger without opening the list, like the label of a native `<select>`.
+       * Clicking it focuses the trigger without opening the list, like the label of a native `<select>`. Inside a
+       * `FormControl` it keeps the select's own label and helper text instead of using the wrapper's.
        */
       label: ReactNode;
       'aria-label'?: never;
@@ -283,14 +286,9 @@ type SelectAccessibleName =
   | {
       label?: undefined;
       /** Accessible name when there is no visible label. */
-      'aria-label': string;
-      'aria-labelledby'?: string;
-    }
-  | {
-      label?: undefined;
       'aria-label'?: string;
       /** Id of an external element that labels the trigger when there is no visible label. */
-      'aria-labelledby': string;
+      'aria-labelledby'?: string;
     };
 
 type SelectSearchProps =
@@ -441,6 +439,13 @@ export type SelectProps = SelectBaseProps &
  *     <SelectItem value="alertname">alertname</SelectItem>
  *   </SelectGroup>
  * </Select>
+ *
+ * @example
+ * // Inside a FormControl the wrapper owns the label and helper text.
+ * <FormControl>
+ *   <FormLabel>Unit</FormLabel>
+ *   <Select value={unit} onValueChange={setUnit}>…</Select>
+ * </FormControl>
  */
 export const Select = forwardRef<HTMLElement, SelectProps>(function Select(props, ref) {
   // The mode is fixed for a mounted Select: changing `searchable` remounts it and resets the uncontrolled state.
@@ -449,15 +454,192 @@ export const Select = forwardRef<HTMLElement, SelectProps>(function Select(props
 
 type SelectRootProps = SelectProps & { forwardedRef: Ref<HTMLElement> };
 
+interface SelectOptionsResult {
+  options: SelectOption[];
+  optionNodes: ReactNode;
+}
+
+/** Reads the options from `items` or `children`, and the nodes the list renders (none when virtualized). */
+function useSelectOptions(
+  items: readonly SelectItemData[] | undefined,
+  renderItem: ((item: SelectItemData) => ReactNode) | undefined,
+  children: ReactNode,
+  isVirtualized: boolean,
+): SelectOptionsResult {
+  // `children` is usually a new value on every parent render; the memo still skips the walk when Select re-renders
+  // on its own (for example a theme mode change) or the consumer passes stable children.
+  const options = useMemo(
+    () => (items ? optionsFromItems(items, renderItem) : collectItems(children)),
+    [items, renderItem, children],
+  );
+  const optionNodes = useMemo(() => {
+    // The virtualized list renders its own options from the filtered values.
+    if (isVirtualized) return null;
+    if (!items) return children;
+    return options.map((option) => (
+      <SelectItem key={optionKey(option.value)} value={option.value} disabled={option.disabled} label={option.label}>
+        {option.content}
+      </SelectItem>
+    ));
+  }, [isVirtualized, items, options, children]);
+  return { options, optionNodes };
+}
+
+/** Warns when a `placeholder` is combined with an item whose value is `""`, which also means "nothing selected". */
+function usePlaceholderConflictWarning(showsPlaceholder: boolean, options: readonly SelectOption[]): void {
+  const placeholderConflict = showsPlaceholder && options.some((option) => option.value === '');
+  useEffect(() => {
+    if (!placeholderConflict) return;
+    console.warn(
+      'Select: `placeholder` should not be combined with a `SelectItem` whose value is "" because "" means nothing is selected, so selecting that item shows the placeholder. Give the item a value such as "all" or "none".',
+    );
+  }, [placeholderConflict]);
+}
+
+/** Wraps `renderValue` so an empty selection shows the placeholder instead. */
+function useTriggerValueRenderer(
+  renderValue: unknown,
+  placeholder: ReactNode,
+  showsPlaceholder: boolean,
+): ((current: SelectCurrentValue) => ReactNode) | undefined {
+  return useMemo(() => {
+    if (!renderValue) return undefined;
+    const render = renderValue as (current: SelectCurrentValue) => ReactNode;
+    return (current: SelectCurrentValue): ReactNode =>
+      showsPlaceholder && isEmptySelection(current) ? placeholder : render(toCallbackValue(current));
+  }, [renderValue, showsPlaceholder, placeholder]);
+}
+
+interface SelectValueState {
+  currentValue: SelectCurrentValue;
+  setCurrentValue: (next: SelectCurrentValue) => void;
+  optionsByValue: ReadonlyMap<SelectValue, SelectOption>;
+}
+
+/**
+ * Controlled or uncontrolled selection, plus a lookup of every selected value's option that survives the option
+ * dropping out of `items`.
+ */
+function useSelectValue(
+  value: unknown,
+  defaultValue: unknown,
+  onValueChange: unknown,
+  isMultiple: boolean,
+  options: readonly SelectOption[],
+): SelectValueState {
+  const handleValueChange = useCallback(
+    (next: SelectCurrentValue) =>
+      (onValueChange as ((value: SelectValue | SelectValue[] | null) => void) | undefined)?.(toCallbackValue(next)),
+    [onValueChange],
+  );
+  const [currentValue, setCurrentValue] = useControllableState<SelectCurrentValue>(
+    value as SelectCurrentValue | undefined,
+    (defaultValue as SelectCurrentValue | undefined) ?? emptySelection(isMultiple),
+    handleValueChange,
+  );
+  const optionsByCurrent = useMemo(() => new Map(options.map((option) => [option.value, option])), [options]);
+  const selectedValues = useMemo(() => selectedValuesOf(currentValue), [currentValue]);
+  const [optionCache, setOptionCache] = useState<OptionCache>(() =>
+    refreshOptionCache(EMPTY_OPTION_CACHE, optionsByCurrent, selectedValues),
+  );
+  const nextOptionCache = refreshOptionCache(optionCache, optionsByCurrent, selectedValues);
+  // Adjusting state while rendering (React's documented alternative to an effect) keeps the cache in step with the
+  // same render that needs it.
+  if (nextOptionCache !== optionCache) setOptionCache(nextOptionCache);
+  // The cache holds only selected values; current options take precedence over cached ones.
+  const optionsByValue = useMemo(
+    () => new Map([...nextOptionCache, ...optionsByCurrent]),
+    [optionsByCurrent, nextOptionCache],
+  );
+  return { currentValue, setCurrentValue, optionsByValue };
+}
+
+interface SelectStyleParts {
+  rootClassName: string | undefined;
+  rootStyle: CSSProperties | undefined;
+  wrapperClassName: string | undefined;
+  wrapperStyle: CSSProperties | undefined;
+  domProps: Record<string, unknown>;
+}
+
+/** Splits style props: radius props style the wrapper, the rest the root; `display` is dropped. */
+function splitSelectStyleProps(
+  props: Record<string, unknown>,
+  style: PersesCSSProperties<SelectStyle> | undefined,
+  slotProps: SelectSlotProps | undefined,
+): SelectStyleParts {
+  const wrapperSlot = slotProps?.wrapper;
+  const {
+    className: radiusClassName,
+    style: wrapperStyle,
+    rest: withoutRadius,
+  } = applyStyleProps(props, SELECT_RADIUS_PROPS, wrapperSlot?.style);
+  const {
+    className: rootClassName,
+    style: rootStyle,
+    rest,
+  } = applyStyleProps(withoutRadius, SELECT_STYLE_PROPS, style);
+  const { display: _display, ...domProps } = rest as typeof rest & { display?: unknown };
+  return {
+    rootClassName,
+    rootStyle,
+    wrapperClassName: clsx(radiusClassName, wrapperSlot?.className),
+    wrapperStyle,
+    domProps,
+  };
+}
+
+interface SelectFieldRootProps {
+  nested: boolean;
+  className: string;
+  style: CSSProperties | undefined;
+  disabled: boolean;
+  invalid: boolean;
+  size: Size;
+  status: Status | undefined;
+  fullWidth: boolean | undefined;
+  children: ReactNode;
+}
+
+/**
+ * The Select root. Standalone it is its own `Field.Root`; nested in a `FormControl` it is a plain element so the
+ * wrapper's field owns the label, description and validity.
+ */
+function SelectFieldRoot({
+  nested,
+  className,
+  style,
+  disabled,
+  invalid,
+  size,
+  status,
+  fullWidth,
+  children,
+}: SelectFieldRootProps): ReactElement {
+  const dataProps = { 'data-size': size, 'data-status': status, 'data-full-width': fullWidth || undefined };
+  if (nested) {
+    return (
+      <div className={className} style={style} data-disabled={disabled || undefined} {...dataProps}>
+        {children}
+      </div>
+    );
+  }
+  return (
+    <Field.Root className={className} style={style} disabled={disabled} invalid={invalid} {...dataProps}>
+      {children}
+    </Field.Root>
+  );
+}
+
 function SelectRoot({
   label,
   helperText,
-  status,
+  status: statusProp,
   fullWidth,
-  size = 'md',
-  required,
+  size: sizeProp,
+  required: requiredProp,
   readOnly,
-  disabled,
+  disabled: disabledProp,
   name,
   form,
   placeholder,
@@ -504,90 +686,41 @@ function SelectRoot({
   const generatedId = useId();
   const labelId = useId();
   const mode = useContext(ThemeModeContext);
-  const triggerId = id ?? generatedId;
+  const { inFormControl, size, status, invalid, disabled, required } = useFormControlState({
+    size: sizeProp,
+    status: statusProp,
+    disabled: disabledProp,
+    required: requiredProp,
+  });
+  // Without its own label the select defers its label and helper text to the enclosing FormControl.
+  const nested = inFormControl && !hasContent(label);
   const isMultiple = multiple === true;
   // Only the search engine virtualizes; a basic-mode caller that bypasses the types still gets its full list.
   const isVirtualized = virtualized && searchable === true;
-  // `children` is usually a new value on every parent render; the memo still skips the walk when Select re-renders
-  // on its own (for example a theme mode change) or the consumer passes stable children.
-  const options = useMemo(
-    () => (items ? optionsFromItems(items, renderItem) : collectItems(children)),
-    [items, renderItem, children],
-  );
-  const optionNodes = useMemo(() => {
-    // The virtualized list renders its own options from the filtered values.
-    if (isVirtualized) return null;
-    return items
-      ? options.map((option) => (
-          <SelectItem
-            key={optionKey(option.value)}
-            value={option.value}
-            disabled={option.disabled}
-            label={option.label}
-          >
-            {option.content}
-          </SelectItem>
-        ))
-      : children;
-  }, [isVirtualized, items, options, children]);
   const showsPlaceholder = hasContent(placeholder);
-  const placeholderConflict = showsPlaceholder && options.some((option) => option.value === '');
-  useEffect(() => {
-    if (placeholderConflict) {
-      console.warn(
-        'Select: `placeholder` should not be combined with a `SelectItem` whose value is "" because "" means nothing is selected, so selecting that item shows the placeholder. Give the item a value such as "all" or "none".',
-      );
-    }
-  }, [placeholderConflict]);
-  const renderTriggerValue = useMemo(() => {
-    if (!renderValue) return undefined;
-    const render = renderValue as (current: SelectCurrentValue) => ReactNode;
-    return (current: SelectCurrentValue): ReactNode =>
-      showsPlaceholder && isEmptySelection(current) ? placeholder : render(toCallbackValue(current));
-  }, [renderValue, showsPlaceholder, placeholder]);
-  const handleValueChange = useCallback(
-    (next: SelectCurrentValue) =>
-      (onValueChange as ((value: SelectValue | SelectValue[] | null) => void) | undefined)?.(toCallbackValue(next)),
-    [onValueChange],
-  );
-  const [currentValue, setCurrentValue] = useControllableState<SelectCurrentValue>(
-    value as SelectCurrentValue | undefined,
-    (defaultValue as SelectCurrentValue | undefined) ?? emptySelection(isMultiple),
-    handleValueChange,
-  );
-  const optionsByCurrent = useMemo(() => new Map(options.map((option) => [option.value, option])), [options]);
-  const selectedValues = useMemo(() => selectedValuesOf(currentValue), [currentValue]);
-  const [optionCache, setOptionCache] = useState<OptionCache>(() =>
-    refreshOptionCache(EMPTY_OPTION_CACHE, optionsByCurrent, selectedValues),
-  );
-  const nextOptionCache = refreshOptionCache(optionCache, optionsByCurrent, selectedValues);
-  // Adjusting state while rendering (React's documented alternative to an effect) keeps the cache in step with the
-  // same render that needs it.
-  if (nextOptionCache !== optionCache) setOptionCache(nextOptionCache);
-  // The cache holds only selected values; current options take precedence over cached ones.
-  const optionsByValue = useMemo(
-    () => new Map([...nextOptionCache, ...optionsByCurrent]),
-    [optionsByCurrent, nextOptionCache],
+  const { options, optionNodes } = useSelectOptions(items, renderItem, children, isVirtualized);
+  usePlaceholderConflictWarning(showsPlaceholder, options);
+  const renderTriggerValue = useTriggerValueRenderer(renderValue, placeholder, showsPlaceholder);
+  const { currentValue, setCurrentValue, optionsByValue } = useSelectValue(
+    value,
+    defaultValue,
+    onValueChange,
+    isMultiple,
+    options,
   );
   const [isOpen, setIsOpen] = useControllableState<boolean>(open, defaultOpen ?? false, onOpenChange);
-  const {
-    className: radiusClassName,
-    style: radiusStyle,
-    rest: restWithoutRadius,
-  } = applyStyleProps(props, SELECT_RADIUS_PROPS, slotProps?.wrapper?.style);
-  const {
-    className: styleClassName,
-    style: computedStyle,
-    rest,
-  } = applyStyleProps(restWithoutRadius, SELECT_STYLE_PROPS, style);
-  const { display: _display, ...restWithoutDisplay } = rest as typeof rest & { display?: unknown };
+  const styleParts = splitSelectStyleProps(props, style, slotProps);
 
   const engineProps: SelectEngineProps = {
     forwardedRef,
-    focusableProps: { ...restWithoutDisplay, id: triggerId },
+    focusableProps: {
+      ...(invalid && !disabled && { 'aria-invalid': true }),
+      ...styleParts.domProps,
+      id: id ?? generatedId,
+    },
     label,
     labelId,
-    helperText,
+    helperText: nested ? undefined : helperText,
     placeholder,
     icon,
     startElement,
@@ -624,21 +757,23 @@ function SelectRoot({
     offset,
     themeMode: mode,
     slotProps,
-    wrapperClassName: clsx(radiusClassName, slotProps?.wrapper?.className),
-    wrapperStyle: radiusStyle,
+    wrapperClassName: styleParts.wrapperClassName,
+    wrapperStyle: styleParts.wrapperStyle,
   };
+  const Engine = searchable ? SearchEngine : BasicEngine;
 
   return (
-    <Field.Root
-      className={clsx('ps-Select', styleClassName, className)}
-      style={computedStyle}
+    <SelectFieldRoot
+      nested={nested}
+      className={clsx('ps-Select', styleParts.rootClassName, className)}
+      style={styleParts.rootStyle}
       disabled={disabled}
-      invalid={status === 'error' ? true : undefined}
-      data-size={size}
-      data-status={status}
-      data-full-width={fullWidth || undefined}
+      invalid={invalid}
+      size={size}
+      status={status}
+      fullWidth={fullWidth}
     >
-      {searchable ? <SearchEngine {...engineProps} /> : <BasicEngine {...engineProps} />}
-    </Field.Root>
+      <Engine {...engineProps} />
+    </SelectFieldRoot>
   );
 }

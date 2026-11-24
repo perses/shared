@@ -28,6 +28,12 @@ import type {
   ChipVariant,
   ColorVariant,
   DividerProps,
+  FormControlLabelPlacement,
+  FormControlLabelProps,
+  FormControlProps,
+  FormGroupProps,
+  FormHelperTextProps,
+  FormLabelProps,
   GridItemProps,
   GridProps,
   IconProps,
@@ -81,6 +87,11 @@ import {
   Checkbox,
   Chip,
   Divider,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  FormHelperText,
+  FormLabel,
   Grid,
   GridItem,
   Icon,
@@ -126,6 +137,11 @@ describe('primitives barrel exports', () => {
     expect(Checkbox).toBeDefined();
     expect(Chip).toBeDefined();
     expect(Divider).toBeDefined();
+    expect(FormControl).toBeDefined();
+    expect(FormLabel).toBeDefined();
+    expect(FormHelperText).toBeDefined();
+    expect(FormGroup).toBeDefined();
+    expect(FormControlLabel).toBeDefined();
     expect(Grid).toBeDefined();
     expect(GridItem).toBeDefined();
     expect(Icon).toBeDefined();
@@ -182,6 +198,12 @@ describe('primitives barrel exports', () => {
     const chipVariant: ChipVariant = 'outline';
     const chipStyle: ChipStyle = { '--perses-chip-size-sm': '2.5rem' };
     const dividerProps: DividerProps = {};
+    const formControlProps: FormControlProps = { size: 'sm', status: 'error', required: true, flex: 1 };
+    const formLabelProps: FormLabelProps = { htmlFor: 'name', mb: 'xs' };
+    const formHelperTextProps: FormHelperTextProps = { status: 'warning' };
+    const formGroupProps: FormGroupProps = { legend: 'Columns', direction: { default: 'column', md: 'row' } };
+    const labelPlacement: FormControlLabelPlacement = 'start';
+    const formControlLabelProps: FormControlLabelProps = { label: 'Enabled', labelPlacement, children: null };
     const gridProps: GridProps = { columns: 24 };
     const gridItemProps: GridItemProps = { size: 6 };
     const iconProps: IconProps = {};
@@ -200,7 +222,7 @@ describe('primitives barrel exports', () => {
     const selectStyle: SelectStyle = { '--perses-select-size-md': '2.5rem' };
     const spinnerProps: SpinnerProps = {};
     const stackProps: StackProps = {};
-    const switchProps: SwitchProps = {};
+    const switchProps: SwitchProps = { 'aria-label': 'Toggle' };
     const tooltipProps: TooltipProps = { title: 'tip', children: <button type="button">trigger</button> };
     const menuPlacement: MenuPlacement = 'bottom';
     const menuAlign: MenuAlign = 'start';
@@ -256,6 +278,11 @@ describe('primitives barrel exports', () => {
     expect(chipVariant).toBe('outline');
     expect(chipStyle).toBeDefined();
     expect(dividerProps).toBeDefined();
+    expect(formControlProps.size).toBe('sm');
+    expect(formLabelProps.htmlFor).toBe('name');
+    expect(formHelperTextProps.status).toBe('warning');
+    expect(formGroupProps.legend).toBe('Columns');
+    expect(formControlLabelProps.labelPlacement).toBe('start');
     expect(gridProps.columns).toBe(24);
     expect(gridItemProps.size).toBe(6);
     expect(iconProps).toBeDefined();

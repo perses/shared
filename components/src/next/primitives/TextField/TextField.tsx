@@ -17,6 +17,7 @@ import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, InputHTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { useFormControlState } from '../formControlContext';
 import { hasContent } from '../hasContent';
 import type { DisplayProps, RadiusProps, SizingProps, SpacingProps } from '../system';
 import { applyStyleProps, compileStyleProps, displayProps, radiusProps, sizingProps, spacingProps } from '../system';
@@ -30,6 +31,11 @@ import './textField.css';
 
 // Render function rather than a bare element so the label/aria props Base UI merges in are visible to lint.
 const renderTextarea: NonNullable<Field.Control.Props['render']> = (props) => <textarea {...props} />;
+
+function Adornment({ position, children }: { position: 'start' | 'end'; children: ReactNode }): ReactElement | null {
+  if (!hasContent(children)) return null;
+  return <span className={`ps-TextField__adornment ps-TextField__adornment--${position}`}>{children}</span>;
+}
 
 export interface TextFieldStyle extends CSSProperties {
   /** Per-step height override; falls back to the shared control-size scale. */
@@ -86,14 +92,16 @@ interface TextFieldBaseProps
 }
 
 /**
- * Accessible-name contract: at least one of `label`, `aria-label` or `aria-labelledby` is required so the control
- * always has an accessible name. When a visible `label` is provided it is the accessible name; `aria-label` and
- * `aria-labelledby` are disallowed there because either would silently override the visible text and produce a
- * Label-in-Name mismatch (WCAG 2.5.3).
+ * Accessible-name contract. A visible `label` is the accessible name, so `aria-label` and `aria-labelledby` are
+ * disallowed with it: either would silently override the visible text (WCAG 2.5.3 Label in Name). Without a `label`,
+ * the field is named by `aria-label`, `aria-labelledby`, or the `FormLabel` of an enclosing `FormControl`.
  */
 type TextFieldAccessibleName =
   | {
-      /** Visible label, associated with the control through `htmlFor`/`id`, and used as the accessible name. */
+      /**
+       * Visible label, associated with the control through `htmlFor`/`id`, and used as the accessible name. Inside a
+       * `FormControl` it keeps the field's own label and helper text instead of using the wrapper's.
+       */
       label: ReactNode;
       'aria-label'?: never;
       'aria-labelledby'?: never;
@@ -101,14 +109,9 @@ type TextFieldAccessibleName =
   | {
       label?: undefined;
       /** Accessible name when there is no visible label. */
-      'aria-label': string;
-      'aria-labelledby'?: string;
-    }
-  | {
-      label?: undefined;
       'aria-label'?: string;
       /** Id of an external element that labels the control when there is no visible label. */
-      'aria-labelledby': string;
+      'aria-labelledby'?: string;
     };
 
 export type TextFieldProps = TextFieldBaseProps & TextFieldAccessibleName;
@@ -117,14 +120,25 @@ export type TextFieldProps = TextFieldBaseProps & TextFieldAccessibleName;
  * Text input with label, helper text and optional start/end elements. Spacing, sizing and `overflow` style props apply to the root
  * element and behave as documented on `Box`; `display` is fixed by the stylesheet. Native attributes, handlers, and
  * `ref` stay on the control.
+ *
+ * @example
+ * <TextField label="Name" helperText="Shown to your team" />
+ *
+ * @example
+ * // Inside a FormControl the wrapper owns the label and helper text.
+ * <FormControl required>
+ *   <FormLabel>Name</FormLabel>
+ *   <TextField />
+ *   <FormHelperText>Shown to your team</FormHelperText>
+ * </FormControl>
  */
 export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, TextFieldProps>(function TextField(
   {
     label,
     helperText,
-    status,
+    status: statusProp,
     fullWidth,
-    size = 'md',
+    size: sizeProp,
     multiline = false,
     rows,
     startElement,
@@ -133,13 +147,22 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     style,
     slotProps,
     id,
-    disabled,
+    disabled: disabledProp,
+    required: requiredProp,
     ...props
   },
   ref,
 ) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
+  const { inFormControl, size, status, invalid, disabled, required } = useFormControlState({
+    size: sizeProp,
+    status: statusProp,
+    disabled: disabledProp,
+    required: requiredProp,
+  });
+  // Without its own label the field defers its label and helper text to the enclosing FormControl.
+  const nested = inFormControl && !hasContent(label);
   const renderHelper = useMemo<NonNullable<Field.Description.Props['render']>>(
     () =>
       (descriptionProps, state): ReactElement => (
@@ -158,18 +181,43 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
     rest,
   } = applyStyleProps(restWithoutRadius, TEXT_FIELD_STYLE_PROPS, style);
   const { display: _display, ...restWithoutDisplay } = rest as typeof rest & { display?: unknown };
+  const rootProps = {
+    className: clsx('ps-TextField', styleClassName, className),
+    style: computedStyle,
+    'data-size': size,
+    'data-status': status,
+    'data-full-width': fullWidth || undefined,
+    'data-multiline': multiline || undefined,
+  };
+  const control = (
+    <div className={clsx('ps-TextField__wrapper', radiusClassName, slotProps?.wrapper?.className)} style={radiusStyle}>
+      <Adornment position="start">{startElement}</Adornment>
+      <Field.Control
+        {...(invalid && !disabled && { 'aria-invalid': true })}
+        {...restWithoutDisplay}
+        ref={ref}
+        id={inputId}
+        disabled={disabled}
+        required={required}
+        className={clsx('ps-TextField__input', slotProps?.input?.className)}
+        style={slotProps?.input?.style}
+        render={multiline ? renderTextarea : undefined}
+        {...(multiline && { rows })}
+      />
+      <Adornment position="end">{endElement}</Adornment>
+    </div>
+  );
+
+  if (nested) {
+    return (
+      <div {...rootProps} data-disabled={disabled || undefined}>
+        {control}
+      </div>
+    );
+  }
 
   return (
-    <Field.Root
-      className={clsx('ps-TextField', styleClassName, className)}
-      style={computedStyle}
-      disabled={disabled}
-      invalid={status === 'error' ? true : undefined}
-      data-size={size}
-      data-status={status}
-      data-full-width={fullWidth || undefined}
-      data-multiline={multiline || undefined}
-    >
+    <Field.Root {...rootProps} disabled={disabled} invalid={invalid}>
       {hasContent(label) && (
         <Field.Label
           className={clsx('ps-TextField__label', slotProps?.label?.className)}
@@ -179,26 +227,7 @@ export const TextField = forwardRef<HTMLInputElement | HTMLTextAreaElement, Text
           {label}
         </Field.Label>
       )}
-      <div
-        className={clsx('ps-TextField__wrapper', radiusClassName, slotProps?.wrapper?.className)}
-        style={radiusStyle}
-      >
-        {hasContent(startElement) && (
-          <span className="ps-TextField__adornment ps-TextField__adornment--start">{startElement}</span>
-        )}
-        <Field.Control
-          {...restWithoutDisplay}
-          ref={ref}
-          id={inputId}
-          className={clsx('ps-TextField__input', slotProps?.input?.className)}
-          style={slotProps?.input?.style}
-          render={multiline ? renderTextarea : undefined}
-          {...(multiline && { rows })}
-        />
-        {hasContent(endElement) && (
-          <span className="ps-TextField__adornment ps-TextField__adornment--end">{endElement}</span>
-        )}
-      </div>
+      {control}
       {hasContent(helperText) && (
         <Field.Description
           className={clsx('ps-TextField__helper', slotProps?.helper?.className)}

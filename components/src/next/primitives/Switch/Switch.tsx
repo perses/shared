@@ -17,7 +17,9 @@ import { forwardRef, useId, useMemo } from 'react';
 import type { CSSProperties, HTMLAttributes, ReactElement, ReactNode } from 'react';
 
 import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { useFormControlState } from '../formControlContext';
 import { hasContent } from '../hasContent';
+import { resolveAriaLabelledBy } from '../resolveAriaLabelledBy';
 import {
   applyStyleProps,
   compileStyleProps,
@@ -54,6 +56,10 @@ export interface SwitchSlotProps {
   label?: SlotStyleProps;
 }
 
+/**
+ * Name the switch with `label`, `aria-label` or `aria-labelledby`, or place it inside a `FormControl` or
+ * `FormControlLabel`, whose label names it automatically.
+ */
 export interface SwitchProps
   extends
     Omit<HTMLAttributes<HTMLElement>, 'onChange' | 'children' | 'defaultChecked' | 'style'>,
@@ -106,26 +112,28 @@ export interface SwitchProps
  * `data-required`) so a host application can restyle or replace this primitive.
  *
  * @example
- * // Controlled, no label
- * <Switch checked={enabled} onCheckedChange={setEnabled} />
- *
- * @example
  * // With a label, matching the MUI `FormControlLabel` pattern it replaces
  * <Switch checked={enabled} onCheckedChange={setEnabled} label="Enable feature" />
+ *
+ * @example
+ * // Named by an enclosing FormControlLabel
+ * <FormControlLabel label="Enable feature">
+ *   <Switch checked={enabled} onCheckedChange={setEnabled} />
+ * </FormControlLabel>
  */
 export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
   {
     checked,
     defaultChecked,
     onCheckedChange,
-    disabled,
-    required,
+    disabled: disabledProp,
+    required: requiredProp,
     readOnly,
     name,
     form,
     value,
     uncheckedValue,
-    size = 'md',
+    size: sizeProp,
     color = 'default',
     label,
     className,
@@ -148,6 +156,11 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
     style: computedStyle,
     rest,
   } = applyStyleProps(restWithoutRadius, SWITCH_STYLE_PROPS, style);
+  const { size, disabled, required } = useFormControlState({
+    size: sizeProp,
+    disabled: disabledProp,
+    required: requiredProp,
+  });
   const generatedId = useId();
   const controlId = id ?? generatedId;
   const labelId = `${controlId}-label`;
@@ -176,7 +189,7 @@ export const Switch = forwardRef<HTMLElement, SwitchProps>(function Switch(
       value={value}
       uncheckedValue={uncheckedValue}
       aria-label={ariaLabel}
-      aria-labelledby={ariaLabelledBy ?? (hasLabel && ariaLabel === undefined ? labelId : undefined)}
+      aria-labelledby={resolveAriaLabelledBy(ariaLabelledBy, ariaLabel, hasLabel ? labelId : undefined)}
       data-size={size}
       data-color={color}
       className={clsx('ps-Switch', radiusClassName, !hasLabel && callerClassName, slotProps?.control?.className)}

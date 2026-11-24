@@ -38,7 +38,7 @@
     /* Background: Elevation */
     --perses-bg-default: var(--perses-color-white);
     --perses-bg-surface: var(--perses-color-gray-50);
-    --perses-bg-sunken: var(--perses-color-gray-200);
+    --perses-bg-sunken: var(--perses-color-gray-300);
     --perses-bg-overlay: var(--perses-color-white);
     --perses-bg-backdrop: rgba(21, 23, 33, 0.75);
     --perses-bg-navigation: var(--perses-color-blue-150);
@@ -126,7 +126,7 @@
     /* Background: Elevation */
     --perses-bg-default: var(--perses-color-gray-900);
     --perses-bg-surface: var(--perses-color-gray-850);
-    --perses-bg-sunken: var(--perses-color-gray-850);
+    --perses-bg-sunken: var(--perses-color-gray-800);
     --perses-bg-overlay: var(--perses-color-gray-900);
     --perses-bg-backdrop: rgba(10, 12, 16, 0.85);
     --perses-bg-navigation: var(--perses-color-gray-850);
