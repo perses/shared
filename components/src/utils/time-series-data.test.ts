@@ -13,7 +13,7 @@
 
 import type { TimeSeriesData } from '@perses-dev/spec';
 
-import { getCommonTimeScale } from './time-series-data';
+import { getCommonTimeScale, getTimeSeriesValues } from './time-series-data';
 
 describe('getCommonTimeScale', () => {
   const undefinedSeriesData: Array<{
@@ -188,5 +188,58 @@ describe('getCommonTimeScale', () => {
       rangeMs: refreshedEndMs - refreshedStartMs,
       stepMs: 3600,
     });
+  });
+});
+
+describe('getTimeSeriesValues', () => {
+  const HOUR = 60 * 60 * 1000;
+  const DAY = 24 * HOUR;
+
+  test('fills in missing steps with null values', () => {
+    const timeScale = { startMs: 0, endMs: 4 * HOUR, stepMs: HOUR, rangeMs: 4 * HOUR };
+    const values = getTimeSeriesValues(
+      {
+        name: 'x',
+        values: [
+          [HOUR, 1],
+          [3 * HOUR, 3],
+        ],
+      },
+      timeScale,
+    );
+    expect(values).toEqual([
+      [0, null],
+      [HOUR, 1],
+      [2 * HOUR, null],
+      [3 * HOUR, 3],
+      [4 * HOUR, null],
+    ]);
+  });
+
+  test('places daily values on the nearest step across a daylight saving time change', () => {
+    // Midnights in America/New_York around the end of daylight saving time: 1 November 2026 is 25 hours long.
+    const oct31 = Date.UTC(2026, 9, 31, 4);
+    const nov1 = Date.UTC(2026, 10, 1, 4);
+    const nov2 = Date.UTC(2026, 10, 2, 5);
+    const nov3 = Date.UTC(2026, 10, 3, 5);
+    const timeScale = { startMs: oct31, endMs: nov3, stepMs: DAY, rangeMs: nov3 - oct31 };
+    const values = getTimeSeriesValues(
+      {
+        name: 'x',
+        values: [
+          [oct31, 1],
+          [nov1, 2],
+          [nov2, 3],
+          [nov3, 4],
+        ],
+      },
+      timeScale,
+    );
+    expect(values).toEqual([
+      [oct31, 1],
+      [oct31 + DAY, 2],
+      [oct31 + 2 * DAY, 3],
+      [oct31 + 3 * DAY, 4],
+    ]);
   });
 });
