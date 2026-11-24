@@ -74,7 +74,7 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
             mode="inline"
             url={{
               onBlur: field.onBlur,
-              value: safeLink.url,
+              value: safeLink.url ?? '',
               label: 'URL',
               error: { hasError: !!fieldState.error, helperText: fieldState.error?.message },
               onChange: (url) => {

@@ -27,7 +27,7 @@ import {
 } from '@mui/material';
 import { InfoTooltip, LinkEditorForm } from '@perses-dev/components';
 import type { FormEditorHandle } from '@perses-dev/components';
-import type { Link } from '@perses-dev/spec';
+import type { Link, URLLink } from '@perses-dev/spec';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
 import ArrowUp from 'mdi-material-ui/ArrowUp';
 import ChevronUp from 'mdi-material-ui/ChevronUp';
@@ -136,7 +136,8 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
     });
   };
 
-  const isValid = links.every((link) => link.url.trim().length > 0);
+  // Tag links have no URL. This editor does not edit them, but it keeps them.
+  const isValid = links.every((link) => !isURLLink(link) || link.url.trim().length > 0);
 
   return (
     <>
@@ -231,12 +232,22 @@ function LinkTableRow({
   onMoveDown,
 }: LinkTableRowProps): ReactElement {
   const displayName = link.name?.trim() || `Link ${index + 1}`;
-  const hasError = link.url.trim().length === 0;
+  const urlLink = isURLLink(link) ? link : undefined;
+  const hasError = urlLink !== undefined && urlLink.url.trim().length === 0;
+  const target = isURLLink(link) ? link.url || '(no URL)' : `Tags: ${link.tags.join(', ')}`;
 
   return (
     <>
       <TableRow>
-        <TableCell component="th" scope="row" sx={{ fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <TableCell
+          component="th"
+          scope="row"
+          sx={{
+            fontWeight: 'bold',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+        >
           {displayName}
         </TableCell>
         <TableCell
@@ -247,8 +258,8 @@ function LinkTableRow({
             color: hasError ? 'error.main' : undefined,
           }}
         >
-          <InfoTooltip description={link.url} enterDelay={100}>
-            {link.url || '(no URL)'}
+          <InfoTooltip description={target} enterDelay={100}>
+            {target}
           </InfoTooltip>
         </TableCell>
         <TableCell>{link.targetBlank ? 'Yes' : 'No'}</TableCell>
@@ -259,7 +270,11 @@ function LinkTableRow({
           <IconButton onClick={onMoveDown} disabled={isLast} aria-label="Move link down">
             <ArrowDown />
           </IconButton>
-          <IconButton onClick={onToggleExpand} aria-label={isExpanded ? 'Collapse link editor' : 'Edit link'}>
+          <IconButton
+            onClick={onToggleExpand}
+            disabled={urlLink === undefined}
+            aria-label={isExpanded ? 'Collapse link editor' : 'Edit link'}
+          >
             {isExpanded ? <ChevronUp /> : <PencilIcon />}
           </IconButton>
           <IconButton onClick={onRemove} aria-label="Remove link">
@@ -268,43 +283,71 @@ function LinkTableRow({
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell colSpan={4} sx={{ paddingBottom: 0, paddingTop: 0, border: isExpanded ? undefined : 'none' }}>
-          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 2 }}>
-              <LinkEditorForm
-                mode="modalEmbedded"
-                url={{
-                  value: link.url,
-                  label: 'URL',
-                  error: { hasError: hasError, helperText: hasError ? 'URL is required' : undefined },
-                  placeholder: 'https://example.com/dashboard?var=$variable',
-                  onChange: (url) => onUpdate({ ...link, url }),
-                }}
-                name={{
-                  value: link.name ?? '',
-                  label: 'Display Name',
-                  onChange: (name) => onUpdate({ ...link, name }),
-                }}
-                tooltip={{
-                  value: link.tooltip ?? '',
-                  label: 'Tooltip',
-                  onChange: (tooltip) => onUpdate({ ...link, tooltip }),
-                }}
-                renderVariables={{
-                  value: link.renderVariables ?? true,
-                  label: 'Replace variables in URL',
-                  onChange: (renderVariables) => onUpdate({ ...link, renderVariables }),
-                }}
-                newTabOpen={{
-                  value: link.targetBlank ?? true,
-                  label: 'Open in new tab',
-                  onChange: (targetBlank) => onUpdate({ ...link, targetBlank }),
-                }}
-              />
-            </Box>
+        <TableCell
+          colSpan={4}
+          sx={{
+            paddingBottom: 0,
+            paddingTop: 0,
+            border: isExpanded ? undefined : 'none',
+          }}
+        >
+          <Collapse in={isExpanded && urlLink !== undefined} timeout="auto" unmountOnExit>
+            {urlLink && <UrlLinkForm link={urlLink} hasError={hasError} onUpdate={onUpdate} />}
           </Collapse>
         </TableCell>
       </TableRow>
     </>
   );
+}
+
+function UrlLinkForm({
+  link,
+  hasError,
+  onUpdate,
+}: {
+  link: URLLink;
+  hasError: boolean;
+  onUpdate: (link: Link) => void;
+}): ReactElement {
+  return (
+    <Box sx={{ margin: 2 }}>
+      <LinkEditorForm
+        mode="modalEmbedded"
+        url={{
+          value: link.url,
+          label: 'URL',
+          error: {
+            hasError: hasError,
+            helperText: hasError ? 'URL is required' : undefined,
+          },
+          placeholder: 'https://example.com/dashboard?var=$variable',
+          onChange: (url) => onUpdate({ ...link, url }),
+        }}
+        name={{
+          value: link.name ?? '',
+          label: 'Display Name',
+          onChange: (name) => onUpdate({ ...link, name }),
+        }}
+        tooltip={{
+          value: link.tooltip ?? '',
+          label: 'Tooltip',
+          onChange: (tooltip) => onUpdate({ ...link, tooltip }),
+        }}
+        renderVariables={{
+          value: link.renderVariables ?? true,
+          label: 'Replace variables in URL',
+          onChange: (renderVariables) => onUpdate({ ...link, renderVariables }),
+        }}
+        newTabOpen={{
+          value: link.targetBlank ?? true,
+          label: 'Open in new tab',
+          onChange: (targetBlank) => onUpdate({ ...link, targetBlank }),
+        }}
+      />
+    </Box>
+  );
+}
+
+function isURLLink(link: Link): link is URLLink {
+  return link.url !== undefined;
 }
