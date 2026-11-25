@@ -1,0 +1,401 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '@perses-dev/design-tokens/css/layers';
+
+/*
+ * Layout style props (display, flexbox, grid, sizing). Each class reads only its matching
+ * custom property, set inline by styleProps.ts. Breakpoint values carry forward
+ * until a later explicit breakpoint overrides them.
+ */
+@layer perses.utilities {
+  .ps-display {
+    display: var(--ps-display, revert);
+  }
+  .ps-display-xs {
+    display: var(--ps-display-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-display-sm {
+      display: var(--ps-display-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-display-md {
+      display: var(--ps-display-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-display-lg {
+      display: var(--ps-display-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-display-xl {
+      display: var(--ps-display-xl, revert);
+    }
+  }
+
+  .ps-flex-direction {
+    flex-direction: var(--ps-flex-direction, revert);
+  }
+  .ps-flex-direction-xs {
+    flex-direction: var(--ps-flex-direction-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-flex-direction-sm {
+      flex-direction: var(--ps-flex-direction-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-flex-direction-md {
+      flex-direction: var(--ps-flex-direction-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-flex-direction-lg {
+      flex-direction: var(--ps-flex-direction-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-flex-direction-xl {
+      flex-direction: var(--ps-flex-direction-xl, revert);
+    }
+  }
+
+  .ps-align-items {
+    align-items: var(--ps-align-items, revert);
+  }
+  .ps-align-items-xs {
+    align-items: var(--ps-align-items-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-align-items-sm {
+      align-items: var(--ps-align-items-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-align-items-md {
+      align-items: var(--ps-align-items-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-align-items-lg {
+      align-items: var(--ps-align-items-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-align-items-xl {
+      align-items: var(--ps-align-items-xl, revert);
+    }
+  }
+
+  .ps-justify-content {
+    justify-content: var(--ps-justify-content, revert);
+  }
+  .ps-justify-content-xs {
+    justify-content: var(--ps-justify-content-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-justify-content-sm {
+      justify-content: var(--ps-justify-content-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-justify-content-md {
+      justify-content: var(--ps-justify-content-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-justify-content-lg {
+      justify-content: var(--ps-justify-content-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-justify-content-xl {
+      justify-content: var(--ps-justify-content-xl, revert);
+    }
+  }
+
+  .ps-flex-wrap {
+    flex-wrap: var(--ps-flex-wrap, revert);
+  }
+  .ps-flex-wrap-xs {
+    flex-wrap: var(--ps-flex-wrap-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-flex-wrap-sm {
+      flex-wrap: var(--ps-flex-wrap-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-flex-wrap-md {
+      flex-wrap: var(--ps-flex-wrap-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-flex-wrap-lg {
+      flex-wrap: var(--ps-flex-wrap-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-flex-wrap-xl {
+      flex-wrap: var(--ps-flex-wrap-xl, revert);
+    }
+  }
+
+  .ps-flex {
+    flex: var(--ps-flex, revert);
+  }
+  .ps-flex-xs {
+    flex: var(--ps-flex-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-flex-sm {
+      flex: var(--ps-flex-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-flex-md {
+      flex: var(--ps-flex-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-flex-lg {
+      flex: var(--ps-flex-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-flex-xl {
+      flex: var(--ps-flex-xl, revert);
+    }
+  }
+
+  .ps-grid-column {
+    grid-column: var(--ps-grid-column, revert);
+  }
+  .ps-grid-column-xs {
+    grid-column: var(--ps-grid-column-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-grid-column-sm {
+      grid-column: var(--ps-grid-column-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-grid-column-md {
+      grid-column: var(--ps-grid-column-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-grid-column-lg {
+      grid-column: var(--ps-grid-column-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-grid-column-xl {
+      grid-column: var(--ps-grid-column-xl, revert);
+    }
+  }
+
+  .ps-width {
+    width: var(--ps-width, revert);
+  }
+  .ps-width-xs {
+    width: var(--ps-width-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-width-sm {
+      width: var(--ps-width-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-width-md {
+      width: var(--ps-width-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-width-lg {
+      width: var(--ps-width-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-width-xl {
+      width: var(--ps-width-xl, revert);
+    }
+  }
+
+  .ps-height {
+    height: var(--ps-height, revert);
+  }
+  .ps-height-xs {
+    height: var(--ps-height-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-height-sm {
+      height: var(--ps-height-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-height-md {
+      height: var(--ps-height-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-height-lg {
+      height: var(--ps-height-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-height-xl {
+      height: var(--ps-height-xl, revert);
+    }
+  }
+
+  .ps-min-width {
+    min-width: var(--ps-min-width, revert);
+  }
+  .ps-min-width-xs {
+    min-width: var(--ps-min-width-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-min-width-sm {
+      min-width: var(--ps-min-width-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-min-width-md {
+      min-width: var(--ps-min-width-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-min-width-lg {
+      min-width: var(--ps-min-width-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-min-width-xl {
+      min-width: var(--ps-min-width-xl, revert);
+    }
+  }
+
+  .ps-max-width {
+    max-width: var(--ps-max-width, revert);
+  }
+  .ps-max-width-xs {
+    max-width: var(--ps-max-width-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-max-width-sm {
+      max-width: var(--ps-max-width-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-max-width-md {
+      max-width: var(--ps-max-width-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-max-width-lg {
+      max-width: var(--ps-max-width-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-max-width-xl {
+      max-width: var(--ps-max-width-xl, revert);
+    }
+  }
+
+  .ps-min-height {
+    min-height: var(--ps-min-height, revert);
+  }
+  .ps-min-height-xs {
+    min-height: var(--ps-min-height-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-min-height-sm {
+      min-height: var(--ps-min-height-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-min-height-md {
+      min-height: var(--ps-min-height-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-min-height-lg {
+      min-height: var(--ps-min-height-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-min-height-xl {
+      min-height: var(--ps-min-height-xl, revert);
+    }
+  }
+
+  .ps-max-height {
+    max-height: var(--ps-max-height, revert);
+  }
+  .ps-max-height-xs {
+    max-height: var(--ps-max-height-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-max-height-sm {
+      max-height: var(--ps-max-height-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-max-height-md {
+      max-height: var(--ps-max-height-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-max-height-lg {
+      max-height: var(--ps-max-height-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-max-height-xl {
+      max-height: var(--ps-max-height-xl, revert);
+    }
+  }
+
+  .ps-overflow {
+    overflow: var(--ps-overflow, revert);
+  }
+  .ps-overflow-xs {
+    overflow: var(--ps-overflow-xs, revert);
+  }
+  @media (min-width: 600px) {
+    .ps-overflow-sm {
+      overflow: var(--ps-overflow-sm, revert);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-overflow-md {
+      overflow: var(--ps-overflow-md, revert);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-overflow-lg {
+      overflow: var(--ps-overflow-lg, revert);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-overflow-xl {
+      overflow: var(--ps-overflow-xl, revert);
+    }
+  }
+}

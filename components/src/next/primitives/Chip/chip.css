@@ -1,0 +1,169 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '@perses-dev/design-tokens/css/layers';
+
+@layer perses.components {
+  :where(.ps-Chip) {
+    display: inline-flex;
+    width: min-content;
+    align-items: center;
+    gap: var(--perses-spacing-xs);
+    min-height: var(--ps-chip-size);
+    border-width: var(--perses-chip-border-width, var(--perses-border-width-sm));
+    border-style: var(--perses-chip-border-style, solid);
+    border-color: transparent;
+    border-radius: var(--perses-radius-full);
+    background-color: var(--chip-bg);
+    color: var(--chip-text);
+    font-family: var(--perses-font-family);
+    font-weight: var(--perses-font-weight-medium);
+    line-height: var(--perses-line-height-normal);
+  }
+
+  /* Sized via --ps-chip-size: per-component --perses-chip-size-<step>, else the shared control-size token. */
+  :where(.ps-Chip[data-size='xs']) {
+    --ps-chip-size: var(--perses-chip-size-xs, var(--perses-selection-control-size-xs));
+    padding: var(--perses-spacing-0) var(--perses-spacing-sm);
+    font-size: var(--perses-font-size-xs);
+  }
+
+  :where(.ps-Chip[data-size='sm']) {
+    --ps-chip-size: var(--perses-chip-size-sm, var(--perses-selection-control-size-sm));
+    padding: var(--perses-spacing-0) var(--perses-spacing-md);
+    font-size: var(--perses-font-size-sm);
+  }
+
+  :where(.ps-Chip[data-size='md']) {
+    --ps-chip-size: var(--perses-chip-size-md, var(--perses-selection-control-size-md));
+    padding: var(--perses-spacing-0) var(--perses-spacing-md);
+    font-size: var(--perses-font-size-md);
+  }
+
+  :where(.ps-Chip[data-color='default']) {
+    --chip-bg: var(--perses-status-bg-default);
+    --chip-border: var(--perses-status-border-default);
+    --chip-text: var(--perses-status-text-default);
+  }
+
+  :where(.ps-Chip[data-color='primary']) {
+    --chip-bg: var(--perses-status-bg-primary);
+    --chip-border: var(--perses-status-border-primary);
+    --chip-text: var(--perses-status-text-primary);
+  }
+
+  :where(.ps-Chip[data-color='secondary']) {
+    --chip-bg: var(--perses-status-bg-secondary);
+    --chip-border: var(--perses-status-border-secondary);
+    --chip-text: var(--perses-status-text-secondary);
+  }
+
+  :where(.ps-Chip[data-color='success']) {
+    --chip-bg: var(--perses-status-bg-success);
+    --chip-border: var(--perses-status-border-success);
+    --chip-text: var(--perses-status-text-success);
+  }
+
+  :where(.ps-Chip[data-color='warning']) {
+    --chip-bg: var(--perses-status-bg-warning);
+    --chip-border: var(--perses-status-border-warning);
+    --chip-text: var(--perses-status-text-warning);
+  }
+
+  :where(.ps-Chip[data-color='error']) {
+    --chip-bg: var(--perses-status-bg-error);
+    --chip-border: var(--perses-status-border-error);
+    --chip-text: var(--perses-status-text-error);
+  }
+
+  :where(.ps-Chip[data-color='info']) {
+    --chip-bg: var(--perses-status-bg-info);
+    --chip-border: var(--perses-status-border-info);
+    --chip-text: var(--perses-status-text-info);
+  }
+
+  :where(.ps-Chip[data-variant='outline']) {
+    border-color: var(--chip-border);
+    background-color: transparent;
+  }
+
+  :where(.ps-Chip[data-clickable]) {
+    cursor: pointer;
+  }
+
+  :where(.ps-Chip[data-clickable]:focus-visible),
+  :where(.ps-Chip__label[role='button']:focus-visible),
+  :where(.ps-Chip__close:focus-visible) {
+    outline-width: var(--perses-focus-ring-width);
+    outline-style: solid;
+    outline-color: var(--perses-focus-ring-color);
+    outline-offset: var(--perses-focus-ring-offset);
+  }
+
+  :where(.ps-Chip[data-disabled]) {
+    cursor: not-allowed;
+    opacity: var(--perses-opacity-disabled, 0.5);
+  }
+
+  :where(.ps-Chip__start) {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+  }
+
+  :where(.ps-Chip__label[role='button']) {
+    cursor: pointer;
+  }
+
+  :where(.ps-Chip__label) {
+    min-width: 0;
+    overflow: hidden;
+    max-width: var(--perses-chip-label-max-width);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  :where(.ps-Chip__close) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 0.875rem;
+    height: 0.875rem;
+    padding: var(--perses-spacing-0);
+    border: none;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+    opacity: 0.7;
+  }
+
+  :where(.ps-Chip__close:hover) {
+    opacity: 1;
+  }
+
+  :where(.ps-Chip__close:disabled) {
+    cursor: not-allowed;
+  }
+
+  :where(.ps-Chip__close svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  :where(.ps-Chip[data-size='sm'] .ps-Chip__close) {
+    width: 1rem;
+    height: 1rem;
+  }
+}

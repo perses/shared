@@ -1,0 +1,106 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import type { PersesComponents, PersesIcons } from '../contexts/ComponentsContext';
+import { Alert } from './Alert';
+import { Box } from './Box';
+import { Button } from './Button';
+import { Card, CardContent, CardHeader } from './Card';
+import { Checkbox } from './Checkbox';
+import { Chip } from './Chip';
+import { Divider } from './Divider';
+import { Drawer, DrawerContent, DrawerHeader } from './Drawer';
+import { FormControl, FormControlLabel, FormGroup, FormHelperText, FormLabel } from './FormControl';
+import { Grid, GridItem } from './Grid';
+import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from './Icon/icons';
+import { IconButton } from './IconButton';
+import { Menu, MenuCheckboxItem, MenuItem, MenuLinkItem } from './Menu';
+import { Select, SelectGroup, SelectItem } from './Select';
+import { Spinner } from './Spinner';
+import { Stack } from './Stack';
+import { Switch } from './Switch';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableFooter,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableRowExpandButton,
+  TableSortLabel,
+} from './Table';
+import { Tab, TabList, TabPanel, Tabs } from './Tabs';
+import { Text } from './Text';
+import { TextField } from './TextField';
+import { TextHelper } from './TextHelper';
+import { Tooltip } from './Tooltip';
+
+export const defaultComponents: PersesComponents = {
+  Button,
+  Alert,
+  Box,
+  Card,
+  CardHeader,
+  CardContent,
+  Checkbox,
+  Chip,
+  IconButton,
+  Divider,
+  Drawer,
+  DrawerHeader,
+  DrawerContent,
+  FormControl,
+  FormLabel,
+  FormHelperText,
+  FormGroup,
+  FormControlLabel,
+  Grid,
+  GridItem,
+  Select,
+  SelectItem,
+  SelectGroup,
+  Spinner,
+  Stack,
+  Switch,
+  Tooltip,
+  Menu,
+  MenuItem,
+  MenuLinkItem,
+  MenuCheckboxItem,
+  Table,
+  TableHead,
+  TableBody,
+  TableFooter,
+  TableRow,
+  TableCell,
+  TableContainer,
+  TableRowExpandButton,
+  TableSortLabel,
+  TablePagination,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanel,
+  TextField,
+  Text,
+  TextHelper,
+};
+
+export const defaultIcons: PersesIcons = {
+  Error: ErrorIcon,
+  Info: InfoIcon,
+  Success: SuccessIcon,
+  Warning: WarningIcon,
+};

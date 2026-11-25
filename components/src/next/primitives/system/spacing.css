@@ -1,0 +1,485 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '@perses-dev/design-tokens/css/layers';
+
+/*
+ * Each class reads only its matching custom property. Breakpoint values carry forward
+ * until a later explicit breakpoint overrides them. Keep all rules for p before px/py,
+ * then physical sides, and m before mx/my, then physical sides, so more specific
+ * directions win even over later broad breakpoints. Likewise, keep row/column gap
+ * rules after all gap breakpoints so axis-specific spacing always wins.
+ * Values are token references, numeric pixels, or literal CSS spacing values.
+ */
+@layer perses.utilities {
+  .ps-p {
+    padding: var(--ps-p, initial);
+  }
+  .ps-p-xs {
+    padding: var(--ps-p-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-p-sm {
+      padding: var(--ps-p-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-p-md {
+      padding: var(--ps-p-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-p-lg {
+      padding: var(--ps-p-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-p-xl {
+      padding: var(--ps-p-xl, initial);
+    }
+  }
+
+  .ps-px {
+    padding-inline: var(--ps-px, initial);
+  }
+  .ps-px-xs {
+    padding-inline: var(--ps-px-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-px-sm {
+      padding-inline: var(--ps-px-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-px-md {
+      padding-inline: var(--ps-px-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-px-lg {
+      padding-inline: var(--ps-px-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-px-xl {
+      padding-inline: var(--ps-px-xl, initial);
+    }
+  }
+
+  .ps-py {
+    padding-block: var(--ps-py, initial);
+  }
+  .ps-py-xs {
+    padding-block: var(--ps-py-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-py-sm {
+      padding-block: var(--ps-py-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-py-md {
+      padding-block: var(--ps-py-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-py-lg {
+      padding-block: var(--ps-py-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-py-xl {
+      padding-block: var(--ps-py-xl, initial);
+    }
+  }
+
+  .ps-pt {
+    padding-top: var(--ps-pt, initial);
+  }
+  .ps-pt-xs {
+    padding-top: var(--ps-pt-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-pt-sm {
+      padding-top: var(--ps-pt-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-pt-md {
+      padding-top: var(--ps-pt-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-pt-lg {
+      padding-top: var(--ps-pt-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-pt-xl {
+      padding-top: var(--ps-pt-xl, initial);
+    }
+  }
+
+  .ps-pr {
+    padding-right: var(--ps-pr, initial);
+  }
+  .ps-pr-xs {
+    padding-right: var(--ps-pr-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-pr-sm {
+      padding-right: var(--ps-pr-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-pr-md {
+      padding-right: var(--ps-pr-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-pr-lg {
+      padding-right: var(--ps-pr-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-pr-xl {
+      padding-right: var(--ps-pr-xl, initial);
+    }
+  }
+
+  .ps-pb {
+    padding-bottom: var(--ps-pb, initial);
+  }
+  .ps-pb-xs {
+    padding-bottom: var(--ps-pb-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-pb-sm {
+      padding-bottom: var(--ps-pb-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-pb-md {
+      padding-bottom: var(--ps-pb-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-pb-lg {
+      padding-bottom: var(--ps-pb-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-pb-xl {
+      padding-bottom: var(--ps-pb-xl, initial);
+    }
+  }
+
+  .ps-pl {
+    padding-left: var(--ps-pl, initial);
+  }
+  .ps-pl-xs {
+    padding-left: var(--ps-pl-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-pl-sm {
+      padding-left: var(--ps-pl-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-pl-md {
+      padding-left: var(--ps-pl-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-pl-lg {
+      padding-left: var(--ps-pl-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-pl-xl {
+      padding-left: var(--ps-pl-xl, initial);
+    }
+  }
+
+  .ps-m {
+    margin: var(--ps-m, initial);
+  }
+  .ps-m-xs {
+    margin: var(--ps-m-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-m-sm {
+      margin: var(--ps-m-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-m-md {
+      margin: var(--ps-m-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-m-lg {
+      margin: var(--ps-m-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-m-xl {
+      margin: var(--ps-m-xl, initial);
+    }
+  }
+
+  .ps-mx {
+    margin-inline: var(--ps-mx, initial);
+  }
+  .ps-mx-xs {
+    margin-inline: var(--ps-mx-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-mx-sm {
+      margin-inline: var(--ps-mx-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-mx-md {
+      margin-inline: var(--ps-mx-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-mx-lg {
+      margin-inline: var(--ps-mx-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-mx-xl {
+      margin-inline: var(--ps-mx-xl, initial);
+    }
+  }
+
+  .ps-my {
+    margin-block: var(--ps-my, initial);
+  }
+  .ps-my-xs {
+    margin-block: var(--ps-my-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-my-sm {
+      margin-block: var(--ps-my-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-my-md {
+      margin-block: var(--ps-my-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-my-lg {
+      margin-block: var(--ps-my-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-my-xl {
+      margin-block: var(--ps-my-xl, initial);
+    }
+  }
+
+  .ps-mt {
+    margin-top: var(--ps-mt, initial);
+  }
+  .ps-mt-xs {
+    margin-top: var(--ps-mt-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-mt-sm {
+      margin-top: var(--ps-mt-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-mt-md {
+      margin-top: var(--ps-mt-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-mt-lg {
+      margin-top: var(--ps-mt-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-mt-xl {
+      margin-top: var(--ps-mt-xl, initial);
+    }
+  }
+
+  .ps-mr {
+    margin-right: var(--ps-mr, initial);
+  }
+  .ps-mr-xs {
+    margin-right: var(--ps-mr-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-mr-sm {
+      margin-right: var(--ps-mr-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-mr-md {
+      margin-right: var(--ps-mr-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-mr-lg {
+      margin-right: var(--ps-mr-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-mr-xl {
+      margin-right: var(--ps-mr-xl, initial);
+    }
+  }
+
+  .ps-mb {
+    margin-bottom: var(--ps-mb, initial);
+  }
+  .ps-mb-xs {
+    margin-bottom: var(--ps-mb-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-mb-sm {
+      margin-bottom: var(--ps-mb-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-mb-md {
+      margin-bottom: var(--ps-mb-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-mb-lg {
+      margin-bottom: var(--ps-mb-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-mb-xl {
+      margin-bottom: var(--ps-mb-xl, initial);
+    }
+  }
+
+  .ps-ml {
+    margin-left: var(--ps-ml, initial);
+  }
+  .ps-ml-xs {
+    margin-left: var(--ps-ml-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-ml-sm {
+      margin-left: var(--ps-ml-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-ml-md {
+      margin-left: var(--ps-ml-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-ml-lg {
+      margin-left: var(--ps-ml-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-ml-xl {
+      margin-left: var(--ps-ml-xl, initial);
+    }
+  }
+
+  .ps-gap {
+    gap: var(--ps-gap, initial);
+  }
+  .ps-gap-xs {
+    gap: var(--ps-gap-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-gap-sm {
+      gap: var(--ps-gap-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-gap-md {
+      gap: var(--ps-gap-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-gap-lg {
+      gap: var(--ps-gap-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-gap-xl {
+      gap: var(--ps-gap-xl, initial);
+    }
+  }
+
+  .ps-row-gap {
+    row-gap: var(--ps-row-gap, initial);
+  }
+  .ps-row-gap-xs {
+    row-gap: var(--ps-row-gap-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-row-gap-sm {
+      row-gap: var(--ps-row-gap-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-row-gap-md {
+      row-gap: var(--ps-row-gap-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-row-gap-lg {
+      row-gap: var(--ps-row-gap-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-row-gap-xl {
+      row-gap: var(--ps-row-gap-xl, initial);
+    }
+  }
+
+  .ps-column-gap {
+    column-gap: var(--ps-column-gap, initial);
+  }
+  .ps-column-gap-xs {
+    column-gap: var(--ps-column-gap-xs, initial);
+  }
+  @media (min-width: 600px) {
+    .ps-column-gap-sm {
+      column-gap: var(--ps-column-gap-sm, initial);
+    }
+  }
+  @media (min-width: 900px) {
+    .ps-column-gap-md {
+      column-gap: var(--ps-column-gap-md, initial);
+    }
+  }
+  @media (min-width: 1200px) {
+    .ps-column-gap-lg {
+      column-gap: var(--ps-column-gap-lg, initial);
+    }
+  }
+  @media (min-width: 1536px) {
+    .ps-column-gap-xl {
+      column-gap: var(--ps-column-gap-xl, initial);
+    }
+  }
+}
