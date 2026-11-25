@@ -138,6 +138,7 @@ export const tokens = {
   },
 
   zIndex: {
+    drawer: 'var(--perses-z-index-drawer)',
     overlay: 'var(--perses-z-index-overlay)',
   },
 

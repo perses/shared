@@ -28,6 +28,12 @@ import type {
   ChipVariant,
   ColorVariant,
   DividerProps,
+  DrawerAnchor,
+  DrawerContentProps,
+  DrawerHeaderProps,
+  DrawerProps,
+  DrawerSlotProps,
+  DrawerStyle,
   FormControlLabelPlacement,
   FormControlLabelProps,
   FormControlProps,
@@ -87,6 +93,9 @@ import {
   Checkbox,
   Chip,
   Divider,
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
   FormControl,
   FormControlLabel,
   FormGroup,
@@ -137,6 +146,9 @@ describe('primitives barrel exports', () => {
     expect(Checkbox).toBeDefined();
     expect(Chip).toBeDefined();
     expect(Divider).toBeDefined();
+    expect(Drawer).toBeDefined();
+    expect(DrawerHeader).toBeDefined();
+    expect(DrawerContent).toBeDefined();
     expect(FormControl).toBeDefined();
     expect(FormLabel).toBeDefined();
     expect(FormHelperText).toBeDefined();
@@ -198,6 +210,17 @@ describe('primitives barrel exports', () => {
     const chipVariant: ChipVariant = 'outline';
     const chipStyle: ChipStyle = { '--perses-chip-size-sm': '2.5rem' };
     const dividerProps: DividerProps = {};
+    const drawerAnchor: DrawerAnchor = 'left';
+    const drawerProps: DrawerProps = {
+      open: false,
+      onClose: () => {},
+      anchor: drawerAnchor,
+      'aria-label': 'Drawer',
+    };
+    const drawerHeaderProps: DrawerHeaderProps = {};
+    const drawerStyle: DrawerStyle = { '--perses-drawer-width': '960px' };
+    const drawerSlotProps: DrawerSlotProps = { backdrop: { className: 'scrim' } };
+    const drawerContentProps: DrawerContentProps = {};
     const formControlProps: FormControlProps = { size: 'sm', status: 'error', required: true, flex: 1 };
     const formLabelProps: FormLabelProps = { htmlFor: 'name', mb: 'xs' };
     const formHelperTextProps: FormHelperTextProps = { status: 'warning' };
@@ -278,6 +301,11 @@ describe('primitives barrel exports', () => {
     expect(chipVariant).toBe('outline');
     expect(chipStyle).toBeDefined();
     expect(dividerProps).toBeDefined();
+    expect(drawerProps).toBeDefined();
+    expect(drawerHeaderProps).toBeDefined();
+    expect(drawerStyle).toBeDefined();
+    expect(drawerSlotProps).toBeDefined();
+    expect(drawerContentProps).toBeDefined();
     expect(formControlProps.size).toBe('sm');
     expect(formLabelProps.htmlFor).toBe('name');
     expect(formHelperTextProps.status).toBe('warning');

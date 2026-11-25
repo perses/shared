@@ -1,0 +1,145 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '@perses-dev/design-tokens/css/layers';
+
+@layer perses.components {
+  :where(.ps-Drawer__backdrop),
+  :where(.ps-Drawer__viewport) {
+    position: fixed;
+    inset: 0;
+    z-index: var(--perses-z-index-drawer);
+  }
+
+  :where(.ps-Drawer__backdrop) {
+    background-color: var(--perses-bg-backdrop);
+    transition: opacity 0.15s ease;
+  }
+
+  :where(.ps-Drawer__backdrop[data-starting-style]),
+  :where(.ps-Drawer__backdrop[data-ending-style]) {
+    opacity: 0;
+  }
+
+  /*
+   * 1080px is the default editor width; `--perses-drawer-width` changes it and the `width` style prop still wins
+   * per instance. max-width clamps on narrow viewports without a media query.
+   * `anchor` is a physical edge (like swipeDirection and translateX), so placement and radii use
+   * physical properties and do not flip in RTL. `--ps-drawer-offset` is the off-screen slide position.
+   * Public `--perses-drawer-*` properties fall back to the shared tokens; radius style props still win.
+   */
+  :where(.ps-Drawer) {
+    --ps-drawer-radius: var(--perses-drawer-radius, var(--perses-radius-md));
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: var(--perses-drawer-width, 1080px);
+    max-width: 100%;
+    overflow: hidden;
+    background-color: var(--perses-drawer-bg, var(--perses-bg-surface));
+    color: var(--perses-text-primary);
+    font-family: var(--perses-font-family);
+    box-shadow: var(--perses-shadow-overlay);
+    outline: 0;
+    transform: translateX(var(--drawer-swipe-movement-x, 0px));
+    transition: transform 0.15s ease;
+  }
+
+  :where(.ps-Drawer[data-swiping]) {
+    transition: none;
+  }
+
+  :where(.ps-Drawer:focus-visible) {
+    outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
+    outline-offset: calc(-1 * var(--perses-focus-ring-width));
+  }
+
+  :where(.ps-Drawer[data-anchor='right']) {
+    --ps-drawer-offset: 100%;
+    right: 0;
+    border-radius: var(--ps-drawer-radius) 0 0 var(--ps-drawer-radius);
+  }
+
+  :where(.ps-Drawer[data-anchor='left']) {
+    --ps-drawer-offset: -100%;
+    left: 0;
+    border-radius: 0 var(--ps-drawer-radius) var(--ps-drawer-radius) 0;
+  }
+
+  :where(.ps-Drawer[data-starting-style]),
+  :where(.ps-Drawer[data-ending-style]) {
+    transform: translateX(var(--ps-drawer-offset));
+  }
+
+  /* ---- Header ---- */
+  :where(.ps-DrawerHeader) {
+    display: flex;
+    align-items: center;
+    gap: var(--perses-spacing-sm);
+    flex-shrink: 0;
+    padding: var(--perses-spacing-md) var(--perses-spacing-lg);
+    border-bottom: var(--perses-border-width-sm) solid var(--perses-border-default);
+  }
+
+  :where(.ps-DrawerHeader__title) {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-size: var(--perses-font-size-lg);
+    font-weight: var(--perses-font-weight-medium);
+    line-height: var(--perses-line-height-tight);
+  }
+
+  :where(.ps-DrawerHeader__end) {
+    display: flex;
+    align-items: center;
+    gap: var(--perses-spacing-sm);
+    flex-shrink: 0;
+  }
+
+  /* ---- Content ---- */
+  :where(.ps-DrawerContent) {
+    box-sizing: border-box;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: var(--perses-spacing-lg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :where(.ps-Drawer),
+    :where(.ps-Drawer__backdrop) {
+      transition: none;
+    }
+  }
+
+  /* Windows High Contrast drops box-shadow; restate the panel edge and focus ring with system colours. */
+  @media (forced-colors: active) {
+    :where(.ps-Drawer[data-anchor='right']) {
+      border-left: var(--perses-border-width-sm) solid CanvasText;
+    }
+
+    :where(.ps-Drawer[data-anchor='left']) {
+      border-right: var(--perses-border-width-sm) solid CanvasText;
+    }
+
+    :where(.ps-Drawer:focus-visible) {
+      outline-color: Highlight;
+    }
+  }
+}
