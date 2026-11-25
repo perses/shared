@@ -21,6 +21,7 @@ type VitestPackageOptions = {
   packageDir: string;
   setupFiles?: string[];
   passWithNoTests?: boolean;
+  testTimeout?: number;
 };
 
 const repoRoot = fileURLToPath(new URL('.', import.meta.url));
@@ -39,6 +40,7 @@ export function definePackageVitestConfig({
   packageDir,
   setupFiles = [],
   passWithNoTests = false,
+  testTimeout,
 }: VitestPackageOptions): ReturnType<typeof mergeConfig> {
   return mergeConfig(
     sharedConfig,
@@ -46,6 +48,7 @@ export function definePackageVitestConfig({
       test: {
         root: packageDir,
         passWithNoTests,
+        testTimeout,
         setupFiles: setupFiles.map((file) => resolve(packageDir, file)),
       },
     }),
