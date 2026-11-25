@@ -17,7 +17,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo } from 'reac
 
 import type { AlertsQueryDefinition } from '../alerts-queries';
 import { useAlertsQueries } from '../alerts-queries';
-import type { ExpressionQueryInputState } from '../expression-queries';
+import type { TimeSeriesExpressionQueryInputState } from '../expression-queries';
 import { EXPRESSION_QUERY_KEY, useExpressionQueries } from '../expression-queries';
 import type { JsonQueryDefinition } from '../json-queries';
 import { useJsonQueries } from '../json-queries';
@@ -83,7 +83,9 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
 
   // Expressions are computed from the results of the other queries, referenced by their index in `definitions`.
   const expressionQueries = definitions.filter((definition) => definition.kind === EXPRESSION_QUERY_KEY);
-  const expressionInputs: Array<ExpressionQueryInputState | undefined> = Array.from({ length: definitions.length });
+  const expressionInputs: Array<TimeSeriesExpressionQueryInputState | undefined> = Array.from({
+    length: definitions.length,
+  });
   timeSeriesQueryEntries.forEach(({ originalIdx }, filteredIdx) => {
     expressionInputs[originalIdx] = timeSeriesResults[filteredIdx];
   });

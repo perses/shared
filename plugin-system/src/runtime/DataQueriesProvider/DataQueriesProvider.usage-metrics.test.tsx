@@ -33,7 +33,7 @@ vi.mock('../alerts-queries', () => ({ useAlertsQueries: (): unknown[] => mocks.n
 vi.mock('../silences-queries', () => ({ useSilencesQueries: (): unknown[] => mocks.noResults }));
 vi.mock('../json-queries', () => ({ useJsonQueries: (): unknown[] => mocks.noResults }));
 vi.mock('../expression-queries', () => ({
-  EXPRESSION_QUERY_KEY: 'ExpressionQuery',
+  EXPRESSION_QUERY_KEY: 'TimeSeriesExpressionQuery',
   useExpressionQueries: (): unknown[] => mocks.noResults,
 }));
 

@@ -17,28 +17,29 @@ import type { Plugin } from './plugin-base';
 import type { TimeSeriesQueryContext } from './time-series-queries';
 
 /**
- * An object containing all the dependencies of an ExpressionQuery.
+ * An object containing all the dependencies of a TimeSeriesExpressionQuery.
  */
-export interface ExpressionQueryPluginDependencies {
+export interface TimeSeriesExpressionQueryPluginDependencies {
   /**
    * Returns a list of variables name this expression query depends on.
    */
   variables?: string[];
   /**
    * The indices of the queries of the panel this expression depends on (position in the panel's list of queries, 0
-   * for the first query). Only TimeSeriesQuery and ExpressionQuery queries can be used. The expression is executed
-   * once all of them succeeded, with their results in `ExpressionQueryContext.inputs`, indexed the same way.
+   * for the first query). Only TimeSeriesQuery and TimeSeriesExpressionQuery queries can be used. The expression is
+   * executed once all of them succeeded, with their results in `TimeSeriesExpressionQueryContext.inputs`, indexed the
+   * same way.
    */
   queries: number[];
 }
 
 /**
- * Context available to ExpressionQuery plugins at runtime.
+ * Context available to TimeSeriesExpressionQuery plugins at runtime.
  */
-export interface ExpressionQueryContext extends TimeSeriesQueryContext {
+export interface TimeSeriesExpressionQueryContext extends TimeSeriesQueryContext {
   /**
-   * The results of the queries this expression depends on (see `ExpressionQueryPluginDependencies.queries`), indexed
-   * by their position in the panel's list of queries.
+   * The results of the queries this expression depends on (see `TimeSeriesExpressionQueryPluginDependencies.queries`),
+   * indexed by their position in the panel's list of queries.
    */
   inputs: Record<number, TimeSeriesData>;
 }
@@ -47,19 +48,23 @@ export interface ExpressionQueryContext extends TimeSeriesQueryContext {
  * A plugin computing time series from the results of other queries of the same panel (e.g. a math expression),
  * instead of fetching them from a datasource.
  */
-export interface ExpressionQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
-  getTimeSeriesData: (spec: Spec, ctx: ExpressionQueryContext, abortSignal?: AbortSignal) => Promise<TimeSeriesData>;
+export interface TimeSeriesExpressionQueryPlugin<Spec = UnknownSpec> extends Plugin<Spec> {
+  getTimeSeriesData: (
+    spec: Spec,
+    ctx: TimeSeriesExpressionQueryContext,
+    abortSignal?: AbortSignal
+  ) => Promise<TimeSeriesData>;
 
-  dependsOn: (spec: Spec, ctx: TimeSeriesQueryContext) => ExpressionQueryPluginDependencies;
+  dependsOn: (spec: Spec, ctx: TimeSeriesQueryContext) => TimeSeriesExpressionQueryPluginDependencies;
 }
 
 /**
- * Returns the query types a panel supports, given the ones it declares. An ExpressionQuery returns TimeSeriesData, so
- * it is supported by every panel supporting TimeSeriesQuery without the panel having to declare it.
+ * Returns the query types a panel supports, given the ones it declares. A TimeSeriesExpressionQuery returns
+ * TimeSeriesData, so it is supported by every panel supporting TimeSeriesQuery without the panel having to declare it.
  */
 export function getSupportedQueryTypes(declaredQueryTypes: QueryPluginType[] = []): QueryPluginType[] {
-  if (declaredQueryTypes.includes('TimeSeriesQuery') && !declaredQueryTypes.includes('ExpressionQuery')) {
-    return [...declaredQueryTypes, 'ExpressionQuery'];
+  if (declaredQueryTypes.includes('TimeSeriesQuery') && !declaredQueryTypes.includes('TimeSeriesExpressionQuery')) {
+    return [...declaredQueryTypes, 'TimeSeriesExpressionQuery'];
   }
   return declaredQueryTypes;
 }

@@ -15,7 +15,7 @@ import type { QueryDefinition, TimeSeriesData, UnknownSpec } from '@perses-dev/s
 import type { QueryCache, QueryKey, QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 
-import type { ExpressionQueryContext, ExpressionQueryPlugin, TimeSeriesQueryContext } from '../model';
+import type { TimeSeriesExpressionQueryContext, TimeSeriesExpressionQueryPlugin, TimeSeriesQueryContext } from '../model';
 import { useDatasourceStore } from './datasources';
 import { usePluginRegistry, usePlugins } from './plugin-registry';
 import type { UseTimeSeriesQueryOptions } from './time-series-queries';
@@ -23,8 +23,11 @@ import { useTimeRange } from './TimeRangeProvider';
 import { filterVariableStateMap, getVariableValuesKey } from './utils';
 import { useAllVariableValues } from './variables';
 
-export type ExpressionQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'ExpressionQuery', PluginSpec>;
-export const EXPRESSION_QUERY_KEY = 'ExpressionQuery';
+export type TimeSeriesExpressionQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<
+  'TimeSeriesExpressionQuery',
+  PluginSpec
+>;
+export const EXPRESSION_QUERY_KEY = 'TimeSeriesExpressionQuery';
 
 /** Converts a 0-based query index to the 1-based number shown in user-facing messages. */
 function queryNum(idx: number): number {
@@ -39,12 +42,12 @@ const INPUT_QUERY_TYPES = ['TimeSeriesQuery', EXPRESSION_QUERY_KEY] as const;
 /**
  * The state of a query used as input of an expression. Both a `UseQueryResult` and a cached query state match it.
  */
-export type ExpressionQueryInputState = Pick<
+export type TimeSeriesExpressionQueryInputState = Pick<
   UseQueryResult<TimeSeriesData>,
   'status' | 'data' | 'dataUpdatedAt' | 'errorUpdatedAt'
 >;
 
-interface PreparedExpressionQuery {
+interface PreparedTimeSeriesExpressionQuery {
   queryKey: QueryKey;
   enabled: boolean;
   inputs: Record<number, TimeSeriesData>;
@@ -53,7 +56,7 @@ interface PreparedExpressionQuery {
 }
 
 function getBaseOptions(
-  plugin: ExpressionQueryPlugin | undefined,
+  plugin: TimeSeriesExpressionQueryPlugin | undefined,
   definition: QueryDefinition,
   context: TimeSeriesQueryContext,
 ): { queryKey: QueryKey; enabled: boolean; dependencies: number[] } {
@@ -120,6 +123,116 @@ export function sortQueriesByDependencies(
   return { order, errors };
 }
 
+/** The outcome of resolving a single dependency of an expression query. */
+type ResolvedDependency =
+  | { kind: 'error'; error: Error; inputKey?: [number, number] }
+  | { kind: 'pending' }
+  | { kind: 'ready'; data: TimeSeriesData; inputKey: [number, number] };
+
+/**
+ * Reads the input state of the query `dep` relied on by the expression query `idx`, from either the expression results
+ * already prepared or the results of the non-expression queries.
+ */
+function getDependencyState(
+  idx: number,
+  dep: number,
+  definitions: QueryDefinition[],
+  prepared: Array<PreparedTimeSeriesExpressionQuery | undefined>,
+  inputResults: Array<TimeSeriesExpressionQueryInputState | undefined>,
+  queryCache: Pick<QueryCache, 'find'>,
+): { state?: TimeSeriesExpressionQueryInputState; error?: Error } {
+  if (definitions[dep]?.kind !== EXPRESSION_QUERY_KEY) {
+    return { state: inputResults[dep] };
+  }
+  const depPrepared = prepared[dep];
+  if (depPrepared?.error) {
+    return { error: new Error(`Query ${queryNum(idx)} can't be computed because the query ${queryNum(dep)} failed`) };
+  }
+  const state = depPrepared?.enabled
+    ? queryCache.find<TimeSeriesData>({ queryKey: depPrepared.queryKey, exact: true })?.state
+    : undefined;
+  return { state };
+}
+
+/**
+ * Resolves a single dependency `dep` of the expression query `idx` into an error, a not-yet-ready marker, or the input
+ * data to feed the expression.
+ */
+function resolveDependency(
+  idx: number,
+  dep: number,
+  definitions: QueryDefinition[],
+  prepared: Array<PreparedTimeSeriesExpressionQuery | undefined>,
+  inputResults: Array<TimeSeriesExpressionQueryInputState | undefined>,
+  queryCache: Pick<QueryCache, 'find'>,
+): ResolvedDependency {
+  const kind = definitions[dep]?.kind;
+  if (!INPUT_QUERY_TYPES.includes(kind)) {
+    return {
+      kind: 'error',
+      error: new Error(
+        `Query ${queryNum(idx)} can't use the query ${queryNum(dep)}: only time series and expression queries can be used`,
+      ),
+    };
+  }
+
+  const { state, error } = getDependencyState(idx, dep, definitions, prepared, inputResults, queryCache);
+  if (error) {
+    return { kind: 'error', error };
+  }
+  if (state?.status === 'error') {
+    return {
+      kind: 'error',
+      error: new Error(`Query ${queryNum(idx)} can't be computed because the query ${queryNum(dep)} failed`),
+      inputKey: [dep, state.errorUpdatedAt],
+    };
+  }
+  if (state?.status !== 'success' || state.data === undefined) {
+    return { kind: 'pending' };
+  }
+  return { kind: 'ready', data: state.data, inputKey: [dep, state.dataUpdatedAt] };
+}
+
+/**
+ * Prepares a single expression query `idx` by resolving all of its dependencies into inputs, a query key and the
+ * enabled/error state.
+ */
+function prepareExpressionQuery(
+  idx: number,
+  base: { queryKey: QueryKey; enabled: boolean; dependencies: number[] },
+  definitions: QueryDefinition[],
+  prepared: Array<PreparedTimeSeriesExpressionQuery | undefined>,
+  inputResults: Array<TimeSeriesExpressionQueryInputState | undefined>,
+  queryCache: Pick<QueryCache, 'find'>,
+): PreparedTimeSeriesExpressionQuery {
+  const inputs: Record<number, TimeSeriesData> = {};
+  const inputsKey: Array<[number, number]> = [];
+  let ready = true;
+  let error: Error | undefined;
+
+  for (const dep of base.dependencies) {
+    const resolved = resolveDependency(idx, dep, definitions, prepared, inputResults, queryCache);
+    if (resolved.kind === 'error') {
+      error = resolved.error;
+      if (resolved.inputKey) {
+        inputsKey.push(resolved.inputKey);
+      }
+    } else if (resolved.kind === 'pending') {
+      ready = false;
+    } else {
+      inputs[dep] = resolved.data;
+      inputsKey.push(resolved.inputKey);
+    }
+  }
+
+  return {
+    queryKey: [...base.queryKey, ...inputsKey],
+    enabled: base.enabled && (ready || error !== undefined),
+    inputs,
+    error,
+  };
+}
+
 /**
  * Computes the query key and the inputs of every expression query. An expression is enabled only once its inputs are
  * available, and its query key includes the update time of its inputs, so it is re-executed every time an input
@@ -133,11 +246,11 @@ export function sortQueriesByDependencies(
  */
 export function prepareExpressionQueries(
   definitions: QueryDefinition[],
-  plugins: Array<ExpressionQueryPlugin | undefined>,
+  plugins: Array<TimeSeriesExpressionQueryPlugin | undefined>,
   context: TimeSeriesQueryContext,
-  inputResults: Array<ExpressionQueryInputState | undefined>,
+  inputResults: Array<TimeSeriesExpressionQueryInputState | undefined>,
   queryCache: Pick<QueryCache, 'find'>,
-): Array<PreparedExpressionQuery | undefined> {
+): Array<PreparedTimeSeriesExpressionQuery | undefined> {
   const baseOptions = definitions.map((definition, idx) =>
     definition.kind === EXPRESSION_QUERY_KEY ? getBaseOptions(plugins[idx], definition, context) : undefined,
   );
@@ -146,7 +259,7 @@ export function prepareExpressionQueries(
     baseOptions.map((options) => options?.dependencies ?? []),
   );
 
-  const prepared: Array<PreparedExpressionQuery | undefined> = Array.from({ length: definitions.length });
+  const prepared: Array<PreparedTimeSeriesExpressionQuery | undefined> = Array.from({ length: definitions.length });
   for (const idx of order) {
     const base = baseOptions[idx];
     if (base === undefined) {
@@ -162,60 +275,15 @@ export function prepareExpressionQueries(
       };
       continue;
     }
-
-    const inputs: Record<number, TimeSeriesData> = {};
-    const inputsKey: Array<[number, number]> = [];
-    let ready = true;
-    let error: Error | undefined;
-    for (const dep of base.dependencies) {
-      const kind = definitions[dep]?.kind;
-      if (!INPUT_QUERY_TYPES.includes(kind)) {
-        error = new Error(
-          `Query ${queryNum(idx)} can't use the query ${queryNum(dep)}: only time series and expression queries can be used`,
-        );
-        continue;
-      }
-
-      let state: ExpressionQueryInputState | undefined;
-      if (kind === EXPRESSION_QUERY_KEY) {
-        const depPrepared = prepared[dep];
-        if (depPrepared?.error) {
-          error = new Error(`Query ${queryNum(idx)} can't be computed because the query ${queryNum(dep)} failed`);
-          continue;
-        }
-        state = depPrepared?.enabled
-          ? queryCache.find<TimeSeriesData>({ queryKey: depPrepared.queryKey, exact: true })?.state
-          : undefined;
-      } else {
-        state = inputResults[dep];
-      }
-
-      if (state?.status === 'error') {
-        error = new Error(`Query ${queryNum(idx)} can't be computed because the query ${queryNum(dep)} failed`);
-        inputsKey.push([dep, state.errorUpdatedAt]);
-        continue;
-      }
-      if (state?.status !== 'success' || state.data === undefined) {
-        ready = false;
-        continue;
-      }
-      inputs[dep] = state.data;
-      inputsKey.push([dep, state.dataUpdatedAt]);
-    }
-    prepared[idx] = {
-      queryKey: [...base.queryKey, ...inputsKey],
-      enabled: base.enabled && (ready || error !== undefined),
-      inputs,
-      error,
-    };
+    prepared[idx] = prepareExpressionQuery(idx, base, definitions, prepared, inputResults, queryCache);
   }
   return prepared;
 }
 
 /**
  * Runs the expression queries of a panel. An expression query is computed from the results of other queries of the
- * panel, referenced by their position in `definitions` (see `ExpressionQueryPluginDependencies.queries`). It is
- * executed once these queries succeeded, with their results in `ExpressionQueryContext.inputs`.
+ * panel, referenced by their position in `definitions` (see `TimeSeriesExpressionQueryPluginDependencies.queries`). It is
+ * executed once these queries succeeded, with their results in `TimeSeriesExpressionQueryContext.inputs`.
  * @param definitions all the queries of the panel, whatever their type
  * @param inputResults the results of the queries that are not expressions, indexed like `definitions`
  * @param options time range and step options forwarded to the expression query context
@@ -224,7 +292,7 @@ export function prepareExpressionQueries(
  */
 export function useExpressionQueries(
   definitions: QueryDefinition[],
-  inputResults: Array<ExpressionQueryInputState | undefined>,
+  inputResults: Array<TimeSeriesExpressionQueryInputState | undefined>,
   options?: UseTimeSeriesQueryOptions,
   queryOptions?: Omit<QueryObserverOptions, 'queryKey' | 'queryFn'>,
 ): Array<UseQueryResult<TimeSeriesData>> {
@@ -252,7 +320,7 @@ export function useExpressionQueries(
       registry: definitions[idx]!.spec.plugin.metadata?.registry,
     })),
   );
-  const plugins: Array<ExpressionQueryPlugin | undefined> = Array.from({ length: definitions.length });
+  const plugins: Array<TimeSeriesExpressionQueryPlugin | undefined> = Array.from({ length: definitions.length });
   expressionIndices.forEach((defIdx, i) => {
     plugins[defIdx] = pluginLoaderResponse[i]?.data;
   });
@@ -284,7 +352,7 @@ export function useExpressionQueries(
             version: definition.spec.plugin.metadata?.version,
             registry: definition.spec.plugin.metadata?.registry,
           });
-          const ctx: ExpressionQueryContext = { ...context, inputs };
+          const ctx: TimeSeriesExpressionQueryContext = { ...context, inputs };
           return plugin.getTimeSeriesData(definition.spec.plugin.spec, ctx, signal);
         },
       });

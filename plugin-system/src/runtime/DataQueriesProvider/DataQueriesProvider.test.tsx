@@ -57,7 +57,7 @@ vi.mock('../json-queries', () => ({
 }));
 
 vi.mock('../expression-queries', () => ({
-  EXPRESSION_QUERY_KEY: 'ExpressionQuery',
+  EXPRESSION_QUERY_KEY: 'TimeSeriesExpressionQuery',
   useExpressionQueries: vi.fn().mockImplementation(() => []),
 }));
 
