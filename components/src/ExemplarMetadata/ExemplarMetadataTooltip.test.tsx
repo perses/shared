@@ -125,6 +125,20 @@ describe('ExemplarMetadataTooltip', () => {
     expect(screen.queryByText('Unsafe')).not.toBeInTheDocument();
   });
 
+  it('does not render links with an empty URL', () => {
+    renderComponent({
+      exemplar: {
+        ...exemplar,
+        links: [
+          { name: 'Empty', url: '' },
+          { name: 'Blank', url: '   ' },
+        ],
+      },
+    });
+    expect(screen.queryByText('Links')).not.toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
   it('does not render a divider for empty label sets', () => {
     render(<ExemplarMetadataTooltip exemplar={{ ...exemplar, labels: {} }} seriesLabels={{}} pinnedPos={pinnedPos} />);
     expect(screen.queryByText('Series labels')).not.toBeInTheDocument();

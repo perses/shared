@@ -25,7 +25,7 @@ import {
   TableRow,
   Collapse,
 } from '@mui/material';
-import { InfoTooltip, LinkEditorForm } from '@perses-dev/components';
+import { InfoTooltip, isURLLink, LinkEditorForm } from '@perses-dev/components';
 import type { FormEditorHandle } from '@perses-dev/components';
 import type { Link, URLLink } from '@perses-dev/spec';
 import ArrowDown from 'mdi-material-ui/ArrowDown';
@@ -137,7 +137,7 @@ export const DashboardLinksEditor = forwardRef(function DashboardLinksEditor(
   };
 
   // Tag links have no URL. This editor does not edit them, but it keeps them.
-  const isValid = links.every((link) => !isURLLink(link) || link.url.trim().length > 0);
+  const isValid = links.every((link) => !isURLLink(link) || (link.url ?? '').trim().length > 0);
 
   return (
     <>
@@ -233,8 +233,9 @@ function LinkTableRow({
 }: LinkTableRowProps): ReactElement {
   const displayName = link.name?.trim() || `Link ${index + 1}`;
   const urlLink = isURLLink(link) ? link : undefined;
-  const hasError = urlLink !== undefined && urlLink.url.trim().length === 0;
-  const target = isURLLink(link) ? link.url || '(no URL)' : `Tags: ${link.tags.join(', ')}`;
+  // The URL is defaulted, as persisted links that predate the schema can have neither a URL nor tags.
+  const hasError = urlLink !== undefined && (urlLink.url ?? '').trim().length === 0;
+  const target = urlLink ? urlLink.url || '(no URL)' : `Tags: ${link.tags?.join(', ') ?? ''}`;
 
   return (
     <>
@@ -314,7 +315,7 @@ function UrlLinkForm({
       <LinkEditorForm
         mode="modalEmbedded"
         url={{
-          value: link.url,
+          value: link.url ?? '',
           label: 'URL',
           error: {
             hasError: hasError,
@@ -346,8 +347,4 @@ function UrlLinkForm({
       />
     </Box>
   );
-}
-
-function isURLLink(link: Link): link is URLLink {
-  return link.url !== undefined;
 }

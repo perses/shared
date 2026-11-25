@@ -13,7 +13,7 @@
 
 import type { Theme } from '@mui/material';
 import { IconButton, Link as LinkComponent, Menu, MenuItem, Chip, capitalize, Stack } from '@mui/material';
-import { InfoTooltip, sanitizeUrl } from '@perses-dev/components';
+import { InfoTooltip, isURLLink, sanitizeUrl } from '@perses-dev/components';
 import { useReplaceVariablesInString, useReplaceVariablesInUrl } from '@perses-dev/plugin-system';
 import type { Link, URLLink } from '@perses-dev/spec';
 import LaunchIcon from 'mdi-material-ui/Launch';
@@ -43,8 +43,9 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
     setAnchorEl(null);
   };
 
-  // Tag links open a menu of dashboards, which needs the application to list them. Only URL links are displayed here.
-  const urlLinks = links.filter(isURLLink);
+  // Tag links open a menu of dashboards, which needs the application to list them. Only URL links are displayed here,
+  // and only those with a URL, as an empty href would reload the current page.
+  const urlLinks = links.filter((link): link is URLLink => isURLLink(link) && (link.url ?? '').trim().length > 0);
 
   if (urlLinks.length === 0) {
     return null;
@@ -192,10 +193,6 @@ interface ResolvedLink extends URLLink {
    * is disabled.
    */
   description: string;
-}
-
-function isURLLink(link: Link): link is URLLink {
-  return link.url !== undefined;
 }
 
 function getDisabledLinkDescription(url: string): string {

@@ -55,7 +55,9 @@ export interface ExemplarMetadataTooltipProps {
  * Tooltip showing an exemplar's metadata (links, series labels, exemplar labels, value and timestamp).
  * Follows the mouse while hovering an exemplar marker and can be pinned in place, the same way
  * the annotation tooltip works. The links of the exemplar (e.g. to its trace in a tracing UI) open
- * in a new tab; they can only be reached once the tooltip is pinned.
+ * in a new tab; they can only be reached once the tooltip is pinned. Pinning is driven by `pinnedPos`:
+ * a consumer that renders links must set it when an exemplar is clicked, whether or not `enablePinning`
+ * is set, as `enablePinning` only controls the pin button.
  */
 export function ExemplarMetadataTooltip({
   exemplar,
@@ -90,7 +92,10 @@ export function ExemplarMetadataTooltip({
   // Links come first: they are the main action of the tooltip and must not be pushed out of
   // view by long label sets. The URLs are built from exemplar labels, i.e. from data that is
   // not controlled by Perses, so an unsafe one (e.g. javascript:) is never rendered as a link.
-  const safeLinks = (exemplar.links ?? []).filter((link) => sanitizeUrl(link.url) !== undefined);
+  // An empty URL (e.g. built from a missing label) would open the current page, so it is not rendered either.
+  const safeLinks = (exemplar.links ?? []).filter(
+    (link) => link.url.trim() !== '' && sanitizeUrl(link.url) !== undefined,
+  );
   if (safeLinks.length > 0) {
     sections.push({ key: 'links', content: <LinkList links={safeLinks} /> });
   }
