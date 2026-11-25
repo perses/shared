@@ -81,6 +81,8 @@ export type ShadowVar = '--perses-shadow-overlay';
 
 export type ZIndexVar = '--perses-z-index-drawer' | '--perses-z-index-overlay';
 
+export type MotionVar = '--perses-motion-duration-fast' | '--perses-motion-easing-default';
+
 export type FontSizeScale = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 
 export type FontSizeVar = `--perses-font-size-${FontSizeScale}`;
@@ -116,6 +118,7 @@ export type PersesTokenVar =
   | RadiusVar
   | ShadowVar
   | ZIndexVar
+  | MotionVar
   | FontVar;
 
 export type PersesMode = 'light' | 'dark';

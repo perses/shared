@@ -26,9 +26,9 @@
     border-radius: var(--perses-radius-md);
     cursor: pointer;
     transition:
-      background-color 0.15s ease,
-      border-color 0.15s ease,
-      color 0.15s ease;
+      background-color var(--perses-motion-duration-fast) var(--perses-motion-easing-default),
+      border-color var(--perses-motion-duration-fast) var(--perses-motion-easing-default),
+      color var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
   }
 
   :where(.ps-ButtonBase:focus-visible) {

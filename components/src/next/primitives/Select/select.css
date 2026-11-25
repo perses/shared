@@ -462,13 +462,13 @@
 
   @media (prefers-reduced-motion: no-preference) {
     :where(.ps-Select__chevron) {
-      transition: transform 0.15s ease;
+      transition: transform var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
     }
 
     :where(.ps-Select__popup) {
       transition:
-        opacity 0.15s ease,
-        transform 0.15s ease;
+        opacity var(--perses-motion-duration-fast) var(--perses-motion-easing-default),
+        transform var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
     }
   }
 }

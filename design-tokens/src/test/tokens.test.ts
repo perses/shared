@@ -158,6 +158,11 @@ describe('tokens object', () => {
     expect(tokens).not.toHaveProperty('elevation');
   });
 
+  it('mirrors the CSS variable path for motion tokens', () => {
+    expect(tokens.motion.duration.fast).toBe('var(--perses-motion-duration-fast)');
+    expect(tokens.motion.easing.default).toBe('var(--perses-motion-easing-default)');
+  });
+
   it('has all expected top-level categories', () => {
     expect(Object.keys(tokens)).toEqual(
       expect.arrayContaining([
@@ -170,6 +175,7 @@ describe('tokens object', () => {
         'control',
         'shadow',
         'zIndex',
+        'motion',
         'radius',
         'font',
       ]),
