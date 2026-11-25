@@ -122,8 +122,8 @@ describe('PanelActions notices', () => {
               logs: { entries: [] },
               timeRange,
               metadata: {
-                executedQueryString: 'SELECT line FROM logs',
                 notices: [{ type: 'warning', message: warning }],
+                stats: { linesExamined: 250 },
               },
             }),
         },
