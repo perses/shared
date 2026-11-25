@@ -34,21 +34,24 @@
   }
 
   /*
-   * 1080px is the default editor width; max-width clamps on narrow viewports without a media query.
+   * 1080px is the default editor width; `--perses-drawer-width` changes it and the `width` style prop still wins
+   * per instance. max-width clamps on narrow viewports without a media query.
    * `anchor` is a physical edge (like swipeDirection and translateX), so placement and radii use
    * physical properties and do not flip in RTL. `--ps-drawer-offset` is the off-screen slide position.
+   * Public `--perses-drawer-*` properties fall back to the shared tokens; radius style props still win.
    */
   :where(.ps-Drawer) {
+    --ps-drawer-radius: var(--perses-drawer-radius, var(--perses-radius-md));
     position: absolute;
     top: 0;
     bottom: 0;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    width: 1080px;
+    width: var(--perses-drawer-width, 1080px);
     max-width: 100%;
     overflow: hidden;
-    background-color: var(--perses-bg-surface);
+    background-color: var(--perses-drawer-bg, var(--perses-bg-surface));
     color: var(--perses-text-primary);
     font-family: var(--perses-font-family);
     box-shadow: var(--perses-shadow-overlay);
@@ -69,13 +72,13 @@
   :where(.ps-Drawer[data-anchor='right']) {
     --ps-drawer-offset: 100%;
     right: 0;
-    border-radius: var(--perses-radius-md) 0 0 var(--perses-radius-md);
+    border-radius: var(--ps-drawer-radius) 0 0 var(--ps-drawer-radius);
   }
 
   :where(.ps-Drawer[data-anchor='left']) {
     --ps-drawer-offset: -100%;
     left: 0;
-    border-radius: 0 var(--perses-radius-md) var(--perses-radius-md) 0;
+    border-radius: 0 var(--ps-drawer-radius) var(--ps-drawer-radius) 0;
   }
 
   :where(.ps-Drawer[data-starting-style]),

@@ -206,7 +206,7 @@ describe('Drawer', () => {
   });
 
   describe('parts', () => {
-    it('DrawerHeader names the dialog from its visible title and renders endElement', () => {
+    it('DrawerHeader names the dialog from its visible title, over aria-label, and renders endElement', () => {
       render(
         <Drawer open onClose={() => {}} aria-label="fallback">
           <DrawerHeader endElement={<button type="button">Apply</button>}>Edit variables</DrawerHeader>
@@ -255,6 +255,18 @@ describe('Drawer', () => {
       expect(contentRef.current).toHaveClass('ps-DrawerContent', 'ps-p', 'c');
       expect(contentRef.current).toHaveStyle({ '--ps-p': 'var(--perses-spacing-0)' });
     });
+
+    it('marks DrawerContent so mouse drags inside it do not start a swipe, leaving the header as the drag handle', () => {
+      renderDrawer(
+        {},
+        <>
+          <DrawerHeader data-testid="header">Title</DrawerHeader>
+          <DrawerContent data-testid="body">Body</DrawerContent>
+        </>,
+      );
+      expect(screen.getByTestId('body')).toHaveAttribute('data-drawer-content');
+      expect(screen.getByTestId('header')).not.toHaveAttribute('data-drawer-content');
+    });
   });
 
   describe('prop combinations', () => {
@@ -269,6 +281,40 @@ describe('Drawer', () => {
     it('supports responsive width', () => {
       renderDrawer({ width: { default: '100%', lg: 1080 } });
       expect(screen.getByRole('dialog')).toHaveStyle({ '--ps-width': '100%', '--ps-width-lg': '1080px' });
+    });
+
+    it('maps radius props onto the popup', () => {
+      renderDrawer({ roundedLeft: 'lg' });
+      const popup = screen.getByRole('dialog');
+      expect(popup).toHaveClass('ps-Drawer', 'ps-rounded-left');
+      expect(popup).toHaveStyle({ '--ps-rounded-left': 'var(--perses-radius-lg)' });
+      expect(popup).not.toHaveAttribute('roundedLeft');
+    });
+
+    it('applies --perses-drawer-* custom properties from style to the popup', () => {
+      renderDrawer({
+        style: { '--perses-drawer-bg': 'red', '--perses-drawer-radius': '0px', '--perses-drawer-width': '600px' },
+      });
+      expect(screen.getByRole('dialog')).toHaveStyle({
+        '--perses-drawer-bg': 'red',
+        '--perses-drawer-radius': '0px',
+        '--perses-drawer-width': '600px',
+      });
+    });
+
+    it('applies slotProps to the backdrop and viewport, keeping their component classes', () => {
+      renderDrawer({
+        slotProps: {
+          backdrop: { className: 'b', style: { backgroundColor: 'red' } },
+          viewport: { className: 'v', style: { top: '64px' } },
+        },
+      });
+      const backdrop = document.querySelector('.ps-Drawer__backdrop');
+      expect(backdrop).toHaveClass('b');
+      expect(backdrop).toHaveStyle({ backgroundColor: 'rgb(255, 0, 0)' });
+      const viewport = screen.getByRole('dialog').parentElement;
+      expect(viewport).toHaveClass('ps-Drawer__viewport', 'v');
+      expect(viewport).toHaveStyle({ top: '64px' });
     });
 
     it('names the dialog from aria-label or aria-labelledby', () => {

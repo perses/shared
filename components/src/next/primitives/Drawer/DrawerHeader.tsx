@@ -43,7 +43,8 @@ export interface DrawerHeaderProps extends HTMLAttributes<HTMLDivElement>, Spaci
 
 /**
  * Title row of a `Drawer`. `children` renders inside an `<h2>` that also labels the dialog for assistive
- * technology, so the visible title and the accessible name cannot drift apart. Must be rendered inside `Drawer`.
+ * technology, taking precedence over the `Drawer`'s `aria-label`, so the visible title and the accessible name
+ * cannot drift apart. Must be rendered inside `Drawer`.
  *
  * @example
  * <DrawerHeader endElement={<Button variant="outline" onClick={cancel}>Cancel</Button>}>Edit variables</DrawerHeader>

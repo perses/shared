@@ -11,6 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import { Drawer as BaseDrawer } from '@base-ui/react/drawer';
 import { clsx } from 'clsx';
 import { forwardRef } from 'react';
 import type { HTMLAttributes } from 'react';
@@ -32,7 +33,8 @@ export interface DrawerContentProps extends HTMLAttributes<HTMLDivElement>, Spac
 
 /**
  * Padded, scrollable body of a `Drawer`. Fills the space below the header; long content scrolls here while
- * the header stays put. Use `p="0"` for edge-to-edge content.
+ * the header stays put. Use `p="0"` for edge-to-edge content. Mouse and pen drags inside it select text or
+ * interact with content instead of swiping the drawer closed. Must be rendered inside `Drawer`.
  *
  * @example
  * <DrawerContent>{form}</DrawerContent>
@@ -48,8 +50,13 @@ export const DrawerContent = forwardRef<HTMLDivElement, DrawerContentProps>(func
   } = applyStyleProps(props, DRAWER_CONTENT_STYLE_PROPS, style);
 
   return (
-    <div {...rest} ref={ref} className={clsx('ps-DrawerContent', styleClassName, className)} style={computedStyle}>
+    <BaseDrawer.Content
+      {...rest}
+      ref={ref}
+      className={clsx('ps-DrawerContent', styleClassName, className)}
+      style={computedStyle}
+    >
       {children}
-    </div>
+    </BaseDrawer.Content>
   );
 });

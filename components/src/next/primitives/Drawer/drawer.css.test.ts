@@ -45,6 +45,19 @@ describe('drawer.css', () => {
     expect(css).not.toMatch(/justify-content|border-(start|end)-(start|end)-radius|inset-inline|margin-inline/);
   });
 
+  it('exposes width, background and radius as --perses-drawer-* properties over the shared tokens', () => {
+    const popup = getRule(':where(.ps-Drawer)');
+    expect(popup).toContain('width: var(--perses-drawer-width, 1080px)');
+    expect(popup).toContain('background-color: var(--perses-drawer-bg, var(--perses-bg-surface))');
+    expect(popup).toContain('--ps-drawer-radius: var(--perses-drawer-radius, var(--perses-radius-md))');
+    expect(getRule(":where(.ps-Drawer[data-anchor='right'])")).toContain(
+      'border-radius: var(--ps-drawer-radius) 0 0 var(--ps-drawer-radius)',
+    );
+    expect(getRule(":where(.ps-Drawer[data-anchor='left'])")).toContain(
+      'border-radius: 0 var(--ps-drawer-radius) var(--ps-drawer-radius) 0',
+    );
+  });
+
   it('replaces the removed default outline with a token focus ring', () => {
     const popup = getRule(':where(.ps-Drawer)');
     expect(popup).toContain('outline: 0');
