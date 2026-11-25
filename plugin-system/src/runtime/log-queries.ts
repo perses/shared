@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { QueryDefinition, UnknownSpec } from '@perses-dev/spec';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQueries } from '@tanstack/react-query';
 
 import type { LogQueryResult } from '../model/log-queries';
@@ -24,7 +24,10 @@ import { useVariableValues } from './variables';
 export type LogQueryDefinition<PluginSpec = UnknownSpec> = QueryDefinition<'LogQuery', PluginSpec>;
 export const LOG_QUERY_KEY = 'LogQuery';
 
-export function useLogQueries(definitions: LogQueryDefinition[]): Array<UseQueryResult<LogQueryResult>> {
+export function useLogQueries(
+  definitions: LogQueryDefinition[],
+  queryOptions?: Pick<QueryObserverOptions, 'enabled'>,
+): Array<UseQueryResult<LogQueryResult>> {
   const { getPlugin } = usePluginRegistry();
   const datasourceStore = useDatasourceStore();
   const { absoluteTimeRange } = useTimeRange();
@@ -42,6 +45,7 @@ export function useLogQueries(definitions: LogQueryDefinition[]): Array<UseQuery
       const queryKey = ['query', LOG_QUERY_KEY, definition, absoluteTimeRange, variableValues] as const;
       const logQueryKind = definition?.spec?.plugin?.kind;
       return {
+        enabled: queryOptions?.enabled ?? true,
         queryKey: queryKey,
         refetchOnMount: false,
         refetchOnWindowFocus: false,

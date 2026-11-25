@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { JsonData, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
-import type { UseQueryResult } from '@tanstack/react-query';
+import type { QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQueries } from '@tanstack/react-query';
 
 import type { JsonQueryContext } from '../model/json-queries';
@@ -27,8 +27,12 @@ export const JSON_QUERY_KEY = 'JsonQuery';
  * Run a json query using a JsonQuery plugin and return the results.
  * A json query returns an arbitrary JSON payload and is NOT time-range dependent.
  * @param definitions: dashboard definitions for the json queries to run
+ * @param queryOptions: set `enabled` to false to prevent the queries from running
  */
-export function useJsonQueries(definitions: JsonQueryDefinition[]): Array<UseQueryResult<JsonData>> {
+export function useJsonQueries(
+  definitions: JsonQueryDefinition[],
+  queryOptions?: Pick<QueryObserverOptions, 'enabled'>,
+): Array<UseQueryResult<JsonData>> {
   const { getPlugin } = usePluginRegistry();
   const datasourceStore = useDatasourceStore();
   const variableValues = useVariableValues();
@@ -43,6 +47,7 @@ export function useJsonQueries(definitions: JsonQueryDefinition[]): Array<UseQue
       const queryKey = ['query', JSON_QUERY_KEY, definition, variableValues] as const;
       const jsonQueryKind = definition?.spec?.plugin?.kind;
       return {
+        enabled: queryOptions?.enabled ?? true,
         queryKey,
         refetchOnMount: false,
         refetchOnWindowFocus: false,

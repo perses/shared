@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { AlertsData, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
-import type { QueryKey, UseQueryResult } from '@tanstack/react-query';
+import type { QueryKey, QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import { useQueries } from '@tanstack/react-query';
 
 import type { AlertsQueryContext, AlertsQueryPlugin } from '../model';
@@ -28,8 +28,12 @@ export const ALERTS_QUERY_KEY = 'AlertsQuery';
  * Run an alerts query using an AlertsQuery plugin and return the results.
  * Alerts represent current state and are NOT time-range dependent.
  * @param definitions: dashboard definition for an alerts query
+ * @param queryOptions: set `enabled` to false to prevent the queries from running
  */
-export function useAlertsQueries(definitions: AlertsQueryDefinition[]): Array<UseQueryResult<AlertsData>> {
+export function useAlertsQueries(
+  definitions: AlertsQueryDefinition[],
+  queryOptions?: Pick<QueryObserverOptions, 'enabled'>,
+): Array<UseQueryResult<AlertsData>> {
   const { getPlugin } = usePluginRegistry();
   const context = useAlertsQueryContext();
 
@@ -48,7 +52,7 @@ export function useAlertsQueries(definitions: AlertsQueryDefinition[]): Array<Us
       const { queryEnabled, queryKey } = getQueryOptions({ context, definition, plugin });
       const alertsQueryKind = definition?.spec?.plugin?.kind;
       return {
-        enabled: queryEnabled,
+        enabled: (queryOptions?.enabled ?? true) && queryEnabled,
         queryKey: queryKey,
         refetchOnMount: false,
         refetchOnWindowFocus: false,
