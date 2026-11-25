@@ -1,0 +1,100 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import clsx from 'clsx';
+import type { ComponentType, HTMLAttributes, ReactElement, ReactNode, SVGProps } from 'react';
+import { forwardRef } from 'react';
+
+import type { PersesIcons } from '../../contexts/ComponentsContext';
+import { useComponents } from '../../contexts/ComponentsProvider';
+import type { PersesCSSProperties, SlotStyleProps } from '../../types';
+import { Icon } from '../Icon/Icon';
+import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from '../Icon/icons';
+import type { DisplayProps } from '../system/display';
+import { displayProps } from '../system/display';
+import type { RadiusProps } from '../system/radius';
+import { radiusProps } from '../system/radius';
+import type { SizingProps } from '../system/sizing';
+import { sizingProps } from '../system/sizing';
+import type { SpacingProps } from '../system/spacing';
+import { spacingProps } from '../system/spacing';
+import { applyStyleProps, compileStyleProps } from '../system/styleProps';
+
+import '../system/layout.css';
+import '../system/radius.css';
+import '../system/spacing.css';
+import './alert.css';
+
+export type AlertSeverity = 'error' | 'warning' | 'success' | 'info';
+
+export interface AlertSlotProps {
+  /** Shared Icon wrapper; rendered only when `icon` resolves to visible content. */
+  icon?: SlotStyleProps;
+  /** Message container around `children`. */
+  message?: SlotStyleProps;
+}
+
+const SEVERITY_ICONS: Record<AlertSeverity, { key: keyof PersesIcons; icon: ComponentType<SVGProps<SVGSVGElement>> }> =
+  {
+    success: { key: 'Success', icon: SuccessIcon },
+    info: { key: 'Info', icon: InfoIcon },
+    warning: { key: 'Warning', icon: WarningIcon },
+    error: { key: 'Error', icon: ErrorIcon },
+  };
+
+function isAlertSeverity(icon: unknown): icon is AlertSeverity {
+  return typeof icon === 'string' && icon in SEVERITY_ICONS;
+}
+
+const ALERT_STYLE_PROPS = compileStyleProps([spacingProps, sizingProps, displayProps, radiusProps]);
+
+export interface AlertProps
+  extends HTMLAttributes<HTMLDivElement>, SpacingProps, SizingProps, DisplayProps, RadiusProps {
+  style?: PersesCSSProperties;
+  /** Styling-only overrides for internal parts; does not replace content, behavior, or accessibility attributes. */
+  slotProps?: AlertSlotProps;
+  severity?: AlertSeverity;
+  icon?: AlertSeverity | ReactElement | number | boolean | null;
+}
+
+export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  { severity = 'info', role = 'alert', className, style, slotProps, icon, children, ...props },
+  ref,
+) {
+  const { className: styleClassName, style: computedStyle, rest } = applyStyleProps(props, ALERT_STYLE_PROPS, style);
+  const classes = clsx('ps-Alert', styleClassName, className);
+  const { icons } = useComponents();
+
+  let resolvedIcon: ReactNode;
+
+  if (isAlertSeverity(icon)) {
+    const { key, icon: DefaultIcon } = SEVERITY_ICONS[icon];
+    const IconComponent = icons[key] ?? DefaultIcon;
+    resolvedIcon = <IconComponent />;
+  } else {
+    resolvedIcon = icon;
+  }
+
+  return (
+    <div role={role} {...rest} ref={ref} className={classes} style={computedStyle} data-severity={severity}>
+      {Boolean(resolvedIcon) && (
+        <Icon className={clsx('ps-Alert__icon', slotProps?.icon?.className)} style={slotProps?.icon?.style}>
+          {resolvedIcon}
+        </Icon>
+      )}
+      <div className={clsx('ps-Alert__message', slotProps?.message?.className)} style={slotProps?.message?.style}>
+        {children}
+      </div>
+    </div>
+  );
+});

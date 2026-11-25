@@ -1,0 +1,153 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+@import '@perses-dev/design-tokens/css/layers';
+
+@layer perses.components {
+  :where(.ps-Switch__wrapper) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--perses-spacing-sm);
+    cursor: pointer;
+  }
+
+  .ps-Switch__wrapper:has(.ps-Switch[data-disabled]) {
+    opacity: var(--perses-opacity-disabled, 0.5);
+    cursor: not-allowed;
+  }
+
+  :where(.ps-Switch__wrapper:has(.ps-Switch[data-readonly])) {
+    cursor: default;
+  }
+
+  :where(.ps-Switch) {
+    --ps-switch-padding: 2px;
+    --ps-switch-size: var(--perses-switch-size-md, var(--perses-selection-control-size-md));
+    --ps-switch-thumb-size: calc(var(--ps-switch-size) - 2 * var(--ps-switch-padding));
+
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    width: calc(2 * var(--ps-switch-thumb-size) + 2 * var(--ps-switch-padding));
+    height: var(--ps-switch-size);
+    border: none;
+    border-radius: var(--perses-radius-full);
+    background-color: var(--perses-bg-sunken);
+    cursor: pointer;
+    transition: background-color var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
+    padding: var(--ps-switch-padding);
+  }
+
+  .ps-Switch:focus-visible {
+    outline: var(--perses-focus-ring-width) solid var(--perses-focus-ring-color);
+    outline-offset: var(--perses-focus-ring-offset);
+  }
+
+  .ps-Switch[data-disabled] {
+    opacity: var(--perses-opacity-disabled, 0.5);
+    cursor: not-allowed;
+  }
+
+  /* A labeled switch is dimmed by its wrapper, not again by the track or nested text. */
+  .ps-Switch__wrapper:has(.ps-Switch[data-disabled]) .ps-Switch[data-disabled],
+  .ps-Switch__wrapper:has(.ps-Switch[data-disabled]) .ps-Text[data-disabled] {
+    opacity: 1;
+  }
+
+  .ps-Switch[data-readonly] {
+    cursor: default;
+  }
+
+  :where(.ps-Switch[data-checked]) {
+    background-color: var(--ps-switch-checked-bg);
+  }
+
+  :where(.ps-Switch[data-color='default']) {
+    --ps-switch-checked-bg: var(--perses-status-solid-default);
+  }
+  :where(.ps-Switch[data-color='primary']) {
+    --ps-switch-checked-bg: var(--perses-status-solid-primary);
+  }
+  :where(.ps-Switch[data-color='secondary']) {
+    --ps-switch-checked-bg: var(--perses-status-solid-secondary);
+  }
+  :where(.ps-Switch[data-color='error']) {
+    --ps-switch-checked-bg: var(--perses-status-solid-error);
+  }
+  :where(.ps-Switch[data-color='warning']) {
+    --ps-switch-checked-bg: var(--perses-status-solid-warning);
+  }
+  :where(.ps-Switch[data-color='success']) {
+    --ps-switch-checked-bg: var(--perses-status-solid-success);
+  }
+  :where(.ps-Switch[data-color='info']) {
+    --ps-switch-checked-bg: var(--perses-status-solid-info);
+  }
+
+  :where(.ps-Switch[data-size='xs']) {
+    --ps-switch-size: var(--perses-switch-size-xs, var(--perses-selection-control-size-xs));
+  }
+  :where(.ps-Switch[data-size='sm']) {
+    --ps-switch-size: var(--perses-switch-size-sm, var(--perses-selection-control-size-sm));
+  }
+  :where(.ps-Switch[data-size='lg']) {
+    --ps-switch-size: var(--perses-switch-size-lg, var(--perses-selection-control-size-lg));
+  }
+
+  :where(.ps-Switch__thumb) {
+    display: block;
+    width: var(--ps-switch-thumb-size);
+    height: var(--ps-switch-thumb-size);
+    border-radius: var(--perses-radius-full);
+    background-color: var(--perses-color-white);
+    transition: transform var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
+  }
+
+  :where(.ps-Switch[data-checked] .ps-Switch__thumb) {
+    transform: translateX(var(--ps-switch-thumb-size));
+  }
+
+  :where(.ps-Switch__label) {
+    font-family: var(--perses-font-family);
+    font-size: var(--perses-font-size-sm);
+    color: var(--perses-text-primary);
+  }
+
+  /* Thumb position, not colour alone, shows the state; keep it visible in forced-colors mode. */
+  @media (forced-colors: active) {
+    :where(.ps-Switch) {
+      border: 1px solid CanvasText;
+      forced-color-adjust: none;
+      background-color: Canvas;
+    }
+    :where(.ps-Switch[data-checked]) {
+      background-color: Highlight;
+    }
+    :where(.ps-Switch__thumb) {
+      background-color: CanvasText;
+    }
+    :where(.ps-Switch[data-checked] .ps-Switch__thumb) {
+      background-color: HighlightText;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :where(.ps-Switch),
+    :where(.ps-Switch__thumb) {
+      transition: none;
+    }
+  }
+}

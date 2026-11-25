@@ -1,0 +1,81 @@
+/*
+ * Copyright The Perses Authors
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/*
+ * Scoped to the page wrapper: data-perses-mode also lands on portaled popups, which must keep their own size.
+ * The wrapper sits under #ladle-root in preview mode, .ladle-main in the full UI, and #root in iframe mode.
+ */
+#ladle-root > [data-perses-mode='dark'],
+.ladle-main > [data-perses-mode='dark'],
+#root > [data-perses-mode='dark'] {
+  min-height: 100vh;
+  color: var(--perses-text-primary);
+}
+
+[data-perses-mode='dark'] h1,
+[data-perses-mode='dark'] h2,
+[data-perses-mode='dark'] h3,
+[data-perses-mode='dark'] h4,
+[data-perses-mode='dark'] h5,
+[data-perses-mode='dark'] h6,
+[data-perses-mode='dark'] p,
+[data-perses-mode='dark'] label {
+  color: var(--perses-text-primary);
+}
+
+/* ---- Card story demos ---- */
+.story-card-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--perses-spacing-lg);
+}
+
+.story-card-title {
+  margin: 0;
+  font-size: var(--perses-font-size-md);
+  font-weight: var(--perses-font-weight-medium);
+}
+
+.story-card-text {
+  margin: 0;
+}
+
+.story-card-panel-content {
+  flex-grow: 1;
+}
+
+.story-card-chart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background: repeating-linear-gradient(
+    135deg,
+    transparent 0 var(--perses-spacing-sm),
+    var(--perses-bg-sunken) var(--perses-spacing-sm) var(--perses-spacing-lg)
+  );
+}
