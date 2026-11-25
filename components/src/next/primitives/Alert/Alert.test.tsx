@@ -1,0 +1,207 @@
+// Copyright The Perses Authors
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { render, screen } from '@testing-library/react';
+import type { ReactElement, ReactNode, SVGProps } from 'react';
+
+import { ComponentsProvider } from '../../contexts/ComponentsProvider';
+import { defaultComponents, defaultIcons } from '../defaults';
+import { Alert } from './Alert';
+
+function Wrapper({ children }: { children: ReactNode }): ReactElement {
+  return (
+    <ComponentsProvider components={defaultComponents} icons={defaultIcons}>
+      {children}
+    </ComponentsProvider>
+  );
+}
+
+const RESPONSIVE_PADDING = { default: 'sm', md: 'xl' } as const;
+const RESPONSIVE_DISPLAY = { default: 'flex', md: 'none' };
+const STYLE_OVERRIDE = { padding: '99px' };
+
+describe('Alert', () => {
+  it('renders children', () => {
+    render(<Alert>Something happened</Alert>, { wrapper: Wrapper });
+    expect(screen.getByRole('alert')).toHaveTextContent('Something happened');
+  });
+
+  it('applies the ps-Alert class', () => {
+    render(<Alert>Test</Alert>, { wrapper: Wrapper });
+    expect(screen.getByRole('alert')).toHaveClass('ps-Alert');
+  });
+
+  it('defaults to info severity', () => {
+    render(<Alert>Test</Alert>, { wrapper: Wrapper });
+    expect(screen.getByRole('alert')).toHaveAttribute('data-severity', 'info');
+  });
+
+  it('sets data-severity attribute', () => {
+    render(<Alert severity="error">Error!</Alert>, { wrapper: Wrapper });
+    expect(screen.getByRole('alert')).toHaveAttribute('data-severity', 'error');
+  });
+
+  it('merges additional className', () => {
+    render(<Alert className="custom">Test</Alert>, { wrapper: Wrapper });
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveClass('ps-Alert');
+    expect(alert).toHaveClass('custom');
+  });
+
+  it('renders all severity levels', () => {
+    const severities = ['error', 'warning', 'success', 'info'] as const;
+
+    for (const severity of severities) {
+      const { unmount } = render(<Alert severity={severity}>{severity}</Alert>, { wrapper: Wrapper });
+      expect(screen.getByRole('alert')).toHaveAttribute('data-severity', severity);
+      unmount();
+    }
+  });
+
+  it('renders no icon when icon prop is omitted', () => {
+    render(<Alert severity="info">Test</Alert>, { wrapper: Wrapper });
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).not.toBeInTheDocument();
+  });
+
+  it('renders the built-in icon matching a severity key passed to icon', () => {
+    render(<Alert icon="info">Test</Alert>, { wrapper: Wrapper });
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).toBeInTheDocument();
+    expect(iconContainer?.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('composes the shared Icon primitive for its icon wrapper', () => {
+    render(<Alert icon="info">Test</Alert>, { wrapper: Wrapper });
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).toHaveClass('ps-Icon');
+  });
+
+  it('resolves the icon key independently of the severity prop', () => {
+    render(
+      <Alert severity="error" icon="info">
+        Test
+      </Alert>,
+      { wrapper: Wrapper },
+    );
+    const alert = screen.getByRole('alert');
+    expect(alert).toHaveAttribute('data-severity', 'error');
+    expect(alert.querySelector('.ps-Alert__icon svg')).toBeInTheDocument();
+  });
+
+  it('renders a custom icon when icon prop is provided', () => {
+    const customIcon = <svg data-testid="custom-icon" />;
+    render(<Alert icon={customIcon}>Test</Alert>, { wrapper: Wrapper });
+    expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
+  });
+
+  it('renders no icon when icon is set to null', () => {
+    render(<Alert icon={null}>Test</Alert>, { wrapper: Wrapper });
+    const iconContainer = screen.getByRole('alert').querySelector('.ps-Alert__icon');
+    expect(iconContainer).not.toBeInTheDocument();
+  });
+
+  it('renders no icon when icon is set to false or 0', () => {
+    const { rerender } = render(<Alert icon={false}>Test</Alert>, { wrapper: Wrapper });
+    expect(screen.getByRole('alert').querySelector('.ps-Alert__icon')).not.toBeInTheDocument();
+
+    rerender(<Alert icon={0}>Test</Alert>);
+    expect(screen.getByRole('alert').querySelector('.ps-Alert__icon')).not.toBeInTheDocument();
+    expect(screen.getByRole('alert')).not.toHaveTextContent('0');
+  });
+
+  it('uses provider icons when inside a ComponentsProvider', () => {
+    const CustomErrorIcon = (props: SVGProps<SVGSVGElement>): ReactElement => (
+      <svg data-testid="provider-error-icon" {...props} />
+    );
+
+    render(
+      <ComponentsProvider components={defaultComponents} icons={{ ...defaultIcons, Error: CustomErrorIcon }}>
+        <Alert severity="error" icon="error">
+          Error
+        </Alert>
+      </ComponentsProvider>,
+    );
+
+    expect(screen.getByTestId('provider-error-icon')).toBeInTheDocument();
+  });
+
+  it('throws when rendered outside a ComponentsProvider', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    expect(() => render(<Alert>Error</Alert>)).toThrow(
+      'No ComponentsContext found. Did you forget a ComponentsProvider?',
+    );
+    consoleSpy.mockRestore();
+  });
+
+  describe('style props', () => {
+    it('applies a spacing token through its design-token custom property', () => {
+      render(<Alert p="md">Content</Alert>, { wrapper: Wrapper });
+      const el = screen.getByRole('alert');
+      expect(el).toHaveClass('ps-p');
+      expect(el).toHaveStyle({ '--ps-p': 'var(--perses-spacing-md)' });
+    });
+
+    it('creates responsive spacing variables', () => {
+      render(<Alert p={RESPONSIVE_PADDING}>Content</Alert>, { wrapper: Wrapper });
+      const el = screen.getByRole('alert');
+      expect(el).toHaveClass('ps-p');
+      expect(el).toHaveStyle({ '--ps-p': 'var(--perses-spacing-sm)' });
+      expect(el).toHaveStyle({ '--ps-p-md': 'var(--perses-spacing-xl)' });
+    });
+
+    it('treats numeric sizing as pixels and passes strings through', () => {
+      render(
+        <Alert width={130} maxWidth="50%">
+          Content
+        </Alert>,
+        { wrapper: Wrapper },
+      );
+      const el = screen.getByRole('alert');
+      expect(el).toHaveClass('ps-width', 'ps-max-width');
+      expect(el).toHaveStyle({ '--ps-width': '130px', '--ps-max-width': '50%' });
+    });
+
+    it('applies a responsive display prop', () => {
+      render(<Alert display={RESPONSIVE_DISPLAY}>Content</Alert>, { wrapper: Wrapper });
+      const el = screen.getByRole('alert');
+      expect(el).toHaveClass('ps-display');
+      expect(el).toHaveStyle({ '--ps-display': 'flex', '--ps-display-md': 'none' });
+    });
+
+    it('lets the style prop override a style prop and keeps the component class', () => {
+      render(
+        <Alert p="md" style={STYLE_OVERRIDE}>
+          Content
+        </Alert>,
+        { wrapper: Wrapper },
+      );
+      const el = screen.getByRole('alert');
+      expect(el).toHaveClass('ps-Alert', 'ps-p');
+      expect(el).toHaveStyle({ padding: '99px' });
+    });
+
+    it('does not forward style props to the DOM element', () => {
+      render(
+        <Alert p="md" width={100} id="x">
+          Content
+        </Alert>,
+        { wrapper: Wrapper },
+      );
+      const el = screen.getByRole('alert');
+      expect(el).toHaveAttribute('id', 'x');
+      expect(el).not.toHaveAttribute('p');
+      expect(el).not.toHaveAttribute('width');
+    });
+  });
+});

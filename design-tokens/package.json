@@ -1,0 +1,48 @@
+{
+  "name": "@perses-dev/design-tokens",
+  "version": "0.56.0-beta.1",
+  "description": "Perses design tokens for ui components",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/perses/perses/blob/main/README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/perses/perses.git"
+  },
+  "bugs": {
+    "url": "https://github.com/perses/perses/issues"
+  },
+  "type": "module",
+  "module": "dist/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./css": "./dist/css/index.css",
+    "./css/layers": "./dist/css/layers.css",
+    "./css/reset": "./dist/css/reset.css",
+    "./css/tokens": "./dist/css/tokens.css",
+    "./css/semantic": "./dist/css/semantic.css"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "clean": "rimraf dist/",
+    "build": "concurrently \"npm:build:*\"",
+    "build:esm": "swc ./src -d dist --strip-leading-paths --config-file ../.swcrc --ignore '**/test/**'",
+    "build:types": "tsc --project tsconfig.build.json",
+    "build:css": "mkdir -p dist/css && cp -f src/css/*.css dist/css/",
+    "type-check": "tsc --noEmit",
+    "start": "concurrently -P \"npm:build:* -- {*}\" -- --watch",
+    "test": "cross-env TZ=UTC vitest run",
+    "test:watch": "cross-env TZ=UTC vitest",
+    "lint": "oxlint src",
+    "lint:fix": "oxlint --fix src"
+  },
+  "files": [
+    "dist"
+  ]
+}

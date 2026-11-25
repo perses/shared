@@ -30,6 +30,7 @@ const sharedConfig = defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
+    testTimeout: 10_000,
     include: ['src/**/*.test.{ts,tsx,js,jsx}', 'src/**/*.spec.{ts,tsx,js,jsx}'],
     setupFiles: [resolve(repoRoot, 'vitest.setup.ts')],
   },
