@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { AbsoluteTimeRange, UnknownSpec, LogData, QueryDefinition } from '@perses-dev/spec';
+import type { AbsoluteTimeRange, LogData, Notice, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
 
 import type { DatasourceStore, VariableStateMap } from '../runtime';
 import type { Plugin } from './plugin-base';
@@ -21,6 +21,8 @@ export interface LogQueryResult {
   timeRange: AbsoluteTimeRange;
   metadata?: {
     executedQueryString: string;
+    /** Notices to display in the panel header. */
+    notices?: Notice[];
   };
 }
 
