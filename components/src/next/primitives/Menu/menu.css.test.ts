@@ -89,7 +89,10 @@ describe('menu.css', () => {
   });
 
   it('animates open and close through Base UI transition attributes', () => {
-    expect(getRule(':where(.ps-Menu)')).toMatch(/transition:\s*opacity 0\.15s ease,\s*transform 0\.15s ease;/);
+    const fast = String.raw`var\(--perses-motion-duration-fast\) var\(--perses-motion-easing-default\)`;
+    expect(getRule(':where(.ps-Menu)')).toMatch(
+      new RegExp(String.raw`transition:\s*opacity ${fast},\s*transform ${fast};`),
+    );
     const hidden = getRule(':where(.ps-Menu[data-starting-style]),\n  :where(.ps-Menu[data-ending-style])');
     expect(hidden).toContain('opacity: 0;');
     expect(hidden).toContain('transform: scale(0.95);');

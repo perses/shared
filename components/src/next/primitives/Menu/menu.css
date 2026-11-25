@@ -40,8 +40,8 @@
     outline: 0;
     transform-origin: var(--transform-origin);
     transition:
-      opacity 0.15s ease,
-      transform 0.15s ease;
+      opacity var(--perses-motion-duration-fast) var(--perses-motion-easing-default),
+      transform var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
   }
 
   :where(.ps-Menu[data-starting-style]),

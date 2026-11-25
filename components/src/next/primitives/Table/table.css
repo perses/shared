@@ -236,7 +236,7 @@
   :where(.ps-TableSortLabel__icon) {
     font-size: 0.75em;
     opacity: 0.35;
-    transition: opacity 0.15s ease;
+    transition: opacity var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
   }
 
   :where(.ps-TableSortLabel:hover .ps-TableSortLabel__icon),
@@ -270,7 +270,7 @@
 
   /* ---- Row expand button ---- */
   :where(.ps-TableRowExpandButton__icon) {
-    transition: transform 0.15s ease;
+    transition: transform var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
   }
 
   :where(.ps-TableRowExpandButton[data-expanded] .ps-TableRowExpandButton__icon) {

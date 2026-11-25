@@ -38,6 +38,18 @@ Components use this export internally; consumers do not need a bootstrap import 
 Override these variables globally or in a scoped container. Exported types: `RadiusScale` and `RadiusVar` (included in
 `PersesTokenVar`).
 
+## Motion
+
+`tokens.motion.duration.fast` and `tokens.motion.easing.default` reference `--perses-motion-duration-fast` (`0.15s`) and
+`--perses-motion-easing-default` (`ease`). Every primitive transition uses them, so one override retunes all hover, press
+and enter/exit animations. Exported type: `MotionVar` (included in `PersesTokenVar`).
+
+```css
+:root {
+  --perses-motion-duration-fast: 0.2s;
+}
+```
+
 ## Disabled opacity
 
 `tokens.opacity.disabled` references `var(--perses-opacity-disabled)`, which defaults to `0.5` in both light and dark modes.

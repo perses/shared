@@ -47,7 +47,7 @@
     border-radius: var(--perses-radius-full);
     background-color: var(--perses-bg-sunken);
     cursor: pointer;
-    transition: background-color 0.15s ease;
+    transition: background-color var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
     padding: var(--ps-switch-padding);
   }
 
@@ -113,7 +113,7 @@
     height: var(--ps-switch-thumb-size);
     border-radius: var(--perses-radius-full);
     background-color: var(--perses-color-white);
-    transition: transform 0.15s ease;
+    transition: transform var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
   }
 
   :where(.ps-Switch[data-checked] .ps-Switch__thumb) {

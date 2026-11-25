@@ -142,6 +142,15 @@ export const tokens = {
     overlay: 'var(--perses-z-index-overlay)',
   },
 
+  motion: {
+    duration: {
+      fast: 'var(--perses-motion-duration-fast)',
+    },
+    easing: {
+      default: 'var(--perses-motion-easing-default)',
+    },
+  },
+
   radius: {
     none: 'var(--perses-radius-none)',
     sm: 'var(--perses-radius-sm)',

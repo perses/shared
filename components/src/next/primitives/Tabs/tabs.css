@@ -454,10 +454,10 @@
 
     :where(.ps-TabList__indicator) {
       transition:
-        left 0.15s ease,
-        top 0.15s ease,
-        width 0.15s ease,
-        height 0.15s ease;
+        left var(--perses-motion-duration-fast) var(--perses-motion-easing-default),
+        top var(--perses-motion-duration-fast) var(--perses-motion-easing-default),
+        width var(--perses-motion-duration-fast) var(--perses-motion-easing-default),
+        height var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
     }
   }
 }

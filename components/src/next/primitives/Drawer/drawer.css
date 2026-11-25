@@ -25,7 +25,7 @@
 
   :where(.ps-Drawer__backdrop) {
     background-color: var(--perses-bg-backdrop);
-    transition: opacity 0.15s ease;
+    transition: opacity var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
   }
 
   :where(.ps-Drawer__backdrop[data-starting-style]),
@@ -57,7 +57,7 @@
     box-shadow: var(--perses-shadow-overlay);
     outline: 0;
     transform: translateX(var(--drawer-swipe-movement-x, 0px));
-    transition: transform 0.15s ease;
+    transition: transform var(--perses-motion-duration-fast) var(--perses-motion-easing-default);
   }
 
   :where(.ps-Drawer[data-swiping]) {
