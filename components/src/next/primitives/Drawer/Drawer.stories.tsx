@@ -382,8 +382,8 @@ function SlotsDrawer(): ReactElement {
         </DrawerHeader>
         <DrawerContent>
           <p>
-            The scrim is red, the drawer starts 48px below the top of the window, the title is bold and the actions
-            sit closer together.
+            The scrim is red, the drawer starts 48px below the top of the window, the title is bold and the actions sit
+            closer together.
           </p>
         </DrawerContent>
       </Drawer>
