@@ -11,28 +11,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-import tsconfigPaths from 'vite-tsconfig-paths';
-import { defineConfig, mergeConfig } from 'vitest/config';
+import tsconfigPaths from "vite-tsconfig-paths";
+import { defineConfig, mergeConfig } from "vitest/config";
 
 type VitestPackageOptions = {
   packageDir: string;
   setupFiles?: string[];
   passWithNoTests?: boolean;
-  testTimeout?: number;
 };
 
-const repoRoot = fileURLToPath(new URL('.', import.meta.url));
+const repoRoot = fileURLToPath(new URL(".", import.meta.url));
 
 const sharedConfig = defineConfig({
-  plugins: [tsconfigPaths({ projects: [resolve(repoRoot, 'tsconfig.vitest.json')] })],
+  plugins: [
+    tsconfigPaths({ projects: [resolve(repoRoot, "tsconfig.vitest.json")] }),
+  ],
   test: {
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
-    include: ['src/**/*.test.{ts,tsx,js,jsx}', 'src/**/*.spec.{ts,tsx,js,jsx}'],
-    setupFiles: [resolve(repoRoot, 'vitest.setup.ts')],
+    include: ["src/**/*.test.{ts,tsx,js,jsx}", "src/**/*.spec.{ts,tsx,js,jsx}"],
+    setupFiles: [resolve(repoRoot, "vitest.setup.ts")],
   },
 });
 
@@ -40,7 +41,6 @@ export function definePackageVitestConfig({
   packageDir,
   setupFiles = [],
   passWithNoTests = false,
-  testTimeout,
 }: VitestPackageOptions): ReturnType<typeof mergeConfig> {
   return mergeConfig(
     sharedConfig,
@@ -48,7 +48,6 @@ export function definePackageVitestConfig({
       test: {
         root: packageDir,
         passWithNoTests,
-        testTimeout,
         setupFiles: setupFiles.map((file) => resolve(packageDir, file)),
       },
     }),

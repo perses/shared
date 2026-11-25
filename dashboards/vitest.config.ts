@@ -18,5 +18,4 @@ import { definePackageVitestConfig } from '../vitest.shared';
 export default definePackageVitestConfig({
   packageDir: resolve(__dirname),
   setupFiles: ['src/test/setup-tests.ts'],
-  testTimeout: 30_000,
 });
