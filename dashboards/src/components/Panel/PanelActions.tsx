@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Stack, Box, CircularProgress, styled, Popper, ClickAwayListener } from '@mui/material';
+import { Stack, Box, styled, Popper, ClickAwayListener } from '@mui/material';
 import { InfoTooltip } from '@perses-dev/components';
 import type { QueryData } from '@perses-dev/plugin-system';
 import type { Link, Notice } from '@perses-dev/spec';
@@ -118,13 +118,9 @@ export const PanelActions: React.FC<PanelActionsProps> = ({
   const extraActions = editHandlers === undefined && extra;
 
   const queryStateIndicator = useMemo((): ReactNode | undefined => {
-    const hasData = queryResults.some((q) => q.data);
-    const isFetching = queryResults.some((q) => q.isFetching);
     const queryErrors = queryResults.filter((q) => q.error);
 
-    if (isFetching && hasData) {
-      return <CircularProgress aria-label="loading" size="1.125rem" />;
-    } else if (queryErrors.length > 0) {
+    if (queryErrors.length > 0) {
       const errorTexts = queryErrors
         .map((q) => q.error)
         .map((e) => e.message)
