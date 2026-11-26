@@ -12,8 +12,14 @@
 // limitations under the License.
 
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { DataQueriesProvider, TimeRangeProviderBasic } from '@perses-dev/plugin-system';
-import type { Link } from '@perses-dev/spec';
+import {
+  DataQueriesProvider,
+  mockPluginRegistry,
+  PluginRegistry,
+  TimeRangeProviderBasic,
+} from '@perses-dev/plugin-system';
+import type { LogQueryResult } from '@perses-dev/plugin-system';
+import type { Link, PanelDefinition, QueryDefinition } from '@perses-dev/spec';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
@@ -22,6 +28,7 @@ import { useState } from 'react';
 import { VariableProvider } from '../../context';
 import { renderWithContext } from '../../test';
 import { LinksDisplay } from '../LinksDisplay';
+import { Panel } from './Panel';
 import { OverflowMenu, PanelActions } from './PanelActions';
 
 const testTheme = createTheme({
@@ -98,5 +105,67 @@ describe('PanelActions links menu', () => {
 
     userEvent.click(screen.getByRole('button', { name: 'rerender', hidden: true }));
     expect(screen.getByRole('menuitem', { name: 'Link A' })).toBeInTheDocument();
+  });
+});
+
+describe('PanelActions notices', () => {
+  it('shows a notice returned by a log query plugin in the panel header', async () => {
+    const warning = 'Log results were truncated';
+    const registry = mockPluginRegistry(
+      {
+        kind: 'LogQuery',
+        spec: { name: 'TestLogQuery' },
+        plugin: {
+          createInitialOptions: () => ({}),
+          getLogData: (_spec, { timeRange }) =>
+            Promise.resolve<LogQueryResult>({
+              logs: { entries: [] },
+              timeRange,
+              metadata: {
+                notices: [{ type: 'warning', message: warning }],
+                stats: { linesExamined: 250 },
+              },
+            }),
+        },
+      },
+      {
+        kind: 'Panel',
+        spec: { name: 'TestLogPanel' },
+        plugin: {
+          PanelComponent: () => <div>Log panel</div>,
+          createInitialOptions: () => ({}),
+          supportedQueryTypes: ['LogQuery'],
+        },
+      },
+    );
+    const queries: Array<QueryDefinition<'LogQuery'>> = [
+      { kind: 'LogQuery', spec: { plugin: { kind: 'TestLogQuery', spec: {} } } },
+    ];
+    const definition: PanelDefinition = {
+      kind: 'Panel',
+      spec: {
+        display: { name: 'Logs' },
+        plugin: { kind: 'TestLogPanel', spec: {} },
+        queries,
+      },
+    };
+
+    renderWithContext(
+      <ThemeProvider theme={testTheme}>
+        <PluginRegistry {...registry}>
+          <TimeRangeProviderBasic initialTimeRange={{ pastDuration: '1h' }}>
+            <VariableProvider initialVariableDefinitions={[]}>
+              <DataQueriesProvider definitions={queries}>
+                <Panel definition={definition} />
+              </DataQueriesProvider>
+            </VariableProvider>
+          </TimeRangeProviderBasic>
+        </PluginRegistry>
+      </ThemeProvider>,
+    );
+
+    const notice = await screen.findByRole('button', { name: 'panel notices' });
+    userEvent.hover(notice);
+    expect(await screen.findByRole('tooltip', { name: warning })).toBeInTheDocument();
   });
 });
