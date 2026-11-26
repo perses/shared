@@ -13,9 +13,9 @@
 
 import type { Theme } from '@mui/material';
 import { IconButton, Link as LinkComponent, Menu, MenuItem, Chip, capitalize, Stack } from '@mui/material';
-import { InfoTooltip, sanitizeUrl } from '@perses-dev/components';
+import { InfoTooltip, isURLLink, sanitizeUrl } from '@perses-dev/components';
 import { useReplaceVariablesInString, useReplaceVariablesInUrl } from '@perses-dev/plugin-system';
-import type { Link } from '@perses-dev/spec';
+import type { Link, URLLink } from '@perses-dev/spec';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import type { MouseEvent, ReactElement } from 'react';
 import { useId, useState } from 'react';
@@ -43,21 +43,25 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
     setAnchorEl(null);
   };
 
-  if (links.length === 0) {
+  // Tag links open a menu of dashboards, which needs the application to list them. Only URL links are displayed here,
+  // and only those with a URL, as an empty href would reload the current page.
+  const urlLinks = links.filter((link): link is URLLink => isURLLink(link) && (link.url ?? '').trim().length > 0);
+
+  if (urlLinks.length === 0) {
     return null;
   }
 
   // Panel variant: single link shows as icon button
-  if (variant === 'panel' && links.length === 1 && links[0]) {
-    return <LinkButton link={links[0]} />;
+  if (variant === 'panel' && urlLinks.length === 1 && urlLinks[0]) {
+    return <LinkButton link={urlLinks[0]} />;
   }
 
   // Dashboard variant: 1-3 links show as chips
   // Max character limit for the name and url to prevent overflow
   // in the dashboard title area, but if either the name or url is too long,
   // we will fall back to showing the links in a dropdown menu
-  if (variant === 'dashboard' && links.length <= 3) {
-    const canRenderAsChips = links.every((link) => {
+  if (variant === 'dashboard' && urlLinks.length <= 3) {
+    const canRenderAsChips = urlLinks.every((link) => {
       if (link.name) {
         return link.name.length < 30;
       }
@@ -72,7 +76,7 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
     if (canRenderAsChips) {
       return (
         <Stack direction="row" spacing={1}>
-          {links.map((link: Link) => (
+          {urlLinks.map((link) => (
             <LinkChip key={link.url} link={link} />
           ))}
         </Stack>
@@ -83,13 +87,16 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
   // Default: show dropdown menu for multiple links
   return (
     <>
-      <InfoTooltip description={`${links.length} links`} enterDelay={100}>
+      <InfoTooltip description={`${urlLinks.length} links`} enterDelay={100}>
         <IconButton
           aria-label={`${capitalize(variant)}-links`}
           id={buttonId}
           size="small"
           onClick={handleOpenMenu}
-          sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
+          sx={(theme) => ({
+            borderRadius: theme.shape.borderRadius,
+            padding: '4px',
+          })}
         >
           <LaunchIcon
             aria-describedby="links-icon"
@@ -107,7 +114,7 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
           'aria-labelledby': buttonId,
         }}
       >
-        {links.map((link: Link) => (
+        {urlLinks.map((link) => (
           <LinkMenuItem key={link.url} link={link} />
         ))}
       </Menu>
@@ -115,7 +122,7 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
   );
 }
 
-function LinkChip({ link }: { link: Link }): ReactElement {
+function LinkChip({ link }: { link: URLLink }): ReactElement {
   const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
@@ -135,7 +142,7 @@ function LinkChip({ link }: { link: Link }): ReactElement {
   );
 }
 
-function LinkButton({ link }: { link: Link }): ReactElement {
+function LinkButton({ link }: { link: URLLink }): ReactElement {
   const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
@@ -147,7 +154,10 @@ function LinkButton({ link }: { link: Link }): ReactElement {
         href={href}
         target={targetBlank ? '_blank' : '_self'}
         rel={targetBlank ? 'noopener noreferrer' : undefined}
-        sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
+        sx={(theme) => ({
+          borderRadius: theme.shape.borderRadius,
+          padding: '4px',
+        })}
       >
         <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
       </IconButton>
@@ -155,7 +165,7 @@ function LinkButton({ link }: { link: Link }): ReactElement {
   );
 }
 
-function LinkMenuItem({ link }: { link: Link }): ReactElement {
+function LinkMenuItem({ link }: { link: URLLink }): ReactElement {
   const { url, name, targetBlank, href, description } = useLink(link);
 
   return (
@@ -172,7 +182,7 @@ function LinkMenuItem({ link }: { link: Link }): ReactElement {
   );
 }
 
-interface ResolvedLink extends Link {
+interface ResolvedLink extends URLLink {
   /**
    * URL to use as the href of the link. It is undefined when the URL uses a scheme that is not allowed
    * (e.g. `javascript:`), so the link is rendered but cannot be followed.
@@ -189,7 +199,7 @@ function getDisabledLinkDescription(url: string): string {
   return `This link is disabled because its URL uses a scheme that is not allowed: ${url}`;
 }
 
-function useLink(link: Link): ResolvedLink {
+function useLink(link: URLLink): ResolvedLink {
   // Name/tooltip: plain string interpolation (unencoded $var).
   const name = useReplaceVariablesInString(link.name);
   const tooltip = useReplaceVariablesInString(link.tooltip);

@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import { Divider, IconButton, Stack, Typography } from '@mui/material';
-import { LinkEditorForm } from '@perses-dev/components';
+import { isTagLink, LinkEditorForm } from '@perses-dev/components';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import type { HTMLAttributes, ReactElement } from 'react';
@@ -68,13 +68,31 @@ function LinkControl({ control, index }: { control: Control<PanelEditorValues>; 
       control={control}
       name={`panelDefinition.spec.links.${index}`}
       render={({ field, field: { value: link }, fieldState }) => {
+        // A link has either a URL or tags. Tag links are not edited here, as setting a URL on one makes it invalid.
+        // The errors of a tag link (e.g. a missing name) are not tied to a field, so they are shown below it.
+        if (link && isTagLink(link)) {
+          return (
+            <Stack flexGrow={1}>
+              <Typography>{link.name}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Tags: {link.tags.join(', ')}
+              </Typography>
+              {fieldState.error && (
+                <Typography variant="body2" color="error">
+                  {fieldState.error.message}
+                </Typography>
+              )}
+            </Stack>
+          );
+        }
+
         const safeLink = link ?? defaultLink;
         return (
           <LinkEditorForm
             mode="inline"
             url={{
               onBlur: field.onBlur,
-              value: safeLink.url,
+              value: safeLink.url ?? '',
               label: 'URL',
               error: { hasError: !!fieldState.error, helperText: fieldState.error?.message },
               onChange: (url) => {

@@ -17,6 +17,7 @@ export * from './chart-actions';
 export * from './combine-sx';
 export * from './data-field-interpolation';
 export * from './format';
+export * from './link';
 export * from './request-interpolation';
 export * from './selection-interpolation';
 export * from './theme-gen';

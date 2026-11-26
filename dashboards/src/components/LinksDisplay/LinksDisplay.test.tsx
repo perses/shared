@@ -70,6 +70,60 @@ describe('LinksDisplay', () => {
     expect(buttons[0]?.id).not.toBe(buttons[1]?.id);
   });
 
+  describe('tag links and empty URLs', () => {
+    it('renders nothing when there are only tag links', () => {
+      const { container } = renderLinks(
+        <LinksDisplay links={[{ name: 'Related', tags: ['team-a'] }]} variant="dashboard" />,
+      );
+
+      expect(container).toBeEmptyDOMElement();
+    });
+
+    it('renders only the URL links when tag links are mixed in', () => {
+      renderLinks(
+        <LinksDisplay
+          links={[
+            { name: 'Docs', url: 'https://perses.dev' },
+            { name: 'Related', tags: ['team-a'] },
+          ]}
+          variant="dashboard"
+        />,
+      );
+
+      expect(screen.getByText('Docs').closest('a')).toHaveAttribute('href', 'https://perses.dev');
+      expect(screen.queryByText('Related')).not.toBeInTheDocument();
+    });
+
+    it('renders a single panel URL link as a button when a tag link is mixed in', () => {
+      renderLinks(
+        <LinksDisplay
+          links={[
+            { name: 'Docs', url: '/explore' },
+            { name: 'Related', tags: ['team-a'] },
+          ]}
+          variant="panel"
+        />,
+      );
+
+      expect(screen.getByRole('link', { name: 'Docs' })).toHaveAttribute('href', '/explore');
+      expect(screen.queryByRole('button', { name: 'Panel-links' })).not.toBeInTheDocument();
+    });
+
+    it('does not render URL links with an empty URL', () => {
+      const { container } = renderLinks(
+        <LinksDisplay
+          links={[
+            { name: 'Empty', url: '' },
+            { name: 'Blank', url: '  ' },
+          ]}
+          variant="dashboard"
+        />,
+      );
+
+      expect(container).toBeEmptyDOMElement();
+    });
+  });
+
   describe('link URL sanitization', () => {
     const javascriptUrl = 'javascript:alert(document.domain)';
 

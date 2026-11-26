@@ -11,11 +11,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { PluginSchema } from '@perses-dev/spec';
+import { isURLLink } from '@perses-dev/components';
+import type { PanelDefinition, PluginSchema } from '@perses-dev/spec';
 import { panelDefinitionSchema, buildPanelDefinitionSchema } from '@perses-dev/spec';
 import { z } from 'zod';
 
 import type { PanelEditorValues } from '../model';
+
+// The spec schema accepts a looser link input than PanelDefinition, so its input type is `unknown`.
+// The editor form always feeds a PanelDefinition, so narrowing the input keeps the form resolver typed.
+type PanelDefinitionEditorSchema = z.ZodType<PanelDefinition, PanelDefinition>;
 
 const layoutDefinitionSchema = z
   .object({
@@ -31,16 +36,30 @@ const layoutDefinitionSchema = z
   })
   .optional();
 
-export const panelEditorSchema: z.ZodType<PanelEditorValues, PanelEditorValues> = z.object({
-  groupId: z.number(),
-  panelDefinition: panelDefinitionSchema,
-  layoutDefinition: layoutDefinitionSchema,
-});
+// The spec accepts an empty URL on a URL link, but the editor requires one, so that a link added with "+" and left
+// empty is not saved. The error is set on the link, where the links editor displays it.
+function requireLinkUrls(values: PanelEditorValues, ctx: z.RefinementCtx): void {
+  values.panelDefinition.spec.links?.forEach((link, index) => {
+    if (isURLLink(link) && (link.url ?? '').trim().length === 0) {
+      ctx.addIssue({ code: 'custom', message: 'URL is required', path: ['panelDefinition', 'spec', 'links', index] });
+    }
+  });
+}
+
+export const panelEditorSchema: z.ZodType<PanelEditorValues, PanelEditorValues> = z
+  .object({
+    groupId: z.number(),
+    panelDefinition: panelDefinitionSchema as PanelDefinitionEditorSchema,
+    layoutDefinition: layoutDefinitionSchema,
+  })
+  .superRefine(requireLinkUrls);
 
 export function buildPanelEditorSchema(pluginSchema: PluginSchema): z.ZodType<PanelEditorValues, PanelEditorValues> {
-  return z.object({
-    groupId: z.number(),
-    panelDefinition: buildPanelDefinitionSchema(pluginSchema),
-    layoutDefinition: layoutDefinitionSchema,
-  });
+  return z
+    .object({
+      groupId: z.number(),
+      panelDefinition: buildPanelDefinitionSchema(pluginSchema) as PanelDefinitionEditorSchema,
+      layoutDefinition: layoutDefinitionSchema,
+    })
+    .superRefine(requireLinkUrls);
 }
