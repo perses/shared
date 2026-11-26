@@ -11,148 +11,97 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button, Card, Stack, Tab, Tabs, useMediaQuery } from '@mui/material';
-import { useLocalStorage } from '@perses-dev/components';
-import type { PluginMetadataWithModule } from '@perses-dev/plugin-system';
-import {
-  comparePluginVersions,
-  PluginLoaderComponent,
-  useListPluginMetadata,
-  usePluginRegistry,
-} from '@perses-dev/plugin-system';
-import ChevronLeft from 'mdi-material-ui/ChevronLeft';
-import ChevronRight from 'mdi-material-ui/ChevronRight';
-import type { ReactElement, ReactNode } from 'react';
-import { useMemo } from 'react';
+import { Alert, Card, Stack, Tab, Tabs } from '@mui/material';
+import { PluginLoaderComponent, usePluginRegistry } from '@perses-dev/plugin-system';
+import type { ReactElement, ReactNode, SyntheticEvent } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { ExploreToolbar } from '../ExploreToolbar';
+import type { ExploreTab, ResolvedExploreTab } from './explore-tabs';
 import { useExplorerManagerContext } from './ExplorerManagerProvider';
+import { useExploreTabs } from './use-explore-tabs';
 
-const EXPLORE_TABS_COLLAPSED_KEY = 'PERSES_EXPLORE_TABS_COLLAPSED';
+export { useSortedExplorerPlugins } from './use-explore-tabs';
 
-/** Identifier of an explorer plugin, as stored in the explorer manager state. */
-export function getExplorerKey(plugin: PluginMetadataWithModule): string {
-  return `${plugin.module.name}-${plugin.spec.name}`;
-}
-
-/** Same precedence as the plugin registry: a plugin served in dev wins over installed ones, whatever their versions. */
-function isPreferredOver(plugin: PluginMetadataWithModule, other: PluginMetadataWithModule): boolean {
-  if (Boolean(plugin.inDev) !== Boolean(other.inDev)) {
-    return Boolean(plugin.inDev);
-  }
-  return comparePluginVersions(plugin.module.version, other.module.version) > 0;
-}
-
-/**
- * Explore plugins sorted by display name, matching the order of the explorer tabs. When several versions of the same
- * explorer are installed, only the one served in dev, or else the latest, is kept.
- */
-export function useSortedExplorerPlugins(): PluginMetadataWithModule[] | undefined {
-  const plugins = useListPluginMetadata(['Explore']);
-  return useMemo(() => {
-    if (!plugins.data) {
-      return undefined;
-    }
-    const latestByKey = new Map<string, PluginMetadataWithModule>();
-    for (const plugin of plugins.data) {
-      const key = getExplorerKey(plugin);
-      const existing = latestByKey.get(key);
-      if (!existing || isPreferredOver(plugin, existing)) {
-        latestByKey.set(key, plugin);
-      }
-    }
-    return [...latestByKey.values()].toSorted((a, b) => a.spec.display.name.localeCompare(b.spec.display.name));
-  }, [plugins.data]);
-}
+const ROOT_SX = { width: '100%' };
+const TABS_SX = { borderBottom: 1, borderColor: 'divider' };
+const CARD_SX = { padding: '10px', width: '100%', minWidth: 0 };
 
 export interface ExploreManagerProps {
   exploreTitleComponent?: ReactNode;
+  /**
+   * Tabs of the explore page. Defaults to one tab per Explore plugin, sorted by display name. Keep the array stable
+   * between renders (e.g. define it outside of the component or memoize it).
+   */
+  tabs?: ExploreTab[];
 }
 
+/** Explore page: the toolbar, a tab per explorer, and the content of the selected tab. */
 export function ExploreManager(props: ExploreManagerProps): ReactElement {
-  const { exploreTitleComponent } = props;
+  const { exploreTitleComponent, tabs } = props;
   const { explorer, setExplorer } = useExplorerManagerContext();
+  const resolvedTabs = useExploreTabs(tabs);
 
-  const plugins = useSortedExplorerPlugins();
-  const { pluginsBaseURL } = usePluginRegistry();
-
-  const isSmallScreen = useMediaQuery('(max-width: 768px)');
-  const [isCollapsed, setIsCollapsed] = useLocalStorage<boolean>(EXPLORE_TABS_COLLAPSED_KEY, false);
-
-  const currentPlugin = explorer ? plugins?.find((plugin) => getExplorerKey(plugin) === explorer) : undefined;
+  const handleTabChange = useCallback((_: SyntheticEvent, key: string) => setExplorer(key), [setExplorer]);
 
   if (!explorer) {
     return <div>No explorer plugin available</div>;
   }
 
+  const currentTab = resolvedTabs?.find((tab) => tab.key === explorer);
+
   return (
-    <Stack sx={{ width: '100%' }} px={2} pb={2} pt={1.5} gap={1}>
+    <Stack sx={ROOT_SX} px={2} pb={2} pt={1.5} gap={1}>
       <ExploreToolbar exploreTitleComponent={exploreTitleComponent} />
-
-      <Stack direction={isSmallScreen ? 'column' : 'row'} gap={2} sx={{ width: '100%' }}>
-        <Stack
-          sx={{
-            borderRight: isSmallScreen ? 0 : 1,
-            borderBottom: isSmallScreen ? 1 : 0,
-            borderColor: 'divider',
-            minWidth: isCollapsed ? 15 : 100,
-          }}
-        >
-          <Box sx={{ position: 'relative', height: 30, display: isSmallScreen ? 'none' : undefined }} test-id="qdqwd">
-            <Button
-              title={isCollapsed ? 'Expand explorer tabs' : 'Collapse explorer tabs'}
-              aria-label={isCollapsed ? 'Expand explorer tabs' : 'Collapse explorer tabs'}
-              variant="text"
-              sx={{
-                position: 'absolute',
-                right: -15,
-                zIndex: 1,
-                padding: 0.5,
-                minWidth: 'auto',
-                backgroundColor: (theme) => theme.palette.background.default,
-              }}
-              onClick={() => setIsCollapsed(!isCollapsed)}
-            >
-              {isCollapsed ? <ChevronRight /> : <ChevronLeft />}
-            </Button>
-          </Box>
-
-          <Tabs
-            orientation={isSmallScreen ? 'horizontal' : 'vertical'}
-            value={explorer}
-            onChange={(_, state) => setExplorer(state)}
-            variant={isSmallScreen ? 'fullWidth' : 'scrollable'}
-            sx={{
-              display: isCollapsed ? 'none' : 'flex',
-            }}
-          >
-            {plugins?.map((plugin) => (
-              <Tab
-                key={getExplorerKey(plugin)}
-                value={getExplorerKey(plugin)}
-                label={plugin.spec.display.name}
-                sx={{
-                  padding: 0.5,
-                }}
-              />
-            ))}
-          </Tabs>
-        </Stack>
-        <Card sx={{ padding: '10px', width: '100%' }}>
-          {currentPlugin && (
-            <PluginLoaderComponent
-              key={getExplorerKey(currentPlugin)}
-              plugin={{
-                name: currentPlugin.spec.name,
-                moduleName: currentPlugin.module.name,
-                version: currentPlugin.module.version,
-                registry: currentPlugin.module.registry,
-                baseURL: pluginsBaseURL,
-              }}
-            />
-          )}
-        </Card>
-      </Stack>
+      <Tabs
+        value={currentTab ? explorer : false}
+        onChange={handleTabChange}
+        variant="scrollable"
+        aria-label="Explorers"
+        sx={TABS_SX}
+      >
+        {resolvedTabs?.map((tab) => (
+          <Tab key={tab.key} value={tab.key} label={tab.label} />
+        ))}
+      </Tabs>
+      {currentTab && <ExploreTabContent tab={currentTab} />}
     </Stack>
+  );
+}
+
+interface ExploreTabContentProps {
+  tab: ResolvedExploreTab;
+}
+
+function ExploreTabContent(props: ExploreTabContentProps): ReactNode {
+  const { tab } = props;
+  const { pluginsBaseURL } = usePluginRegistry();
+  const plugin = useMemo(
+    () =>
+      tab.plugin && {
+        name: tab.plugin.spec.name,
+        moduleName: tab.plugin.module.name,
+        version: tab.plugin.module.version,
+        registry: tab.plugin.module.registry,
+        baseURL: pluginsBaseURL,
+      },
+    [tab.plugin, pluginsBaseURL],
+  );
+
+  // Custom content owns its layout.
+  if (tab.content !== undefined) {
+    return tab.content;
+  }
+  return (
+    <Card sx={CARD_SX}>
+      {plugin && <PluginLoaderComponent key={tab.key} plugin={plugin} />}
+      {!plugin && (
+        <Alert severity="info">
+          {tab.missingPluginName
+            ? `${tab.label} is not available: the ${tab.missingPluginName} plugin is not installed.`
+            : `${tab.label} is not available.`}
+        </Alert>
+      )}
+    </Card>
   );
 }

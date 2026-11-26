@@ -11,6 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+export type { ExploreTab } from './explore-tabs';
+export { getExplorerKey } from './explore-tabs';
 export * from './ExploreManager';
 export * from './ExplorerManagerProvider';
 export * from './ExplorerManagerProviderWithQueryParams';

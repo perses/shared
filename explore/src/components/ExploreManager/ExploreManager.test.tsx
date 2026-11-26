@@ -14,6 +14,7 @@
 import type * as PluginSystemModule from '@perses-dev/plugin-system';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
+import type { ExploreTab } from './explore-tabs';
 import { ExploreManager } from './ExploreManager';
 import { ExplorerManagerProvider } from './ExplorerManagerProvider';
 
@@ -166,4 +167,58 @@ it('shows the plugin served in dev over a newer installed version', () => {
   expect(pluginLoaderComponent).toHaveBeenLastCalledWith(
     expect.objectContaining({ plugin: expect.objectContaining({ version: '0.59.0' }) }),
   );
+});
+
+const TABS: ExploreTab[] = [
+  { id: 'metrics', label: 'Metrics', explorerPluginName: 'MetricsExplorer' },
+  { id: 'logs', label: 'Logs', content: <p>Custom logs explorer</p> },
+  { id: 'profiles', label: 'Profiling', explorerPluginName: 'ProfilesExplorer' },
+];
+
+describe('ExploreManager tabs', () => {
+  beforeEach(() => {
+    listPluginMetadata.mockReturnValue({
+      data: [
+        {
+          kind: 'Explore',
+          spec: { name: 'MetricsExplorer', display: { name: 'Metrics Explorer' } },
+          module: { name: 'metrics', version: '1.2.3' },
+        },
+      ],
+    });
+  });
+
+  it('shows the defined tabs at the top and loads the selected explorer plugin', () => {
+    render(
+      <ExplorerManagerProvider defaultExplorer="metrics-MetricsExplorer">
+        <ExploreManager tabs={TABS} />
+      </ExplorerManagerProvider>,
+    );
+    expect(screen.getByRole('tablist', { name: 'Explorers' })).not.toHaveAttribute('aria-orientation', 'vertical');
+    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Metrics', 'Logs', 'Profiling']);
+    expect(pluginLoaderComponent).toHaveBeenLastCalledWith(
+      expect.objectContaining({ plugin: expect.objectContaining({ name: 'MetricsExplorer' }) }),
+    );
+  });
+
+  it('renders the custom content of a tab', () => {
+    render(
+      <ExplorerManagerProvider defaultExplorer="metrics-MetricsExplorer">
+        <ExploreManager tabs={TABS} />
+      </ExplorerManagerProvider>,
+    );
+    fireEvent.click(screen.getByRole('tab', { name: 'Logs' }));
+    expect(screen.getByText('Custom logs explorer')).toBeInTheDocument();
+  });
+
+  it('explains when the explorer plugin of a tab is not installed', () => {
+    render(
+      <ExplorerManagerProvider defaultExplorer="tab-profiles">
+        <ExploreManager tabs={TABS} />
+      </ExplorerManagerProvider>,
+    );
+    expect(
+      screen.getByText('Profiling is not available: the ProfilesExplorer plugin is not installed.'),
+    ).toBeInTheDocument();
+  });
 });

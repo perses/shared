@@ -29,6 +29,7 @@ import {
 import type { ReactElement } from 'react';
 import React from 'react';
 
+import type { ViewAppProps } from './ViewExploreApp';
 import { ViewExploreApp } from './ViewExploreApp';
 
 export interface ViewExploreProps extends Omit<BoxProps, 'children'> {
@@ -36,10 +37,12 @@ export interface ViewExploreProps extends Omit<BoxProps, 'children'> {
   projectName?: DatasourceStoreProviderProps['projectName'];
   externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   exploreTitleComponent?: React.ReactNode;
+  /** Tabs of the explore page. See `ExploreManagerProps.tabs`. */
+  tabs?: ViewAppProps['tabs'];
 }
 
 export function ViewExplore(props: ViewExploreProps): ReactElement {
-  const { datasourceApi, projectName, externalVariableDefinitions, sx, exploreTitleComponent, ...others } = props;
+  const { datasourceApi, projectName, externalVariableDefinitions, sx, exploreTitleComponent, tabs, ...others } = props;
 
   const initialTimeRange = useInitialTimeRange(DEFAULT_DASHBOARD_DURATION);
   const initialRefreshInterval = useInitialRefreshInterval(DEFAULT_REFRESH_INTERVAL);
@@ -65,7 +68,7 @@ export function ViewExplore(props: ViewExploreProps): ReactElement {
             {...others}
           >
             <ErrorBoundary FallbackComponent={ErrorAlert}>
-              <ViewExploreApp exploreTitleComponent={exploreTitleComponent} />
+              <ViewExploreApp exploreTitleComponent={exploreTitleComponent} tabs={tabs} />
             </ErrorBoundary>
           </Box>
         </VariableProvider>
