@@ -24,7 +24,7 @@ import {
 } from '@perses-dev/components';
 import type { FormEditorHandle } from '@perses-dev/components';
 import type { VariableDefinition, ListVariableDefinition } from '@perses-dev/spec';
-import { useQueryClient } from '@tanstack/react-query';
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import type { DispatchWithoutAction, ForwardedRef, ReactElement } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
 import type { Control, SubmitHandler } from 'react-hook-form';
@@ -124,6 +124,11 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
     }
   }, [previewDefinition, queryClient, values]);
 
+  const isQueryRunning = useIsFetching({ queryKey: ['variable', previewDefinition] }) > 0;
+  const handleCancelQuery = useCallback(() => {
+    void queryClient.cancelQueries({ queryKey: ['variable', previewDefinition] });
+  }, [previewDefinition, queryClient]);
+
   const plugin = useWatch<VariableDefinition, 'spec.plugin'>({ control, name: 'spec.plugin' });
   const kind = plugin?.kind;
   const pluginSpec = plugin?.spec;
@@ -196,6 +201,8 @@ function ListVariableEditorForm({ action, control }: KindVariableEditorFormProps
                       field.onChange({ kind: v.selection.kind, spec: v.spec });
                     }}
                     onRunQuery={handleRunQuery}
+                    isQueryRunning={isQueryRunning}
+                    onCancelQuery={handleCancelQuery}
                   />
                 );
               }}

@@ -192,6 +192,8 @@ export const QueryEditorContainer = forwardRef<PluginEditorRef, QueryEditorConta
             filteredQueryPlugins={filteredQueryPlugins}
             onChange={(next) => onChange(index, next)}
             onQueryRun={() => onQueryRun(index, query)}
+            isQueryRunning={!!queryResult?.isFetching}
+            onCancelQuery={queryResult?.cancel}
           />
         )}
       </Stack>
@@ -252,6 +254,8 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   filteredQueryPlugins?: string[];
   onChange: (next: QueryDefinition) => void;
   onQueryRun: () => void;
+  isQueryRunning?: boolean;
+  onCancelQuery?: () => void;
 }
 
 /**
@@ -263,7 +267,8 @@ interface QueryEditorProps extends Omit<BoxProps, OmittedMuiProps> {
  */
 
 const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): ReactElement => {
-  const { queryTypes, value, filteredQueryPlugins, onChange, onQueryRun, ...others } = props;
+  const { queryTypes, value, filteredQueryPlugins, onChange, onQueryRun, isQueryRunning, onCancelQuery, ...others } =
+    props;
 
   const handlePluginChange: PluginEditorProps['onChange'] = (next) => {
     onChange(
@@ -291,6 +296,8 @@ const QueryEditor = forwardRef<PluginEditorRef, QueryEditorProps>((props, ref): 
         filteredQueryPlugins={filteredQueryPlugins}
         withRunQueryButton
         onRunQuery={onQueryRun}
+        isQueryRunning={isQueryRunning}
+        onCancelQuery={onCancelQuery}
         onChange={handlePluginChange}
       />
     </Box>

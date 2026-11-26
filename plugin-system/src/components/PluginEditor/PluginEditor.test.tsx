@@ -178,6 +178,42 @@ describe('PluginEditor', () => {
           expect(onRunQueryHandler).toHaveBeenCalledTimes(1);
         });
       });
+
+      it('should show a loading indicator and cancel the query while it is running', async () => {
+        const onRunQuery = vi.fn();
+        const onCancelQuery = vi.fn();
+        function TestRunningEditor(): ReactElement {
+          const [isQueryRunning, setQueryRunning] = useState(true);
+          return (
+            <PluginEditor
+              pluginTypes={['TimeSeriesQuery']}
+              pluginKindLabel="Query Type"
+              value={{ selection: { type: 'TimeSeriesQuery', kind: '' }, spec: {} }}
+              onChange={vi.fn()}
+              onRunQuery={onRunQuery}
+              isQueryRunning={isQueryRunning}
+              onCancelQuery={() => {
+                onCancelQuery();
+                setQueryRunning(false);
+              }}
+            />
+          );
+        }
+        renderWithContext(<TestRunningEditor />);
+
+        const queryButton = screen.getByTestId('run_query_button');
+        expect(queryButton).toHaveAccessibleName('Cancel');
+        expect(screen.getByRole('progressbar', { name: 'query running' })).toBeInTheDocument();
+        userEvent.click(queryButton);
+        expect(onCancelQuery).toHaveBeenCalledTimes(1);
+        expect(onRunQuery).not.toHaveBeenCalled();
+
+        await waitFor(() => expect(queryButton).toHaveAccessibleName('Run Query'));
+        expect(screen.queryByRole('progressbar', { name: 'query running' })).not.toBeInTheDocument();
+        userEvent.click(queryButton);
+        expect(onRunQuery).toHaveBeenCalledTimes(1);
+        expect(onCancelQuery).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });

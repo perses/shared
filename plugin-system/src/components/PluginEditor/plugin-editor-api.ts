@@ -52,6 +52,11 @@ export interface PluginEditorProps extends Omit<BoxProps, OmittedMuiProps> {
   filteredQueryPlugins?: string[];
   onChange: (next: PluginEditorValue) => void;
   onRunQuery?: () => void;
+  /**
+   * When true, the run query button shows a loading indicator and a "Cancel" label; clicking it calls `onCancelQuery`.
+   */
+  isQueryRunning?: boolean;
+  onCancelQuery?: () => void;
   testConnection?: (spec: DatasourceSpec, healthCheckPath: string) => Promise<void>;
 }
 

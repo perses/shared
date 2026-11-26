@@ -25,7 +25,7 @@ import {
 } from '@perses-dev/components';
 import type { FormEditorHandle } from '@perses-dev/components';
 import type { AnnotationSpec } from '@perses-dev/spec';
-import { useQueryClient } from '@tanstack/react-query';
+import { useIsFetching, useQueryClient } from '@tanstack/react-query';
 import InvertColorsIcon from 'mdi-material-ui/InvertColors';
 import type { DispatchWithoutAction, ForwardedRef, ReactElement } from 'react';
 import { forwardRef, useCallback, useImperativeHandle, useState } from 'react';
@@ -45,9 +45,17 @@ interface KindAnnotationEditorFormProps {
   action: Action;
   control: Control<AnnotationSpec>;
   onRunQuery: () => void;
+  isQueryRunning: boolean;
+  onCancelQuery: () => void;
 }
 
-function AnnotationPluginControl({ action, control, onRunQuery }: KindAnnotationEditorFormProps): ReactElement {
+function AnnotationPluginControl({
+  action,
+  control,
+  onRunQuery,
+  isQueryRunning,
+  onCancelQuery,
+}: KindAnnotationEditorFormProps): ReactElement {
   const plugin = useWatch<AnnotationSpec, 'plugin'>({ control, name: 'plugin' });
   const kind = plugin?.kind;
   const pluginSpec = plugin?.spec;
@@ -75,6 +83,8 @@ function AnnotationPluginControl({ action, control, onRunQuery }: KindAnnotation
               field.onChange({ kind: v.selection.kind, spec: v.spec });
             }}
             onRunQuery={onRunQuery}
+            isQueryRunning={isQueryRunning}
+            onCancelQuery={onCancelQuery}
           />
         );
       }}
@@ -134,6 +144,11 @@ export const AnnotationEditorForm = forwardRef(function AnnotationEditorForm(
       setPreviewSpec(structuredClone(values));
     }
   }, [form, previewSpec, queryClient]);
+
+  const isQueryRunning = useIsFetching({ queryKey: ['annotation', previewSpec] }) > 0;
+  const handleCancelQuery = useCallback(() => {
+    void queryClient.cancelQueries({ queryKey: ['annotation', previewSpec] });
+  }, [previewSpec, queryClient]);
 
   const processForm: SubmitHandler<AnnotationSpec> = (data: AnnotationSpec) => {
     // reset display attributes to undefined when empty, because we don't want to save empty strings
@@ -258,7 +273,13 @@ export const AnnotationEditorForm = forwardRef(function AnnotationEditorForm(
         </ErrorBoundary>
 
         <ErrorBoundary FallbackComponent={ErrorAlert}>
-          <AnnotationPluginControl action={action} control={form.control} onRunQuery={handleRunQuery} />
+          <AnnotationPluginControl
+            action={action}
+            control={form.control}
+            onRunQuery={handleRunQuery}
+            isQueryRunning={isQueryRunning}
+            onCancelQuery={handleCancelQuery}
+          />
         </ErrorBoundary>
       </Box>
       <DiscardChangesConfirmationDialog

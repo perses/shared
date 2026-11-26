@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { QueryDefinition, UnknownSpec, QueryDataType } from '@perses-dev/spec';
-import type { QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
+import type { QueryClient, QueryObserverOptions, UseQueryResult } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 
 export type QueryOptions = Record<string, unknown>;
@@ -43,16 +43,31 @@ export type QueryData<T = QueryDataType> = {
   isFetching: boolean;
   isPending: boolean;
   refetch?: () => void;
+  /**
+   * Cancels the in-flight fetch of this query (aborting its request signal) and restores the query to the state it
+   * had before the fetch started.
+   */
+  cancel?: () => void;
 };
 
-export function transformQueryResults(results: UseQueryResult[], definitions: QueryDefinition[]): QueryData[] {
+export function transformQueryResults(
+  results: UseQueryResult[],
+  definitions: QueryDefinition[],
+  queryClient?: QueryClient,
+): QueryData[] {
   return results.map(({ data, isFetching, isPending, refetch, error }, i) => {
+    const definition = definitions[i];
     return {
-      definition: definitions[i],
+      definition,
       data,
       isFetching,
       isPending,
       refetch,
+      // Data query keys all start with ['query', kind, definition], whatever the query type.
+      cancel:
+        queryClient && definition
+          ? (): void => void queryClient.cancelQueries({ queryKey: ['query', definition.kind, definition] })
+          : undefined,
       error,
     } as QueryData;
   });
