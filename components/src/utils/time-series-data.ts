@@ -20,7 +20,8 @@ export const MIN_STEP_INTERVAL_MS = 10;
 /**
  * Given a TimeSeries from a query and a common time scale (see `getCommonTimeScale`),
  * processes the time series values, filling in any timestamps that are missing
- * from the time series data with `null` values.
+ * from the time series data with `null` values. A value that falls between two
+ * steps is placed on the nearer one.
  */
 export function getTimeSeriesValues(series: TimeSeries, timeScale: TimeScale): TimeSeriesValueTuple[] {
   let timestamp = timeScale.startMs;
@@ -29,13 +30,15 @@ export function getTimeSeriesValues(series: TimeSeries, timeScale: TimeScale): T
   const processedValues: TimeSeriesValueTuple[] = [];
 
   for (const valueTuple of values) {
-    // Fill in values up to the current series value timestamp with nulls
-    while (timestamp < valueTuple[0]) {
+    // Fill in nulls up to the step nearest to the current series value timestamp.
+    // A value can fall between steps, e.g. a daily value across a daylight saving
+    // time change, where the day is 23 or 25 hours long.
+    while (timestamp + timeScale.stepMs / 2 < valueTuple[0]) {
       processedValues.push([timestamp, null]);
       timestamp += timeScale.stepMs;
     }
 
-    // Now add the current value since timestamp should match
+    // Now add the current value at the nearest step
     processedValues.push([timestamp, valueTuple[1]]);
     timestamp += timeScale.stepMs;
   }
