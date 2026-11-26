@@ -11,7 +11,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { SilencesData, QueryDefinition, UnknownSpec } from '@perses-dev/spec';
+import type { QueryDefinition, UnknownSpec, SilencesData } from '@perses-dev/spec';
 import type { QueryKey, UseQueryResult } from '@tanstack/react-query';
 import { useQueries } from '@tanstack/react-query';
 
@@ -34,35 +34,35 @@ export function useSilencesQueries(definitions: SilencesQueryDefinition[]): Arra
   const context = useSilencesQueryContext();
 
   const pluginLoaderResponse = usePlugins(
-    'SilencesQuery',
-    definitions.map((d) => ({
-      kind: d.spec.plugin.kind,
-      version: d.spec.plugin.metadata?.version,
-      registry: d.spec.plugin.metadata?.registry,
+    SILENCES_QUERY_KEY,
+    definitions.map(({ spec }) => ({
+      kind: spec.plugin.kind,
+      version: spec.plugin.metadata?.version,
+      registry: spec.plugin.metadata?.registry,
     })),
   );
 
   return useQueries({
-    queries: definitions.map((definition, idx) => {
-      const plugin = pluginLoaderResponse[idx]?.data;
-      const { queryEnabled, queryKey } = getQueryOptions({ context, definition, plugin });
-      const silencesQueryKind = definition?.spec?.plugin?.kind;
+    queries: definitions.map((definition, index) => {
+      const plugin = pluginLoaderResponse[index]?.data;
+      const pluginLoadFailed = pluginLoaderResponse[index]?.isError ?? false;
+      const { queryEnabled, queryKey } = getQueryOptions({ plugin, pluginLoadFailed, definition, context });
       return {
         enabled: queryEnabled,
-        queryKey: queryKey,
+        queryKey,
         refetchOnMount: false,
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
-        staleTime: 60_000,
+        staleTime: Infinity,
+        structuralSharing: false,
         queryFn: async ({ signal }: { signal?: AbortSignal }): Promise<SilencesData> => {
-          const plugin = await getPlugin({
+          const queryPlugin = await getPlugin({
             kind: SILENCES_QUERY_KEY,
-            name: silencesQueryKind,
+            name: definition.spec.plugin.kind,
             version: definition.spec.plugin.metadata?.version,
             registry: definition.spec.plugin.metadata?.registry,
           });
-          const data = await plugin.getSilencesData(definition.spec.plugin.spec, context, signal);
-          return data;
+          return queryPlugin.getSilencesData(definition.spec.plugin.spec, context, signal);
         },
       };
     }),
@@ -71,10 +71,12 @@ export function useSilencesQueries(definitions: SilencesQueryDefinition[]): Arra
 
 function getQueryOptions({
   plugin,
+  pluginLoadFailed,
   definition,
   context,
 }: {
   plugin?: SilencesQueryPlugin;
+  pluginLoadFailed: boolean;
   definition: SilencesQueryDefinition;
   context: SilencesQueryContext;
 }): {
@@ -82,21 +84,16 @@ function getQueryOptions({
   queryEnabled: boolean;
 } {
   const { variableState } = context;
-
-  const dependencies = plugin?.dependsOn ? plugin.dependsOn(definition.spec.plugin.spec, context) : {};
+  const dependencies = plugin?.dependsOn?.(definition.spec.plugin.spec, context);
   const variableDependencies = dependencies?.variables;
-
-  const filteredVariabledState = filterVariableStateMap(variableState, variableDependencies);
-  const variablesValueKey = getVariableValuesKey(filteredVariabledState);
-  // Note: no absoluteTimeRange in query key since silences are current state
+  const filteredVariableState = filterVariableStateMap(variableState, variableDependencies);
+  const variablesValueKey = getVariableValuesKey(filteredVariableState);
   const queryKey = ['query', SILENCES_QUERY_KEY, definition, variablesValueKey] as const;
+  // Only declared dependencies delay the query; undeclared ones still rerun it through the cache key.
+  const waitToLoad = variableDependencies?.some((name) => variableState[name]?.loading) ?? false;
+  // Let the query function surface plugin loading errors once variable dependencies are ready.
+  const queryEnabled = (plugin !== undefined || pluginLoadFailed) && !waitToLoad;
 
-  let waitToLoad = false;
-  if (variableDependencies) {
-    waitToLoad = variableDependencies.some((v) => variableState[v]?.loading);
-  }
-
-  const queryEnabled = plugin !== undefined && !waitToLoad;
   return {
     queryKey,
     queryEnabled,

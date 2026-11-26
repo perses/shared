@@ -25,10 +25,9 @@ export interface LogQueryResult {
 }
 
 export interface LogQueryContext {
-  timeRange: AbsoluteTimeRange;
+  absoluteTimeRange: AbsoluteTimeRange;
   variableState: VariableStateMap;
   datasourceStore: DatasourceStore;
-  refreshKey: string;
 }
 
 type LogQueryPluginDependencies = {
