@@ -22,10 +22,6 @@ export interface DashboardSummary {
    * Human-readable name of the dashboard. Consumers fall back to `metadata.name` when it is omitted.
    */
   displayName?: string;
-  /**
-   * Names of the variables declared by the dashboard. Omitted when the host does not provide them.
-   */
-  variableNames?: string[];
 }
 
 export interface ListDashboardsFilters {
