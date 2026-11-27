@@ -140,12 +140,6 @@ vi.mock('@perses-dev/components', async () => {
   };
 });
 
-vi.mock('@mui/material/CircularProgress', () => {
-  return function MockCircularProgress(props: { 'aria-label'?: string }): ReactElement {
-    return <div aria-label={props['aria-label'] || 'loading'} />;
-  };
-});
-
 vi.mock('@perses-dev/plugin-system', async () => {
   const actual = await vi.importActual<typeof PluginSystemModule>('@perses-dev/plugin-system');
   return {
@@ -549,7 +543,7 @@ describe('Panel', () => {
     expect(panel).not.toHaveTextContent('Extra content');
   });
 
-  it('shows loading indicator if 1/2 queries are loading', async () => {
+  it('shows a loading progress bar if a query with data is refetching', async () => {
     vi.mocked(useDataQueriesContext).mockReturnValue(
       makeDataQueriesContext([
         makeQueryResult({
@@ -560,14 +554,31 @@ describe('Panel', () => {
     );
 
     await renderPanel();
-    expect(screen.queryAllByLabelText('loading').length).toBeGreaterThan(0);
+    expect(screen.getByRole('progressbar', { name: 'loading' })).toBeInTheDocument();
   });
 
-  it('does not show a loading indicator if 2/2 queries are loading', async () => {
-    vi.mocked(useDataQueriesContext).mockReturnValue(makeDataQueriesContext());
+  it('shows the loading progress bar when the panel header is hidden', async () => {
+    vi.mocked(useDataQueriesContext).mockReturnValue(
+      makeDataQueriesContext([
+        makeQueryResult({
+          data: { series: [{ name: 'test', values: [[1, 2]] }] },
+          isFetching: true,
+        }),
+      ]),
+    );
+
+    await renderPanel(undefined, undefined, { hideHeader: true });
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument();
+    expect(screen.getByRole('progressbar', { name: 'loading' })).toBeInTheDocument();
+  });
+
+  it('does not show a loading progress bar if no query has data yet', async () => {
+    vi.mocked(useDataQueriesContext).mockReturnValue(
+      makeDataQueriesContext([makeQueryResult({ isFetching: true }), makeQueryResult({ isFetching: true })]),
+    );
 
     await renderPanel();
-    expect(screen.queryAllByLabelText('loading')).toHaveLength(0);
+    expect(screen.queryByRole('progressbar', { name: 'loading' })).not.toBeInTheDocument();
   });
 
   it('shows query errors in the tooltip', async () => {

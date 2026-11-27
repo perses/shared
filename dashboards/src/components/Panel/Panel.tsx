@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { CardProps } from '@mui/material';
-import { Card, CardContent } from '@mui/material';
+import { Card, CardContent, LinearProgress } from '@mui/material';
 import { ErrorAlert, ErrorBoundary, ItemActionsProvider, SelectionProvider, combineSx } from '@perses-dev/components';
 import type { ActionOptions } from '@perses-dev/plugin-system';
 import { useDataQueriesContext, usePlugin } from '@perses-dev/plugin-system';
@@ -145,6 +145,8 @@ export const Panel = memo(function Panel(props: PanelProps) {
     : undefined;
   const itemActionsListConfig =
     itemActionsConfig?.enabled && itemActionsConfig.displayInHeader ? itemActionsConfig.actionsList : [];
+  // Without data, PanelContent already renders its own loading state.
+  const isRefreshing = queryResults.some((q) => q.isFetching) && queryResults.some((q) => q.data);
 
   return (
     <SelectionProvider>
@@ -153,6 +155,7 @@ export const Panel = memo(function Panel(props: PanelProps) {
           component="section"
           sx={combineSx(
             {
+              position: 'relative',
               width: '100%',
               height: '100%',
               display: 'flex',
@@ -213,6 +216,22 @@ export const Panel = memo(function Panel(props: PanelProps) {
               />
             </ErrorBoundary>
           </CardContent>
+          {isRefreshing && (
+            <LinearProgress
+              aria-label="loading"
+              sx={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 2,
+                backgroundColor: 'transparent',
+                // Must be at least the PanelHeader zIndex (5) to be visible above headerless panel actions
+                zIndex: 5,
+                pointerEvents: 'none',
+              }}
+            />
+          )}
         </Card>
       </ItemActionsProvider>
     </SelectionProvider>
