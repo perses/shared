@@ -363,7 +363,13 @@ export function VirtualizedTable<TableData extends RowData>({
                   <TableCell
                     key={cell.id}
                     data-testid={cell.id}
-                    title={description || cellConfig?.text || cellContent}
+                    title={
+                      description ||
+                      cellConfig?.text ||
+                      (typeof cellContent === 'string' || typeof cellContent === 'number'
+                        ? String(cellContent)
+                        : undefined)
+                    }
                     width={
                       cell.column.getCanResize()
                         ? `calc(var(--col-${cell.column.id}-size) * 1px)`

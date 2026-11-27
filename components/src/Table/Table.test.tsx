@@ -521,6 +521,36 @@ describe('table', () => {
       });
     });
 
+    test('table cell keeps numeric `cell` result as its title', () => {
+      const valueColumn = 1;
+      const columns = COLUMNS.map((col, i) =>
+        i === valueColumn
+          ? { ...col, cell: ({ getValue }: { getValue: () => unknown }): number => getValue() as number }
+          : col,
+      );
+      const dataRows = 5;
+      const data = generateMockTableData(dataRows);
+      renderTable({ data, columns, height: dataRows * MOCK_ITEM_HEIGHT });
+
+      // Offset 1 to account for header row.
+      for (let i = 1; i <= dataRows; i++) {
+        const cell = getTableCellByIndex(i, valueColumn);
+        expect(cell).toHaveAttribute('title', `${data[i - 1]?.value}`);
+      }
+    });
+
+    test('table cell does not use the non-string `cell` result as its title', () => {
+      const dataRows = 5;
+      const data = generateMockTableData(dataRows);
+      renderTable({ data, height: dataRows * MOCK_ITEM_HEIGHT });
+
+      // Offset 1 to account for header row.
+      for (let i = 1; i <= dataRows; i++) {
+        const cell = getTableCellByIndex(i, columnWithComplexCell);
+        expect(cell).not.toHaveAttribute('title');
+      }
+    });
+
     describe('when `cellDescription` is `true`', () => {
       test('table cell does not have a description because the `cell` result cannot be put in a `title`', () => {
         const columns = COLUMNS.map((col, i) => {
