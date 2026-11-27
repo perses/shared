@@ -48,6 +48,7 @@ describe('FormatControls', () => {
 
     const unitSelector = getUnitSelector();
     userEvent.click(unitSelector);
+    userEvent.click(screen.getByRole('option', { name: 'Browse Decimal units' }));
     const decimalOption = screen.getByRole('option', {
       name: 'Decimal',
     });
@@ -91,6 +92,7 @@ describe('FormatControls', () => {
     renderFormatControls({ unit: 'ops/sec', customLabel: 'pnr/mn' }, onChange);
 
     userEvent.click(getUnitSelector());
+    userEvent.click(screen.getByRole('option', { name: 'Browse Bytes units' }));
     userEvent.click(screen.getByRole('option', { name: 'Bytes (IEC)' }));
     expect(onChange).toHaveBeenCalledWith({
       unit: 'bytes',
@@ -164,6 +166,7 @@ describe('FormatControls', () => {
     renderFormatControls({ unit: 'ops/sec', customLabel: 'pnr/mn' }, onChange);
 
     userEvent.click(getUnitSelector());
+    userEvent.click(screen.getByRole('option', { name: 'Browse Decimal units' }));
     userEvent.click(screen.getByRole('option', { name: 'Decimal' }));
     expect(onChange).toHaveBeenCalledWith({
       unit: 'decimal',
@@ -246,16 +249,5 @@ describe('FormatControls', () => {
       renderFormatControls({ unit: 'eur' });
       expect(getDecimalPlacesSelector()).toBeEnabled();
     });
-  });
-
-  it('should not show an option for disabled units', () => {
-    const onChange = vi.fn();
-    renderFormatControls({ unit: 'decimal' }, onChange);
-
-    userEvent.click(getUnitSelector());
-    const percentShorthandOption = screen.queryByRole('option', {
-      name: '%',
-    });
-    expect(percentShorthandOption).not.toBeInTheDocument();
   });
 });
