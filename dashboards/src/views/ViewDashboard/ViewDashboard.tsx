@@ -13,8 +13,10 @@
 
 import type { BoxProps } from '@mui/material';
 import { Box } from '@mui/material';
+import type { DashboardApi } from '@perses-dev/client';
 import { ErrorBoundary, ErrorAlert, combineSx } from '@perses-dev/components';
 import {
+  DashboardResourceStoreProvider,
   TimeRangeProviderWithQueryParams,
   useInitialRefreshInterval,
   useInitialTimeRange,
@@ -34,6 +36,11 @@ import { DashboardApp } from './DashboardApp';
 
 export interface ViewDashboardProps extends Omit<BoxProps, 'children'>, DashboardAppProps {
   datasourceApi: DatasourceStoreProviderProps['datasourceApi'];
+  /**
+   * Lets the dashboard read other dashboards of the host application.
+   * When omitted, a `DashboardResourceStoreProvider` mounted by the host above the dashboard still applies.
+   */
+  dashboardApi?: DashboardApi;
   externalVariableDefinitions?: VariableProviderProps['externalVariableDefinitions'];
   isEditing?: boolean;
   isCreating?: boolean;
@@ -47,6 +54,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   const {
     dashboardResource,
     datasourceApi,
+    dashboardApi,
     externalVariableDefinitions,
     emptyDashboardProps,
     isReadonly,
@@ -115,7 +123,7 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
     return result;
   }, [dashboardResource.metadata.name, dashboardResource.metadata.project, data]);
 
-  return (
+  const view = (
     <DatasourceStoreProvider dashboardResource={dashboardResource} datasourceApi={datasourceApi}>
       <DashboardProviderWithQueryParams
         initialState={{
@@ -175,4 +183,9 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
       </DashboardProviderWithQueryParams>
     </DatasourceStoreProvider>
   );
+
+  if (dashboardApi === undefined) {
+    return view;
+  }
+  return <DashboardResourceStoreProvider dashboardApi={dashboardApi}>{view}</DashboardResourceStoreProvider>;
 }
