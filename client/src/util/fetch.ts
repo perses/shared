@@ -12,25 +12,33 @@
 // limitations under the License.
 
 /**
- * Calls `globalThis.fetch` and determines which type of error to show for non-200 responses.
+ * Calls `globalThis.fetch` and determines which type of error to show for non-200 responses: a `UserFriendlyError`
+ * with the body's message or text, or a `FetchError` for an empty body. Both carry the status and response headers.
  */
 export async function fetch(...args: Parameters<typeof globalThis.fetch>): Promise<Response> {
   const response = await globalThis.fetch(...args);
   if (response.ok === false) {
     const contentType = response.headers.get('content-type');
     if (contentType?.includes('application/json')) {
-      const json = await response.clone().json();
-      if (json.error) {
-        throw new UserFriendlyError(json.error, response.status);
+      // Invalid or non-object JSON falls through to the text path so status and headers survive.
+      const json = await response
+        .clone()
+        .json()
+        .catch((error: unknown) => {
+          if (error instanceof SyntaxError) return undefined;
+          throw error;
+        });
+      if (json?.error) {
+        throw new UserFriendlyError(json.error, response.status, response.headers);
       }
-      if (json.message) {
-        throw new UserFriendlyError(json.message, response.status);
+      if (json?.message) {
+        throw new UserFriendlyError(json.message, response.status, response.headers);
       }
     }
 
     const text = await response.clone().text();
     if (text) {
-      throw new UserFriendlyError(text, response.status);
+      throw new UserFriendlyError(text, response.status, response.headers);
     }
     throw new FetchError(response);
   }
@@ -38,7 +46,7 @@ export async function fetch(...args: Parameters<typeof globalThis.fetch>): Promi
 }
 
 /**
- * Calls `globalThis.fetch` and throws a `FetchError` on non-200 responses, but also
+ * Calls {@link fetch}, which throws a `UserFriendlyError` or `FetchError` on non-200 responses, and also
  * decodes the response body as JSON, casting it to type `T`. Returns the
  * decoded body.
  */
@@ -52,6 +60,7 @@ export async function fetchJson<T>(...args: Parameters<typeof globalThis.fetch>)
 
 export interface StatusError extends Error {
   status: number;
+  headers?: Headers;
 }
 
 /**
@@ -59,9 +68,11 @@ export interface StatusError extends Error {
  */
 export class FetchError extends Error implements StatusError {
   status: number;
+  headers: Headers;
   constructor(response: Readonly<Response>) {
     super(`${response.status} ${response.statusText}`);
     this.status = response.status;
+    this.headers = response.headers;
     Object.setPrototypeOf(this, FetchError.prototype);
   }
 }
@@ -71,9 +82,11 @@ export class FetchError extends Error implements StatusError {
  */
 export class UserFriendlyError extends Error implements StatusError {
   status: number;
-  constructor(message: string, status: number) {
+  headers?: Headers;
+  constructor(message: string, status: number, headers?: Headers) {
     super(message);
     this.status = status;
+    this.headers = headers;
     Object.setPrototypeOf(this, UserFriendlyError.prototype);
   }
 }
