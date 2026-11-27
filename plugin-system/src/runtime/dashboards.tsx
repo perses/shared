@@ -27,14 +27,9 @@ import { createContext, useContext, useMemo } from 'react';
  */
 export interface DashboardResourceStore {
   /**
-   * Project used when a consumer does not name one, usually the project of the current dashboard.
+   * Lists the dashboards matching the given filters. The host applies the filters.
    */
-  project?: string;
-
-  /**
-   * Lists the dashboards of a project. Tags are trimmed, deduplicated and sorted before reaching the API.
-   */
-  listDashboards(project: string, filters?: ListDashboardsFilters): Promise<DashboardSummary[]>;
+  listDashboards(filters?: ListDashboardsFilters): Promise<DashboardSummary[]>;
 
   /**
    * Builds the URL that opens a dashboard. Undefined when the host does not support it.
@@ -54,7 +49,6 @@ export function useDashboardResourceStore(): DashboardResourceStore {
 
 export interface DashboardResourceStoreProviderProps {
   dashboardApi: DashboardApi;
-  projectName?: string;
   children?: ReactNode;
 }
 
@@ -63,64 +57,37 @@ export interface DashboardResourceStoreProviderProps {
  */
 export function DashboardResourceStoreProvider({
   dashboardApi,
-  projectName,
   children,
 }: DashboardResourceStoreProviderProps): ReactElement {
   const store = useMemo<DashboardResourceStore>(
     () => ({
-      project: projectName,
-      listDashboards: (project, filters): Promise<DashboardSummary[]> =>
-        dashboardApi.listDashboards(project, { ...filters, tags: normalizeTags(filters?.tags) }),
+      listDashboards: (filters): Promise<DashboardSummary[]> => dashboardApi.listDashboards(filters),
       buildDashboardUrl: (params): string | undefined => dashboardApi.buildDashboardUrl?.(params),
     }),
-    [dashboardApi, projectName],
+    [dashboardApi],
   );
   return <DashboardResourceStoreContext.Provider value={store}>{children}</DashboardResourceStoreContext.Provider>;
 }
 
-export interface UseListDashboardsParams extends ListDashboardsFilters {
-  /**
-   * Defaults to the project of the `DashboardResourceStore`.
-   */
-  project?: string;
-}
-
 /**
- * Lists the dashboards of a project. The query fails, instead of staying pending, when no
- * `DashboardResourceStoreProvider` is mounted or no project is known.
+ * Lists the dashboards matching the given filters, across all projects when no project is given.
+ * The query fails, instead of staying pending, when no `DashboardResourceStoreProvider` is mounted.
  */
 export function useListDashboards(
-  params: UseListDashboardsParams = {},
+  filters: ListDashboardsFilters = {},
   options?: Omit<UseQueryOptions<DashboardSummary[]>, 'queryKey' | 'queryFn'>,
 ): UseQueryResult<DashboardSummary[]> {
   const store = useContext(DashboardResourceStoreContext);
-  const project = params.project ?? store?.project;
-  const tags = normalizeTags(params.tags);
-  const isUnavailable = store === undefined || project === undefined;
   return useQuery<DashboardSummary[]>({
     ...options,
-    queryKey: ['listDashboards', project, tags],
+    queryKey: ['listDashboards', filters],
     queryFn: () => {
       if (store === undefined) {
         throw new Error('No DashboardResourceStoreContext found. Did you forget a Provider?');
       }
-      if (project === undefined) {
-        throw new Error('No project to list dashboards from');
-      }
-      return store.listDashboards(project, { tags });
+      return store.listDashboards(filters);
     },
-    // Retrying cannot help when the store or the project is missing.
-    ...(isUnavailable ? { retry: false } : {}),
+    // Retrying cannot help when the store is missing.
+    ...(store === undefined ? { retry: false } : {}),
   });
-}
-
-function normalizeTags(tags: string[] | undefined): string[] {
-  const normalized = new Set<string>();
-  for (const tag of tags ?? []) {
-    const trimmed = tag.trim();
-    if (trimmed !== '') {
-      normalized.add(trimmed);
-    }
-  }
-  return [...normalized].toSorted();
 }

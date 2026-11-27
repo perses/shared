@@ -26,7 +26,12 @@ export interface DashboardSummary {
 
 export interface ListDashboardsFilters {
   /**
+   * Project to list the dashboards from. Dashboards of all projects are listed when it is omitted.
+   */
+  project?: string;
+  /**
    * Keep only the dashboards whose metadata contains every tag.
+   * The host owns the matching, for example by filtering client-side when its backend cannot search on tags.
    */
   tags?: string[];
 }
@@ -42,9 +47,9 @@ export interface BuildDashboardUrlParams {
  */
 export interface DashboardApi {
   /**
-   * List the dashboards of a project. Implementations must apply the given filters.
+   * List the dashboards matching the given filters. Implementations must apply every filter.
    */
-  listDashboards: (project: string, filters?: ListDashboardsFilters) => Promise<DashboardSummary[]>;
+  listDashboards: (filters?: ListDashboardsFilters) => Promise<DashboardSummary[]>;
   /**
    * Optional function to build the URL that opens a dashboard in the host application.
    */

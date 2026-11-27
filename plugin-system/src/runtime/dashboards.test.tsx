@@ -11,20 +11,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import type { DashboardApi, DashboardSummary } from '@perses-dev/client';
+import type { DashboardApi, DashboardSummary, ListDashboardsFilters } from '@perses-dev/client';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook, waitFor } from '@testing-library/react';
 import type { PropsWithChildren, ReactElement } from 'react';
 
-import type { UseListDashboardsParams } from './dashboards';
 import { DashboardResourceStoreProvider, useListDashboards } from './dashboards';
 
 const summaries: DashboardSummary[] = [{ metadata: { name: 'detail', project: 'perses' }, displayName: 'Detail' }];
 
 function renderListDashboards(
-  params: UseListDashboardsParams,
+  filters: ListDashboardsFilters,
   dashboardApi?: DashboardApi,
 ): RenderHookResult<UseQueryResult<DashboardSummary[]>, unknown> {
   // Default retries, so a query that keeps failing would stay pending past the waitFor timeout.
@@ -33,33 +32,32 @@ function renderListDashboards(
     return (
       <QueryClientProvider client={queryClient}>
         {dashboardApi ? (
-          <DashboardResourceStoreProvider dashboardApi={dashboardApi} projectName="perses">
-            {children}
-          </DashboardResourceStoreProvider>
+          <DashboardResourceStoreProvider dashboardApi={dashboardApi}>{children}</DashboardResourceStoreProvider>
         ) : (
           children
         )}
       </QueryClientProvider>
     );
   }
-  return renderHook(() => useListDashboards(params), { wrapper: Wrapper });
+  return renderHook(() => useListDashboards(filters), { wrapper: Wrapper });
 }
 
 describe('useListDashboards', () => {
-  it('lists the dashboards of the store project with normalized tags', async () => {
+  it('forwards the project and the tags to the host unchanged', async () => {
     const listDashboards = vi.fn().mockResolvedValue(summaries);
-    const { result } = renderListDashboards({ tags: [' traffic', 'api', '', 'traffic'] }, { listDashboards });
+    const filters = { project: 'perses', tags: [' traffic', 'api', 'traffic'] };
+    const { result } = renderListDashboards(filters, { listDashboards });
 
     await waitFor(() => expect(result.current.data).toEqual(summaries));
-    expect(listDashboards).toHaveBeenCalledWith('perses', { tags: ['api', 'traffic'] });
+    expect(listDashboards).toHaveBeenCalledWith(filters);
   });
 
-  it('lists the dashboards of an explicit project', async () => {
+  it('lists the dashboards of all projects when no project is given', async () => {
     const listDashboards = vi.fn().mockResolvedValue([]);
-    const { result } = renderListDashboards({ project: 'other' }, { listDashboards });
+    const { result } = renderListDashboards({}, { listDashboards });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(listDashboards).toHaveBeenCalledWith('other', { tags: [] });
+    expect(listDashboards).toHaveBeenCalledWith({});
   });
 
   it('fails instead of staying pending when no provider is mounted', async () => {

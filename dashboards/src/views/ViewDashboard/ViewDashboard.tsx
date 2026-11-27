@@ -187,9 +187,5 @@ export function ViewDashboard(props: ViewDashboardProps): ReactElement {
   if (dashboardApi === undefined) {
     return view;
   }
-  return (
-    <DashboardResourceStoreProvider dashboardApi={dashboardApi} projectName={dashboardResource.metadata.project}>
-      {view}
-    </DashboardResourceStoreProvider>
-  );
+  return <DashboardResourceStoreProvider dashboardApi={dashboardApi}>{view}</DashboardResourceStoreProvider>;
 }
