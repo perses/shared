@@ -55,4 +55,40 @@ describe('transformQueryResults', () => {
     unmount();
     client.clear();
   });
+
+  it('cancels the in-flight fetch of the query matching the definition', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const definition: QueryDefinition = {
+      kind: 'TimeSeriesQuery',
+      spec: { plugin: { kind: 'TestQuery', spec: {} } },
+    };
+    let signal: AbortSignal | undefined;
+    const queryFn = vi.fn(
+      (ctx: { signal: AbortSignal }) =>
+        new Promise((_resolve, reject) => {
+          signal = ctx.signal;
+          ctx.signal.addEventListener('abort', () => reject(ctx.signal.reason));
+        }),
+    );
+    const wrapper = ({ children }: { children: ReactNode }): ReactElement => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
+    const { result, unmount } = renderHook(
+      () => {
+        // Same key layout as the data query hooks: ['query', kind, definition, ...context].
+        const query = useQuery({ queryKey: ['query', definition.kind, { ...definition }, 'time-range'], queryFn });
+        return transformQueryResults([query], [definition], client)[0];
+      },
+      { wrapper },
+    );
+
+    await waitFor(() => expect(result.current?.isFetching).toBe(true));
+    act(() => result.current?.cancel?.());
+
+    await waitFor(() => expect(result.current?.isFetching).toBe(false));
+    expect(signal?.aborted).toBe(true);
+    expect(result.current?.error).toBeNull();
+    unmount();
+    client.clear();
+  });
 });

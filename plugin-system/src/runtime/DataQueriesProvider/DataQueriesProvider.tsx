@@ -12,6 +12,7 @@
 // limitations under the License.
 
 import type { QueryType, TimeSeriesQueryDefinition } from '@perses-dev/spec';
+import { QueryClientContext } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import { createContext, useCallback, useContext, useEffect, useMemo } from 'react';
 
@@ -71,6 +72,8 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
   const { definitions, options, children, queryOptions } = props;
 
   const usageMetrics = useUsageMetrics();
+  // Optional so the provider still works when the query hooks are mocked without a QueryClientProvider.
+  const queryClient = useContext(QueryClientContext);
 
   // Filter definitions for time series query and other future query plugins
   const timeSeriesQueries = definitions.filter(
@@ -114,13 +117,13 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
 
   const ctx = useMemo(() => {
     const mergedQueryResults = [
-      ...transformQueryResults(timeSeriesResults, timeSeriesQueries),
-      ...transformQueryResults(traceResults, traceQueries),
-      ...transformQueryResults(profileResults, profileQueries),
-      ...transformQueryResults(logResults, logQueries),
-      ...transformQueryResults(alertsResults, alertsQueries),
-      ...transformQueryResults(silencesResults, silencesQueries),
-      ...transformQueryResults(jsonResults, jsonQueries),
+      ...transformQueryResults(timeSeriesResults, timeSeriesQueries, queryClient),
+      ...transformQueryResults(traceResults, traceQueries, queryClient),
+      ...transformQueryResults(profileResults, profileQueries, queryClient),
+      ...transformQueryResults(logResults, logQueries, queryClient),
+      ...transformQueryResults(alertsResults, alertsQueries, queryClient),
+      ...transformQueryResults(silencesResults, silencesQueries, queryClient),
+      ...transformQueryResults(jsonResults, jsonQueries, queryClient),
     ];
 
     return {
@@ -148,6 +151,7 @@ export function DataQueriesProvider(props: DataQueriesProviderProps): ReactEleme
     traceResults,
     definitions,
     refetchAll,
+    queryClient,
   ]);
 
   useEffect(() => {

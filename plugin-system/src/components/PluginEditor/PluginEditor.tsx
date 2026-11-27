@@ -11,7 +11,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Box, Button } from '@mui/material';
+import type { SxProps, Theme } from '@mui/material';
+import { Box, Button, CircularProgress } from '@mui/material';
 import { ErrorAlert, ErrorBoundary } from '@perses-dev/components';
 import type { UnknownSpec } from '@perses-dev/spec';
 import Reload from 'mdi-material-ui/Reload';
@@ -41,6 +42,8 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
     onChange: _,
     isReadonly,
     onRunQuery,
+    isQueryRunning = false,
+    onCancelQuery,
     filteredQueryPlugins,
     testConnection,
     ...others
@@ -83,15 +86,12 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
         />
 
         {withRunQueryButton && (
-          <Button
-            data-testid="run_query_button"
-            variant="contained"
-            startIcon={<Reload />}
-            onClick={onRunQuery}
+          <RunQueryButton
+            isQueryRunning={isQueryRunning}
             disabled={isLoading}
-          >
-            Run Query
-          </Button>
+            onRunQuery={onRunQuery}
+            onCancelQuery={onCancelQuery}
+          />
         )}
       </Box>
 
@@ -105,5 +105,48 @@ export function PluginEditor(props: PluginEditorProps): ReactElement {
         />
       </ErrorBoundary>
     </Box>
+  );
+}
+
+interface RunQueryButtonProps {
+  isQueryRunning: boolean;
+  disabled: boolean;
+  onRunQuery?: () => void;
+  onCancelQuery?: () => void;
+}
+
+// Both states share the same grid cell so the button keeps the width of the widest one when switching.
+const stackedSx: SxProps<Theme> = { display: 'inline-grid', alignItems: 'center', justifyItems: 'center' };
+
+function stateSx(isVisible: boolean): SxProps<Theme> {
+  return { gridArea: '1 / 1', display: 'inline-flex', visibility: isVisible ? 'visible' : 'hidden' };
+}
+
+function RunQueryButton({ isQueryRunning, disabled, onRunQuery, onCancelQuery }: RunQueryButtonProps): ReactElement {
+  return (
+    <Button
+      data-testid="run_query_button"
+      variant="contained"
+      startIcon={
+        <Box component="span" sx={stackedSx}>
+          <Reload fontSize="inherit" aria-hidden={isQueryRunning} sx={stateSx(!isQueryRunning)} />
+          <Box component="span" aria-hidden={!isQueryRunning} sx={stateSx(isQueryRunning)}>
+            {isQueryRunning && <CircularProgress aria-label="query running" color="inherit" size={16} />}
+          </Box>
+        </Box>
+      }
+      onClick={isQueryRunning ? onCancelQuery : onRunQuery}
+      disabled={disabled || (isQueryRunning && !onCancelQuery)}
+      aria-busy={isQueryRunning}
+    >
+      <Box component="span" sx={stackedSx}>
+        <Box component="span" aria-hidden={isQueryRunning} sx={stateSx(!isQueryRunning)}>
+          Run Query
+        </Box>
+        <Box component="span" aria-hidden={!isQueryRunning} sx={stateSx(isQueryRunning)}>
+          Cancel
+        </Box>
+      </Box>
+    </Button>
   );
 }
