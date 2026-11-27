@@ -24,3 +24,4 @@ export * from './user';
 export * from './ephemeralDashboard';
 export * from './variable';
 export * from './dashboard';
+export * from './dashboard-api';

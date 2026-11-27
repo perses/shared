@@ -13,6 +13,7 @@
 
 export * from './annotations';
 export * from './builtin-variables';
+export * from './dashboards';
 export * from './datasources';
 export * from './plugin-registry';
 export * from './variables';
