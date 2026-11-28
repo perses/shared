@@ -11,12 +11,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Divider, IconButton, Stack, Typography } from '@mui/material';
+import {
+  Checkbox,
+  Divider,
+  FormControl,
+  FormControlLabel,
+  IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import { LinkEditorForm } from '@perses-dev/components';
+import type { Link, TagLink, URLLink } from '@perses-dev/spec';
 import MinusIcon from 'mdi-material-ui/Minus';
 import PlusIcon from 'mdi-material-ui/Plus';
 import type { HTMLAttributes, ReactElement } from 'react';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import type { Control } from 'react-hook-form';
 import { Controller, useFieldArray } from 'react-hook-form';
 
@@ -61,61 +74,221 @@ export function LinksEditor({ control, ...props }: LinksEditorProps): ReactEleme
   );
 }
 
+const EMPTY_URL_LINK: URLLink = { url: '', name: '', tooltip: '', renderVariables: false, targetBlank: false };
+
+function isTagLink(link: Link): link is TagLink {
+  return 'tags' in link && Array.isArray(link.tags);
+}
+
 function LinkControl({ control, index }: { control: Control<PanelEditorValues>; index: number }): ReactElement {
-  const defaultLink = { url: '', name: '', tooltip: '', renderVariables: false, targetBlank: false };
   return (
     <Controller
       control={control}
       name={`panelDefinition.spec.links.${index}`}
-      render={({ field, field: { value: link }, fieldState }) => {
-        const safeLink = link ?? defaultLink;
+      render={({ field, field: { value }, fieldState }) => {
+        const link = value ?? EMPTY_URL_LINK;
+        const update = (next: Link): void => {
+          field.onChange(next);
+        };
         return (
-          <LinkEditorForm
-            mode="inline"
-            url={{
-              onBlur: field.onBlur,
-              value: safeLink.url,
-              label: 'URL',
-              error: { hasError: !!fieldState.error, helperText: fieldState.error?.message },
-              onChange: (url) => {
-                field.onChange({ ...link, url });
-              },
-            }}
-            newTabOpen={{
-              onBlur: field.onBlur,
-              value: !!safeLink.targetBlank,
-              onChange: (targetBlank) => {
-                field.onChange({ ...link, targetBlank });
-              },
-              label: 'Open in new tab',
-            }}
-            name={{
-              onBlur: field.onBlur,
-              value: safeLink.name ?? '',
-              label: 'Name',
-              onChange: (name) => {
-                field.onChange({ ...link, name });
-              },
-            }}
-            renderVariables={{
-              onBlur: field.onBlur,
-              value: !!safeLink.renderVariables,
-              label: 'Render variables',
-              onChange: (renderVariables) => {
-                field.onChange({ ...link, renderVariables });
-              },
-            }}
-            tooltip={{
-              onBlur: field.onBlur,
-              value: safeLink.tooltip ?? '',
-              label: 'Tooltip',
-              onChange: (tooltip) => {
-                field.onChange({ ...link, tooltip });
-              },
-            }}
-          />
+          <Stack gap={1} flexGrow={1}>
+            <FormControl fullWidth>
+              <InputLabel id={`panel-link-kind-${index}`}>Kind</InputLabel>
+              <Select
+                labelId={`panel-link-kind-${index}`}
+                label="Kind"
+                value={isTagLink(link) ? 'tags' : 'url'}
+                onChange={(event) => {
+                  if (event.target.value === 'tags') {
+                    update(toTagLink(link));
+                    return;
+                  }
+                  update(toURLLink(link));
+                }}
+              >
+                <MenuItem value="url">URL</MenuItem>
+                <MenuItem value="tags">Dashboards by tag</MenuItem>
+              </Select>
+            </FormControl>
+            {isTagLink(link) ? (
+              <TagLinkFields link={link} onBlur={field.onBlur} onChange={update} />
+            ) : (
+              <URLLinkFields
+                link={link}
+                errorMessage={fieldState.error?.message}
+                onBlur={field.onBlur}
+                onChange={update}
+              />
+            )}
+          </Stack>
         );
       }}
     />
+  );
+}
+
+function toTagLink(link: Link): TagLink {
+  return {
+    name: link.name ?? '',
+    tags: isTagLink(link) ? link.tags : [],
+    tooltip: link.tooltip,
+    targetBlank: link.targetBlank,
+    keepTime: link.keepTime,
+    includeVariables: link.includeVariables,
+  };
+}
+
+function toURLLink(link: Link): URLLink {
+  return {
+    url: isTagLink(link) ? '' : link.url,
+    name: link.name,
+    tooltip: link.tooltip,
+    renderVariables: isTagLink(link) ? false : link.renderVariables,
+    targetBlank: link.targetBlank,
+    keepTime: link.keepTime,
+    includeVariables: link.includeVariables,
+  };
+}
+
+function URLLinkFields({
+  link,
+  errorMessage,
+  onBlur,
+  onChange,
+}: {
+  link: URLLink;
+  errorMessage?: string;
+  onBlur: () => void;
+  onChange: (link: URLLink) => void;
+}): ReactElement {
+  return (
+    <>
+      <LinkEditorForm
+        mode="inline"
+        url={{
+          onBlur,
+          value: link.url,
+          label: 'URL',
+          error: { hasError: errorMessage !== undefined, helperText: errorMessage },
+          onChange: (url) => {
+            onChange({ ...link, url });
+          },
+        }}
+        newTabOpen={{
+          onBlur,
+          value: !!link.targetBlank,
+          onChange: (targetBlank) => {
+            onChange({ ...link, targetBlank });
+          },
+          label: 'Open in new tab',
+        }}
+        name={{
+          onBlur,
+          value: link.name ?? '',
+          label: 'Name',
+          onChange: (name) => {
+            onChange({ ...link, name });
+          },
+        }}
+        renderVariables={{
+          onBlur,
+          value: !!link.renderVariables,
+          label: 'Render variables',
+          onChange: (renderVariables) => {
+            onChange({ ...link, renderVariables });
+          },
+        }}
+        tooltip={{
+          onBlur,
+          value: link.tooltip ?? '',
+          label: 'Tooltip',
+          onChange: (tooltip) => {
+            onChange({ ...link, tooltip });
+          },
+        }}
+      />
+      <LinkStateFields link={link} onChange={onChange} />
+    </>
+  );
+}
+
+function TagLinkFields({
+  link,
+  onBlur,
+  onChange,
+}: {
+  link: TagLink;
+  onBlur: () => void;
+  onChange: (link: TagLink) => void;
+}): ReactElement {
+  const [tagsText, setTagsText] = useState(link.tags.join(', '));
+  return (
+    <Stack gap={1}>
+      <TextField
+        label="Name"
+        value={link.name}
+        onBlur={onBlur}
+        onChange={(event) => onChange({ ...link, name: event.target.value })}
+      />
+      <TextField
+        label="Tags"
+        required
+        value={tagsText}
+        onBlur={onBlur}
+        helperText="Comma-separated. A dashboard must have every tag."
+        onChange={(event) => {
+          const text = event.target.value;
+          setTagsText(text);
+          onChange({
+            ...link,
+            tags: text
+              .split(',')
+              .map((tag) => tag.trim())
+              .filter((tag) => tag.length > 0),
+          });
+        }}
+      />
+      <TextField
+        label="Tooltip"
+        value={link.tooltip ?? ''}
+        onBlur={onBlur}
+        onChange={(event) => onChange({ ...link, tooltip: event.target.value })}
+      />
+      <FormControlLabel
+        label="Open in new tab"
+        control={
+          <Checkbox
+            checked={link.targetBlank === true}
+            onChange={(event) => onChange({ ...link, targetBlank: event.target.checked })}
+          />
+        }
+      />
+      <LinkStateFields link={link} onChange={onChange} />
+    </Stack>
+  );
+}
+
+function LinkStateFields<T extends Link>({ link, onChange }: { link: T; onChange: (link: T) => void }): ReactElement {
+  return (
+    <Stack direction="row" gap={1}>
+      <FormControlLabel
+        label="Keep current time range"
+        control={
+          <Checkbox
+            checked={link.keepTime === true}
+            onChange={(event) => onChange({ ...link, keepTime: event.target.checked })}
+          />
+        }
+      />
+      <FormControlLabel
+        label="Include current variables"
+        control={
+          <Checkbox
+            checked={link.includeVariables === true}
+            onChange={(event) => onChange({ ...link, includeVariables: event.target.checked })}
+          />
+        }
+      />
+    </Stack>
   );
 }

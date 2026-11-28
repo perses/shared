@@ -15,15 +15,20 @@ import type { Theme } from '@mui/material';
 import { IconButton, Link as LinkComponent, Menu, MenuItem, Chip, capitalize, Stack } from '@mui/material';
 import { InfoTooltip, sanitizeUrl } from '@perses-dev/components';
 import { useReplaceVariablesInString, useReplaceVariablesInUrl } from '@perses-dev/plugin-system';
-import type { Link } from '@perses-dev/spec';
 import LaunchIcon from 'mdi-material-ui/Launch';
 import type { MouseEvent, ReactElement } from 'react';
 import { useId, useState } from 'react';
 
+import type { DashboardLink } from './dashboard-link';
+import { isTagLink } from './dashboard-link';
+import { WithTimeRange, WithVariables } from './link-state';
+import { appendLinkState } from './tag-links';
+import { TagLinkMenu } from './TagLinkMenu';
+
 type LinksVariant = 'dashboard' | 'panel';
 
 interface LinksProps {
-  links: Link[];
+  links: DashboardLink[];
   variant: LinksVariant;
 }
 
@@ -49,6 +54,9 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
 
   // Panel variant: single link shows as icon button
   if (variant === 'panel' && links.length === 1 && links[0]) {
+    if (isTagLink(links[0])) {
+      return <TagLinkMenu link={links[0]} appearance="button" />;
+    }
     return <LinkButton link={links[0]} />;
   }
 
@@ -72,9 +80,13 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
     if (canRenderAsChips) {
       return (
         <Stack direction="row" spacing={1}>
-          {links.map((link: Link) => (
-            <LinkChip key={link.url} link={link} />
-          ))}
+          {links.map((link: DashboardLink) =>
+            isTagLink(link) ? (
+              <TagLinkMenu key={linkKey(link)} link={link} appearance="chip" />
+            ) : (
+              <LinkChip key={linkKey(link)} link={link} />
+            ),
+          )}
         </Stack>
       );
     }
@@ -107,72 +119,121 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
           'aria-labelledby': buttonId,
         }}
       >
-        {links.map((link: Link) => (
-          <LinkMenuItem key={link.url} link={link} />
-        ))}
+        {links.map((link: DashboardLink) =>
+          isTagLink(link) ? (
+            <TagLinkMenu key={linkKey(link)} link={link} appearance="item" />
+          ) : (
+            <LinkMenuItem key={linkKey(link)} link={link} />
+          ),
+        )}
       </Menu>
     </>
   );
 }
 
-function LinkChip({ link }: { link: Link }): ReactElement {
-  const { url, name, targetBlank, href, description } = useLink(link);
+function linkKey(link: DashboardLink): string {
+  if (isTagLink(link)) {
+    return `tags:${link.name ?? ''}:${(link.tags ?? []).join(',')}`;
+  }
+  return link.url ?? link.name ?? '';
+}
 
+function LinkChip({ link }: { link: DashboardLink }): ReactElement {
   return (
-    <InfoTooltip description={description} enterDelay={100}>
-      <Chip
-        label={name ?? url}
-        component="a"
-        href={href}
-        target={targetBlank ? '_blank' : '_self'}
-        rel={targetBlank ? 'noopener noreferrer' : undefined}
-        clickable={href !== undefined}
-        size="medium"
-        icon={<LaunchIcon color="inherit" fontSize="small" />}
-        sx={(theme) => ({ height: theme.spacing(3) })}
-      />
-    </InfoTooltip>
+    <ResolveLink link={link}>
+      {(resolved) => (
+        <InfoTooltip description={resolved.description} enterDelay={100}>
+          <Chip
+            label={resolved.name ?? resolved.url}
+            component="a"
+            href={resolved.href}
+            target={resolved.targetBlank ? '_blank' : '_self'}
+            rel={resolved.targetBlank ? 'noopener noreferrer' : undefined}
+            clickable={resolved.href !== undefined}
+            size="medium"
+            icon={<LaunchIcon color="inherit" fontSize="small" />}
+            sx={(theme) => ({ height: theme.spacing(3) })}
+          />
+        </InfoTooltip>
+      )}
+    </ResolveLink>
   );
 }
 
-function LinkButton({ link }: { link: Link }): ReactElement {
-  const { url, name, targetBlank, href, description } = useLink(link);
-
+function LinkButton({ link }: { link: DashboardLink }): ReactElement {
   return (
-    <InfoTooltip description={description} enterDelay={100}>
-      <IconButton
-        component="a"
-        aria-label={name ?? url}
-        size="small"
-        href={href}
-        target={targetBlank ? '_blank' : '_self'}
-        rel={targetBlank ? 'noopener noreferrer' : undefined}
-        sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
-      >
-        <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
-      </IconButton>
-    </InfoTooltip>
+    <ResolveLink link={link}>
+      {(resolved) => (
+        <InfoTooltip description={resolved.description} enterDelay={100}>
+          <IconButton
+            component="a"
+            aria-label={resolved.name ?? resolved.url}
+            size="small"
+            href={resolved.href}
+            target={resolved.targetBlank ? '_blank' : '_self'}
+            rel={resolved.targetBlank ? 'noopener noreferrer' : undefined}
+            sx={(theme) => ({ borderRadius: theme.shape.borderRadius, padding: '4px' })}
+          >
+            <LaunchIcon fontSize="inherit" sx={{ color: (theme: Theme) => theme.palette.text.secondary }} />
+          </IconButton>
+        </InfoTooltip>
+      )}
+    </ResolveLink>
   );
 }
 
-function LinkMenuItem({ link }: { link: Link }): ReactElement {
-  const { url, name, targetBlank, href, description } = useLink(link);
-
+function LinkMenuItem({ link }: { link: DashboardLink }): ReactElement {
   return (
-    <InfoTooltip description={description} enterDelay={100}>
-      <MenuItem
-        component={LinkComponent}
-        href={href}
-        target={targetBlank ? '_blank' : '_self'}
-        rel={targetBlank ? 'noopener noreferrer' : undefined}
-      >
-        {name ?? url}
-      </MenuItem>
-    </InfoTooltip>
+    <ResolveLink link={link}>
+      {(resolved) => (
+        <InfoTooltip description={resolved.description} enterDelay={100}>
+          <MenuItem
+            component={LinkComponent}
+            href={resolved.href}
+            target={resolved.targetBlank ? '_blank' : '_self'}
+            rel={resolved.targetBlank ? 'noopener noreferrer' : undefined}
+          >
+            {resolved.name ?? resolved.url}
+          </MenuItem>
+        </InfoTooltip>
+      )}
+    </ResolveLink>
   );
 }
 
-interface ResolvedLink extends Link {
+function ResolveLink({
+  link,
+  children,
+}: {
+  link: DashboardLink;
+  children: (resolved: ResolvedLink) => ReactElement;
+}): ReactElement {
+  const interpolated = useInterpolatedLink(link);
+  return (
+    <WithTimeRange enabled={link.keepTime === true}>
+      {(timeRange) => (
+        <WithVariables enabled={link.includeVariables === true}>
+          {(variables) =>
+            children(
+              finishResolvedLink(
+                link,
+                interpolated,
+                appendLinkState(interpolated.baseUrl, {
+                  keepTime: timeRange !== undefined,
+                  includeVariables: variables !== undefined,
+                  timeRange,
+                  variables,
+                }),
+              ),
+            )
+          }
+        </WithVariables>
+      )}
+    </WithTimeRange>
+  );
+}
+
+interface ResolvedLink extends DashboardLink {
   /**
    * URL to use as the href of the link. It is undefined when the URL uses a scheme that is not allowed
    * (e.g. `javascript:`), so the link is rendered but cannot be followed.
@@ -189,17 +250,28 @@ function getDisabledLinkDescription(url: string): string {
   return `This link is disabled because its URL uses a scheme that is not allowed: ${url}`;
 }
 
-function useLink(link: Link): ResolvedLink {
+interface InterpolatedLink {
+  name: string | undefined;
+  tooltip: string | undefined;
+  baseUrl: string;
+}
+
+function useInterpolatedLink(link: DashboardLink): InterpolatedLink {
   // Name/tooltip: plain string interpolation (unencoded $var).
   const name = useReplaceVariablesInString(link.name);
   const tooltip = useReplaceVariablesInString(link.tooltip);
   // URL: URL-aware interpolation (also expands %24var inside query params).
   const interpolatedUrl = useReplaceVariablesInUrl(link.renderVariables === false ? undefined : link.url);
+  const baseUrl = link.renderVariables === false ? (link.url ?? '') : (interpolatedUrl ?? link.url ?? '');
+  return { name, tooltip, baseUrl };
+}
 
-  // The URL must be sanitized after the interpolation, since variable values can be provided by the user (e.g. through
-  // the URL query parameters).
+function finishResolvedLink(link: DashboardLink, interpolated: InterpolatedLink, url: string): ResolvedLink {
+  // Sanitize after interpolation. Variable values can come from the URL query parameters.
   const resolvedLink =
-    link.renderVariables === false ? link : { ...link, url: interpolatedUrl ?? link.url, name, tooltip };
+    link.renderVariables === false
+      ? { ...link, url }
+      : { ...link, url, name: interpolated.name, tooltip: interpolated.tooltip };
   const href = sanitizeUrl(resolvedLink.url);
   const description =
     href === undefined ? getDisabledLinkDescription(resolvedLink.url) : (resolvedLink.tooltip ?? resolvedLink.url);
