@@ -73,7 +73,7 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
       return (
         <Stack direction="row" spacing={1}>
           {links.map((link: Link) => (
-            <LinkChip key={link.url} link={link} />
+            <LinkChip key={link.url ?? link.name} link={link} />
           ))}
         </Stack>
       );
@@ -108,7 +108,7 @@ export function LinksDisplay({ links, variant }: LinksProps): ReactElement | nul
         }}
       >
         {links.map((link: Link) => (
-          <LinkMenuItem key={link.url} link={link} />
+          <LinkMenuItem key={link.url ?? link.name} link={link} />
         ))}
       </Menu>
     </>
@@ -172,16 +172,13 @@ function LinkMenuItem({ link }: { link: Link }): ReactElement {
   );
 }
 
-interface ResolvedLink extends Link {
-  /**
-   * URL to use as the href of the link. It is undefined when the URL uses a scheme that is not allowed
-   * (e.g. `javascript:`), so the link is rendered but cannot be followed.
-   */
+interface ResolvedLink {
+  url: string;
+  name?: string;
+  tooltip?: string;
+  targetBlank?: boolean;
+  /** Undefined when the URL scheme is not allowed, so the link renders but cannot be followed. */
   href?: string;
-  /**
-   * Text displayed when hovering over the link: the tooltip (or the URL) of the link, or an explanation when the link
-   * is disabled.
-   */
   description: string;
 }
 
@@ -190,19 +187,12 @@ function getDisabledLinkDescription(url: string): string {
 }
 
 function useLink(link: Link): ResolvedLink {
-  // Name/tooltip: plain string interpolation (unencoded $var).
   const name = useReplaceVariablesInString(link.name);
   const tooltip = useReplaceVariablesInString(link.tooltip);
-  // URL: URL-aware interpolation (also expands %24var inside query params).
-  const interpolatedUrl = useReplaceVariablesInUrl(link.renderVariables === false ? undefined : link.url);
-
-  // The URL must be sanitized after the interpolation, since variable values can be provided by the user (e.g. through
-  // the URL query parameters).
-  const resolvedLink =
-    link.renderVariables === false ? link : { ...link, url: interpolatedUrl ?? link.url, name, tooltip };
-  const href = sanitizeUrl(resolvedLink.url);
-  const description =
-    href === undefined ? getDisabledLinkDescription(resolvedLink.url) : (resolvedLink.tooltip ?? resolvedLink.url);
-
-  return { ...resolvedLink, href, description };
+  const rawUrl = link.url ?? '';
+  const interpolatedUrl = useReplaceVariablesInUrl(link.renderVariables === false ? undefined : rawUrl);
+  const url = link.renderVariables === false ? rawUrl : (interpolatedUrl ?? rawUrl);
+  const href = sanitizeUrl(url);
+  const description = href === undefined ? getDisabledLinkDescription(url) : (tooltip ?? url);
+  return { url, name, tooltip, targetBlank: link.targetBlank, href, description };
 }

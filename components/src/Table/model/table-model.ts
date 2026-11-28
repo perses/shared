@@ -12,7 +12,7 @@
 // limitations under the License.
 
 import type { Theme } from '@mui/material';
-import type { Link } from '@perses-dev/spec';
+import type { URLLink } from '@perses-dev/spec';
 import type { RankingInfo, rankings } from '@tanstack/match-sorter-utils';
 import type {
   AccessorKeyColumnDef,
@@ -443,7 +443,7 @@ declare module '@tanstack/table-core' {
 // Column link settings
 // The URL could be set to a static link or could be constructed dynamically
 // The URL may include reference to the variables or neighboring cells in the row
-export type DataLink = Omit<Link, 'name'>;
+export type DataLink = Omit<URLLink, 'name'>;
 
 // Only exposing a very simplified version of the very extensive column definitions
 // possible with tanstack table to make it easier for us to control rendering
