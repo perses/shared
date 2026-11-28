@@ -47,7 +47,10 @@ describe('panelDescriptionToHTML', () => {
     expect(panelDescriptionToHTML('Expected format: <host>:<port>')).toBe(
       '<p>Expected format: &lt;host&gt;:&lt;port&gt;</p>\n',
     );
-    expect(panelDescriptionToHTML('<div>\nblock\n</div>')).toBe('&lt;div&gt;\nblock\n&lt;/div&gt;');
+    const block = toElement(panelDescriptionToHTML('<div>\nblock\n</div>'));
+    expect(block.querySelector('div')).toBeNull();
+    expect(block.textContent).toContain('<div>');
+    expect(block.textContent).toContain('</div>');
   });
 
   it('still renders autolinks', () => {
@@ -69,6 +72,7 @@ describe('panelDescriptionToHTML', () => {
     ['selects', '<select><option>a</option></select>', 'select'],
     ['class attributes', '<span class="MuiBackdrop-root">x</span>', '[class]'],
     ['id attributes', '<span id="root">x</span>', '[id]'],
+    ['images nested in raw inline tags', 'prefix <code><img/src=//example.com/tracker></code>', 'img'],
   ])('does not create %s from raw HTML', (_, description, forbiddenSelector) => {
     const element = toElement(panelDescriptionToHTML(description));
     expect(element.querySelector(forbiddenSelector)).toBeNull();

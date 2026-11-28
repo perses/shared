@@ -23,17 +23,25 @@ import { cloneElement, useId, useMemo, useState } from 'react';
 const descriptionMarked = new Marked({
   gfm: true,
   breaks: true,
+  // Raw HTML is not supported: it is not tokenized, so it is escaped and displayed as text. This keeps e.g.
+  // `<host>:<port>` from being parsed as tags and then removed by the sanitizer. Escaping in the `html` renderer is not
+  // enough, since the content following a raw `<code>`, `<kbd>`, `<pre>`, ... tag would still be output as HTML.
+  tokenizer: {
+    html(): undefined {
+      return undefined;
+    },
+    tag(): undefined {
+      return undefined;
+    },
+  },
   renderer: {
     // Task list items are rendered as text, since `<input>` elements are removed by the sanitizer.
     checkbox: ({ checked }): string => (checked ? '☑' : '☐'),
-    // Raw HTML is not supported: it is displayed as text, so that e.g. `<host>:<port>` is not parsed as tags and
-    // then removed by the sanitizer.
-    html: ({ text }): string => escapeHTML(text),
   },
 });
 
 // Elements and attributes that could affect the page outside the tooltip (which is portaled to `document.body`),
-// e.g. restyle or cover the application, or collect user input. Raw HTML is already escaped by the renderer, so
+// e.g. restyle or cover the application, or collect user input. Raw HTML is already escaped as text, so
 // this is a second layer of defense for the HTML produced from Markdown.
 const FORBIDDEN_TAGS = ['style', 'form', 'input', 'button', 'textarea', 'select'];
 const FORBIDDEN_ATTRIBUTES = ['style', 'class', 'id'];
